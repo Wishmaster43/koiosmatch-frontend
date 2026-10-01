@@ -1104,6 +1104,7 @@
     "oauthDisconnectFailed": "Disconnecting failed.",
     "oauthCallbackConnected": "Email account connected: {{email}}.",
     "oauthCallbackError": "The email connection failed.",
+    "oauthCallbackBrowserMismatch": "The mailbox link failed: the authorisation came back in a different browser. Link the mailbox again from the browser you started in.",
     "senderDetails": "Sender details",
     "senderName": "Sender name",
     "senderNamePlaceholder": "e.g. KoiosMatch",

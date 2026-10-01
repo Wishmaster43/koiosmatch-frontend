@@ -845,6 +845,7 @@
     "oauthDisconnectFailed": "La déconnexion a échoué.",
     "oauthCallbackConnected": "Compte e-mail connecté : {{email}}.",
     "oauthCallbackError": "La connexion e-mail a échoué.",
+    "oauthCallbackBrowserMismatch": "La liaison de la boîte mail a échoué : l’autorisation est revenue dans un autre navigateur. Reliez la boîte mail à nouveau depuis le navigateur où vous avez commencé.",
     "senderDetails": "Coordonnées de l'expéditeur",
     "senderName": "Nom de l'expéditeur",
     "senderNamePlaceholder": "p.ex. KoiosMatch",

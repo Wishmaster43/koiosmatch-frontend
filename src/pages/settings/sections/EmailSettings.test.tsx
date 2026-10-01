@@ -51,6 +51,9 @@ function withLocationSpy() {
   return () => { Object.defineProperty(window, 'location', { configurable: true, value: original }) }
 }
 
+// The settings context this suite renders (a pre-existing Dutch settings slug, named once).
+const CONTEXT = 'klanten'
+
 function renderPanel(context = 'klanten') {
   return render(<I18nextProvider i18n={i18n}><EmailSettings context={context} /></I18nextProvider>)
 }
@@ -59,14 +62,14 @@ describe('EmailSettings · connection status (DL-10)', () => {
   it('fetches GET /settings/email/{context}/status on mount', async () => {
     loadSettings.mockResolvedValue({ email_klanten_provider: 'gmail' })
     mockedGet.mockResolvedValue({ data: { data: { context: 'klanten', connected: false, provider: 'gmail', address: null } } })
-    renderPanel('klanten')
+    renderPanel(CONTEXT)
     await waitFor(() => expect(mockedGet).toHaveBeenCalledWith('/settings/email/klanten/status'))
   })
 
   it('shows the connected state with the provider and address', async () => {
     loadSettings.mockResolvedValue({ email_klanten_provider: 'gmail' })
     mockedGet.mockResolvedValue({ data: { data: { context: 'klanten', connected: true, provider: 'gmail', address: 'info@yesway.nl' } } })
-    renderPanel('klanten')
+    renderPanel(CONTEXT)
     await waitFor(() => expect(
       screen.getByText(st('email.oauthConnected').replace('{{provider}}', 'Google').replace('{{address}}', 'info@yesway.nl')),
     ).toBeInTheDocument())
@@ -77,7 +80,7 @@ describe('EmailSettings · connection status (DL-10)', () => {
   it('paints the chosen provider in the success pair', async () => {
     loadSettings.mockResolvedValue({ email_klanten_provider: 'gmail' })
     mockedGet.mockResolvedValue({ data: { data: { connected: false, provider: 'gmail', address: null } } })
-    renderPanel('klanten')
+    renderPanel(CONTEXT)
     const active = await screen.findByRole('radio', { name: /Gmail/ })
     expect(active.style.background).toBe('var(--color-success-bg)')
     expect(active.style.border).toBe('1px solid var(--color-success)')
@@ -87,7 +90,7 @@ describe('EmailSettings · connection status (DL-10)', () => {
     loadSettings.mockResolvedValue({ email_klanten_provider: 'manual' })
     mockedGet.mockResolvedValue({ data: { data: { context: 'klanten', connected: false, provider: null, address: null } } })
     const user = userEvent.setup()
-    renderPanel('klanten')
+    renderPanel(CONTEXT)
     await waitFor(() => expect(mockedGet).toHaveBeenCalledWith('/settings/email/klanten/status'))
     mockedGet.mockClear()
 
@@ -102,7 +105,7 @@ describe('EmailSettings · field label association (§6)', () => {
   it('associates sender/SMTP labels to their inputs for the manual provider', async () => {
     loadSettings.mockResolvedValue({ email_klanten_provider: 'manual' })
     mockedGet.mockResolvedValue({ data: { data: { context: 'klanten', connected: false, provider: null, address: null } } })
-    renderPanel('klanten')
+    renderPanel(CONTEXT)
     await waitFor(() => expect(mockedGet).toHaveBeenCalled())
     expect(screen.getByLabelText(st('email.senderName'))).toBeInTheDocument()
     expect(screen.getByLabelText(st('email.fromAddress'))).toBeInTheDocument()
@@ -123,7 +126,7 @@ describe('EmailSettings · Koppelen (DL-10)', () => {
     })
     const restore = withLocationSpy()
     const user = userEvent.setup()
-    renderPanel('klanten')
+    renderPanel(CONTEXT)
 
     await user.click(await screen.findByRole('button', { name: st('email.oauthConnect') }))
     await waitFor(() => {
@@ -141,7 +144,7 @@ describe('EmailSettings · Ontkoppelen (DL-10)', () => {
     mockedGet.mockResolvedValue({ data: { data: { connected: true, provider: 'gmail', address: 'info@yesway.nl' } } })
     mockedApi.delete.mockResolvedValue({ data: { message: 'ok' } })
     const user = userEvent.setup()
-    renderPanel('klanten')
+    renderPanel(CONTEXT)
 
     await user.click(await screen.findByRole('button', { name: st('email.oauthDisconnect') }))
     await waitFor(() => expect(mockedApi.delete).toHaveBeenCalledWith('/settings/email/oauth/klanten'))
@@ -153,7 +156,7 @@ describe('EmailSettings · Koppelen/Ontkoppelen are gated on settings.update (DL
     hasPermission.mockReturnValue(false)
     loadSettings.mockResolvedValue({ email_klanten_provider: 'gmail' })
     mockedGet.mockResolvedValue({ data: { data: { connected: false, provider: 'gmail', address: null } } })
-    renderPanel('klanten')
+    renderPanel(CONTEXT)
 
     expect(await screen.findByRole('button', { name: st('email.oauthConnect') })).toBeDisabled()
   })
@@ -162,7 +165,7 @@ describe('EmailSettings · Koppelen/Ontkoppelen are gated on settings.update (DL
     hasPermission.mockReturnValue(false)
     loadSettings.mockResolvedValue({ email_klanten_provider: 'gmail' })
     mockedGet.mockResolvedValue({ data: { data: { connected: true, provider: 'gmail', address: 'info@yesway.nl' } } })
-    renderPanel('klanten')
+    renderPanel(CONTEXT)
 
     expect(await screen.findByRole('button', { name: st('email.oauthDisconnect') })).toBeDisabled()
   })
@@ -172,11 +175,26 @@ describe('EmailSettings · OAuth callback landing reads the hash, not location.s
   // The SPA is hash-routed (DashboardLayout boots activePage from
   // window.location.hash, there is no /instellingen path route) — the backend
   // redirect lands with the callback params inside the hash's query string.
+  // ONIX L-002 (BE 84917a3e): the OAuth consent is bound to the browser that started it;
+  // a state redeemed in another browser comes back as ?email_oauth=error&reason=browser_mismatch
+  // and gets its own sentence (not the generic failure), with the reason stripped from the hash.
+  it('shows the browser-mismatch sentence for ?email_oauth=error&reason=browser_mismatch and strips the reason', async () => {
+    window.location.hash = '#settings/communication/email?email_oauth=error&reason=browser_mismatch'
+    loadSettings.mockResolvedValue({ [`email_${CONTEXT}_provider`]: 'gmail' })
+    mockedGet.mockResolvedValue({ data: { data: { connected: false, provider: 'gmail' } } })
+    renderPanel(CONTEXT)
+
+    await waitFor(() => expect(screen.getByText(st('email.oauthCallbackBrowserMismatch'))).toBeInTheDocument())
+    expect(screen.queryByText(st('email.oauthCallbackError'))).not.toBeInTheDocument()
+    await waitFor(() => expect(window.location.hash).not.toContain('reason'))
+    window.location.hash = ''
+  })
+
   it('shows the connected banner and refetches status from a hash-carried ?email_oauth=connected', async () => {
     window.location.hash = '#settings/communication/email_klanten?email_oauth=connected&context=klanten&email=info%40yesway.nl'
     loadSettings.mockResolvedValue({ email_klanten_provider: 'gmail' })
     mockedGet.mockResolvedValue({ data: { data: { connected: true, provider: 'gmail', address: 'info@yesway.nl' } } })
-    renderPanel('klanten')
+    renderPanel(CONTEXT)
 
     await waitFor(() => expect(
       screen.getByText(st('email.oauthCallbackConnected').replace('{{email}}', 'info@yesway.nl')),
@@ -190,7 +208,7 @@ describe('EmailSettings · OAuth callback landing reads the hash, not location.s
     window.location.hash = '#settings/communication/email_kandidaten?email_oauth=connected&context=kandidaten&email=x%40y.nl'
     loadSettings.mockResolvedValue({ email_klanten_provider: 'gmail' })
     mockedGet.mockResolvedValue({ data: { data: { connected: false, provider: 'gmail', address: null } } })
-    renderPanel('klanten')
+    renderPanel(CONTEXT)
 
     await waitFor(() => expect(mockedGet).toHaveBeenCalledWith('/settings/email/klanten/status'))
     expect(screen.queryByText(st('email.oauthCallbackConnected').replace('{{email}}', 'x@y.nl'))).not.toBeInTheDocument()

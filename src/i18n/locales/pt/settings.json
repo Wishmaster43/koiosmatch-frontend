@@ -1140,6 +1140,7 @@
     "oauthConnectFailed": "Falha ao associar.",
     "oauthDisconnectFailed": "Falha ao desassociar.",
     "oauthCallbackConnected": "Conta de e-mail associada: {{email}}.",
+    "oauthCallbackBrowserMismatch": "A ligação da caixa de correio falhou: a autorização regressou noutro browser. Ligue a caixa de correio novamente a partir do browser em que começou.",
     "oauthCallbackError": "A associação de e-mail falhou."
   },
   "notifications": {

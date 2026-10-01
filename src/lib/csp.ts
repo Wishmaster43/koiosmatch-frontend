@@ -86,8 +86,10 @@ export function buildCsp(env: CspEnv): string {
     "object-src 'none'",
     "base-uri 'self'",
     // frame-ancestors cannot be set via a <meta http-equiv> CSP tag (the spec
-    // ignores it there) — clickjacking protection for this app is an infra/nginx
-    // response-header follow-up, not something this file can express.
+    // ignores it there) — clickjacking protection for this app is a webserver/CDN
+    // RESPONSE header on the app, portal and career-site hosts (frame-ancestors 'none',
+    // X-Frame-Options DENY, HSTS, nosniff, Referrer-Policy): the infra row in
+    // koiosmatch-api/docs/SERVERS.md §9 (ONIX L-002 follow-up, 01-10), never this file.
   ]
   return directives.join('; ')
 }

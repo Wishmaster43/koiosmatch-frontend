@@ -845,6 +845,7 @@
     "oauthDisconnectFailed": "Error al desconectar.",
     "oauthCallbackConnected": "Cuenta de correo conectada: {{email}}.",
     "oauthCallbackError": "La conexión de correo ha fallado.",
+    "oauthCallbackBrowserMismatch": "La vinculación del buzón ha fallado: la autorización volvió en otro navegador. Vincula el buzón de nuevo desde el navegador en el que empezaste.",
     "senderDetails": "Datos del remitente",
     "senderName": "Nombre del remitente",
     "senderNamePlaceholder": "p.ej. KoiosMatch",

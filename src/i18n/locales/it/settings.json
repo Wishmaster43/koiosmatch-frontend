@@ -1140,6 +1140,7 @@
     "oauthConnectFailed": "Collegamento non riuscito.",
     "oauthDisconnectFailed": "Scollegamento non riuscito.",
     "oauthCallbackConnected": "Account email collegato: {{email}}.",
+    "oauthCallbackBrowserMismatch": "Il collegamento della casella di posta non è riuscito: l’autorizzazione è tornata in un altro browser. Collega di nuovo la casella dal browser in cui hai iniziato.",
     "oauthCallbackError": "Il collegamento email non è riuscito."
   },
   "notifications": {

@@ -1104,6 +1104,7 @@
     "oauthDisconnectFailed": "Ontkoppelen mislukt.",
     "oauthCallbackConnected": "E-mailaccount gekoppeld: {{email}}.",
     "oauthCallbackError": "De e-mailkoppeling is mislukt.",
+    "oauthCallbackBrowserMismatch": "De e-mailkoppeling is mislukt: de autorisatie kwam terug in een andere browser. Koppel de mailbox opnieuw vanuit dezelfde browser waarin je begon.",
     "senderDetails": "Afzendergegevens",
     "senderName": "Afzendernaam",
     "senderNamePlaceholder": "Bijv. KoiosMatch",

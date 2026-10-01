@@ -151,14 +151,18 @@ export default function EmailSettings({ context = 'klanten' }: EmailSettingsProp
     if (!outcome) return
     const forThisTab = outcome === 'error' || params.get('context') === context
     if (!forThisTab) return
+    // ONIX L-002 (BE 84917a3e): the consent flow is bound to the browser that started
+    // it; `reason=browser_mismatch` means the state came back in another browser.
+    const reason = params.get('reason')
     setOauthBanner(outcome === 'connected'
       ? { ok: true, msg: t('email.oauthCallbackConnected', { email: params.get('email') || '' }) }
-      : { ok: false, msg: t('email.oauthCallbackError') })
+      : { ok: false, msg: reason === 'browser_mismatch' ? t('email.oauthCallbackBrowserMismatch') : t('email.oauthCallbackError') })
     if (outcome === 'connected') loadConnStatus()
     let nextHash = setHashParam(window.location.hash, 'email_oauth', null)
     nextHash = setHashParam(nextHash, 'context', null)
     nextHash = setHashParam(nextHash, 'email', null)
     nextHash = setHashParam(nextHash, 'request_id', null)
+    nextHash = setHashParam(nextHash, 'reason', null)
     window.history.replaceState(null, '', window.location.pathname + window.location.search + nextHash)
   }, [context, loadConnStatus, t])
 
