@@ -67,6 +67,10 @@ const USAGE_LABEL_KEYS: Record<string, string> = {
   candidates: 'candidates', candidate_links: 'candidateLinks', customers: 'customers',
   vacancies: 'vacancies', opportunities: 'opportunities', tasks: 'tasks',
   matches: 'matches', appointments: 'appointments',
+  // ONIX C-003 census (BE LocationController::usageCounts): the pivots that used to
+  // cascade silently now block the delete too — every key the server can send has a label.
+  staff_couplings: 'staffCouplings', role_couplings: 'roleCouplings', webhooks: 'webhooks',
+  webhook_subscriptions: 'webhookSubscriptions', whatsapp_web_devices: 'whatsappWebDevices', api_keys: 'apiKeys',
 }
 
 // Turn `{ candidates: 3, tasks: 1 }` into "3 candidates, 1 task" (translated,

@@ -182,6 +182,27 @@ describe('LocationsSettings', () => {
     expect(await screen.findByRole('button', { name: st('locations.deleteBlockedTooltip') })).toBeDisabled()
   })
 
+  // ONIX C-003 census: the staff/role pivots (and webhooks, WhatsApp-Web devices, API keys)
+  // now block a branch delete too — every key the server sends renders as a label, never raw.
+  it('a 409 with the C-003 census keys lists them translated (never a raw staff_couplings key)', async () => {
+    mockedApi.get.mockResolvedValue({ data: { data: [location()] } })
+    mockedApi.delete.mockRejectedValue({ response: { status: 409, data: { in_use: true, counts: { staff_couplings: 2, role_couplings: 1, api_keys: 1 } } } })
+    const { notifyError } = await import('@/lib/notify')
+    const user = userEvent.setup()
+    render(<LocationsSettings />)
+    await waitFor(() => expect(screen.getByText('Kantoor Rotterdam')).toBeInTheDocument())
+
+    await confirmDelete(user, 'Kantoor Rotterdam')
+
+    const expectedList = [
+      st('locations.usage.staffCouplings', { count: 2 }),
+      st('locations.usage.roleCouplings', { count: 1 }),
+      st('locations.usage.apiKeys', { count: 1 }),
+    ].join(', ')
+    await waitFor(() => expect(notifyError).toHaveBeenCalledWith(st('locations.deleteBlocked', { list: expectedList })))
+    expect(String(vi.mocked(notifyError).mock.calls.at(-1)?.[0])).not.toMatch(/staff_couplings|role_couplings|api_keys/)
+  })
+
   it('a non-409 delete failure surfaces the generic notifyError, not a raw server error', async () => {
     mockedApi.get.mockResolvedValue({ data: { data: [location()] } })
     mockedApi.delete.mockRejectedValue(new Error('network down'))
