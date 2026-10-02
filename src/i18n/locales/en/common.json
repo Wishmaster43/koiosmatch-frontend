@@ -38,6 +38,12 @@
     "unmarked": "Moved back to the archive."
   },
   "actionFailed": "Action failed. Please try again.",
+  "eraseDialog": {
+    "password": "Password",
+    "hint": "Confirm with your own password. This cannot be undone.",
+    "wrongPassword": "Incorrect password or no permission.",
+    "passwordRequired": "Password is required."
+  },
   "save": "Save",
   "saving": "Saving…",
   "saveChanges": "Save changes",

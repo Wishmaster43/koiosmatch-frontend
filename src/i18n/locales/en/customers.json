@@ -432,7 +432,11 @@
       "linkedin": "LinkedIn",
       "openLinkedin": "Open on LinkedIn",
       "freeText": "Free text",
-      "preferredLanguage": "Preferred language"
+      "preferredLanguage": "Preferred language",
+      "erasePerson": "Erase person",
+      "eraseTitle": "Erase person",
+      "eraseIntro": "{{name}} will be made unrecognisable: name, e-mail address and phone numbers disappear from the file, the conversations and the audit log. Vacancies, matches and notes stay in place without a name.",
+      "eraseDone": "Personal data erased."
     },
     "deleteConfirm": "Delete this contact?",
     "saveFailed": "Saving failed.",

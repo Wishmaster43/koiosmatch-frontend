@@ -38,6 +38,12 @@
     "unmarked": "Zurück ins Archiv verschoben."
   },
   "actionFailed": "Aktion fehlgeschlagen – bitte erneut versuchen.",
+  "eraseDialog": {
+    "password": "Passwort",
+    "hint": "Bestätigen Sie mit Ihrem eigenen Passwort. Dies kann nicht widerrufen werden.",
+    "wrongPassword": "Passwort falsch oder keine Berechtigung.",
+    "passwordRequired": "Passwort ist erforderlich."
+  },
   "save": "Speichern",
   "saving": "Speichern…",
   "saveChanges": "Änderungen speichern",

@@ -38,6 +38,12 @@
     "unmarked": "Devuelto al archivo."
   },
   "actionFailed": "La acción falló. Inténtalo de nuevo.",
+  "eraseDialog": {
+    "password": "Contraseña",
+    "hint": "Confirma con tu propia contraseña. Esta acción no se puede deshacer.",
+    "wrongPassword": "Contraseña incorrecta o sin permiso.",
+    "passwordRequired": "La contraseña es obligatoria."
+  },
   "save": "Guardar",
   "saving": "Guardando…",
   "saveChanges": "Guardar cambios",

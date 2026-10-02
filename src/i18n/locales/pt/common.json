@@ -38,6 +38,12 @@
     "unmarked": "Reposto no arquivo."
   },
   "actionFailed": "A ação falhou. Tente novamente.",
+  "eraseDialog": {
+    "password": "Palavra-passe",
+    "hint": "Confirme com a sua própria palavra-passe. Esta ação não pode ser anulada.",
+    "wrongPassword": "Palavra-passe incorreta ou sem permissão.",
+    "passwordRequired": "A palavra-passe é obrigatória."
+  },
   "save": "Guardar",
   "saving": "A guardar…",
   "saveChanges": "Guardar alterações",

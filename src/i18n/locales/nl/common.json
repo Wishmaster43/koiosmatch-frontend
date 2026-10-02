@@ -38,6 +38,12 @@
     "unmarked": "Teruggezet naar archief."
   },
   "actionFailed": "Actie mislukt. Probeer het opnieuw.",
+  "eraseDialog": {
+    "password": "Wachtwoord",
+    "hint": "Bevestig met je eigen wachtwoord. Dit kan niet ongedaan worden gemaakt.",
+    "wrongPassword": "Wachtwoord onjuist of geen rechten.",
+    "passwordRequired": "Wachtwoord is verplicht."
+  },
   "save": "Opslaan",
   "saving": "Opslaan…",
   "saveChanges": "Wijzigingen opslaan",

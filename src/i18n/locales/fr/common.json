@@ -38,6 +38,12 @@
     "unmarked": "Remis aux archives."
   },
   "actionFailed": "Échec de l'action. Veuillez réessayer.",
+  "eraseDialog": {
+    "password": "Mot de passe",
+    "hint": "Confirmez avec votre propre mot de passe. Cette action est irréversible.",
+    "wrongPassword": "Mot de passe incorrect ou autorisation manquante.",
+    "passwordRequired": "Le mot de passe est obligatoire."
+  },
   "save": "Enregistrer",
   "saving": "Enregistrement…",
   "saveChanges": "Enregistrer les modifications",

@@ -432,7 +432,11 @@
       "linkedin": "LinkedIn",
       "openLinkedin": "Auf LinkedIn öffnen",
       "freeText": "Freitext",
-      "preferredLanguage": "Bevorzugte Sprache"
+      "preferredLanguage": "Bevorzugte Sprache",
+      "erasePerson": "Person löschen",
+      "eraseTitle": "Person löschen",
+      "eraseIntro": "{{name}} wird unkenntlich gemacht: Name, E-Mail-Adresse und Telefonnummern verschwinden aus der Akte, den Gesprächen und dem Protokoll. Stellenangebote, Matches und Notizen bleiben ohne Namen bestehen.",
+      "eraseDone": "Personenbezogene Daten gelöscht."
     },
     "deleteConfirm": "Diesen Kontakt löschen?",
     "saveFailed": "Speichern fehlgeschlagen.",

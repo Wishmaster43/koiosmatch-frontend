@@ -432,7 +432,11 @@
       "linkedin": "LinkedIn",
       "openLinkedin": "Apri su LinkedIn",
       "freeText": "Testo libero",
-      "preferredLanguage": "Lingua preferita"
+      "preferredLanguage": "Lingua preferita",
+      "erasePerson": "Elimina persona",
+      "eraseTitle": "Elimina persona",
+      "eraseIntro": "{{name}} verrà reso irriconoscibile: nome, indirizzo e-mail e numeri di telefono scompaiono dal fascicolo, dalle conversazioni e dal registro di controllo. Offerte, match e note restano senza nome.",
+      "eraseDone": "Dati personali eliminati."
     },
     "deleteConfirm": "Eliminare questo referente?",
     "saveFailed": "Salvataggio non riuscito.",

@@ -38,6 +38,12 @@
     "unmarked": "Ripristinato nell'archivio."
   },
   "actionFailed": "Azione non riuscita. Riprova.",
+  "eraseDialog": {
+    "password": "Password",
+    "hint": "Conferma con la tua password. Questa azione non può essere annullata.",
+    "wrongPassword": "Password errata o permesso mancante.",
+    "passwordRequired": "La password è obbligatoria."
+  },
   "save": "Salva",
   "saving": "Salvataggio…",
   "saveChanges": "Salva modifiche",

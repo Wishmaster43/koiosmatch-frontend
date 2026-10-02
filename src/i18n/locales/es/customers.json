@@ -432,7 +432,11 @@
       "linkedin": "LinkedIn",
       "openLinkedin": "Abrir en LinkedIn",
       "freeText": "Texto libre",
-      "preferredLanguage": "Idioma preferido"
+      "preferredLanguage": "Idioma preferido",
+      "erasePerson": "Borrar persona",
+      "eraseTitle": "Borrar persona",
+      "eraseIntro": "{{name}} quedará irreconocible: el nombre, el correo electrónico y los números de teléfono desaparecen del expediente, las conversaciones y el registro de auditoría. Las vacantes, los matches y las notas permanecen sin nombre.",
+      "eraseDone": "Datos personales borrados."
     },
     "deleteConfirm": "¿Eliminar este contacto?",
     "saveFailed": "Error al guardar.",

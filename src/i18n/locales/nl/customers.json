@@ -432,7 +432,11 @@
       "linkedin": "LinkedIn",
       "openLinkedin": "Openen op LinkedIn",
       "freeText": "Vrije tekst",
-      "preferredLanguage": "Voorkeurstaal"
+      "preferredLanguage": "Voorkeurstaal",
+      "erasePerson": "Persoon wissen",
+      "eraseTitle": "Persoon wissen",
+      "eraseIntro": "{{name}} wordt onherkenbaar gemaakt: naam, e-mailadres en telefoonnummers verdwijnen uit het dossier, de gesprekken en de audit. Vacatures, matches en notities blijven bestaan zonder naam.",
+      "eraseDone": "Persoonsgegevens gewist."
     },
     "deleteConfirm": "Deze contactpersoon verwijderen?",
     "saveFailed": "Opslaan is mislukt.",
