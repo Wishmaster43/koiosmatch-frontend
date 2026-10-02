@@ -538,6 +538,8 @@
     "unitMonths": "mois",
     "listValuesHint": "Saisissez une valeur et appuyez sur Entrée.",
     "removeValue": "Supprimer la valeur",
+    "mapField": "Champ d'un module précédent",
+    "mappedValue": "Champ mappé",
     "opContains": "contient",
     "opNotContains": "ne contient pas",
     "opEmpty": "est vide",
@@ -1166,6 +1168,15 @@
     "more": "+ {{n}} de plus",
     "capped": "{{shown}} sur {{total}} affichés",
     "items": "{{n}} éléments"
+  },
+  "inspector": {
+    "empty": "vide",
+    "fieldCount_one": "{{count, number}} champ",
+    "fieldCount_other": "{{count, number}} champs",
+    "bundle": "Lot {{n}}",
+    "collection": "Collection",
+    "bundlePosition": "Position du lot",
+    "bundleTotal": "Nombre total de lots"
   },
   "wa": {
     "template": "Modèle",

@@ -538,6 +538,8 @@
     "unitMonths": "months",
     "listValuesHint": "Type a value and press Enter.",
     "removeValue": "Remove value",
+    "mapField": "Field from an earlier module",
+    "mappedValue": "Mapped field",
     "opContains": "contains",
     "opNotContains": "does not contain",
     "opEmpty": "is empty",
@@ -1166,6 +1168,15 @@
     "more": "+ {{n}} more",
     "capped": "{{shown}} of {{total}} shown",
     "items": "{{n}} items"
+  },
+  "inspector": {
+    "empty": "empty",
+    "fieldCount_one": "{{count, number}} field",
+    "fieldCount_other": "{{count, number}} fields",
+    "bundle": "Bundle {{n}}",
+    "collection": "Collection",
+    "bundlePosition": "Bundle order position",
+    "bundleTotal": "Total number of bundles"
   },
   "wa": {
     "template": "Template",

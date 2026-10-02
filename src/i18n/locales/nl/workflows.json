@@ -14,6 +14,15 @@
     "capped": "{{shown}} van {{total}} getoond",
     "items": "{{n}} items"
   },
+  "inspector": {
+    "empty": "leeg",
+    "fieldCount_one": "{{count, number}} veld",
+    "fieldCount_other": "{{count, number}} velden",
+    "bundle": "Bundel {{n}}",
+    "collection": "Collectie",
+    "bundlePosition": "Bundelpositie",
+    "bundleTotal": "Totaal aantal bundels"
+  },
   "wa": {
     "template": "Template",
     "templateLoading": "Templates ophalen…",
@@ -573,6 +582,8 @@
     "unitMonths": "maanden",
     "listValuesHint": "Typ een waarde en druk op Enter.",
     "removeValue": "Waarde verwijderen",
+    "mapField": "Veld van een eerdere module",
+    "mappedValue": "Gekoppeld veld",
     "opContains": "bevat",
     "opNotContains": "bevat niet",
     "opEmpty": "is leeg",

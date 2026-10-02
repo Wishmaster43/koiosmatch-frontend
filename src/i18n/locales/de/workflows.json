@@ -538,6 +538,8 @@
     "unitMonths": "Monate",
     "listValuesHint": "Wert eingeben und Enter drücken.",
     "removeValue": "Wert entfernen",
+    "mapField": "Feld aus einem früheren Modul",
+    "mappedValue": "Zugeordnetes Feld",
     "opContains": "enthält",
     "opNotContains": "enthält nicht",
     "opEmpty": "ist leer",
@@ -1166,6 +1168,15 @@
     "more": "+ {{n}} weitere",
     "capped": "{{shown}} von {{total}} angezeigt",
     "items": "{{n}} Einträge"
+  },
+  "inspector": {
+    "empty": "leer",
+    "fieldCount_one": "{{count, number}} Feld",
+    "fieldCount_other": "{{count, number}} Felder",
+    "bundle": "Bündel {{n}}",
+    "collection": "Sammlung",
+    "bundlePosition": "Bündelposition",
+    "bundleTotal": "Gesamtzahl der Bündel"
   },
   "wa": {
     "template": "Vorlage",

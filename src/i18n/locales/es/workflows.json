@@ -538,6 +538,8 @@
     "unitMonths": "meses",
     "listValuesHint": "Escriba un valor y pulse Intro.",
     "removeValue": "Eliminar valor",
+    "mapField": "Campo de un módulo anterior",
+    "mappedValue": "Campo asignado",
     "opContains": "contiene",
     "opNotContains": "no contiene",
     "opEmpty": "está vacío",
@@ -1166,6 +1168,15 @@
     "more": "+ {{n}} más",
     "capped": "{{shown}} de {{total}} mostrados",
     "items": "{{n}} elementos"
+  },
+  "inspector": {
+    "empty": "vacío",
+    "fieldCount_one": "{{count, number}} campo",
+    "fieldCount_other": "{{count, number}} campos",
+    "bundle": "Lote {{n}}",
+    "collection": "Colección",
+    "bundlePosition": "Posición del lote",
+    "bundleTotal": "Número total de lotes"
   },
   "wa": {
     "template": "Plantilla",

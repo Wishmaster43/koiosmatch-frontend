@@ -14,6 +14,15 @@
     "capped": "{{shown}} de {{total}} mostrados",
     "items": "{{n}} itens"
   },
+  "inspector": {
+    "empty": "vazio",
+    "fieldCount_one": "{{count, number}} campo",
+    "fieldCount_other": "{{count, number}} campos",
+    "bundle": "Lote {{n}}",
+    "collection": "Coleção",
+    "bundlePosition": "Posição do lote",
+    "bundleTotal": "Número total de lotes"
+  },
   "wa": {
     "template": "Template",
     "templateLoading": "A obter templates…",
@@ -573,6 +582,8 @@
     "unitMonths": "meses",
     "listValuesHint": "Digite um valor e pressione Enter.",
     "removeValue": "Remover valor",
+    "mapField": "Campo de um módulo anterior",
+    "mappedValue": "Campo mapeado",
     "opContains": "contém",
     "opNotContains": "não contém",
     "opEmpty": "está vazio",
