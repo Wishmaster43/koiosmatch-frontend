@@ -34,10 +34,10 @@ describe('checkIsSuperAdmin', () => {
     expect(checkIsSuperAdmin({ is_super_admin: true } as AuthUser)).toBe(true)
     expect(checkIsSuperAdmin({ roles: [{ name: 'super_admin' }] } as unknown as AuthUser)).toBe(true)
   })
-  it('fires on an explicit tenant_id: null with no tenant object', () => {
-    expect(checkIsSuperAdmin({ tenant_id: null } as AuthUser)).toBe(true)
+  // ONIX C-003: "no tenant" is NOT a super admin — only the explicit flag or role is.
+  it('never fires on an explicit tenant_id: null without the flag or role', () => {
+    expect(checkIsSuperAdmin({ tenant_id: null } as AuthUser)).toBe(false)
   })
-  // SUPERADMIN-FALLBACK-1: a profile that merely OMITS tenant_id is a tenant user, never platform.
   it('never fires when tenant_id is simply absent', () => {
     expect(checkIsSuperAdmin({ id: 'tom' } as AuthUser)).toBe(false)
   })

@@ -21,12 +21,13 @@ export const checkHasRole = (user: AuthUser | null, role: string): boolean =>
 export const checkIsAdmin = (user: AuthUser | null): boolean =>
   checkHasRole(user, 'admin') || checkHasRole(user, 'tenant_admin') || checkHasRole(user, 'super_admin')
 
-// Super admin = the explicit flag, the super_admin role, or a profile that EXPLICITLY
-// says it has no tenant (`tenant_id: null` present). A profile that merely omits the
-// key is a tenant user (SUPERADMIN-FALLBACK-1): "missing" must never mean "platform".
+// Super admin = the explicit `is_super_admin` flag (always on /auth/me and the login
+// payload since BE ONIX C-003 51bc7f3c) or the super_admin role. NEVER "a profile
+// without a tenant": that proxy was the C-003 finding (an orphaned account is not a
+// platform admin; the server now refuses it with 403 no_organisation, see
+// lib/orphanAccount). A profile that omits the flag is a tenant user.
 export const checkIsSuperAdmin = (user: AuthUser | null): boolean =>
   user?.is_super_admin === true || checkHasRole(user, 'super_admin')
-    || (!!user && 'tenant_id' in user && user.tenant_id === null && !user.tenant)
 
 // Capability check for paid add-on modules ('sm', 'hf', 'ai', 'ats', 'plan').
 // Module gating is uniform: an off module is unprovisioned for the tenant, so it stays

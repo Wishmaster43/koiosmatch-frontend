@@ -98,3 +98,26 @@ describe('LoginPage · §4 tokens, no ad-hoc Tailwind greys', () => {
     sessionStorage.removeItem('km_session_expired')
   })
 })
+
+// ONIX C-003: a session that ended because the account hangs on no organisation
+// explains itself on the login screen (and wins over the generic expired notice).
+describe('LoginPage · orphaned account (no_organisation)', () => {
+  it('shows the no-organisation notice instead of the session-expired one and clears its flag', () => {
+    sessionStorage.setItem('km_no_organisation', '1')
+    sessionStorage.setItem('km_session_expired', '1')
+    renderLogin()
+    expect(screen.getByRole('alert')).toHaveTextContent(nlAuth.login.noOrganisation)
+    expect(screen.queryByText(nlAuth.login.sessionExpired)).toBeNull()
+    expect(sessionStorage.getItem('km_no_organisation')).toBeNull()
+    sessionStorage.removeItem('km_session_expired')
+  })
+
+  it('maps a 403 no_organisation on the login call to the translated notice, never the raw server message', async () => {
+    loginMock.mockRejectedValueOnce({ response: { status: 403, data: { code: 'no_organisation', message: 'raw server text' } } })
+    renderLogin()
+    await act(async () => { submit() })
+    expect(screen.getByText(nlAuth.login.noOrganisation)).toBeInTheDocument()
+    expect(screen.queryByText('raw server text')).toBeNull()
+    loginMock.mockReset()
+  })
+})

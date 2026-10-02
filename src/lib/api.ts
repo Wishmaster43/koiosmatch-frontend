@@ -22,6 +22,7 @@ import axios, {
 import type { ListResult, PaginationMeta } from '../types/api'
 import { CSRF_COOKIE_URL } from './authMode'
 import { isMfaEnrollmentError } from './mfaGate'
+import { isNoOrganisationError, NO_ORGANISATION_FLAG } from './orphanAccount'
 import { notifyError } from './notify'
 
 const api = axios.create({
@@ -223,7 +224,13 @@ api.interceptors.response.use(
     // that comes back AGAIN after the CSRF re-prime means the session behind the cookie is
     // gone, not the token — treat it exactly like a 401 so the app routes to login instead
     // of leaving every later request red in a tab that still looks signed in.
-    const sessionGone = status === 401 || (status === 419 && config._retried419 === true)
+    // ONIX C-003 (BE 51bc7f3c): a 403 no_organisation on a signed-in request means the
+    // account hangs on no organisation any more and the server already revoked its
+    // tokens — end the local session exactly like a 401, and let the login screen
+    // explain why (the flag below). The login call itself maps the code in LoginPage.
+    const orphaned = isNoOrganisationError(error)
+    if (orphaned && !isAuthCall) sessionStorage.setItem(NO_ORGANISATION_FLAG, '1')
+    const sessionGone = status === 401 || (status === 419 && config._retried419 === true) || orphaned
     if (sessionGone && !isAuthCall) {
       localStorage.removeItem('auth_token')
       localStorage.removeItem('auth_user')
@@ -231,7 +238,7 @@ api.interceptors.response.use(
       localStorage.removeItem('accessible_pages')
       localStorage.removeItem('km_session')
       if (window.location.pathname !== '/login') {
-        sessionStorage.setItem('km_session_expired', '1')
+        if (!orphaned) sessionStorage.setItem('km_session_expired', '1')
         window.dispatchEvent(new CustomEvent('km:auth-expired'))
       }
     }

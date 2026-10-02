@@ -36,6 +36,30 @@ describe('api · session-gone handling (CONFIRM-EERLIJK-1)', () => {
     window.removeEventListener('km:auth-expired', seen)
   })
 
+  // ONIX C-003 (BE 51bc7f3c): an orphaned account is refused with 403 no_organisation and
+  // its tokens are revoked — the local session ends like a 401, with its OWN flag so the
+  // login screen explains "no organisation" instead of "session expired".
+  it('a 403 no_organisation on a normal call ends the session with the orphan flag, never the expired flag', async () => {
+    const seen = vi.fn()
+    window.addEventListener('km:auth-expired', seen, { once: true })
+    const err = { response: { status: 403, data: { code: 'no_organisation' } }, config: { url: '/candidates', method: 'get' } }
+    await expect(rejected()(err)).rejects.toBe(err)
+    expect(seen).toHaveBeenCalledTimes(1)
+    expect(sessionStorage.getItem('km_no_organisation')).toBe('1')
+    expect(sessionStorage.getItem('km_session_expired')).toBeNull()
+    expect(localStorage.getItem('km_session')).toBeNull()
+  })
+
+  it('a 403 no_organisation on the login call itself leaves the session handling to the login screen', async () => {
+    const seen = vi.fn()
+    window.addEventListener('km:auth-expired', seen, { once: true })
+    const err = { response: { status: 403, data: { code: 'no_organisation' } }, config: { url: '/auth/login', method: 'post' } }
+    await expect(rejected()(err)).rejects.toBe(err)
+    expect(seen).not.toHaveBeenCalled()
+    expect(sessionStorage.getItem('km_no_organisation')).toBeNull()
+    window.removeEventListener('km:auth-expired', seen)
+  })
+
   it('a 401 on a normal call still clears the session and dispatches km:auth-expired', async () => {
     const seen = vi.fn()
     window.addEventListener('km:auth-expired', seen, { once: true })

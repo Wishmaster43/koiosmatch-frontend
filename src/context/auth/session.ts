@@ -12,21 +12,14 @@ export interface ShapedAuthResponse {
   tenant: Tenant | null
 }
 
-// SUPERADMIN-FALLBACK-1 (04-09, measured as the readonly demo user): /auth/me
-// carries the tenant as a SIBLING of `user`, never as user.tenant_id, so the
-// "user without a tenant" heuristic in isSuperAdmin() fired for every tenant
-// user and opened every permission gate. Stamp the sibling tenant onto the
-// stored profile so the profile itself says which tenant it belongs to.
-export const stampTenantOnUser = (raw: AuthUser, sibling: Tenant | undefined): AuthUser =>
-  raw && sibling?.id && raw.tenant_id == null && !raw.tenant ? { ...raw, tenant_id: sibling.id } : raw
-
 // Extracts the user, accessible pages and active tenant from a raw /auth/me
 // or login response body — the response may nest the user under `user`,
 // `data`, or (older shape) be the user itself.
 export function shapeAuthResponse(data: unknown): ShapedAuthResponse {
   const d = data as { user?: AuthUser; data?: AuthUser; accessible_pages?: string[]; tenant?: Tenant } | null | undefined
-  const raw = (d?.user ?? d?.data ?? data) as AuthUser
-  const user = stampTenantOnUser(raw, d?.tenant)
+  // The profile travels as is: super admin is the explicit is_super_admin flag
+  // (ONIX C-003), so no tenant id needs stamping onto the user any more.
+  const user = (d?.user ?? d?.data ?? data) as AuthUser
   const accessiblePages = d?.accessible_pages ?? user?.accessible_pages ?? []
   const tenant = d?.tenant ?? user?.tenant ?? null
   return { user, accessiblePages, tenant }

@@ -21,6 +21,7 @@ import { PageTitle, BodyText, FormLabel } from '@/components/ui/typography'
 import { FIELD_FONT_SIZE } from '@/components/forms/fieldMetrics'
 // DUP-04: one shared axios-error → message extractor, never a re-derived inline dance.
 import { extractApiError } from '@/lib/extractApiError'
+import { isNoOrganisationError, NO_ORGANISATION_FLAG } from '@/lib/orphanAccount'
 
 // Read the login throttle's machine field off a 429 (LOGIN-THROTTLE-1, Danny 13-08):
 // the backend sends retry_after (integer seconds) beside its message; we count that
@@ -105,7 +106,10 @@ function CredentialForm({ onMfaRequired }: { onMfaRequired: (token: string) => v
   const [retryAfter, setRetryAfter] = useState<number | null>(null)
   // Set by api.js when a 401 ended the previous session — show a hint, then clear.
   const [expired] = useState(() => sessionStorage.getItem('km_session_expired') === '1')
+  // ONIX C-003: the previous session ended because the account hangs on no organisation.
+  const [orphaned] = useState(() => sessionStorage.getItem(NO_ORGANISATION_FLAG) === '1')
   useEffect(() => { if (expired) sessionStorage.removeItem('km_session_expired') }, [expired])
+  useEffect(() => { if (orphaned) sessionStorage.removeItem(NO_ORGANISATION_FLAG) }, [orphaned])
 
   // Tick the throttle countdown once per second; at 0 the notice clears and the
   // submit button re-enables — the promise in the text stays true.
@@ -135,6 +139,7 @@ function CredentialForm({ onMfaRequired }: { onMfaRequired: (token: string) => v
       // existing message path.
       const secs = retryAfterOf(err)
       if (secs !== null) setRetryAfter(secs)
+      else if (isNoOrganisationError(err)) setError(t('login.noOrganisation'))
       else setError(extractApiError(err, t('login.failed')))
     } finally {
       setLoading(false)
@@ -148,7 +153,12 @@ function CredentialForm({ onMfaRequired }: { onMfaRequired: (token: string) => v
       <PageTitle as="h1" style={{ marginBottom: 4 }}>{t('login.title')}</PageTitle>
       <BodyText style={{ color: 'var(--text-muted)', marginBottom: 32 }}>{t('login.subtitle')}</BodyText>
 
-      {expired && !error && (
+      {orphaned && !error && (
+        <div style={{ marginBottom: 16 }}>
+          <CalloutBox variant="danger">{t('login.noOrganisation')}</CalloutBox>
+        </div>
+      )}
+      {expired && !orphaned && !error && (
         <div style={{ marginBottom: 16 }}>
           <CalloutBox variant="warning">{t('login.sessionExpired')}</CalloutBox>
         </div>

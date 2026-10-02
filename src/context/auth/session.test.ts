@@ -1,24 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { stampTenantOnUser, shapeAuthResponse } from './session'
-import type { AuthUser } from './permissions'
-
-describe('stampTenantOnUser', () => {
-  it('stamps the sibling tenant id when the user carries none', () => {
-    const raw = { id: 'u1' } as AuthUser
-    const stamped = stampTenantOnUser(raw, { id: 't1', name: 'Demo' } as never)
-    expect(stamped.tenant_id).toBe('t1')
-  })
-  it('leaves the user untouched when it already has a tenant object', () => {
-    const raw = { id: 'u1', tenant: { id: 't2' } } as unknown as AuthUser
-    const stamped = stampTenantOnUser(raw, { id: 't1', name: 'Demo' } as never)
-    expect(stamped).toBe(raw)
-  })
-  it('leaves the user untouched when tenant_id is already set', () => {
-    const raw = { id: 'u1', tenant_id: 't3' } as AuthUser
-    const stamped = stampTenantOnUser(raw, { id: 't1', name: 'Demo' } as never)
-    expect(stamped.tenant_id).toBe('t3')
-  })
-})
+import { shapeAuthResponse } from './session'
 
 describe('shapeAuthResponse', () => {
   it('reads user + accessible_pages + tenant from a nested /auth/me body', () => {
@@ -28,7 +9,8 @@ describe('shapeAuthResponse', () => {
       tenant: { id: 't1', name: 'Demo' },
     })
     expect(user.id).toBe('u1')
-    expect(user.tenant_id).toBe('t1')
+    // ONIX C-003: the profile travels untouched — no tenant id is stamped onto it.
+    expect(user).toEqual({ id: 'u1' })
     expect(accessiblePages).toEqual(['candidates'])
     expect(tenant?.id).toBe('t1')
   })
