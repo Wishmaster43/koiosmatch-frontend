@@ -14,13 +14,22 @@ export function isBooleanField(field?: string): boolean {
 }
 
 // The stored value as the yes/no menu's option key ('' when nothing chosen yet).
-export function booleanValueKey(value: string | boolean | undefined): string {
+export function booleanValueKey(value: string | boolean | string[] | undefined): string {
   if (value === true || value === 'true') return 'true'
   if (value === false || value === 'false') return 'false'
   return ''
 }
 
-// The text a plain input shows for a condition value (a stray boolean renders as its word).
-export function textValue(value: string | boolean | undefined): string {
+// The text a plain input shows for a condition value (a stray boolean renders as its
+// word, a seeded list array as its comma-joined form).
+export function textValue(value: string | boolean | string[] | undefined): string {
+  if (Array.isArray(value)) return value.map(String).join(',')
   return typeof value === 'boolean' ? String(value) : (value ?? '')
+}
+
+// The items of a list-operator value: a seeded array as is, a comma string split —
+// trimmed, empties dropped. Both forms are what the engine's toList() reads.
+export function listValueItems(value: string | boolean | string[] | undefined): string[] {
+  const raw = Array.isArray(value) ? value.map(String) : textValue(value).split(',')
+  return raw.map(s => s.trim()).filter(Boolean)
 }

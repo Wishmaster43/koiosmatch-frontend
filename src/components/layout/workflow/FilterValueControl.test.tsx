@@ -137,6 +137,35 @@ describe('FilterValueControl · list operators (in / not_in)', () => {
     fireEvent.click(screen.getAllByLabelText('canvas.removeValue')[0])
     expect(onChange).toHaveBeenCalledWith('b,c')
   })
+
+  // REGRESSION (02-10, measured on the seeded Yesway AI-agent workflow): the stored
+  // not_in value is a real ARRAY, not a comma string; the chip editor crashed with
+  // "text.split is not a function". The array form must render and be preserved.
+  it('REGRESSION: a seeded ARRAY value renders every item as a chip and removal writes an array back', () => {
+    const onChange = vi.fn()
+    render(<FilterValueControl operator="not_in" value={['a', 'b', 'c']} onChange={onChange} ariaLabel="value" />)
+    expect(screen.getByText('a')).toBeInTheDocument()
+    expect(screen.getByText('b')).toBeInTheDocument()
+    expect(screen.getByText('c')).toBeInTheDocument()
+    fireEvent.click(screen.getAllByLabelText('canvas.removeValue')[1])
+    expect(onChange).toHaveBeenCalledWith(['a', 'c'])
+  })
+
+  it('adding to an ARRAY value keeps the array form (never flips the stored shape)', () => {
+    const onChange = vi.fn()
+    render(<FilterValueControl operator="in" value={['a']} onChange={onChange} ariaLabel="value" />)
+    const input = screen.getByLabelText('value')
+    fireEvent.change(input, { target: { value: 'b' } })
+    fireEvent.keyDown(input, { key: 'Enter' })
+    expect(onChange).toHaveBeenCalledWith(['a', 'b'])
+  })
+})
+
+describe('FilterValueControl · array value on a non-list operator', () => {
+  it('shows the comma-joined text in the plain input instead of crashing', () => {
+    render(<FilterValueControl operator="=" value={['a', 'b']} onChange={vi.fn()} ariaLabel="value" />)
+    expect(screen.getByLabelText('value')).toHaveValue('a,b')
+  })
 })
 
 describe('FilterValueControl · boolean field (unchanged)', () => {

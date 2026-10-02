@@ -10,7 +10,8 @@
  *   - boolean field      -> a real boolean (true/false)
  *   - date_older_than_days / date_younger_than_days -> a day-count string ("30")
  *   - date_gte/gt/lte/lt  -> 'now', 'now-90d', 'now+2d', or a fixed 'YYYY-MM-DD'
- *   - in / not_in         -> a comma-separated string ("actief,verwijderd,extern")
+ *   - in / not_in         -> a comma-separated string ("actief,verwijderd,extern"), or
+ *                            the seeded ARRAY form; whichever form arrives is written back
  *   - everything else     -> the plain typed string
  */
 import { useEffect, useId, useRef, useState } from 'react'
@@ -22,7 +23,7 @@ import SelectMenu from '@/components/ui/SelectMenu'
 import SegmentedControl from '@/components/ui/SegmentedControl'
 import SoftChip from '@/components/ui/SoftChip'
 import { Caption } from '@/components/ui/typography'
-import { isBooleanField, booleanValueKey, textValue } from './booleanField'
+import { isBooleanField, booleanValueKey, textValue, listValueItems } from './booleanField'
 
 // DATETIME-IMPORT-LES (CLAUDE.md §2): the shared `components/ui/NumberInput`
 // imports `lib/formatters` -> `lib/datetime`, which has a real-i18n-init side
@@ -71,8 +72,8 @@ const ISO_DATE = /^\d{4}-\d{2}-\d{2}$/
 export interface FilterValueControlProps {
   operator: string
   field?: string
-  value: string | boolean | undefined
-  onChange: (value: string | boolean) => void
+  value: string | boolean | string[] | undefined
+  onChange: (value: string | boolean | string[]) => void
   ariaLabel: string
 }
 
@@ -137,11 +138,13 @@ export default function FilterValueControl({ operator, field, value, onChange, a
     )
   }
 
-  // List operators (in / not_in) — removable chips + a type-to-add input, the
-  // comma-separated wire string stays the backend's exact contract.
+  // List operators (in / not_in) — removable chips + a type-to-add input. The
+  // engine reads a comma string and an array alike (FilterEvaluator::toList), the
+  // seeds store arrays: the control reads both and writes back the FORM it received,
+  // so an untouched shape never flips on edit (GET-shape == PUT-shape).
   if (LIST_OPERATORS.includes(operator)) {
-    const items = text.split(',').map(s => s.trim()).filter(Boolean)
-    const commit = (next: string[]) => onChange(next.join(','))
+    const items = listValueItems(value)
+    const commit = (next: string[]) => onChange(Array.isArray(value) ? next : next.join(','))
     const addFromInput = (raw: string) => {
       const v = raw.trim()
       if (v && !items.includes(v)) commit([...items, v])

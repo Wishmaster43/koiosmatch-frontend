@@ -139,8 +139,11 @@ export interface FlowEdge {
 
 // ── Editor config shapes (schedule · edge filters · config-panel fields) ──────
 // A boolean field (consent flags) stores a real boolean, the engine compares it as one
-// (WORKFLOW-CONSENT-1); every other field stores the typed text.
-export interface FilterCondition { field?: string; operator?: string; value?: string | boolean }
+// (WORKFLOW-CONSENT-1); every other field stores the typed text. A list operator
+// (in / not_in) may carry a real array: the seeded templates store one and the
+// engine's FilterEvaluator::toList accepts an array and a comma string alike.
+export type FilterConditionValue = string | boolean | string[]
+export interface FilterCondition { field?: string; operator?: string; value?: FilterConditionValue }
 export interface EdgeFilters { logic?: string; conditions?: FilterCondition[] }
 
 // One AND-group of conditions inside a router edge's OR'ed group set. A single

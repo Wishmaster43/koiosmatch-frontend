@@ -24,7 +24,7 @@ import { FilterFieldPicker } from './FilterFieldPicker'
 import { OperatorSelect } from './OperatorSelect'
 import FilterValueControl from './FilterValueControl'
 import { MODULE_META } from '@/modules/index'
-import type { FilterCondition, FilterConditionGroup, EdgeFilters, FlowNode, FlowEdge } from '@/types/workflow'
+import type { FilterCondition, FilterConditionValue, FilterConditionGroup, EdgeFilters, FlowNode, FlowEdge } from '@/types/workflow'
 import Button from '@/components/ui/Button'
 import { PageTitle } from '@/components/ui/typography'
 import DrawerAddButton from '@/components/drawer/DrawerAddButton'
@@ -70,7 +70,7 @@ export function EdgeFilterPanel({ filters, label, sourceNodeId, nodes = [], edge
   // Condition-level mutations, scoped to one group by index.
   const addCond = (gi: number) => setGroups(gs => gs.map((g, i) => (i === gi ? [...g, { field: '', operator: '=', value: '' }] : g)))
   const delCond = (gi: number, ci: number) => setGroups(gs => gs.map((g, i) => (i === gi ? g.filter((_, j) => j !== ci) : g)))
-  const updCond = (gi: number, ci: number, key: keyof FilterCondition, val: string | boolean) =>
+  const updCond = (gi: number, ci: number, key: keyof FilterCondition, val: FilterConditionValue) =>
     setGroups(gs => gs.map((g, i) => (i === gi ? g.map((row, j) => (j === ci ? { ...row, [key]: val } : row)) : g)))
 
   // Persist: no non-empty group left → null (F5); exactly one non-empty group
