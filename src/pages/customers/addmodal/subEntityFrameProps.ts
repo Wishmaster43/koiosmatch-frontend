@@ -25,12 +25,14 @@ interface SubEntityFrameInput {
   onClose: () => void
   submit: () => void
   canSubmit: boolean
+  // ONIX N-007: the dialog's in-flight flag (useGuardedSubmit) → the footer's busy state.
+  saving?: boolean
 }
 
 // Builds the identical prop block; the caller spreads it and adds icon/iconColor/iconBg.
 export function subEntityFrameProps({
   t, isEdit, editTitle, addTitle, entityLabel, persistKey, customerName,
-  importOpen, setImportOpen, alert, importCard, onClose, submit, canSubmit,
+  importOpen, setImportOpen, alert, importCard, onClose, submit, canSubmit, saving = false,
 }: SubEntityFrameInput) {
   const title = isEdit ? editTitle : addTitle
   const importTitle = t('subModal.import.title', { entity: entityLabel })
@@ -40,5 +42,6 @@ export function subEntityFrameProps({
     alert, importCard, onCancel: onClose, onSubmit: submit,
     cancelLabel: t('subModal.cancel'), submitLabel: isEdit ? t('subModal.save') : t('subModal.create'),
     submitDisabled: !canSubmit,
+    submitBusy: saving,
   }
 }

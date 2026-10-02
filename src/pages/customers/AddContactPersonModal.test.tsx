@@ -767,3 +767,27 @@ describe('AddContactPersonModal · import card (Danny 02-08: "+ nieuwe contactpe
     expect(screen.getByRole('button', { name: importCardTitle })).toHaveAttribute('aria-expanded', 'false')
   })
 })
+
+// ONIX N-007 (FE correctness): a double-click on "Aanmaken" created the contact twice
+// (measured by the auditor: two identical "AUDIT DoubleSubmit" contacts).
+describe('AddContactPersonModal · one create per click (ONIX N-007)', () => {
+  it('ignores the second click while the first create is still running, then closes once', async () => {
+    let resolve!: () => void
+    const onCreate = vi.fn(() => new Promise<void>(r => { resolve = r }))
+    const onClose = vi.fn()
+    const user = userEvent.setup()
+    render(<AddContactPersonModal onClose={onClose} onCreate={onCreate} locations={locations} statuses={statuses} />)
+    await user.type(screen.getByLabelText(ct('subModal.firstName'), { exact: false }), 'Jan')
+    await user.type(screen.getByLabelText(ct('subModal.lastName'), { exact: false }), 'Jansen')
+
+    const create = screen.getByRole('button', { name: ct('subModal.create') })
+    fireEvent.click(create)
+    fireEvent.click(create)
+    await waitFor(() => expect(onCreate).toHaveBeenCalledTimes(1))
+    expect(screen.getByRole('button', { name: `${ct('subModal.create')}…` })).toBeDisabled()
+
+    resolve()
+    await waitFor(() => expect(onClose).toHaveBeenCalledTimes(1))
+    expect(onCreate).toHaveBeenCalledTimes(1)
+  })
+})

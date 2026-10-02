@@ -358,3 +358,26 @@ describe('AddDepartmentModal · import card (Danny 02-08: "+ nieuwe afdeling ...
     expect(screen.getByRole('button', { name: importCardTitle })).toHaveAttribute('aria-expanded', 'false')
   })
 })
+
+// ONIX N-007 (FE correctness): a double-click on "Aanmaken" created the department twice.
+describe('AddDepartmentModal · one create per click (ONIX N-007)', () => {
+  it('ignores the second click while the first create is still running, then closes once', async () => {
+    let resolve!: () => void
+    const onCreate = vi.fn(() => new Promise<void>(r => { resolve = r }))
+    const onClose = vi.fn()
+    const user = userEvent.setup()
+    render(<AddDepartmentModal onClose={onClose} onCreate={onCreate} locations={locations} statuses={statuses} />)
+    await user.type(screen.getByLabelText(ct('subModal.departmentName'), { exact: false }), 'Thuiszorg')
+
+    const create = screen.getByRole('button', { name: ct('subModal.create') })
+    fireEvent.click(create)
+    fireEvent.click(create)
+    await waitFor(() => expect(onCreate).toHaveBeenCalledTimes(1))
+    // The footer shows the busy face and refuses further clicks until the request settles.
+    expect(screen.getByRole('button', { name: `${ct('subModal.create')}…` })).toBeDisabled()
+
+    resolve()
+    await waitFor(() => expect(onClose).toHaveBeenCalledTimes(1))
+    expect(onCreate).toHaveBeenCalledTimes(1)
+  })
+})

@@ -35,6 +35,8 @@ interface SubEntityModalFrameProps {
   cancelLabel: string
   submitLabel: string
   submitDisabled: boolean
+  // ONIX N-007: true while the create request runs — the footer button shows busy and ignores clicks.
+  submitBusy?: boolean
 }
 
 // Render the shared header (icon + title + import button) for customer sub-entity modals.
@@ -42,7 +44,7 @@ export default function SubEntityModalFrame({
   open, onClose, ariaLabel, persistKey, isEdit, title, subtitle, icon: Icon,
   iconColor, iconBg, importOpen, setImportOpen, importButtonTitle, importCardTitle,
   children, importCard, alert, onCancel, onSubmit, cancelLabel,
-  submitLabel, submitDisabled,
+  submitLabel, submitDisabled, submitBusy = false,
 }: SubEntityModalFrameProps) {
   return (
     <FloatingPanel open={open} onClose={onClose} ariaLabel={ariaLabel} persistKey={persistKey}
@@ -84,7 +86,7 @@ export default function SubEntityModalFrame({
       {alert}
 
       <ModalFooter onCancel={onCancel} cancelLabel={cancelLabel}
-        onSubmit={onSubmit} submitLabel={submitLabel} disabled={submitDisabled ? true : false} />
+        onSubmit={onSubmit} submitLabel={submitLabel} disabled={submitDisabled ? true : false} busy={submitBusy} />
     </FloatingPanel>
   )
 }

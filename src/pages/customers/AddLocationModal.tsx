@@ -38,6 +38,7 @@
  * identifier validation, the contact-coupling submit chain) stays local.
  */
 import { useState, useEffect } from 'react'
+import { useGuardedSubmit } from '@/hooks/useGuardedSubmit'
 import { useTranslation } from 'react-i18next'
 import { MapPin } from 'lucide-react'
 import { useSubEntityImportPermissions } from './hooks/useSubEntityImportPermissions'
@@ -219,7 +220,8 @@ export default function AddLocationModal({
     // eslint-disable-next-line react-hooks/exhaustive-deps -- only react to the resolved province list changing, not every form edit
   }, [provinces])
 
-  const submit = async () => {
+  // ONIX N-007: one create in flight — a double-click never creates the record twice.
+  const { submit, saving } = useGuardedSubmit(async () => {
     // VALIDATIE-LIVE-1-rest: block on a live format failure too — marks any
     // untouched-but-malformed field touched so its message renders.
     const invalidKeys = touchInvalidFields()
@@ -279,7 +281,7 @@ export default function AddLocationModal({
     } catch (err) {
       handleApiError(err)
     }
-  }
+  })
 
   const statusOptions = statuses.map(s => ({ value: String(s.id ?? s.value), label: s.label }))
   // K-283: the tenant's own establishments — same GET /locations list
@@ -304,7 +306,7 @@ export default function AddLocationModal({
         t, isEdit, editTitle: t('subModal.editLocation'), addTitle: t('subModal.addLocation'),
         entityLabel: t('settings:import.entities.locations.label'), persistKey: 'customer-add-location',
         customerName, importOpen, setImportOpen, alert: alertElement, importCard: importCardElement,
-        onClose, submit, canSubmit,
+        onClose, submit, canSubmit, saving,
       })}
       icon={MapPin}
       iconColor="var(--color-secondary)"

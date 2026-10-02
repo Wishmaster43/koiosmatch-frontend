@@ -123,7 +123,7 @@ export default function AddContactPersonModal({
   // duplicate check, location→department cascade, submit + 422 mapping).
   const {
     isEdit, importWizard, importOpen, setImportOpen, form, set, errors, createError, dialog,
-    markTouched, emailDup, phoneDup, mobileDup, submit, canSubmit,
+    markTouched, emailDup, phoneDup, mobileDup, submit, saving, canSubmit,
     departmentOptions, departmentPlaceholder, showLocationPicker, showDepartmentPicker,
     emailMessage, phoneMessage, mobileMessage, handlePrimaryToggle, dup,
   } = useAddContactPersonForm({ onCreate, onClose, onImported, departments, statuses, initial, lockLocationId, lockDepartmentId, existing, t, customerId, onOpenExisting })
@@ -150,7 +150,7 @@ export default function AddContactPersonModal({
         t, isEdit, editTitle: t('subModal.editContact'), addTitle: t('subModal.addContact'),
         entityLabel: t('settings:import.entities.contacts.label'), persistKey: 'customer-add-contact',
         customerName, importOpen, setImportOpen, alert: alertElement, importCard: importCardElement,
-        onClose, submit, canSubmit,
+        onClose, submit, canSubmit, saving,
       })}
       icon={Users}
       iconColor="var(--color-primary)"

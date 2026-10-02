@@ -27,6 +27,7 @@
  * (customer_department_required_fields, FlatRequiredFieldsGuard catalog).
  */
 import { useState } from 'react'
+import { useGuardedSubmit } from '@/hooks/useGuardedSubmit'
 import { useTranslation } from 'react-i18next'
 import { Building } from 'lucide-react'
 import { useSubEntityImportPermissions } from './hooks/useSubEntityImportPermissions'
@@ -117,7 +118,8 @@ export default function AddDepartmentModal({ onClose, onCreate, onImported, loca
   const showStatusPicker = getJsonSetting<string[]>(settings, 'customer_department_required_fields', []).includes('status_id')
 
   // Validate the required name/location fields, then create or update the department via the API.
-  const submit = async () => {
+  // ONIX N-007: one create in flight — a double-click never creates the record twice.
+  const { submit, saving } = useGuardedSubmit(async () => {
     if (!form.name.trim() || !form.locationId) {
       setErrors({ name: !form.name.trim(), locationId: !form.locationId })
       return
@@ -134,7 +136,7 @@ export default function AddDepartmentModal({ onClose, onCreate, onImported, loca
     } catch (err) {
       handleApiError(err)
     }
-  }
+  })
 
   const canSubmit = !!form.name.trim() && !!form.locationId
   const statusOptions = statuses.map(s => ({ value: String(s.id ?? s.value), label: s.label }))
@@ -157,7 +159,7 @@ export default function AddDepartmentModal({ onClose, onCreate, onImported, loca
         t, isEdit, editTitle: t('subModal.editDepartment'), addTitle: t('subModal.addDepartment'),
         entityLabel: t('settings:import.entities.departments.label'), persistKey: 'customer-add-department',
         customerName, importOpen, setImportOpen, alert: alertElement, importCard: importCardElement,
-        onClose, submit, canSubmit,
+        onClose, submit, canSubmit, saving,
       })}
       icon={Building}
       iconColor="var(--color-violet)"

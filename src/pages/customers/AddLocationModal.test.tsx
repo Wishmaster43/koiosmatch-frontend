@@ -668,3 +668,25 @@ describe('AddLocationModal · import card (Danny 02-08: "+ nieuwe locatie ... mo
     expect(screen.getByRole('button', { name: importCardTitle })).toHaveAttribute('aria-expanded', 'false')
   })
 })
+
+// ONIX N-007 (FE correctness): a double-click on "Aanmaken" created the location twice.
+describe('AddLocationModal · one create per click (ONIX N-007)', () => {
+  it('ignores the second click while the first create is still running, then closes once', async () => {
+    let resolve!: (v: undefined) => void
+    const onCreate = vi.fn(() => new Promise<undefined>(r => { resolve = r }))
+    const onClose = vi.fn()
+    const user = userEvent.setup()
+    render(<AddLocationModal onClose={onClose} onCreate={onCreate} statuses={statuses} />)
+    await user.type(screen.getByLabelText(ct('subModal.locationName'), { exact: false }), 'Hoofdlocatie')
+
+    const create = screen.getByRole('button', { name: ct('subModal.create') })
+    fireEvent.click(create)
+    fireEvent.click(create)
+    await waitFor(() => expect(onCreate).toHaveBeenCalledTimes(1))
+    expect(screen.getByRole('button', { name: `${ct('subModal.create')}…` })).toBeDisabled()
+
+    resolve(undefined)
+    await waitFor(() => expect(onClose).toHaveBeenCalledTimes(1))
+    expect(onCreate).toHaveBeenCalledTimes(1)
+  })
+})

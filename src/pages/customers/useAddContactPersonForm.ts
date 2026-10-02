@@ -9,6 +9,7 @@
 // hook keeps only what those two don't need: field MESSAGES (not just booleans)
 // and the duplicate-check/primary-confirm orchestration.
 import { useState } from 'react'
+import { useGuardedSubmit } from '@/hooks/useGuardedSubmit'
 import type { TFunction } from 'i18next'
 import { useConfirm } from '@/hooks/useConfirm'
 import { useLiveFieldValidation } from '@/hooks/useLiveFieldValidation'
@@ -146,7 +147,8 @@ export function useAddContactPersonForm({
   const phoneDup = findDuplicate(form.phone, 'phone')
   const mobileDup = findDuplicate(form.mobile, 'mobile')
 
-  const submit = async () => {
+  // ONIX N-007: one create in flight — a double-click never creates the record twice.
+  const { submit, saving } = useGuardedSubmit(async () => {
     // VALIDATIE-LIVE-1-rest: block on a live format failure too — marks any
     // untouched-but-malformed field touched so its message renders.
     const invalidKeys = touchInvalidFields()
@@ -191,7 +193,7 @@ export function useAddContactPersonForm({
         setCreateError(e?.response?.data?.message ?? t('common:errorGeneric'))
       }
     }
-  }
+  })
 
   const canSubmit = !!form.firstName.trim() && !!form.lastName.trim() && !emailDup && !phoneDup && !mobileDup && !hasFormatError
   // Department options stay EMPTY until a location is picked — mirrors AddShiftModal's
@@ -227,7 +229,7 @@ export function useAddContactPersonForm({
 
   return {
     isEdit, importWizard, importOpen, setImportOpen, form, set, errors, createError, dialog,
-    markTouched, emailDup, phoneDup, mobileDup, submit, canSubmit,
+    markTouched, emailDup, phoneDup, mobileDup, submit, saving, canSubmit,
     departmentOptions, departmentPlaceholder, showLocationPicker, showDepartmentPicker,
     emailMessage, phoneMessage, mobileMessage, handlePrimaryToggle, dup,
   }
