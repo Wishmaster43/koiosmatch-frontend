@@ -765,9 +765,12 @@ describe('ConversationsSection · WA-THREAD-UX-1', () => {
       await screen.findByText('conversations.delivery.queued')
       const callsBeforeTimer = getCount
 
-      // The 60s drainer-cadence timer refetches this thread's messages.
-      await act(async () => { await vi.advanceTimersByTimeAsync(60_000) })
-      expect(getCount).toBeGreaterThan(callsBeforeTimer)
+      // The 60s drainer-cadence timer refetches this thread's messages. Advance PAST the
+      // cadence (shouldAdvanceTime moves the fake clock with real time too, so an exact
+      // 60_000 can land a few ms short under CPU load) and wait for the refetch instead of
+      // asserting synchronously — measured flake in two landings on 02-10.
+      await act(async () => { await vi.advanceTimersByTimeAsync(65_000) })
+      await waitFor(() => expect(getCount).toBeGreaterThan(callsBeforeTimer))
     } finally {
       vi.useRealTimers()
     }
