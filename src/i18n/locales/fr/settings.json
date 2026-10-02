@@ -4003,9 +4003,6 @@
       "vacancy_status_stale_days": {
         "label": "Statut du poste inchangé (jours)"
       },
-      "dashboard_stale_lead_workdays": {
-        "label": "Lead sans activité sur le tableau de bord (jours ouvrés)"
-      },
       "match_advice_renew_days": {
         "label": "Conseil de match : renouveler (jours à l’avance)"
       },

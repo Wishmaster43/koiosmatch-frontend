@@ -4003,9 +4003,6 @@
       "vacancy_status_stale_days": {
         "label": "Stellenstatus unverändert (Tage)"
       },
-      "dashboard_stale_lead_workdays": {
-        "label": "Lead ohne Bewegung im Dashboard (Werktage)"
-      },
       "match_advice_renew_days": {
         "label": "Match-Empfehlung verlängern (Tage im Voraus)"
       },

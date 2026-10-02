@@ -4003,9 +4003,6 @@
       "vacancy_status_stale_days": {
         "label": "Vacancy status unchanged (days)"
       },
-      "dashboard_stale_lead_workdays": {
-        "label": "Lead stale on dashboard (workdays)"
-      },
       "match_advice_renew_days": {
         "label": "Match advice: renew (days ahead)"
       },

@@ -4003,9 +4003,6 @@
       "vacancy_status_stale_days": {
         "label": "Estado de la vacante sin cambios (días)"
       },
-      "dashboard_stale_lead_workdays": {
-        "label": "Lead sin actividad en el panel (días laborables)"
-      },
       "match_advice_renew_days": {
         "label": "Consejo de match: renovar (días de antelación)"
       },

@@ -4004,9 +4004,6 @@
       "vacancy_status_stale_days": {
         "label": "Estado da vaga inalterado (dias)"
       },
-      "dashboard_stale_lead_workdays": {
-        "label": "Lead parado no painel (dias úteis)"
-      },
       "match_advice_renew_days": {
         "label": "Conselho de match: renovar (dias de antecedência)"
       },
