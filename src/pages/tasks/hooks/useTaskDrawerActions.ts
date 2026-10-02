@@ -37,6 +37,11 @@ interface Args {
 export function useTaskDrawerActions({ setTasks, archivedTasks, setArchivedTasks, decorate, t }: Args) {
   const [selected, setSelected] = useState<TaskDetail | null>(null)
   const [expanded, setExpanded] = useState(false)
+  // ONIX N-007: restore is a single-record action shown behind one banner at a
+  // time — a boolean latch (ref written in the handler, never during render)
+  // is enough to drop a second restore while the first is still in flight.
+  const [restoring, setRestoring] = useState(false)
+  const restoringRef = useRef(false)
   // TASKTYPE-ID-1 (measured): UpdateTaskRequest only validates the real uuid FK
   // (`status_id`/`priority_id`/`type_id`) — the tenant slug this drawer's header
   // pickers/DetailsTab carry (`status`/`priority`/`type`) is an undeclared key,
@@ -178,7 +183,9 @@ export function useTaskDrawerActions({ setTasks, archivedTasks, setArchivedTasks
   // BE D-3 — never the bulk route for one record). The row moves back to the active
   // list; the drawer closes (the row leaves the archived view, mirroring candidates).
   const restoreTask = (id: Id | undefined) => {
-    if (id == null) return
+    if (id == null || restoringRef.current) return
+    restoringRef.current = true
+    setRestoring(true)
     const row = archivedTasks.find(x => x.id === id)
     api.post(`/tasks/${id}/restore`)
       .then(() => {
@@ -188,6 +195,7 @@ export function useTaskDrawerActions({ setTasks, archivedTasks, setArchivedTasks
         notifySuccess(t('drawer.archivedBanner.restored'))
       })
       .catch(() => notifyError(t('drawer.archivedBanner.restoreFailed')))
+      .finally(() => { restoringRef.current = false; setRestoring(false) })
   }
 
   // SUBTASK-CREATE-1: local-ONLY tally bump after a subtask is created — no PATCH
@@ -201,6 +209,6 @@ export function useTaskDrawerActions({ setTasks, archivedTasks, setArchivedTasks
 
   return {
     selected, setSelected, expanded, setExpanded,
-    closeDrawer, selectTask, handleUpdate, handleMove, handleAddLink, handleRemoveLink, restoreTask, bumpSubtaskTotal,
+    closeDrawer, selectTask, handleUpdate, handleMove, handleAddLink, handleRemoveLink, restoreTask, restoring, bumpSubtaskTotal,
   }
 }

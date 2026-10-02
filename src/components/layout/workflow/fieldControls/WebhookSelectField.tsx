@@ -4,7 +4,7 @@
  * receiving URL to hand to externals (Facebook, Intus, …). One webhook binds
  * to one workflow (Make-style). Split out of the former fieldControls.tsx monolith (§3 400-line split trigger).
  */
-import { useState, useEffect, useId } from 'react'
+import { useState, useEffect, useId, useRef } from 'react'
 import { Plus, X } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import { unwrap, unwrapList } from '@/lib/api'
@@ -32,6 +32,10 @@ export function WebhookSelectField({ value, onChange, fieldKey }: { value?: unkn
   // CreatableSelect's trigger is a <button>, which a plain aria-label cannot
   // name — a sr-only span + aria-labelledby names it instead (§4).
   const webhookLabelId = useId()
+  // ONIX N-007: re-entrancy latch for `create` (ref, written in the handler
+  // only) — `creating` state is async, so two synchronous Enter keydowns would
+  // both read it as false before the first POST starts.
+  const creatingRef = useRef(false)
 
   // Load the tenant's inbound webhooks (same resource as Settings).
   useEffect(() => {
@@ -44,9 +48,12 @@ export function WebhookSelectField({ value, onChange, fieldKey }: { value?: unkn
   const selected = hooks.find(h => String(h.id) === String(value))
 
   // Create a new inbound webhook inline and select it immediately.
+  // ONIX N-007: the ref latch drops a re-entrant call (Enter twice, or Enter
+  // plus the Button click) while the first POST is still in flight.
   const create = async () => {
     const name = newName.trim()
-    if (!name) return
+    if (!name || creatingRef.current) return
+    creatingRef.current = true
     setCreating(true)
     try {
       const api = (await import('@/lib/api')).default
@@ -56,6 +63,7 @@ export function WebhookSelectField({ value, onChange, fieldKey }: { value?: unkn
       onChange(fieldKey, wh.id)
       setNewName(''); setShowNew(false)
     } catch { setError(true) }
+    creatingRef.current = false
     setCreating(false)
   }
 

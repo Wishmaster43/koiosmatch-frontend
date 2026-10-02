@@ -22,6 +22,8 @@ interface DrawerGlyphButtonProps {
   tone: 'muted' | 'danger' | 'archive'
   opacity?: number
   children: ReactNode
+  // ONIX N-007: disables the glyph while its own request is in flight (no visual change otherwise).
+  disabled?: boolean
 }
 
 // DRY round 11, DRAWERS: the deliberate bare 14px icon button used by every drawer
@@ -29,11 +31,11 @@ interface DrawerGlyphButtonProps {
 // look) — merged from candidates/customers ("frozen calm-header glyph control")
 // and matches ("danger-ink ghost icon: no Button tone carries danger ink on a
 // bare face"), one necessity-disable instead of four.
-export default function DrawerGlyphButton({ onClick, title, tone, opacity, children }: DrawerGlyphButtonProps) {
+export default function DrawerGlyphButton({ onClick, title, tone, opacity, children, disabled }: DrawerGlyphButtonProps) {
   return (
-    <button onClick={onClick} title={title} aria-label={title}
+    <button onClick={onClick} title={title} aria-label={title} disabled={disabled}
       // eslint-disable-next-line huisstijlLegacy/no-restricted-syntax -- frozen calm-header glyph control (Danny 08-08): deliberate bare 14px icon; no Button tone carries danger ink on a bare face either (ghost=neutral, dangerSoft=tinted); Button iconOnly's 28px chrome would change the frozen look
-      style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 4, display: 'flex', color: TONE_COLOR[tone], opacity }}>
+      style={{ background: 'none', border: 'none', cursor: disabled ? 'default' : 'pointer', padding: 4, display: 'flex', color: TONE_COLOR[tone], opacity: disabled ? 0.5 : opacity }}>
       {children}
     </button>
   )

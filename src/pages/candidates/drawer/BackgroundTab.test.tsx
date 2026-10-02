@@ -105,6 +105,24 @@ describe('BackgroundTab · references verify wiring (KAND-REFERENTIES-1)', () =>
     expect(screen.queryByTitle('Verifiëren')).toBeNull()
   })
 
+  // ONIX N-007: two synchronous clicks on one row's Verify button must POST once.
+  it('two synchronous clicks on one row verify once (per-row latch)', async () => {
+    const user = userEvent.setup()
+    // Never resolves within this test — proves the second click is dropped
+    // while the first POST is still in flight.
+    vi.mocked(api.post).mockReturnValueOnce(new Promise(() => {}))
+    const c = {
+      ...candidate(),
+      references: [{ id: 'r1', first_name: 'Jan', last_name: 'Jansen' }],
+    } as unknown as Candidate
+    render(<BackgroundTab c={c} />)
+    await user.click(screen.getByRole('tab', { name: 'Referenties' }))
+    const verifyBtn = screen.getByTitle('Verifiëren')
+    fireEvent.click(verifyBtn)
+    fireEvent.click(verifyBtn)
+    expect(api.post).toHaveBeenCalledTimes(1)
+  })
+
   it('does not offer verify for an unpersisted (temp id) row', async () => {
     const user = userEvent.setup()
     // The add flow's own POST never needs to resolve for this assertion — just

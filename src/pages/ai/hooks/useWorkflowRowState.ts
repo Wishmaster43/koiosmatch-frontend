@@ -26,6 +26,8 @@ export interface WorkflowRowLifecycleProps {
   // unmark (settings.update) on a trashed card/row. Absent prop = hidden (§7).
   onMarkDeletion?: () => void
   onUnmark?: () => void | Promise<void>
+  // ONIX N-007: disables the unmark button while its own POST is in flight.
+  unmarkBusy?: boolean
   // Tenant grace window — feeds the trashed card/row's erase note (DD-MM-YYYY).
   graceDays?: number | null
 }

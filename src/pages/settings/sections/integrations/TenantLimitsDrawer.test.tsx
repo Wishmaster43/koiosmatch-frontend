@@ -4,7 +4,7 @@
  * mutation's method/route/body (§13).
  */
 import { describe, it, expect, vi, beforeEach } from 'vitest'
-import { render, screen } from '@testing-library/react'
+import { render, screen, fireEvent } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { QueryClientProvider, QueryClient } from '@tanstack/react-query'
 import api from '@/lib/api'
@@ -109,6 +109,26 @@ describe('TenantLimitsDrawer', () => {
     await user.click(screen.getByRole('button', { name: t('limits.approval.revoke') }))
     await screen.findByText(t('limits.approval.revoke_confirm'))
     await user.click(screen.getByRole('button', { name: i18n.t('confirm', { ns: 'common' }) }))
+    expect(api.delete).toHaveBeenCalledWith('/admin/tenants/t1/limits/hf/approvals/ap1')
+  })
+
+  it('ONIX N-007: two synchronous Confirm clicks on revoke DELETE once', async () => {
+    vi.mocked(api.get).mockResolvedValueOnce({ data: { data: [hfRow] } })
+    let resolveDelete: (v: unknown) => void = () => {}
+    vi.mocked(api.delete).mockReturnValueOnce(new Promise(resolve => { resolveDelete = resolve }))
+    const user = userEvent.setup()
+    renderDrawer()
+    await screen.findByText('HelloFlex')
+    await user.click(screen.getByRole('button', { name: t('limits.approval.revoke') }))
+    await screen.findByText(t('limits.approval.revoke_confirm'))
+    const confirmBtn = screen.getByRole('button', { name: i18n.t('confirm', { ns: 'common' }) })
+    // Two synchronous clicks before the DELETE settles — the dialog stays open
+    // until onSuccess/onError, so the guard inside onConfirm is the only defence.
+    fireEvent.click(confirmBtn)
+    fireEvent.click(confirmBtn)
+    resolveDelete({ data: {} })
+    await screen.findByText('HelloFlex')
+    expect(api.delete).toHaveBeenCalledTimes(1)
     expect(api.delete).toHaveBeenCalledWith('/admin/tenants/t1/limits/hf/approvals/ap1')
   })
 

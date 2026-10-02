@@ -345,7 +345,7 @@ export function useMatchForm({
   // Inline contact-create (Danny) — own sibling hook (§3 size split): the
   // draft fields, the client-side duplicate-contact preflight and the create
   // call, coupled to the picked location and this cascade's own refetch.
-  const { creatingContact, setCreatingContact, nc, setNc, saveContact, duplicateContact, setDuplicateContact } =
+  const { creatingContact, setCreatingContact, nc, setNc, saveContact, saving: savingContact, duplicateContact, setDuplicateContact } =
     useInlineContactCreate({ customerId, locationId, contacts, refetchCustomer, setContactId })
 
   return {
@@ -357,7 +357,7 @@ export function useMatchForm({
     matchRuleDecision,
     customerId, setCustomerId, detail, locations, departments, contacts,
     locationId, setLocationId, departmentId, setDepartmentId, contactId, setContactId,
-    creatingContact, setCreatingContact, nc, setNc, saveContact,
+    creatingContact, setCreatingContact, nc, setNc, saveContact, savingContact,
     duplicateContact, setDuplicateContact,
     func, setFunc, vacancyId, setVacancyId, ownerId, setOwnerId,
     branchId, setBranchId, setBranchDirty, branchLocations,

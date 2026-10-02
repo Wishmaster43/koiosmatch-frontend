@@ -59,7 +59,7 @@ export default function RelationsSection({
   locationId, setLocationId, locations,
   departmentId, setDepartmentId, departments,
   contactId, setContactId, contacts,
-  creatingContact, setCreatingContact, nc, setNc, saveContact,
+  creatingContact, setCreatingContact, nc, setNc, saveContact, savingContact,
   duplicateContact, setDuplicateContact,
   contactFunctions, contactFunctionsAllowFreeEntry,
   func, setFunc, functions,
@@ -90,7 +90,7 @@ export default function RelationsSection({
   departmentId: string; setDepartmentId: (v: string) => void; departments: CascadeDepartment[]
   contactId: string; setContactId: (v: string) => void; contacts: CascadeOption[]
   creatingContact: boolean; setCreatingContact: (v: boolean) => void
-  nc: NewContact; setNc: Dispatch<SetStateAction<NewContact>>; saveContact: () => void
+  nc: NewContact; setNc: Dispatch<SetStateAction<NewContact>>; saveContact: () => void; savingContact: boolean
   // Duplicate-contact preflight result (Danny 24-07) — set by saveContact() when
   // the entered email/phone/mobile already matches a contact on this customer.
   duplicateContact: CascadeOption | null; setDuplicateContact: (v: CascadeOption | null) => void
@@ -229,7 +229,7 @@ export default function RelationsSection({
                   )}
                   <div style={{ display: 'flex', gap: 6, justifyContent: 'flex-end' }}>
                     <Button variant="secondary" size="sm" onClick={() => { setCreatingContact(false); setDuplicateContact(null); setNc({ first_name: '', last_name: '', email: '', phone: '', mobile: '', function: '' }) }}>{t('common:cancel')}</Button>
-                    <Button variant="primary" size="sm" onClick={saveContact} disabled={!nc.first_name.trim() || !nc.last_name.trim()}>{t('common:save')}</Button>
+                    <Button variant="primary" size="sm" onClick={saveContact} disabled={!nc.first_name.trim() || !nc.last_name.trim() || savingContact}>{t('common:save')}</Button>
                   </div>
                 </div>
               ) : (

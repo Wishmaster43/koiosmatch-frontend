@@ -36,6 +36,11 @@ export function useVacancyRecord({ setVacancies, setTotal, statusMeta, users, cu
   const [detail,         setDetail]         = useState<VacancyDetail | null>(null)
   const [drawerExpanded, setDrawerExpanded] = useState(false)
   const selectedIdRef = useRef<Id | null>(null)
+  // ONIX N-007: restore is a single-record action behind one banner at a time —
+  // a boolean latch (ref written in the handler, never during render) drops a
+  // second restore while the first is still in flight.
+  const [restoring, setRestoring] = useState(false)
+  const restoringRef = useRef(false)
 
   // Light row first, then fetch the full detail (ref-guarded against races).
   const closeDrawer = () => { selectedIdRef.current = null; setSelected(null); setDetail(null); setDrawerExpanded(false) }
@@ -110,7 +115,9 @@ export function useVacancyRecord({ setVacancies, setTotal, statusMeta, users, cu
   // VAC-RESTORE-1 (BE 1ac4e14): bring an archived vacancy back; reconcile all three
   // local copies so the chip/banner clear without a refetch.
   const restoreVacancy = (id: Id | undefined) => {
-    if (id == null) return
+    if (id == null || restoringRef.current) return
+    restoringRef.current = true
+    setRestoring(true)
     api.post(`/vacancies/${id}/restore`)
       .then(() => {
         notifySuccess(t('drawer.archivedBanner.restored'))
@@ -120,7 +127,8 @@ export function useVacancyRecord({ setVacancies, setTotal, statusMeta, users, cu
         setDetail(prev   => (prev && prev.id === id ? ({ ...prev, ...clear } as VacancyDetail) : prev))
       })
       .catch(() => notifyError(t('drawer.archivedBanner.restoreFailed')))
+      .finally(() => { restoringRef.current = false; setRestoring(false) })
   }
 
-  return { selected, detail, drawerExpanded, setDrawerExpanded, closeDrawer, selectVacancy, handleCreated, updateVacancy, restoreVacancy }
+  return { selected, detail, drawerExpanded, setDrawerExpanded, closeDrawer, selectVacancy, handleCreated, updateVacancy, restoreVacancy, restoring }
 }

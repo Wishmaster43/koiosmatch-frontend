@@ -47,38 +47,52 @@ export function useWorkflowGraph({ workflow, onNodeRunOutput }: {
   // null = auto (node without incoming edge, leftmost); set via START badge drag
   const [startNodeId, setStartNodeId] = useState<string | null>(null)
 
+  // ONIX N-007: a nodeId-keyed in-flight latch so a second click on the same
+  // node's run button while the first POST is still pending never double-fires
+  // (the ref is written only inside the handler, never during render).
+  const nodeRunInFlight = useRef<Set<string>>(new Set())
+
   // User asked to test-run a single node: calls the matching preview endpoint per
   // module type and stashes the result on the node so the config panel can show it.
   const handleNodeRun = useCallback(async (nodeId: string, data: FlowNodeData) => {
-    const { default: api } = await import('@/lib/api')
-    let output: unknown = null
-
+    if (nodeRunInFlight.current.has(nodeId)) return
+    nodeRunInFlight.current.add(nodeId)
+    // ONIX N-007 verifier fix: the latch must release whichever way the request
+    // settles — a rejected dynamic import or a throwing setNodes/callback used to
+    // leave the node permanently stuck, so the whole body runs in try/finally.
     try {
-      // Generic module test-run — backend POST /workflows/test-module (G-9): previews the
-      // module's output; 422 for an unknown or non-testable (really-sends) module type.
-      // WORKFLOW-422: we surface the 422 reason ourselves (toast below), so keep it
-      // out of the api.ts dev interceptor's own double-toast.
-      const res = await api.post('/workflows/test-module', { module_type: data.type, config: data.config }, { quietStatuses: [422] })
-      // AVOND4-12 (CMBE c253fac6): a wa_web config state (no device chosen, device not
-      // linked or disconnected) answers 200 with top-level `no_recipients`/`reason`/
-      // `message` beside a zero-count output — keep the sentence on the node, or the
-      // panel would show bare zeros for a step that honestly did nothing.
-      const body = res.data as { output?: unknown; no_recipients?: boolean; reason?: string; message?: string } | undefined
-      const preview = body?.output ?? body
-      const previewObj = preview && typeof preview === 'object' && !Array.isArray(preview) ? preview as Record<string, unknown> : {}
-      output = body?.no_recipients === true
-        ? { ...previewObj, no_recipients: true, reason: body.reason, message: body.message }
-        : preview
-    } catch (err) {
-      // WORKFLOW-422: same extraction for the panel line and the toast, so the
-      // two never disagree (e.g. "no active WhatsApp number").
-      const reason = extractApiError(err, t('config.testFailed'))
-      output = { error: reason }
-      notifyError(reason)
-    }
+      const { default: api } = await import('@/lib/api')
+      let output: unknown = null
 
-    setNodes(nds => nds.map(n => n.id === nodeId ? { ...n, data: { ...n.data, output } } : n))
-    onNodeRunOutput?.(nodeId, output)
+      try {
+        // Generic module test-run — backend POST /workflows/test-module (G-9): previews the
+        // module's output; 422 for an unknown or non-testable (really-sends) module type.
+        // WORKFLOW-422: we surface the 422 reason ourselves (toast below), so keep it
+        // out of the api.ts dev interceptor's own double-toast.
+        const res = await api.post('/workflows/test-module', { module_type: data.type, config: data.config }, { quietStatuses: [422] })
+        // AVOND4-12 (CMBE c253fac6): a wa_web config state (no device chosen, device not
+        // linked or disconnected) answers 200 with top-level `no_recipients`/`reason`/
+        // `message` beside a zero-count output — keep the sentence on the node, or the
+        // panel would show bare zeros for a step that honestly did nothing.
+        const body = res.data as { output?: unknown; no_recipients?: boolean; reason?: string; message?: string } | undefined
+        const preview = body?.output ?? body
+        const previewObj = preview && typeof preview === 'object' && !Array.isArray(preview) ? preview as Record<string, unknown> : {}
+        output = body?.no_recipients === true
+          ? { ...previewObj, no_recipients: true, reason: body.reason, message: body.message }
+          : preview
+      } catch (err) {
+        // WORKFLOW-422: same extraction for the panel line and the toast, so the
+        // two never disagree (e.g. "no active WhatsApp number").
+        const reason = extractApiError(err, t('config.testFailed'))
+        output = { error: reason }
+        notifyError(reason)
+      }
+
+      setNodes(nds => nds.map(n => n.id === nodeId ? { ...n, data: { ...n.data, output } } : n))
+      onNodeRunOutput?.(nodeId, output)
+    } finally {
+      nodeRunInFlight.current.delete(nodeId)
+    }
   }, [setNodes, onNodeRunOutput, t])
 
   // User removed a connector on the canvas — drop that one edge, nothing else.

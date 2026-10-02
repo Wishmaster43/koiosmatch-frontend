@@ -23,19 +23,22 @@ interface ArchivedBannerProps {
   onRestore?: (id: Id | undefined) => void
   // Pre-translated tooltip/aria-label for the restore button.
   restoreLabel: string
+  // ONIX N-007: disables the restore button while its own request is in flight,
+  // so a second click (or Enter) never fires a second restore (no layout change).
+  busy?: boolean
 }
 
 // Dumb: strings arrive as props, so it never needs its own i18n namespace — each
 // entity keeps its own translation keys and passes the already-translated
 // message/restoreLabel in.
-export default function ArchivedBanner({ id, message, onRestore, restoreLabel }: ArchivedBannerProps) {
+export default function ArchivedBanner({ id, message, onRestore, restoreLabel, busy }: ArchivedBannerProps) {
   return (
     <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginTop: 8, padding: '7px 10px', borderRadius: 8, fontSize: 12,
       color: chipInk('var(--color-archive)'), background: tintBg('var(--color-archive)'),
       border: tintBorder('var(--color-archive)') }}>
       <span style={{ flex: 1, minWidth: 0 }}>{message}</span>
       {onRestore && (
-        <DrawerGlyphButton onClick={() => onRestore(id)} title={restoreLabel} tone="archive">
+        <DrawerGlyphButton onClick={() => onRestore(id)} title={restoreLabel} tone="archive" disabled={busy}>
           <ArchiveRestore size={14} />
         </DrawerGlyphButton>
       )}

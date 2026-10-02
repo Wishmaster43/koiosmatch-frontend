@@ -376,6 +376,7 @@ export default function MatchesPage({ intent }: { intent?: unknown } = {}) {
         // unmark (matches.update) puts a trashed match back to plain archived.
         onMarkDeletion={canMarkDeletion ? openMarkDeletion : undefined}
         onUnmark={canArchive ? (id) => { if (id != null) trash.unmark(id) } : undefined}
+        unmarkBusy={trash.unmarkBusy}
         graceDays={trash.graceDays}
         // EXTRACT-1: same matches.update gate as canApprove/canArchive above.
         canLinkBackoffice={hasPermission('matches.update')}

@@ -69,6 +69,8 @@ export function useWorkflowTrigger({ workflow, nodes, edges, initialNodes, initi
   // workflow can never look active (Danny 10-09: a 422 on Run nobody understood).
   const [serverStatus,   setServerStatus]   = useState(workflow.status || 'draft')
   const [saved,          setSaved]          = useState(false)
+  // ONIX N-007: exposed so both header buttons disable while a save is in flight.
+  const [saving,         setSaving]         = useState(false)
 
   // Dirty-check baseline (item 19): the snapshot right after load, computed via the
   // SAME serializer as the live snapshot below, so a freshly-opened workflow never
@@ -88,17 +90,19 @@ export function useWorkflowTrigger({ workflow, nodes, edges, initialNodes, initi
   // Stays synchronous for a synchronous onSave (a boolean comes back at once) and
   // only turns into a promise when the caller's onSave is one — so callers that
   // never await keep their exact timing.
+  // ONIX N-007: re-entrancy latch so a second Save/Save&close click while the
+  // first is still in flight (sync or async onSave both covered) never calls
+  // onSave twice. The ref is written only in the handler/its own settle paths.
+  const savingRef = useRef(false)
   const handleSave = useCallback((closeAfter = false): boolean | Promise<boolean> => {
-    const steps = flowToSteps(nodes, edges)
-    // audit module-schema-reconcile-4: a webhook/applicant_event START card is the
-    // trigger the inbound route and the dispatcher match on — persist it as such.
-    const start = deriveStartTrigger(steps)
-    // The ONE builder the dirty-check snapshot uses too (workflowEditorUtils).
-    const nextTriggerConfig = start ? start.triggerConfig : buildHeaderTriggerConfig(trigger, scheduleConfig, webhookId)
-    const nextTrigger = start ? start.trigger : trigger
-    const result = onSave({ ...workflow, name, trigger: nextTrigger, trigger_config: nextTriggerConfig, status, steps, is_interview: isInterview }, closeAfter)
+    if (savingRef.current) return false
+    savingRef.current = true
+    setSaving(true)
     // Moves the baseline, the server status and the "saved" flash only on success.
+    // Always releases the latch, success or not — a rejected save must not stick.
     const finish = (ok: boolean): boolean => {
+      savingRef.current = false
+      setSaving(false)
       if (!ok) return false
       // A save just persisted the current state — it's the new dirty-check baseline.
       savedSnapshotRef.current = computeWorkflowSnapshot(nodes, edges, name, trigger, scheduleConfig, webhookId, status, isInterview)
@@ -109,10 +113,26 @@ export function useWorkflowTrigger({ workflow, nodes, edges, initialNodes, initi
       }
       return true
     }
-    if (result != null && typeof (result as Promise<unknown>).then === 'function') {
-      return (result as Promise<void | boolean>).then(r => finish(r !== false), () => false)
+    try {
+      const steps = flowToSteps(nodes, edges)
+      // audit module-schema-reconcile-4: a webhook/applicant_event START card is the
+      // trigger the inbound route and the dispatcher match on — persist it as such.
+      const start = deriveStartTrigger(steps)
+      // The ONE builder the dirty-check snapshot uses too (workflowEditorUtils).
+      const nextTriggerConfig = start ? start.triggerConfig : buildHeaderTriggerConfig(trigger, scheduleConfig, webhookId)
+      const nextTrigger = start ? start.trigger : trigger
+      const result = onSave({ ...workflow, name, trigger: nextTrigger, trigger_config: nextTriggerConfig, status, steps, is_interview: isInterview }, closeAfter)
+      if (result != null && typeof (result as Promise<unknown>).then === 'function') {
+        // A rejected onSave must release the latch too, not only a resolved false.
+        return (result as Promise<void | boolean>).then(r => finish(r !== false), () => finish(false))
+      }
+      return finish(result !== false)
+    } catch (err) {
+      // A synchronous throw from flowToSteps/deriveStartTrigger/onSave must not leave the latch stuck.
+      savingRef.current = false
+      setSaving(false)
+      throw err
     }
-    return finish(result !== false)
   }, [nodes, edges, workflow, name, trigger, scheduleConfig, webhookId, status, isInterview, onSave])
 
   // Dirty-check (item 19): true when the live graph/name/trigger/schedule/status/
@@ -125,6 +145,6 @@ export function useWorkflowTrigger({ workflow, nodes, edges, initialNodes, initi
 
   return {
     name, setName, trigger, setTrigger, scheduleConfig, setScheduleConfig, webhookId, status, setStatus,
-    isInterview, setIsInterview, serverStatus, saved, handleSave, isDirty,
+    isInterview, setIsInterview, serverStatus, saved, saving, handleSave, isDirty,
   }
 }

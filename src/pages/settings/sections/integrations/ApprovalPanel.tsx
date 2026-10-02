@@ -5,7 +5,7 @@
  * badge with a Revoke button gated behind the shared ConfirmDialog (§3 destructive
  * actions are never a bare click).
  */
-import { useState } from 'react'
+import { useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import NumberInput from '@/components/ui/NumberInput'
@@ -42,6 +42,10 @@ export default function ApprovalPanel({ tenantId, connector, approval, readOnly 
   const [note, setNote] = useState('')
   const [confirmRevoke, setConfirmRevoke] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  // ONIX N-007: the dialog stays open until the DELETE settles, and useMutation's
+  // `isPending` only updates on the next render — a ref latch (written only in the
+  // handler) is the only thing that is true for a second synchronous click.
+  const revokeInFlight = useRef(false)
 
   const invalidate = () => queryClient.invalidateQueries({ queryKey: ['admin-tenant-limits', tenantId] })
 
@@ -59,8 +63,8 @@ export default function ApprovalPanel({ tenantId, connector, approval, readOnly 
 
   const revoke = useMutation({
     mutationFn: () => deleteApproval(tenantId, connector, approval!.id),
-    onSuccess: () => { setError(null); setConfirmRevoke(false); invalidate() },
-    onError: (err) => { setConfirmRevoke(false); setError(extractApiError(err, t('limits.approval.error'))) },
+    onSuccess: () => { revokeInFlight.current = false; setError(null); setConfirmRevoke(false); invalidate() },
+    onError: (err) => { revokeInFlight.current = false; setConfirmRevoke(false); setError(extractApiError(err, t('limits.approval.error'))) },
   })
 
   if (approval) {
@@ -79,7 +83,10 @@ export default function ApprovalPanel({ tenantId, connector, approval, readOnly 
             </Button>
             <ConfirmDialog open={confirmRevoke} danger title={t('limits.approval.revoke')}
               message={t('limits.approval.revoke_confirm')}
-              onConfirm={() => revoke.mutate()} onCancel={() => setConfirmRevoke(false)} />
+              // ONIX N-007: the dialog stays open until onSuccess/onError settle it, so a
+              // second Confirm click before the DELETE resolves would fire a second request.
+              onConfirm={() => { if (revokeInFlight.current) return; revokeInFlight.current = true; revoke.mutate() }}
+              onCancel={() => setConfirmRevoke(false)} />
           </>
         )}
         {error && <ErrorBanner variant="subtle">{error}</ErrorBanner>}

@@ -233,6 +233,7 @@ export default function OutreachPage({ intent }: { intent?: unknown } = {}) {
           graceDays={trash.graceDays}
           onMarkDeletion={canMarkDeletion ? (cid) => trash.openFor(cid, openRow?.name ?? String(cid)) : undefined}
           onUnmark={canRestore ? (cid) => trash.unmark(cid) : undefined}
+          unmarkBusy={trash.unmarkBusy}
           expanded={drawerExpanded} onToggleExpand={() => setDrawerExpanded(e => !e)} />
       }>
 

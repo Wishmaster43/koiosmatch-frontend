@@ -417,6 +417,20 @@ describe('MatchDrawer · trash lifecycle (TRASH-OVERAL-2)', () => {
     expect(onUnmark).toHaveBeenCalledWith('m1')
   })
 
+  it('ONIX N-007: disables the unmark button while unmarkBusy, enabled otherwise', () => {
+    render(<MatchDrawer
+      match={{ ...match, archived: true, lifecycle: 'pending_erase', pendingEraseAt: '2026-08-10T12:00:00Z' }}
+      onClose={vi.fn()} onUnmark={vi.fn()} unmarkBusy />)
+    expect(screen.getByRole('button', { name: unmarkLabel })).toBeDisabled()
+  })
+
+  it('ONIX N-007: the unmark button stays enabled without unmarkBusy', () => {
+    render(<MatchDrawer
+      match={{ ...match, archived: true, lifecycle: 'pending_erase', pendingEraseAt: '2026-08-10T12:00:00Z' }}
+      onClose={vi.fn()} onUnmark={vi.fn()} />)
+    expect(screen.getByRole('button', { name: unmarkLabel })).toBeEnabled()
+  })
+
   it('hides the unmark action without the permission (prop absent)', () => {
     render(<MatchDrawer
       match={{ ...match, archived: true, lifecycle: 'pending_erase', pendingEraseAt: '2026-08-10T12:00:00Z' }}

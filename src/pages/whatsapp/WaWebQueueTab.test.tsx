@@ -9,7 +9,7 @@
 import { describe, it, expect, vi, afterEach } from 'vitest'
 import { render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
-import '@/i18n'
+import i18n from '@/i18n'
 import WaWebQueueTab from './WaWebQueueTab'
 import type { WaWebQueueRow, WaWebQueueNumberStats } from './hooks/useWaWebQueue'
 
@@ -19,12 +19,15 @@ const sendNowMutate = vi.fn()
 const pauseMutate = vi.fn()
 const retryMutate = vi.fn()
 const cancelMutate = vi.fn()
+// ONIX N-007: sendNowPending lets one test assert the row button disables
+// while its own mutation is in flight.
+let sendNowPending = false
 vi.mock('./hooks/useWaWebQueue', () => ({
   useWaWebQueueList: (status?: string) => mockList(status),
   useWaWebQueueStats: (active: boolean) => mockStats(active),
   useWaWebQueueActions: () => ({
-    sendNow: { mutate: sendNowMutate }, pause: { mutate: pauseMutate },
-    retry: { mutate: retryMutate }, cancel: { mutate: cancelMutate },
+    sendNow: { mutate: sendNowMutate, isPending: sendNowPending }, pause: { mutate: pauseMutate, isPending: false },
+    retry: { mutate: retryMutate, isPending: false }, cancel: { mutate: cancelMutate, isPending: false },
   }),
 }))
 
@@ -38,7 +41,7 @@ const row = (over: Partial<WaWebQueueRow>): WaWebQueueRow => ({
 const stats = (over: Partial<WaWebQueueNumberStats> = {}): WaWebQueueNumberStats =>
   ({ number_id: 'n1', label: 'Device A', rate_limit: 20, in_queue: 3, est_drain: 1, ...over })
 
-afterEach(() => vi.clearAllMocks())
+afterEach(() => { vi.clearAllMocks(); sendNowPending = false })
 
 describe('WaWebQueueTab', () => {
   it('renders queue rows with translated status/hold reason, no raw priority integer', () => {
@@ -66,6 +69,16 @@ describe('WaWebQueueTab', () => {
     render(<WaWebQueueTab status="" canManage />)
     await userEvent.click(screen.getByRole('button', { name: /verstuur nu|send now/i }))
     expect(sendNowMutate).toHaveBeenCalledWith('q1')
+  })
+
+  // ONIX N-007: send-now is a REAL WhatsApp send — the row button disables
+  // while its own mutation is pending (double-click never sends twice).
+  it('disables the send-now button while its own mutation is pending', () => {
+    sendNowPending = true
+    mockList.mockReturnValue({ data: [row({ status: 'paused' })], isLoading: false, isError: false })
+    mockStats.mockReturnValue({ data: [], isLoading: false })
+    render(<WaWebQueueTab status="" canManage />)
+    expect(screen.getByRole('button', { name: i18n.t('whatsapp:waWebQueue.action.sendNow') })).toBeDisabled()
   })
 
   it('cancel action calls the mutation with the row id', async () => {

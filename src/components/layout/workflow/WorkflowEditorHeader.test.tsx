@@ -171,3 +171,12 @@ describe('WorkflowEditorHeader · WORKFLOW-PERMS-1', () => {
     expect(screen.getByText('editor.saveClose').closest('button')).toBeDisabled()
   })
 })
+
+// ONIX N-007: `saving` disables both Save buttons (shared useWorkflowTrigger latch).
+describe('WorkflowEditorHeader · saving disables both Save buttons (ONIX N-007)', () => {
+  it('disables Save and Save&close while saving is true, even with canSave', () => {
+    render(<WorkflowEditorHeader {...baseProps} status="active" canSave saving />)
+    expect(screen.getByText('editor.save').closest('button')).toBeDisabled()
+    expect(screen.getByText('editor.saveClose').closest('button')).toBeDisabled()
+  })
+})

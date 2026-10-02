@@ -197,7 +197,7 @@ export default function MatchModal({
                 locationId={form.locationId} setLocationId={form.setLocationId} locations={form.locations}
                 departmentId={form.departmentId} setDepartmentId={form.setDepartmentId} departments={form.departments}
                 contactId={form.contactId} setContactId={form.setContactId} contacts={form.contacts}
-                creatingContact={form.creatingContact} setCreatingContact={form.setCreatingContact} nc={form.nc} setNc={form.setNc} saveContact={form.saveContact}
+                creatingContact={form.creatingContact} setCreatingContact={form.setCreatingContact} nc={form.nc} setNc={form.setNc} saveContact={form.saveContact} savingContact={form.savingContact}
                 duplicateContact={form.duplicateContact} setDuplicateContact={form.setDuplicateContact}
                 contactFunctions={form.contactFunctions} contactFunctionsAllowFreeEntry={form.contactFunctionsAllowFreeEntry}
                 func={form.func} setFunc={form.setFunc} functions={form.functions}

@@ -94,7 +94,7 @@ function triggerMeta(triggerType?: string): { Icon: LucideIcon; key: string } {
 }
 
 // One row in the workflow list: status/trigger badges plus its run/edit/archive/restore actions, gated on canManageFolders where relevant.
-export default function WorkflowListRow({ workflow, folderName, onRun, canRun = true, onEdit, onToggleStatus, canManageFolders, onArchive, onRestore, onMarkDeletion, onUnmark, graceDays = null }: WorkflowListRowProps) {
+export default function WorkflowListRow({ workflow, folderName, onRun, canRun = true, onEdit, onToggleStatus, canManageFolders, onArchive, onRestore, onMarkDeletion, onUnmark, unmarkBusy = false, graceDays = null }: WorkflowListRowProps) {
   const { t } = useTranslation('workflows')
   const { formatDate, formatDateTime } = useDateFormat()
   const seedLabel = useSeedLabel()
@@ -206,7 +206,7 @@ export default function WorkflowListRow({ workflow, folderName, onRun, canRun = 
               No standing variant reproduces the archive tint; secondary is the
               closest sanctioned identity (necessity deviation, noted). */}
           {inTrash && onUnmark && (
-            <Button variant="secondary" style={{ flexShrink: 0 }} onClick={e => { e.stopPropagation(); onUnmark() }}
+            <Button variant="secondary" style={{ flexShrink: 0 }} onClick={e => { e.stopPropagation(); onUnmark() }} disabled={unmarkBusy}
               aria-label={t('common:trash.unmarkAction')} title={t('common:trash.unmarkAction')}
             >
               <ArchiveRestore size={11} />

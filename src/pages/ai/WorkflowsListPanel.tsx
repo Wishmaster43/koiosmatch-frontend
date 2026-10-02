@@ -32,6 +32,8 @@ interface WorkflowRowActionHandlers {
   handleRestore: (wf: Workflow) => void | Promise<void>
   onMarkDeletion?: (wf: Workflow) => void
   onUnmark?: (wf: Workflow) => void | Promise<void>
+  // ONIX N-007: disables the unmark button while its own POST is in flight.
+  unmarkBusy?: boolean
   graceDays: number | null
 }
 
@@ -40,7 +42,7 @@ interface WorkflowRowActionHandlers {
 // LAYOUT) — two call sites (grid card, list row) passed the same six props
 // built from `wf` the same way.
 function workflowRowActions(wf: Workflow, {
-  canManageFolders, handleArchive, handleRestore, onMarkDeletion, onUnmark, graceDays,
+  canManageFolders, handleArchive, handleRestore, onMarkDeletion, onUnmark, unmarkBusy, graceDays,
 }: WorkflowRowActionHandlers) {
   return {
     canManageFolders,
@@ -48,6 +50,7 @@ function workflowRowActions(wf: Workflow, {
     onRestore: () => handleRestore(wf),
     onMarkDeletion: onMarkDeletion ? () => onMarkDeletion(wf) : undefined,
     onUnmark: onUnmark ? () => onUnmark(wf) : undefined,
+    unmarkBusy,
     graceDays,
   }
 }
@@ -112,7 +115,7 @@ interface WorkflowsListPanelProps extends Omit<WorkflowRowActionHandlers, 'grace
 export default function WorkflowsListPanel({
   loading, error, retryLoad, visibleWorkflows, folders, viewMode, setViewMode,
   showArchived, onToggleArchived, showTrash, onToggleTrash, selectedFolder, dragWf: dragWfRef, openEditor, handleRun, handleToggleStatus,
-  canManageFolders, canRun = true, canCreate = true, handleArchive, handleRestore, onMarkDeletion, onUnmark, graceDays = null,
+  canManageFolders, canRun = true, canCreate = true, handleArchive, handleRestore, onMarkDeletion, onUnmark, unmarkBusy, graceDays = null,
 }: WorkflowsListPanelProps) {
   const { t } = useTranslation(['workflows', 'common'])
   // WF-WACHTRIJ-FE-1: the page's own list⇄queue switch — mirrors the app-wide
@@ -191,7 +194,7 @@ export default function WorkflowsListPanel({
                   identical to the list-row call below — that repetition IS the
                   point of the helper (one call per render site, same six props). */}
               <WorkflowCard workflow={wf} onRun={handleRun} onEdit={() => openEditor(wf)} canRun={canRun}
-                {...workflowRowActions(wf, { canManageFolders, handleArchive, handleRestore, onMarkDeletion, onUnmark, graceDays })}
+                {...workflowRowActions(wf, { canManageFolders, handleArchive, handleRestore, onMarkDeletion, onUnmark, unmarkBusy, graceDays })}
               />
             </DraggableWorkflowItem>
           ))}
@@ -210,7 +213,7 @@ export default function WorkflowsListPanel({
                 canRun={canRun}
                 onEdit={() => openEditor(wf)}
                 onToggleStatus={() => handleToggleStatus(wf)}
-                {...workflowRowActions(wf, { canManageFolders, handleArchive, handleRestore, onMarkDeletion, onUnmark, graceDays })}
+                {...workflowRowActions(wf, { canManageFolders, handleArchive, handleRestore, onMarkDeletion, onUnmark, unmarkBusy, graceDays })}
               />
             </DraggableWorkflowItem>
           ))}

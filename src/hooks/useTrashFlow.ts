@@ -6,7 +6,7 @@
  * every trash-enabled entity page wires the exact same flow instead of a
  * hand-rolled copy per page.
  */
-import { useCallback, useState } from 'react'
+import { useCallback, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import api from '@/lib/api'
 import { notifyError, notifySuccess } from '@/lib/notify'
@@ -30,6 +30,10 @@ export function useTrashFlow({ entityPath, onMarked, onUnmarked }: Args) {
   const [target, setTarget] = useState<TrashTarget | null>(null)
   const [busy, setBusy] = useState(false)
   const [blocked, setBlocked] = useState(false)
+  // ONIX N-007: `unmark` has no row-id, so a per-id ref latch (written only in the
+  // handler) guards re-entrancy; `unmarkBusy` mirrors it as state for the banner.
+  const unmarkInFlight = useRef<Set<string>>(new Set())
+  const [unmarkBusy, setUnmarkBusy] = useState(false)
   // Keyed on the open target: opening fetches a fresh deletion preview per row.
   const deletion = useDeletionLifecycle(entityPath, target?.id ?? null)
 
@@ -62,17 +66,24 @@ export function useTrashFlow({ entityPath, onMarked, onUnmarked }: Args) {
 
   // Trash view → back to plain archived (restore-to-active stays the /restore route).
   const unmark = useCallback(async (id: string | number) => {
+    const key = String(id)
+    if (unmarkInFlight.current.has(key)) return
+    unmarkInFlight.current.add(key)
+    setUnmarkBusy(true)
     try {
       await api.post(`/${entityPath}/${id}/unmark-deletion`)
       notifySuccess(t('trash.unmarked'))
-      onUnmarked?.(String(id))
+      onUnmarked?.(key)
     } catch {
       notifyError(t('actionFailed'))
+    } finally {
+      unmarkInFlight.current.delete(key)
+      setUnmarkBusy(false)
     }
   }, [entityPath, onUnmarked, t])
 
   return {
-    target, openFor, close, confirmMark, unmark, busy, blocked,
+    target, openFor, close, confirmMark, unmark, busy, blocked, unmarkBusy,
     preview: deletion.preview, loading: deletion.loading, error: deletion.error,
     graceDays: deletion.graceDays,
   }

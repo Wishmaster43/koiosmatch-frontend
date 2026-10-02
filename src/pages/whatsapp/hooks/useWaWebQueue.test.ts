@@ -4,7 +4,7 @@
  * hits its own route, and each action mutation asserts its exact route (§13).
  */
 import { describe, it, expect, vi, afterEach } from 'vitest'
-import { renderHook, waitFor } from '@testing-library/react'
+import { renderHook, waitFor, act } from '@testing-library/react'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { createElement, type ReactNode } from 'react'
 import api from '@/lib/api'
@@ -69,5 +69,33 @@ describe('useWaWebQueueActions', () => {
     const { result } = renderHook(() => useWaWebQueueActions(), { wrapper })
     result.current.cancel.mutate('row-4')
     await waitFor(() => expect(api.delete).toHaveBeenCalledWith('/whatsapp-web/queue/row-4'))
+  })
+
+  // ONIX N-007: send-now is a REAL WhatsApp send — two synchronous clicks on one
+  // row must POST once. The mutation object is shared across every row, so the
+  // guard is a row-id-keyed latch, not `isPending` (which only updates on the
+  // next render, too late for two clicks in the same tick).
+  it('a second send-now call for the SAME row while the first is in flight is dropped (one POST)', async () => {
+    let resolvePost: (() => void) | undefined
+    vi.mocked(api.post).mockImplementation(() => new Promise(res => { resolvePost = () => res({ data: {} }) }))
+    const { result } = renderHook(() => useWaWebQueueActions(), { wrapper })
+    act(() => {
+      result.current.sendNow.mutate('row-1')
+      result.current.sendNow.mutate('row-1')
+    })
+    await waitFor(() => expect(api.post).toHaveBeenCalledTimes(1))
+    await act(async () => { resolvePost?.() })
+    expect(api.post).toHaveBeenCalledTimes(1)
+  })
+
+  // A different row id must never be latched out by another row's in-flight call.
+  it('a send-now call for a DIFFERENT row while another is in flight still posts', async () => {
+    vi.mocked(api.post).mockImplementation(() => new Promise(() => {}))
+    const { result } = renderHook(() => useWaWebQueueActions(), { wrapper })
+    act(() => {
+      result.current.sendNow.mutate('row-1')
+      result.current.sendNow.mutate('row-2')
+    })
+    await waitFor(() => expect(api.post).toHaveBeenCalledTimes(2))
   })
 })

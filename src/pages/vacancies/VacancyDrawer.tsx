@@ -138,6 +138,8 @@ interface VacancyDrawerProps {
   onUpdate?: UpdateFn
   // VAC-RESTORE-1: page passes this only with vacancies.update permission.
   onRestore?: (id: Id | undefined) => void
+  // ONIX N-007: disables the restore button while its own request is in flight.
+  restoring?: boolean
   // TRASH-OVERAL-2: the shared trash-section wiring (mark/unmark, see TrashLifecycleSection).
   trash?: TrashSectionConfig
   users?: DrawerUser[]
@@ -151,7 +153,7 @@ interface VacancyDrawerProps {
  * VacancyDrawer — thin container: wires data (lookups + onUpdate) and declares the
  * header config + tab list. No heavy JSX, no business logic (mirror CandidateDrawer).
  */
-export default function VacancyDrawer({ vacancy: v, onClose, expanded, onToggleExpand, onUpdate, onRestore, trash, users = [], initialTab }: VacancyDrawerProps) {
+export default function VacancyDrawer({ vacancy: v, onClose, expanded, onToggleExpand, onUpdate, onRestore, restoring, trash, users = [], initialTab }: VacancyDrawerProps) {
   const { t } = useTranslation('vacancies')
   const { statuses } = useVacancyLookups()
   const { formatDate, formatDateTime } = useDateFormat()
@@ -317,7 +319,7 @@ export default function VacancyDrawer({ vacancy: v, onClose, expanded, onToggleE
           {/* TRASH-OVERAL-2: hidden once the record sits in the trash — the trash
               banner (TrashLifecycleSection) takes over with unmark instead. */}
           {v.archived && v.lifecycle !== 'pending_erase' && (
-            <ArchivedBanner id={v.id} onRestore={onRestore}
+            <ArchivedBanner id={v.id} onRestore={onRestore} busy={restoring}
               message={v.archivedAt ? t('drawer.archivedBanner.since', { date: formatDate(v.archivedAt) }) : t('drawer.archivedBanner.flag')}
               restoreLabel={t('drawer.archivedBanner.restore')} />
           )}

@@ -11,6 +11,7 @@ import { useTranslation } from 'react-i18next'
 import api, { unwrap } from '@/lib/api'
 import { notifyError, notifySuccess } from '@/lib/notify'
 import { findDuplicateContact } from './helpers'
+import { useGuardedSubmit } from '@/hooks/useGuardedSubmit'
 import type { CascadeOption } from '@/hooks/useCustomerCascade'
 import type { Id } from '@/types/common'
 
@@ -39,7 +40,7 @@ export function useInlineContactCreate({
 
   // Create a contact for the current customer, coupled to the picked location, then
   // refetch the cascade (shared hook) and select the new contact.
-  const saveContact = async () => {
+  const saveContactOnce = async () => {
     if (!customerId || !nc.first_name.trim() || !nc.last_name.trim()) return
     // Duplicate preflight (Danny 24-07): block BEFORE posting when the email or
     // either phone number already belongs to a contact already loaded for this
@@ -67,5 +68,10 @@ export function useInlineContactCreate({
     }
   }
 
-  return { creatingContact, setCreatingContact, nc, setNc, saveContact, duplicateContact, setDuplicateContact }
+  // ONIX N-007: guards the Save button against a second click while the POST
+  // is still in flight (`creatingContact` toggles the FORM's visibility, a
+  // different concern from the request itself).
+  const { submit: saveContact, saving } = useGuardedSubmit(saveContactOnce)
+
+  return { creatingContact, setCreatingContact, nc, setNc, saveContact, saving, duplicateContact, setDuplicateContact }
 }

@@ -4,7 +4,7 @@
  * candidate's sub-entity routes. See the component docblock below for the
  * revert-on-failure contract every op() shares.
  */
-import { useState } from 'react'
+import { useState, useRef } from 'react'
 import type { ComponentType, Dispatch, SetStateAction } from 'react'
 import { useTranslation } from 'react-i18next'
 import api, { unwrap } from '@/lib/api'
@@ -239,12 +239,20 @@ export default function BackgroundTab({ c, onLocalMerge, onJump }: { c: Candidat
   // are NOT fillable client fields — see CandidateReferenceController::verify), so
   // this waits for the real response instead of optimistically guessing it, then
   // merges the returned row (which carries the stamp) into state.
+  // ONIX N-007: a per-row latch (ref Set, written only in the handler) so two
+  // synchronous clicks on the same row's Verify button POST once; `verifyingIds`
+  // is exposed for the button's own `disabled` state.
+  const verifyingRef = useRef<Set<string | number>>(new Set())
+  const [verifyingIds, setVerifyingIds] = useState<Set<string | number>>(new Set())
   const verifyReference = (i: number) => {
     const id = references[i]?.id
-    if (!isPersisted(id)) return
+    if (!isPersisted(id) || verifyingRef.current.has(id)) return
+    verifyingRef.current.add(id)
+    setVerifyingIds(new Set(verifyingRef.current))
     api.post(`/candidates/${c.id}/references/${id}/verify`)
       .then(r => { const it = unwrap<RelItem>(r); if (it) setReferences(p => p.map(x => x.id === id ? { ...x, ...it } : x)) })
       .catch(err => notifyError(extractApiError(err, t('actionFailed'))))
+      .finally(() => { verifyingRef.current.delete(id); setVerifyingIds(new Set(verifyingRef.current)) })
   }
 
   // House sub-tab bar (Danny kandidaten-ronde-2 ("candidates round 2"), point B): one sub-tab per section
@@ -292,7 +300,7 @@ export default function BackgroundTab({ c, onLocalMerge, onJump }: { c: Candidat
       {/* REF-ERVARING-1: `experiences` is the LOCAL list, not c.experiences — an
           experience added this session is instantly linkable, and one just removed
           disappears from the picker. */}
-      {subTab === 'references'     && <ReferencesTab      items={references}  documents={c.documents ?? []} experiences={experiences} onJumpToDocuments={onJump ? () => onJump('documents') : undefined} onVerify={verifyReference} {...ops('references', references, setReferences)} />}
+      {subTab === 'references'     && <ReferencesTab      items={references}  documents={c.documents ?? []} experiences={experiences} onJumpToDocuments={onJump ? () => onJump('documents') : undefined} onVerify={verifyReference} verifyingIds={verifyingIds} {...ops('references', references, setReferences)} />}
       {/* Talen ("Languages") already lived on this tab (moved here from Profiel,
           "Profile", earlier) — now its own sub-tab instead of a stacked block;
           persists via the drawer's onUpdate. */}

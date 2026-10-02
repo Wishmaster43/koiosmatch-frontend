@@ -372,3 +372,24 @@ describe('useTaskDrawerActions · handleRemoveLink', () => {
     expect(notifyError).toHaveBeenCalledWith('common:actionFailed')
   })
 })
+
+// ONIX N-007: a double-click (or Enter-then-Enter) on the restore banner must
+// POST the restore route exactly once; `restoring` disables the banner's button.
+describe('useTaskDrawerActions · restoreTask re-entrancy guard', () => {
+  it('two synchronous restoreTask calls POST /tasks/{id}/restore once; restoring resets after settle', async () => {
+    let resolvePost: (() => void) | undefined
+    mockedPost.mockImplementation(() => new Promise(res => { resolvePost = () => res({}) }))
+    const r = harness([task({ id: 't1', archived: true })])
+
+    act(() => {
+      r.result.current.actions.restoreTask('t1')
+      r.result.current.actions.restoreTask('t1')
+    })
+    expect(mockedPost).toHaveBeenCalledTimes(1)
+    expect(mockedPost).toHaveBeenCalledWith('/tasks/t1/restore')
+    expect(r.result.current.actions.restoring).toBe(true)
+
+    await act(async () => { resolvePost?.(); await Promise.resolve() })
+    await waitFor(() => expect(r.result.current.actions.restoring).toBe(false))
+  })
+})

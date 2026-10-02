@@ -120,7 +120,7 @@ function VacanciesPageInner({ intent }: { intent?: unknown }) {
   [vacancies, showArchived, showTrash])
 
   // ── Drawer/record data layer (§3): selection + detail fetch + optimistic edits ──
-  const { selected, detail, drawerExpanded, setDrawerExpanded, closeDrawer, selectVacancy, handleCreated, updateVacancy, restoreVacancy } =
+  const { selected, detail, drawerExpanded, setDrawerExpanded, closeDrawer, selectVacancy, handleCreated, updateVacancy, restoreVacancy, restoring } =
     useVacancyRecord({ setVacancies, setTotal, statusMeta, users, customers: customerList, t })
 
   // VACANCY-MATCH-COUNT-1 (Danny 23-07): the drawer's deep-link target tab. The
@@ -234,6 +234,8 @@ function VacanciesPageInner({ intent }: { intent?: unknown }) {
             onToggleExpand={() => setDrawerExpanded(v => !v)}
             onUpdate={updateVacancy}
             onRestore={hasPermission('vacancies.update') ? restoreVacancy : undefined}
+            // ONIX N-007: disables the restore button while its own request runs.
+            restoring={restoring}
             // TRASH-OVERAL-2: shared trash section (mark = vacancies.delete, unmark =
             // vacancies.update; backend re-checks, §7). The patches are pure LOCAL
             // merges — buildVacancyPatch maps none of these keys, so no stray PATCH.

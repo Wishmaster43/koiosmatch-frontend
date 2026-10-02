@@ -231,6 +231,7 @@ function ModuleNode({ id, data, selected }: { id: string; data: FlowNodeData; se
         {/* Run knop rechtsonder op de cirkel */}
         <button
           onClick={handleRun}
+          disabled={busy}
           title={t('canvas.runModule')} aria-label={t('canvas.runModule')}
           // eslint-disable-next-line huisstijlLegacy/no-restricted-syntax -- 22px circular canvas-node run control riding the node's own colour; Button's square sm would not fit the node corner
           style={{

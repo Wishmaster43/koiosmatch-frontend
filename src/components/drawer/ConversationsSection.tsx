@@ -181,6 +181,9 @@ export default function ConversationsSection({ threadsUrl, threadsParams, header
   // single shared slot is enough since the accordion only ever has one open thread.
   const [composerText, setComposerText] = useState('')
   const [sendingMsg, setSendingMsg] = useState(false)
+  // ONIX N-007: re-entrancy latch for sendMessage, written in the handler only
+  // (never during render) — two Enter/Send triggers in one tick must POST once.
+  const sendingRef = useRef(false)
   // WA-SEND-TRANSPORT-1: the 409/502 inline explanation shown next to the composer —
   // never a toast, so it survives on screen next to the draft the recruiter can retry.
   const [sendError, setSendError] = useState<string | null>(null)
@@ -278,6 +281,9 @@ export default function ConversationsSection({ threadsUrl, threadsParams, header
   const sendMessage = useCallback((id: Id) => {
     const text = composerText.trim()
     if (!text) return
+    // ONIX N-007: drop a re-entrant call while the previous send is still in flight.
+    if (sendingRef.current) return
+    sendingRef.current = true
     setSendingMsg(true)
     setSendError(null)
     api.post(`/conversations/${id}/messages`, { direction: 'outbound', message_content: text })
@@ -316,7 +322,7 @@ export default function ConversationsSection({ threadsUrl, threadsParams, header
           notifyError(extractApiError(err, t('conversations.composerSendFailed')))
         }
       })
-      .finally(() => setSendingMsg(false))
+      .finally(() => { sendingRef.current = false; setSendingMsg(false) })
   }, [composerText, t, threadsUrl, threadsParams])
 
   // WA-WINDOW-1: after a template send the SERVER wrote the outbound row — pull the

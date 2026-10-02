@@ -66,6 +66,9 @@ interface ReferencesTabProps {
   // The one action beyond generic CRUD. Omitted or the row not yet persisted →
   // no verify affordance at all (no fake button with nothing real behind it).
   onVerify?: (i: number) => void
+  // ONIX N-007: ids currently mid-verify (BackgroundTab's per-row latch) — the
+  // button disables for its OWN row only while its request is in flight.
+  verifyingIds?: Set<string | number>
   // DOC-EDU-1 mirror: the candidate's own documents (for the "reference letter"
   // edit-form picker + icon resolution) and a callback that switches the drawer
   // to the Documenten tab — mirrors EducationTab/CertificationsTab's props
@@ -110,7 +113,7 @@ function resolveReferenceDocument(entry: RelItem, documents: RelItem[]): RelItem
 // Third-party references list (see file docblock above): add/edit/remove/verify
 // rows plus the reference-letter and linked-experience pickers, mirroring
 // EducationTab/CertificationsTab's own anatomy.
-export default function ReferencesTab({ items = [], onAdd, onEdit, onRemove, onVerify, documents = [], onJumpToDocuments, experiences = [], onReorder }: ReferencesTabProps) {
+export default function ReferencesTab({ items = [], onAdd, onEdit, onRemove, onVerify, verifyingIds, documents = [], onJumpToDocuments, experiences = [], onReorder }: ReferencesTabProps) {
   const { t } = useTranslation('candidates')
   const { formatDate } = useDateFormat()
   // REFERENTIE-VELDEN-1: the relation lookup, searchable + pick-only (CLAUDE.md
@@ -241,6 +244,7 @@ export default function ReferencesTab({ items = [], onAdd, onEdit, onRemove, onV
                   } />
                 ) : (onVerify && isPersisted(r.id)) ? (
                   <Button type="button" variant="secondary" size="sm" onClick={() => onVerify(i)}
+                    disabled={verifyingIds?.has(r.id as string | number) ?? false}
                     title={t('references.verify', { defaultValue: 'Verifiëren' })}>
                     <BadgeCheck size={12} />
                     {t('references.verify', { defaultValue: 'Verifiëren' })}

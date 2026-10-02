@@ -23,7 +23,7 @@ const baseProps = {
   locationId: '', setLocationId: vi.fn(), locations: [],
   departmentId: '', setDepartmentId: vi.fn(), departments: [],
   contactId: '', setContactId: vi.fn(), contacts: [],
-  creatingContact: false, setCreatingContact: vi.fn(), nc: { first_name: '', last_name: '', email: '', phone: '', mobile: '', function: '' }, setNc: vi.fn(), saveContact: vi.fn(),
+  creatingContact: false, setCreatingContact: vi.fn(), nc: { first_name: '', last_name: '', email: '', phone: '', mobile: '', function: '' }, setNc: vi.fn(), saveContact: vi.fn(), savingContact: false,
   duplicateContact: null, setDuplicateContact: vi.fn(),
   contactFunctions: [], contactFunctionsAllowFreeEntry: false,
   func: '', setFunc: vi.fn(), functions: [],

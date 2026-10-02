@@ -58,7 +58,7 @@ function StepPill({ type }: { type: string }) {
 }
 
 // One card in the workflow list/board: status badge, step pills, and the run/edit/archive/restore/delete actions for that workflow.
-export default function WorkflowCard({ workflow, onRun, canRun = true, onEdit, canManageFolders, onArchive, onRestore, onMarkDeletion, onUnmark, graceDays = null }: WorkflowCardProps) {
+export default function WorkflowCard({ workflow, onRun, canRun = true, onEdit, canManageFolders, onArchive, onRestore, onMarkDeletion, onUnmark, unmarkBusy = false, graceDays = null }: WorkflowCardProps) {
   const { t } = useTranslation('workflows')
   const { formatDate, formatDateTime } = useDateFormat()
   const seedLabel = useSeedLabel()
@@ -170,7 +170,7 @@ export default function WorkflowCard({ workflow, onRun, canRun = true, onEdit, c
                   // is the archive token via style (Button merges caller style before
                   // the disabled recipe — the ContactDetail archive idiom).
                   <Button variant="secondary" style={{ color: 'var(--color-archive)' }}
-                    onClick={e => { e.stopPropagation(); onUnmark() }}
+                    onClick={e => { e.stopPropagation(); onUnmark() }} disabled={unmarkBusy}
                     aria-label={t('common:trash.unmarkAction')} title={t('common:trash.unmarkAction')}
                   >
                     <ArchiveRestore size={12} />

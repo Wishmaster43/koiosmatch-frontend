@@ -21,4 +21,12 @@ describe('ArchivedBanner', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Restore' }))
     expect(onRestore).toHaveBeenCalledWith('m1')
   })
+
+  // ONIX N-007: `busy` disables the restore button while its own request runs —
+  // no other visual change (no layout/label shift).
+  it('disables the restore button while busy', () => {
+    const onRestore = vi.fn()
+    render(<ArchivedBanner id="m1" message="Archived" onRestore={onRestore} restoreLabel="Restore" busy />)
+    expect(screen.getByRole('button', { name: 'Restore' })).toBeDisabled()
+  })
 })

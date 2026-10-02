@@ -10,6 +10,7 @@
  * only (no nested number object) and `priority` as a raw integer snapshot of
  * the message type at enqueue time, never a high/normal/low slug.
  */
+import { useRef } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import api, { unwrapList } from '@/lib/api'
 
@@ -73,6 +74,26 @@ export function useWaWebQueueStats(active: boolean) {
   })
 }
 
+// ONIX N-007: one mutation object is shared across every row (a plain `mutate`
+// re-fires while the previous call for the SAME row is still in flight — the
+// test fires two clicks synchronously, before `isPending` can re-render the
+// button). A row-id-keyed latch (ref, written in the handler only) drops the
+// second call; the mutation's own `isPending` still disables the row button.
+function useLatchedMutation(mutationFn: (id: string) => Promise<unknown>, invalidate: () => void) {
+  const inFlight = useRef<Set<string>>(new Set())
+  const mutation = useMutation({
+    mutationFn,
+    onSuccess: invalidate,
+    onSettled: (_data, _err, id) => { inFlight.current.delete(id as string) },
+  })
+  const mutate = (id: string) => {
+    if (inFlight.current.has(id)) return
+    inFlight.current.add(id)
+    mutation.mutate(id)
+  }
+  return { ...mutation, mutate }
+}
+
 // The three mutating actions + cancel, each invalidating both queries so the
 // row list and the stats strip settle back to the server's own state.
 export function useWaWebQueueActions() {
@@ -81,21 +102,9 @@ export function useWaWebQueueActions() {
     qc.invalidateQueries({ queryKey: ['wa-web-queue'] })
     qc.invalidateQueries({ queryKey: ['wa-web-queue-stats'] })
   }
-  const sendNow = useMutation({
-    mutationFn: (id: string) => api.post(`/whatsapp-web/queue/${id}/send-now`),
-    onSuccess: invalidate,
-  })
-  const pause = useMutation({
-    mutationFn: (id: string) => api.post(`/whatsapp-web/queue/${id}/pause`),
-    onSuccess: invalidate,
-  })
-  const retry = useMutation({
-    mutationFn: (id: string) => api.post(`/whatsapp-web/queue/${id}/retry`),
-    onSuccess: invalidate,
-  })
-  const cancel = useMutation({
-    mutationFn: (id: string) => api.delete(`/whatsapp-web/queue/${id}`),
-    onSuccess: invalidate,
-  })
+  const sendNow = useLatchedMutation((id: string) => api.post(`/whatsapp-web/queue/${id}/send-now`), invalidate)
+  const pause = useLatchedMutation((id: string) => api.post(`/whatsapp-web/queue/${id}/pause`), invalidate)
+  const retry = useLatchedMutation((id: string) => api.post(`/whatsapp-web/queue/${id}/retry`), invalidate)
+  const cancel = useLatchedMutation((id: string) => api.delete(`/whatsapp-web/queue/${id}`), invalidate)
   return { sendNow, pause, retry, cancel }
 }

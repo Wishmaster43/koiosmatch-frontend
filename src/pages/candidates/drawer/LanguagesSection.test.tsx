@@ -12,7 +12,7 @@
  *     proof-document link rides in the same per-item body.
  */
 import { describe, it, expect, vi, beforeEach } from 'vitest'
-import { render, screen, waitFor } from '@testing-library/react'
+import { render, screen, waitFor, fireEvent } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import LanguagesSection from './LanguagesSection'
 import type { Candidate } from '@/types/candidate'
@@ -115,6 +115,24 @@ describe('LanguagesSection · per-item routes (ENT1-03)', () => {
     await waitFor(() => expect(del).toHaveBeenCalledWith('/candidates/c1/languages/l1', { quietStatuses: [422] }))
     expect(patch).not.toHaveBeenCalled()
     await waitFor(() => expect(onSaved).toHaveBeenCalledWith({ languages: [] }))
+  })
+
+  // ONIX N-007: the diskette must not re-run the per-item batch while the
+  // first call is still in flight — two synchronous clicks, one POST.
+  it('two synchronous clicks on the diskette POST the new row once', async () => {
+    const user = userEvent.setup()
+    post.mockReturnValueOnce(new Promise(() => {})) // never resolves within this test
+    render(<LanguagesSection c={{ id: 'c1', languages: [] } as unknown as Candidate} onSaved={vi.fn()} />)
+    await user.click(screen.getByRole('button', { name: 'addFields.language' }))
+    const langTriggers = screen.getAllByRole('button', { name: 'addFields.language' })
+    await user.click(langTriggers[langTriggers.length - 1])
+    await user.click(await screen.findByRole('button', { name: 'Nederlands' }))
+
+    const saveBtn = screen.getByTitle('common:save')
+    fireEvent.click(saveBtn)
+    fireEvent.click(saveBtn)
+
+    await waitFor(() => expect(post).toHaveBeenCalledTimes(1))
   })
 
   it('saving without touching anything sends NO request at all', async () => {

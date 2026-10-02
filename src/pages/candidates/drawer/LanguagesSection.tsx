@@ -13,6 +13,7 @@ import { extractApiError } from '@/lib/extractApiError'
 import { downloadFilesSequentially } from '@/lib/downloadFiles'
 import DocPreviewModal from '@/components/drawer/DocPreviewModal'
 import { useLanguageLookups } from '@/lib/useLanguageLookups'
+import { useGuardedSubmit } from '@/hooks/useGuardedSubmit'
 import DrawerAddButton from './DrawerAddButton'
 import Button from '@/components/ui/Button'
 // DOC-1-EIGENAAR-1: the ONE shared "which document is still free" rule (§11).
@@ -197,6 +198,9 @@ export default function LanguagesSection({ c, onSaved }: { c: Candidate; onSaved
     }
     setEditing(false)
   }
+  // ONIX N-007: guards the diskette against a second click while the batch
+  // (per-row POST/PATCH/DELETE above) is still in flight.
+  const { submit: guardedSave, saving } = useGuardedSubmit(save)
   // Download a linked document through the one shared helper (same mechanics as the
   // Documenten list row) — the in-app stream url first, the signed url as fallback.
   const downloadDoc = (doc: LinkedDocument) => downloadFilesSequentially([{ url: doc.url ?? doc.download_url, name: doc.name ?? doc.file_name ?? '' }])
@@ -309,8 +313,8 @@ export default function LanguagesSection({ c, onSaved }: { c: Candidate; onSaved
             ))}
             {/* Save/✕ as a real footer line — right-aligned under the rows. */}
             <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 4, marginTop: 2 }}>
-              <Button variant="primary" size="sm" iconOnly onClick={save} title={t('common:save')} aria-label={t('common:save')}><Save size={13} /></Button>
-              <Button variant="secondary" size="sm" iconOnly onClick={cancel} title={t('common:cancel')} aria-label={t('common:cancel')}><X size={13} /></Button>
+              <Button variant="primary" size="sm" iconOnly onClick={guardedSave} disabled={saving} title={t('common:save')} aria-label={t('common:save')}><Save size={13} /></Button>
+              <Button variant="secondary" size="sm" iconOnly onClick={cancel} disabled={saving} title={t('common:cancel')} aria-label={t('common:cancel')}><X size={13} /></Button>
             </div>
           </div>
         ) : view.length === 0 ? (

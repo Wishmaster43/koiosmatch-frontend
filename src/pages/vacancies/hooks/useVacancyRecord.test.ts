@@ -90,3 +90,26 @@ describe('useVacancyRecord · updateVacancy interview-workflow re-sync', () => {
     expect(ok).toBe(false)
   })
 })
+
+// ONIX N-007: a double-click on the restore banner must POST the restore route
+// exactly once; `restoring` disables the banner's button while it runs.
+describe('useVacancyRecord · restoreVacancy re-entrancy guard', () => {
+  it('two synchronous restoreVacancy calls POST /vacancies/{id}/restore once; restoring resets after settle', async () => {
+    let resolvePost: (() => void) | undefined
+    mockPatch.mockReset()
+    const mockPost = api.post as unknown as ReturnType<typeof vi.fn>
+    mockPost.mockImplementation(() => new Promise(res => { resolvePost = () => res({}) }))
+    const { result: hook } = setup()
+
+    act(() => {
+      hook.current.restoreVacancy('v1')
+      hook.current.restoreVacancy('v1')
+    })
+    expect(mockPost).toHaveBeenCalledTimes(1)
+    expect(mockPost).toHaveBeenCalledWith('/vacancies/v1/restore')
+    expect(hook.current.restoring).toBe(true)
+
+    await act(async () => { resolvePost?.(); await Promise.resolve() })
+    await waitFor(() => expect(hook.current.restoring).toBe(false))
+  })
+})

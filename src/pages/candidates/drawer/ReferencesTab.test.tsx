@@ -202,6 +202,15 @@ describe('ReferencesTab · verify action ↔ verified badge', () => {
     expect(onVerify).toHaveBeenCalledWith(0)
   })
 
+  // ONIX N-007: the per-row latch disables ONLY the id currently in flight.
+  it('disables the verify button for a row whose id is in verifyingIds, leaves other rows enabled', () => {
+    const items = [{ id: 'r1', first_name: 'Jan', last_name: 'Jansen' }, { id: 'r2', first_name: 'Piet', last_name: 'Pietersen' }]
+    render(<ReferencesTab items={items} onVerify={vi.fn()} verifyingIds={new Set(['r1'])} />)
+    const buttons = screen.getAllByTitle('Verifiëren')
+    expect(buttons[0]).toBeDisabled()
+    expect(buttons[1]).not.toBeDisabled()
+  })
+
   it('shows the verified badge with a formatted date instead of the action once verified_at is set', () => {
     const item = { id: 'r1', first_name: 'Jan', last_name: 'Jansen', verified_at: '2026-08-01T10:00:00Z' }
     render(<ReferencesTab items={[item]} onVerify={vi.fn()} />)

@@ -153,6 +153,22 @@ describe('useWorkflowGraph · handleNodeRun surfaces a 422 reason', () => {
     expect(notifyError).not.toHaveBeenCalled()
   })
 
+  it('ONIX N-007: two synchronous run calls on the same node POST once', async () => {
+    let resolvePost: (v: unknown) => void = () => {}
+    mockedPost.mockReturnValueOnce(new Promise(resolve => { resolvePost = resolve }))
+    const { result } = renderHook(() => useWorkflowGraph({ workflow: wf([{ id: 'n1', type: 'candidates', config: {}, position: { x: 0, y: 0 } }]) }))
+    let first: Promise<void> = Promise.resolve()
+    let second: Promise<void> = Promise.resolve()
+    act(() => {
+      first = result.current.handleNodeRun('n1', { type: 'candidates', config: {} })
+      second = result.current.handleNodeRun('n1', { type: 'candidates', config: {} })
+    })
+    await act(async () => { resolvePost({ data: { output: [{ id: 1 }] } }) })
+    await act(async () => { await Promise.all([first, second]) })
+    expect(mockedPost).toHaveBeenCalledTimes(1)
+    expect(mockedPost).toHaveBeenCalledWith('/workflows/test-module', { module_type: 'candidates', config: {} }, expect.anything())
+  })
+
   it('a plain 200 answer still unwraps `output` as before', async () => {
     mockedPost.mockResolvedValue({ data: { output: [{ id: 1 }] } })
     const { result } = renderHook(() => useWorkflowGraph({ workflow: wf([{ id: 'n1', type: 'candidates', config: {}, position: { x: 0, y: 0 } }]) }))

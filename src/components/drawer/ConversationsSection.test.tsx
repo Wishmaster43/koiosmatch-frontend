@@ -266,6 +266,28 @@ describe('ConversationsSection · session composer (WHATSAPP-COMPOSE-1)', () => 
     })
   })
 
+  // ONIX N-007: two synchronous Enter presses must POST exactly once — the
+  // first send stays in flight (never resolved here) while the second Enter fires.
+  it('two synchronous Enter presses send once (re-entrancy latch)', async () => {
+    const recent = new Date(Date.now() - 60_000).toISOString()
+    vi.mocked(api.get).mockImplementation((url: string) => {
+      if (url === '/conversations') return Promise.resolve({ data: { data: threadWith(recent) } })
+      if (url === '/conversations/conv-1/messages') return Promise.resolve({ data: { data: MESSAGES } })
+      return Promise.reject(new Error(`unexpected GET ${url}`))
+    })
+    // Never resolves within this test — proves the SECOND Enter is dropped
+    // while the first POST is still pending, not merely fast.
+    vi.mocked(api.post).mockReturnValueOnce(new Promise(() => {}))
+    render(<ConversationsSection composerEnabled threadsUrl="/conversations" threadsParams={{ candidate_id: 'cand-1' }} />)
+
+    const input = await screen.findByPlaceholderText('conversations.composerPlaceholder')
+    fireEvent.change(input, { target: { value: 'Tot morgen!' } })
+    fireEvent.keyDown(input, { key: 'Enter' })
+    fireEvent.keyDown(input, { key: 'Enter' })
+
+    expect(api.post).toHaveBeenCalledTimes(1)
+  })
+
   // WA-COMPOSER-1: the Bold toolbar button wraps the selected draft text in `*`.
   it('the Bold toolbar button wraps the selected text with *', async () => {
     const recent = new Date(Date.now() - 60_000).toISOString()

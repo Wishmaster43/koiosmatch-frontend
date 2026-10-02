@@ -14,6 +14,7 @@
 import { describe, it, expect, vi } from 'vitest'
 import { render, screen, fireEvent } from '@testing-library/react'
 import { NODE_TYPES, OutputPanel } from './canvas'
+import { NodeRunContext } from './contexts'
 import { MODULE_META } from '@/modules/index'
 import type { FlowNodeData } from '@/types/workflow'
 import type { ModuleCatalog } from './filterFieldCatalog'
@@ -136,5 +137,27 @@ describe('OutputPanel · POPUP-AUDIT-1 FloatingPanel migration', () => {
     expect(document.querySelector('[aria-hidden][style*="nwse-resize"]')).toBeInTheDocument()
     fireEvent.click(screen.getByRole('button', { name: 'close' }))
     expect(onClose).toHaveBeenCalled()
+  })
+})
+
+// ONIX N-007: the per-node run button must disable while its own test-run is
+// pending, so a second click before the first POST resolves never fires again.
+describe('ModuleNode · run button busy state', () => {
+  it('disables the run button while onRun has not resolved, two clicks call onRun once', async () => {
+    let resolveRun: () => void = () => {}
+    const onRun = vi.fn(() => new Promise<void>(resolve => { resolveRun = resolve }))
+    mockCatalog = realCatalog('candidates')
+    render(
+      <NodeRunContext.Provider value={onRun}>
+        <ModuleNode {...node('candidates')} />
+      </NodeRunContext.Provider>,
+    )
+    const runBtn = screen.getByLabelText('canvas.runModule')
+    fireEvent.click(runBtn)
+    expect(runBtn).toBeDisabled()
+    fireEvent.click(runBtn)
+    expect(onRun).toHaveBeenCalledTimes(1)
+    resolveRun()
+    await screen.findByLabelText('canvas.runModule')
   })
 })

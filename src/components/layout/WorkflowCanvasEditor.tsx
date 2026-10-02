@@ -49,7 +49,7 @@ function EditorInner({ workflow, onClose, onSave, initialRunId }: {
   const {
     edges, onNodesChange, onEdgesChange, onConnect, nodesWithFirst, selectedNode, setSelectedNodeId,
     name, setName, trigger, setTrigger, scheduleConfig, setScheduleConfig, status, setStatus,
-    serverStatus, isInterview, setIsInterview, saved, running, runError, runBudget, setRunError, showSchedule, setShowSchedule, widePanelActive, setWidePanelActive, showLogs, setShowLogs,
+    serverStatus, isInterview, setIsInterview, saved, saving, running, runError, runBudget, setRunError, showSchedule, setShowSchedule, widePanelActive, setWidePanelActive, showLogs, setShowLogs,
     liveRun, activeRunId, liveRunActive, runConflict, handleStopped,
     pickerState, setPickerState, filterState, setFilterState, outputState, setOutputState,
     firstNodeId, setStartNodeId, startInvalid, getUpstreamVariables,
@@ -137,7 +137,7 @@ function EditorInner({ workflow, onClose, onSave, initialRunId }: {
           liveRunActive={liveRunActive} activeRunId={activeRunId} onStopped={handleStopped}
           running={running} onRun={handleRunSavingFirst} onRunDryRun={handleRunDryRun}
           canRun={canRunWorkflow} canSave={canSaveWorkflow}
-          saved={saved} onSave={() => handleSave(false)}
+          saved={saved} saving={saving} onSave={() => handleSave(false)}
           // Save & close — back to the overview (live-run guard first)
           onSaveClose={() => (liveRunActive ? confirm(t('editor.liveRunConfirm'), () => handleSave(true)) : handleSave(true))}
           onClose={confirmClose}

@@ -141,3 +141,42 @@ describe('useWorkflowTrigger · handleSave reports success (RUN-SAVES-FIRST-1)',
     expect(result.current.isDirty()).toBe(false)
   })
 })
+
+// ONIX N-007: two synchronous Save clicks while the first save is still in
+// flight must call onSave once — the second is dropped, not queued.
+describe('useWorkflowTrigger · handleSave re-entrancy latch (ONIX N-007)', () => {
+  it('two synchronous handleSave() calls with a pending async onSave call onSave once', async () => {
+    let resolve!: (v: boolean) => void
+    const onSave = vi.fn(() => new Promise<boolean>(r => { resolve = r }))
+    const { result } = renderHook(() => useWorkflowTrigger({ workflow: wf(), nodes, edges, initialNodes: nodes, initialEdges: edges, onSave }))
+
+    let second: boolean | Promise<boolean> = true
+    act(() => {
+      result.current.handleSave()
+      second = result.current.handleSave()
+    })
+    expect(second).toBe(false)
+    expect(onSave).toHaveBeenCalledTimes(1)
+    expect(result.current.saving).toBe(true)
+
+    await act(async () => { resolve(true) })
+    expect(result.current.saving).toBe(false)
+  })
+
+  // Verifier fix: a rejected onSave must release the latch too (it used to stick
+  // forever, leaving Save/Save&close disabled and every later handleSave a no-op).
+  it('a rejected onSave releases the latch so saving goes back to false and a second handleSave calls onSave again', async () => {
+    const onSave = vi.fn(() => Promise.reject(new Error('network error')))
+    const { result } = renderHook(() => useWorkflowTrigger({ workflow: wf(), nodes, edges, initialNodes: nodes, initialEdges: edges, onSave }))
+
+    let first!: Promise<boolean>
+    await act(async () => {
+      first = result.current.handleSave() as Promise<boolean>
+    })
+    expect(await first).toBe(false)
+    expect(result.current.saving).toBe(false)
+
+    await act(async () => { result.current.handleSave() })
+    expect(onSave).toHaveBeenCalledTimes(2)
+  })
+})

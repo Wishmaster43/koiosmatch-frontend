@@ -66,12 +66,14 @@ export default function ThreadComposer({ value, onChange, onSend, sending = fals
 
   // Enter sends, Shift+Enter inserts a newline — same contract as the input it
   // replaces. Without an `onSend` (popup host) Enter simply inserts a newline.
+  // ONIX N-007: while `sending` is true, Enter is a no-op (mirrors the Send
+  // button's own disabled state) so Enter-Enter never fires two sends.
   const onTextareaKeyDown = useCallback((e: KeyboardEvent<HTMLTextAreaElement>) => {
     if (onSend && e.key === 'Enter' && !e.shiftKey) {
       e.preventDefault()
-      onSend()
+      if (!sending) onSend()
     }
-  }, [onSend])
+  }, [onSend, sending])
 
   // Escape closes the emoji panel regardless of which element inside the
   // composer currently has focus (the toggle button, not the textarea, right

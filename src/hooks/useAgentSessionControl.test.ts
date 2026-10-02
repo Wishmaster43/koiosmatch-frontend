@@ -34,6 +34,25 @@ describe('useAgentSessionControl', () => {
     expect(postMock).toHaveBeenCalledWith('/conversations/c1/agent-session/resume')
   })
 
+  it('ONIX N-007: two run calls in one tick POST once, the second resolves false', async () => {
+    let resolvePost: (v: unknown) => void = () => {}
+    postMock.mockImplementation(() => new Promise(resolve => { resolvePost = resolve }))
+    const onChanged = vi.fn()
+    const { result } = renderHook(() => useAgentSessionControl(onChanged, 'test:failed'))
+    let first: Promise<boolean> = Promise.resolve(false)
+    let second: Promise<boolean> = Promise.resolve(false)
+    act(() => {
+      first = result.current.run('c1', 'pause')
+      second = result.current.run('c1', 'pause')
+    })
+    await act(async () => { resolvePost({ data: {} }) })
+    expect(await second).toBe(false)
+    await first
+    expect(postMock).toHaveBeenCalledTimes(1)
+    expect(postMock).toHaveBeenCalledWith('/conversations/c1/agent-session/pause')
+    expect(onChanged).toHaveBeenCalledTimes(1)
+  })
+
   it('a 409 surfaces the server message, skips the refetch and resolves false', async () => {
     postMock.mockRejectedValue({ response: { status: 409, data: { message: 'Geen actief interview voor dit gesprek.' } } })
     const onChanged = vi.fn()

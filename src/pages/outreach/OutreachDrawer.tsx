@@ -62,7 +62,7 @@ const STATUS_COLOR: Record<string, string> = {
 }
 
 // Thin container: wires useOutreachDetail's data into the shared drawer shell and owns the Stats-to-Targets click-to-filter state shared by the two tabs.
-export default function OutreachDrawer({ id, createdAt, archived = false, archivedAt = null, fallbackName, fallbackStatus, onRestore, inTrash = false, pendingEraseAt = null, graceDays = null, onMarkDeletion, onUnmark, onClose, expanded = false, onToggleExpand, onMutated }: {
+export default function OutreachDrawer({ id, createdAt, archived = false, archivedAt = null, fallbackName, fallbackStatus, onRestore, inTrash = false, pendingEraseAt = null, graceDays = null, onMarkDeletion, onUnmark, unmarkBusy = false, onClose, expanded = false, onToggleExpand, onMutated }: {
   id: string | null
   createdAt?: string
   // Enkelstuks-sweep: soft-deleted row (flag from the page). W2 delivered (measured:
@@ -83,6 +83,8 @@ export default function OutreachDrawer({ id, createdAt, archived = false, archiv
   // Mark for erasure (outreach.delete — HIDDEN without) / unmark (outreach.update).
   onMarkDeletion?: (id: string) => void
   onUnmark?: (id: string) => void
+  // ONIX N-007: disables the unmark button while its own POST is in flight.
+  unmarkBusy?: boolean
   onClose: () => void
   // DRILL-REFRESH-AUDIT-1: reports every successful drawer mutation upstream —
   // with an owner delta when the table shows it, else as a stale-list signal.
@@ -253,6 +255,7 @@ export default function OutreachDrawer({ id, createdAt, archived = false, archiv
             <PendingEraseBanner id={id}
               message={buildTrashNote(t, formatDate, pendingEraseAt, graceDays)}
               onUnmark={onUnmark ? () => onUnmark(id) : undefined}
+              unmarkBusy={unmarkBusy}
               unmarkLabel={t('common:trash.unmarkAction')} />
           )}
         </EntityHeader>

@@ -40,7 +40,7 @@ export default function WorkflowEditorHeader({
   runError, runBudget, onRunError, runConflict,
   liveRunActive, activeRunId, onStopped,
   running, onRun, onRunDryRun, canRun = true, canSave = true,
-  saved, onSave, onSaveClose,
+  saved, saving = false, onSave, onSaveClose,
   startInvalid,
   onClose,
 }: {
@@ -90,6 +90,9 @@ export default function WorkflowEditorHeader({
   // lives in the editor composer, which owns `useConfirm`).
   onRunDryRun: () => void
   saved: boolean
+  // ONIX N-007: true while a Save/Save&close request is in flight — both
+  // buttons share it (same handleSave latch), optional so an unmigrated test double still compiles.
+  saving?: boolean
   onSave: () => void
   onSaveClose: () => void
   onClose: () => void
@@ -302,13 +305,13 @@ export default function WorkflowEditorHeader({
 
       {/* Opslaan — blijft in editor. §4's "aan/gelukt" token pair (never
           re-approximated per screen) lives in the shared SaveButton. */}
-      <SaveButton variant="secondary" size="sm" saved={saved} onClick={onSave} disabled={!canSave} title={canSave ? undefined : t('editor.saveNoPermission')}>
+      <SaveButton variant="secondary" size="sm" saved={saved} onClick={onSave} disabled={!canSave || saving} title={canSave ? undefined : t('editor.saveNoPermission')}>
         <Save size={13} />
         {saved ? t('editor.saved') : t('editor.save')}
       </SaveButton>
 
       {/* Opslaan & sluiten — terug naar overzicht (live-run guard eerst) */}
-      <Button variant="primary" size="sm" onClick={onSaveClose} disabled={!canSave} title={canSave ? undefined : t('editor.saveNoPermission')}>
+      <Button variant="primary" size="sm" onClick={onSaveClose} disabled={!canSave || saving} title={canSave ? undefined : t('editor.saveNoPermission')}>
         <Save size={13} />
         {t('editor.saveClose')}
       </Button>

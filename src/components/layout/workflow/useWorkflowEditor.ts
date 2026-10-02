@@ -107,7 +107,7 @@ export function useWorkflowEditor({ workflow, onSave, initialRunId = null }: {
     scheduleConfig: trigger.scheduleConfig, setScheduleConfig: trigger.setScheduleConfig,
     status: trigger.status, setStatus: trigger.setStatus, serverStatus: trigger.serverStatus,
     isInterview: trigger.isInterview, setIsInterview: trigger.setIsInterview,
-    saved: trigger.saved, running, runError, runBudget, setRunError,
+    saved: trigger.saved, saving: trigger.saving, running, runError, runBudget, setRunError,
     showSchedule: panels.showSchedule, setShowSchedule: panels.setShowSchedule,
     widePanelActive: panels.widePanelActive, setWidePanelActive: panels.setWidePanelActive,
     showLogs: panels.showLogs, setShowLogs: panels.setShowLogs,

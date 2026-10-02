@@ -67,6 +67,8 @@ interface TaskDrawerProps {
   onRemoveLink: (id: Id | undefined, link: { type: string; id: Id | null }) => void
   // Enkelstuks-sweep: per-id restore — the page passes this only with tasks.update.
   onRestore?: (id: Id | undefined) => void
+  // ONIX N-007: disables the restore button while its own request is in flight.
+  restoring?: boolean
   // TRASH-OVERAL-2: the shared trash-section wiring (mark/unmark, see TrashLifecycleSection).
   trash?: TrashSectionConfig
   // SUBTASK-CREATE-1: local-only `subtaskProgress` tally bump after a subtask is
@@ -75,7 +77,7 @@ interface TaskDrawerProps {
 }
 
 // Thin drawer container: inline title edit, tab visibility (Extra/Related gating) and the tab-content dispatcher below; header meta reads the live tenant lookup at render (see the TAKEN-CHIP-KLEUR-BUG-1 note).
-export default function TaskDrawer({ task, onClose, expanded, onToggleExpand, onUpdate, onAddLink, onRemoveLink, onRestore, trash, onSubtaskCreated }: TaskDrawerProps) {
+export default function TaskDrawer({ task, onClose, expanded, onToggleExpand, onUpdate, onAddLink, onRemoveLink, onRestore, restoring, trash, onSubtaskCreated }: TaskDrawerProps) {
   const { t } = useTranslation('tasks')
   const { formatDate, formatDateTime } = useDateFormat()
   const { statuses, priorities, doneStatusValues, statusMeta, typeMeta } = useTaskLookups()
@@ -258,7 +260,7 @@ export default function TaskDrawer({ task, onClose, expanded, onToggleExpand, on
           {/* TRASH-OVERAL-2: hidden once the record sits in the trash — the trash
               banner (TrashLifecycleSection) takes over with unmark instead. */}
           {task.archived && task.lifecycle !== 'pending_erase' && (
-            <ArchivedBanner id={task.id} onRestore={onRestore}
+            <ArchivedBanner id={task.id} onRestore={onRestore} busy={restoring}
               message={task.archivedAt ? t('drawer.archivedBanner.since', { date: formatDate(task.archivedAt) }) : t('drawer.archivedBanner.flag')}
               restoreLabel={t('drawer.archivedBanner.restore')} />
           )}

@@ -6,7 +6,7 @@
  * agent chip flips. A 409 (no open session / not paused) carries the server's
  * own message, which extractApiError surfaces as-is; nothing is retried.
  */
-import { useCallback, useState } from 'react'
+import { useCallback, useRef, useState } from 'react'
 import api from '@/lib/api'
 import { notifyError } from '@/lib/notify'
 import { extractApiError } from '@/lib/extractApiError'
@@ -17,9 +17,14 @@ type AgentSessionAction = 'pause' | 'resume'
 // `failMessage` is the host's already-translated fallback for extractApiError (each host owns its namespace).
 export function useAgentSessionControl(onChanged: () => void, failMessage: string) {
   const [busy, setBusy] = useState<AgentSessionAction | null>(null)
+  // ONIX N-007: a ref latch (written only inside the handler) so two `run` calls
+  // issued in the same tick — before the `busy` re-render lands — still POST once.
+  const busyRef = useRef(false)
 
   // POST the action; resolves true only on a landed write (honest signal for the dialog).
   const run = useCallback(async (conversationId: string, action: AgentSessionAction): Promise<boolean> => {
+    if (busyRef.current) return false
+    busyRef.current = true
     setBusy(action)
     try {
       await api.post(`/conversations/${conversationId}/agent-session/${action}`)
@@ -29,6 +34,7 @@ export function useAgentSessionControl(onChanged: () => void, failMessage: strin
       notifyError(extractApiError(err, failMessage))
       return false
     } finally {
+      busyRef.current = false
       setBusy(null)
     }
   }, [onChanged, failMessage])

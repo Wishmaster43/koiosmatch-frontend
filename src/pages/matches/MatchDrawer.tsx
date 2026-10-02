@@ -105,6 +105,8 @@ interface MatchDrawerProps {
   // shared preview modal at the page; unmark (matches.update) leaves the trash again.
   onMarkDeletion?: (id: MatchRow['id']) => void
   onUnmark?: (id: MatchRow['id']) => void
+  // ONIX N-007: disables the unmark button while its own POST is in flight.
+  unmarkBusy?: boolean
   // Tenant grace window (useTrashFlow.graceDays) — feeds the trash banner's erase note.
   graceDays?: number | null
   // EXTRACT-1: the caller's own matches.update permission check for the
@@ -121,7 +123,7 @@ interface MatchDrawerProps {
 // Thin drawer container (see the module doc above): composes the approval hook + presentational header pieces, wires the tab list, and keeps the match facts read-only.
 export default function MatchDrawer({
   match, allRows = [], onClose, expanded = false, onToggleExpand, onSetStatus, onSetOwner, canApprove = false, onApprovalChange, onUpdate, onUpdateCustomFields,
-  onArchive, onRestore, onMarkDeletion, onUnmark, graceDays = null, canLinkBackoffice = false, canTerminate: canTerminatePermission = false, canRenew: canRenewPermission = false,
+  onArchive, onRestore, onMarkDeletion, onUnmark, unmarkBusy = false, graceDays = null, canLinkBackoffice = false, canTerminate: canTerminatePermission = false, canRenew: canRenewPermission = false,
 }: MatchDrawerProps) {
   const { t } = useTranslation('matches')
   const { formatDate, formatDateTime } = useDateFormat()
@@ -380,6 +382,7 @@ export default function MatchDrawer({
             <PendingEraseBanner id={match.id}
               message={buildTrashNote(t, formatDate, match.pendingEraseAt, graceDays)}
               onUnmark={onUnmark ? () => onUnmark(match.id) : undefined}
+              unmarkBusy={unmarkBusy}
               unmarkLabel={t('common:trash.unmarkAction')} />
           )}
         </EntityHeader>

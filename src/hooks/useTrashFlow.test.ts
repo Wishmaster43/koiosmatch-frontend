@@ -102,6 +102,26 @@ describe('useTrashFlow · unmark', () => {
     expect(notifySuccess).toHaveBeenCalled()
   })
 
+  it('ONIX N-007: two synchronous unmark calls on one id POST once and leave unmarkBusy false after settling', async () => {
+    let resolvePost: (v: unknown) => void = () => {}
+    vi.mocked(api.post).mockReturnValueOnce(new Promise(resolve => { resolvePost = resolve }))
+    const onUnmarked = vi.fn()
+    const { result } = renderHook(() => useTrashFlow({ entityPath: 'matches', onUnmarked }))
+    let first: Promise<void> = Promise.resolve()
+    let second: Promise<void> = Promise.resolve()
+    act(() => {
+      first = result.current.unmark('m1')
+      second = result.current.unmark('m1')
+    })
+    expect(result.current.unmarkBusy).toBe(true)
+    await act(async () => { resolvePost({ data: {} }) })
+    await act(async () => { await Promise.all([first, second]) })
+    expect(api.post).toHaveBeenCalledTimes(1)
+    expect(api.post).toHaveBeenCalledWith('/matches/m1/unmark-deletion')
+    expect(onUnmarked).toHaveBeenCalledTimes(1)
+    expect(result.current.unmarkBusy).toBe(false)
+  })
+
   it('surfaces the failure toast and skips the refresh when the POST rejects', async () => {
     const onUnmarked = vi.fn()
     vi.mocked(api.post).mockRejectedValue({ response: { status: 500 } })
