@@ -122,10 +122,17 @@ export async function reportDeeplinkDrill({ page, errors }) {
 
 // Read-only + credit guard over the collected traffic: no mutating verb, no
 // /api/ai/ call (API-CREDITS-1). Entries carry method/url as plain strings.
+// Three GET routes under /api/ai/ are DB computations, never a model call (CMBE
+// confirmed 02-10): the assistant feed, the dashboard's Koios performance card and
+// its "Koios did this for you" card. A tenant with the koios_ai module (Demo is
+// enterprise) loads the two cards on the dashboard the app boots on, so they are
+// allowed BY NAME and GET only — anything else under /api/ai/ still fails the flow.
+const MODEL_FREE_AI_GETS = [/\/api\/ai\/koios\/assistant(\?|$)/, /\/api\/ai\/koios\/performance(\?|$)/, /\/api\/ai\/koios\/for-you(\?|$)/]
 function assertGuards(requests) {
   const mutating = requests.filter(r => ['POST', 'PATCH', 'PUT', 'DELETE'].includes(r.method)
     && !/\/(login|sanctum|csrf)/.test(r.url))
   expect(mutating.length === 0, `flow fired mutating request(s): ${mutating.map(r => `${r.method} ${r.url}`).join(', ')}`)
-  const aiCalls = requests.filter(r => r.url.includes('/api/ai/'))
+  const aiCalls = requests.filter(r => r.url.includes('/api/ai/')
+    && !(r.method === 'GET' && MODEL_FREE_AI_GETS.some(re => re.test(r.url))))
   expect(aiCalls.length === 0, `flow triggered an AI endpoint (API-CREDITS-1 violation): ${aiCalls.map(r => r.url).join(', ')}`)
 }
