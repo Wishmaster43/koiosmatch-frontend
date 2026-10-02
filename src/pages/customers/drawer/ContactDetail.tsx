@@ -29,7 +29,7 @@
  */
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Trash2, GitMerge, Archive } from 'lucide-react'
+import { Trash2, GitMerge, Archive, UserX } from 'lucide-react'
 import type { FieldRow } from '@/components/forms/EditableFieldTable'
 import Button from '@/components/ui/Button'
 import DrillPager, { type DrillPagerProps } from '@/components/drawer/DrillPager'
@@ -66,6 +66,10 @@ import { useAuth } from '@/context/AuthContext'
 import { useDateFormat } from '@/lib/datetime'
 import { archiveContact, restoreContact } from '../hooks/useCustomerContacts'
 import { useSubEntityArchive } from '../hooks/useSubEntityArchive'
+// ONIX K-005: the password-confirmed erase of ONE contact person, visible only
+// with privacy.erase (BE baec56da; the shared dialog + the action hook).
+import EraseWithPasswordDialog from '@/components/drawer/EraseWithPasswordDialog'
+import { useContactEraseAction } from '../hooks/useContactEraseAction'
 import type { Contact, Department } from '@/types/customer'
 import type { Id, LookupOption } from '@/types/common'
 import type { ContactPayload } from '../hooks/useCustomerContacts'
@@ -128,6 +132,11 @@ export default function ContactDetail({ contact, locations, departments, statuse
   const auth = useAuth()
   const canMerge = (auth?.hasPermission ?? (() => false))('customers.update')
   const [merging, setMerging] = useState(false)
+  // ONIX K-005: "Persoon wissen" is permission-gated (same privacy.erase gate the
+  // candidate erasure uses) and a fake affordance otherwise — hidden once archived,
+  // since an erase leaves the contact archived and offering it twice is a dead end.
+  const canErase = (auth?.hasPermission ?? (() => false))('privacy.erase')
+  const contactErase = useContactEraseAction(contact, close, t('contacts.detail.eraseDone'))
 
   // B15-flow mirror (LAATSTE-CONTACT-SCOPE-1): confirming re-broadcasts the
   // shared contacts-changed event so this panel's own list refetch (which
@@ -340,6 +349,15 @@ export default function ContactDetail({ contact, locations, departments, statuse
           <Button variant="dangerSoft" iconOnly size="sm" onClick={remove} title={t('common:delete')} aria-label={t('common:delete')}>
             <Trash2 size={13} />
           </Button>
+          {/* ONIX K-005: hidden without privacy.erase, hidden once already archived
+              (erase leaves the contact archived, so a second click would always
+              fail — fake affordance). */}
+          {canErase && contact.customerId != null && !contact.archived && (
+            <Button variant="dangerSoft" iconOnly size="sm" onClick={contactErase.open}
+              title={t('contacts.detail.erasePerson')} aria-label={t('contacts.detail.erasePerson')}>
+              <UserX size={13} />
+            </Button>
+          )}
         </div>
       </div>
 
@@ -401,6 +419,12 @@ export default function ContactDetail({ contact, locations, departments, statuse
         <MergeContactModal customerId={contact.customerId} current={contact} others={existing}
           onClose={() => setMerging(false)}
           onMerged={survivorId => { setMerging(false); onMerged?.(survivorId) }} />
+      )}
+      {contactErase.erasing && (
+        <EraseWithPasswordDialog open title={t('contacts.detail.eraseTitle')}
+          intro={t('contacts.detail.eraseIntro', { name: contact.name })}
+          confirmLabel={t('contacts.detail.eraseTitle')}
+          onConfirm={contactErase.confirm} onClose={contactErase.cancel} />
       )}
       {dialog}
     </div>

@@ -17,6 +17,7 @@ import type { ReactNode } from 'react'
 import i18n from '@/i18n'
 import api from '@/lib/api'
 import ContactDetail from './ContactDetail'
+import { CONTACTS_CHANGED_EVENT } from '../hooks/useCustomerContacts'
 import type { Contact, Department } from '@/types/customer'
 
 // useContactFunctions + useCustomFields both hit @/lib/api under the hood (the
@@ -31,6 +32,10 @@ vi.mock('@/lib/api', async () => {
   return { ...actual, default: { get: vi.fn().mockResolvedValue({ data: { data: [] } }), post: (...args: unknown[]) => mockPost(...args), patch: vi.fn(), delete: vi.fn() } }
 })
 beforeEach(() => { mockPost.mockClear(); mockPost.mockResolvedValue({ data: {} }) })
+
+// ONIX K-005: the erase flow's success toast is a real call, not just "a callback fired".
+const mockNotifySuccess = vi.fn()
+vi.mock('@/lib/notify', () => ({ notifySuccess: (...args: unknown[]) => mockNotifySuccess(...args), notifyError: vi.fn() }))
 
 // CONTACT-TEKST-1: minimal stand-in for the Tiptap editor the free-text block
 // mounts while editing — same stub EditableRichTextField.test.tsx uses; its own
@@ -691,5 +696,59 @@ describe('ContactDetail · retention consent block', () => {
       // Block should be present when consent is set.
       expect(screen.getByText(ct('communication.retentionTitle'))).toBeInTheDocument()
     })
+  })
+})
+
+/**
+ * ONIX K-005 — "Persoon wissen". Permission-gated like merge/archive (privacy.erase),
+ * and a fake affordance once already archived (an erase leaves the contact archived,
+ * so a second click would always fail). The POST is asserted by route + body (§13).
+ */
+describe('ContactDetail · erase person (ONIX K-005)', () => {
+  const allowed = { hasPermission: (p: string) => p === 'privacy.erase' }
+  afterEach(() => { mockAuth.current = null })
+
+  it('HIDES the erase action without privacy.erase', () => {
+    mockAuth.current = { hasPermission: () => false }
+    render(<ContactDetail contact={baseContact()} locations={locations} departments={departments} statuses={statuses}
+      onSave={vi.fn()} onDelete={vi.fn()} close={vi.fn()} />)
+    expect(screen.queryByTitle(ct('contacts.detail.erasePerson'))).toBeNull()
+  })
+
+  it('HIDES the erase action on an already-archived contact', () => {
+    mockAuth.current = allowed
+    render(<ContactDetail contact={baseContact({ archived: true })} locations={locations} departments={departments} statuses={statuses}
+      onSave={vi.fn()} onDelete={vi.fn()} close={vi.fn()} />)
+    expect(screen.queryByTitle(ct('contacts.detail.erasePerson'))).toBeNull()
+  })
+
+  it('shows the erase action with privacy.erase on a live contact', () => {
+    mockAuth.current = allowed
+    render(<ContactDetail contact={baseContact()} locations={locations} departments={departments} statuses={statuses}
+      onSave={vi.fn()} onDelete={vi.fn()} close={vi.fn()} />)
+    expect(screen.getByTitle(ct('contacts.detail.erasePerson'))).toBeInTheDocument()
+  })
+
+  it('opens the dialog, POSTs the erase route with { password }, and shows the success toast', async () => {
+    mockAuth.current = allowed
+    const user = userEvent.setup()
+    const close = vi.fn()
+    const onChangedEvent = vi.fn()
+    window.addEventListener(CONTACTS_CHANGED_EVENT, onChangedEvent)
+    mockPost.mockResolvedValue({ data: { data: { message: 'ok', contact_id: 'c1' } } })
+    render(<ContactDetail contact={baseContact()} locations={locations} departments={departments} statuses={statuses}
+      onSave={vi.fn()} onDelete={vi.fn()} close={close} />)
+
+    await user.click(screen.getByTitle(ct('contacts.detail.erasePerson')))
+    const dialog = screen.getByRole('dialog', { name: ct('contacts.detail.eraseTitle') })
+
+    await user.type(within(dialog).getByLabelText(cm('eraseDialog.password'), { exact: false }), 'geheim')
+    await user.click(within(dialog).getByRole('button', { name: ct('contacts.detail.eraseTitle') }))
+
+    await waitFor(() => expect(mockPost).toHaveBeenCalledWith('/customers/cust-1/contacts/c1/erase', { password: 'geheim' }))
+    await waitFor(() => expect(mockNotifySuccess).toHaveBeenCalledWith(ct('contacts.detail.eraseDone')))
+    await waitFor(() => expect(onChangedEvent).toHaveBeenCalled())
+    await waitFor(() => expect(close).toHaveBeenCalled())
+    window.removeEventListener(CONTACTS_CHANGED_EVENT, onChangedEvent)
   })
 })
