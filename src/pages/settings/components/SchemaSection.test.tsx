@@ -122,6 +122,32 @@ describe('SchemaSection · unitOf companion field', () => {
   })
 })
 
+// BLANK-RESETS-1 (BE contract 02-10): an emptied typed number field is "not set" — the
+// POST carries '' for that key (the BE drops the row, the catalogue default returns),
+// never a silent 0.
+describe('SchemaSection · emptied number field', () => {
+  it('POSTs an empty string for a number field the user cleared', async () => {
+    const schema: Schema = {
+      i18nKey: 'catalog.sections.company',
+      fields: [{ key: 'per_number_hourly_limit', type: 'number', default: 60, labelKey: 'catalog.sections.company.fields.per_number_hourly_limit.label' }],
+    }
+    render(<SchemaSection schema={schema} />)
+    const input = await screen.findByRole('textbox')
+    await waitFor(() => expect(input).toHaveValue('60'))
+    fireEvent.change(input, { target: { value: '' } })
+    const saveBtn = await waitFor(() => {
+      const btn = screen.getByRole('button', { name: i18n.t('common.save', { ns: 'settings' }) })
+      expect(btn).toBeEnabled()
+      return btn
+    })
+    fireEvent.click(saveBtn)
+    // The api mock is shared across this file's tests: read THIS test's POST (the last one).
+    await waitFor(() => expect(api.post).toHaveBeenCalled())
+    const [, body] = vi.mocked(api.post).mock.calls.at(-1) as [string, Record<string, string>]
+    expect(body.per_number_hourly_limit).toBe('')
+  })
+})
+
 // SETTINGS-UNIT-PAIRS-1: a toggle row with `windowKeys` renders its amount + unit
 // inline right of the switch, and the standalone amount/unit rows are hidden (no
 // double truth — the switch/window pair is the ONE place those two keys render).

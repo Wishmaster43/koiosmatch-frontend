@@ -13,9 +13,11 @@ export async function loadSettings() {
 }
 
 // Stringifies every value (the backend stores settings as strings) and merges the payload in, then invalidates the shared KPI/all-settings caches so live readers pick up the change.
+// BLANK-RESETS-1 (BE contract 02-10): null/undefined travel as '' — "not set", the BE drops the
+// typed row and the catalogue default applies — never the string "null".
 export async function saveSettings(payload) {
   const stringified = {}
-  Object.entries(payload).forEach(([k, v]) => (stringified[k] = String(v)))
+  Object.entries(payload).forEach(([k, v]) => (stringified[k] = v == null ? '' : String(v)))
   await api.post('/settings', stringified)
   // Refresh both shared caches so live readers (dashboards, candidate table) update.
   invalidateKpiCache()

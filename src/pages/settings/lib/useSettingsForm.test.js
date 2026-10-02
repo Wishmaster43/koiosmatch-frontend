@@ -28,6 +28,15 @@ vi.mock('@/lib/extractApiError', () => ({
 beforeEach(() => vi.clearAllMocks())
 
 describe('useSettingsForm — load failure', () => {
+  // BLANK-RESETS-1: a blank stored value on a typed default reads as the default.
+  it('reads a stored blank on a numeric default as the default, not as 0', async () => {
+    vi.mocked(api.get).mockResolvedValueOnce({ data: { limit: '', flag: '' } })
+    const { result } = renderHook(() => useSettingsForm({ limit: 60, flag: true }))
+    await waitFor(() => expect(result.current.loading).toBe(false))
+    expect(result.current.values).toEqual({ limit: 60, flag: true })
+    expect(result.current.dirty).toBe(false)
+  })
+
   it('flags loadError when GET /settings rejects, instead of silently keeping defaults', async () => {
     api.get.mockRejectedValue(new Error('network down'))
     const { result } = renderHook(() => useSettingsForm({ retention_months_never_placed: 24 }))

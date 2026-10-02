@@ -24,6 +24,8 @@ import { extractApiError } from '@/lib/extractApiError'
 // Coerce a stored (string) API value to the type of its default so the form
 // state stays typed (number/boolean/string) regardless of what the server sent.
 function coerce(raw, sample) {
+  // BLANK-RESETS-1: a blank stored value means "not set" — the default, never 0.
+  if (raw === '' || raw == null)   return sample
   if (typeof sample === 'number')  return Number(raw)
   if (typeof sample === 'boolean') return raw === true || raw === 'true'
   return raw == null ? '' : String(raw)

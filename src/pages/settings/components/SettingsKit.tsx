@@ -147,8 +147,12 @@ const inputStyle = fieldInputStyle
 
 // Right-aligned numeric input with an optional unit suffix, for settings that store a plain number.
 interface NumberFieldProps {
-  value: number
+  value: number | null
   onChange: (n: number) => void
+  // BLANK-RESETS-1 (BE contract 02-10 "blank = not set"): when given, an emptied field
+  // calls this instead of onChange(0), so the host can store null and the catalogue
+  // default returns after the save. Callers without it keep the old 0 behaviour.
+  onEmpty?: () => void
   min?: number
   max?: number
   unit?: ReactNode
@@ -159,14 +163,14 @@ interface NumberFieldProps {
   decimals?: number
   onCommit?: (n: number | null) => void
 }
-export function NumberField({ value, onChange, min = 0, max, unit, width = 96, disabled = false, step, ariaLabel, decimals, onCommit }: NumberFieldProps) {
+export function NumberField({ value, onChange, onEmpty, min = 0, max, unit, width = 96, disabled = false, step, ariaLabel, decimals, onCommit }: NumberFieldProps) {
   // GETALLEN-1 also inside inputs: the house NumberInput shows 1.250, not 1250; `step`
   // with a fraction implies the decimals a schema wants (0.01 → 2), an explicit
   // `decimals` wins. The callers keep receiving a number (0 when the field is emptied),
   // exactly what the old type="number" handed them.
   const dec = decimals ?? (step && step < 1 ? Math.max(0, Math.ceil(-Math.log10(step))) : 0)
   return (
-    <NumberInput value={value} onChange={n => onChange(n ?? 0)} min={min} max={max} decimals={dec}
+    <NumberInput value={value} onChange={n => (n == null && onEmpty ? onEmpty() : onChange(n ?? 0))} min={min} max={max} decimals={dec}
       width={width} unit={unit} disabled={disabled} ariaLabel={ariaLabel} onCommit={onCommit}
       style={{ fontWeight: 600 }} />
   )

@@ -131,7 +131,10 @@ function FieldControl({ field, value, onChange, t, base, label, disabled, hideUn
     case 'number':
     default:
       return (
-        <NumberField value={value as number} onChange={onChange} ariaLabel={label}
+        // BLANK-RESETS-1: emptied = "not set" (null → '' on the wire, the BE drops the row
+        // and the catalogue default shows again), never a silent 0 (a cleared WhatsApp cap
+        // used to become 0 messages per hour).
+        <NumberField value={value as number | null} onChange={onChange} onEmpty={() => onChange(null)} ariaLabel={label}
           min={field.min} max={field.max} step={field.step}
           unit={hideUnit ? undefined : optionalT(t, sibling('unit'))} disabled={disabled} />
       )
