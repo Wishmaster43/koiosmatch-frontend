@@ -13,7 +13,7 @@
  * still renders (picker just empty, CreatableSelect's free-entry path covers it)
  * if a caller can't supply the graph.
  */
-import { useId, useMemo, useState } from 'react'
+import { useMemo, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Plus, Trash2 } from 'lucide-react'
 import FloatingPanel from '@/components/ui/FloatingPanel'
@@ -22,22 +22,17 @@ import { VALUELESS_OPERATORS } from './constants'
 import { collectUpstreamFilterFields, toFilterFieldOptions, type ModuleCatalog } from './filterFieldCatalog'
 import { FilterFieldPicker } from './FilterFieldPicker'
 import { OperatorSelect } from './OperatorSelect'
-import SelectMenu from '@/components/ui/SelectMenu'
-import { isBooleanField, booleanValueKey, textValue } from './booleanField'
+import FilterValueControl from './FilterValueControl'
 import { MODULE_META } from '@/modules/index'
 import type { FilterCondition, FilterConditionGroup, EdgeFilters, FlowNode, FlowEdge } from '@/types/workflow'
 import Button from '@/components/ui/Button'
 import { PageTitle } from '@/components/ui/typography'
 import DrawerAddButton from '@/components/drawer/DrawerAddButton'
 
-// A short syntax reminder for the newer date/time operators — undefined (no
-// hint row rendered) for the plain equality/text operators.
+// FILTER-VALUE-1: the date/day-count syntax hints are gone now that
+// FilterValueControl renders a real picker for those operators — only the
+// clock operators (still a bare number/HH:mm input) keep a hint row.
 function operatorHint(t: (key: string) => string, operator?: string): string | undefined {
-  // date_older_than_days takes a DAY COUNT, not a date — the exact-match branch
-  // must run before the date_ prefix test or it inherits the wrong syntax hint
-  // (verify round 22-08: the hint told users to type a date here).
-  if (operator === 'date_older_than_days' || operator === 'date_younger_than_days') return t('canvas.filterDaysHint')
-  if (operator?.startsWith('date_')) return t('canvas.filterDateHint')
   if (operator === '>' || operator === '>=' || operator === '<' || operator === '<=') return t('canvas.filterClockHint')
   return undefined
 }
@@ -57,8 +52,6 @@ export function EdgeFilterPanel({ filters, label, sourceNodeId, nodes = [], edge
   const [groups, setGroups] = useState<FilterConditionGroup[]>(() => parseEdgeFilterGroups(filters))
   const [name, setName] = useState(label ?? '')
   const { t } = useTranslation('workflows')
-  // Names the yes/no value menu of a boolean condition (SelectMenu's trigger is a button).
-  const booleanLabelId = useId()
 
   // Make-style numbered field options: walk the edge source's upstream chain
   // once per graph change, then flatten to "N. <module label> · <field>" options.
@@ -108,8 +101,6 @@ export function EdgeFilterPanel({ filters, label, sourceNodeId, nodes = [], edge
 
       {/* OR'ed groups — each group ANDs its own conditions; "+ OF-groep" adds another */}
       <div style={{ display: 'flex', flexDirection: 'column', gap: 10, marginBottom: 12 }}>
-        {/* Accessible name for every boolean value menu below (hidden text, still read by aria-labelledby). */}
-        <span id={booleanLabelId} hidden>{t('fields.valuePlaceholder')}</span>
         {groups.map((group, gi) => (
           <div key={gi}>
             {gi > 0 && (
@@ -150,21 +141,12 @@ export function EdgeFilterPanel({ filters, label, sourceNodeId, nodes = [], edge
                     {/* Row 2 — operator + value + delete */}
                     <div style={{ display: 'flex', gap: 6, alignItems: 'center', paddingLeft: 34 }}>
                       <OperatorSelect value={c.operator} onChange={v => updCond(gi, ci, 'operator', v)} />
-                      {!VALUELESS_OPERATORS.includes(c.operator ?? '') && (isBooleanField(c.field) ? (
-                        // A yes/no field gets a yes/no choice, never a free text box (Danny 09-09 on the
-                        // WhatsApp-consent route filter); the stored value is a real boolean.
-                        // DROPDOWN-CLEAR-1: a yes/no condition has no empty state — dropping the
-                        // condition is the row's own delete button, so the clear stays off.
-                        <div style={{ flex: 1 }}>
-                          <SelectMenu aria-labelledby={booleanLabelId} value={booleanValueKey(c.value)} clearable={false}
-                            options={[{ value: 'true', label: t('common:yes') }, { value: 'false', label: t('common:no') }]}
-                            onChange={v => updCond(gi, ci, 'value', v === 'true')} />
-                        </div>
-                      ) : (
-                        <input value={textValue(c.value)} onChange={e => updCond(gi, ci, 'value', e.target.value)}
-                          placeholder={t('fields.valuePlaceholder')} aria-label={t('fields.valuePlaceholder')}
-                          style={{ flex: 1, padding: '6px 8px', fontSize: 12, border: '1px solid var(--border)', borderRadius: 6, outline: 'none' }} />
-                      ))}
+                      {!VALUELESS_OPERATORS.includes(c.operator ?? '') && (
+                        // FILTER-VALUE-1: the value control now depends on operator/field — a
+                        // real date/day-count/chip picker instead of one bare text input.
+                        <FilterValueControl operator={c.operator ?? '='} field={c.field} value={c.value}
+                          onChange={v => updCond(gi, ci, 'value', v)} ariaLabel={t('fields.valuePlaceholder')} />
+                      )}
                       {/* HUISSTIJL-1: same delete action as the group-delete Button above — dangerSoft carries this ink. */}
                       <Button variant="dangerSoft" size="sm" iconOnly onClick={() => delCond(gi, ci)}
                         aria-label={t('canvas.deleteCondition')} title={t('canvas.deleteCondition')}>

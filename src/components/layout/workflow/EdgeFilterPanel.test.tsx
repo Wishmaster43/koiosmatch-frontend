@@ -233,3 +233,49 @@ describe('EdgeFilterPanel · boolean field', () => {
     expect(filters).toEqual({ conditions: [{ field: 'whatsapp_consent', operator: '=', value: true }], logic: 'AND' })
   })
 })
+
+// FILTER-VALUE-1 (Danny 02-10): the day-count/date/list operators now render a
+// real control (FilterValueControl) instead of the old typed-syntax text box —
+// these assert the panel wires operator/field through and the wire format
+// FilterValueControl produces survives a full add→pick→save round trip.
+describe('EdgeFilterPanel · FILTER-VALUE-1 operator controls', () => {
+  it('a day-count operator renders a number input and saves a plain day-count string', () => {
+    const { onSave } = setup()
+    fireEvent.click(screen.getByText('fields.addCondition'))
+    pickOperator(0, 'canvas.opGroupDate · canvas.opDateOlderThanDays')
+    // The day-count control is a number input, named by the shared value label.
+    const dayInput = screen.getAllByLabelText('fields.valuePlaceholder').pop() as HTMLInputElement
+    fireEvent.change(dayInput, { target: { value: '30' } })
+    fireEvent.blur(dayInput)
+    fireEvent.click(screen.getByText('common:save'))
+    const [filters] = onSave.mock.calls[0]
+    expect(filters).toEqual({ conditions: [{ field: '', operator: 'date_older_than_days', value: '30' }], logic: 'AND' })
+  })
+
+  it('a list operator (in) builds the comma-separated wire string from typed chips', () => {
+    const { onSave } = setup()
+    fireEvent.click(screen.getByText('fields.addCondition'))
+    pickOperator(0, 'canvas.opGroupText · canvas.opIn')
+    const chipInput = screen.getAllByLabelText('fields.valuePlaceholder').pop() as HTMLInputElement
+    fireEvent.change(chipInput, { target: { value: 'actief' } })
+    fireEvent.keyDown(chipInput, { key: 'Enter' })
+    fireEvent.change(chipInput, { target: { value: 'extern' } })
+    fireEvent.keyDown(chipInput, { key: 'Enter' })
+    fireEvent.click(screen.getByText('common:save'))
+    const [filters] = onSave.mock.calls[0]
+    expect(filters).toEqual({ conditions: [{ field: '', operator: 'in', value: 'actief,extern' }], logic: 'AND' })
+  })
+
+  it('a date_gte operator in relative mode saves the now±Nd syntax', () => {
+    const { onSave } = setup()
+    fireEvent.click(screen.getByText('fields.addCondition'))
+    pickOperator(0, 'canvas.opGroupDate · canvas.opDateGte')
+    fireEvent.click(screen.getByText('canvas.dateModeRelative'))
+    const amount = screen.getAllByLabelText('fields.valuePlaceholder').pop() as HTMLInputElement
+    fireEvent.change(amount, { target: { value: '90' } })
+    fireEvent.blur(amount)
+    fireEvent.click(screen.getByText('common:save'))
+    const [filters] = onSave.mock.calls[0]
+    expect(filters).toEqual({ conditions: [{ field: '', operator: 'date_gte', value: 'now-90d' }], logic: 'AND' })
+  })
+})
