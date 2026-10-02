@@ -41,17 +41,18 @@ export const catalogFixture: SettingsCatalogResponse = {
       {
         id: 'retention',
         keys: [
+          // ONIX S-006 (02-10): the legacy retention_candidate_months row is gone from
+          // the live catalogue; this is the retention/candidates generic row that remains.
           {
-            key: 'retention_candidate_months',
+            key: 'retention_thanks_text',
             section: 'retention',
-            type: 'integer',
-            rules: ['integer', 'min:1', 'max:120'],
-            default: 24,
+            type: 'string',
+            rules: ['nullable', 'string', 'max:2000'],
+            default: null,
             aliases: [],
-            label_key: 'settings.retention.retention_candidate_months.label',
+            label_key: 'settings.retention.retention_thanks_text.label',
             ui: 'generic',
             fe_screen: 'retention',
-            constraints: { min: 1, max: 120 },
           },
         ],
       },

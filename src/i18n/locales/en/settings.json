@@ -4116,9 +4116,6 @@
       }
     },
     "retention": {
-      "retention_candidate_months": {
-        "label": "Candidate retention (months)"
-      },
       "message_retention_days": {
         "label": "Message retention (days)"
       },

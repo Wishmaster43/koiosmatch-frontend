@@ -4,7 +4,7 @@
  * REAL /settings request (§13: a mutation/read test must prove the seam, never
  * only that a callback fired): the retention windows load with tenant defaults,
  * coerce stored strings to numbers, and save all seven keys on a single POST.
- * The legacy `retention_candidate_months` key is never rendered as a field.
+ * The retired `retention_candidate_months` key (ONIX S-006) is never rendered as a field.
  *
  * CATALOG-EMBED-1: this screen now embeds <CatalogSection section="retention"
  * group="candidates" embedded /> at the bottom, whose useSettingsCatalog() runs its
@@ -61,7 +61,9 @@ describe('RetentionSettings — load', () => {
     expect(screen.getByDisplayValue('18')).toBeInTheDocument() // retention_contact_months
   })
 
-  it('never renders the legacy retention_candidate_months key as a field', async () => {
+  // ONIX S-006 (02-10): the key is retired on the BE and gone from the catalogue; this
+  // guard keeps it from ever reappearing as a field through a stale fixture or alias.
+  it('never renders the retired retention_candidate_months key as a field', async () => {
     render(<RetentionSettings />)
     await waitFor(() => expect(api.get).toHaveBeenCalledWith('/settings'))
     expect(screen.queryByText(/retention_candidate_months/i)).not.toBeInTheDocument()

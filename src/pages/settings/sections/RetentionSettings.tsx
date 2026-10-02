@@ -12,8 +12,9 @@
  * derive `retention_expires_at` on the candidate (CandidateDetailResource),
  * shown read-only on the Communication -> Toestemmingen tab (and the candidate
  * drill-down privacy block) — this screen is the only place that policy is
- * edited. The legacy single key `retention_candidate_months` is a backend-only
- * fallback and is deliberately never surfaced here (CMBE handoff 2026-08-13).
+ * edited. The legacy single key `retention_candidate_months` is RETIRED (BE ONIX
+ * S-006, abadc93c, 02-10): the two keys above are the only sources of their window,
+ * the catalogue no longer lists the old key and writing it answers 422.
  */
 import { useTranslation } from 'react-i18next'
 import { useSettingsForm } from '../lib/useSettingsForm'
@@ -129,8 +130,8 @@ export default function RetentionSettings() {
       </SettingCardList>
     </SettingsScaffold>
     {/* CATALOG-EMBED-1 (Danny 13-09: "Hoort bij kandidaten"): the catalogue's
-        "retention" section, candidates group (the legacy retention_candidate_months
-        alias plus the after-care thank-you text) — every generic row gets a home
+        "retention" section, candidates group (the after-care thank-you text; the
+        legacy retention_candidate_months row is gone since S-006) — every generic row gets a home
         under its own entity instead of a dedicated catalogue nav screen.
         F1 (Opus review 13-09): headedBy="group" reads "Kandidaten", not the section's
         own "Bewaartermijnen" — this page's OWN title already says that. */}
