@@ -535,6 +535,12 @@
     "variantChipFull": "Volledig cv",
     "sendEmail": "Direct versturen via e-mail",
     "sentByKoiosInfo": "Koios verstuurt dit bericht zelf via e-mail. Zet de schakelaar uit om alleen vast te leggen en de deellink zelf te delen.",
+    "conflict": {
+      "proposal_in_flight": "Dit voorstel wordt al verstuurd.",
+      "proposal_recently_sent": "Dit voorstel is recent al verstuurd.",
+      "forceSend": "Toch versturen",
+      "openExisting": "Bekijk bestaand voorstel"
+    },
     "sendStatus": {
       "sent": "Verzonden",
       "failed": "Mislukt",

@@ -545,6 +545,7 @@
       "retry": "Erneut verknüpfen",
       "linking": "Verknüpfen…",
       "linkStarted": "Verknüpfung gestartet",
+      "alreadyQueued": "Verknüpfung läuft bereits",
       "linkFailed": "Verknüpfen fehlgeschlagen",
       "linkedByOn": "Verknüpft von {{name}} am {{date}}",
       "statusLinked": "Verknüpft",
@@ -606,6 +607,11 @@
       "loadingRun": "Lauf wird geladen…",
       "error": "Koios konnte die Aktionen nicht starten.",
       "executed": "Ausgeführt",
+      "executing": "Wird ausgeführt…",
+      "declined": {
+        "proposal_in_flight": "Vorschlag wird bereits gesendet",
+        "proposal_recently_sent": "Vorschlag wurde bereits kürzlich gesendet"
+      },
       "viewRun": "Workflow-Lauf ansehen",
       "confirm": "Bestätigen",
       "confirmFailed": "Bestätigung fehlgeschlagen",
@@ -613,6 +619,8 @@
       "confirmNotApplied": "Der Server hat die Bestätigung nicht übernommen, bitte erneut versuchen",
       "forbidden": "Keine Berechtigung",
       "unsupported": "Noch nicht unterstützt",
+      "forceSend": "Trotzdem senden",
+      "openProposal": "Bestehender Vorschlag",
       "forbiddenReason": {
         "task": "Du hast keine Berechtigung, Aufgaben zu erstellen.",
         "whatsapp": "Du hast keine Berechtigung, WhatsApp-Nachrichten zu senden.",
@@ -667,6 +675,8 @@
       "linkClear": "Verknüpfung entfernen",
       "modeUnknown": "Koios-Modus unbekannt. Aktionen warten auf deine Bestätigung.",
       "statusBudgetExceeded": "Staffel voll",
+      "statusExecuting": "Wird ausgeführt",
+      "statusDeclined": "Abgelehnt",
       "budgetLine": "{{used}}/{{allowance}} {{unit}}",
       "upgradeHint": "Upgrade auf {{tier}}"
     }

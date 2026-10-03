@@ -53,6 +53,9 @@ const { formFixture } = vi.hoisted(() => ({
     // VOORSTEL-AFZENDER-FE-1: sender picker state + the tenant users it lists.
     senderUserId: '', setSenderUserId: vi.fn(), users: [{ id: 'u2', name: 'Sara Demo' }],
     usersLoading: false,
+    // CLAIM-1: the 409 duplicate-propose conflict + its own force-resubmit.
+    conflict: null as { code: 'proposal_in_flight' | 'proposal_recently_sent'; proposalId?: string; sentAt?: string } | null,
+    forceSend: vi.fn(() => Promise.resolve(true)),
   },
 }))
 vi.mock('./useProposeForm', () => ({ useProposeForm: () => formFixture }))
@@ -63,7 +66,7 @@ const app = (over: Partial<ApplicationDetail> = {}): ApplicationDetail => ({
 } as unknown as ApplicationDetail)
 
 // Tests mutate the shared fixture in place; restore here so a throwing test can never leak state.
-afterEach(() => { formFixture.senderUserId = ''; formFixture.usersLoading = false })
+afterEach(() => { formFixture.senderUserId = ''; formFixture.usersLoading = false; formFixture.conflict = null })
 
 describe('ProposeCandidateModal', () => {
   it('never renders a button whose label suggests the message is actually sent', () => {
@@ -184,6 +187,37 @@ describe('ProposeCandidateModal · sender', () => {
     expect(screen.getByRole('button', { name: 'propose.onBehalfOfSelf' })).toBeInTheDocument()
     expect(screen.queryByText('u-unknown')).toBeNull()
     formFixture.senderUserId = ''
+  })
+})
+
+// CLAIM-1 (03-10): a 409 duplicate-propose conflict renders the warning
+// callout plus the two actions (force-send and open-existing), never a
+// generic error state.
+describe('ProposeCandidateModal · duplicate-propose conflict (CLAIM-1)', () => {
+  it('renders nothing extra when there is no conflict', () => {
+    render(<ProposeCandidateModal application={app()} onClose={vi.fn()} />)
+    expect(screen.queryByText('propose.conflict.forceSend')).toBeNull()
+  })
+
+  it('renders the callout + both actions on a proposal_in_flight conflict', async () => {
+    formFixture.conflict = { code: 'proposal_in_flight', proposalId: 'p1' }
+    const onClose = vi.fn()
+    const user = userEvent.setup()
+    render(<ProposeCandidateModal application={app()} onClose={onClose} />)
+    expect(screen.getByText('propose.conflict.proposal_in_flight')).toBeInTheDocument()
+    const forceButton = screen.getByRole('button', { name: 'propose.conflict.forceSend' })
+    const openButton = screen.getByRole('button', { name: 'propose.conflict.openExisting' })
+    expect(forceButton).toBeInTheDocument()
+    await user.click(forceButton)
+    expect(formFixture.forceSend).toHaveBeenCalledTimes(1)
+    await user.click(openButton)
+    expect(onClose).toHaveBeenCalledTimes(1)
+  })
+
+  it('renders the recently-sent copy for that code', () => {
+    formFixture.conflict = { code: 'proposal_recently_sent', proposalId: 'p1' }
+    render(<ProposeCandidateModal application={app()} onClose={vi.fn()} />)
+    expect(screen.getByText('propose.conflict.proposal_recently_sent')).toBeInTheDocument()
   })
 })
 

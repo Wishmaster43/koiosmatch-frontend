@@ -278,6 +278,8 @@
     "coupleUnavailable": "A ligação ao backoffice ainda não está disponível.",
     "noPermission": "Não tem permissões para ações em massa.",
     "coupleQueuedPartial": "{{queued}} de {{total}} colocado(s) em fila para ligação com {{target}}; {{skipped}} ignorado(s).",
+    "coupleQueuedPartialAlreadyQueued": "{{queued}} de {{total}} colocados na fila para ligação com {{target}}; {{already}} já em curso, {{skipped}} ignorados.",
+    "coupleQueuedPartialAlreadyQueuedReasoned": "{{queued}} de {{total}} colocados na fila para ligação com {{target}}; {{already}} já em curso, {{skipped}} ignorados ({{breakdown}}).",
     "coupleQueuedPartialReasoned": "{{queued}} de {{total}} colocado(s) em fila para ligação com {{target}}; {{skipped}} ignorado(s) ({{breakdown}}).",
     "skipReasons": {
       "helloflex_contract_type_unmapped": "nenhum tipo de contrato HelloFlex associado"

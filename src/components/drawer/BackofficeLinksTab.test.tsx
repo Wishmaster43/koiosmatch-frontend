@@ -17,13 +17,18 @@ const mockPost = vi.fn()
 const mockGet = vi.fn()
 const mockNotifySuccess = vi.fn()
 const mockNotifyError = vi.fn()
+const mockNotify = vi.fn()
 
 vi.mock('@/context/AppsContext', () => ({ useApps: () => mockUseApps() }))
 vi.mock('@/lib/api', () => ({
   default: { post: (...args: unknown[]) => mockPost(...args), get: (...args: unknown[]) => mockGet(...args) },
   unwrap: (res: { data: unknown }) => res.data,
 }))
-vi.mock('@/lib/notify', () => ({ notifySuccess: (...a: unknown[]) => mockNotifySuccess(...a), notifyError: (...a: unknown[]) => mockNotifyError(...a) }))
+vi.mock('@/lib/notify', () => ({
+  notify: (...a: unknown[]) => mockNotify(...a),
+  notifySuccess: (...a: unknown[]) => mockNotifySuccess(...a),
+  notifyError: (...a: unknown[]) => mockNotifyError(...a),
+}))
 vi.mock('@/lib/datetime', () => ({ useDateFormat: () => ({ formatDate: (v: string) => v, formatDateTime: (v: string) => `fmt(${v})` }) }))
 
 const link = (overrides: Partial<BackofficeLink> = {}): BackofficeLink => ({
@@ -78,6 +83,20 @@ describe('BackofficeLinksTab · entity-agnostic "Koppelen" POST (§13: asserts t
     await user.click(shiftmanagerBtn)
     expect(mockPost).toHaveBeenCalledWith('/sync/matches/7', { system: 'shiftmanager' })
     await waitFor(() => expect(mockNotifySuccess).toHaveBeenCalledWith('backofficeLinks.common.linkStarted'))
+  })
+
+  // CLAIM-1: a double click inside an already-live sync claim answers
+  // `already_queued: true` on the 202 — show the "loopt al" info toast instead of
+  // the fresh "link started" success toast.
+  it('shows the "already queued" info toast (not "link started") when the 202 carries already_queued: true', async () => {
+    mockPost.mockResolvedValue({ data: { link: { status: 'pending' }, already_queued: true } })
+    const user = userEvent.setup()
+    render(<BackofficeLinksTab entity="matches" id="7" helloflexLink={null} shiftmanagerLink={null} canLink />)
+    const [helloflexBtn] = screen.getAllByRole('button', { name: /backofficeLinks.common.linkButton/ })
+    await user.click(helloflexBtn)
+    expect(mockPost).toHaveBeenCalledWith('/sync/matches/7', { system: 'helloflex' })
+    await waitFor(() => expect(mockNotify).toHaveBeenCalledWith('info', 'backofficeLinks.common.alreadyQueued'))
+    expect(mockNotifySuccess).not.toHaveBeenCalledWith('backofficeLinks.common.linkStarted')
   })
 
   // HF-CONTRACTMAP-1: a 409 `helloflex_contract_type_unmapped` is a known, honest

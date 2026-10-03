@@ -16,7 +16,7 @@ import { useState, useEffect, useRef } from 'react'
 import type { ReactNode } from 'react'
 import { useApps } from '@/context/AppsContext'
 import api, { unwrap } from '@/lib/api'
-import { notifySuccess, notifyError } from '@/lib/notify'
+import { notify, notifySuccess, notifyError } from '@/lib/notify'
 import { extractApiError, apiErrorKey } from '@/lib/extractApiError'
 import { useTranslation } from 'react-i18next'
 import { HelloflexCard, ShiftmanagerCard } from './backofficeLinkCards'
@@ -122,7 +122,11 @@ export default function BackofficeLinksTab({ entity, id, helloflexLink, shiftman
       const body: SyncBody = { system }
       const { data } = await api.post(`/sync/${entity}/${id}`, body)
       setQueuedStatus(s => ({ ...s, [system]: data?.link?.status ?? 'pending' }))
-      notifySuccess(t('backofficeLinks.common.linkStarted'))
+      // CLAIM-1: a double click inside an already-live sync claim (<15 min) answers
+      // `already_queued: true` on the same 202 — show "koppeling loopt al" instead
+      // of the fresh "link started" toast, since nothing new was actually queued.
+      if (data?.already_queued) notify('info', t('backofficeLinks.common.alreadyQueued'))
+      else notifySuccess(t('backofficeLinks.common.linkStarted'))
       // KOPPELINGEN-REFRESH-1: pull the real record right after the sync call
       // resolves, so the card shows the actual linked/failed result without a
       // hard reload — the async worker often lands the result within this window.

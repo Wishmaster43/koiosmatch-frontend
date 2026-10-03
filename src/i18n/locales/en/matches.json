@@ -281,6 +281,8 @@
     "coupleUnavailable": "Backoffice coupling isn't available yet.",
     "noPermission": "You don't have permission for bulk actions.",
     "coupleQueuedPartial": "{{queued}} of {{total}} queued for coupling with {{target}}; {{skipped}} skipped.",
+    "coupleQueuedPartialAlreadyQueued": "{{queued}} of {{total}} queued for coupling with {{target}}; {{already}} already in progress, {{skipped}} skipped.",
+    "coupleQueuedPartialAlreadyQueuedReasoned": "{{queued}} of {{total}} queued for coupling with {{target}}; {{already}} already in progress, {{skipped}} skipped ({{breakdown}}).",
     "coupleQueuedPartialReasoned": "{{queued}} of {{total}} queued for linking with {{target}}; {{skipped}} skipped ({{breakdown}}).",
     "skipReasons": {
       "helloflex_contract_type_unmapped": "no HelloFlex contract type linked"

@@ -18,6 +18,7 @@ import { executeRichTextActions, toExecuteItem } from './assistActionsExecuteApi
 import type { ExecuteItemStatus, ExecuteSource } from './assistActionsExecuteApi'
 import type { RichTextAssistActionItem } from './richTextAssistApi'
 import type { ActionBudget } from '@/types/actionBudget'
+import type { Id } from '@/types/common'
 
 export type PreviewStatus = 'idle' | 'loading' | 'success' | 'error'
 
@@ -35,6 +36,10 @@ export interface ExecItem extends RichTextAssistActionItem {
   reason?: string
   // PRIJSMODEL-C 30-08: present only on status === 'budget_exceeded'.
   budget?: ActionBudget
+  // CLAIM-1 (03-10): present only on status === 'declined' — the machine
+  // code to branch on, and the existing proposal this duplicate collided with.
+  code?: 'proposal_in_flight' | 'proposal_recently_sent' | null
+  proposal_id?: Id | null
   confirming?: boolean
   confirmError?: boolean
   // CONFIRM-EERLIJK-1 (Danny 18-09 19:5x, a card that stayed on "Wacht op bevestiging" with
@@ -92,7 +97,7 @@ export function useAssistActionsExecute(source: ExecuteSource = {}) {
   // already-executed/forbidden sibling in the same batch is never re-run.
   // `override` lets the caller send ITS current copy (late edits at the
   // pending stage — r2 punt-7 gat: the hook's own array held the pre-edit item).
-  const confirm = useCallback(async (index: number, override?: RichTextAssistActionItem) => {
+  const confirm = useCallback(async (index: number, override?: RichTextAssistActionItem, force?: boolean) => {
     const target = override ?? items?.[index]
     if (!target) return
     // NOTE-CONFIRM-HANG-2 (measured 19-09): a persisted "pending" item confirmed after the note
@@ -103,7 +108,7 @@ export function useAssistActionsExecute(source: ExecuteSource = {}) {
       prev ? { base: prev, i: index } : { base: [target as ExecItem], i: 0 }
     setItems(prev => { const { base, i } = place(prev); return base.map((it, k) => k === i ? { ...it, confirming: true, confirmError: false } : it) })
     try {
-      const [result] = await executeRichTextActions([toExecuteItem(target, true)], source)
+      const [result] = await executeRichTextActions([toExecuteItem(target, true, force)], source)
       if (!aliveRef.current) return
       // A 2xx that still says pending/wizard_required after confirmed:true is NOT progress —
       // the server did not apply the confirm; say so instead of silently re-arming the button.

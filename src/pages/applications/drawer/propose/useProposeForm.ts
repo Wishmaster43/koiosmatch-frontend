@@ -30,6 +30,16 @@ import { buildProposalCvBlob } from '@/lib/proposalCv'
 import type { CvCandidate } from '@/pages/candidates/shared'
 import type { ApplicationDetail } from '@/types/application'
 import type { Candidate } from '@/types/candidate'
+import type { Id } from '@/types/common'
+
+// CLAIM-1 (03-10): the 409 shape a repeat propose returns within the server's
+// 10-minute window — the machine code to branch on, plus the proposal this
+// attempt collided with (shown as a link, never re-fetched by title/body).
+export interface ProposeConflict {
+  code: 'proposal_in_flight' | 'proposal_recently_sent'
+  proposalId?: Id
+  sentAt?: string
+}
 
 // `function` is optional — the fallback recipient built from `application.contact`
 // (ApplicationDetailResource::contact() only sends id/name/email/phone) never
@@ -171,6 +181,9 @@ export function useProposeForm(application: ApplicationDetail) {
   // to go hunting for it in the ProposalsBlock history below.
   const [shareUrl, setShareUrl] = useState<string | null>(null)
   const copyTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+  // CLAIM-1: a 409 duplicate-propose conflict — the modal stays open and
+  // renders the callout + "Toch versturen" instead of a generic failure toast.
+  const [conflict, setConflict] = useState<ProposeConflict | null>(null)
 
   useEffect(() => () => { if (copyTimerRef.current) clearTimeout(copyTimerRef.current) }, [])
 
@@ -266,9 +279,12 @@ export function useProposeForm(application: ApplicationDetail) {
   // then download the CV, and (only when the tenant setting is on) move the
   // funnel phase. Any failing step surfaces the server message and returns
   // false — never a false "sent"/"recorded" claim.
-  const submit = async (): Promise<boolean> => {
+  // CLAIM-1: `force` re-sends after a 409 conflict ("Toch versturen") — a NEW
+  // Idempotency-Key (withIdempotencyKey() is called fresh below), a new click.
+  const submit = async (force?: boolean): Promise<boolean> => {
     if (disabledReason || !candidate || submitting) return false
     setSubmitting(true)
+    setConflict(null)
     try {
       // 1. Record the proposal via the real endpoint (gate applications.update)
       // BEFORE anything leaves the app (DEFECT 3, §8): recipient, cv variant and
@@ -287,7 +303,9 @@ export function useProposeForm(application: ApplicationDetail) {
         // VOORSTEL-AFZENDER-FE-1: null means "resolve server-side" (tenant default,
         // then the proposer) — never send an empty string for "no explicit pick".
         sender_user_id: senderUserId || null,
-      }, withIdempotencyKey())
+        // CLAIM-1: only sent when true — a plain submit never carries force:false.
+        ...(force ? { force: true } : null),
+      }, withIdempotencyKey({ quietStatuses: [409] }))
       // V-appdetail-5: PROPOSE-SHARE-LINK-1 shipped — the response's own record
       // carries the same recipient-facing share_url ProposalsBlock renders (never
       // logged, §8 — only handed into component state for the copy affordance).
@@ -319,6 +337,16 @@ export function useProposeForm(application: ApplicationDetail) {
       notifySuccess(t('propose.recorded'))
       return true
     } catch (err) {
+      // CLAIM-1: a 409 duplicate-propose conflict is not a generic failure —
+      // keep the modal open and let it render the callout + force-send
+      // action instead of the usual error toast. Any other 409/4xx keeps
+      // today's toast.
+      const response = (err as { response?: { status?: number; data?: { code?: string; proposal_id?: Id; sent_at?: string } } })?.response
+      const code = response?.data?.code
+      if (response?.status === 409 && (code === 'proposal_in_flight' || code === 'proposal_recently_sent')) {
+        setConflict({ code, proposalId: response.data?.proposal_id, sentAt: response.data?.sent_at })
+        return false
+      }
       notifyError(extractApiError(err, t('common:actionFailed')))
       return false
     } finally {
@@ -360,5 +388,7 @@ export function useProposeForm(application: ApplicationDetail) {
     disabledReason, submitting, submit,
     copyMessage, copied,
     shareUrl, copyShareLink, shareLinkCopied,
+    // CLAIM-1: the modal's conflict callout + its own force-resubmit.
+    conflict, forceSend: () => submit(true),
   }
 }

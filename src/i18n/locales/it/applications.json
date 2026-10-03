@@ -535,6 +535,12 @@
     "variantChipFull": "CV completo",
     "sendEmail": "Invia direttamente via e-mail",
     "sentByKoiosInfo": "Koios invia questo messaggio autonomamente via e-mail. Disattiva l'interruttore per registrare solo la proposta e condividere tu stesso il link.",
+    "conflict": {
+      "proposal_in_flight": "Questa proposta è già in fase di invio.",
+      "proposal_recently_sent": "Questa proposta è già stata inviata di recente.",
+      "forceSend": "Invia comunque",
+      "openExisting": "Visualizza proposta esistente"
+    },
     "sendStatus": {
       "sent": "Inviato",
       "failed": "Non riuscito",

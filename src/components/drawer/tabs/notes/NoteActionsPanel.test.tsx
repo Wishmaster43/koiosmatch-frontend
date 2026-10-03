@@ -178,6 +178,46 @@ describe('NoteActionsPanel · candidate on the call and an honest confirm outcom
   })
 })
 
+// CLAIM-1 (03-10): the merge effect maps the two new per-item statuses into
+// the panel's own row state — the persisted panel shows the same two faces
+// AssistActionItemCard renders.
+describe('NoteActionsPanel · executing/declined mapping (CLAIM-1)', () => {
+  it('maps an executing result to the executing status chip, no confirm button', async () => {
+    const user = userEvent.setup()
+    vi.mocked(executeRichTextActions).mockResolvedValue([{ title: 'Bel terug', type: 'task', status: 'executing' }])
+    render(<Controlled initial={[baseItem()]} />)
+    await user.click(screen.getByRole('button', { name: 'Uitvoeren' }))
+    expect(await screen.findByText('notesAssist.panel.statusExecuting')).toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: 'notesAssist.panel.confirm' })).not.toBeInTheDocument()
+  })
+
+  it('maps a declined result to the declined chip + reason + a force-send button', async () => {
+    const user = userEvent.setup()
+    vi.mocked(executeRichTextActions).mockResolvedValue([
+      { title: 'Bel terug', type: 'task', status: 'declined', code: 'proposal_in_flight', reason: 'Wordt al verstuurd.' },
+    ])
+    render(<Controlled initial={[baseItem()]} />)
+    await user.click(screen.getByRole('button', { name: 'Uitvoeren' }))
+    expect(await screen.findByText('notesAssist.panel.statusDeclined')).toBeInTheDocument()
+    expect(screen.getByText('notesAssist.execute.declined.proposal_in_flight')).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'notesAssist.execute.forceSend' })).toBeInTheDocument()
+  })
+
+  it('the force-send button re-sends confirmed:true + force:true', async () => {
+    const user = userEvent.setup()
+    vi.mocked(executeRichTextActions)
+      .mockResolvedValueOnce([{ title: 'Bel terug', type: 'task', status: 'declined', code: 'proposal_recently_sent' }])
+      .mockResolvedValueOnce([{ title: 'Bel terug', type: 'task', status: 'executed', run_id: 'run-9' }])
+    render(<Controlled initial={[baseItem()]} noteId="note-1" />)
+    await user.click(screen.getByRole('button', { name: 'Uitvoeren' }))
+    await user.click(await screen.findByRole('button', { name: 'notesAssist.execute.forceSend' }))
+    expect(executeRichTextActions).toHaveBeenLastCalledWith(
+      [expect.objectContaining({ title: 'Bel terug', confirmed: true, force: true })],
+      { note_id: 'note-1' },
+    )
+  })
+})
+
 // NOTE-CONFIRM-HANG-2, the case Danny hit: the note was saved and reopened, its item is already
 // "pending" from the server, and Bevestigen is the FIRST call of this mount — it must send the
 // confirm (with the persisted item id) instead of doing nothing behind a spinner.

@@ -132,6 +132,7 @@
     "couple": "Koppelen aan backoffice",
     "coupleQueued": "{{count}} kandidaten in wachtrij gezet voor koppeling met {{target}}.",
     "coupleQueuedPartial": "{{queued}} van {{total}} in wachtrij gezet voor koppeling met {{target}}; {{skipped}} overgeslagen.",
+    "coupleQueuedPartialAlreadyQueued": "{{queued}} van {{total}} in wachtrij gezet voor koppeling met {{target}}; {{already}} liep al, {{skipped}} overgeslagen.",
     "coupleUnavailable": "Backoffice-koppeling is nog niet beschikbaar.",
     "scopeSelected": "{{count}} geselecteerd",
     "scopeUseFilters": "Alle {{count}} resultaten van deze filters",

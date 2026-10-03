@@ -545,6 +545,7 @@
       "retry": "Retry link",
       "linking": "Linking…",
       "linkStarted": "Link started",
+      "alreadyQueued": "Link already in progress",
       "linkFailed": "Linking failed",
       "linkedByOn": "Linked by {{name}} on {{date}}",
       "statusLinked": "Linked",
@@ -606,6 +607,11 @@
       "loadingRun": "Loading run…",
       "error": "Koios couldn't start the actions.",
       "executed": "Executed",
+      "executing": "Running…",
+      "declined": {
+        "proposal_in_flight": "Proposal is already being sent",
+        "proposal_recently_sent": "Proposal was already sent recently"
+      },
       "viewRun": "View workflow run",
       "confirm": "Confirm",
       "confirmFailed": "Confirmation failed",
@@ -613,6 +619,8 @@
       "confirmNotApplied": "The server did not apply the confirmation, please try again",
       "forbidden": "No permission",
       "unsupported": "Not supported yet",
+      "forceSend": "Send anyway",
+      "openProposal": "Existing proposal",
       "forbiddenReason": {
         "task": "You don't have permission to create tasks.",
         "whatsapp": "You don't have permission to send WhatsApp messages.",
@@ -667,6 +675,8 @@
       "linkClear": "Remove link",
       "modeUnknown": "Koios mode unknown. Actions wait for your confirmation.",
       "statusBudgetExceeded": "Tier full",
+      "statusExecuting": "Running",
+      "statusDeclined": "Declined",
       "budgetLine": "{{used}}/{{allowance}} {{unit}}",
       "upgradeHint": "Upgrade to {{tier}}"
     }

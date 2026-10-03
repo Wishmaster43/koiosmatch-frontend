@@ -515,6 +515,12 @@
     "variantChipFull": "Vollständiger Lebenslauf",
     "sendEmail": "Direkt per E-Mail versenden",
     "sentByKoiosInfo": "Koios versendet diese Nachricht selbst per E-Mail. Schalten Sie den Schalter aus, um nur den Vorschlag zu erfassen und den Link selbst zu teilen.",
+    "conflict": {
+      "proposal_in_flight": "Dieser Vorschlag wird bereits gesendet.",
+      "proposal_recently_sent": "Dieser Vorschlag wurde bereits kürzlich gesendet.",
+      "forceSend": "Trotzdem senden",
+      "openExisting": "Bestehenden Vorschlag ansehen"
+    },
     "sendStatus": {
       "sent": "Gesendet",
       "failed": "Fehlgeschlagen",

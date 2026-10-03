@@ -28,6 +28,7 @@ import { useNumberFormat } from '@/lib/formatters'
 import type { RichTextAssistActionType } from './richTextAssistApi'
 import type { ExecItem } from './useAssistActionsExecute'
 import Spinner from '../Spinner'
+import AssistDeclinedFace from './AssistDeclinedFace'
 
 // Icon per action-item type — its own small map (distinct concern from
 // channelIcons.ts's contact-channel chip: 'appointment'/'notification' here
@@ -48,7 +49,10 @@ const draftStyle: CSSProperties = {
 
 interface AssistActionItemCardProps {
   item: ExecItem
-  onConfirm: () => void
+  // CLAIM-1: an optional force flag — the 'declined' card's "Toch versturen"
+  // button calls onConfirm(true) to re-post the same item with force:true;
+  // every other caller omits it (a plain confirmed re-send).
+  onConfirm: (force?: boolean) => void
   // Present only for an 'executed' item with a run_id — opens the shared
   // workflow-run view (RunDetailDrawer); omitted items render no link.
   onViewRun?: () => void
@@ -121,11 +125,34 @@ export default function AssistActionItemCard({ item, onConfirm, onViewRun }: Ass
                   : t('notesAssist.execute.confirmFailed')}
             </span>
           )}
-          <Button variant="primary" size="sm" onClick={onConfirm} disabled={item.confirming} style={{ flexShrink: 0 }}>
+          <Button variant="primary" size="sm" onClick={() => onConfirm()} disabled={item.confirming} style={{ flexShrink: 0 }}>
             {item.confirming ? <Spinner size={12} /> : <Clock size={12} />}
             {t('notesAssist.execute.confirm')}
           </Button>
         </span>
+      )}
+
+      {/* Executing (CLAIM-1) — another request already claimed this item's
+          run; no buttons, nothing to confirm, the next read of this item will
+          show its real outcome. */}
+      {item.status === 'executing' && (
+        <Caption as="span" style={{ display: 'inline-flex', alignItems: 'center', gap: 4 }}>
+          <Spinner size={12} /> {t('notesAssist.execute.executing')}
+        </Caption>
+      )}
+
+      {/* Declined (CLAIM-1) — a duplicate application_propose inside the
+          server's 10-minute window; same visual family as forbidden (muted,
+          ShieldAlert), the server reason as the title, a chip to the existing
+          proposal when the item carries both a proposal_id AND an application
+          link (no application id in scope → plain caption, never a dead
+          link), and a force-send button that re-posts this one item with
+          confirmed:true + force:true (never a second automatic run). */}
+      {item.status === 'declined' && (
+        <AssistDeclinedFace code={item.code} reason={item.reason}
+          applicationId={item.link_type === 'application' ? item.link_id : undefined}
+          proposalId={item.proposal_id} confirming={item.confirming}
+          onForceSend={() => onConfirm(true)} />
       )}
 
       {/* Forbidden — the rights matrix blocked it; an honest why-tooltip (the

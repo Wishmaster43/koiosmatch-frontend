@@ -662,6 +662,7 @@
     "couple": "Associar ao backoffice",
     "coupleQueued": "{{count}} cliente(s) colocado(s) na fila para associação com {{target}}.",
     "coupleQueuedPartial": "{{queued}} de {{total}} colocado(s) na fila para associação com {{target}}; {{skipped}} ignorado(s).",
+    "coupleQueuedPartialAlreadyQueued": "{{queued}} de {{total}} colocados na fila para ligação com {{target}}; {{already}} já em curso, {{skipped}} ignorados.",
     "coupleUnavailable": "A associação com o backoffice ainda não está disponível."
   },
   "modal": {

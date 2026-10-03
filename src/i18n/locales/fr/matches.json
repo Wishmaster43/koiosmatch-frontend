@@ -279,6 +279,8 @@
     "coupleUnavailable": "Le couplage backoffice n'est pas encore disponible.",
     "noPermission": "Vous n'avez pas l'autorisation pour les actions groupées.",
     "coupleQueuedPartial": "{{queued}} sur {{total}} mis en file pour le couplage avec {{target}} ; {{skipped}} ignoré(s).",
+    "coupleQueuedPartialAlreadyQueued": "{{queued}} sur {{total}} mis en file pour le couplage avec {{target}} ; {{already}} déjà en cours, {{skipped}} ignoré(s).",
+    "coupleQueuedPartialAlreadyQueuedReasoned": "{{queued}} sur {{total}} mis en file pour le couplage avec {{target}} ; {{already}} déjà en cours, {{skipped}} ignoré(s) ({{breakdown}}).",
     "coupleQueuedPartialReasoned": "{{queued}} sur {{total}} mis en file pour la liaison avec {{target}} ; {{skipped}} ignorés ({{breakdown}}).",
     "skipReasons": {
       "helloflex_contract_type_unmapped": "aucun type de contrat HelloFlex lié"

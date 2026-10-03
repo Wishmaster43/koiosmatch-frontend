@@ -535,6 +535,12 @@
     "variantChipFull": "Full CV",
     "sendEmail": "Send directly by e-mail",
     "sentByKoiosInfo": "Koios sends this message itself by e-mail. Turn the switch off to only record the proposal and share the link yourself.",
+    "conflict": {
+      "proposal_in_flight": "This proposal is already being sent.",
+      "proposal_recently_sent": "This proposal was already sent recently.",
+      "forceSend": "Send anyway",
+      "openExisting": "View existing proposal"
+    },
     "sendStatus": {
       "sent": "Sent",
       "failed": "Failed",

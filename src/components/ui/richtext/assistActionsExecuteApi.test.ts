@@ -47,6 +47,17 @@ describe('toExecuteItem', () => {
       message: null, start: '2026-08-10 10:00', confirmed: true,
     })
   })
+
+  // CLAIM-1 (03-10): force:true re-sends a 'declined' item anyway — only sent
+  // when truthy, a plain confirm never carries a stray force:false.
+  it('carries force:true only when the caller passes it', () => {
+    const item = { title: 'Voorstel versturen', type: 'notification' as const, due_date: null, note_excerpt: null }
+    expect(toExecuteItem(item, true, true)).toEqual({
+      title: 'Voorstel versturen', type: 'notification', due_date: null, note_excerpt: null,
+      message: null, start: null, confirmed: true, force: true,
+    })
+    expect('force' in toExecuteItem(item, true)).toBe(false)
+  })
 })
 
 describe('executeRichTextActions', () => {

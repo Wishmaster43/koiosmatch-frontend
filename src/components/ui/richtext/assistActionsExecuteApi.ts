@@ -44,6 +44,7 @@ import api from '@/lib/api'
 import type { RichTextAssistActionItem, RichTextAssistActionType } from './richTextAssistApi'
 import type { RunRow } from '@/types/reports'
 import type { ActionBudget } from '@/types/actionBudget'
+import type { Id } from '@/types/common'
 // K-3: /workflow-runs is a workflow-EXECUTION endpoint — route it through the
 // configurable engine base URL, same as every other run/cancel/logs call.
 import { resolveWorkflowBaseURL } from '@/lib/workflowApi'
@@ -51,8 +52,11 @@ import { resolveWorkflowBaseURL } from '@/lib/workflowApi'
 // K-153: a synchronously failed run reports 'failed' + reason — never a green
 // 'executed' over a broken run. 'budget_exceeded' added PRIJSMODEL-C 30-08:
 // the tenant's workflow-run staffel is full — never a retry, the reason +
-// budget line render instead (see AssistActionItemCard).
-export type ExecuteItemStatus = 'executed' | 'failed' | 'pending' | 'wizard_required' | 'forbidden' | 'unsupported' | 'budget_exceeded'
+// budget line render instead (see AssistActionItemCard). CLAIM-1 (03-10) adds
+// 'executing' (another request already claimed this item's run) and
+// 'declined' (a duplicate application_propose inside the server's 10-minute
+// window) — neither is a retry target on its own confirm path.
+export type ExecuteItemStatus = 'executed' | 'failed' | 'pending' | 'wizard_required' | 'forbidden' | 'unsupported' | 'budget_exceeded' | 'executing' | 'declined'
 
 // One item sent to the execute endpoint — the assist-suggested item shape
 // plus the per-item confirm flag (omit/false = preview, true = run it now).
@@ -72,6 +76,9 @@ export interface ExecuteRequestItem {
   message: string | null
   start: string | null
   confirmed?: boolean
+  // CLAIM-1 (03-10): re-send a 'declined' application_propose item anyway —
+  // only meaningful together with confirmed:true, the server's own force path.
+  force?: boolean
 }
 
 export interface ExecuteResultItem {
@@ -89,6 +96,11 @@ export interface ExecuteResultItem {
   // PRIJSMODEL-C 30-08: present only on status === 'budget_exceeded' — the
   // staffel stand (state/allowance/used/remaining/unit/upgrade_hint), no price.
   budget?: ActionBudget
+  // CLAIM-1 (03-10): present only on status === 'declined' — the machine code
+  // to branch on instead of parsing the human `reason`, plus the existing
+  // proposal this duplicate collided with (null when the server has none).
+  code?: 'proposal_in_flight' | 'proposal_recently_sent' | null
+  proposal_id?: Id | null
 }
 
 export interface ExecuteSource {
@@ -105,10 +117,12 @@ export interface ExecuteSource {
 // endpoint validates — never forward extra local UI state into the request
 // body. message/start default to null (never undefined) so a pre-CMBE
 // fixture that lacks them still produces the same explicit shape.
-export function toExecuteItem(item: RichTextAssistActionItem, confirmed?: boolean): ExecuteRequestItem {
+export function toExecuteItem(item: RichTextAssistActionItem, confirmed?: boolean, force?: boolean): ExecuteRequestItem {
   return {
     title: item.title, type: item.type, due_date: item.due_date, note_excerpt: item.note_excerpt,
     message: item.message ?? null, start: item.start ?? null, confirmed,
+    // CLAIM-1: only sent when true — a plain confirm never carries a stray force:false.
+    ...(force ? { force: true } : null),
     // K-159: only when set — an omitted assignee falls back to the requester
     // server-side, and an absent link simply links nothing.
     ...(item.assignee_user_id ? { assignee_user_id: item.assignee_user_id } : null),

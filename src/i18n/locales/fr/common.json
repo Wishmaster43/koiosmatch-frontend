@@ -545,6 +545,7 @@
       "retry": "Reconnecter",
       "linking": "Connexion…",
       "linkStarted": "Connexion démarrée",
+      "alreadyQueued": "Connexion déjà en cours",
       "linkFailed": "Échec de la connexion",
       "linkedByOn": "Connecté par {{name}} le {{date}}",
       "statusLinked": "Connecté",
@@ -606,6 +607,11 @@
       "loadingRun": "Chargement de l'exécution…",
       "error": "Koios n'a pas pu démarrer les actions.",
       "executed": "Exécutée",
+      "executing": "Exécution…",
+      "declined": {
+        "proposal_in_flight": "La proposition est déjà en cours d'envoi",
+        "proposal_recently_sent": "La proposition a déjà été envoyée récemment"
+      },
       "viewRun": "Voir l'exécution du workflow",
       "confirm": "Confirmer",
       "confirmFailed": "Échec de la confirmation",
@@ -613,6 +619,8 @@
       "confirmNotApplied": "Le serveur n'a pas appliqué la confirmation, veuillez réessayer",
       "forbidden": "Aucun droit",
       "unsupported": "Pas encore pris en charge",
+      "forceSend": "Envoyer malgré tout",
+      "openProposal": "Proposition existante",
       "forbiddenReason": {
         "task": "Vous n'avez pas le droit de créer des tâches.",
         "whatsapp": "Vous n'avez pas le droit d'envoyer des messages WhatsApp.",
@@ -667,6 +675,8 @@
       "linkClear": "Supprimer le lien",
       "modeUnknown": "Mode Koios inconnu. Les actions attendent votre confirmation.",
       "statusBudgetExceeded": "Palier atteint",
+      "statusExecuting": "En cours",
+      "statusDeclined": "Refusé",
       "budgetLine": "{{used}}/{{allowance}} {{unit}}",
       "upgradeHint": "Passer à {{tier}}"
     }

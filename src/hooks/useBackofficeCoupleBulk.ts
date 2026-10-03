@@ -50,10 +50,22 @@ export function useBackofficeCoupleBulk({ entity, selectedIds, setSelectedIds, n
         const queued = Array.isArray(res.data?.queued) ? res.data.queued.length : 0
         const skippedArr = Array.isArray(res.data?.skipped) ? res.data.skipped : []
         const skipped = skippedArr.length
-        if (skipped > 0) {
+        // CLAIM-1: a third list `already_queued` next to `queued`/`skipped` — rows
+        // whose sync claim was already live; these are NEVER counted as failures.
+        const alreadyArr = Array.isArray(res.data?.already_queued) ? res.data.already_queued : []
+        const already = alreadyArr.length
+        const total = queued + skipped + already
+        if (already > 0) {
+          // A mixed already_queued + skipped batch still owes the per-reason
+          // breakdown (HF-CONTRACTMAP-1) — before CLAIM-1 those already-live
+          // rows sat in `queued` and the breakdown showed; keep showing it.
+          const breakdown = skipped > 0 ? reasonBreakdown?.(skippedArr) : ''
+          if (breakdown) notify(partialTone, t('bulk.coupleQueuedPartialAlreadyQueuedReasoned', { target: label, queued, total, already, skipped, breakdown }))
+          else notify(partialTone, t('bulk.coupleQueuedPartialAlreadyQueued', { target: label, queued, total, already, skipped }))
+        } else if (skipped > 0) {
           const breakdown = reasonBreakdown?.(skippedArr)
-          if (breakdown) notify(partialTone, t('bulk.coupleQueuedPartialReasoned', { target: label, queued, total: queued + skipped, skipped, breakdown }))
-          else notify(partialTone, t('bulk.coupleQueuedPartial', { target: label, queued, total: queued + skipped, skipped }))
+          if (breakdown) notify(partialTone, t('bulk.coupleQueuedPartialReasoned', { target: label, queued, total, skipped, breakdown }))
+          else notify(partialTone, t('bulk.coupleQueuedPartial', { target: label, queued, total, skipped }))
         } else notify('success', t('bulk.coupleQueued', { target: label, count: queued }))
       })
       .catch((err) => {

@@ -98,6 +98,13 @@ export default function ApplicationDrawer({ application: a, onClose, expanded, o
   // Danny 25-07: "propose to customer" — the CV-in-house-style + optional
   // motivation letter flow, gated below on canManage + a linked candidate/customer.
   const [proposeModalOpen, setProposeModalOpen] = useState(false)
+  // CLAIM-1 (propose 409 conflict): "Bekijk bestaand voorstel" asks the drawer to show the
+  // Voorstellen block, which lives on the application tab. A requested tab rides as the
+  // drawer's initialTab (EntityDrawer switches on a changed deep-link) and is dropped the
+  // moment an external deep-link arrives, so it never masks a later table-cell click.
+  const [requestedTab, setRequestedTab] = useState<string | null>(null)
+  const [seenInitialTab, setSeenInitialTab] = useState(initialTab)
+  if (initialTab !== seenInitialTab) { setSeenInitialTab(initialTab); setRequestedTab(null) }
   // Funnel phases (Settings lookup) for the header phase picker; never hardcoded.
   const { funnelTypes } = useLookups() as unknown as { funnelTypes: Array<{ value: string; label: string; color?: string; is_rejected?: boolean }> }
   // The Extra tab only shows when the tenant has defined application custom fields (§3A(f)).
@@ -195,7 +202,7 @@ export default function ApplicationDrawer({ application: a, onClose, expanded, o
       entity={a}
       // An explicit deep-link always wins; otherwise fall back to the NAV-BACK-1
       // remembered tab (see rememberedTab above).
-      initialTab={initialTab ?? rememberedTab ?? undefined}
+      initialTab={requestedTab ?? initialTab ?? rememberedTab ?? undefined}
       expanded={expanded}
       onToggleExpand={onToggleExpand}
       footer={(
@@ -332,7 +339,8 @@ export default function ApplicationDrawer({ application: a, onClose, expanded, o
     {/* Danny 25-07: propose-to-customer — CV in house style + optional motivation
         letter, mounted only while open (mirrors the detach/reject modals above). */}
     {proposeModalOpen && (
-      <ProposeCandidateModal application={a} onClose={() => setProposeModalOpen(false)} />
+      <ProposeCandidateModal application={a} onClose={() => setProposeModalOpen(false)}
+        onOpenExisting={() => { setProposeModalOpen(false); setRequestedTab('application') }} />
     )}
     </>
   )

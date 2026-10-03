@@ -41,6 +41,11 @@ function strictest(a?: ActionRuleDecision | null, b?: ActionRuleDecision | null)
 interface Props {
   application: ApplicationDetail
   onClose: () => void
+  // CLAIM-1: switches the drawer to the Application tab (where ProposalsBlock
+  // renders) BEFORE closing — the host (ApplicationDrawer) owns tab navigation,
+  // so this is a prop, not a local close. Omitted hosts fall back to a plain
+  // close (§3: honest reach, never a dead "view" button).
+  onOpenExisting?: () => void
 }
 
 /**
@@ -63,7 +68,7 @@ interface Props {
  * skip (§3, no fake affordance) until proposals get their own draft-persistence
  * route.
  */
-export default function ProposeCandidateModal({ application: a, onClose }: Props) {
+export default function ProposeCandidateModal({ application: a, onClose, onOpenExisting }: Props) {
   const { t } = useTranslation(['applications', 'common'])
   const form = useProposeForm(a)
   // V-appdetail-4: the propose body gets an expand toggle, mirroring the
@@ -110,6 +115,13 @@ export default function ProposeCandidateModal({ application: a, onClose }: Props
   const handleSubmit = async () => {
     await form.submit()
   }
+
+  // CLAIM-1: "Bekijk bestaand voorstel" switches the drawer to the Application
+  // tab (ProposalsBlock renders there, CvSubTab) before closing — propose can
+  // open from any drawer tab (header trigger), and that tab only renders the
+  // block on 'application', so a bare close from elsewhere would just close
+  // the modal onto whatever tab was already showing (§3, no fake affordance).
+  const openExisting = () => { if (onOpenExisting) onOpenExisting(); else onClose() }
 
   return (
     // POPUP-SLEEP-1: shell swapped onto the shared FloatingPanel (draggable/
@@ -248,6 +260,27 @@ export default function ProposeCandidateModal({ application: a, onClose }: Props
               {form.shareLinkCopied ? <Check size={11} /> : <Copy size={11} />}
               {form.shareLinkCopied ? t('propose.copied') : t('propose.copyLink')}
             </Button>
+          </div>
+        )}
+
+        {/* CLAIM-1: a 409 duplicate-propose conflict — the modal stays open,
+            the callout names which window collided, with a force-resend and
+            a way back to the existing proposal. */}
+        {form.conflict && (
+          <div style={{ marginTop: 10 }}>
+            <CalloutBox variant="warning">
+              {form.conflict.code === 'proposal_in_flight'
+                ? t('propose.conflict.proposal_in_flight')
+                : t('propose.conflict.proposal_recently_sent')}
+            </CalloutBox>
+            <div style={{ display: 'flex', gap: 8, marginTop: 8 }}>
+              <Button variant="ghost" size="sm" onClick={openExisting}>
+                {t('propose.conflict.openExisting')}
+              </Button>
+              <Button variant="secondary" size="sm" onClick={form.forceSend} disabled={form.submitting}>
+                {t('propose.conflict.forceSend')}
+              </Button>
+            </div>
           </div>
         )}
 

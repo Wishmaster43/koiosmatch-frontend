@@ -278,6 +278,8 @@
     "coupleUnavailable": "Backoffice-koppeling is nog niet beschikbaar.",
     "noPermission": "Je hebt geen rechten voor massa-acties.",
     "coupleQueuedPartial": "{{queued}} van {{total}} in wachtrij gezet voor koppeling met {{target}}; {{skipped}} overgeslagen.",
+    "coupleQueuedPartialAlreadyQueued": "{{queued}} van {{total}} in wachtrij gezet voor koppeling met {{target}}; {{already}} liep al, {{skipped}} overgeslagen.",
+    "coupleQueuedPartialAlreadyQueuedReasoned": "{{queued}} van {{total}} in wachtrij gezet voor koppeling met {{target}}; {{already}} liep al, {{skipped}} overgeslagen ({{breakdown}}).",
     "coupleQueuedPartialReasoned": "{{queued}} van {{total}} in wachtrij gezet voor koppeling met {{target}}; {{skipped}} overgeslagen ({{breakdown}}).",
     "skipReasons": {
       "helloflex_contract_type_unmapped": "geen HelloFlex-contracttype gekoppeld"

@@ -24,9 +24,11 @@ import { tintBg, tintBorder, chipInk } from '@/lib/tint'
 import { humanizeIsoDates } from '@/lib/localDate'
 import { buildEntityDeepLink } from '@/components/ui/EntityLink'
 import { useAssistActionsExecute } from '@/components/ui/richtext/useAssistActionsExecute'
+import AssistDeclinedFace from '@/components/ui/richtext/AssistDeclinedFace'
 import { useNumberFormat } from '@/lib/formatters'
 import type { AssistActionType } from './noteAssistApi'
 import type { ActionBudget } from '@/types/actionBudget'
+import type { Id } from '@/types/common'
 
 // One panel item — a suggested action item plus its OWN execution outcome.
 // `created` only appears once the server actually made a record (executed).
@@ -46,8 +48,16 @@ export interface NoteActionPanelItem {
   // 'budget_exceeded' added PRIJSMODEL-C 30-08: the tenant's workflow-run
   // staffel is full — its own terminal branch, never a retry (mirrors the
   // rich-text AssistActionItemCard's vocabulary, §11 one source).
-  status: 'proposed' | 'pending' | 'executed' | 'failed' | 'budget_exceeded'
+  // CLAIM-1 (03-10): 'executing' (another request already claimed this item's
+  // run) and 'declined' (a duplicate application_propose inside the server's
+  // 10-minute window) — their own terminal/transient branches, mirroring the
+  // rich-text AssistActionItemCard's vocabulary (§11 one source).
+  status: 'proposed' | 'pending' | 'executed' | 'failed' | 'budget_exceeded' | 'executing' | 'declined'
   reason?: string
+  // CLAIM-1: present only on status === 'declined' — the machine code to
+  // branch on, and the existing proposal this duplicate collided with.
+  code?: 'proposal_in_flight' | 'proposal_recently_sent' | null
+  proposal_id?: Id | null
   budget?: ActionBudget
   run_id?: string
   created?: { type: 'appointment' | 'task' | 'calllist'; id: string } | null
@@ -102,7 +112,7 @@ function createdLink(created: NoteActionPanelItem['created'], candidateId?: stri
 // warning tint, executed the house success pair, failed danger (§4).
 const STATUS_TONE: Record<NoteActionPanelItem['status'], string> = {
   proposed: 'var(--text-muted)', pending: 'var(--color-warning)', executed: 'var(--color-success)', failed: 'var(--color-danger)',
-  budget_exceeded: 'var(--color-warning)',
+  budget_exceeded: 'var(--color-warning)', executing: 'var(--text-muted)', declined: 'var(--text-muted)',
 }
 
 // Renders one action's lifecycle status as a soft-tinted chip, coloured by STATUS_TONE.
@@ -112,7 +122,7 @@ function StatusChip({ status }: { status: NoteActionPanelItem['status'] }) {
   // the bare charAt-capitalize scheme would produce an invalid statusBudget_exceeded key.
   const STATUS_LABEL_KEY: Record<NoteActionPanelItem['status'], string> = {
     proposed: 'statusProposed', pending: 'statusPending', executed: 'statusExecuted', failed: 'statusFailed',
-    budget_exceeded: 'statusBudgetExceeded',
+    budget_exceeded: 'statusBudgetExceeded', executing: 'statusExecuting', declined: 'statusDeclined',
   }
   const label = t(`notesAssist.panel.${STATUS_LABEL_KEY[status]}`)
   const color = STATUS_TONE[status]
@@ -131,7 +141,9 @@ function ActionItemCard({ item, index, onEdit, onConfirm, candidateId, formatNum
   item: NoteActionPanelItem
   index: number
   onEdit: (index: number, patch: Partial<NoteActionPanelItem>) => void
-  onConfirm: (index: number) => void
+  // CLAIM-1: an optional force flag — the 'declined' card's "Toch versturen" re-posts
+  // confirmed:true + force:true; every other caller omits it.
+  onConfirm: (index: number, force?: boolean) => void
   candidateId?: string
   formatNumber: (n: number) => string
 }) {
@@ -147,6 +159,8 @@ function ActionItemCard({ item, index, onEdit, onConfirm, candidateId, formatNum
   // Fired once; cleared once the item's own status moves on (the confirm
   // response landed and NoteActionsPanel's sync effect updated this prop).
   const confirm = () => onConfirm(index)
+  // CLAIM-1: the 'declined' card's own re-post, with force:true alongside confirmed:true.
+  const forceSend = () => onConfirm(index, true)
 
   return (
     <div style={{ border: '1px solid var(--border)', borderRadius: 8, padding: '8px 10px', display: 'flex', flexDirection: 'column', gap: 6 }}>
@@ -209,6 +223,15 @@ function ActionItemCard({ item, index, onEdit, onConfirm, candidateId, formatNum
       <div style={{ display: 'flex', alignItems: 'center', gap: 6, flexWrap: 'wrap' }}>
         <StatusChip status={item.status} />
         {(item.status === 'failed' || item.status === 'pending' || item.status === 'budget_exceeded') && item.reason && <Caption as="span" title={item.reason}>{item.reason}</Caption>}
+        {/* CLAIM-1: declined — the server reason (by code) plus a chip to the
+            existing proposal when it carries both a proposal_id AND an
+            application link, and a force-send button that re-posts this one
+            item with confirmed:true + force:true. */}
+        {item.status === 'declined' && (
+          <AssistDeclinedFace code={item.code} reason={item.reason}
+            applicationId={item.link_type === 'application' ? item.link_id : undefined}
+            proposalId={item.proposal_id} confirming={confirming} onForceSend={forceSend} />
+        )}
         {item.status === 'pending' && item.confirmError && (
           <span role="alert"><Caption as="span" style={{ color: 'var(--color-danger-text)' }}>
             {item.confirmErrorKind === 'sessionExpired'
@@ -282,9 +305,12 @@ export default function NoteActionsPanel({ items, onItemsChange, noteId, candida
       // as "wacht op bevestiging" with a confirm button that just re-422s.
       const status: NoteActionPanelItem['status'] = r.status === 'executed' ? 'executed'
         : r.status === 'budget_exceeded' ? 'budget_exceeded'
+        : r.status === 'executing' ? 'executing'
+        : r.status === 'declined' ? 'declined'
         : (r.status === 'failed' || r.status === 'forbidden' || r.status === 'unsupported' ? 'failed' : 'pending')
       return { ...it, status, reason: r.reason, run_id: r.run_id, execIndex,
         budget: r.budget ?? it.budget,
+        code: r.code, proposal_id: r.proposal_id,
         created: r.created ?? it.created ?? null,
         confirming: r.confirming, confirmError: r.confirmError, confirmErrorKind: r.confirmErrorKind }
     })
@@ -326,11 +352,11 @@ export default function NoteActionsPanel({ items, onItemsChange, noteId, candida
   // the confirm can never resend a stale pre-edit copy (r2 punt-7 gat).
   // A persisted pending item (note reopened, no preview in this mount) confirms too: the hook
   // seeds its own list from the override when it has none (NOTE-CONFIRM-HANG-2).
-  const confirmOne = (index: number) => {
+  const confirmOne = (index: number, force?: boolean) => {
     const target = items[index]
     if (!target) return
     const execIndex = target.execIndex ?? (exec.items ? exec.items.findIndex(r => r.title === target.title && r.type === target.type) : -1)
-    exec.confirm(execIndex >= 0 ? execIndex : 0, target)
+    exec.confirm(execIndex >= 0 ? execIndex : 0, target, force)
   }
 
   // Inline edit — applies a patch to one item's local fields (title/date),

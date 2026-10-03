@@ -545,6 +545,7 @@
       "retry": "Tentar ligar novamente",
       "linking": "A ligar…",
       "linkStarted": "Ligação iniciada",
+      "alreadyQueued": "Ligação já em curso",
       "linkFailed": "Falha ao ligar",
       "linkedByOn": "Ligado por {{name}} em {{date}}",
       "statusLinked": "Associado",
@@ -606,6 +607,11 @@
       "loadingRun": "A carregar execução…",
       "error": "O Koios não conseguiu iniciar as ações.",
       "executed": "Executado",
+      "executing": "A executar…",
+      "declined": {
+        "proposal_in_flight": "A proposta já está a ser enviada",
+        "proposal_recently_sent": "A proposta já foi enviada recentemente"
+      },
       "viewRun": "Ver execução da workflow",
       "confirm": "Confirmar",
       "confirmFailed": "A confirmação falhou",
@@ -613,6 +619,8 @@
       "confirmNotApplied": "O servidor não aplicou a confirmação, tente novamente",
       "forbidden": "Sem permissões",
       "unsupported": "Ainda não suportado",
+      "forceSend": "Enviar mesmo assim",
+      "openProposal": "Proposta existente",
       "forbiddenReason": {
         "task": "Não tem permissões para criar tarefas.",
         "whatsapp": "Não tem permissões para enviar mensagens de WhatsApp.",
@@ -667,6 +675,8 @@
       "linkClear": "Remover associação",
       "modeUnknown": "Modo Koios desconhecido. As ações aguardam a sua confirmação.",
       "statusBudgetExceeded": "Escalão esgotado",
+      "statusExecuting": "Em execução",
+      "statusDeclined": "Rejeitado",
       "budgetLine": "{{used}}/{{allowance}} {{unit}}",
       "upgradeHint": "Atualizar para {{tier}}"
     }

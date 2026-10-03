@@ -545,6 +545,7 @@
       "retry": "Opnieuw koppelen",
       "linking": "Koppelen…",
       "linkStarted": "Koppeling gestart",
+      "alreadyQueued": "Koppeling loopt al",
       "linkFailed": "Koppelen mislukt",
       "linkedByOn": "Gekoppeld door {{name}} op {{date}}",
       "statusLinked": "Gekoppeld",
@@ -606,6 +607,11 @@
       "loadingRun": "Run laden…",
       "error": "Koios kon de acties niet starten.",
       "executed": "Uitgevoerd",
+      "executing": "Wordt uitgevoerd…",
+      "declined": {
+        "proposal_in_flight": "Voorstel wordt al verstuurd",
+        "proposal_recently_sent": "Voorstel is recent al verstuurd"
+      },
       "viewRun": "Bekijk workflow-run",
       "confirm": "Bevestigen",
       "confirmFailed": "Bevestigen mislukt",
@@ -613,6 +619,8 @@
       "confirmNotApplied": "De server nam de bevestiging niet aan, probeer het nogmaals",
       "forbidden": "Geen rechten",
       "unsupported": "Nog niet ondersteund",
+      "forceSend": "Toch versturen",
+      "openProposal": "Bestaand voorstel",
       "forbiddenReason": {
         "task": "Je hebt geen rechten om taken aan te maken.",
         "whatsapp": "Je hebt geen rechten om WhatsApp-berichten te versturen.",
@@ -667,6 +675,8 @@
       "linkClear": "Koppeling verwijderen",
       "modeUnknown": "Koios-stand onbekend. Acties wachten op jouw bevestiging.",
       "statusBudgetExceeded": "Staffel vol",
+      "statusExecuting": "Wordt uitgevoerd",
+      "statusDeclined": "Geweigerd",
       "budgetLine": "{{used}}/{{allowance}} {{unit}}",
       "upgradeHint": "Upgrade naar {{tier}}"
     }

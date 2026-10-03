@@ -109,6 +109,7 @@
     "couple": "Vincular al backoffice",
     "coupleQueued": "{{count}} candidato(s) en cola para vincular con {{target}}.",
     "coupleQueuedPartial": "{{queued}} de {{total}} en cola para vincular con {{target}}; {{skipped}} omitido(s).",
+    "coupleQueuedPartialAlreadyQueued": "{{queued}} de {{total}} en cola para vincular con {{target}}; {{already}} ya en curso, {{skipped}} omitido(s).",
     "coupleUnavailable": "La vinculación con el backoffice aún no está disponible.",
     "scopeSelected": "{{count}} seleccionado(s)",
     "scopeUseFilters": "Los {{count}} resultados de estos filtros",

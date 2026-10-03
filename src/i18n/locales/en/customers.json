@@ -662,6 +662,7 @@
     "couple": "Couple to backoffice",
     "coupleQueued": "{{count}} customer(s) queued for coupling with {{target}}.",
     "coupleQueuedPartial": "{{queued}} of {{total}} queued for coupling with {{target}}; {{skipped}} skipped.",
+    "coupleQueuedPartialAlreadyQueued": "{{queued}} of {{total}} queued for coupling with {{target}}; {{already}} already in progress, {{skipped}} skipped.",
     "coupleUnavailable": "Backoffice coupling isn't available yet."
   },
   "modal": {

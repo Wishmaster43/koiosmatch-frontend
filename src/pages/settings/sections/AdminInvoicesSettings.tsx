@@ -19,7 +19,7 @@ import { withIdempotencyKey } from '@/lib/idempotency'
 import { triggerBlobDownload } from '@/lib/downloadBlob'
 import { useNumberFormat } from '@/lib/formatters'
 import { useLocale, buildLast12Months } from '@/lib/datetime'
-import { notifyError, notifySuccess } from '@/lib/notify'
+import { notify, notifyError, notifySuccess } from '@/lib/notify'
 import { extractApiError } from '@/lib/extractApiError'
 import StatusPill from '@/components/ui/StatusPill'
 import Spinner from '@/components/ui/Spinner'
@@ -104,8 +104,25 @@ export default function AdminInvoicesSettings() {
   const handleFinalize = async (invoice: AdminInvoice) => {
     setFinalizingId(invoice.id)
     try {
-      await api.post(`/admin/invoices/${invoice.id}/finalize`, undefined, withIdempotencyKey())
-      notifySuccess(t(invoice.status === 'final' ? 'adminInvoices.resendSuccess' : 'adminInvoices.finalizeSuccess'))
+      const res = await api.post(`/admin/invoices/${invoice.id}/finalize`, undefined, withIdempotencyKey())
+      // CLAIM-1: the invoice is final regardless, but a concurrent/stuck MAIL
+      // claim means nothing new was actually sent — say so, by reason. On the
+      // resend path a mailed:false answer means nothing new happened, so the
+      // success toast would be untrue there (finalize keeps it: the invoice
+      // really did become final).
+      const mailed = res?.data?.mailed
+      const reason = res?.data?.reason
+      if (invoice.status !== 'final' || mailed !== false) {
+        notifySuccess(t(invoice.status === 'final' ? 'adminInvoices.resendSuccess' : 'adminInvoices.finalizeSuccess'))
+      }
+      if (mailed === false) {
+        if (reason === 'in_flight') notify('info', t('adminInvoices.mailInFlight'))
+        else if (reason === 'unconfirmed') notify('info', t('adminInvoices.mailUnconfirmed'))
+        else if (reason === 'already_final') notify('info', t('adminInvoices.alreadyFinal'))
+        // Unknown reason: an honest generic line, with the raw server reason as
+        // the toast title so it is never silently swallowed (§7/§8 — no fake affordance).
+        else notify('info', t('adminInvoices.mailFailedUnknownReason'), { title: String(reason ?? '') })
+      }
       await reload()
     } catch (err) {
       notifyError(extractApiError(err, t('adminInvoices.finalizeFailed')))

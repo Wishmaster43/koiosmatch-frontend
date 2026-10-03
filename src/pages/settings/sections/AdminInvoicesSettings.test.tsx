@@ -70,6 +70,114 @@ describe('AdminInvoicesSettings', () => {
     await waitFor(() => expect(api.post).toHaveBeenCalledWith('/admin/invoices/inv-f/finalize', undefined, expect.objectContaining({ headers: expect.objectContaining({ 'Idempotency-Key': expect.any(String) }) })))
   })
 
+  // CLAIM-1: the finalize call's `mailed`/`reason` fields drive an extra info
+  // toast on top of today's finalize-success toast — captured via the real
+  // `km:toast` event (no notify mock in this file) so the request AND the
+  // surfaced reason are both proven, never only that finalize resolved.
+  describe('CLAIM-1 mail-claim reasons on finalize', () => {
+    function captureToasts() {
+      const events: Array<{ type: string; message: string }> = []
+      const handler = (e: Event) => events.push((e as CustomEvent).detail)
+      window.addEventListener('km:toast', handler)
+      return { events, stop: () => window.removeEventListener('km:toast', handler) }
+    }
+
+    it('shows only the success toast when mailed: true', async () => {
+      api.get.mockResolvedValueOnce({ data: [
+        { id: 'inv-d', tenant_id: 't1', tenant_name: 'Yesway', number: null, period: '2026-08', status: 'draft', total: 100, vat_amount: 21, finalized_at: null, sent_at: null },
+      ] })
+      api.post.mockResolvedValueOnce({ data: { mailed: true, reason: null } })
+      api.get.mockResolvedValueOnce({ data: [] })
+      const { events, stop } = captureToasts()
+      renderScreen()
+      const btn = await screen.findByRole('button', { name: i18n.t('adminInvoices.finalize', { ns: 'settings' }) })
+      await userEvent.click(btn)
+      await waitFor(() => expect(events.length).toBeGreaterThan(0))
+      expect(events).toEqual([{ type: 'success', message: i18n.t('adminInvoices.finalizeSuccess', { ns: 'settings' }) }])
+      stop()
+    })
+
+    it('adds the "in_flight" info toast on top of the success toast when mailed: false', async () => {
+      api.get.mockResolvedValueOnce({ data: [
+        { id: 'inv-d', tenant_id: 't1', tenant_name: 'Yesway', number: null, period: '2026-08', status: 'draft', total: 100, vat_amount: 21, finalized_at: null, sent_at: null },
+      ] })
+      api.post.mockResolvedValueOnce({ data: { mailed: false, reason: 'in_flight' } })
+      api.get.mockResolvedValueOnce({ data: [] })
+      const { events, stop } = captureToasts()
+      renderScreen()
+      const btn = await screen.findByRole('button', { name: i18n.t('adminInvoices.finalize', { ns: 'settings' }) })
+      await userEvent.click(btn)
+      await waitFor(() => expect(events.length).toBe(2))
+      expect(events[0]).toEqual({ type: 'success', message: i18n.t('adminInvoices.finalizeSuccess', { ns: 'settings' }) })
+      expect(events[1]).toEqual({ type: 'info', message: i18n.t('adminInvoices.mailInFlight', { ns: 'settings' }) })
+      stop()
+    })
+
+    it('adds the "unconfirmed" info toast when mailed: false, reason: unconfirmed', async () => {
+      api.get.mockResolvedValueOnce({ data: [
+        { id: 'inv-d', tenant_id: 't1', tenant_name: 'Yesway', number: null, period: '2026-08', status: 'draft', total: 100, vat_amount: 21, finalized_at: null, sent_at: null },
+      ] })
+      api.post.mockResolvedValueOnce({ data: { mailed: false, reason: 'unconfirmed' } })
+      api.get.mockResolvedValueOnce({ data: [] })
+      const { events, stop } = captureToasts()
+      renderScreen()
+      const btn = await screen.findByRole('button', { name: i18n.t('adminInvoices.finalize', { ns: 'settings' }) })
+      await userEvent.click(btn)
+      await waitFor(() => expect(events.length).toBe(2))
+      expect(events[1]).toEqual({ type: 'info', message: i18n.t('adminInvoices.mailUnconfirmed', { ns: 'settings' }) })
+      stop()
+    })
+
+    it('adds the "already_final" info toast when mailed: false, reason: already_final', async () => {
+      api.get.mockResolvedValueOnce({ data: [
+        { id: 'inv-d', tenant_id: 't1', tenant_name: 'Yesway', number: null, period: '2026-08', status: 'draft', total: 100, vat_amount: 21, finalized_at: null, sent_at: null },
+      ] })
+      api.post.mockResolvedValueOnce({ data: { mailed: false, reason: 'already_final' } })
+      api.get.mockResolvedValueOnce({ data: [] })
+      const { events, stop } = captureToasts()
+      renderScreen()
+      const btn = await screen.findByRole('button', { name: i18n.t('adminInvoices.finalize', { ns: 'settings' }) })
+      await userEvent.click(btn)
+      await waitFor(() => expect(events.length).toBe(2))
+      expect(events[1]).toEqual({ type: 'info', message: i18n.t('adminInvoices.alreadyFinal', { ns: 'settings' }) })
+      stop()
+    })
+
+    // Resend path (status: final) with mailed: false must not also claim success —
+    // the invoice was already final, so the only honest toast is the reason one.
+    it('shows only the reason toast (no resendSuccess) when resending a final invoice and mailed: false', async () => {
+      api.get.mockResolvedValueOnce({ data: [
+        { id: 'inv-f', tenant_id: 't1', tenant_name: 'Yesway', number: 'KM-000002', period: '2026-08', status: 'final', total: 100, vat_amount: 21, finalized_at: '2026-08-02', sent_at: null },
+      ] })
+      api.post.mockResolvedValueOnce({ data: { mailed: false, reason: 'in_flight' } })
+      api.get.mockResolvedValueOnce({ data: [] })
+      const { events, stop } = captureToasts()
+      renderScreen()
+      const btn = await screen.findByRole('button', { name: i18n.t('adminInvoices.resend', { ns: 'settings' }) })
+      await userEvent.click(btn)
+      await waitFor(() => expect(events.length).toBe(1))
+      expect(events).toEqual([{ type: 'info', message: i18n.t('adminInvoices.mailInFlight', { ns: 'settings' }) }])
+      stop()
+    })
+
+    it('adds the generic unknown-reason info toast, with the raw reason as the toast title', async () => {
+      api.get.mockResolvedValueOnce({ data: [
+        { id: 'inv-d', tenant_id: 't1', tenant_name: 'Yesway', number: null, period: '2026-08', status: 'draft', total: 100, vat_amount: 21, finalized_at: null, sent_at: null },
+      ] })
+      api.post.mockResolvedValueOnce({ data: { mailed: false, reason: 'smtp_timeout' } })
+      api.get.mockResolvedValueOnce({ data: [] })
+      const events: Array<{ type: string; message: string; title?: string }> = []
+      const handler = (e: Event) => events.push((e as CustomEvent).detail)
+      window.addEventListener('km:toast', handler)
+      renderScreen()
+      const btn = await screen.findByRole('button', { name: i18n.t('adminInvoices.finalize', { ns: 'settings' }) })
+      await userEvent.click(btn)
+      await waitFor(() => expect(events.length).toBe(2))
+      expect(events[1]).toEqual({ type: 'info', message: i18n.t('adminInvoices.mailFailedUnknownReason', { ns: 'settings' }), title: 'smtp_timeout' })
+      window.removeEventListener('km:toast', handler)
+    })
+  })
+
   it('downloads a final invoice PDF via a real blob GET', async () => {
     vi.stubGlobal('URL', { ...URL, createObjectURL, revokeObjectURL })
     api.get.mockResolvedValueOnce({ data: [

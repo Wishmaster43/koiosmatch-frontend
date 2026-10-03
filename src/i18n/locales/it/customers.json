@@ -662,6 +662,7 @@
     "couple": "Collega al backoffice",
     "coupleQueued": "{{count}} cliente/i messi in coda per il collegamento con {{target}}.",
     "coupleQueuedPartial": "{{queued}} di {{total}} messi in coda per il collegamento con {{target}}; {{skipped}} saltati.",
+    "coupleQueuedPartialAlreadyQueued": "{{queued}} di {{total}} messi in coda per il collegamento con {{target}}; {{already}} già in corso, {{skipped}} saltati.",
     "coupleUnavailable": "Il collegamento al backoffice non è ancora disponibile."
   },
   "modal": {

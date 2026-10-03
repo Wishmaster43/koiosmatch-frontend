@@ -463,4 +463,30 @@ describe('NOTE-ACTION-ITEMS-1 · items persist with the note (CMBE 173ffbf7)', (
       onSave={vi.fn()} onCancel={vi.fn()} />)
     expect(screen.getByText('Intake gepland')).toBeInTheDocument()
   })
+
+  // CLAIM-1 (03-10 verifier fix): 'executing'/'declined' are STORED statuses
+  // (BE NoteActionItem::STATUSES) — a reopened note used to collapse both to
+  // 'pending' and show a "Bevestigen" confirm button that just re-sent an
+  // already-claimed or declined item.
+  it('a reopened note keeps a persisted executing item executing, no confirm button', () => {
+    render(<NoteComposer open noteTypes={[]} channels={[]} labels={labels} editorLabels={{}} initialDraft={null}
+      initialNote={{ id: 'n1', type: 'general', body: '', action_items: [
+        { id: 'ai-10', title: 'Voorstel sturen', type: 'notification', status: 'executing' },
+      ] } as never}
+      onSave={vi.fn()} onCancel={vi.fn()} />)
+    expect(screen.getByText('notesAssist.panel.statusExecuting')).toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: 'notesAssist.panel.confirm' })).not.toBeInTheDocument()
+  })
+
+  it('a reopened note keeps a persisted declined item declined, with its reason and a force-send button', () => {
+    render(<NoteComposer open noteTypes={[]} channels={[]} labels={labels} editorLabels={{}} initialDraft={null}
+      initialNote={{ id: 'n1', type: 'general', body: '', action_items: [
+        { id: 'ai-11', title: 'Voorstel sturen', type: 'notification', status: 'declined', code: 'proposal_recently_sent', reason: 'Al verstuurd.' },
+      ] } as never}
+      onSave={vi.fn()} onCancel={vi.fn()} />)
+    expect(screen.getByText('notesAssist.panel.statusDeclined')).toBeInTheDocument()
+    expect(screen.getByText('notesAssist.execute.declined.proposal_recently_sent')).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'notesAssist.execute.forceSend' })).toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: 'notesAssist.panel.confirm' })).not.toBeInTheDocument()
+  })
 })

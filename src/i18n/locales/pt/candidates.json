@@ -132,6 +132,7 @@
     "couple": "Ligar ao backoffice",
     "coupleQueued": "{{count}} candidato(s) colocado(s) na fila para ligação com {{target}}.",
     "coupleQueuedPartial": "{{queued}} de {{total}} colocados na fila para ligação com {{target}}; {{skipped}} ignorados.",
+    "coupleQueuedPartialAlreadyQueued": "{{queued}} de {{total}} colocados na fila para ligação com {{target}}; {{already}} já em curso, {{skipped}} ignorados.",
     "coupleUnavailable": "A ligação ao backoffice ainda não está disponível.",
     "scopeSelected": "{{count}} selecionados",
     "scopeUseFilters": "Todos os {{count}} resultados destes filtros",

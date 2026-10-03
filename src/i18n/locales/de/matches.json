@@ -278,6 +278,8 @@
     "coupleUnavailable": "Backoffice-Kopplung ist noch nicht verfügbar.",
     "noPermission": "Sie haben keine Berechtigung für Massenaktionen.",
     "coupleQueuedPartial": "{{queued}} von {{total}} zur Kopplung mit {{target}} eingereiht; {{skipped}} übersprungen.",
+    "coupleQueuedPartialAlreadyQueued": "{{queued}} von {{total}} zur Kopplung mit {{target}} eingereiht; {{already}} liefen bereits, {{skipped}} übersprungen.",
+    "coupleQueuedPartialAlreadyQueuedReasoned": "{{queued}} von {{total}} zur Kopplung mit {{target}} eingereiht; {{already}} liefen bereits, {{skipped}} übersprungen ({{breakdown}}).",
     "coupleQueuedPartialReasoned": "{{queued}} von {{total}} für die Verknüpfung mit {{target}} eingereiht; {{skipped}} übersprungen ({{breakdown}}).",
     "skipReasons": {
       "helloflex_contract_type_unmapped": "kein HelloFlex-Vertragstyp verknüpft"

@@ -662,6 +662,7 @@
     "couple": "Vincular al backoffice",
     "coupleQueued": "{{count}} cliente(s) en cola para vincular con {{target}}.",
     "coupleQueuedPartial": "{{queued}} de {{total}} en cola para vincular con {{target}}; {{skipped}} omitido(s).",
+    "coupleQueuedPartialAlreadyQueued": "{{queued}} de {{total}} en cola para vincular con {{target}}; {{already}} ya en curso, {{skipped}} omitido(s).",
     "coupleUnavailable": "La vinculación con el backoffice aún no está disponible."
   },
   "modal": {

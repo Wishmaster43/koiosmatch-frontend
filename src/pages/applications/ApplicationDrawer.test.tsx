@@ -16,6 +16,7 @@ import '@/i18n'
 import ApplicationDrawer from './ApplicationDrawer'
 import { useAuth } from '@/context/AuthContext'
 import type { ApplicationDetail } from '@/types/application'
+import nlApplications from '@/i18n/locales/nl/applications.json'
 
 // ApplicationDrawer wires useApplicationCandidateEdit directly (the header
 // pencil) — it reads useQueryClient() to invalidate on save (REFRESH-FIX-2),
@@ -43,6 +44,11 @@ vi.mock('./drawer/InterviewsTab', () => ({ default: () => null }))
 vi.mock('./drawer/AppointmentsTab', () => ({ default: () => null }))
 vi.mock('./drawer/NotesTab', () => ({ default: () => null }))
 vi.mock('./drawer/Timeline', () => ({ default: () => null }))
+// CLAIM-1: the propose modal's "Bekijk bestaand voorstel" asks the drawer for the application tab —
+// a stub exposes that callback as a button so the wiring is proven without the modal's own form.
+vi.mock('./drawer/propose/ProposeCandidateModal', () => ({
+  default: (props: { onOpenExisting?: () => void }) => <button type="button" onClick={props.onOpenExisting}>open-existing-stub</button>,
+}))
 
 // A minimal drawer-ready application; `bucket` stays set (it still drives
 // filters/insights elsewhere) even though the header no longer renders it.
@@ -125,3 +131,19 @@ describe('ApplicationDrawer · owner picker clear (DROPDOWN-CLEAR-1)', () => {
     expect(screen.getByRole('button', { name: /Geen eigenaar/ })).toBeInTheDocument()
   })
 })
+
+// CLAIM-1 (DOUBLE-SUBMIT-FE-1 4c): a propose 409 conflict offers "Bekijk bestaand voorstel";
+// the drawer answers by switching to the application tab, where the Voorstellen block lives.
+describe('ApplicationDrawer · open existing proposal switches to the application tab', () => {
+  it('switches the active tab when the modal asks for the existing proposal', () => {
+    vi.mocked(useAuth).mockReturnValue({ hasPermission: () => true } as unknown as ReturnType<typeof useAuth>)
+    const app = application({ bucket: 'active', vacancyId: 'v1', candidateId: 'cand-1', customerId: 'cust-1' } as Partial<ApplicationDetail>)
+    renderDrawer({ application: app, onClose: vi.fn(), canManage: true, initialTab: 'notes' })
+    expect(screen.getByRole('tab', { name: nlApplications.drawer.tabs.notes })).toHaveAttribute('aria-selected', 'true')
+    fireEvent.click(screen.getByRole('button', { name: 'Voorstellen aan klant' }))
+    fireEvent.click(screen.getByRole('button', { name: 'open-existing-stub' }))
+    expect(screen.getByRole('tab', { name: nlApplications.drawer.tabs.application })).toHaveAttribute('aria-selected', 'true')
+    expect(screen.queryByRole('button', { name: 'open-existing-stub' })).toBeNull()
+  })
+})
+

@@ -662,6 +662,7 @@
     "couple": "Mit Backoffice koppeln",
     "coupleQueued": "{{count}} Kunde(n) zur Kopplung mit {{target}} eingereiht.",
     "coupleQueuedPartial": "{{queued}} von {{total}} zur Kopplung mit {{target}} eingereiht; {{skipped}} übersprungen.",
+    "coupleQueuedPartialAlreadyQueued": "{{queued}} von {{total}} zur Kopplung mit {{target}} eingereiht; {{already}} liefen bereits, {{skipped}} übersprungen.",
     "coupleUnavailable": "Backoffice-Kopplung ist noch nicht verfügbar."
   },
   "modal": {

@@ -132,6 +132,7 @@
     "couple": "Couple to backoffice",
     "coupleQueued": "{{count}} candidate(s) queued for coupling with {{target}}.",
     "coupleQueuedPartial": "{{queued}} of {{total}} queued for coupling with {{target}}; {{skipped}} skipped.",
+    "coupleQueuedPartialAlreadyQueued": "{{queued}} of {{total}} queued for coupling with {{target}}; {{already}} already in progress, {{skipped}} skipped.",
     "coupleUnavailable": "Backoffice coupling isn't available yet.",
     "scopeSelected": "{{count}} selected",
     "scopeUseFilters": "All {{count}} results matching these filters",

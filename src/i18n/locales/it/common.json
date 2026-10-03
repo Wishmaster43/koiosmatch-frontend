@@ -545,6 +545,7 @@
       "retry": "Riprova collegamento",
       "linking": "Collegamento…",
       "linkStarted": "Collegamento avviato",
+      "alreadyQueued": "Collegamento già in corso",
       "linkFailed": "Collegamento non riuscito",
       "linkedByOn": "Collegato da {{name}} il {{date}}",
       "statusLinked": "Collegato",
@@ -606,6 +607,11 @@
       "loadingRun": "Caricamento run…",
       "error": "Koios non è riuscito ad avviare le azioni.",
       "executed": "Eseguito",
+      "executing": "In esecuzione…",
+      "declined": {
+        "proposal_in_flight": "La proposta è già in fase di invio",
+        "proposal_recently_sent": "La proposta è già stata inviata di recente"
+      },
       "viewRun": "Visualizza run workflow",
       "confirm": "Conferma",
       "confirmFailed": "Conferma fallita",
@@ -613,6 +619,8 @@
       "confirmNotApplied": "Il server non ha applicato la conferma, riprova",
       "forbidden": "Nessun permesso",
       "unsupported": "Non ancora supportato",
+      "forceSend": "Invia comunque",
+      "openProposal": "Proposta esistente",
       "forbiddenReason": {
         "task": "Non hai i permessi per creare attività.",
         "whatsapp": "Non hai i permessi per inviare messaggi WhatsApp.",
@@ -667,6 +675,8 @@
       "linkClear": "Rimuovi collegamento",
       "modeUnknown": "Modalità Koios sconosciuta. Le azioni attendono la tua conferma.",
       "statusBudgetExceeded": "Scaglione esaurito",
+      "statusExecuting": "In esecuzione",
+      "statusDeclined": "Rifiutato",
       "budgetLine": "{{used}}/{{allowance}} {{unit}}",
       "upgradeHint": "Passa a {{tier}}"
     }

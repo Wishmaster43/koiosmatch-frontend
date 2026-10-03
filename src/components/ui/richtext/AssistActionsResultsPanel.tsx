@@ -114,7 +114,7 @@ export default function AssistActionsResultsPanel({ items, source, onApplyAsText
     <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
       {exec.items.map((it, i) => (
         <AssistActionItemCard key={i} item={it}
-          onConfirm={() => exec.confirm(i)}
+          onConfirm={(force) => exec.confirm(i, undefined, force)}
           onViewRun={it.status === 'executed' && it.run_id ? () => viewRun(it.run_id as string) : undefined} />
       ))}
       {runLoading && <Caption as="div">{t('notesAssist.execute.loadingRun', { defaultValue: 'Run laden…' })}</Caption>}

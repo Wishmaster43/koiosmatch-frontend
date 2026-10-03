@@ -358,6 +358,57 @@ describe('useProposeForm', () => {
     expect(result.current.subject).not.toContain('{vacancy}')
   })
 
+  // CLAIM-1 (03-10): a 409 duplicate-propose sets `conflict` instead of a toast,
+  // and the modal stays open (submit returns false, nothing claims success).
+  it('sets conflict on a 409 proposal_in_flight, never a toast', async () => {
+    apiPost.mockRejectedValueOnce({ response: { status: 409, data: { code: 'proposal_in_flight', proposal_id: 'p1' } } })
+    const { result } = renderHook(() => useProposeForm(app()), { wrapper })
+    await waitFor(() => expect(result.current.candidateLoading).toBe(false))
+    act(() => { result.current.setConsentConfirmed(true) })
+    await waitFor(() => expect(result.current.disabledReason).toBeNull())
+    let ok: boolean | undefined
+    await act(async () => { ok = await result.current.submit() })
+    expect(ok).toBe(false)
+    expect(notifyError).not.toHaveBeenCalled()
+    expect(result.current.conflict).toEqual({ code: 'proposal_in_flight', proposalId: 'p1', sentAt: undefined })
+  })
+
+  // forceSend re-submits with force:true in the body and a NEW Idempotency-Key.
+  it('forceSend re-POSTs with force:true and a fresh Idempotency-Key', async () => {
+    apiPost
+      .mockRejectedValueOnce({ response: { status: 409, data: { code: 'proposal_recently_sent', proposal_id: 'p1', sent_at: '2026-10-01T10:00:00Z' } } })
+      .mockResolvedValueOnce({ data: { id: 9 } })
+    const { result } = renderHook(() => useProposeForm(app()), { wrapper })
+    await waitFor(() => expect(result.current.candidateLoading).toBe(false))
+    act(() => { result.current.setConsentConfirmed(true) })
+    await waitFor(() => expect(result.current.disabledReason).toBeNull())
+    await act(async () => { await result.current.submit() })
+    expect(result.current.conflict?.code).toBe('proposal_recently_sent')
+
+    await act(async () => { await result.current.forceSend() })
+    expect(apiPost).toHaveBeenLastCalledWith(
+      '/applications/1/propose',
+      expect.objectContaining({ force: true }),
+      expect.objectContaining({ headers: expect.objectContaining({ 'Idempotency-Key': expect.any(String) }) }),
+    )
+    const [firstKey, lastKey] = apiPost.mock.calls.map(c => (c as unknown as [string, unknown, { headers?: Record<string, string> }])[2]?.headers?.['Idempotency-Key'])
+    expect(lastKey).not.toBe(firstKey)
+    expect(result.current.conflict).toBeNull()
+  })
+
+  // Any other 409/4xx code keeps today's generic toast — the conflict callout
+  // is reserved for the two documented codes only.
+  it('falls back to the generic toast on a 409 with an unknown code', async () => {
+    apiPost.mockRejectedValueOnce({ response: { status: 409, data: { code: 'something_else' } } })
+    const { result } = renderHook(() => useProposeForm(app()), { wrapper })
+    await waitFor(() => expect(result.current.candidateLoading).toBe(false))
+    act(() => { result.current.setConsentConfirmed(true) })
+    await waitFor(() => expect(result.current.disabledReason).toBeNull())
+    await act(async () => { await result.current.submit() })
+    expect(notifyError).toHaveBeenCalled()
+    expect(result.current.conflict).toBeNull()
+  })
+
   // Agency token reads the tenant's company_name setting, falls back to empty.
   it('fills {agency} from the company_name setting, defaults to empty', async () => {
     settingsFixture = { application_proposal: JSON.stringify({ body_template: 'Agency: {agency}' }) }
