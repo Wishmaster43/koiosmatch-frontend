@@ -24,6 +24,7 @@ import { CSRF_COOKIE_URL } from './authMode'
 import { isMfaEnrollmentError } from './mfaGate'
 import { isNoOrganisationError, NO_ORGANISATION_FLAG } from './orphanAccount'
 import { notifyError } from './notify'
+import { requestKey, dedupeInFlight } from './inFlightDedupe'
 
 const api = axios.create({
   baseURL: import.meta.env.VITE_API_URL ?? 'http://koiosmatch-api.test/api',
@@ -104,6 +105,7 @@ const sleep = (ms: number) => new Promise<void>((r) => setTimeout(r, ms))
 interface RetryableConfig extends InternalAxiosRequestConfig {
   _retried429?: boolean
   _retried419?: boolean
+  _retriedInFlight?: boolean
   // Opt-in per request: a 404 on an OPTIONAL endpoint (a lookup the backend hasn't
   // shipped yet; the caller has a seed fallback) is expected — keep it out of the
   // dev log so it doesn't read as (or turn the smoke suite) red.
@@ -154,6 +156,16 @@ api.interceptors.response.use(
       let primed = false
       try { await primeCsrf(); primed = true } catch { /* cookie refresh failed — fall through to normal error handling */ }
       if (primed) { config._retried419 = true; return api(config) }
+    }
+
+    // DOUBLE-SUBMIT-FE-1 / BE CLAIM-1: 409 request_in_flight = the SAME JSON write is still
+    // being processed server-side (a sibling tab, a retried network call). Wait briefly and
+    // retry ONCE; a second 409 falls through to the caller as the server's own message,
+    // never a generic red failure.
+    if (status === 409 && isRequestInFlight(error) && !config._retriedInFlight) {
+      config._retriedInFlight = true
+      await new Promise(r => setTimeout(r, 600))
+      return api(config)
     }
 
     if (status === 429 && method === 'get' && !config._retried429) {
@@ -246,6 +258,21 @@ api.interceptors.response.use(
   },
 )
 
+// DOUBLE-SUBMIT-FE-1: the structural net. Every write method of the client shares one
+// promise for an identical call (method + base URL + path + stable JSON body) that is
+// still in flight — a double-click, a double Enter or a repeated toggle never sends a
+// second request; a settled call clears the slot so a later click is a new intention.
+// Uploads (FormData/Blob) are never compared. GET stays untouched (idempotent by nature).
+for (const method of ['post', 'put', 'patch', 'delete'] as const) {
+  const raw = api[method].bind(api) as (...args: unknown[]) => Promise<unknown>
+  ;(api as unknown as Record<string, unknown>)[method] = (url: string, ...rest: unknown[]) => {
+    const hasBody = method !== 'delete'
+    const data = hasBody ? rest[0] : (rest[0] as { data?: unknown } | undefined)?.data
+    const config = (hasBody ? rest[1] : rest[0]) as { baseURL?: string } | undefined
+    return dedupeInFlight(requestKey(method, url, data, config?.baseURL ?? api.defaults.baseURL), () => raw(url, ...rest))
+  }
+}
+
 export default api
 
 /**
@@ -269,6 +296,12 @@ type ResponseLike = AxiosResponse | { data: unknown }
 /** Unwrap a single resource to its payload (handles { data } or a bare object). */
 // A 403 answer: the caller's role lacks the right, not a transient fault — a picker
 // says so calmly and never retries (INTERVIEW-403-1, measured 29-09 as a recruiter).
+// A 409 whose body says the same write is still being processed (BE CLAIM-1 `request_in_flight`).
+export function isRequestInFlight(error: unknown): boolean {
+  const r = (error as { response?: { status?: number; data?: { code?: string } | null } } | null)?.response
+  return r?.status === 409 && r?.data?.code === 'request_in_flight'
+}
+
 export function isForbidden(error: unknown): boolean {
   return (error as { response?: { status?: number } } | null)?.response?.status === 403
 }
