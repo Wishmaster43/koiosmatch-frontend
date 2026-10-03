@@ -39,9 +39,9 @@ function isEmptyBundle(v: unknown): boolean {
 }
 
 // One Input/Output column: search + typed tree, driven by the shared expand/collapse signals.
-function RunStepColumn({ title, data, fields, ownKeys, emptyLabel, expandSignal, collapseSignal }: {
+function RunStepColumn({ title, data, fields, ownKeys, emptyLabel, expandSignal, collapseSignal, searchPlaceholder }: {
   title: string; data: unknown; fields: 'all' | 'own'; ownKeys: string[] | null; emptyLabel: string
-  expandSignal: number; collapseSignal: number
+  expandSignal: number; collapseSignal: number; searchPlaceholder: string
 }) {
   // "own" keeps only the module's own output_fields keys — everything else (an
   // upstream bundle slice riding along in the merged step output) is hidden;
@@ -59,7 +59,7 @@ function RunStepColumn({ title, data, fields, ownKeys, emptyLabel, expandSignal,
       <div style={{ flex: 1, minHeight: 0, display: 'flex' }}>
         {isEmptyBundle(data)
           ? <Caption style={{ fontStyle: 'italic', padding: 4, display: 'block' }}>{emptyLabel}</Caption>
-          : <OutputTree data={shown} typed counts bundles fill expandSignal={expandSignal} collapseSignal={collapseSignal} />}
+          : <OutputTree data={shown} typed counts bundles fill expandSignal={expandSignal} collapseSignal={collapseSignal} searchPlaceholder={searchPlaceholder} />}
       </div>
     </div>
   )
@@ -86,7 +86,7 @@ export default function RunStepInspectorPanel({ runId, stepId, moduleLabel, onCl
 }) {
   const { t } = useTranslation('workflows')
   // GETALLEN-1: every count the user sees (log rows, list totals, bytes) goes through the active locale.
-  const { formatFileSizeMb, formatNumber } = useNumberFormat()
+  const { formatFileSize, formatNumber } = useNumberFormat()
   const { step, loading, error, forbidden, refetch } = useRunStepDetail(runId, stepId)
   const { catalog } = useModuleCatalog()
   const ownKeys = step?.module_type ? Object.keys(catalog[step.module_type]?.outputFields ?? {}) : null
@@ -158,7 +158,8 @@ export default function RunStepInspectorPanel({ runId, stepId, moduleLabel, onCl
           {/* Header summary: status + started/duration + operation count + payload size */}
           <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
             <StepStatusBadge status={step.status} />
-            <Caption>{t('inspector.summary', { count: operationCount, size: formatFileSizeMb(size / (1024 * 1024)) })}</Caption>
+            {/* `size` is a BYTE count — the adaptive formatter picks B / KB / MB (a tiny payload used to read "0"). */}
+            <Caption>{t('inspector.summary', { count: operationCount, size: formatFileSize(size) })}</Caption>
             {step.started_at && <Mono style={{ fontSize: 11 }}>{formatDateTimeStr(step.started_at)}</Mono>}
             {step.duration_ms != null && <Caption>{formatDuration(step.duration_ms)}</Caption>}
           </div>
@@ -194,10 +195,10 @@ export default function RunStepInspectorPanel({ runId, stepId, moduleLabel, onCl
           {/* Input | Output columns */}
           <div style={{ display: 'flex', gap: 16, flex: 1, minHeight: 0 }}>
             <RunStepColumn title={t('inspector.input')} data={activeAttempt ? activeAttempt.input : {}} fields={fields} ownKeys={ownKeys}
-              emptyLabel={t('inspector.noInput')} expandSignal={expandSignal} collapseSignal={collapseSignal} />
+              emptyLabel={t('inspector.noInput')} expandSignal={expandSignal} collapseSignal={collapseSignal} searchPlaceholder={t('inspector.searchInput')} />
             <RunStepColumn title={t('inspector.output')} data={isNewestAttempt ? mergedOutput : (activeAttempt?.output ?? {})}
               fields={fields} ownKeys={ownKeys}
-              emptyLabel={t('inspector.noOutput')} expandSignal={expandSignal} collapseSignal={collapseSignal} />
+              emptyLabel={t('inspector.noOutput')} expandSignal={expandSignal} collapseSignal={collapseSignal} searchPlaceholder={t('inspector.searchOutput')} />
           </div>
 
           {/* Load-more per list key — newest attempt only (pagination tracks the

@@ -36,6 +36,8 @@
     "attemptCount_one": "{{count, number}} poging",
     "attemptCount_other": "{{count, number}} pogingen",
     "search": "Zoeken",
+    "searchInput": "Zoeken in invoer…",
+    "searchOutput": "Zoeken in uitvoer…",
     "log": "Uitvoeringslog · {{shown}} van {{total}}",
     "summary_one": "{{count, number}} operatie · {{size}}",
     "summary_other": "{{count, number}} operaties · {{size}}",

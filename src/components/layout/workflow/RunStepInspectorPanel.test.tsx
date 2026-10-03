@@ -96,8 +96,7 @@ describe('RunStepInspectorPanel', () => {
     // the load-more label's shown count ticks from 50 to 51 first.
     await waitFor(() => expect(screen.getAllByText(/"shown":51/).length).toBeGreaterThan(0))
     // Search forces matching branches open, so the merged row (deep in bundle 51) surfaces.
-    const searchBoxes = screen.getAllByLabelText('tree.search')
-    await userEvent.type(searchBoxes[1], 'new-row')
+    await userEvent.type(screen.getByLabelText('inspector.searchOutput'), 'new-row')
     await waitFor(() => expect(screen.getByText(/new-row/)).toBeInTheDocument())
   })
 
@@ -105,8 +104,7 @@ describe('RunStepInspectorPanel', () => {
     vi.mocked(api.get).mockResolvedValue({ data: envelope } as never)
     render(<RunStepInspectorPanel runId="run-1" stepId="step-1" moduleLabel="Kandidaten ophalen" onClose={() => {}} />, { wrapper })
     await screen.findByText('upstream_key:')
-    const searchBoxes = screen.getAllByLabelText('tree.search')
-    await userEvent.type(searchBoxes[1], 'candidates')
+    await userEvent.type(screen.getByLabelText('inspector.searchOutput'), 'candidates')
     await waitFor(() => expect(screen.queryByText('upstream_key:')).toBeNull())
   })
 
@@ -133,3 +131,16 @@ describe('RunStepInspectorPanel', () => {
     expect(screen.getByText('inspector.noOutput')).toBeInTheDocument()
   })
 })
+
+// RUN-INSPECTOR-1 polish: each column's search box names what it searches (screen check 03-10:
+// the Input column used to say "Zoeken in output…").
+describe('RunStepInspectorPanel · per-column search placeholders', () => {
+  it('labels the Input and Output search boxes with their own keys', async () => {
+    vi.mocked(api.get).mockResolvedValue({ data: envelope } as never)
+    render(<RunStepInspectorPanel runId="run-1" stepId="step-1" moduleLabel="Kandidaten ophalen" onClose={() => {}} />, { wrapper })
+    await screen.findByText('inspector.output')
+    expect(screen.getByPlaceholderText('inspector.searchInput')).toBeInTheDocument()
+    expect(screen.getByPlaceholderText('inspector.searchOutput')).toBeInTheDocument()
+  })
+})
+

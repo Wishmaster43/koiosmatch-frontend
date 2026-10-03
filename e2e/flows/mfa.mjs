@@ -53,6 +53,12 @@ export async function mfaLifecycle() {
   const confirm = await post('/auth/mfa/confirm', { code: totp(setup.data.secret) }, token)
   expect(Array.isArray(confirm.data.recovery_codes) && confirm.data.recovery_codes.length === 8,
     `mfa/confirm gaf geen 8 recovery-codes (${confirm.status})`)
+  // The server's replay guard refuses a TOTP code that was already used in the same
+  // 30 s window (measured 03-10 in the central audit log: confirm → UI verify 2 s
+  // later = mfa.failed ×2, flow red, cleanup impossible, account left enrolled).
+  // Every later use of the secret therefore waits for the NEXT window.
+  const nextWindow = () => sleep(30000 - (Date.now() % 30000) + 500)
+  await nextWindow()
 
   try {
     // 2. TWO-STEP LOGIN through the real UI.
@@ -75,9 +81,18 @@ export async function mfaLifecycle() {
     expect(errors.length === 0, `login gaf fouten: ${errors.join(' | ')}`)
     await browser.close()
   } finally {
-    // 3. DISABLE — leave the seeded account clean whatever happened above.
-    const relogin = await post('/auth/mfa/verify', { mfa_token: (await post('/auth/login', MFA_USER)).data.mfa_token, code: totp(setup.data.secret) })
-    const t2 = relogin.data.token ?? token
-    await post('/auth/mfa/disable', { code: totp(setup.data.secret) }, t2)
+    // 3. DISABLE — leave the seeded account clean whatever happened above. The server's
+    // replay guard refuses a TOTP code that was already used in the same 30 s window, so
+    // the disable code comes from the NEXT period, and a failed disable is a RED flow
+    // (measured 03-10: a silent disable failure left sara@demo.nl enrolled and every
+    // later pre-login answered mfa_required until CMBE reset the row by hand).
+    await nextWindow()
+    const login2 = await post('/auth/login', MFA_USER)
+    const relogin = login2.data.token ? login2 : await post('/auth/mfa/verify', { mfa_token: login2.data.mfa_token, code: totp(setup.data.secret) })
+    expect(relogin.data.token, `herlogin voor disable faalde (${relogin.status}): ${JSON.stringify(relogin.data).slice(0, 120)}`)
+    const t2 = relogin.data.token
+    await nextWindow()
+    const off = await post('/auth/mfa/disable', { code: totp(setup.data.secret) }, t2)
+    expect(off.status >= 200 && off.status < 300, `mfa/disable faalde (${off.status}): ${JSON.stringify(off.data).slice(0, 120)}`)
   }
 }

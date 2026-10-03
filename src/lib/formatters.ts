@@ -127,6 +127,18 @@ export function formatFileSizeMb(bytes: NumberInput, locale: string = 'nl-NL'): 
   return new Intl.NumberFormat(locale, { maximumFractionDigits: 1 }).format(mb)
 }
 
+// A byte count with an adaptive unit (RUN-INSPECTOR-1, Make's "2,5 MB" summary): below
+// 1 MB it reads in KB so a small payload never shows as "0 MB"; the unit is a universal
+// symbol, the number follows the active locale (GETALLEN-1).
+export function formatFileSize(bytes: NumberInput, locale: string = 'nl-NL'): string {
+  const n = toFiniteNumber(bytes)
+  if (n === null) return '—'
+  const nf = (v: number, digits: number) => new Intl.NumberFormat(locale, { maximumFractionDigits: digits }).format(v)
+  if (n < 1024) return `${nf(n, 0)} B`
+  if (n < 1024 * 1024) return `${nf(n / 1024, 0)} KB`
+  return `${nf(n / 1024 / 1024, 1)} MB`
+}
+
 // Geographic coordinate (latitude/longitude), fixed 5 decimals, locale-INDEPENDENT.
 // A coordinate is a code, not a quantity; the decimal separator is a technical detail
 // not localized. Always returns exactly 5 decimals: "12.34567", never "12,34567" (nl-NL).
@@ -160,6 +172,7 @@ export function useNumberFormat() {
     formatRatio: (value: NumberInput) => formatRatio(value, locale),
     formatDistanceKm: (value: NumberInput) => formatDistanceKm(value, locale),
     formatFileSizeMb: (value: NumberInput) => formatFileSizeMb(value, locale),
+    formatFileSize: (value: NumberInput) => formatFileSize(value, locale),
     formatCoord: formatCoord,
     formatSeconds: (value: NumberInput) => formatSeconds(value, locale),
     currency: tenantCurrency,

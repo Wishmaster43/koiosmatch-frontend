@@ -192,10 +192,12 @@ function Children({ value, depth, query, t, opts, bundleTotal }: {
 // Root of the Make-style bundle inspector: wraps the data in a searchable expandable field tree instead
 // of a raw JSON dump (see file header). `typed`/`counts`/`bundles`/`expandSignal`/`collapseSignal` and
 // `bundleTotal` are OUTPUT-TREE-TYPED-1's opt-in additions; every default keeps today's plain render.
-export default function OutputTree({ data, searchable = true, typed, counts, bundles, expandSignal, collapseSignal, bundleTotal, fill }: {
+export default function OutputTree({ data, searchable = true, typed, counts, bundles, expandSignal, collapseSignal, bundleTotal, fill, searchPlaceholder }: {
   data: unknown; searchable?: boolean
   typed?: boolean; counts?: boolean; bundles?: boolean
   expandSignal?: number; collapseSignal?: number; bundleTotal?: number; fill?: boolean
+  // RUN-INSPECTOR-1: the search box names what it searches ("Zoeken in invoer…" on the Input column); default = the generic tree.search.
+  searchPlaceholder?: string
 }) {
   const { t } = useTranslation('workflows')
   const [q, setQ] = useState('')
@@ -217,7 +219,7 @@ export default function OutputTree({ data, searchable = true, typed, counts, bun
         <div style={{ position: 'relative', padding: 6, borderBottom: '1px solid var(--border)', flexShrink: 0 }}>
           <Search size={12} style={{ position: 'absolute', left: 13, top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)' }} />
           <input value={q} onChange={e => setQ(e.target.value)}
-            placeholder={t('tree.search')} aria-label={t('tree.search')}
+            placeholder={searchPlaceholder ?? t('tree.search')} aria-label={searchPlaceholder ?? t('tree.search')}
             style={{ width: '100%', padding: '4px 8px 4px 24px', fontSize: 12, border: '1px solid var(--border)',
                      borderRadius: 6, outline: 'none', background: 'var(--surface)', color: 'var(--text)', boxSizing: 'border-box' }} />
         </div>

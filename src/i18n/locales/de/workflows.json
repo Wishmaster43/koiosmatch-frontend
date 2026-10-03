@@ -1191,6 +1191,8 @@
     "attemptCount_one": "{{count, number}} Versuch",
     "attemptCount_other": "{{count, number}} Versuche",
     "search": "Suchen",
+    "searchInput": "In der Eingabe suchen…",
+    "searchOutput": "In der Ausgabe suchen…",
     "log": "Ausführungsprotokoll · {{shown}} von {{total}}",
     "summary_one": "{{count, number}} Operation · {{size}}",
     "summary_other": "{{count, number}} Operationen · {{size}}",

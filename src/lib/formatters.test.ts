@@ -122,3 +122,16 @@ describe('useNumberFormat', () => {
     expect(result.current.formatCurrency(5.12).replace(/\u00A0/g, ' ')).toBe('€ 5,12')
   })
 })
+
+// RUN-INSPECTOR-1: the adaptive byte formatter never shows a small payload as "0".
+describe('formatFileSize', () => {
+  it('picks B, KB or MB by magnitude and formats the number on the locale', async () => {
+    const { formatFileSize } = await import('./formatters')
+    expect(formatFileSize(512, 'nl-NL')).toBe('512 B')
+    expect(formatFileSize(3 * 1024, 'nl-NL')).toBe('3 KB')
+    expect(formatFileSize(2.5 * 1024 * 1024, 'nl-NL')).toBe('2,5 MB')
+    expect(formatFileSize(2.5 * 1024 * 1024, 'en-GB')).toBe('2.5 MB')
+    expect(formatFileSize(null)).toBe('—')
+  })
+})
+

@@ -36,6 +36,8 @@
     "attemptCount_one": "{{count, number}} tentativa",
     "attemptCount_other": "{{count, number}} tentativas",
     "search": "Buscar",
+    "searchInput": "Pesquisar na entrada…",
+    "searchOutput": "Pesquisar na saída…",
     "log": "Registro de execução · {{shown}} de {{total}}",
     "summary_one": "{{count, number}} operação · {{size}}",
     "summary_other": "{{count, number}} operações · {{size}}",
