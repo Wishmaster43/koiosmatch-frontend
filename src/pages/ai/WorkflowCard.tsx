@@ -62,7 +62,7 @@ export default function WorkflowCard({ workflow, onRun, canRun = true, onEdit, c
   const { t } = useTranslation('workflows')
   const { formatDate, formatDateTime } = useDateFormat()
   const seedLabel = useSeedLabel()
-  const { running, setRunning, restoring, setRestoring, hover, setHover } = useWorkflowRowState()
+  const { running, setRestoring, restoring, hover, setHover, justRan, runWithDoneFlash } = useWorkflowRowState()
   const status = STATUS_STYLES[workflow.status ?? ''] || STATUS_STYLES.draft
   const archived = Boolean(workflow.archived)
   // TRASH-OVERAL-2: trashed cards swap restore/mark for the erase note + unmark.
@@ -72,16 +72,12 @@ export default function WorkflowCard({ workflow, onRun, canRun = true, onEdit, c
   const displayName = seedLabel('workflowNames', { label: workflow.name ?? null })
 
   // Run is a distinct action — stop propagation so it doesn't also open the editor.
-  const handleRun = async (e: MouseEvent) => {
+  // The shared runWithDoneFlash (N007-POINT3-FIX-1) blocks a repeat click while
+  // running or still flashing "just ran" — onRun itself only resolves once its
+  // post-success refetch has landed, so `running` covers the whole window.
+  const handleRun = (e: MouseEvent) => {
     e.stopPropagation()
-    setRunning(true)
-    // The hook's onRun now notifies + refetches the list on success (LIST-FRESH-1)
-    // and toasts on failure — no fixed cosmetic delay needed to "feel" done.
-    try {
-      await onRun(workflow.id)
-    } finally {
-      setRunning(false)
-    }
+    runWithDoneFlash(onRun, workflow.id)
   }
 
   // Restore is a distinct async action — keep the card responsive while it lands.
@@ -203,9 +199,9 @@ export default function WorkflowCard({ workflow, onRun, canRun = true, onEdit, c
           ) : (
             <>
               {/* Run is this row's primary action — the solid house accent. */}
-              <Button variant="soft" onClick={handleRun} disabled={running || !canRun} title={canRun ? undefined : t('page.runNoPermission')}>
-                {running ? <Spinner size={12} /> : <Play size={12} />}
-                {running ? t('page.running') : t('page.run')}
+              <Button variant="soft" onClick={handleRun} disabled={running || justRan || !canRun} title={canRun ? undefined : t('page.runNoPermission')}>
+                {running ? <Spinner size={12} /> : justRan ? <CheckCircle size={12} /> : <Play size={12} />}
+                {running ? t('page.running') : justRan ? t('page.justRan') : t('page.run')}
               </Button>
 
               {/* Archive (soft-delete) — settings.update-gated, mirrors WorkflowListRow.

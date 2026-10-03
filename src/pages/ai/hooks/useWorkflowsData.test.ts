@@ -276,6 +276,46 @@ describe('useWorkflowsData · handleRun (K-3 workflow-execution base URL)', () =
     await waitFor(() => expect(mockedGet.mock.calls.length).toBeGreaterThan(getCallsBefore))
   })
 
+  // N007-POINT3-FIX-1: handleRun's own promise must resolve only once the
+  // post-success refetch has LANDED, not the moment the POST responds — the
+  // card/row's "running" state is built directly on this promise.
+  it('on success: the returned promise only resolves after the refetch has landed, not right after the POST', async () => {
+    seedList()
+    mockedPost.mockResolvedValue({ data: {} })
+    let resolveReload!: (v: unknown) => void
+    const pendingReload = new Promise(res => { resolveReload = res })
+    // The mount's own load (one call to /workflows) resolves normally via seedList
+    // (mockImplementationOnce takes priority); every LATER call (the post-run
+    // refetch) hangs on pendingReload until resolveReload fires below.
+    mockedGet.mockImplementationOnce((url: string) =>
+      url === '/workflows'
+        ? Promise.resolve({ data: { data: [{ id: 'wf-1', name: 'Welcome flow', status: 'active', steps: [] }] } })
+        : Promise.resolve({ data: { data: [] } }))
+    mockedGet.mockImplementationOnce((url: string) =>
+      url === '/workflow-folders' ? Promise.resolve({ data: { data: [] } }) : pendingReload)
+    mockedGet.mockImplementation((url: string) => (url === '/workflows' ? pendingReload : Promise.resolve({ data: { data: [] } })))
+
+    try {
+      const { result } = renderHook(() => useWorkflowsData(false))
+      await waitFor(() => expect(result.current.loading).toBe(false))
+
+      let settled = false
+      const runPromise = result.current.handleRun('wf-1').then(() => { settled = true })
+
+      // Give microtasks a chance to flush the POST — the hook's promise must still be pending.
+      await act(async () => { await Promise.resolve(); await Promise.resolve() })
+      expect(settled).toBe(false)
+
+      // Now let the refetch land — only then does handleRun's promise resolve.
+      await act(async () => { resolveReload({ data: { data: [] } }); await runPromise })
+      expect(settled).toBe(true)
+    } finally {
+      // This test's permanent mockImplementation would otherwise leak into
+      // later tests (vi.clearAllMocks() only clears call history, not implementations).
+      mockedGet.mockReset()
+    }
+  })
+
   it('on failure: notifies the specific backend reason, no refetch bump', async () => {
     seedList()
     mockedPost.mockRejectedValue({ response: { status: 422, data: { message: 'Workflow is niet actief' } } })
@@ -286,6 +326,54 @@ describe('useWorkflowsData · handleRun (K-3 workflow-execution base URL)', () =
 
     expect(notifyError).toHaveBeenCalledWith('Workflow is niet actief')
     expect(notify).not.toHaveBeenCalled()
+  })
+
+  // N007-POINT3-FIX-1 verifier fix: a FAILED run must resolve `false` so
+  // runWithDoneFlash never flashes "just started" over a run that never ran.
+  it('on a 422: handleRun resolves false', async () => {
+    seedList()
+    mockedPost.mockRejectedValue({ response: { status: 422, data: { message: 'Workflow is niet actief' } } })
+    const { result } = renderHook(() => useWorkflowsData(false))
+    await waitFor(() => expect(result.current.loading).toBe(false))
+
+    let runResult: boolean | undefined
+    await act(async () => { runResult = await result.current.handleRun('wf-1') })
+
+    expect(runResult).toBe(false)
+  })
+
+  // N007-POINT3-FIX-1 verifier fix: the real screen keeps the row list mounted
+  // during the post-run refetch (WorkflowsListPanel swaps the whole grid for a
+  // spinner on `loading`, which would unmount every row's running/justRan state).
+  it('on success: `loading` stays false for the whole post-run refetch (silent reload)', async () => {
+    seedList()
+    mockedPost.mockResolvedValue({ data: {} })
+    let resolveReload!: (v: unknown) => void
+    const pendingReload = new Promise(res => { resolveReload = res })
+    mockedGet.mockImplementationOnce((url: string) =>
+      url === '/workflows'
+        ? Promise.resolve({ data: { data: [{ id: 'wf-1', name: 'Welcome flow', status: 'active', steps: [] }] } })
+        : Promise.resolve({ data: { data: [] } }))
+    mockedGet.mockImplementationOnce((url: string) =>
+      url === '/workflow-folders' ? Promise.resolve({ data: { data: [] } }) : pendingReload)
+    mockedGet.mockImplementation((url: string) => (url === '/workflows' ? pendingReload : Promise.resolve({ data: { data: [] } })))
+
+    try {
+      const { result } = renderHook(() => useWorkflowsData(false))
+      await waitFor(() => expect(result.current.loading).toBe(false))
+
+      const loadingSnapshots: boolean[] = []
+      act(() => { void result.current.handleRun('wf-1') })
+      await act(async () => { await Promise.resolve(); await Promise.resolve() })
+      loadingSnapshots.push(result.current.loading)
+
+      await act(async () => { resolveReload({ data: { data: [] } }); await Promise.resolve() })
+      loadingSnapshots.push(result.current.loading)
+
+      expect(loadingSnapshots).toEqual([false, false])
+    } finally {
+      mockedGet.mockReset()
+    }
   })
 })
 

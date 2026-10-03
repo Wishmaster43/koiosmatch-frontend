@@ -22,13 +22,15 @@ export default function SmSyncButton() {
   const auth = useAuth()
   const canSync = auth?.isSuperAdmin?.() ?? false
   const { connections, loading: loadingConnections } = useSmConnections()
-  const { syncing, result, sync } = useSmSync()
+  const { syncing, awaitingSnapshot, result, sync } = useSmSync()
   // The picker only replaces the button once it's actually needed (2+ connections) —
   // a single connection never shows a dropdown, it just fires straight away.
   const [picking, setPicking] = useState(false)
 
   const noConnection = !loadingConnections && connections.length === 0
-  const blocked = !canSync || syncing || noConnection || loadingConnections
+  // N007-POINT3-FIX-1: stays blocked while the queued snapshot has not landed yet,
+  // so a second click right after a successful queue does not re-fire the sync.
+  const blocked = !canSync || syncing || awaitingSnapshot || noConnection || loadingConnections
 
   // Entry point: one connection syncs immediately, several open the picker instead.
   const handleClick = () => {
@@ -55,7 +57,9 @@ export default function SmSyncButton() {
         <Button type="button" variant="secondary" onClick={handleClick} disabled={blocked} title={title}
           style={{ gap: 5, padding: '0 10px' }}>
           <RefreshCw size={11} className={syncing ? 'animate-spin' : ''} />
-          {syncing ? t('charts.sync.busy') : t('charts.sync.button')}
+          {syncing ? t('charts.sync.busy')
+            : awaitingSnapshot ? t('charts.sync.awaiting')
+            : t('charts.sync.button')}
         </Button>
       )}
       {result && !syncing && (

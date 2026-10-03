@@ -193,6 +193,7 @@
       "noPermission": "Nessun permesso per sincronizzare",
       "noConnection": "Nessuna connessione Shiftmanager attiva trovata",
       "started": "Sincronizzazione avviata. Può richiedere alcuni minuti",
+      "awaiting": "Sincronizzazione avviata…",
       "failed": "Sincronizzazione non riuscita",
       "tooManyRequests": "Troppi tentativi, riprova tra {{secs}}s"
     },

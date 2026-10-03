@@ -26,6 +26,10 @@ export function useSmSync() {
   const queryClient = useQueryClient()
   const [syncing, setSyncing] = useState(false)
   const [result, setResult]   = useState<SmSyncResult | null>(null)
+  // N007-POINT3-FIX-1: true from the 202 response until the backoff poll sees the
+  // landed snapshot, hits its cap, or errors — keeps the button in a visible "done
+  // state" window so a second click right after success does not re-queue the sync.
+  const [awaitingSnapshot, setAwaitingSnapshot] = useState(false)
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   // Bumped on every new sync/unmount so an in-flight poll from a stale sync never
   // keeps ticking after a fresher one started.
@@ -47,13 +51,18 @@ export function useSmSync() {
   const pollUntilLandedRef = useRef<(generation: number, before: string, step: number) => void>(() => {})
   useEffect(() => {
     pollUntilLandedRef.current = (generation, before, step) => {
-      if (step >= SYNC_POLL_DELAYS_MS.length) return
+      if (step >= SYNC_POLL_DELAYS_MS.length) {
+        // Cap reached without seeing a change — stop blocking the button, the job
+        // may still land later and the dashboard will pick it up on its own.
+        if (generationRef.current === generation) setAwaitingSnapshot(false)
+        return
+      }
       timerRef.current = setTimeout(async () => {
         if (generationRef.current !== generation) return
         await queryClient.invalidateQueries({ queryKey: ['dashboard', 'sync-sources'] })
         if (generationRef.current !== generation) return
         const after = JSON.stringify(queryClient.getQueryData(['dashboard', 'sync-sources']) ?? null)
-        if (after !== before) return // landed — the dashboard/last-sync readers pick up the fresh data on their own
+        if (after !== before) { setAwaitingSnapshot(false); return } // landed — the dashboard/last-sync readers pick up the fresh data on their own
         pollUntilLandedRef.current(generation, before, step + 1)
       }, SYNC_POLL_DELAYS_MS[step])
     }
@@ -64,11 +73,16 @@ export function useSmSync() {
   const sync = useCallback(async (connectionId: string, scope?: SmSyncScope) => {
     stopPoll()
     setSyncing(true)
+    setAwaitingSnapshot(false)
     setResult(null)
     try {
       const before = JSON.stringify(queryClient.getQueryData(['dashboard', 'sync-sources']) ?? null)
       await api.post('/sm_reports/sync', { connection_id: connectionId, scope })
       setResult({ kind: 'queued' })
+      // Success: hold the done state until the poll sees the landed snapshot, caps
+      // out, or the next sync call resets it — a repeat click while this is true
+      // never re-queues the job.
+      setAwaitingSnapshot(true)
       await queryClient.invalidateQueries({ queryKey: ['dashboard', 'sync-sources'] })
       pollUntilLandedRef.current(generationRef.current, before, 0)
     } catch (err) {
@@ -87,5 +101,5 @@ export function useSmSync() {
     }
   }, [queryClient, stopPoll])
 
-  return { syncing, result, sync }
+  return { syncing, awaitingSnapshot, result, sync }
 }

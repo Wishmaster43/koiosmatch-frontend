@@ -1100,6 +1100,7 @@
     "subtitle": "Verzendadres en verbinding voor de e-mailmodule",
     "testConnection": "Test verbinding",
     "testSent": "Testmail verstuurd",
+    "testSentButton": "Test verstuurd",
     "testFailed": "Verbinding mislukt",
     "provider": "E-mail provider",
     "gmailDesc": "Verbind via OAuth2 of App-wachtwoord",

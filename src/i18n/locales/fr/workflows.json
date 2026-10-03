@@ -294,6 +294,7 @@
     "notRun": "Pas encore exécuté",
     "running": "En cours...",
     "run": "Exécuter",
+    "justRan": "Vient de démarrer",
     "folders": "Dossiers",
     "newFolder": "Nouveau dossier",
     "newFolderTitle": "Nouveau dossier",

@@ -294,6 +294,7 @@
     "notRun": "Aún no ejecutado",
     "running": "Procesando...",
     "run": "Ejecutar",
+    "justRan": "Recién iniciado",
     "folders": "Carpetas",
     "newFolder": "Nueva carpeta",
     "newFolderTitle": "Nueva carpeta",

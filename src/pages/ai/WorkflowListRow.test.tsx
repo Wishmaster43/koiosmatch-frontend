@@ -64,6 +64,25 @@ describe('WorkflowListRow', () => {
     render(<WorkflowListRow workflow={{ ...baseWorkflow, steps: [] }} onRun={vi.fn()} onEdit={vi.fn()} onToggleStatus={vi.fn()} />)
     expect(screen.queryByText(/^\+\d+$/)).not.toBeInTheDocument()
   })
+
+  // N007-POINT3-FIX-1: a run button that already succeeded must not fire a
+  // second POST on a quick repeat click, until the "just ran" flash clears.
+  it('disables the run button and shows "just ran" after onRun resolves, and a repeat click does not call onRun again', async () => {
+    let resolveRun!: () => void
+    const onRun = vi.fn(() => new Promise<void>(res => { resolveRun = res }))
+    render(<WorkflowListRow workflow={baseWorkflow} onRun={onRun} onEdit={vi.fn()} onToggleStatus={vi.fn()} />)
+
+    const runButton = screen.getByRole('button', { name: 'Uitvoeren' })
+    fireEvent.click(runButton)
+    expect(onRun).toHaveBeenCalledTimes(1)
+
+    await act(async () => { resolveRun(); await Promise.resolve() })
+
+    const doneButton = screen.getByRole('button', { name: 'Zojuist gestart' })
+    expect(doneButton).toBeDisabled()
+    fireEvent.click(doneButton)
+    expect(onRun).toHaveBeenCalledTimes(1) // the repeat click never re-fired the run
+  })
 })
 
 // TRASH-OVERAL-1b: an archived row shows its state and a gated restore action —

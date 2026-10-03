@@ -193,6 +193,7 @@
       "noPermission": "No permission to sync",
       "noConnection": "No active Shiftmanager connection found",
       "started": "Sync started. This can take a few minutes",
+      "awaiting": "Sync started…",
       "failed": "Sync failed",
       "tooManyRequests": "Too many attempts, try again in {{secs}}s"
     },

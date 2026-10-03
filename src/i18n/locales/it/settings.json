@@ -1100,6 +1100,7 @@
     "subtitle": "Indirizzo mittente e connessione per il modulo e-mail",
     "testConnection": "Testa connessione",
     "testSent": "E-mail di prova inviata",
+    "testSentButton": "Test inviato",
     "testFailed": "Connessione non riuscita",
     "provider": "Provider e-mail",
     "gmailDesc": "Connetti tramite OAuth2 o password per le app",

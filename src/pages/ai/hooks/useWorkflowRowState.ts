@@ -6,7 +6,7 @@
  * both call sites — three useState calls, called unconditionally, first thing
  * in the component. (DRY round 11, LAYOUT.)
  */
-import { useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import type { Workflow } from '@/types/workflow'
 
 // Shared archive/restore/trash lifecycle props for one workflow card/row
@@ -14,7 +14,10 @@ import type { Workflow } from '@/types/workflow'
 // (WorkflowListRow adds folderName/onToggleStatus).
 export interface WorkflowRowLifecycleProps {
   workflow: Workflow
-  onRun: (id?: string | number) => void | Promise<void>
+  // N007-POINT3-FIX-1 verifier fix: onRun may resolve `false` for a failed/refused
+  // run (handleRun's own catch branches) — runWithDoneFlash only flashes "just
+  // ran" when the result isn't explicitly `false`.
+  onRun: (id?: string | number) => void | boolean | Promise<void | boolean>
   // WORKFLOW-PERMS-1: false renders Run disabled with the reason (workflows.run missing).
   canRun?: boolean
   onEdit: () => void
@@ -36,5 +39,37 @@ export function useWorkflowRowState() {
   const [running, setRunning] = useState(false)
   const [restoring, setRestoring] = useState(false)
   const [hover, setHover] = useState(false)
-  return { running, setRunning, restoring, setRestoring, hover, setHover }
+  // N007-POINT3-FIX-1: true for a short "just ran" flash right after a run's
+  // refetch has landed, before the button returns to its normal "Run" label.
+  const [justRan, setJustRan] = useState(false)
+  // Alive guard for the flash timeout below — never setState after unmount.
+  const aliveRef = useRef(true)
+  useEffect(() => { aliveRef.current = true; return () => { aliveRef.current = false } }, [])
+
+  // N007-POINT3-FIX-1: the shared "run once, flash done" wrapper for
+  // WorkflowCard/WorkflowListRow's Run button — both had this identical block
+  // (CLONE-BY-CONSTRUCTION-1), so it lives here once. A click while already
+  // running or still flashing "just ran" is a no-op; onRun's own promise
+  // (resolving only once its refetch has landed, see useWorkflowsData.handleRun)
+  // decides how long `running` stays true.
+  const runWithDoneFlash = useCallback(async (
+    onRun: (id?: string | number) => void | boolean | Promise<void | boolean>,
+    id?: string | number,
+  ) => {
+    if (running || justRan) return
+    setRunning(true)
+    try {
+      // N007-POINT3-FIX-1 verifier fix: an explicit `false` means the run FAILED
+      // or was refused (409) — never flash "just ran" over something that didn't run.
+      const result = await onRun(id)
+      if (result !== false) {
+        setJustRan(true)
+        setTimeout(() => { if (aliveRef.current) setJustRan(false) }, 3000)
+      }
+    } finally {
+      setRunning(false)
+    }
+  }, [running, justRan])
+
+  return { running, setRunning, restoring, setRestoring, hover, setHover, justRan, setJustRan, runWithDoneFlash }
 }

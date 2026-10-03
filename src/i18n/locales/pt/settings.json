@@ -1100,6 +1100,7 @@
     "subtitle": "Endereço de envio e ligação para o módulo de e-mail",
     "testConnection": "Testar ligação",
     "testSent": "E-mail de teste enviado",
+    "testSentButton": "Teste enviado",
     "testFailed": "Falha na ligação",
     "provider": "Fornecedor de e-mail",
     "gmailDesc": "Ligue via OAuth2 ou palavra-passe de aplicação",

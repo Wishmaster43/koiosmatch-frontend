@@ -841,6 +841,7 @@
     "subtitle": "Dirección de remitente y conexión para el módulo de correo",
     "testConnection": "Probar conexión",
     "testSent": "Correo de prueba enviado",
+    "testSentButton": "Prueba enviada",
     "testFailed": "Conexión fallida",
     "provider": "Proveedor de correo",
     "gmailDesc": "Conectar mediante OAuth2 o contraseña de aplicación",

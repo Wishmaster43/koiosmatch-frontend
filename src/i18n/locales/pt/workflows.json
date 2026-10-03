@@ -388,6 +388,7 @@
     "notRun": "Ainda não executado",
     "running": "A processar...",
     "run": "Executar",
+    "justRan": "Iniciado agora",
     "folders": "Pastas",
     "newFolder": "Nova pasta",
     "newFolderTitle": "Nova pasta",

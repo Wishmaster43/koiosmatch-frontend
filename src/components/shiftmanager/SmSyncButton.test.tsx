@@ -6,6 +6,7 @@
  * queued/throttled/error feedback states.
  */
 import '@/i18n'
+import nlShiftmanager from '@/i18n/locales/nl/shiftmanager.json'
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { render, screen, fireEvent } from '@testing-library/react'
 import SmSyncButton from './SmSyncButton'
@@ -23,7 +24,7 @@ beforeEach(() => {
   vi.clearAllMocks()
   mockUseAuth.mockReturnValue({ isSuperAdmin: () => true })
   mockUseSmConnections.mockReturnValue({ connections: [{ value: 'c1', label: 'demo — shiftmanager (host)' }], loading: false })
-  mockUseSmSync.mockReturnValue({ syncing: false, result: null, sync: mockSync })
+  mockUseSmSync.mockReturnValue({ syncing: false, awaitingSnapshot: false, result: null, sync: mockSync })
 })
 
 describe('SmSyncButton', () => {
@@ -72,8 +73,22 @@ describe('SmSyncButton', () => {
   })
 
   it('shows the error feedback', () => {
-    mockUseSmSync.mockReturnValue({ syncing: false, result: { kind: 'error' }, sync: mockSync })
+    mockUseSmSync.mockReturnValue({ syncing: false, awaitingSnapshot: false, result: { kind: 'error' }, sync: mockSync })
     render(<SmSyncButton />)
-    expect(screen.getByText(/mislukt/i)).toBeInTheDocument()
+    // The real nl copy of the failure label, read from the locale file (never a Dutch literal in a test).
+    expect(screen.getByText(nlShiftmanager.charts.sync.failed)).toBeInTheDocument()
+  })
+
+  // N007-POINT3-FIX-1: the button stays disabled with a "done" label while the
+  // queued sync is still awaiting its landed snapshot — a repeat click must not
+  // call sync() again.
+  it('stays disabled with the "sync started" label while awaiting the snapshot, and a repeat click does not re-fire sync', () => {
+    mockUseSmSync.mockReturnValue({ syncing: false, awaitingSnapshot: true, result: { kind: 'queued' }, sync: mockSync })
+    render(<SmSyncButton />)
+    const button = screen.getByRole('button')
+    expect(button).toBeDisabled()
+    expect(screen.getByText(/Sync gestart/i)).toBeInTheDocument()
+    fireEvent.click(button)
+    expect(mockSync).not.toHaveBeenCalled()
   })
 })

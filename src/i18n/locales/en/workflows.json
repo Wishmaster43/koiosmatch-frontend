@@ -298,6 +298,7 @@
     "notRun": "Not run yet",
     "running": "Working...",
     "run": "Run",
+    "justRan": "Just started",
     "folders": "Folders",
     "newFolder": "New folder",
     "newFolderTitle": "New folder",

@@ -193,6 +193,7 @@
       "noPermission": "Geen rechten om te synchroniseren",
       "noConnection": "Geen actieve Shiftmanager-koppeling gevonden",
       "started": "Synchronisatie gestart. Kan enkele minuten duren",
+      "awaiting": "Sync gestart…",
       "failed": "Synchroniseren mislukt",
       "tooManyRequests": "Te veel pogingen, probeer over {{secs}}s opnieuw"
     },

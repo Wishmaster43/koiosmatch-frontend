@@ -104,7 +104,9 @@ interface WorkflowsListPanelProps extends Omit<WorkflowRowActionHandlers, 'grace
   selectedFolder: FolderId
   dragWf: MutableRefObject<string | number | null>
   openEditor: (wf: Workflow, runId?: string | number | null) => void
-  handleRun: (id?: string | number) => void | Promise<void>
+  // N007-POINT3-FIX-1 verifier fix: handleRun may resolve `false` for a
+  // failed/refused run (useWorkflowsData.handleRun) — widened to match.
+  handleRun: (id?: string | number) => void | boolean | Promise<void | boolean>
   handleToggleStatus: (wf: Workflow) => void
   // WORKFLOW-PERMS-1: the workflows.run / workflows.create verbs (open until the BE seeds them).
   canRun?: boolean

@@ -841,6 +841,7 @@
     "subtitle": "Adresse d'expéditeur et connexion pour le module e-mail",
     "testConnection": "Tester la connexion",
     "testSent": "E-mail de test envoyé",
+    "testSentButton": "Test envoyé",
     "testFailed": "Échec de la connexion",
     "provider": "Fournisseur e-mail",
     "gmailDesc": "Connexion via OAuth2 ou mot de passe d'application",

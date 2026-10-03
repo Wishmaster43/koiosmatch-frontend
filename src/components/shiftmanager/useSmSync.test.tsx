@@ -84,6 +84,37 @@ describe('useSmSync · backoff poll', () => {
     expect(invalidateSpy).toHaveBeenCalledTimes(countAfterSecondSync + 1)
   })
 
+  // N007-POINT3-FIX-1: the button-facing "done state" flag — true right after the
+  // 202, cleared only once the poll actually sees the landed snapshot.
+  it('keeps awaitingSnapshot true from the 202 until the poll sees the landed snapshot', async () => {
+    const client = new QueryClient({ defaultOptions: { queries: { retry: false } } })
+    client.setQueryData(SYNC_KEY, [{ system: 'shiftmanager', last_synced_at: 'before' }])
+    mockedPost.mockResolvedValue({ data: { queued: [], last_synced_at: 'before' } })
+
+    const { result } = renderHook(() => useSmSync(), { wrapper: makeWrapper(client) })
+    await act(async () => { await result.current.sync('c1') })
+    expect(result.current.awaitingSnapshot).toBe(true)
+
+    // Still unchanged after one backoff step — stays true.
+    await act(async () => { await vi.advanceTimersByTimeAsync(5000) })
+    expect(result.current.awaitingSnapshot).toBe(true)
+    expect(mockedPost).toHaveBeenCalledTimes(1) // a repeat click would call sync() again; the button itself blocks it via the flag
+
+    // The job lands — flag clears.
+    client.setQueryData(SYNC_KEY, [{ system: 'shiftmanager', last_synced_at: 'after' }])
+    await act(async () => { await vi.advanceTimersByTimeAsync(5000) })
+    expect(result.current.awaitingSnapshot).toBe(false)
+  })
+
+  it('clears awaitingSnapshot on a 429/error response (no poll started)', async () => {
+    const client = new QueryClient({ defaultOptions: { queries: { retry: false } } })
+    mockedPost.mockRejectedValue({ response: { status: 429, data: { retry_after: 30 } } })
+
+    const { result } = renderHook(() => useSmSync(), { wrapper: makeWrapper(client) })
+    await act(async () => { await result.current.sync('c1') })
+    expect(result.current.awaitingSnapshot).toBe(false)
+  })
+
   it('surfaces a throttled (429) result without starting a poll', async () => {
     const client = new QueryClient({ defaultOptions: { queries: { retry: false } } })
     const invalidateSpy = vi.spyOn(client, 'invalidateQueries')

@@ -10,7 +10,7 @@
  * improve+summarize-only default (ACTIONS-SCOPE-DEFAULT-FLIP), no per-field
  * override needed.
  */
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect, useCallback, useRef } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Check, Mail, AlertTriangle, Eye, EyeOff } from 'lucide-react'
 import api from '@/lib/api'
@@ -82,6 +82,14 @@ export default function EmailSettings({ context = 'klanten' }: EmailSettingsProp
   const [loading,      setLoading]       = useState(true)
   const [testing,      setTesting]       = useState(false)
   const [testResult,   setTestResult]    = useState<OutcomeBanner | null>(null)
+  // N007-POINT3-FIX-1: true after a SUCCESSFUL test send until a form setting
+  // changes or 60s pass — a repeat click while true never re-sends the real
+  // test e-mail. A failed test keeps today's behaviour (button re-enabled).
+  const [testSent,     setTestSent]      = useState(false)
+  const testSentTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+  // Alive guard so the 60s timeout never setState after unmount.
+  const aliveRef = useRef(true)
+  useEffect(() => { aliveRef.current = true; return () => { aliveRef.current = false; if (testSentTimerRef.current) clearTimeout(testSentTimerRef.current) } }, [])
   const [loadError,    setLoadError]     = useState(false)
   // DL-10: the real OAuth coupling state for this context — GET /settings/email/{context}/status.
   const [connStatus,   setConnStatus]    = useState<EmailConnStatus | null>(null)
@@ -215,17 +223,35 @@ export default function EmailSettings({ context = 'klanten' }: EmailSettingsProp
   }
 
   // Sends a live test email through the configured provider and surfaces the server outcome/error as a banner.
+  // N007-POINT3-FIX-1: a successful send flips the button into a disabled "done"
+  // state for 60s (or until the form changes, see the effect below) so a repeat
+  // click right after success never fires a second real test e-mail.
   const testConnection = async () => {
+    if (testing || testSent) return
     setTesting(true)
     setTestResult(null)
     try {
       const res = await api.post('/settings/email/test', { context })
       setTestResult({ ok: true, msg: res.data?.message ?? t('email.testSent') })
+      setTestSent(true)
+      if (testSentTimerRef.current) clearTimeout(testSentTimerRef.current)
+      testSentTimerRef.current = setTimeout(() => { if (aliveRef.current) setTestSent(false) }, 60000)
     } catch (err) {
       setTestResult({ ok: false, msg: (err as { response?: { data?: { message?: string } } }).response?.data?.message ?? t('email.testFailed') })
     }
     setTesting(false)
   }
+
+  // N007-POINT3-FIX-1: any provider/context setting change re-enables the test
+  // button immediately — the user is now testing a DIFFERENT configuration.
+  // `context` is in the deps too (verifier fix): the registry can reuse this
+  // component's instance across the klanten/kandidaten/planning sub-tabs
+  // (groups.communication.tsx), and without it a test sent on one context left
+  // "Test verstuurd" disabled on another that was never actually tested.
+  useEffect(() => {
+    setTestSent(false)
+    if (testSentTimerRef.current) { clearTimeout(testSentTimerRef.current); testSentTimerRef.current = null }
+  }, [context, provider, fromName, fromEmail, smtpHost, smtpPort, smtpUser, smtpPass, smtpSecure, signature])
 
   // Canon field style (G33/fieldMetrics) — was its own height-34 copy, minus a background.
   const inputStyle = fieldInputStyle
@@ -251,9 +277,9 @@ export default function EmailSettings({ context = 'klanten' }: EmailSettingsProp
           <p style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 2 }}>{t(`email.context.${context}.subtitle`)}</p>
         </div>
         <div style={{ display: 'flex', gap: 8, flexShrink: 0 }}>
-          <Button variant="secondary" onClick={testConnection} disabled={testing}>
-            {testing ? <Spinner size={13} /> : <Mail size={13} />}
-            {t('email.testConnection')}
+          <Button variant="secondary" onClick={testConnection} disabled={testing || testSent}>
+            {testing ? <Spinner size={13} /> : testSent ? <Check size={13} /> : <Mail size={13} />}
+            {testSent ? t('email.testSentButton') : t('email.testConnection')}
           </Button>
           {/* SaveButton — the ONE saved-state save action (§4 success token pair). No
               explicit children: SaveButton's own saved/saving/save face (DRY round 11,

@@ -9,7 +9,7 @@
  * Extracted from WorkflowsPage so the page stays a thin container (§3A); this
  * hook owns everything that talks to the backend or localStorage for this page.
  */
-import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect, useRef, useCallback } from 'react'
 import { notify, notifyError } from '@/lib/notify'
 import { useTranslation } from 'react-i18next'
 import api, { unwrap, unwrapList } from '@/lib/api'
@@ -65,45 +65,58 @@ export function useWorkflowsData(showArchived: boolean) {
   // House confirmation dialog (§0 restschuld) — replaces the native window.confirm() below.
   const { confirm, dialog } = useConfirm()
 
-  useEffect(() => {
-    // Archived view asks the backend for soft-deleted rows too (C-27-workflow).
-    // Alive guard (mirrors useWorkflowQueue/useWorkflowQueueBadge in this same folder):
-    // a fast showArchived toggle or retry must never let a stale response win, and no
-    // setState may fire after unmount.
-    let alive = true
-    setLoading(true); setError(false)
-    Promise.allSettled([
-      api.get('/workflows', { params: showArchived ? { include_archived: 1 } : {} }),
+  // The actual list+folders fetch, extracted so handleRun/handleRunBulk can
+  // AWAIT a real reload directly (N007-POINT3-FIX-1) instead of only bumping
+  // fetchTick and hoping the effect below lands before the caller resolves.
+  // `aliveRef` guards against setState after this hook's own unmount; the
+  // mount/showArchived-driven effect below also races a STALE earlier call
+  // against a fresher one via `callIdRef`.
+  const aliveRef = useRef(true)
+  useEffect(() => { aliveRef.current = true; return () => { aliveRef.current = false } }, [])
+  const callIdRef = useRef(0)
+  // N007-POINT3-FIX-1 verifier fix: `silent` skips the loading/error flip so a
+  // post-run refetch never swaps the whole list for a spinner (WorkflowsListPanel
+  // unmounts every row on `loading`, which destroyed the running/justRan state —
+  // the Run button never showed its "done" flash and remounted plainly enabled).
+  const loadList = useCallback(async (archived: boolean, opts?: { silent?: boolean }) => {
+    const callId = ++callIdRef.current
+    if (!opts?.silent) { setLoading(true); setError(false) }
+    const [wfResult, folderResult] = await Promise.allSettled([
+      api.get('/workflows', { params: archived ? { include_archived: 1 } : {} }),
       api.get('/workflow-folders'),
-    ]).then(([wfResult, folderResult]) => {
-      if (!alive) return
-      if (wfResult.status === 'rejected') {
-        // The primary list failed to load — a real error, not "no workflows yet".
-        setError(true)
-        setWorkflows([])
-      } else {
-        const wfs = unwrapList<RawWorkflow>(wfResult.value).rows.map(normalizeWorkflow)
-        // The backend persists the graph (C-27 landed); the localStorage cache
-        // only steps in for a workflow whose SERVER copy carries no edges (saved
-        // pre-C-27). Cached steps are self-consistent (node ids match edge
-        // source/target), so use them wholesale — merging with server ids would mismatch.
-        const merged = wfs.map((wf: Workflow) => {
-          const serverHasGraph = wf.steps.some(s => Array.isArray(s.next) && s.next.length)
-          if (serverHasGraph) return wf           // backend already stores the graph → trust it
-          const raw = localStorage.getItem(`wf_graph_${wf.id}`)
-          if (!raw) return wf
-          try {
-            const cachedSteps = JSON.parse(raw)
-            return { ...wf, steps: cachedSteps }  // cached steps have consistent ids + next[]
-          } catch { return wf }
-        })
-        setWorkflows(merged)
-      }
-      // Folders are secondary (sidebar-only) — a failure there still degrades quietly.
-      setFolders(folderResult.status === 'fulfilled' ? unwrapList<WorkflowFolder>(folderResult.value).rows : [])
-    }).finally(() => { if (alive) setLoading(false) })
-    return () => { alive = false }
-  }, [showArchived, fetchTick])
+    ])
+    // A STALE call (a fresher one started after this one) never overwrites state.
+    if (!aliveRef.current || callIdRef.current !== callId) return
+    if (wfResult.status === 'rejected') {
+      // The primary list failed to load — a real error, not "no workflows yet".
+      setError(true)
+      setWorkflows([])
+    } else {
+      const wfs = unwrapList<RawWorkflow>(wfResult.value).rows.map(normalizeWorkflow)
+      // The backend persists the graph (C-27 landed); the localStorage cache
+      // only steps in for a workflow whose SERVER copy carries no edges (saved
+      // pre-C-27). Cached steps are self-consistent (node ids match edge
+      // source/target), so use them wholesale — merging with server ids would mismatch.
+      const merged = wfs.map((wf: Workflow) => {
+        const serverHasGraph = wf.steps.some(s => Array.isArray(s.next) && s.next.length)
+        if (serverHasGraph) return wf           // backend already stores the graph → trust it
+        const raw = localStorage.getItem(`wf_graph_${wf.id}`)
+        if (!raw) return wf
+        try {
+          const cachedSteps = JSON.parse(raw)
+          return { ...wf, steps: cachedSteps }  // cached steps have consistent ids + next[]
+        } catch { return wf }
+      })
+      setWorkflows(merged)
+    }
+    // Folders are secondary (sidebar-only) — a failure there still degrades quietly.
+    setFolders(folderResult.status === 'fulfilled' ? unwrapList<WorkflowFolder>(folderResult.value).rows : [])
+    setLoading(false)
+  }, [])
+
+  // Archived view asks the backend for soft-deleted rows too (C-27-workflow);
+  // a showArchived flip or retryLoad's fetchTick bump re-runs this.
+  useEffect(() => { loadList(showArchived) }, [showArchived, fetchTick, loadList])
 
   // Manual retry — bumps the tick so the load effect above re-runs.
   const retryLoad = () => setFetchTick(v => v + 1)
@@ -149,16 +162,24 @@ export function useWorkflowsData(showArchived: boolean) {
 
   // User pressed "run" on a workflow: fires the run, and on a 409 (already running)
   // opens the builder focused on that live run instead of just failing.
-  const handleRun = async (id?: string | number) => {
+  // N007-POINT3-FIX-1 verifier fix: returns `true` only on an actual successful
+  // run so runWithDoneFlash's "just ran" flash never claims a FAILED/refused run
+  // succeeded; `false` on every catch branch (409 included — nothing ran).
+  const handleRun = async (id?: string | number): Promise<boolean> => {
     try {
       // 409 (already running) is handled below with its own toast + builder focus.
       // K-3: this is a workflow-EXECUTION call — route it through the
       // configurable engine base URL, same as every other run/cancel/logs call.
       await api.post(`/workflows/${id}/run`, undefined, { quietStatuses: [409], baseURL: resolveWorkflowBaseURL() })
       // Success feedback + refetch, mirroring archive/restore below — otherwise the
-      // last-run stamp stays stale until the user reloads the page.
+      // last-run stamp stays stale until the user reloads the page. handleRun only
+      // resolves once this refetch has LANDED (N007-POINT3-FIX-1), so the caller's
+      // "running" state covers the whole window, not just the POST. `silent: true`
+      // keeps the list visible (WorkflowsListPanel swaps to a spinner on `loading`,
+      // which would unmount every row's running/justRan state mid-flight).
       notify('success', t('page.runStarted'))
-      setFetchTick(v => v + 1)
+      await loadList(showArchived, { silent: true })
+      return true
     } catch (err) {
       const e = err as { response?: { status?: number; data?: { run_id?: string | number } } }
       // RUN-CONTROL-1 single-flight 409: this workflow already has a live run —
@@ -167,10 +188,11 @@ export function useWorkflowsData(showArchived: boolean) {
         notify('info', t('runControl.alreadyRunning'))
         const wf = workflows.find(w => w.id === id)
         if (wf) openEditor(wf, e.response.data?.run_id ?? null)
-        return
+        return false
       }
       // AIK-05: the backend's own (already Dutch) reason, never one anonymous red toast.
       notifyError(extractApiError(err, t('common:actionFailed')))
+      return false
     }
   }
 

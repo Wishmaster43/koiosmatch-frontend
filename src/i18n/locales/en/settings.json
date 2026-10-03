@@ -1100,6 +1100,7 @@
     "subtitle": "Sender address and connection for the email module",
     "testConnection": "Test connection",
     "testSent": "Test email sent",
+    "testSentButton": "Test sent",
     "testFailed": "Connection failed",
     "provider": "Email provider",
     "gmailDesc": "Connect via OAuth2 or app password",

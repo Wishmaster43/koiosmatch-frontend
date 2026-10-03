@@ -98,7 +98,7 @@ export default function WorkflowListRow({ workflow, folderName, onRun, canRun = 
   const { t } = useTranslation('workflows')
   const { formatDate, formatDateTime } = useDateFormat()
   const seedLabel = useSeedLabel()
-  const { running, setRunning, restoring, setRestoring, hover, setHover } = useWorkflowRowState()
+  const { running, restoring, setRestoring, hover, setHover, justRan, runWithDoneFlash } = useWorkflowRowState()
   const active = workflow.status === 'active'
   const archived = Boolean(workflow.archived)
   // TRASH-OVERAL-2: trashed rows swap restore/mark for the erase note + unmark.
@@ -129,16 +129,12 @@ export default function WorkflowListRow({ workflow, folderName, onRun, canRun = 
   if (calledBy > 0) metaParts.push(t('list.relationsCalledBy', { count: calledBy }))
 
   // Run stays a distinct action (stopPropagation) even though the row opens the editor.
-  const handleRun = async (e: MouseEvent) => {
+  // The shared runWithDoneFlash (N007-POINT3-FIX-1) blocks a repeat click while
+  // running or still flashing "just ran" — onRun itself only resolves once its
+  // post-success refetch has landed, so `running` covers the whole window.
+  const handleRun = (e: MouseEvent) => {
     e.stopPropagation()
-    setRunning(true)
-    // The hook's onRun now notifies + refetches the list on success (LIST-FRESH-1)
-    // and toasts on failure — no fixed cosmetic delay needed to "feel" done.
-    try {
-      await onRun(workflow.id)
-    } finally {
-      setRunning(false)
-    }
+    runWithDoneFlash(onRun, workflow.id)
   }
 
   return (
@@ -219,10 +215,10 @@ export default function WorkflowListRow({ workflow, folderName, onRun, canRun = 
           {/* Run is this row's primary action — the solid house accent (also fixes the
               ink-twin: this used to read raw --color-primary on a tinted bg, unlike
               WorkflowCard's already-correct --color-primary-text). */}
-          <Button variant="soft" onClick={handleRun} disabled={running || !canRun} style={{ flexShrink: 0 }}
+          <Button variant="soft" onClick={handleRun} disabled={running || justRan || !canRun} style={{ flexShrink: 0 }}
             title={canRun ? undefined : t('page.runNoPermission')}>
-            {running ? <Spinner size={11} /> : <Play size={11} />}
-            {running ? t('page.running') : t('page.run')}
+            {running ? <Spinner size={11} /> : justRan ? <CheckCircle size={11} /> : <Play size={11} />}
+            {running ? t('page.running') : justRan ? t('page.justRan') : t('page.run')}
           </Button>
 
           {/* Active/draft toggle — same semantics as the editor's status switch (active <-> inactive). */}

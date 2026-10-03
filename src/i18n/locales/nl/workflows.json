@@ -388,6 +388,7 @@
     "notRun": "Nog niet uitgevoerd",
     "running": "Bezig...",
     "run": "Uitvoeren",
+    "justRan": "Zojuist gestart",
     "folders": "Folders",
     "newFolder": "Nieuwe folder",
     "newFolderTitle": "Nieuwe map",

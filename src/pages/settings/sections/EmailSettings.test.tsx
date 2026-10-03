@@ -19,6 +19,7 @@ import api from '@/lib/api'
 // vi.mocked() gives the mocked-module factory's plain vi.fn()s their real Mock typing at every call site.
 const mockedApi = vi.mocked(api, true)
 const mockedGet = vi.mocked(mockedApi.get)
+const mockedPost = vi.mocked(mockedApi.post)
 
 const loadSettings = vi.hoisted(() => vi.fn(async (...a: unknown[]) => { void a; return {} }))
 const saveSettings = vi.hoisted(() => vi.fn(async (...a: unknown[]) => { void a }))
@@ -60,14 +61,14 @@ function renderPanel(context = 'klanten') {
 
 describe('EmailSettings · connection status (DL-10)', () => {
   it('fetches GET /settings/email/{context}/status on mount', async () => {
-    loadSettings.mockResolvedValue({ email_klanten_provider: 'gmail' })
+    loadSettings.mockResolvedValue({ [`email_${CONTEXT}_provider`]: 'gmail' })
     mockedGet.mockResolvedValue({ data: { data: { context: 'klanten', connected: false, provider: 'gmail', address: null } } })
     renderPanel(CONTEXT)
     await waitFor(() => expect(mockedGet).toHaveBeenCalledWith('/settings/email/klanten/status'))
   })
 
   it('shows the connected state with the provider and address', async () => {
-    loadSettings.mockResolvedValue({ email_klanten_provider: 'gmail' })
+    loadSettings.mockResolvedValue({ [`email_${CONTEXT}_provider`]: 'gmail' })
     mockedGet.mockResolvedValue({ data: { data: { context: 'klanten', connected: true, provider: 'gmail', address: 'info@yesway.nl' } } })
     renderPanel(CONTEXT)
     await waitFor(() => expect(
@@ -78,7 +79,7 @@ describe('EmailSettings · connection status (DL-10)', () => {
   // SETTINGS-INCON-B1b: the chosen provider reads as chosen via the §4 "aan/gelukt"
   // success pair (activeFill + activeOnly), same green as the super-admin package picker.
   it('paints the chosen provider in the success pair', async () => {
-    loadSettings.mockResolvedValue({ email_klanten_provider: 'gmail' })
+    loadSettings.mockResolvedValue({ [`email_${CONTEXT}_provider`]: 'gmail' })
     mockedGet.mockResolvedValue({ data: { data: { connected: false, provider: 'gmail', address: null } } })
     renderPanel(CONTEXT)
     const active = await screen.findByRole('radio', { name: /Gmail/ })
@@ -116,9 +117,80 @@ describe('EmailSettings · field label association (§6)', () => {
   })
 })
 
+// N007-POINT3-FIX-1: a successful test send disables the button with a "sent"
+// label until a form setting changes (or 60s pass); a repeat click never
+// re-fires the real test e-mail.
+describe('EmailSettings · test connection done state (N007-POINT3-FIX-1)', () => {
+  it('disables the test button and shows "sent" after success, and a repeat click does not POST again', async () => {
+    loadSettings.mockResolvedValue({ email_klanten_provider: 'manual' })
+    mockedGet.mockResolvedValue({ data: { data: { connected: false, provider: null, address: null } } })
+    mockedPost.mockResolvedValue({ data: { message: 'ok' } })
+    const user = userEvent.setup()
+    renderPanel(CONTEXT)
+    await waitFor(() => expect(mockedGet).toHaveBeenCalled())
+
+    const testButton = screen.getByRole('button', { name: st('email.testConnection') })
+    await user.click(testButton)
+    await waitFor(() => expect(mockedPost).toHaveBeenCalledWith('/settings/email/test', { context: CONTEXT }))
+
+    const sentButton = await screen.findByRole('button', { name: st('email.testSentButton') })
+    expect(sentButton).toBeDisabled()
+    await user.click(sentButton)
+    expect(mockedPost).toHaveBeenCalledTimes(1) // the repeat click never re-sent the real test e-mail
+  })
+
+  it('re-enables the test button as soon as a form setting changes', async () => {
+    loadSettings.mockResolvedValue({ email_klanten_provider: 'manual' })
+    mockedGet.mockResolvedValue({ data: { data: { connected: false, provider: null, address: null } } })
+    mockedPost.mockResolvedValue({ data: { message: 'ok' } })
+    const user = userEvent.setup()
+    renderPanel(CONTEXT)
+    await waitFor(() => expect(mockedGet).toHaveBeenCalled())
+
+    await user.click(screen.getByRole('button', { name: st('email.testConnection') }))
+    await screen.findByRole('button', { name: st('email.testSentButton') })
+
+    await user.type(screen.getByLabelText(st('email.senderName')), 'A')
+    expect(await screen.findByRole('button', { name: st('email.testConnection') })).not.toBeDisabled()
+  })
+
+  // N007-POINT3-FIX-1 verifier fix: the registry can reuse this component's
+  // React instance across the klanten/kandidaten/planning sub-tabs
+  // (groups.communication.tsx renders the same <EmailSettings> type for each) —
+  // a context switch must re-enable the button even when every field value is
+  // unchanged, never leave "Test verstuurd" on a context that was never tested.
+  it('re-enables the test button on a context switch (shared component instance across sub-tabs)', async () => {
+    loadSettings.mockResolvedValue({ email_klanten_provider: 'manual' })
+    mockedGet.mockResolvedValue({ data: { data: { connected: false, provider: null, address: null } } })
+    mockedPost.mockResolvedValue({ data: { message: 'ok' } })
+    const user = userEvent.setup()
+    const { rerender } = renderPanel(CONTEXT)
+    await waitFor(() => expect(mockedGet).toHaveBeenCalled())
+
+    await user.click(screen.getByRole('button', { name: st('email.testConnection') }))
+    await screen.findByRole('button', { name: st('email.testSentButton') })
+
+    rerender(<I18nextProvider i18n={i18n}><EmailSettings context="kandidaten" /></I18nextProvider>)
+    expect(await screen.findByRole('button', { name: st('email.testConnection') })).not.toBeDisabled()
+  })
+
+  it('keeps today\'s behaviour on a FAILED test: the button re-enables, no "sent" state', async () => {
+    loadSettings.mockResolvedValue({ email_klanten_provider: 'manual' })
+    mockedGet.mockResolvedValue({ data: { data: { connected: false, provider: null, address: null } } })
+    mockedPost.mockRejectedValue({ response: { data: { message: 'SMTP connection refused' } } })
+    const user = userEvent.setup()
+    renderPanel(CONTEXT)
+    await waitFor(() => expect(mockedGet).toHaveBeenCalled())
+
+    await user.click(screen.getByRole('button', { name: st('email.testConnection') }))
+    await waitFor(() => expect(screen.getByText('SMTP connection refused')).toBeInTheDocument())
+    expect(screen.getByRole('button', { name: st('email.testConnection') })).not.toBeDisabled()
+  })
+})
+
 describe('EmailSettings · Koppelen (DL-10)', () => {
   it('fetches the consent URL and redirects the browser to it, never a bare navigation', async () => {
-    loadSettings.mockResolvedValue({ email_klanten_provider: 'gmail' })
+    loadSettings.mockResolvedValue({ [`email_${CONTEXT}_provider`]: 'gmail' })
     mockedGet.mockImplementation(async url => {
       if (url === '/settings/email/klanten/status') return { data: { data: { connected: false, provider: 'gmail', address: null } } }
       if (url === '/settings/email/oauth/klanten/redirect') return { data: { url: 'https://accounts.google.com/o/oauth2/consent?x=1' } }
@@ -140,7 +212,7 @@ describe('EmailSettings · Koppelen (DL-10)', () => {
 
 describe('EmailSettings · Ontkoppelen (DL-10)', () => {
   it('calls DELETE /settings/email/oauth/{context} and refetches status', async () => {
-    loadSettings.mockResolvedValue({ email_klanten_provider: 'gmail' })
+    loadSettings.mockResolvedValue({ [`email_${CONTEXT}_provider`]: 'gmail' })
     mockedGet.mockResolvedValue({ data: { data: { connected: true, provider: 'gmail', address: 'info@yesway.nl' } } })
     mockedApi.delete.mockResolvedValue({ data: { message: 'ok' } })
     const user = userEvent.setup()
@@ -154,7 +226,7 @@ describe('EmailSettings · Ontkoppelen (DL-10)', () => {
 describe('EmailSettings · Koppelen/Ontkoppelen are gated on settings.update (DL-10)', () => {
   it('disables Koppelen for a settings.view-only caller', async () => {
     hasPermission.mockReturnValue(false)
-    loadSettings.mockResolvedValue({ email_klanten_provider: 'gmail' })
+    loadSettings.mockResolvedValue({ [`email_${CONTEXT}_provider`]: 'gmail' })
     mockedGet.mockResolvedValue({ data: { data: { connected: false, provider: 'gmail', address: null } } })
     renderPanel(CONTEXT)
 
@@ -163,7 +235,7 @@ describe('EmailSettings · Koppelen/Ontkoppelen are gated on settings.update (DL
 
   it('disables Ontkoppelen for a settings.view-only caller', async () => {
     hasPermission.mockReturnValue(false)
-    loadSettings.mockResolvedValue({ email_klanten_provider: 'gmail' })
+    loadSettings.mockResolvedValue({ [`email_${CONTEXT}_provider`]: 'gmail' })
     mockedGet.mockResolvedValue({ data: { data: { connected: true, provider: 'gmail', address: 'info@yesway.nl' } } })
     renderPanel(CONTEXT)
 
@@ -192,7 +264,7 @@ describe('EmailSettings · OAuth callback landing reads the hash, not location.s
 
   it('shows the connected banner and refetches status from a hash-carried ?email_oauth=connected', async () => {
     window.location.hash = '#settings/communication/email_klanten?email_oauth=connected&context=klanten&email=info%40yesway.nl'
-    loadSettings.mockResolvedValue({ email_klanten_provider: 'gmail' })
+    loadSettings.mockResolvedValue({ [`email_${CONTEXT}_provider`]: 'gmail' })
     mockedGet.mockResolvedValue({ data: { data: { connected: true, provider: 'gmail', address: 'info@yesway.nl' } } })
     renderPanel(CONTEXT)
 
@@ -206,7 +278,7 @@ describe('EmailSettings · OAuth callback landing reads the hash, not location.s
 
   it('ignores a connected callback addressed to a different context tab', async () => {
     window.location.hash = '#settings/communication/email_kandidaten?email_oauth=connected&context=kandidaten&email=x%40y.nl'
-    loadSettings.mockResolvedValue({ email_klanten_provider: 'gmail' })
+    loadSettings.mockResolvedValue({ [`email_${CONTEXT}_provider`]: 'gmail' })
     mockedGet.mockResolvedValue({ data: { data: { connected: false, provider: 'gmail', address: null } } })
     renderPanel(CONTEXT)
 
