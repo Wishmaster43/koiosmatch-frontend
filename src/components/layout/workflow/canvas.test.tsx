@@ -161,3 +161,37 @@ describe('ModuleNode · run button busy state', () => {
     await screen.findByLabelText('canvas.runModule')
   })
 })
+
+// RUN-INSPECTOR-1b: a finished node whose run carries a real step id (data.onInspect)
+// turns its status badge into a real button that opens the per-step inspector; a
+// node without a step id (no onInspect) keeps the plain, non-interactive badge.
+describe('ModuleNode · RUN-INSPECTOR-1b status marker opens the inspector', () => {
+  it('renders the status badge as a button and calls onInspect on click when a step id is known', () => {
+    mockCatalog = realCatalog('candidates')
+    const onInspect = vi.fn()
+    render(<ModuleNode id="n1" data={{ type: 'candidates', status: 'success', onInspect } as unknown as FlowNodeData} />)
+    const badge = screen.getByLabelText('inspector.open')
+    expect(badge.tagName).toBe('BUTTON')
+    fireEvent.click(badge)
+    expect(onInspect).toHaveBeenCalledTimes(1)
+  })
+
+  it('renders no inspect affordance for a node without a step id', () => {
+    mockCatalog = realCatalog('candidates')
+    render(<ModuleNode id="n1" data={{ type: 'candidates', status: 'success' } as unknown as FlowNodeData} />)
+    expect(screen.queryByLabelText('inspector.open')).not.toBeInTheDocument()
+  })
+
+  // VERIFIER FIX: a finished entity-fetch node also carries a count badge
+  // (items_total) — the inspector affordance must still show next to it, and
+  // the counter must keep rendering too.
+  it('renders the inspector affordance next to the counter badge on a finished node with items', () => {
+    mockCatalog = realCatalog('candidates')
+    const onInspect = vi.fn()
+    render(<ModuleNode id="n1" data={{ type: 'candidates', status: 'success', itemsTotal: 38, onInspect } as unknown as FlowNodeData} />)
+    const badge = screen.getByLabelText('inspector.open')
+    fireEvent.click(badge)
+    expect(onInspect).toHaveBeenCalledTimes(1)
+    expect(screen.getByText('38')).toBeInTheDocument()
+  })
+})

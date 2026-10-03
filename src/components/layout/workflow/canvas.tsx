@@ -251,18 +251,39 @@ function ModuleNode({ id, data, selected }: { id: string; data: FlowNodeData; se
         {/* Status badge — live run (success/failed) or a stored test-run output.
             Suppressed while the counter badge occupies the same corner (verify
             finding): the green ring already encodes success; failed always shows
-            here since the counter never renders on a failed step. */}
-        {badgeCount == null && (done || failed || !!data.output) && (
-          <div style={{
-            position: 'absolute', top: -4, right: -4,
-            width: 16, height: 16, borderRadius: '50%',
-            background: failed ? 'var(--color-danger)' : 'var(--color-success)', border: '2px solid var(--surface)',
-            display: 'flex', alignItems: 'center', justifyContent: 'center',
-          }}>
-            {/* Icon on a FIXED semantic fill — the on-danger/on-success tokens, never a raw
-                'white' (white only reaches 3.3:1 on --color-success, failing 4.5:1). */}
-            {failed ? <X size={9} color="var(--color-on-danger)" /> : <CheckCircle size={9} color="var(--color-on-success)" />}
-          </div>
+            here since the counter never renders on a failed step.
+            RUN-INSPECTOR-1b: when the run gave this node a real step id, the badge
+            becomes a real button that opens the per-step inspector — never a bare
+            onClick on a non-button div. */}
+        {/* VERIFIER FIX: a finished node that also carries a count badge (e.g. an
+            entity fetch with items_total) must still show the inspector affordance —
+            only suppress the status badge render itself, never the onInspect button. */}
+        {(badgeCount == null || !!data.onInspect) && (done || failed || !!data.output) && (
+          data.onInspect ? (
+            // Button's danger/success variants already carry the right fixed-fill +
+            // on-fill ink pair — only POSITION (layout) is overridden here: the atom keeps
+            // its own sm size (MAATWET: a <Button> never carries a height in its style),
+            // so the clickable badge is the same 28px circle idiom as the node's run button.
+            <Button
+              variant={failed ? 'danger' : 'success'} size="sm" iconOnly
+              onClick={(e) => { e.stopPropagation(); (data.onInspect as () => void)() }}
+              title={t('inspector.open')} aria-label={t('inspector.open')}
+              style={{
+                position: 'absolute', top: -10, right: -10, borderRadius: '50%',
+                border: '2px solid var(--surface)', padding: 0,
+              }}>
+              {failed ? <X size={12} /> : <CheckCircle size={12} />}
+            </Button>
+          ) : (
+            <div style={{
+              position: 'absolute', top: -4, right: -4,
+              width: 16, height: 16, borderRadius: '50%',
+              background: failed ? 'var(--color-danger)' : 'var(--color-success)', border: '2px solid var(--surface)',
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+            }}>
+              {failed ? <X size={9} color="var(--color-on-danger)" /> : <CheckCircle size={9} color="var(--color-on-success)" />}
+            </div>
+          )
         )}
         {/* PICKER-INTERSECT: "not executable" marker — TOP-LEFT. The status badge above
             already owns top-right (done/failed/output) and the counter badge owns

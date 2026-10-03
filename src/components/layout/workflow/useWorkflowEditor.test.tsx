@@ -636,6 +636,41 @@ describe('useWorkflowEditor · handleNodeRun', () => {
   })
 })
 
+// RUN-INSPECTOR-1b: the canvas node's own run-status marker opens the per-step
+// inspector for that node's step of the live run shown in the Logs panel —
+// `stepForNode(nodeId)` on `liveRun.steps` (step_id = node id, id = the route's
+// {step}) feeds an `onInspect` callback into the node's data, and clicking it
+// sets `inspecting` with the run+step ids the panel needs.
+describe('useWorkflowEditor · RUN-INSPECTOR-1b stepForNode + inspecting', () => {
+  it('gives a node whose run step carries both ids an onInspect that sets inspecting', async () => {
+    const run = { id: 'r1', status: 'success', steps: [{ step_id: 'n1', id: 42, status: 'success' }] }
+    vi.mocked(api.get).mockImplementation(async (url: string) =>
+      url.includes('/workflow-runs/') ? { data: { data: run } } : { data: { data: [] } })
+    const { result } = renderHook(
+      () => useWorkflowEditor({
+        workflow: wf([{ id: 'n1', type: 'candidates', config: {}, position: { x: 0, y: 0 } }]),
+        onSave: vi.fn(),
+        initialRunId: 'r1',
+      }),
+      { wrapper },
+    )
+    await waitFor(() => expect(result.current.nodesWithFirst[0].data.inspectStepId).toBe(42), { timeout: 5000 })
+    expect(result.current.stepForNode('n1')).toMatchObject({ step_id: 'n1', id: 42 })
+    expect(result.current.inspecting).toBeNull()
+
+    act(() => { (result.current.nodesWithFirst[0].data.onInspect as () => void)() })
+    expect(result.current.inspecting).toEqual({ runId: 'r1', stepId: 42, nodeId: 'n1' })
+  })
+
+  it('gives a node with no run step no onInspect at all', async () => {
+    const { result } = setup([{ id: 'n1', type: 'candidates', config: {}, position: { x: 0, y: 0 } }])
+    await waitFor(() => expect(result.current.nodesWithFirst).toHaveLength(1))
+    expect(result.current.nodesWithFirst[0].data.inspectStepId).toBeNull()
+    expect(result.current.nodesWithFirst[0].data.onInspect).toBeUndefined()
+    expect(result.current.stepForNode('n1')).toBeNull()
+  })
+})
+
 // VERTREKMODULE-1 proof (CMBE 10-09, point 3): a workflow whose only step is a
 // send step has no Koios start module and says so in the header.
 describe('useWorkflowEditor · start hint for a send-only workflow', () => {

@@ -27,6 +27,7 @@ import { EdgeFilterPanel } from './workflow/EdgeFilterPanel'
 import ModulePicker from './workflow/ModulePicker'
 import ConfigPanel from './workflow/ConfigPanel'
 import LogsPanel from './workflow/LogsPanel'
+import RunStepInspectorPanel from './workflow/RunStepInspectorPanel'
 import WorkflowHistoryView from './workflow/WorkflowHistoryView'
 import WorkflowRelationsView from './workflow/WorkflowRelationsView'
 import WorkflowEditorHeader from './workflow/WorkflowEditorHeader'
@@ -55,6 +56,7 @@ function EditorInner({ workflow, onClose, onSave, initialRunId }: {
     firstNodeId, setStartNodeId, startInvalid, getUpstreamVariables,
     handleEdgeAdd, handleEdgeDelete, handleEdgeFilter, saveEdgeFilter, handleNodeRun,
     insertModule, addRouterBranch, updateNodeConfig, deleteNode, handleSave, handleRun, isDirty,
+    inspecting, setInspecting,
   } = useWorkflowEditor({ workflow, onSave, initialRunId })
   const { t } = useTranslation('workflows')
   // WORKFLOW-PERMS-1: Run and Save gate on the workflows.* verbs (open until the BE seeds them).
@@ -105,6 +107,14 @@ function EditorInner({ workflow, onClose, onSave, initialRunId }: {
   // EdgeFilterPanel open in this session.
   const { catalog: moduleCatalog } = useModuleCatalog()
   const filterEdge = edges.find(e => e.id === filterState?.edgeId)
+  // RUN-INSPECTOR-1b: the inspected node's own module label (same translation
+  // path as the canvas node's own label), honest fallback for an unknown type.
+  const inspectingNode = inspecting ? nodesWithFirst.find(n => n.id === inspecting.nodeId) : null
+  const inspectingType = inspectingNode?.data.type as string | undefined
+  const inspectingKnownMeta = inspectingType ? MODULE_META[inspectingType] : undefined
+  const inspectingModuleLabel = inspectingType
+    ? t('modules.' + inspectingType, { defaultValue: inspectingKnownMeta?.label ?? inspectingType })
+    : t('canvas.unknownModule')
 
   return (
     // WF-PICKER-SELF-1: exposes this workflow's own id so a picker (e.g.
@@ -262,6 +272,17 @@ function EditorInner({ workflow, onClose, onSave, initialRunId }: {
           <OutputPanel
             output={outputState.output}
             onClose={() => setOutputState(null)}
+          />
+        )}
+        {/* RUN-INSPECTOR-1b: the canvas node's status marker opens the same
+            per-step inspector as the Logs panel's "view input/output" button,
+            for this node's own step of the run shown there. */}
+        {inspecting && (
+          <RunStepInspectorPanel
+            runId={inspecting.runId}
+            stepId={inspecting.stepId}
+            moduleLabel={inspectingModuleLabel}
+            onClose={() => setInspecting(null)}
           />
         )}
         {dialog}

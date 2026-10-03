@@ -6,7 +6,7 @@
  * ARCH-01 split (§3, at ~400 lines): each concern now lives in its own hook —
  * this file only composes them and merges live-run status onto the nodes.
  */
-import { useMemo, useCallback } from 'react'
+import { useMemo, useCallback, useState } from 'react'
 import { useWorkflowRunControl } from './useWorkflowRunControl'
 import { TERMINAL } from './useWorkflowRun'
 import { useOutputSeeding } from './useOutputSeeding'
@@ -73,6 +73,9 @@ export function useWorkflowEditor({ workflow, onSave, initialRunId = null }: {
     const status: Record<string, string> = {}
     const progress: Record<string, { done: number; total: number }> = {}
     const itemsTotal: Record<string, number> = {}
+    // RUN-INSPECTOR-1b: the step's own db id (RunStep.id), keyed by node id
+    // (step_id), so the canvas can open the inspector for that exact step.
+    const inspectStepId: Record<string, string | number> = {}
     // Whether the polled run is still live: once it reaches a terminal state the
     // poll stops, so a sub-100% arc could never fill further — the canvas then
     // shows only the badge, never a frozen partial ring.
@@ -83,22 +86,43 @@ export function useWorkflowEditor({ workflow, onSave, initialRunId = null }: {
       if (s.status) status[id] = String(s.status)
       if (s.progress && s.progress.total > 0) progress[id] = s.progress
       if (typeof s.items_total === 'number') itemsTotal[id] = s.items_total
+      if (s.id != null) inspectStepId[id] = s.id
     })
-    return { status, progress, itemsTotal, runActive }
+    return { status, progress, itemsTotal, runActive, inspectStepId }
   }, [liveRun])
 
-  const nodesWithFirst = graph.nodes.map(n => ({
-    ...n,
-    data: {
-      ...n.data,
-      isFirst: n.id === graph.firstNodeId,
-      isRunning: n.id === runningNodeId || stepLive.status[n.id] === 'running',
-      status: stepLive.status[n.id],
-      progress: stepLive.progress[n.id] ?? null,
-      itemsTotal: stepLive.itemsTotal[n.id] ?? null,
-      runActive: stepLive.runActive,
-    },
-  }))
+  // RUN-INSPECTOR-1b: which run+step the canvas node's status marker currently
+  // inspects — null while no RunStepInspectorPanel is open.
+  const [inspecting, setInspecting] = useState<{ runId: string | number; stepId: string | number; nodeId: string } | null>(null)
+  // Looks up a run's step entry by the canvas node id (step_id), for the
+  // canvas node click handler below and for callers that need the raw step.
+  const stepForNode = useCallback(
+    (nodeId: string) => (liveRun?.steps ?? []).find(s => String(s.step_id) === String(nodeId)) ?? null,
+    [liveRun],
+  )
+
+  const nodesWithFirst = graph.nodes.map(n => {
+    const inspectStepId = stepLive.inspectStepId[n.id]
+    const runId = liveRun?.id
+    return {
+      ...n,
+      data: {
+        ...n.data,
+        isFirst: n.id === graph.firstNodeId,
+        isRunning: n.id === runningNodeId || stepLive.status[n.id] === 'running',
+        status: stepLive.status[n.id],
+        progress: stepLive.progress[n.id] ?? null,
+        itemsTotal: stepLive.itemsTotal[n.id] ?? null,
+        runActive: stepLive.runActive,
+        inspectStepId: inspectStepId ?? null,
+        // Only present when a real step id + run id are known, so a node
+        // without a run status never grows an inspect affordance.
+        onInspect: (inspectStepId != null && runId != null)
+          ? () => setInspecting({ runId, stepId: inspectStepId, nodeId: n.id })
+          : undefined,
+      },
+    }
+  })
 
   return {
     edges: graph.edges, onNodesChange: graph.onNodesChange, onEdgesChange: graph.onEdgesChange,
@@ -115,6 +139,7 @@ export function useWorkflowEditor({ workflow, onSave, initialRunId = null }: {
     pickerState: panels.pickerState, setPickerState: panels.setPickerState,
     filterState: panels.filterState, setFilterState: panels.setFilterState,
     outputState: panels.outputState, setOutputState: panels.setOutputState,
+    inspecting, setInspecting, stepForNode,
     firstNodeId: graph.firstNodeId, setStartNodeId: graph.setStartNodeId, startInvalid: graph.startInvalid,
     getUpstreamVariables: graph.getUpstreamVariables,
     handleEdgeAdd: panels.handleEdgeAdd, handleEdgeDelete: graph.handleEdgeDelete,

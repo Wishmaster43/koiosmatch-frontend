@@ -16,7 +16,7 @@
  * assertions target the real nl copy, not raw keys.
  */
 import { describe, it, expect, vi, beforeEach } from 'vitest'
-import { render, screen, fireEvent, waitFor } from '@testing-library/react'
+import { render, screen, fireEvent, waitFor, within } from '@testing-library/react'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import type { ReactNode } from 'react'
 import WorkflowCanvasEditor from './WorkflowCanvasEditor'
@@ -36,13 +36,21 @@ vi.mock('@xyflow/react', async importOriginal => {
     ReactFlowProvider: ({ children }: { children: ReactNode }) => <>{children}</>,
     // A node is a plain clickable button standing in for the real canvas node —
     // clicking it fires the SAME onNodeClick the app wires to node selection.
+    // VERIFIER FIX: the stub also exposes `data.onInspect` (when the hook wired
+    // it) via a sibling button, so a mounted-editor test can exercise the
+    // canvas-node → inspector flow without the real ReactFlow node chrome.
     ReactFlow: ({ nodes, onNodeClick }: {
-      nodes: Array<{ id: string }>
+      nodes: Array<{ id: string; data?: { onInspect?: () => void } }>
       onNodeClick?: (e: unknown, n: { id: string }) => void
     }) => (
       <div>
         {nodes.map(n => (
-          <button key={n.id} type="button" onClick={() => onNodeClick?.(null, n)}>{`node-${n.id}`}</button>
+          <div key={n.id}>
+            <button type="button" onClick={() => onNodeClick?.(null, n)}>{`node-${n.id}`}</button>
+            {n.data?.onInspect && (
+              <button type="button" onClick={n.data.onInspect}>{`inspect-${n.id}`}</button>
+            )}
+          </div>
         ))}
       </div>
     ),
@@ -66,6 +74,16 @@ vi.mock('@/lib/api', async importOriginal => {
           { id: 'wf-other', name: 'Andere workflow', archived: false },
         ] })
         if (url.endsWith('/runs')) return Promise.resolve({ data: [] })
+        // RUN-INSPECTOR-1b verifier fix: the live-run poll (node n1's step carries
+        // both step_id=n1 and the route's real db id=42) and the inspector's own
+        // per-step envelope, routed by URL like every other call here.
+        if (url === '/workflow-runs/r1') return Promise.resolve({ data: { data: {
+          id: 'r1', status: 'success',
+          steps: [{ step_id: 'n1', id: 42, status: 'success' }],
+        } } })
+        if (url === '/workflow-runs/r1/steps/42') return Promise.resolve({ data: { data: {
+          id: 42, status: 'success', input: {}, output: {}, attempts_log: [],
+        } } })
         return Promise.resolve({ data: {} }) // /workflows/modules, /webhooks, …
       }),
       post: vi.fn(),
@@ -144,5 +162,32 @@ describe('WorkflowCanvasEditor · status pill flips back to the server status', 
     fireEvent.click(pill())
     expect(pill()).not.toHaveTextContent('(niet opgeslagen)')
     expect(pill()).toHaveTextContent('Inactief')
+  })
+})
+
+// RUN-INSPECTOR-1b verifier fix: the canvas node's own inspector affordance
+// (wired through the hook as data.onInspect) mounts RunStepInspectorPanel for
+// that node's step of the run, and closing it unmounts the panel again.
+describe('WorkflowCanvasEditor · RUN-INSPECTOR-1b canvas-node inspector', () => {
+  it('clicking the node inspect affordance opens the panel for its own run step, and closing unmounts it', async () => {
+    render(<WorkflowCanvasEditor workflow={workflow} onClose={vi.fn()} onSave={vi.fn()} initialRunId="r1" />, { wrapper })
+
+    // The stub exposes data.onInspect only once the live-run poll resolved
+    // and the hook matched node n1's step (step_id) to the route's real id (42).
+    const inspectBtn = await screen.findByText('inspect-n1')
+    fireEvent.click(inspectBtn)
+
+    await waitFor(() => expect(api.get).toHaveBeenCalledWith(
+      expect.stringContaining('/workflow-runs/r1/steps/42'),
+      expect.anything(),
+    ))
+    // The panel is a real dialog, named with the inspected module's label. The
+    // editor itself has its own "Sluiten" button, so scope the close click to
+    // inside the inspector's own dialog.
+    const dialog = await screen.findByRole('dialog')
+    expect(dialog).toBeInTheDocument()
+
+    fireEvent.click(within(dialog).getByRole('button', { name: 'Sluiten' }))
+    await waitFor(() => expect(screen.queryByRole('dialog')).not.toBeInTheDocument())
   })
 })
