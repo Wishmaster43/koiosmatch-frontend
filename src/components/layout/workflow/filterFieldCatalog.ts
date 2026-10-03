@@ -34,6 +34,15 @@ export interface InstructionOutputField {
   label: string
 }
 
+// One output field's full metadata (FILTER-MAPPING-1 BE contract, additive):
+// `source` names a tenant lookup (candidate_statuses, candidate_phases, …) the
+// field's value is drawn from — absent means a free-text/unknown vocabulary.
+export interface OutputFieldMeta {
+  label: string
+  type?: string
+  source?: string
+}
+
 // One backend module type's static bundle-field catalog entry (GET /workflows/modules).
 export interface ModuleCatalogEntry {
   outputFields: Record<string, string>
@@ -42,6 +51,10 @@ export interface ModuleCatalogEntry {
   // (server key `instruction_output_fields`) — absent/empty means that module
   // offers no output-field mapping yet (fields.tsx renders no fake affordance then).
   instructionOutputFields?: InstructionOutputField[]
+  // Parallel to `outputFields` (kept byte-identical for its existing consumers):
+  // the full `{label,type,source}` per field, normalised tolerantly from a plain
+  // string label until the backend lands the richer shape (useModuleCatalog.ts).
+  outputFieldMeta?: Record<string, OutputFieldMeta>
 }
 export type ModuleCatalog = Record<string, ModuleCatalogEntry>
 
@@ -61,6 +74,10 @@ export interface FilterGraphEdge {
 export interface FilterFieldOption {
   key: string   // the dot-path expression to store as the condition's `field`
   label: string // the backend catalog label (server-supplied; see report BE-i18n gap)
+  // FILTER-MAPPING-1: the tenant lookup this field's value is drawn from, when
+  // the catalogue declares one — drives the value control's known-vocabulary
+  // multi-select instead of the free chip editor.
+  source?: string
 }
 
 // One numbered group in the picker — one upstream module + its available fields.
@@ -113,6 +130,7 @@ export function collectUpstreamFilterFields(
   return ordered.map((id, i) => {
     const type = byId.get(id)?.type ?? ''
     const outputFields = catalog[type]?.outputFields ?? {}
+    const outputFieldMeta = catalog[type]?.outputFieldMeta ?? {}
 
     return {
       nodeId: id,
@@ -120,7 +138,8 @@ export function collectUpstreamFilterFields(
       number: i + 1,
       // Underscore keys (_list, …) are engine pipeline metadata, never user-facing fields;
       // every module (including sm_* ones) emits its bare field key.
-      fields: Object.entries(outputFields).filter(([key]) => !key.startsWith('_')).map(([key, label]) => ({ key, label })),
+      fields: Object.entries(outputFields).filter(([key]) => !key.startsWith('_'))
+        .map(([key, label]) => ({ key, label, source: outputFieldMeta[key]?.source })),
     }
   })
 }
@@ -133,8 +152,8 @@ export function collectUpstreamFilterFields(
 export function toFilterFieldOptions(
   groups: FilterFieldGroup[],
   moduleLabel: (type: string) => string,
-): Array<{ value: string; label: string }> {
+): Array<{ value: string; label: string; source?: string }> {
   return groups.flatMap(g =>
-    g.fields.map(f => ({ value: f.key, label: `${g.number}. ${moduleLabel(g.moduleType)} · ${f.label}` }))
+    g.fields.map(f => ({ value: f.key, label: `${g.number}. ${moduleLabel(g.moduleType)} · ${f.label}`, source: f.source }))
   )
 }

@@ -266,6 +266,42 @@ describe('EdgeFilterPanel · FILTER-VALUE-1 operator controls', () => {
     expect(filters).toEqual({ conditions: [{ field: '', operator: 'in', value: 'actief,extern' }], logic: 'AND' })
   })
 
+  // FILTER-MAPPING-1 ADDENDUM 3 — the "{ }" mapping button on the value control
+  // inserts a '{{N.field}}' token through the same upstream chain the field
+  // picker uses, and that token survives the full panel→onSave round trip.
+  it('mapping a field into the value via the "{ }" button saves the exact {{N.field}} token', () => {
+    const { onSave } = setup()
+    fireEvent.click(screen.getByText('fields.addCondition'))
+    pickField('1. Fetch candidates · Voornaam')
+    pickOperator(0, 'canvas.opGroupText · canvas.opIn')
+
+    // Opens the mapping popover and inserts the upstream module's 'id' field.
+    fireEvent.click(screen.getByLabelText('canvas.mapField'))
+    fireEvent.click(screen.getByText('id'))
+
+    fireEvent.click(screen.getByText('common:save'))
+    const [filters] = onSave.mock.calls[0]
+    expect(filters).toEqual({ conditions: [{ field: 'firstname', operator: 'in', value: '{{1.id}}' }], logic: 'AND' })
+  })
+
+  it('a literal chip typed first, then a mapped field, saves both joined by a comma', () => {
+    const { onSave } = setup()
+    fireEvent.click(screen.getByText('fields.addCondition'))
+    pickField('1. Fetch candidates · Voornaam')
+    pickOperator(0, 'canvas.opGroupText · canvas.opIn')
+
+    const chipInput = screen.getAllByLabelText('fields.valuePlaceholder').pop() as HTMLInputElement
+    fireEvent.change(chipInput, { target: { value: 'actief' } })
+    fireEvent.keyDown(chipInput, { key: 'Enter' })
+
+    fireEvent.click(screen.getByLabelText('canvas.mapField'))
+    fireEvent.click(screen.getByText('id'))
+
+    fireEvent.click(screen.getByText('common:save'))
+    const [filters] = onSave.mock.calls[0]
+    expect(filters).toEqual({ conditions: [{ field: 'firstname', operator: 'in', value: 'actief,{{1.id}}' }], logic: 'AND' })
+  })
+
   it('a date_gte operator in relative mode saves the now±Nd syntax', () => {
     const { onSave } = setup()
     fireEvent.click(screen.getByText('fields.addCondition'))

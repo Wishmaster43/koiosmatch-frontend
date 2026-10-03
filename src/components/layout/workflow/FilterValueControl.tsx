@@ -1,29 +1,37 @@
 /**
  * FilterValueControl — the edge-filter condition's VALUE control, picked by
  * operator/field instead of one bare text input (Danny 02-10, screenshot next
- * to Make.com: "de filters zijn ruk … datum is ook ruk"). The MAPPING of a
- * previous module's field into this value (Make's drag-in) is a separate lane
- * (FILTER-MAPPING-1); this component only replaces the typed syntax with real
- * controls while keeping the backend's wire format byte-identical.
+ * to Make.com: "de filters zijn ruk … datum is ook ruk"). FILTER-MAPPING-1
+ * (same day: "actief,verwijderd,extern moeten mappingsvelden zijn van de
+ * modules ervoor, zoals make.com dat ook heeft") adds Make's drag-a-field-in:
+ * a "{ }" button maps a numbered upstream module's field into the value, and a
+ * field with a known tenant vocabulary (`source`) swaps free typing for a
+ * searchable lookup picker.
  *
  * Wire formats (unchanged, the backend evaluator parses exactly these):
  *   - boolean field      -> a real boolean (true/false)
  *   - date_older_than_days / date_younger_than_days -> a day-count string ("30")
- *   - date_gte/gt/lte/lt  -> 'now', 'now-90d', 'now+2d', or a fixed 'YYYY-MM-DD'
+ *   - date_gte/gt/lte/lt  -> 'now', 'now-90d', 'now-2w', 'now-3m', or a fixed 'YYYY-MM-DD'
  *   - in / not_in         -> a comma-separated string ("actief,verwijderd,extern"), or
  *                            the seeded ARRAY form; whichever form arrives is written back
+ *   - a mapping token      -> '{{N.field}}' (filterValueToken), resolved by the
+ *                            backend against the merged upstream bundle (ADDENDUM 2)
  *   - everything else     -> the plain typed string
  */
 import { useEffect, useId, useRef, useState } from 'react'
 import type { CSSProperties } from 'react'
 import { useTranslation } from 'react-i18next'
-import { X } from 'lucide-react'
-import Button from '@/components/ui/Button'
 import SelectMenu from '@/components/ui/SelectMenu'
 import SegmentedControl from '@/components/ui/SegmentedControl'
-import SoftChip from '@/components/ui/SoftChip'
+import CreatableSelect from '@/components/ui/CreatableSelect'
 import { Caption } from '@/components/ui/typography'
 import { isBooleanField, booleanValueKey, textValue, listValueItems } from './booleanField'
+import ListValueEditor from './ListValueEditor'
+import MappingPickerButton from './MappingPickerButton'
+import { mappedValueLabel } from './mappedValueLabel'
+import { lookupItemsForSource } from './lookupSourceTable'
+import { useLookupsOptional } from '@/context/LookupsContext'
+import type { WorkflowVarGroup } from '@/types/workflow'
 
 // DATETIME-IMPORT-LES (CLAUDE.md §2): the shared `components/ui/NumberInput`
 // imports `lib/formatters` -> `lib/datetime`, which has a real-i18n-init side
@@ -50,21 +58,24 @@ function DayCountInput({ value, onChange, ariaLabel, style }: {
 
 const DAY_COUNT_OPERATORS = ['date_older_than_days', 'date_younger_than_days']
 const LIST_OPERATORS = ['in', 'not_in']
-// RELATIVE-DATE-UNITS-1: weeks/months convert to days on save (×7, ×30) until the
-// backend evaluator confirms other units — the wire only ever carries a day count.
-const UNIT_TO_DAYS: Record<string, number> = { days: 1, weeks: 7, months: 30 }
+const SINGLE_VALUE_OPERATORS = ['=', '!=']
 
-// Parses the stored relative syntax ('now', 'now-90d', 'now+2d') back into the
-// relative-mode fields. ALWAYS reads back as 'days' with the raw day count —
-// never auto-promoted to weeks/months — so typing/picking never gets rewritten
-// mid-edit (the bug: '30' parsed back as '1 month' and jumped the input).
+// ADDENDUM 4 (CMBE confirmed): the relative-date unit stores NATIVELY as a
+// 'd'/'w'/'m' suffix on the wire — no more ×7/×30 conversion to a day count.
+const UNIT_SUFFIX: Record<string, string> = { days: 'd', weeks: 'w', months: 'm' }
+const SUFFIX_UNIT: Record<string, string> = { d: 'days', w: 'weeks', m: 'months' }
+
+// Parses the stored relative syntax ('now', 'now-90d', 'now-2w', 'now+3m')
+// back into the relative-mode fields, reading the unit back AS STORED — never
+// auto-promoted or converted — so typing/picking never gets rewritten mid-edit.
 function parseRelative(value: string): { direction: 'minus' | 'plus'; amount: number; unit: string } | null {
-  const m = /^now(?:([+-])(\d+)d)?$/.exec(value)
+  const m = /^now(?:([+-])(\d+)(d|w|m))?$/.exec(value)
   if (!m) return null
   if (!m[1]) return { direction: 'minus', amount: 0, unit: 'days' }
-  const days = Number(m[2])
+  const amount = Number(m[2])
+  const unit = SUFFIX_UNIT[m[3]] ?? 'days'
   const direction = m[1] === '-' ? 'minus' : 'plus'
-  return { direction, amount: days, unit: 'days' }
+  return { direction, amount, unit }
 }
 
 const ISO_DATE = /^\d{4}-\d{2}-\d{2}$/
@@ -75,11 +86,18 @@ export interface FilterValueControlProps {
   value: string | boolean | string[] | undefined
   onChange: (value: string | boolean | string[]) => void
   ariaLabel: string
+  // FILTER-MAPPING-1: the numbered upstream-module field groups the "{ }"
+  // mapping button offers — empty/omitted hides the button (no upstream chain).
+  variables?: WorkflowVarGroup[]
+  // The current FIELD's declared tenant-lookup source (filterFieldCatalog's
+  // FilterFieldOption.source) — present only once the backend catalogue names
+  // one; drives the known-vocabulary picker for =/!=/in/not_in.
+  source?: string
 }
 
 // Picks the right value control for an operator/field combination — see the
 // module doc above for the full wire-format table.
-export default function FilterValueControl({ operator, field, value, onChange, ariaLabel }: FilterValueControlProps) {
+export default function FilterValueControl({ operator, field, value, onChange, ariaLabel, variables = [], source }: FilterValueControlProps) {
   const { t } = useTranslation('workflows')
   const text = textValue(value)
   // Names the yes/no value menu below — SelectMenu's trigger is a <button>, not
@@ -88,6 +106,14 @@ export default function FilterValueControl({ operator, field, value, onChange, a
   // Names the two relative-date menus (direction, unit) below — same pattern.
   const directionLabelId = useId()
   const unitLabelId = useId()
+  // Names the known-vocabulary single-value picker (=/!= with a source) below.
+  const sourceLabelId = useId()
+  // FILTER-MAPPING-1: the current field's lookup, when its catalogue entry
+  // declares a `source` — null when there is none, falling back to free chips.
+  const lookups = useLookupsOptional()
+  const sourceItems = lookups
+    ? lookupItemsForSource(source, { statuses: lookups.statuses, phases: lookups.phases, candidateTypes: lookups.candidateTypes, funnelTypes: lookups.funnelTypes })
+    : null
   // Relative-date fields (direction/amount/unit) are component STATE, seeded
   // ONCE from the wire value — never recomputed from `text` on every render.
   // Recomputing from the serialised string was the bug: it round-tripped exact
@@ -138,44 +164,51 @@ export default function FilterValueControl({ operator, field, value, onChange, a
     )
   }
 
-  // List operators (in / not_in) — removable chips + a type-to-add input. The
-  // engine reads a comma string and an array alike (FilterEvaluator::toList), the
-  // seeds store arrays: the control reads both and writes back the FORM it received,
-  // so an untouched shape never flips on edit (GET-shape == PUT-shape).
+  // List operators (in / not_in) — removable chips + a type-to-add input (or,
+  // with a known vocabulary, a searchable lookup picker instead of free typing)
+  // plus the "{ }" mapping button. The engine reads a comma string and an array
+  // alike (FilterEvaluator::toList), the seeds store arrays: the control reads
+  // both and writes back the FORM it received (GET-shape == PUT-shape).
   if (LIST_OPERATORS.includes(operator)) {
     const items = listValueItems(value)
     const commit = (next: string[]) => onChange(Array.isArray(value) ? next : next.join(','))
-    const addFromInput = (raw: string) => {
+    const addItem = (raw: string) => {
       const v = raw.trim()
       if (v && !items.includes(v)) commit([...items, v])
     }
+    const renderAdd = sourceItems
+      ? (addFromInput: (v: string) => void) => (
+          <div style={{ minWidth: 150, flex: 1 }}>
+            {/* DROPDOWN-CLEAR-1: this is a stateless "add another chip" picker, never a
+                saved value of its own — it always starts unset, so a clear affordance
+                would have nothing to clear. */}
+            <CreatableSelect value={undefined} allowCreate={false} clearable={false}
+              options={sourceItems.map(i => ({ value: i.value, label: i.label }))}
+              placeholder={t('fields.valuePlaceholder')} onChange={addFromInput} menuWidth={220}
+              style={{ padding: '4px 6px', fontSize: 12, borderRadius: 6 }} />
+          </div>
+        )
+      : undefined
     return (
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 4, flex: 1 }}>
-        <div style={{ display: 'flex', flexWrap: 'wrap', gap: 4 }}>
-          {items.map((item, i) => (
-            // CHIP-TINT-1 via the shared SoftChip atom — never a hand-rolled tint span.
-            <SoftChip key={item + i} round color="var(--color-primary)" label={
-              <>
-                {item}
-                <Button variant="ghost" size="sm" iconOnly aria-label={t('canvas.removeValue')}
-                  onClick={() => commit(items.filter((_, j) => j !== i))}>
-                  <X size={10} />
-                </Button>
-              </>
-            } />
-          ))}
-          <input aria-label={ariaLabel} placeholder={t('fields.valuePlaceholder')}
-            onKeyDown={e => {
-              if (e.key === 'Enter' || e.key === ',') {
-                e.preventDefault()
-                addFromInput((e.target as HTMLInputElement).value)
-                ;(e.target as HTMLInputElement).value = ''
-              }
-            }}
-            onBlur={e => { addFromInput(e.target.value); e.target.value = '' }}
-            style={{ flex: 1, minWidth: 80, padding: '4px 6px', fontSize: 12, border: '1px solid var(--border)', borderRadius: 6, outline: 'none' }} />
+      <ListValueEditor items={items} onCommit={commit} ariaLabel={ariaLabel} renderAdd={renderAdd}
+        describeItem={item => mappedValueLabel(item, variables) ?? sourceItems?.find(i => i.value === item)?.label ?? null}>
+        <MappingPickerButton variables={variables} onInsert={f => addItem(f.token)} />
+      </ListValueEditor>
+    )
+  }
+
+  // =/!= on a field with a known vocabulary — one searchable lookup value
+  // instead of free text, plus the "{ }" mapping button beside it.
+  if (sourceItems && SINGLE_VALUE_OPERATORS.includes(operator)) {
+    return (
+      <div style={{ display: 'flex', gap: 4, flex: 1, alignItems: 'center' }}>
+        <span id={sourceLabelId} hidden>{ariaLabel}</span>
+        <div style={{ flex: 1 }}>
+          <CreatableSelect aria-labelledby={sourceLabelId} value={text || undefined} allowCreate={false}
+            options={sourceItems.map(i => ({ value: i.value, label: i.label }))}
+            placeholder={t('fields.valuePlaceholder')} onChange={onChange} />
         </div>
-        <Caption>{t('canvas.listValuesHint')}</Caption>
+        <MappingPickerButton variables={variables} onInsert={f => onChange(f.token)} />
       </div>
     )
   }
@@ -189,9 +222,9 @@ export default function FilterValueControl({ operator, field, value, onChange, a
       { value: 'relative', label: t('canvas.dateModeRelative') },
     ]
     const toRelativeString = (direction: string, amount: number, unit: string) => {
-      const days = amount * (UNIT_TO_DAYS[unit] ?? 1)
-      if (days === 0) return 'now'
-      return `now${direction === 'minus' ? '-' : '+'}${days}d`
+      if (amount === 0) return 'now'
+      const suffix = UNIT_SUFFIX[unit] ?? 'd'
+      return `now${direction === 'minus' ? '-' : '+'}${amount}${suffix}`
     }
     // Writes the local relative state AND the wire value together, so the
     // chosen direction/amount/unit survives even when it serialises to the
@@ -239,10 +272,13 @@ export default function FilterValueControl({ operator, field, value, onChange, a
     )
   }
 
-  // Everything else — the plain text input, unchanged.
+  // Everything else — the plain text input, plus the "{ }" mapping button.
   return (
-    <input value={text} onChange={e => onChange(e.target.value)}
-      placeholder={t('fields.valuePlaceholder')} aria-label={ariaLabel}
-      style={{ flex: 1, padding: '6px 8px', fontSize: 12, border: '1px solid var(--border)', borderRadius: 6, outline: 'none' }} />
+    <div style={{ display: 'flex', gap: 4, flex: 1, alignItems: 'center' }}>
+      <input value={text} onChange={e => onChange(e.target.value)}
+        placeholder={t('fields.valuePlaceholder')} aria-label={ariaLabel}
+        style={{ flex: 1, padding: '6px 8px', fontSize: 12, border: '1px solid var(--border)', borderRadius: 6, outline: 'none' }} />
+      <MappingPickerButton variables={variables} onInsert={f => onChange(text + f.token)} />
+    </div>
   )
 }

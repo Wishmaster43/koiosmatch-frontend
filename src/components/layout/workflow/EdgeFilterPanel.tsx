@@ -13,13 +13,15 @@
  * still renders (picker just empty, CreatableSelect's free-entry path covers it)
  * if a caller can't supply the graph.
  */
-import { useMemo, useState } from 'react'
+import { useCallback, useMemo, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Plus, Trash2 } from 'lucide-react'
 import FloatingPanel from '@/components/ui/FloatingPanel'
 import { parseEdgeFilterGroups, edgeFilterGroupsToFilters } from './serialization'
 import { VALUELESS_OPERATORS } from './constants'
 import { collectUpstreamFilterFields, toFilterFieldOptions, type ModuleCatalog } from './filterFieldCatalog'
+import { filterFieldGroupsToVarGroups } from './filterFieldGroupsToVarGroups'
+import { splitFieldFormat } from './fieldFormat'
 import { FilterFieldPicker } from './FilterFieldPicker'
 import { OperatorSelect } from './OperatorSelect'
 import FilterValueControl from './FilterValueControl'
@@ -53,15 +55,26 @@ export function EdgeFilterPanel({ filters, label, sourceNodeId, nodes = [], edge
   const [name, setName] = useState(label ?? '')
   const { t } = useTranslation('workflows')
 
-  // Make-style numbered field options: walk the edge source's upstream chain
-  // once per graph change, then flatten to "N. <module label> · <field>" options.
-  const fieldOptions = useMemo(() => {
+  // Translated module label resolver — shared by the field picker, the value
+  // picker's mapping groups and the FilterFieldOption.label below.
+  const moduleLabel = useCallback((type: string) => t('modules.' + type, { defaultValue: MODULE_META[type]?.label ?? type }), [t])
+
+  // Make-style numbered upstream walk (FILTER-VELD-1) — walked ONCE per graph
+  // change; both the FIELD picker and the VALUE mapping picker (FILTER-MAPPING-1,
+  // ADDENDUM 3) read this same chain so they always offer the same numbering.
+  const groupsUpstream = useMemo(() => {
     if (!sourceNodeId) return []
     const graphNodes = nodes.map(n => ({ id: n.id, type: n.data.type ?? '', config: n.data.config }))
     const graphEdges = edges.map(e => ({ source: e.source, target: e.target }))
-    const groupsUpstream = collectUpstreamFilterFields(sourceNodeId, graphNodes, graphEdges, catalog)
-    return toFilterFieldOptions(groupsUpstream, type => t('modules.' + type, { defaultValue: MODULE_META[type]?.label ?? type }))
-  }, [sourceNodeId, nodes, edges, catalog, t])
+    return collectUpstreamFilterFields(sourceNodeId, graphNodes, graphEdges, catalog)
+  }, [sourceNodeId, nodes, edges, catalog])
+
+  // Flattened "N. <module label> · <field>" options for the field picker.
+  const fieldOptions = useMemo(() => toFilterFieldOptions(groupsUpstream, moduleLabel), [groupsUpstream, moduleLabel])
+
+  // The same chain, reshaped as the numbered mapping groups the value
+  // control's "{ }" button offers (FILTER-MAPPING-1).
+  const varGroups = useMemo(() => filterFieldGroupsToVarGroups(groupsUpstream, moduleLabel), [groupsUpstream, moduleLabel])
 
   // Group-level mutations — add/remove a whole OR'ed AND-group.
   const addGroup = () => setGroups(gs => [...gs, []])
@@ -144,8 +157,11 @@ export function EdgeFilterPanel({ filters, label, sourceNodeId, nodes = [], edge
                       {!VALUELESS_OPERATORS.includes(c.operator ?? '') && (
                         // FILTER-VALUE-1: the value control now depends on operator/field — a
                         // real date/day-count/chip picker instead of one bare text input.
+                        // FILTER-MAPPING-1: `variables` offers the same numbered upstream chain
+                        // as the field picker; `source` is the SELECTED field's own lookup name.
                         <FilterValueControl operator={c.operator ?? '='} field={c.field} value={c.value}
-                          onChange={v => updCond(gi, ci, 'value', v)} ariaLabel={t('fields.valuePlaceholder')} />
+                          onChange={v => updCond(gi, ci, 'value', v)} ariaLabel={t('fields.valuePlaceholder')}
+                          variables={varGroups} source={fieldOptions.find(o => o.value === splitFieldFormat(c.field ?? '').path)?.source} />
                       )}
                       {/* HUISSTIJL-1: same delete action as the group-delete Button above — dangerSoft carries this ink. */}
                       <Button variant="dangerSoft" size="sm" iconOnly onClick={() => delCond(gi, ci)}

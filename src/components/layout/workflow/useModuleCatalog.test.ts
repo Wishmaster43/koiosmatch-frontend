@@ -59,3 +59,22 @@ describe('normalize · instructionOutputFields', () => {
     expect(catalog.ai_agent.instructionOutputFields).toBeUndefined()
   })
 })
+
+// FILTER-MAPPING-1 — `output_fields` tolerates the legacy plain-string label
+// and the richer `{label,type,source}` shape (BE not landed yet; this lane
+// stays tolerant so the vocabulary picker lights up by itself at the BE landing).
+describe('normalize · output_fields / outputFieldMeta', () => {
+  it('keeps the legacy string-label map byte-identical and mirrors it into outputFieldMeta with no source', () => {
+    const catalog = normalize({ candidate_filter: { output_fields: { status: 'Status' }, emits: 'replace' } })
+    expect(catalog.candidate_filter.outputFields).toEqual({ status: 'Status' })
+    expect(catalog.candidate_filter.outputFieldMeta).toEqual({ status: { label: 'Status', type: undefined, source: undefined } })
+  })
+
+  it('reads the richer {label,type,source} shape per field', () => {
+    const catalog = normalize({
+      candidate_filter: { output_fields: { status: { label: 'Status', type: 'string', source: 'candidate_statuses' } }, emits: 'replace' },
+    })
+    expect(catalog.candidate_filter.outputFields).toEqual({ status: 'Status' })
+    expect(catalog.candidate_filter.outputFieldMeta).toEqual({ status: { label: 'Status', type: 'string', source: 'candidate_statuses' } })
+  })
+})

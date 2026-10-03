@@ -9,7 +9,7 @@
  * `import('@/lib/api')` pattern used by FaqSelectField/WebhookSelectField).
  */
 import { useEffect, useState } from 'react'
-import type { ModuleCatalog, InstructionOutputField } from './filterFieldCatalog'
+import type { ModuleCatalog, InstructionOutputField, OutputFieldMeta } from './filterFieldCatalog'
 import { unwrap } from '@/lib/api'
 
 let cache: ModuleCatalog | null = null
@@ -20,11 +20,39 @@ let inFlight: Promise<ModuleCatalog> | null = null
 // 30-08: `schema.instructions.item_schema.output_field.options`, array OR a
 // plain {key: label} object) and the LEGACY module-level `instruction_output_fields`
 // array are accepted; served wins when both are present on the same response.
+// FILTER-MAPPING-1 (BE contract, additive): an output field is either the
+// legacy plain string label, or the richer `{label,type,source}` shape once
+// the backend lands it — both accepted, never assumed.
+type RawOutputField = string | { label?: string; type?: string; source?: string }
+
 interface RawModuleDef {
-  output_fields?: Record<string, string>
+  output_fields?: Record<string, RawOutputField>
   emits?: string
   instruction_output_fields?: Array<{ key?: string; label?: string }>
   schema?: { instructions?: { item_schema?: { output_field?: { options?: unknown } } } }
+}
+
+// Splits a raw `output_fields` map into the byte-identical legacy label map
+// (every existing consumer of `outputFields`) and the parallel full-meta map
+// (FILTER-MAPPING-1's `source` for the value control's known-vocabulary picker).
+// A field with no `source` on the server simply has none here — no fake affordance.
+function normalizeOutputFields(raw: Record<string, RawOutputField> | undefined): {
+  outputFields: Record<string, string>
+  outputFieldMeta: Record<string, OutputFieldMeta>
+} {
+  const outputFields: Record<string, string> = {}
+  const outputFieldMeta: Record<string, OutputFieldMeta> = {}
+  for (const [key, field] of Object.entries(raw ?? {})) {
+    if (typeof field === 'string') {
+      outputFields[key] = field
+      outputFieldMeta[key] = { label: field }
+    } else if (field && typeof field === 'object') {
+      const label = typeof field.label === 'string' && field.label.length > 0 ? field.label : key
+      outputFields[key] = label
+      outputFieldMeta[key] = { label, type: field.type, source: field.source }
+    }
+  }
+  return { outputFields, outputFieldMeta }
 }
 
 // Normalizes the served `output_field.options` shape (array of {key,label}, or an
@@ -61,8 +89,10 @@ export function normalize(raw: Record<string, unknown>): ModuleCatalog {
   const out: ModuleCatalog = {}
   for (const [type, def] of Object.entries(raw ?? {})) {
     const d = def as RawModuleDef
+    const { outputFields, outputFieldMeta } = normalizeOutputFields(d.output_fields)
     out[type] = {
-      outputFields: d.output_fields ?? {},
+      outputFields,
+      outputFieldMeta,
       emits: d.emits === 'replace' || d.emits === 'append' ? d.emits : 'passthrough',
       instructionOutputFields: servedOutputFields(d.schema?.instructions?.item_schema?.output_field?.options)
         ?? legacyOutputFields(d.instruction_output_fields),

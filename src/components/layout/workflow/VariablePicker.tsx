@@ -130,7 +130,9 @@ function ModuleGroup({ group, query, onInsert }: {
 
 // ── The dropdown listing upstream modules + their fields ────────────────────────
 
-function PickerPopover({ variables, onInsert, onClose }: {
+// Exported so the edge-filter value's mapping affordance (MappingPickerButton,
+// FILTER-MAPPING-1) reuses this exact panel instead of a second one.
+export function PickerPopover({ variables, onInsert, onClose }: {
   variables: WorkflowVarGroup[]
   onInsert: (f: WorkflowVarField) => void
   onClose: () => void
