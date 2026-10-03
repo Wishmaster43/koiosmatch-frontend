@@ -172,7 +172,7 @@ describe('useProposeForm', () => {
     await waitFor(() => expect(result.current.disabledReason).toBeNull())
     await act(async () => { await result.current.submit() })
     expect(apiPatch).not.toHaveBeenCalled()
-    expect(apiPost).toHaveBeenCalledWith('/applications/1/propose', expect.objectContaining({ contact_id: 'ct1' }))
+    expect(apiPost).toHaveBeenCalledWith('/applications/1/propose', expect.objectContaining({ contact_id: 'ct1' }), expect.objectContaining({ headers: expect.objectContaining({ 'Idempotency-Key': expect.any(String) }) }))
     expect(apiPost).not.toHaveBeenCalledWith('/applications/1/notes', expect.anything())
   })
 
@@ -200,7 +200,7 @@ describe('useProposeForm', () => {
       body: result.current.body,
       send: true,
       sender_user_id: null,
-    })
+    }, expect.objectContaining({ headers: expect.objectContaining({ 'Idempotency-Key': expect.any(String) }) }))
   })
 
   // VOORSTEL-AFZENDER-FE-1: the picked sender travels as sender_user_id; the tenant
@@ -213,7 +213,7 @@ describe('useProposeForm', () => {
     act(() => { result.current.setConsentConfirmed(true); result.current.setSenderUserId('u2') })
     await waitFor(() => expect(result.current.disabledReason).toBeNull())
     await act(async () => { await result.current.submit() })
-    expect(apiPost).toHaveBeenCalledWith('/applications/1/propose', expect.objectContaining({ sender_user_id: 'u2' }))
+    expect(apiPost).toHaveBeenCalledWith('/applications/1/propose', expect.objectContaining({ sender_user_id: 'u2' }), expect.objectContaining({ headers: expect.objectContaining({ 'Idempotency-Key': expect.any(String) }) }))
   })
 
   it('preselects the tenant default sender and renders it in the {recruiter} token', async () => {
@@ -226,7 +226,7 @@ describe('useProposeForm', () => {
     act(() => { result.current.setConsentConfirmed(true) })
     await waitFor(() => expect(result.current.disabledReason).toBeNull())
     await act(async () => { await result.current.submit() })
-    expect(apiPost).toHaveBeenCalledWith('/applications/1/propose', expect.objectContaining({ sender_user_id: 'u2' }))
+    expect(apiPost).toHaveBeenCalledWith('/applications/1/propose', expect.objectContaining({ sender_user_id: 'u2' }), expect.objectContaining({ headers: expect.objectContaining({ 'Idempotency-Key': expect.any(String) }) }))
   })
 
   it('keeps an explicit pick when the settings re-fetch would otherwise reapply the default', async () => {
@@ -251,11 +251,11 @@ describe('useProposeForm', () => {
     expect(result.current.sendEmail).toBe(true)
 
     await act(async () => { await result.current.submit() })
-    expect(apiPost).toHaveBeenCalledWith('/applications/1/propose', expect.objectContaining({ send: true }))
+    expect(apiPost).toHaveBeenCalledWith('/applications/1/propose', expect.objectContaining({ send: true }), expect.objectContaining({ headers: expect.objectContaining({ 'Idempotency-Key': expect.any(String) }) }))
 
     act(() => { result.current.setSendEmail(false) })
     await act(async () => { await result.current.submit() })
-    expect(apiPost).toHaveBeenLastCalledWith('/applications/1/propose', expect.objectContaining({ send: false }))
+    expect(apiPost).toHaveBeenLastCalledWith('/applications/1/propose', expect.objectContaining({ send: false }), expect.objectContaining({ headers: expect.objectContaining({ 'Idempotency-Key': expect.any(String) }) }))
   })
 
   // Regression (25-07): the "motivatiebrief meesturen" checkbox changed nothing —

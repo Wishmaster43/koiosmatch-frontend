@@ -235,7 +235,7 @@ describe('ConversationsSection · session composer (WHATSAPP-COMPOSE-1)', () => 
     // §13: the request's method/route/body, not just that a callback fired.
     expect(api.post).toHaveBeenCalledWith('/conversations/conv-1/messages', {
       direction: 'outbound', message_content: 'Tot morgen!',
-    })
+    }, expect.objectContaining({ headers: expect.objectContaining({ 'Idempotency-Key': expect.any(String) }) }))
     expect(await screen.findByText('Tot morgen!')).toBeInTheDocument()
     // The input clears after a successful send.
     expect(input).toHaveValue('')
@@ -263,7 +263,7 @@ describe('ConversationsSection · session composer (WHATSAPP-COMPOSE-1)', () => 
 
     expect(api.post).toHaveBeenCalledWith('/conversations/conv-1/messages', {
       direction: 'outbound', message_content: 'regel 1\nregel 2',
-    })
+    }, expect.objectContaining({ headers: expect.objectContaining({ 'Idempotency-Key': expect.any(String) }) }))
   })
 
   // ONIX N-007: two synchronous Enter presses must POST exactly once — the
@@ -372,7 +372,7 @@ describe('ConversationsSection · send outcomes (WA-SEND-TRANSPORT-1)', () => {
 
     expect(api.post).toHaveBeenCalledWith('/conversations/conv-1/messages', {
       direction: 'outbound', message_content: 'Zo goed?',
-    })
+    }, expect.objectContaining({ headers: expect.objectContaining({ 'Idempotency-Key': expect.any(String) }) }))
     expect(await screen.findByText('Zo goed?')).toBeInTheDocument()
     expect(input).toHaveValue('')
     // The header date now reflects the server's OWN last_message_at after the refetch.
@@ -719,7 +719,7 @@ describe('ConversationsSection · WA-THREAD-UX-1', () => {
     // §13: the request's method/route/body — identical shape to the WABA session send.
     expect(api.post).toHaveBeenCalledWith('/conversations/conv-1/messages', {
       direction: 'outbound', message_content: 'Hoi daar!',
-    })
+    }, expect.objectContaining({ headers: expect.objectContaining({ 'Idempotency-Key': expect.any(String) }) }))
   })
 
   it('still shows the template picker on a waba thread with a closed window (unchanged)', async () => {

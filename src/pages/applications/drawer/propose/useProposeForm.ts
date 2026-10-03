@@ -16,6 +16,8 @@ import { useEffect, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useQueryClient } from '@tanstack/react-query'
 import api, { unwrap } from '@/lib/api'
+// DOUBLE-SUBMIT-FE-1 point 2: one Idempotency-Key per click on an irreversible action (BE IDEMP-1 replays).
+import { withIdempotencyKey } from '@/lib/idempotency'
 import { notifyError, notifySuccess } from '@/lib/notify'
 import { extractApiError } from '@/lib/extractApiError'
 import { useLookups } from '@/context/LookupsContext'
@@ -285,7 +287,7 @@ export function useProposeForm(application: ApplicationDetail) {
         // VOORSTEL-AFZENDER-FE-1: null means "resolve server-side" (tenant default,
         // then the proposer) — never send an empty string for "no explicit pick".
         sender_user_id: senderUserId || null,
-      })
+      }, withIdempotencyKey())
       // V-appdetail-5: PROPOSE-SHARE-LINK-1 shipped — the response's own record
       // carries the same recipient-facing share_url ProposalsBlock renders (never
       // logged, §8 — only handed into component state for the copy affordance).

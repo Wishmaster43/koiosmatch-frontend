@@ -49,7 +49,7 @@ describe('useWorkflowRunControl', () => {
 
     await act(async () => { await result.current.handleRun() })
 
-    expect(mockedPost).toHaveBeenCalledWith('/workflows/w1/run', undefined, { quietStatuses: [409, 422], baseURL: 'http://engine.test/api' })
+    expect(mockedPost).toHaveBeenCalledWith('/workflows/w1/run', undefined, expect.objectContaining({ quietStatuses: [409, 422], baseURL: 'http://engine.test/api', headers: expect.objectContaining({ 'Idempotency-Key': expect.any(String) }) }))
     expect(result.current.activeRunId).toBe('r1')
     expect(result.current.runConflict).toBe(false)
     expect(result.current.runError).toBeNull()
@@ -69,7 +69,7 @@ describe('useWorkflowRunControl', () => {
 
     await act(async () => { await result.current.handleRun({ dryRun: true }) })
 
-    expect(mockedPost).toHaveBeenCalledWith('/workflows/w1/run', { dry_run: true }, { quietStatuses: [409, 422], baseURL: expect.any(String) })
+    expect(mockedPost).toHaveBeenCalledWith('/workflows/w1/run', { dry_run: true }, expect.objectContaining({ quietStatuses: [409, 422], baseURL: expect.any(String), headers: expect.objectContaining({ 'Idempotency-Key': expect.any(String) }) }))
     expect(result.current.activeRunId).toBe('r3')
   })
 
@@ -193,7 +193,7 @@ describe('useWorkflowRunControl', () => {
     expect(mockedPost).toHaveBeenCalledWith(
       '/workflows/w1/run',
       { subject: { entity_type: 'candidate', entity_id: 'c1' } },
-      { quietStatuses: [409, 422], baseURL: expect.any(String) },
+      expect.objectContaining({ quietStatuses: [409, 422], baseURL: expect.any(String), headers: expect.objectContaining({ 'Idempotency-Key': expect.any(String) }) }),
     )
   })
 })
@@ -213,7 +213,7 @@ describe('useWorkflowRunControl · runBulk', () => {
     let outcome
     await act(async () => { outcome = await result.current.runBulk() })
 
-    expect(mockedPost).toHaveBeenCalledWith('/workflows/w1/run-bulk', undefined, { quietStatuses: [409, 422], baseURL: expect.any(String) })
+    expect(mockedPost).toHaveBeenCalledWith('/workflows/w1/run-bulk', undefined, expect.objectContaining({ quietStatuses: [409, 422], baseURL: expect.any(String), headers: expect.objectContaining({ 'Idempotency-Key': expect.any(String) }) }))
     expect(outcome).toEqual({ status: 'started', runId: 'rb1', count: 12 })
     expect(result.current.activeRunId).toBe('rb1')
     expect(onRunStarted).toHaveBeenCalledTimes(1)
@@ -271,7 +271,7 @@ describe('useWorkflowRunControl · runBulk', () => {
     let outcome
     await act(async () => { outcome = await result.current.runBulk({ confirm: true }) })
 
-    expect(mockedPost).toHaveBeenCalledWith('/workflows/w1/run-bulk', { confirm: true }, { quietStatuses: [409, 422], baseURL: expect.any(String) })
+    expect(mockedPost).toHaveBeenCalledWith('/workflows/w1/run-bulk', { confirm: true }, expect.objectContaining({ quietStatuses: [409, 422], baseURL: expect.any(String), headers: expect.objectContaining({ 'Idempotency-Key': expect.any(String) }) }))
     expect(outcome).toEqual({ status: 'started', runId: 'rb2', count: 40 })
   })
 

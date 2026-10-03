@@ -55,7 +55,7 @@ describe('AdminInvoicesSettings', () => {
     renderScreen()
     const btn = await screen.findByRole('button', { name: i18n.t('adminInvoices.finalize', { ns: 'settings' }) })
     await userEvent.click(btn)
-    await waitFor(() => expect(api.post).toHaveBeenCalledWith('/admin/invoices/inv-d/finalize'))
+    await waitFor(() => expect(api.post).toHaveBeenCalledWith('/admin/invoices/inv-d/finalize', undefined, expect.objectContaining({ headers: expect.objectContaining({ 'Idempotency-Key': expect.any(String) }) })))
   })
 
   it('shows "Opnieuw versturen" for a final-but-undelivered invoice and hits the same finalize route', async () => {
@@ -67,7 +67,7 @@ describe('AdminInvoicesSettings', () => {
     renderScreen()
     const btn = await screen.findByRole('button', { name: i18n.t('adminInvoices.resend', { ns: 'settings' }) })
     await userEvent.click(btn)
-    await waitFor(() => expect(api.post).toHaveBeenCalledWith('/admin/invoices/inv-f/finalize'))
+    await waitFor(() => expect(api.post).toHaveBeenCalledWith('/admin/invoices/inv-f/finalize', undefined, expect.objectContaining({ headers: expect.objectContaining({ 'Idempotency-Key': expect.any(String) }) })))
   })
 
   it('downloads a final invoice PDF via a real blob GET', async () => {

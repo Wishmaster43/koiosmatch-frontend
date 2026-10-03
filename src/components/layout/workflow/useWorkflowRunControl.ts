@@ -9,6 +9,8 @@ import { useState, useCallback, useEffect, useRef } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useWorkflowRun } from './useWorkflowRun'
 import api from '@/lib/api'
+// DOUBLE-SUBMIT-FE-1 point 2: one Idempotency-Key per click on an irreversible action (BE IDEMP-1 replays).
+import { withIdempotencyKey } from '@/lib/idempotency'
 import { resolveWorkflowBaseURL } from '@/lib/workflowApi'
 import { extractApiError } from '@/lib/extractApiError'
 import { notifyError } from '@/lib/notify'
@@ -99,7 +101,7 @@ export function useWorkflowRunControl({ workflowId, initialRunId = null, onRunSt
       // 409 (already running) gets its own inline feedback; 422 (WORKFLOW-422)
       // is surfaced by this hook's own catch below — keep both out of the
       // api.ts dev interceptor's generic double-toast.
-      const res = await api.post(`/workflows/${workflowId}/run`, hasBody ? body : undefined, { quietStatuses: [409, 422], baseURL: resolveWorkflowBaseURL() })
+      const res = await api.post(`/workflows/${workflowId}/run`, hasBody ? body : undefined, withIdempotencyKey({ quietStatuses: [409, 422], baseURL: resolveWorkflowBaseURL() }))
       const runId = (res.data?.run?.id ?? res.data?.data?.id ?? res.data?.id) as string | number | undefined
       if (runId != null) setActiveRunId(runId)
 
@@ -164,7 +166,7 @@ export function useWorkflowRunControl({ workflowId, initialRunId = null, onRunSt
       const body = opts?.confirm ? { confirm: true } : undefined
       // WORKFLOW-422: 422 is surfaced by this hook's own catch below — keep it
       // out of the api.ts dev interceptor's generic double-toast, same as 409.
-      const res = await api.post(`/workflows/${workflowId}/run-bulk`, body, { quietStatuses: [409, 422], baseURL: resolveWorkflowBaseURL() })
+      const res = await api.post(`/workflows/${workflowId}/run-bulk`, body, withIdempotencyKey({ quietStatuses: [409, 422], baseURL: resolveWorkflowBaseURL() }))
       const rawRunId = (res.data?.run_id ?? res.data?.run?.id) as string | number | undefined
       const runId = rawRunId != null ? String(rawRunId) : null
       const count = (res.data?.count ?? 0) as number

@@ -28,6 +28,8 @@ import type { ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
 import { MessageCircle, AlertTriangle, ChevronDown, ChevronRight, Clock } from 'lucide-react'
 import api, { unwrapList } from '@/lib/api'
+// DOUBLE-SUBMIT-FE-1 point 2: one Idempotency-Key per click on an irreversible action (BE IDEMP-1 replays).
+import { withIdempotencyKey } from '@/lib/idempotency'
 import { notifyError } from '@/lib/notify'
 import { extractApiError } from '@/lib/extractApiError'
 import SectionCard from '@/components/ui/SectionCard'
@@ -286,7 +288,7 @@ export default function ConversationsSection({ threadsUrl, threadsParams, header
     sendingRef.current = true
     setSendingMsg(true)
     setSendError(null)
-    api.post(`/conversations/${id}/messages`, { direction: 'outbound', message_content: text })
+    api.post(`/conversations/${id}/messages`, { direction: 'outbound', message_content: text }, withIdempotencyKey())
       .then(r => {
         const res = r as { status?: number; data?: MessageRow & { outbox_id?: Id } }
         if (res.status === 202 && res.data?.outbox_id != null) {

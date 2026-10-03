@@ -14,6 +14,8 @@ import { useEffect, useMemo, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Download, FileSpreadsheet, RefreshCw, Send } from 'lucide-react'
 import api, { unwrap } from '@/lib/api'
+// DOUBLE-SUBMIT-FE-1 point 2: one Idempotency-Key per click on an irreversible action (BE IDEMP-1 replays).
+import { withIdempotencyKey } from '@/lib/idempotency'
 import { triggerBlobDownload } from '@/lib/downloadBlob'
 import { useNumberFormat } from '@/lib/formatters'
 import { useLocale, buildLast12Months } from '@/lib/datetime'
@@ -102,7 +104,7 @@ export default function AdminInvoicesSettings() {
   const handleFinalize = async (invoice: AdminInvoice) => {
     setFinalizingId(invoice.id)
     try {
-      await api.post(`/admin/invoices/${invoice.id}/finalize`)
+      await api.post(`/admin/invoices/${invoice.id}/finalize`, undefined, withIdempotencyKey())
       notifySuccess(t(invoice.status === 'final' ? 'adminInvoices.resendSuccess' : 'adminInvoices.finalizeSuccess'))
       await reload()
     } catch (err) {
