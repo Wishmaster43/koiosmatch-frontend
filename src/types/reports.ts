@@ -63,6 +63,10 @@ export interface ReportFilterGroup {
 // Per-step result inside a workflow run. `input`/`output` are the raw data
 // bundles the step received and produced (shown expandable in the run drawer).
 export interface RunStep {
+  // RUN-INSPECTOR-1: the step's own db id (RunPresenter `id`, the path param for
+  // GET /workflow-runs/{run}/steps/{step}) — distinct from `step_id` (the graph
+  // node id) below. Absent on older runs recorded before this field landed.
+  id?: string | number
   // WF-R3 live-run fields (present on runs from the queued engine).
   step_id?: string | number
   step_order?: number

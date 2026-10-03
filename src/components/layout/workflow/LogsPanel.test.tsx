@@ -7,9 +7,18 @@
  */
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { render, screen } from '@testing-library/react'
+import userEvent from '@testing-library/user-event'
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
+import { createElement, type ReactNode } from 'react'
 import api from '@/lib/api'
 import LogsPanel from './LogsPanel'
 import type { RunRow } from '@/types/reports'
+
+// RunStepInspectorPanel (opened by the new inspector button) is react-query
+// backed; this suite's LogsPanel-only tests above never mount it, so they stay
+// unwrapped — only the inspector-button describe block below needs a client.
+const queryWrapper = ({ children }: { children: ReactNode }) =>
+  createElement(QueryClientProvider, { client: new QueryClient({ defaultOptions: { queries: { retry: false } } }) }, children)
 
 vi.mock('@/lib/api', async () => {
   const actual = await vi.importActual<typeof import('@/lib/api')>('@/lib/api')
@@ -45,5 +54,34 @@ describe('LogsPanel — dry-run step preference', () => {
     render(<LogsPanel liveRun={{ ...dryRun, dry_run: false } as unknown as RunRow} onClose={() => {}} />)
     expect(await screen.findAllByText(/success/i)).toBeTruthy()
     expect(screen.queryByText(/skipped/i)).toBeNull()
+  })
+})
+
+// RUN-INSPECTOR-1: the per-step "open inspector" button only appears once the
+// step carries a resolvable db id (`step.id`, the route's path param), and
+// opens the panel with that exact run+step pair.
+describe('LogsPanel — run-step inspector button', () => {
+  const runWithStepId = {
+    id: 'run-9', status: 'success', dry_run: false, started_at: '2026-08-23T10:00:00Z', duration_ms: 900,
+    steps: [{ id: 'step-77', label: 'Kandidaten ophalen', status: 'success' }],
+  } as unknown as RunRow
+
+  beforeEach(() => { vi.mocked(api.get).mockReset(); vi.mocked(api.get).mockResolvedValue({ data: [] }) })
+
+  it('shows inspector.open for a step with an id and opens the panel for that run+step', async () => {
+    vi.mocked(api.get).mockImplementation((url: string) =>
+      url.includes('/steps/') ? Promise.resolve({ data: { data: { id: 'step-77', module_type: 'candidates_fetch', status: 'success', output: {} } } })
+        : Promise.resolve({ data: [] }))
+    render(<LogsPanel liveRun={runWithStepId} onClose={() => {}} />, { wrapper: queryWrapper })
+    const openBtn = await screen.findByText('inspector.open')
+    await userEvent.click(openBtn)
+    expect(api.get).toHaveBeenCalledWith('/workflow-runs/run-9/steps/step-77', expect.objectContaining({ quietStatuses: [403] }))
+  })
+
+  it('never shows the open button for a step without a resolvable id', async () => {
+    const noId = { ...runWithStepId, steps: [{ label: 'Oude stap', status: 'success' }] } as unknown as RunRow
+    render(<LogsPanel liveRun={noId} onClose={() => {}} />, { wrapper: queryWrapper })
+    await screen.findByText('Oude stap')
+    expect(screen.queryByText('inspector.open')).toBeNull()
   })
 })

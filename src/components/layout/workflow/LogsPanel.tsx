@@ -15,6 +15,7 @@ import { StatusBadge, StepStatusBadge, DryRunBanner, formatDT, formatDuration } 
 import { CANCELLABLE, StopRunButton } from './runControl'
 import { useModuleCatalog } from './useModuleCatalog'
 import StepOutputSlice from './StepOutputSlice'
+import RunStepInspectorPanel from './RunStepInspectorPanel'
 import { SectionTitle, Caption, Mono } from '@/components/ui/typography'
 import Button from '@/components/ui/Button'
 import { hhmmss } from '@/lib/localDate'
@@ -60,6 +61,9 @@ export default function LogsPanel({ workflowId, liveRun, onClose, onOpenHistory 
   }, [])
   // Per-run stop feedback (the 422 "already finished" reason from the backend).
   const [stopError, setStopError] = useState<{ id: string | number; message: string } | null>(null)
+  // RUN-INSPECTOR-1: the opened step's Input|Output inspector (run id + the
+  // step's own db id, resolved through this run — route is IDOR-safe by design).
+  const [inspecting, setInspecting] = useState<{ runId: string | number; stepId: string | number; label: string } | null>(null)
   // Bundle-shape catalog (output_fields per module type) for the per-step slices.
   const { catalog } = useModuleCatalog()
 
@@ -241,6 +245,19 @@ export default function LogsPanel({ workflowId, liveRun, onClose, onOpenHistory 
                         )}
                         {/* This step's own emitted records (collapsible; closed above 10 rows). */}
                         <StepOutputSlice step={step} catalog={catalog} />
+                        {/* RUN-INSPECTOR-1: the full Make-style Input|Output inspector for this
+                            step — only reachable once the step has a resolvable db id (`step.id`,
+                            the step-route's path param; older runs without it stay without the button). */}
+                        {run.id != null && step.id != null && (
+                          <Button variant="ghost" size="sm" style={{ marginTop: 4 }}
+                            onClick={() => setInspecting({
+                              // Non-null: this branch only renders when both ids are checked above.
+                              runId: run.id!, stepId: step.id!,
+                              label: step.label ?? step.module_type ?? t('runs.drawer.step', { n: i + 1 }),
+                            })}>
+                            {tw('inspector.open')}
+                          </Button>
+                        )}
                       </div>
                     )
                   })}
@@ -250,6 +267,10 @@ export default function LogsPanel({ workflowId, liveRun, onClose, onOpenHistory 
           )
         })}
       </div>
+      {inspecting && (
+        <RunStepInspectorPanel runId={inspecting.runId} stepId={inspecting.stepId} moduleLabel={inspecting.label}
+          onClose={() => setInspecting(null)} />
+      )}
     </div>
   )
 }

@@ -30,6 +30,10 @@ export type OutputTreeOptions = {
   collapseSignal?: number
 }
 
+// RUN-INSPECTOR-1: `fill` swaps the fixed 420px scroll area for flex:1/minHeight:0
+// so the tree stretches to the panel's own height (default OFF — every existing
+// consumer keeps its byte-identical fixed-height render).
+
 // True when the value renders as an expandable branch (object/array with content).
 const isBranch = (v: unknown): boolean =>
   v != null && typeof v === 'object' && Object.keys(v as object).length > 0
@@ -188,10 +192,10 @@ function Children({ value, depth, query, t, opts, bundleTotal }: {
 // Root of the Make-style bundle inspector: wraps the data in a searchable expandable field tree instead
 // of a raw JSON dump (see file header). `typed`/`counts`/`bundles`/`expandSignal`/`collapseSignal` and
 // `bundleTotal` are OUTPUT-TREE-TYPED-1's opt-in additions; every default keeps today's plain render.
-export default function OutputTree({ data, searchable = true, typed, counts, bundles, expandSignal, collapseSignal, bundleTotal }: {
+export default function OutputTree({ data, searchable = true, typed, counts, bundles, expandSignal, collapseSignal, bundleTotal, fill }: {
   data: unknown; searchable?: boolean
   typed?: boolean; counts?: boolean; bundles?: boolean
-  expandSignal?: number; collapseSignal?: number; bundleTotal?: number
+  expandSignal?: number; collapseSignal?: number; bundleTotal?: number; fill?: boolean
 }) {
   const { t } = useTranslation('workflows')
   const [q, setQ] = useState('')
@@ -205,10 +209,12 @@ export default function OutputTree({ data, searchable = true, typed, counts, bun
   }
 
   return (
-    <div style={{ border: '1px solid var(--border)', borderRadius: 8, overflow: 'hidden', background: 'var(--surface)' }}>
+    <div style={{ border: '1px solid var(--border)', borderRadius: 8, overflow: 'hidden', background: 'var(--surface)',
+                  display: fill ? 'flex' : undefined, flexDirection: fill ? 'column' : undefined,
+                  flex: fill ? 1 : undefined, minHeight: fill ? 0 : undefined }}>
       {/* Search across keys + values */}
       {searchable && (
-        <div style={{ position: 'relative', padding: 6, borderBottom: '1px solid var(--border)' }}>
+        <div style={{ position: 'relative', padding: 6, borderBottom: '1px solid var(--border)', flexShrink: 0 }}>
           <Search size={12} style={{ position: 'absolute', left: 13, top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)' }} />
           <input value={q} onChange={e => setQ(e.target.value)}
             placeholder={t('tree.search')} aria-label={t('tree.search')}
@@ -216,7 +222,7 @@ export default function OutputTree({ data, searchable = true, typed, counts, bun
                      borderRadius: 6, outline: 'none', background: 'var(--surface)', color: 'var(--text)', boxSizing: 'border-box' }} />
         </div>
       )}
-      <div style={{ maxHeight: 420, overflowY: 'auto', padding: 4 }}>
+      <div style={fill ? { flex: 1, minHeight: 0, overflowY: 'auto', padding: 4 } : { maxHeight: 420, overflowY: 'auto', padding: 4 }}>
         {/* Root: a primitive renders as one row; objects/arrays render their children. */}
         {isBranch(data)
           ? <Children value={data as object} depth={0} query={query} t={t} opts={opts} bundleTotal={bundleTotal} />
