@@ -9,9 +9,9 @@
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import FloatingPanel from '@/components/ui/FloatingPanel'
-import ModalFooter from '@/components/ui/ModalFooter'
-import { BodyText, Caption, captionStyle } from '@/components/ui/typography'
+import { BodyText, Caption } from '@/components/ui/typography'
 import { FieldRow, TextField } from '@/components/forms/fields'
+import ReasonDialogFooter from './ReasonDialogFooter'
 import { extractApiError } from '@/lib/extractApiError'
 
 // The two HTTP statuses this dialog maps to its own copy; anything else falls
@@ -65,13 +65,8 @@ export default function EraseWithPasswordDialog({ open, title, intro, confirmLab
           onChange={setPassword} onKeyDown={e => { if (e.key === 'Enter') submit() }} />
       </FieldRow>
       <Caption as="p" style={{ marginTop: 6 }}>{t('common:eraseDialog.hint')}</Caption>
-      {/* A raw <p> (not the Caption atom) — TypoProps carries no `role`, and this
-          line must be announced as an alert (§6). */}
-      {error && <p role="alert" style={{ ...captionStyle, marginTop: 8, color: 'var(--color-danger-text)' }}>{error}</p>}
-      <div style={{ marginTop: 18 }}>
-        <ModalFooter onCancel={onClose} onSubmit={submit} cancelLabel={t('common:cancel')}
-          submitLabel={confirmLabel} disabled={!password} busy={busy} danger />
-      </div>
+      <ReasonDialogFooter error={error} onCancel={onClose} onSubmit={submit} cancelLabel={t('common:cancel')}
+        submitLabel={confirmLabel} disabled={!password} busy={busy} />
     </FloatingPanel>
   )
 }

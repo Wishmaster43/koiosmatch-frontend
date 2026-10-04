@@ -44,6 +44,16 @@
     "wrongPassword": "Wachtwoord onjuist of geen rechten.",
     "passwordRequired": "Wachtwoord is verplicht."
   },
+  "resolveClaim": {
+    "reason": "Reden",
+    "hint": "Wat is er gebeurd? Dit wordt vastgelegd in de audit.",
+    "errors": {
+      "contract_not_in_flight": "Er loopt geen verzending meer.",
+      "contract_already_sent": "Het contract is al verstuurd.",
+      "invoice_already_sent": "De factuur is al gemaild.",
+      "invoice_not_sending": "Er loopt geen mailverzending."
+    }
+  },
   "save": "Opslaan",
   "saving": "Opslaan…",
   "saveChanges": "Wijzigingen opslaan",

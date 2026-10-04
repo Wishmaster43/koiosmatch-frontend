@@ -6,7 +6,7 @@
  * finalize endpoint (the re-send path), a draft shows "Finaliseren".
  */
 import { describe, it, expect, afterEach, beforeEach, vi } from 'vitest'
-import { render, screen, waitFor } from '@testing-library/react'
+import { render, screen, waitFor, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { I18nextProvider } from 'react-i18next'
 import i18n from '@/i18n'
@@ -232,5 +232,49 @@ describe('AdminInvoicesSettings', () => {
 
     clickSpy.mockRestore()
     vi.unstubAllGlobals()
+  })
+})
+
+// CLAIM-RESOLVE-1 (Danny 04-10 answer 2): a stuck mail claim (sending_at set, sent_at null) offers
+// "Markeer als niet verzonden" — appended to the suite on HEAD's own fixtures and mocks, never a rewrite.
+describe('AdminInvoicesSettings · resolve a stuck mail claim (CLAIM-RESOLVE-1)', () => {
+  const resolveLabel = () => i18n.t('adminInvoices.resolveNotSent', { ns: 'settings' })
+  const stuck = { id: 'inv-stuck', tenant_id: 't1', tenant_name: 'Tenant Stuck', number: 'INV-9', total: '100.00', status: 'final', sent_at: null, sending_at: '2026-10-04T08:00:00Z' }
+  const mailed = { id: 'inv-mailed', tenant_id: 't2', tenant_name: 'Tenant Mailed', number: 'INV-8', total: '200.00', status: 'final', sent_at: '2026-10-03T08:00:00Z', sending_at: '2026-10-03T08:00:00Z' }
+  const draft = { id: 'inv-draft', tenant_id: 't3', tenant_name: 'Tenant Draft', number: null, total: '50.00', status: 'draft', sent_at: null, sending_at: null }
+
+  it('shows the resolve button only for a row with sending_at set and sent_at null', async () => {
+    api.get.mockResolvedValue({ data: [stuck, mailed, draft] })
+    renderScreen()
+    await waitFor(() => expect(screen.getByText('Tenant Stuck')).toBeInTheDocument())
+    const row = (name: string) => screen.getAllByRole('row').find(r => within(r).queryByText(name))!
+    expect(within(row('Tenant Stuck')).getByRole('button', { name: resolveLabel() })).toBeInTheDocument()
+    expect(within(row('Tenant Mailed')).queryByRole('button', { name: resolveLabel() })).toBeNull()
+    expect(within(row('Tenant Draft')).queryByRole('button', { name: resolveLabel() })).toBeNull()
+  })
+
+  it('POSTs resolve-sending with exactly { reason } and an Idempotency-Key, then reloads and notifies', async () => {
+    api.get.mockResolvedValueOnce({ data: [stuck] })
+    api.post.mockResolvedValueOnce({ data: { sending_at: null, resolved: true } })
+    api.get.mockResolvedValueOnce({ data: [{ ...stuck, sending_at: null }] })
+    // Toasts are observed through the real km:toast event, like the CLAIM-1 cases above (no notify mock in this file).
+    const events: Array<{ type: string; message: string }> = []
+    const onToast = (e: Event) => events.push((e as CustomEvent).detail)
+    window.addEventListener('km:toast', onToast)
+    const user = userEvent.setup()
+    renderScreen()
+    await waitFor(() => expect(screen.getByText('Tenant Stuck')).toBeInTheDocument())
+    await user.click(screen.getByRole('button', { name: resolveLabel() }))
+    const dialog = await screen.findByRole('dialog')
+    await user.type(within(dialog).getByLabelText(i18n.t('resolveClaim.reason', { ns: 'common' }), { exact: false }), 'Mail support confirmed nothing sent')
+    await user.click(within(dialog).getByRole('button', { name: resolveLabel() }))
+    await waitFor(() => expect(api.post).toHaveBeenCalledWith(
+      '/admin/invoices/inv-stuck/resolve-sending',
+      { reason: 'Mail support confirmed nothing sent' },
+      expect.objectContaining({ headers: expect.objectContaining({ 'Idempotency-Key': expect.any(String) }) }),
+    ))
+    await waitFor(() => expect(events).toContainEqual({ type: 'success', message: i18n.t('adminInvoices.resolved', { ns: 'settings' }) }))
+    await waitFor(() => expect(api.get).toHaveBeenCalledTimes(2))
+    window.removeEventListener('km:toast', onToast)
   })
 })

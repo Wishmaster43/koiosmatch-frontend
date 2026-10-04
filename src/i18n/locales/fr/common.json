@@ -44,6 +44,16 @@
     "wrongPassword": "Mot de passe incorrect ou autorisation manquante.",
     "passwordRequired": "Le mot de passe est obligatoire."
   },
+  "resolveClaim": {
+    "reason": "Motif",
+    "hint": "Que s'est-il passé ? Ceci est enregistré dans le journal d'audit.",
+    "errors": {
+      "contract_not_in_flight": "Aucun envoi en cours.",
+      "contract_already_sent": "Le contrat a déjà été envoyé.",
+      "invoice_already_sent": "La facture a déjà été envoyée par e-mail.",
+      "invoice_not_sending": "Aucun envoi d'e-mail en cours."
+    }
+  },
   "save": "Enregistrer",
   "saving": "Enregistrement…",
   "saveChanges": "Enregistrer les modifications",

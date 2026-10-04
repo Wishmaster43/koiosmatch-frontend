@@ -4388,7 +4388,11 @@
       "draft": "Draft",
       "final": "Final"
     },
-    "generateResult": "{{generated}} generated, {{alreadyFinal}} already final."
+    "generateResult": "{{generated}} generated, {{alreadyFinal}} already final.",
+    "sendingSince": "Mailing in progress since {{since}}",
+    "resolveNotSent": "Mark as not sent",
+    "resolveIntro": "This invoice mail has become stuck. Mark it as not sent to be able to send it again.",
+    "resolved": "Marked as not sent."
   },
   "helloflexContractMap": {
     "title": "HelloFlex contract map",

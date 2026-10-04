@@ -44,6 +44,16 @@
     "wrongPassword": "Password errata o permesso mancante.",
     "passwordRequired": "La password è obbligatoria."
   },
+  "resolveClaim": {
+    "reason": "Motivo",
+    "hint": "Cosa è successo? Questo viene registrato nel log di controllo.",
+    "errors": {
+      "contract_not_in_flight": "Non c'è più nessun invio in corso.",
+      "contract_already_sent": "Il contratto è già stato inviato.",
+      "invoice_already_sent": "La fattura è già stata inviata per email.",
+      "invoice_not_sending": "Non c'è nessun invio email in corso."
+    }
+  },
   "save": "Salva",
   "saving": "Salvataggio…",
   "saveChanges": "Salva modifiche",

@@ -51,6 +51,9 @@ export interface RawMatch {
   // same fields the list AND detail resources both serialize).
   contract_status?: string | null
   helloflex_contract_guid?: string | null
+  // CLAIM-RESOLVE-1: the match's own updated_at while contract_status === 'sending'
+  // (ISO 8601), else null — drives the resolve button's "sinds …" caption.
+  contract_sending_since?: string | null
   // MATCH-ORDINAL-1 (M14/M15): the customer site the match sits at — already
   // serialized by MatchListResource.php but previously dropped by mapMatch.
   customer_location_id?: string | number | null
@@ -170,6 +173,9 @@ export interface MatchRow {
   // payload predates this field, or the seeded default 'none' applies).
   contractStatus?: string | null
   helloflexContractGuid?: string | null
+  // CLAIM-RESOLVE-1: mapped straight off contract_sending_since — non-null only
+  // while contract_status is genuinely 'sending'.
+  contractSendingSince?: string | null
   // MATCH-ORDINAL-1 (M14/M15): the customer site axes as ids, used to compute
   // "Nth match at this location/department" without a second round-trip; the
   // matching NAMES sit right below (customerLocationName/customerDepartmentName,

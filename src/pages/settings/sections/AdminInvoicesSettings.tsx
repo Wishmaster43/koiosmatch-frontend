@@ -27,8 +27,15 @@ import SearchSelect from '@/components/ui/SearchSelect'
 import { card, th as thBase, td as tdBase, numCell as numCellBase, notice } from './usageCardStyles'
 import type { CSSProperties } from 'react'
 import Button from '@/components/ui/Button'
-import { PageTitle } from '@/components/ui/typography'
+import { PageTitle, Caption } from '@/components/ui/typography'
+import ResolveClaimDialog from '@/components/drawer/ResolveClaimDialog'
+import { formatDateTimeStr } from '@/lib/localDate'
 import type { AdminInvoice, GenerateResult } from './invoiceTypes'
+import type { operations } from '@/types/api-generated'
+
+// Request body typed from the generated spec (verifier fix), so a backend field
+// rename surfaces as a compile error here instead of a silent runtime 422.
+type ResolveSendingBody = operations['postAdminInvoicesIdResolveSending']['requestBody']['content']['application/json']
 const th = thBase as CSSProperties
 const td = tdBase as CSSProperties
 const numCell = numCellBase as CSSProperties
@@ -58,6 +65,8 @@ export default function AdminInvoicesSettings() {
   const [finalizingId, setFinalizingId] = useState<string | null>(null)
   const [downloadingId, setDownloadingId] = useState<string | null>(null)
   const [exporting, setExporting] = useState(false)
+  // CLAIM-RESOLVE-1: which invoice's "mark as not sent" dialog is open, if any.
+  const [resolvingInvoice, setResolvingInvoice] = useState<AdminInvoice | null>(null)
 
   // Reload the month's invoices — shared by the initial load and every action
   // that changes server state (generate/finalize), so the list always reflects reality.
@@ -129,6 +138,16 @@ export default function AdminInvoicesSettings() {
     } finally {
       setFinalizingId(null)
     }
+  }
+
+  // CLAIM-RESOLVE-1: releases a stuck mail claim (POST /admin/invoices/{id}/resolve-sending);
+  // a 409 propagates up for the shared dialog's own code mapping, never swallowed here.
+  const handleResolveSending = async (invoice: AdminInvoice, reason: string) => {
+    const body: ResolveSendingBody = { reason }
+    await api.post(`/admin/invoices/${invoice.id}/resolve-sending`, body, withIdempotencyKey())
+    setResolvingInvoice(null)
+    notifySuccess(t('adminInvoices.resolved'))
+    await reload()
   }
 
   // Downloads a single invoice's PDF via the shared blob helper.
@@ -224,19 +243,31 @@ export default function AdminInvoicesSettings() {
                       />
                     </td>
                     <td style={{ ...td, textAlign: 'right' as const }}>
-                      <div style={{ display: 'inline-flex', gap: 8 }}>
-                        {(inv.status === 'draft' || isResend) && (
-                          <Button variant="secondary" size="sm" onClick={() => handleFinalize(inv)} disabled={finalizing}>
-                            {finalizing ? <Spinner size={13} /> : <Send size={13} aria-hidden="true" />}
-                            {t(isResend ? 'adminInvoices.resend' : 'adminInvoices.finalize')}
-                          </Button>
-                        )}
-                        {inv.status === 'final' && (
-                          <Button variant="secondary" size="sm" onClick={() => handleDownload(inv)} disabled={downloading}
-                            aria-label={t('adminInvoices.download')}>
-                            {downloading ? <Spinner size={13} /> : <Download size={13} aria-hidden="true" />}
-                            {t('adminInvoices.download')}
-                          </Button>
+                      <div style={{ display: 'inline-flex', flexDirection: 'column', alignItems: 'flex-end', gap: 4 }}>
+                        <div style={{ display: 'inline-flex', gap: 8 }}>
+                          {(inv.status === 'draft' || isResend) && (
+                            <Button variant="secondary" size="sm" onClick={() => handleFinalize(inv)} disabled={finalizing}>
+                              {finalizing ? <Spinner size={13} /> : <Send size={13} aria-hidden="true" />}
+                              {t(isResend ? 'adminInvoices.resend' : 'adminInvoices.finalize')}
+                            </Button>
+                          )}
+                          {inv.status === 'final' && (
+                            <Button variant="secondary" size="sm" onClick={() => handleDownload(inv)} disabled={downloading}
+                              aria-label={t('adminInvoices.download')}>
+                              {downloading ? <Spinner size={13} /> : <Download size={13} aria-hidden="true" />}
+                              {t('adminInvoices.download')}
+                            </Button>
+                          )}
+                        </div>
+                        {/* CLAIM-RESOLVE-1: a mail claim genuinely stuck (sending_at set, not yet
+                            sent) can be released immediately — beside the status it names. */}
+                        {inv.sending_at && !inv.sent_at && (
+                          <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                            <Caption as="span">{t('adminInvoices.sendingSince', { since: formatDateTimeStr(inv.sending_at) })}</Caption>
+                            <Button variant="dangerSoft" size="sm" onClick={() => setResolvingInvoice(inv)}>
+                              {t('adminInvoices.resolveNotSent')}
+                            </Button>
+                          </div>
                         )}
                       </div>
                     </td>
@@ -247,6 +278,11 @@ export default function AdminInvoicesSettings() {
           </table>
         )}
       </div>
+      {/* CLAIM-RESOLVE-1: the shared resolve dialog, mounted once for whichever row opened it. */}
+      <ResolveClaimDialog open={resolvingInvoice != null} title={t('adminInvoices.resolveNotSent')}
+        intro={t('adminInvoices.resolveIntro')} confirmLabel={t('adminInvoices.resolveNotSent')}
+        onClose={() => setResolvingInvoice(null)} persistKey="admin-invoice-resolve"
+        onConfirm={(reason) => handleResolveSending(resolvingInvoice as AdminInvoice, reason)} />
     </div>
   )
 }

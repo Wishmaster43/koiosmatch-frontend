@@ -126,7 +126,11 @@
         "customer": "Kunde",
         "manual": "manuell"
       },
-      "renewals": "Verlängerungen"
+      "renewals": "Verlängerungen",
+      "sendingSince": "Versand läuft seit {{since}}",
+      "resolveNotSent": "Als nicht gesendet markieren",
+      "resolveIntro": "Dieser Versand an HelloFlex ist hängen geblieben. Markieren Sie ihn als nicht gesendet, um erneut senden zu können.",
+      "resolved": "Als nicht gesendet markiert. Erneutes Senden ist sofort möglich."
     },
     "ownerUnassigned": "Kein Inhaber",
     "terminate": {

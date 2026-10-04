@@ -4388,7 +4388,11 @@
       "draft": "Concept",
       "final": "Definitief"
     },
-    "generateResult": "{{generated}} gegenereerd, {{alreadyFinal}} al definitief."
+    "generateResult": "{{generated}} gegenereerd, {{alreadyFinal}} al definitief.",
+    "sendingSince": "Mail loopt sinds {{since}}",
+    "resolveNotSent": "Markeer als niet verzonden",
+    "resolveIntro": "Deze factuurmail is blijven hangen. Markeer hem als niet verzonden om opnieuw te kunnen versturen.",
+    "resolved": "Gemarkeerd als niet verzonden."
   },
   "helloflexContractMap": {
     "title": "HelloFlex contractmap",

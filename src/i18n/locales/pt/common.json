@@ -44,6 +44,16 @@
     "wrongPassword": "Palavra-passe incorreta ou sem permissão.",
     "passwordRequired": "A palavra-passe é obrigatória."
   },
+  "resolveClaim": {
+    "reason": "Motivo",
+    "hint": "O que aconteceu? Isto fica registado na auditoria.",
+    "errors": {
+      "contract_not_in_flight": "Já não há nenhum envio em curso.",
+      "contract_already_sent": "O contrato já foi enviado.",
+      "invoice_already_sent": "A fatura já foi enviada por email.",
+      "invoice_not_sending": "Não há nenhum envio de email em curso."
+    }
+  },
   "save": "Guardar",
   "saving": "A guardar…",
   "saveChanges": "Guardar alterações",

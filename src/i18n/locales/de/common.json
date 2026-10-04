@@ -44,6 +44,16 @@
     "wrongPassword": "Passwort falsch oder keine Berechtigung.",
     "passwordRequired": "Passwort ist erforderlich."
   },
+  "resolveClaim": {
+    "reason": "Grund",
+    "hint": "Was ist passiert? Dies wird im Audit-Protokoll erfasst.",
+    "errors": {
+      "contract_not_in_flight": "Es läuft kein Versand mehr.",
+      "contract_already_sent": "Der Vertrag wurde bereits versendet.",
+      "invoice_already_sent": "Die Rechnung wurde bereits gemailt.",
+      "invoice_not_sending": "Es läuft kein E-Mail-Versand."
+    }
+  },
   "save": "Speichern",
   "saving": "Speichern…",
   "saveChanges": "Änderungen speichern",

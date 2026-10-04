@@ -61,6 +61,8 @@ export function mapMatch(m: RawMatch): MatchRow {
     // ships both) — drives the client-locked notice in OverviewTab.
     contractStatus: m.contract_status ?? null,
     helloflexContractGuid: m.helloflex_contract_guid ?? null,
+    // CLAIM-RESOLVE-1: the stuck-send age, straight off the list/detail resource.
+    contractSendingSince: m.contract_sending_since ?? null,
     // MATCH-ORDINAL-1 (M14/M15): the location/department ids ride along on every
     // list row (MatchListResource.php) — only the mapper was dropping them.
     customerLocationId:   m.customer_location_id ?? null,

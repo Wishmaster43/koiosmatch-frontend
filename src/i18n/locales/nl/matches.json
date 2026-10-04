@@ -126,7 +126,11 @@
         "customer": "klant",
         "manual": "handmatig"
       },
-      "renewals": "Verlengingen"
+      "renewals": "Verlengingen",
+      "sendingSince": "Verzending loopt sinds {{since}}",
+      "resolveNotSent": "Markeer als niet verzonden",
+      "resolveIntro": "Deze verzending naar HelloFlex is blijven hangen. Markeer hem als niet verzonden om opnieuw te kunnen versturen.",
+      "resolved": "Gemarkeerd als niet verzonden. Opnieuw versturen kan direct."
     },
     "ownerUnassigned": "Geen eigenaar",
     "terminate": {

@@ -57,6 +57,7 @@ import { CANON_LABEL_WIDTH, dash } from '@/components/drawer/fieldRowCanon'
 import { useAuth } from '@/context/AuthContext'
 import { useLookupsOptional } from '@/context/LookupsContext'
 import { useMatchClientEdit } from '../hooks/useMatchClientEdit'
+import MatchContractResolveAction from './MatchContractResolveAction'
 import { Field } from './MatchFieldRow'
 import type { MatchRow } from '@/types/match'
 
@@ -121,6 +122,18 @@ export default function MatchClientRow({ match, onUpdate }: Props) {
           <Caption style={{ paddingLeft: CANON_LABEL_WIDTH + 12, marginTop: -2 }}>
             {t('drawer.clientLocked')}
           </Caption>
+        )}
+        {/* CLAIM-RESOLVE-1: a HelloFlex send genuinely stuck 'sending' (not merely
+            'sent'/'active') can be released immediately. Per CONTRACT-CHANGELOG
+            2026-10-04 the gate is matches.update ONLY — never canEdit, which also
+            requires a customer-applicable match and an unarchived record: a
+            customer_not_applicable match with a stuck send must still be
+            releasable, and the resolve route itself does not care about those
+            two conditions — beside the status it names, never a header action. */}
+        {match.contractStatus === 'sending' && !!auth?.hasPermission?.('matches.update') && (
+          <div style={{ paddingLeft: CANON_LABEL_WIDTH + 12, marginTop: 4 }}>
+            <MatchContractResolveAction match={match} onUpdate={onUpdate} />
+          </div>
         )}
       </>
     )

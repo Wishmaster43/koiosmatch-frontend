@@ -126,7 +126,11 @@
         "customer": "cliente",
         "manual": "manual"
       },
-      "renewals": "Prorrogações"
+      "renewals": "Prorrogações",
+      "sendingSince": "Envio em curso desde {{since}}",
+      "resolveNotSent": "Marcar como não enviado",
+      "resolveIntro": "Este envio para o HelloFlex ficou bloqueado. Marque-o como não enviado para poder enviá-lo novamente.",
+      "resolved": "Marcado como não enviado. É possível enviar novamente de imediato."
     },
     "ownerUnassigned": "Sem responsável",
     "terminate": {

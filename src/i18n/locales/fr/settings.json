@@ -4388,7 +4388,11 @@
       "draft": "Brouillon",
       "final": "Définitive"
     },
-    "generateResult": "{{generated}} générées, {{alreadyFinal}} déjà finalisées."
+    "generateResult": "{{generated}} générées, {{alreadyFinal}} déjà finalisées.",
+    "sendingSince": "Envoi en cours depuis {{since}}",
+    "resolveNotSent": "Marquer comme non envoyée",
+    "resolveIntro": "Cet e-mail de facture est resté bloqué. Marquez-le comme non envoyé pour pouvoir le renvoyer.",
+    "resolved": "Marquée comme non envoyée."
   },
   "helloflexContractMap": {
     "title": "Correspondance des contrats HelloFlex",

@@ -4389,7 +4389,11 @@
       "draft": "Provisória",
       "final": "Definitiva"
     },
-    "generateResult": "{{generated}} geradas, {{alreadyFinal}} já definitivas."
+    "generateResult": "{{generated}} geradas, {{alreadyFinal}} já definitivas.",
+    "sendingSince": "Envio de email em curso desde {{since}}",
+    "resolveNotSent": "Marcar como não enviada",
+    "resolveIntro": "Este email de fatura ficou bloqueado. Marque-o como não enviado para poder enviá-lo novamente.",
+    "resolved": "Marcada como não enviada."
   },
   "helloflexContractMap": {
     "title": "Mapa de contratos HelloFlex",

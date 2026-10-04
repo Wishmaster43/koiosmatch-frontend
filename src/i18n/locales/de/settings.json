@@ -4388,7 +4388,11 @@
       "draft": "Entwurf",
       "final": "Endgültig"
     },
-    "generateResult": "{{generated}} erzeugt, {{alreadyFinal}} bereits endgültig."
+    "generateResult": "{{generated}} erzeugt, {{alreadyFinal}} bereits endgültig.",
+    "sendingSince": "E-Mail-Versand läuft seit {{since}}",
+    "resolveNotSent": "Als nicht gesendet markieren",
+    "resolveIntro": "Diese Rechnungs-E-Mail ist hängen geblieben. Markieren Sie sie als nicht gesendet, um sie erneut senden zu können.",
+    "resolved": "Als nicht gesendet markiert."
   },
   "helloflexContractMap": {
     "title": "HelloFlex-Vertragszuordnung",

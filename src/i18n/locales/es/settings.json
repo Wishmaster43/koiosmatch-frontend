@@ -4388,7 +4388,11 @@
       "draft": "Borrador",
       "final": "Definitiva"
     },
-    "generateResult": "{{generated}} generadas, {{alreadyFinal}} ya definitivas."
+    "generateResult": "{{generated}} generadas, {{alreadyFinal}} ya definitivas.",
+    "sendingSince": "Envío de correo en curso desde {{since}}",
+    "resolveNotSent": "Marcar como no enviada",
+    "resolveIntro": "Este correo de factura se ha quedado atascado. Márcalo como no enviado para poder enviarlo de nuevo.",
+    "resolved": "Marcada como no enviada."
   },
   "helloflexContractMap": {
     "title": "Correspondencia de contratos de HelloFlex",

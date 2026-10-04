@@ -16,7 +16,13 @@ export type AdminInvoice = Required<
   NonNullable<
     operations['getAdminInvoices']['responses'][200]['content']['application/json']['data']
   >[number]
->
+> & {
+  // CLAIM-RESOLVE-1: the generated spec's row shape does not carry this yet
+  // (hand-written: BE ships it on `/admin/invoices` and the finalize response,
+  // contract CONTRACT-CHANGELOG.md 2026-10-04) — ISO 8601 while a mail claim is
+  // stuck, else null. Optional so an older payload still types.
+  sending_at?: string | null
+}
 
 /**
  * Generate result from POST /admin/invoices/generate. Includes generated and

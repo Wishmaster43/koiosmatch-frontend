@@ -44,6 +44,16 @@
     "wrongPassword": "Incorrect password or no permission.",
     "passwordRequired": "Password is required."
   },
+  "resolveClaim": {
+    "reason": "Reason",
+    "hint": "What happened? This is recorded in the audit trail.",
+    "errors": {
+      "contract_not_in_flight": "There is no send in progress anymore.",
+      "contract_already_sent": "The contract has already been sent.",
+      "invoice_already_sent": "The invoice has already been mailed.",
+      "invoice_not_sending": "There is no mail send in progress."
+    }
+  },
   "save": "Save",
   "saving": "Saving…",
   "saveChanges": "Save changes",

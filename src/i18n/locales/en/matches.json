@@ -126,7 +126,11 @@
         "customer": "customer",
         "manual": "manual"
       },
-      "renewals": "Renewals"
+      "renewals": "Renewals",
+      "sendingSince": "Sending in progress since {{since}}",
+      "resolveNotSent": "Mark as not sent",
+      "resolveIntro": "This send to HelloFlex has become stuck. Mark it as not sent to be able to send it again.",
+      "resolved": "Marked as not sent. Sending again is possible right away."
     },
     "ownerUnassigned": "No owner",
     "terminate": {

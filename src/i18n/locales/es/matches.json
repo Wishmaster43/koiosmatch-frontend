@@ -126,7 +126,11 @@
         "customer": "cliente",
         "manual": "manual"
       },
-      "renewals": "Prórrogas"
+      "renewals": "Prórrogas",
+      "sendingSince": "Envío en curso desde {{since}}",
+      "resolveNotSent": "Marcar como no enviado",
+      "resolveIntro": "Este envío a HelloFlex se ha quedado atascado. Márcalo como no enviado para poder enviarlo de nuevo.",
+      "resolved": "Marcado como no enviado. Se puede volver a enviar de inmediato."
     },
     "ownerUnassigned": "Sin responsable",
     "terminate": {

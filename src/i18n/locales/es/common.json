@@ -44,6 +44,16 @@
     "wrongPassword": "Contraseña incorrecta o sin permiso.",
     "passwordRequired": "La contraseña es obligatoria."
   },
+  "resolveClaim": {
+    "reason": "Motivo",
+    "hint": "¿Qué ha pasado? Esto se registra en la auditoría.",
+    "errors": {
+      "contract_not_in_flight": "Ya no hay ningún envío en curso.",
+      "contract_already_sent": "El contrato ya se ha enviado.",
+      "invoice_already_sent": "La factura ya se ha enviado por correo.",
+      "invoice_not_sending": "No hay ningún envío de correo en curso."
+    }
+  },
   "save": "Guardar",
   "saving": "Guardando…",
   "saveChanges": "Guardar cambios",
