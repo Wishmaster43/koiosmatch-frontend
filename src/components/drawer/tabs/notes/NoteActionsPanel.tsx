@@ -56,8 +56,11 @@ export interface NoteActionPanelItem {
   reason?: string
   // CLAIM-1: present only on status === 'declined' — the machine code to
   // branch on, and the existing proposal this duplicate collided with.
-  code?: 'proposal_in_flight' | 'proposal_recently_sent' | null
+  // KOIOS-DEDUPE-1 widens the vocabulary to `duplicate_<entity>[_archived]`.
+  code?: string | null
   proposal_id?: Id | null
+  // KOIOS-DEDUPE-1: the existing record a duplicate decline collided with.
+  ref?: { type: string; id: Id; archived?: boolean } | null
   budget?: ActionBudget
   run_id?: string
   created?: { type: 'appointment' | 'task' | 'calllist'; id: string } | null
@@ -230,7 +233,7 @@ function ActionItemCard({ item, index, onEdit, onConfirm, candidateId, formatNum
         {item.status === 'declined' && (
           <AssistDeclinedFace code={item.code} reason={item.reason}
             applicationId={item.link_type === 'application' ? item.link_id : undefined}
-            proposalId={item.proposal_id} confirming={confirming} onForceSend={forceSend} />
+            proposalId={item.proposal_id} existingRef={item.ref} confirming={confirming} onForceSend={forceSend} />
         )}
         {item.status === 'pending' && item.confirmError && (
           <span role="alert"><Caption as="span" style={{ color: 'var(--color-danger-text)' }}>
@@ -310,7 +313,7 @@ export default function NoteActionsPanel({ items, onItemsChange, noteId, candida
         : (r.status === 'failed' || r.status === 'forbidden' || r.status === 'unsupported' ? 'failed' : 'pending')
       return { ...it, status, reason: r.reason, run_id: r.run_id, execIndex,
         budget: r.budget ?? it.budget,
-        code: r.code, proposal_id: r.proposal_id,
+        code: r.code, proposal_id: r.proposal_id, ref: r.ref,
         created: r.created ?? it.created ?? null,
         confirming: r.confirming, confirmError: r.confirmError, confirmErrorKind: r.confirmErrorKind }
     })

@@ -295,7 +295,9 @@
         "note": "Notiz",
         "phase": "Phase",
         "reason": "Grund"
-      }
+      },
+      "openExisting": "Bestehenden Datensatz ansehen",
+      "existingArchived": "archiviert"
     },
     "resizeHandle": "Panelbreite anpassen",
     "column": "Koios",
@@ -610,7 +612,9 @@
       "executing": "Wird ausgeführt…",
       "declined": {
         "proposal_in_flight": "Vorschlag wird bereits gesendet",
-        "proposal_recently_sent": "Vorschlag wurde bereits kürzlich gesendet"
+        "proposal_recently_sent": "Vorschlag wurde bereits kürzlich gesendet",
+        "duplicate": "Existiert bereits",
+        "duplicate_archived": "Existiert bereits, archiviert"
       },
       "viewRun": "Workflow-Lauf ansehen",
       "confirm": "Bestätigen",
@@ -636,7 +640,8 @@
         "koios_ai_token": "Koios KI-Tokens"
       },
       "budgetLine": "{{used}}/{{allowance}} {{unit}}",
-      "upgradeHint": "Upgrade auf {{tier}}"
+      "upgradeHint": "Upgrade auf {{tier}}",
+      "openExisting": "Bestehenden Datensatz ansehen"
     },
     "koiosMode": {
       "title": "Koios-Modus",

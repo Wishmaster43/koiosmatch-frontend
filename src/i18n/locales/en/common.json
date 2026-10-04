@@ -295,7 +295,9 @@
         "note": "Note",
         "phase": "Phase",
         "reason": "Reason"
-      }
+      },
+      "openExisting": "View existing record",
+      "existingArchived": "archived"
     },
     "resizeHandle": "Resize panel",
     "column": "Koios",
@@ -610,7 +612,9 @@
       "executing": "Running…",
       "declined": {
         "proposal_in_flight": "Proposal is already being sent",
-        "proposal_recently_sent": "Proposal was already sent recently"
+        "proposal_recently_sent": "Proposal was already sent recently",
+        "duplicate": "Already exists",
+        "duplicate_archived": "Already exists, archived"
       },
       "viewRun": "View workflow run",
       "confirm": "Confirm",
@@ -636,7 +640,8 @@
         "koios_ai_token": "Koios AI tokens"
       },
       "budgetLine": "{{used}}/{{allowance}} {{unit}}",
-      "upgradeHint": "Upgrade to {{tier}}"
+      "upgradeHint": "Upgrade to {{tier}}",
+      "openExisting": "View existing record"
     },
     "koiosMode": {
       "title": "Koios mode",

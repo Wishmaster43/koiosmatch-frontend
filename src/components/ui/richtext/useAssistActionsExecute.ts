@@ -38,8 +38,11 @@ export interface ExecItem extends RichTextAssistActionItem {
   budget?: ActionBudget
   // CLAIM-1 (03-10): present only on status === 'declined' — the machine
   // code to branch on, and the existing proposal this duplicate collided with.
-  code?: 'proposal_in_flight' | 'proposal_recently_sent' | null
+  // KOIOS-DEDUPE-1 widens the vocabulary to `duplicate_<entity>[_archived]`.
+  code?: string | null
   proposal_id?: Id | null
+  // KOIOS-DEDUPE-1: the existing record a duplicate decline collided with.
+  ref?: { type: string; id: Id; archived?: boolean } | null
   confirming?: boolean
   confirmError?: boolean
   // CONFIRM-EERLIJK-1 (Danny 18-09 19:5x, a card that stayed on "Wacht op bevestiging" with

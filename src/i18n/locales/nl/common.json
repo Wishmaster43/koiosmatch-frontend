@@ -295,7 +295,9 @@
         "note": "Notitie",
         "phase": "Fase",
         "reason": "Reden"
-      }
+      },
+      "openExisting": "Bekijk bestaand record",
+      "existingArchived": "gearchiveerd"
     },
     "resizeHandle": "Paneelbreedte aanpassen",
     "column": "Koios",
@@ -610,7 +612,9 @@
       "executing": "Wordt uitgevoerd…",
       "declined": {
         "proposal_in_flight": "Voorstel wordt al verstuurd",
-        "proposal_recently_sent": "Voorstel is recent al verstuurd"
+        "proposal_recently_sent": "Voorstel is recent al verstuurd",
+        "duplicate": "Bestaat al",
+        "duplicate_archived": "Bestaat al, gearchiveerd"
       },
       "viewRun": "Bekijk workflow-run",
       "confirm": "Bevestigen",
@@ -636,7 +640,8 @@
         "koios_ai_token": "Koios AI-tokens"
       },
       "budgetLine": "{{used}}/{{allowance}} {{unit}}",
-      "upgradeHint": "Upgrade naar {{tier}}"
+      "upgradeHint": "Upgrade naar {{tier}}",
+      "openExisting": "Bekijk bestaand record"
     },
     "koiosMode": {
       "title": "Koios-modus",

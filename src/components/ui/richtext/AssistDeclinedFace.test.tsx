@@ -50,4 +50,30 @@ describe('AssistDeclinedFace', () => {
     render(<AssistDeclinedFace code="proposal_in_flight" confirming onForceSend={vi.fn()} />)
     expect(screen.getByRole('button', { name: 'notesAssist.execute.forceSend' })).toBeDisabled()
   })
+
+  // KOIOS-DEDUPE-1: a duplicate decline — its own label, an existing-record
+  // chip (never the proposal one) and NO force-send button (no force path).
+  it('renders the duplicate label + existing-record chip, with no force-send button', () => {
+    render(<AssistDeclinedFace code="duplicate_customer" existingRef={{ type: 'customer', id: 'cust-1' }} onForceSend={vi.fn()} />)
+    expect(screen.getByText('notesAssist.execute.declined.duplicate')).toBeInTheDocument()
+    expect(screen.getByText('notesAssist.execute.openExisting')).toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: /forceSend/ })).not.toBeInTheDocument()
+  })
+
+  it('renders the archived duplicate label for a `_archived` code', () => {
+    render(<AssistDeclinedFace code="duplicate_vacancy_archived" existingRef={{ type: 'vacancy', id: 'vac-1', archived: true }} onForceSend={vi.fn()} />)
+    expect(screen.getByText('notesAssist.execute.declined.duplicate_archived')).toBeInTheDocument()
+    expect(screen.getByText('notesAssist.execute.openExisting')).toBeInTheDocument()
+  })
+
+  it('renders no existing-record chip when the duplicate decline carries no ref (no view rights)', () => {
+    render(<AssistDeclinedFace code="duplicate_customer" onForceSend={vi.fn()} />)
+    expect(screen.getByText('notesAssist.execute.declined.duplicate')).toBeInTheDocument()
+    expect(screen.queryByText('notesAssist.execute.openExisting')).not.toBeInTheDocument()
+  })
+
+  it('renders no existing-record chip when the ref type has no mapped page', () => {
+    render(<AssistDeclinedFace code="duplicate_customer" existingRef={{ type: 'unknown_entity', id: 'x1' }} onForceSend={vi.fn()} />)
+    expect(screen.queryByText('notesAssist.execute.openExisting')).not.toBeInTheDocument()
+  })
 })

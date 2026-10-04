@@ -295,7 +295,9 @@
         "note": "Nota",
         "phase": "Fase",
         "reason": "Motivo"
-      }
+      },
+      "openExisting": "Ver registo existente",
+      "existingArchived": "arquivado"
     },
     "resizeHandle": "Ajustar largura do painel",
     "column": "Koios",
@@ -610,7 +612,9 @@
       "executing": "A executar…",
       "declined": {
         "proposal_in_flight": "A proposta já está a ser enviada",
-        "proposal_recently_sent": "A proposta já foi enviada recentemente"
+        "proposal_recently_sent": "A proposta já foi enviada recentemente",
+        "duplicate": "Já existe",
+        "duplicate_archived": "Já existe, arquivado"
       },
       "viewRun": "Ver execução da workflow",
       "confirm": "Confirmar",
@@ -636,7 +640,8 @@
         "koios_ai_token": "Tokens Koios AI"
       },
       "budgetLine": "{{used}}/{{allowance}} {{unit}}",
-      "upgradeHint": "Atualizar para {{tier}}"
+      "upgradeHint": "Atualizar para {{tier}}",
+      "openExisting": "Ver registo existente"
     },
     "koiosMode": {
       "title": "Modo Koios",

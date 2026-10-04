@@ -151,7 +151,7 @@ export default function AssistActionItemCard({ item, onConfirm, onViewRun }: Ass
       {item.status === 'declined' && (
         <AssistDeclinedFace code={item.code} reason={item.reason}
           applicationId={item.link_type === 'application' ? item.link_id : undefined}
-          proposalId={item.proposal_id} confirming={item.confirming}
+          proposalId={item.proposal_id} existingRef={item.ref} confirming={item.confirming}
           onForceSend={() => onConfirm(true)} />
       )}
 

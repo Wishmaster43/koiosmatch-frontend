@@ -105,4 +105,14 @@ describe('AssistActionItemCard — executing/declined (CLAIM-1)', () => {
     )
     expect(screen.getByText('Bestaand voorstel')).toBeInTheDocument()
   })
+
+  // KOIOS-DEDUPE-1: the item's `ref` reaches AssistDeclinedFace as `existingRef`.
+  it('passes a duplicate decline\'s ref through to the existing-record chip', () => {
+    render(
+      <AssistActionItemCard
+        item={{ ...BASE_ITEM, status: 'declined', code: 'duplicate_customer', ref: { type: 'customer', id: 'cust-1' } }}
+        onConfirm={() => {}} />,
+    )
+    expect(screen.getByText('Bekijk bestaand record')).toBeInTheDocument()
+  })
 })

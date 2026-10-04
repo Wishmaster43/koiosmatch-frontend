@@ -32,12 +32,14 @@ import { confirmPendingAction, cancelPendingAction } from './koiosApi'
 import { createdRefFromToolResult } from './koiosToolResult'
 import { pick } from './koiosToolIds'
 import { KoiosRefChip } from './KoiosResultCards'
+import { pageForResultRef } from './koiosResultLinks'
 import type { KoiosContextRef } from '@/types/koios'
 import { entityIconEl } from './koiosEntityIcons'
 import { useKoiosToolCapabilities, findToolCapability, KOIOS_CONNECTION_HASH } from './useKoiosToolCapabilities'
 import { shapePreviewRows, type ShapedPreviewRow } from './pendingPreview'
-import type { KoiosPendingAction, KoiosPreviewRow } from './koiosTypes'
+import type { KoiosPendingAction, KoiosPreviewRow, KoiosResultRef } from './koiosTypes'
 import type { ActionBudget } from '@/types/actionBudget'
+import type { Id } from '@/types/common'
 
 type CardStatus = 'proposed' | 'confirming' | 'submitting' | 'confirmed' | 'cancelled' | 'expired' | 'error' | 'refused' | 'partial'
 
@@ -81,6 +83,9 @@ export default function KoiosPendingActionCard({ action }: { action: KoiosPendin
   const [refusedReason, setRefusedReason] = useState<string | null>(null)
   // KOIOS-CONFIRM-DECLINE-1 (PRIJSMODEL-C): the staffel stand on a budget-full decline.
   const [budget, setBudget] = useState<ActionBudget | null>(null)
+  // KOIOS-DEDUPE-1: a duplicate-twin decline's existing record, present only
+  // when the confirming user holds that record's view permission.
+  const [existingRef, setExistingRef] = useState<{ type: string; id: Id; archived?: boolean } | null>(null)
   // The record the tool created (§0B; Danny 09-09: "I'm missing the hyperlinks on created tasks").
   const [created, setCreated] = useState<KoiosContextRef | null>(null)
 
@@ -156,10 +161,26 @@ export default function KoiosPendingActionCard({ action }: { action: KoiosPendin
         // 422 { status: 'declined', message, data: { budget? } } — checked BEFORE
         // the generic expired/already-resolved fallback, or a budget-full decline
         // would misread as "this proposal has expired".
-        const body = e?.response?.data as { status?: string; message?: string; data?: { budget?: ActionBudget } } | undefined
+        // KOIOS-DEDUPE-1: a duplicate-twin decline also carries `code` (e.g.
+        // `duplicate_candidate[_archived]`) and `ref` (the existing record,
+        // present only for a caller holding its view permission).
+        const body = e?.response?.data as {
+          status?: string; message?: string
+          data?: { budget?: ActionBudget; code?: string; ref?: { type: string; id: Id; archived?: boolean } }
+        } | undefined
         if (body?.status === 'declined') {
-          setRefusedReason(body.message ?? null)
+          // §5: a duplicate-twin decline's `message` is the BE's English
+          // fallback prose — translate via the slug code instead of showing it.
+          const code = body.data?.code
+          if (code?.startsWith('duplicate_')) {
+            setRefusedReason(t(code.endsWith('_archived')
+              ? 'notesAssist.execute.declined.duplicate_archived'
+              : 'notesAssist.execute.declined.duplicate'))
+          } else {
+            setRefusedReason(body.message ?? null)
+          }
           setBudget(body.data?.budget ?? null)
+          setExistingRef(body.data?.ref ?? null)
           setStatus('refused')
           return
         }
@@ -255,6 +276,20 @@ export default function KoiosPendingActionCard({ action }: { action: KoiosPendin
                 <> · {t('koios.pendingAction.upgradeHint', { tier: budget.upgrade_hint.next_tier_label })}</>
               )}
             </Caption>
+          )}
+          {/* KOIOS-DEDUPE-1: a duplicate-twin decline links to the existing record —
+              rendered only when the server sent a ref (no rights = no ref = no chip). */}
+          {existingRef && pageForResultRef(existingRef.type) && (
+            <div style={{ marginTop: 4 }}>
+              <KoiosRefChip
+                item={{
+                  type: existingRef.type, id: existingRef.id,
+                  label: t('koios.pendingAction.openExisting'),
+                  subtitle: existingRef.archived ? t('koios.pendingAction.existingArchived') : undefined,
+                } as KoiosResultRef}
+                title={t('koios.pendingAction.openExisting')}
+              />
+            </div>
           )}
         </CalloutBox>
       )}

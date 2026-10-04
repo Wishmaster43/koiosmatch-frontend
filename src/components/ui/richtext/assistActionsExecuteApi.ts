@@ -99,8 +99,15 @@ export interface ExecuteResultItem {
   // CLAIM-1 (03-10): present only on status === 'declined' — the machine code
   // to branch on instead of parsing the human `reason`, plus the existing
   // proposal this duplicate collided with (null when the server has none).
-  code?: 'proposal_in_flight' | 'proposal_recently_sent' | null
+  // KOIOS-DEDUPE-1 widens the code vocabulary to `duplicate_<entity>[_archived]`
+  // for every create/schedule tool — hand-typed as `string` since the spec
+  // carries no closed enum for it (contract, docs/contract/CONTRACT-CHANGELOG.md).
+  code?: string | null
   proposal_id?: Id | null
+  // KOIOS-DEDUPE-1: the existing record a duplicate decline collided with,
+  // present only when the confirming user holds that record's view
+  // permission (absent, never null, otherwise — hand-typed, no spec schema).
+  ref?: { type: string; id: Id; archived?: boolean } | null
 }
 
 export interface ExecuteSource {

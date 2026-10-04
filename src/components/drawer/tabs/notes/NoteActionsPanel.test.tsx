@@ -216,6 +216,20 @@ describe('NoteActionsPanel · executing/declined mapping (CLAIM-1)', () => {
       { note_id: 'note-1' },
     )
   })
+
+  // KOIOS-DEDUPE-1: a duplicate decline's `ref` is merged onto the panel item
+  // and reaches AssistDeclinedFace's existing-record chip — no force button.
+  it('maps a duplicate decline\'s ref to the existing-record chip, no force-send button', async () => {
+    const user = userEvent.setup()
+    vi.mocked(executeRichTextActions).mockResolvedValue([
+      { title: 'Bel terug', type: 'task', status: 'declined', code: 'duplicate_customer', ref: { type: 'customer', id: 'cust-1' } },
+    ])
+    render(<Controlled initial={[baseItem()]} />)
+    await user.click(screen.getByRole('button', { name: 'Uitvoeren' }))
+    expect(await screen.findByText('notesAssist.execute.declined.duplicate')).toBeInTheDocument()
+    expect(screen.getByText('notesAssist.execute.openExisting')).toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: 'notesAssist.execute.forceSend' })).not.toBeInTheDocument()
+  })
 })
 
 // NOTE-CONFIRM-HANG-2, the case Danny hit: the note was saved and reopened, its item is already
