@@ -18,6 +18,7 @@ import { useState, useRef } from 'react'
 import type { Dispatch, SetStateAction } from 'react'
 import type { TFunction } from 'i18next'
 import api, { unwrap } from '@/lib/api'
+import { withIdempotencyKey } from '@/lib/idempotency'
 import { notifyError, notifySuccess } from '@/lib/notify'
 import { extractApiError } from '@/lib/extractApiError'
 import { mergePatch } from '@/lib/mergePatch'
@@ -225,7 +226,9 @@ export function useCustomerRecord({ setCustomers, setTotal, users, t }: Args) {
   // Reconciles all three local copies so the banner/chip clear without a refetch.
   const restoreCustomer = (id: Id | undefined) => {
     if (id == null) return
-    api.post(`/customers/${id}/restore`)
+    // One Idempotency-Key per click (IDEMP-KEY-BODYLESS-1): a body-less restore POST needs an
+    // explicit key so a double click never restores twice at the server.
+    api.post(`/customers/${id}/restore`, undefined, withIdempotencyKey())
       .then(() => {
         notifySuccess(t('changelog.actions.restored'))
         const clear = { archived: false, archivedAt: null, lifecycle: 'active', pendingEraseAt: null }
@@ -334,7 +337,9 @@ export function useCustomerRecord({ setCustomers, setTotal, users, t }: Args) {
   // update()'s own guards) resolves false so NotesTab degrades calmly.
   const restorePreviousVersion = (id: Id | undefined, noteId: Id | undefined): Promise<boolean> => {
     if (!id || noteId == null) return Promise.resolve(false)
-    return api.post(`/customers/${id}/notes/${noteId}/restore-previous`)
+    // One Idempotency-Key per click (IDEMP-KEY-BODYLESS-1): the undo POST carries no body, so
+    // it needs an explicit key to stay a single undo on a double click.
+    return api.post(`/customers/${id}/notes/${noteId}/restore-previous`, undefined, withIdempotencyKey())
       .then(res => {
         // The route answers CustomerNoteResource (snake_case, `body`) — run it
         // through the family mapper so the UI row really carries the restored

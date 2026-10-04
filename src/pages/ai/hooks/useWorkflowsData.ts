@@ -13,6 +13,7 @@ import { useState, useEffect, useRef, useCallback } from 'react'
 import { notify, notifyError } from '@/lib/notify'
 import { useTranslation } from 'react-i18next'
 import api, { unwrap, unwrapList } from '@/lib/api'
+import { withIdempotencyKey } from '@/lib/idempotency'
 import { useAuth } from '@/context/AuthContext'
 import { useConfirm } from '@/hooks/useConfirm'
 import { extractApiError } from '@/lib/extractApiError'
@@ -170,7 +171,8 @@ export function useWorkflowsData(showArchived: boolean) {
       // 409 (already running) is handled below with its own toast + builder focus.
       // K-3: this is a workflow-EXECUTION call — route it through the
       // configurable engine base URL, same as every other run/cancel/logs call.
-      await api.post(`/workflows/${id}/run`, undefined, { quietStatuses: [409], baseURL: resolveWorkflowBaseURL() })
+      // One Idempotency-Key per click so a double "Run" never starts two runs.
+      await api.post(`/workflows/${id}/run`, undefined, withIdempotencyKey({ quietStatuses: [409], baseURL: resolveWorkflowBaseURL() }))
       // Success feedback + refetch, mirroring archive/restore below — otherwise the
       // last-run stamp stays stale until the user reloads the page. handleRun only
       // resolves once this refetch has LANDED (N007-POINT3-FIX-1), so the caller's
@@ -217,7 +219,8 @@ export function useWorkflowsData(showArchived: boolean) {
   const handleRunBulk = async (id: string | number, opts?: { confirm?: boolean }) => {
     try {
       const body = opts?.confirm ? { confirm: true } : undefined
-      const res = await api.post(`/workflows/${id}/run-bulk`, body, { quietStatuses: [409], baseURL: resolveWorkflowBaseURL() })
+      // One Idempotency-Key per click so a double bulk-run never fires the sweep twice.
+      const res = await api.post(`/workflows/${id}/run-bulk`, body, withIdempotencyKey({ quietStatuses: [409], baseURL: resolveWorkflowBaseURL() }))
       const count = (res.data?.count ?? 0) as number
       notify('success', t('page.runBulkStarted', { count }))
     } catch (err) {
@@ -352,7 +355,8 @@ export function useWorkflowsData(showArchived: boolean) {
   const handleRestore = async (wf: Workflow) => {
     if (!canManageFolders) return
     try {
-      await api.post(`/workflows/${wf.id}/restore`)
+      // One Idempotency-Key per click so a double "Restore" never fires twice.
+      await api.post(`/workflows/${wf.id}/restore`, undefined, withIdempotencyKey())
       notify('success', t('page.restoreSuccess'))
       setFetchTick(v => v + 1)
     } catch {

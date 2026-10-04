@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react'
 import api from '@/lib/api'
 import { queryClient } from '@/lib/queryClient'
 import { notifyError, notifySuccess } from '@/lib/notify'
+import { withIdempotencyKey } from '@/lib/idempotency'
 import type { Id } from '@/types/common'
 
 // Wait this long after the last keystroke before probing — long enough that a
@@ -74,7 +75,8 @@ export function useRestoreArchivedDuplicate({ entity, messages }: UseRestoreArch
   const restore = async (id: Id): Promise<boolean> => {
     setRestoring(true)
     try {
-      await api.post(`/${entity}/${id}/restore`)
+      // IDEMP-KEY-BODYLESS-1: a per-click key so a double click never restores the same archived duplicate twice.
+      await api.post(`/${entity}/${id}/restore`, undefined, withIdempotencyKey())
       queryClient.invalidateQueries({ queryKey: [entity] })
       notifySuccess(messages.restored)
       return true

@@ -23,6 +23,7 @@
 import { useCallback, useMemo, useState } from 'react'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import api, { unwrap, unwrapList } from '@/lib/api'
+import { withIdempotencyKey } from '@/lib/idempotency'
 import { useAuth } from '@/context/AuthContext'
 import { mapCvProposal } from '@/pages/applications/data/mapCvProposal'
 import type { ApiCvParseProposal, CvProposal } from '@/pages/applications/data/mapCvProposal'
@@ -81,7 +82,8 @@ export function useCvParseProposals(candidateId: Id | null | undefined, applicat
     mutationFn: async ({ proposalId, verb }: { proposalId: Id; verb: CvProposalDecision }) =>
       mapCvProposal(
         unwrap<ApiCvParseProposal>(
-          await api.post(`/candidates/${candidateId}/cv-parse-proposals/${proposalId}/${verb}`),
+          // Accept/reject writes candidate data: one Idempotency-Key per click.
+          await api.post(`/candidates/${candidateId}/cv-parse-proposals/${proposalId}/${verb}`, undefined, withIdempotencyKey()),
         ),
       ),
     onSuccess: decided => {

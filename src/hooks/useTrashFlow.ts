@@ -9,6 +9,7 @@
 import { useCallback, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import api from '@/lib/api'
+import { withIdempotencyKey } from '@/lib/idempotency'
 import { notifyError, notifySuccess } from '@/lib/notify'
 import { eraseAroundDate, useDeletionLifecycle } from '@/hooks/useDeletionLifecycle'
 
@@ -71,7 +72,8 @@ export function useTrashFlow({ entityPath, onMarked, onUnmarked }: Args) {
     unmarkInFlight.current.add(key)
     setUnmarkBusy(true)
     try {
-      await api.post(`/${entityPath}/${id}/unmark-deletion`)
+      // Back-to-archive is a user-triggered, irreversible-feeling action: one Idempotency-Key per click.
+      await api.post(`/${entityPath}/${id}/unmark-deletion`, undefined, withIdempotencyKey())
       notifySuccess(t('trash.unmarked'))
       onUnmarked?.(key)
     } catch {

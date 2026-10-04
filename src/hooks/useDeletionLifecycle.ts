@@ -7,6 +7,7 @@
  */
 import { useCallback, useEffect, useRef, useState } from 'react'
 import api, { unwrap } from '@/lib/api'
+import { withIdempotencyKey } from '@/lib/idempotency'
 import { loadSettings } from '@/pages/settings/shared'
 import type {
   DeletionBlocker, DeletionConflictBody, DeletionMarkResponse, DeletionPreview, MarkDeletionBody,
@@ -120,7 +121,8 @@ export function useDeletionLifecycle(entityPath: string, id: string | null) {
   // Back from the trash to plain archived (restore-to-active stays /restore).
   const unmark = useCallback(async (): Promise<void> => {
     if (!base) throw new Error('useDeletionLifecycle.unmark called without an id')
-    await api.post(`${base}/unmark-deletion`)
+    // IDEMP-KEY-BODYLESS-1: a bare unmark POST carries its own per-click key so a double click never double-fires.
+    await api.post(`${base}/unmark-deletion`, undefined, withIdempotencyKey())
     setPreview(prev => prev ? { ...prev, lifecycle: 'archived' } : prev)
   }, [base])
 

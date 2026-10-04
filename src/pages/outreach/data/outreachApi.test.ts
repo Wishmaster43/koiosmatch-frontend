@@ -45,7 +45,8 @@ describe('outreachApi', () => {
   it('restoreCampaign sends POST /outreach-campaigns/{id}/restore and unwraps the detail', async () => {
     vi.mocked(api.post).mockResolvedValue({ data: { data: { id: 'abc-123', name: 'Bellijst' } } })
     const result = await restoreCampaign('abc-123')
-    expect(api.post).toHaveBeenCalledWith('/outreach-campaigns/abc-123/restore')
+    expect(api.post).toHaveBeenCalledWith('/outreach-campaigns/abc-123/restore', undefined,
+      expect.objectContaining({ headers: expect.objectContaining({ 'Idempotency-Key': expect.any(String) }) }))
     expect(result).toEqual({ id: 'abc-123', name: 'Bellijst' })
   })
 

@@ -134,7 +134,8 @@ describe('useOpportunityNotes · previous-version undo (NOTE-UNDO-FE-1)', () => 
     const { result } = renderHook(() => useOpportunityNotes('o1'))
     await waitFor(() => expect(result.current.items).toHaveLength(1))
     const landed = await act(() => result.current.restorePreviousVersion(0))
-    expect(mockedPost).toHaveBeenCalledWith('/opportunities/o1/notes/n1/restore-previous')
+    expect(mockedPost).toHaveBeenCalledWith('/opportunities/o1/notes/n1/restore-previous', undefined,
+      expect.objectContaining({ headers: expect.objectContaining({ 'Idempotency-Key': expect.any(String) }) }))
     expect(landed).toBe(true)
     await waitFor(() => expect(result.current.items[0].body).toBe('Restored'))
   })

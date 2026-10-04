@@ -132,7 +132,7 @@ describe('ConversationsTab · agent session pause/resume (CMFE-MEET-1)', () => {
     await userEvent.click(screen.getByRole('button', { name: /AI-agent pauzeren/i }))
     expect(postMock).not.toHaveBeenCalled()
     await userEvent.click(screen.getByRole('button', { name: /^Pauzeren$/ }))
-    expect(postMock).toHaveBeenCalledWith('/conversations/conv-1/agent-session/pause')
+    expect(postMock).toHaveBeenCalledWith('/conversations/conv-1/agent-session/pause', undefined, expect.objectContaining({ headers: expect.objectContaining({ 'Idempotency-Key': expect.any(String) }) }))
     expect(refetch).toHaveBeenCalledTimes(1)
     expect(screen.queryByRole('button', { name: /^Pauzeren$/ })).not.toBeInTheDocument()
   })
@@ -145,7 +145,7 @@ describe('ConversationsTab · agent session pause/resume (CMFE-MEET-1)', () => {
     await userEvent.click(screen.getByText('Jane Doe'))
     expect(screen.queryByRole('button', { name: /AI-agent pauzeren/i })).not.toBeInTheDocument()
     await userEvent.click(screen.getByRole('button', { name: /AI-agent hervatten/i }))
-    expect(postMock).toHaveBeenCalledWith('/conversations/conv-1/agent-session/resume')
+    expect(postMock).toHaveBeenCalledWith('/conversations/conv-1/agent-session/resume', undefined, expect.objectContaining({ headers: expect.objectContaining({ 'Idempotency-Key': expect.any(String) }) }))
   })
 
   it('a thread without an agent session shows neither control', async () => {

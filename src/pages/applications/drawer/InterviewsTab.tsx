@@ -11,6 +11,7 @@ import { GroupLabel } from '@/components/ui/typography'
 import Spinner from '@/components/ui/Spinner'
 import { useAuth } from '@/context/AuthContext'
 import api, { unwrap } from '@/lib/api'
+import { withIdempotencyKey } from '@/lib/idempotency'
 import { notifySuccess, notifyError } from '@/lib/notify'
 import { extractApiError } from '@/lib/extractApiError'
 import { useDateFormat } from '@/lib/datetime'
@@ -125,7 +126,8 @@ function StartInterviewAction({ applicationId, effective, onStarted }: {
     try {
       // INTERVIEW-FLAG-1: no body — the server derives the agent from the
       // effective workflow, so the client no longer chooses or sends one.
-      const res = await api.post(`/applications/${applicationId}/interview`)
+      // Starting an interview session is irreversible-feeling: one Idempotency-Key per click.
+      const res = await api.post(`/applications/${applicationId}/interview`, undefined, withIdempotencyKey())
       const raw = unwrap<NonNullable<ApiApplication['interview']>>(res)
       const iv = mapInterview(raw)
       if (iv) onStarted(iv)

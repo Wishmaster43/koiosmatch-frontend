@@ -384,7 +384,8 @@ describe('AddCandidateModal · duplicate 409 panel', () => {
     expect(await screen.findByText('duplicate.stateArchived')).toBeInTheDocument()
     await user.click(screen.getByRole('button', { name: 'duplicate.restoreAndOpen' }))
     // Assert the REQUEST (method + route), then the follow-up navigation.
-    await waitFor(() => expect(postMock).toHaveBeenCalledWith('/candidates/dup-2/restore'))
+    await waitFor(() => expect(postMock).toHaveBeenCalledWith('/candidates/dup-2/restore', undefined,
+      expect.objectContaining({ headers: expect.objectContaining({ 'Idempotency-Key': expect.any(String) }) })))
     await waitFor(() => expect(goTo).toHaveBeenCalledWith('candidates', { open: 'dup-2' }))
   })
 

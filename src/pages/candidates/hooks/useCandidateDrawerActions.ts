@@ -17,6 +17,7 @@
  */
 import { useState, useRef, useCallback } from 'react'
 import api from '@/lib/api'
+import { withIdempotencyKey } from '@/lib/idempotency'
 import { useConfirm } from '@/hooks/useConfirm'
 import { useCandidateRecord } from './useCandidateMutations'
 import { needsLiveCheck, fetchLiveBlockers, liveFromError } from '../data/archiveGuard'
@@ -146,7 +147,8 @@ export function useCandidateDrawerActions({ candidates, setCandidates, setTotal,
     // Enkelstuks-sweep (BE 5970c03): one record = the per-id route, never bulk-with-one-id.
     lifecycleCall(() => api.delete(`/candidates/${id}`), id, 'drawer.archivedNamed', 'drawer.archiveFailed', 'archive')
   const runMarkDeletion = (id: Id) =>
-    lifecycleCall(() => api.post(`/candidates/${id}/mark-deletion`, {}), id, 'erase.markedForDeletionNamed', 'erase.markFailed', 'trash')
+    // IDEMP-KEY-BODYLESS-1: a per-click key so a sibling-tab/retry double click never marks twice.
+    lifecycleCall(() => api.post(`/candidates/${id}/mark-deletion`, {}, withIdempotencyKey()), id, 'erase.markedForDeletionNamed', 'erase.markFailed', 'trash')
 
   // Archive-guard modal state (§3B) — set when a pre-check or a 409 finds live blockers.
   const [archiveGuard, setArchiveGuard] = useState<ArchiveGuardTarget | null>(null)
@@ -178,7 +180,8 @@ export function useCandidateDrawerActions({ candidates, setCandidates, setTotal,
     const cand = candidates.find(x => x.id === id)
     try {
       // Enkelstuks-sweep (BE 5970c03): per-id restore for a single record.
-      await api.post(`/candidates/${id}/restore`)
+      // IDEMP-KEY-BODYLESS-1: a per-click key so a sibling-tab/retry double click never restores twice.
+      await api.post(`/candidates/${id}/restore`, undefined, withIdempotencyKey())
       setCandidates(p => p.filter(x => x.id !== id))
       setTotal(v => Math.max(0, v - 1))
       closeDrawer()

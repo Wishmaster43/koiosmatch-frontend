@@ -329,7 +329,7 @@ describe('KoiosSuggestionRow · staged/confirm leg (unchanged, moved from KoiosA
     mockPost.mockResolvedValueOnce({ data: { status: 'executed', data: {} } })
     render(<KoiosSuggestionRow suggestion={suggestion} />)
     fireEvent.click(screen.getByRole('button', { name: /pendingAction\.confirm/ }))
-    await waitFor(() => expect(mockPost).toHaveBeenCalledWith('/ai/koios/actions/pa-7/confirm'))
+    await waitFor(() => expect(mockPost).toHaveBeenCalledWith('/ai/koios/actions/pa-7/confirm', undefined, expect.objectContaining({ headers: expect.objectContaining({ 'Idempotency-Key': expect.any(String) }) })))
     await screen.findByText(/pendingAction\.confirmed/)
   })
 
@@ -344,7 +344,7 @@ describe('KoiosSuggestionRow · staged/confirm leg (unchanged, moved from KoiosA
     await screen.findByText(/koios\.pendingAction\.fields\.due_date · 26-08-2026 → 28-08-2026/)
     mockPost.mockResolvedValueOnce({ data: { status: 'executed', data: {} } })
     fireEvent.click(screen.getByRole('button', { name: /pendingAction\.confirm/ }))
-    await waitFor(() => expect(mockPost).toHaveBeenLastCalledWith('/ai/koios/actions/pa-77/confirm'))
+    await waitFor(() => expect(mockPost).toHaveBeenLastCalledWith('/ai/koios/actions/pa-77/confirm', undefined, expect.objectContaining({ headers: expect.objectContaining({ 'Idempotency-Key': expect.any(String) }) })))
     await screen.findByText(/pendingAction\.confirmed/)
   })
 
@@ -401,7 +401,7 @@ describe('KoiosSuggestionRow · reschedule editor (RESCHEDULE-EDIT-1)', () => {
     fireEvent.click(screen.getByRole('button', { name: 'koios.assistant.rescheduleConfirm' }))
     // ONE user click drives BOTH server round trips: stage with the edited input, then confirm.
     await waitFor(() => expect(mockPost).toHaveBeenNthCalledWith(1, '/ai/koios/actions/stage', { tool: 'update_task', input: { task_id: 't-1', due_date: '2026-10-02' } }))
-    await waitFor(() => expect(mockPost).toHaveBeenNthCalledWith(2, '/ai/koios/actions/pa-1/confirm'))
+    await waitFor(() => expect(mockPost).toHaveBeenNthCalledWith(2, '/ai/koios/actions/pa-1/confirm', undefined, expect.objectContaining({ headers: expect.objectContaining({ 'Idempotency-Key': expect.any(String) }) })))
     await screen.findByText(/pendingAction\.confirmed/)
   })
 
@@ -502,7 +502,7 @@ describe('KoiosSuggestionRow · create_task editor (TASK-CREATE-EDIT-1)', () => 
     await waitFor(() => expect(mockPost).toHaveBeenNthCalledWith(1, '/ai/koios/actions/stage', {
       tool: 'create_task', input: { candidate_id: 'c-1', title: 'Bel Koen Timmermans', due_date: '2026-10-02', priority: 'high' },
     }))
-    await waitFor(() => expect(mockPost).toHaveBeenNthCalledWith(2, '/ai/koios/actions/pa-1/confirm'))
+    await waitFor(() => expect(mockPost).toHaveBeenNthCalledWith(2, '/ai/koios/actions/pa-1/confirm', undefined, expect.objectContaining({ headers: expect.objectContaining({ 'Idempotency-Key': expect.any(String) }) })))
     await screen.findByText(/pendingAction\.confirmed/)
   })
 

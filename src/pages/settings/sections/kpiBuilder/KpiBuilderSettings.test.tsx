@@ -144,7 +144,7 @@ describe('KpiBuilderSettings', () => {
     await waitFor(() => expect(api.delete).toHaveBeenCalledWith('/kpi-definitions/kd-1'))
 
     await user.click(await screen.findByRole('button', { name: st('kpiBuilder.restoreBtn') }))
-    await waitFor(() => expect(api.post).toHaveBeenCalledWith('/kpi-definitions/kd-1/restore'))
+    await waitFor(() => expect(api.post as unknown as (...args: unknown[]) => unknown).toHaveBeenCalledWith('/kpi-definitions/kd-1/restore', undefined, expect.objectContaining({ headers: expect.objectContaining({ 'Idempotency-Key': expect.any(String) }) })))
   })
 
   it('the keyboard "move down" reorder PUTs the new full id order', async () => {

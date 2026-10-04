@@ -19,6 +19,7 @@ import StatusListEditor from '../sections/StatusListEditor'
 import type { StatusListEditorProps } from '../sections/statusListEditorTypes'
 import { SettingCard, SettingRow, Toggle } from './SettingsKit'
 import api from '@/lib/api'
+import { withIdempotencyKey } from '@/lib/idempotency'
 import { extractApiError } from '@/lib/extractApiError'
 import { notifyError } from '@/lib/notify'
 import { useConfirm } from '@/hooks/useConfirm'
@@ -96,7 +97,8 @@ export default function FreeEntryLookupSettings({ useLookup, endpoint, i18nPrefi
             // that follows passes with no remaining mismatch (idempotent on the
             // backend). Never fabricated locally — these are the server's own rows.
             setBusy(true)
-            api.post(`${endpoint}/gather-missing`)
+            // IDEMP-KEY-BODYLESS-1: a body-less, click-triggered server write — a per-submit key.
+            api.post(`${endpoint}/gather-missing`, undefined, withIdempotencyKey())
               .then(() => persist())
               .catch(e => { setBusy(false); notifyError(extractApiError(e, t('statusList.saveFailed'))) })
           },

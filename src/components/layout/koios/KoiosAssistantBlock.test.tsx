@@ -117,7 +117,7 @@ describe('KoiosAssistantBlock', () => {
     mockPost.mockResolvedValueOnce({ data: { status: 'executed', data: {} } })
     renderBlock()
     fireEvent.click(await screen.findByRole('button', { name: /pendingAction\.confirm/ }))
-    await waitFor(() => expect(mockPost).toHaveBeenCalledWith('/ai/koios/actions/pa-7/confirm'))
+    await waitFor(() => expect(mockPost).toHaveBeenCalledWith('/ai/koios/actions/pa-7/confirm', undefined, expect.objectContaining({ headers: expect.objectContaining({ 'Idempotency-Key': expect.any(String) }) })))
     await waitFor(() => expect(mockNotifySuccess).toHaveBeenCalledWith('koios.assistant.doneExecuted'))
     // No lingering "Cancelled."/"Executed." row — it is dropped, not left in a terminal state.
     await waitFor(() => expect(screen.queryByText('Parked')).toBeNull())

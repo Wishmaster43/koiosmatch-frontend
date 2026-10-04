@@ -449,7 +449,7 @@ describe('ContactDetail · archive/restore (ARCHIVE-SUBENTITY-1)', () => {
     await user.click(screen.getByTitle(ct('contacts.detail.archiveContact')))
     await user.click(screen.getByRole('button', { name: cm('confirm') }))
 
-    expect(mockPost).toHaveBeenCalledWith('/customers/cust-1/contacts/c1/archive')
+    expect(mockPost).toHaveBeenCalledWith('/customers/cust-1/contacts/c1/archive', undefined, expect.objectContaining({ headers: expect.objectContaining({ 'Idempotency-Key': expect.any(String) }) }))
     await waitFor(() => expect(close).toHaveBeenCalled())
   })
 
@@ -470,7 +470,7 @@ describe('ContactDetail · archive/restore (ARCHIVE-SUBENTITY-1)', () => {
 
     await user.click(screen.getByRole('button', { name: ct('contacts.archivedBanner.restore') }))
 
-    expect(mockPost).toHaveBeenCalledWith('/customers/cust-1/contacts/c1/restore')
+    expect(mockPost).toHaveBeenCalledWith('/customers/cust-1/contacts/c1/restore', undefined, expect.objectContaining({ headers: expect.objectContaining({ 'Idempotency-Key': expect.any(String) }) }))
     await waitFor(() => expect(close).toHaveBeenCalled())
   })
 })

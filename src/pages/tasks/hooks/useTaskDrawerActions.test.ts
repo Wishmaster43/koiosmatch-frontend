@@ -386,7 +386,7 @@ describe('useTaskDrawerActions · restoreTask re-entrancy guard', () => {
       r.result.current.actions.restoreTask('t1')
     })
     expect(mockedPost).toHaveBeenCalledTimes(1)
-    expect(mockedPost).toHaveBeenCalledWith('/tasks/t1/restore')
+    expect(mockedPost).toHaveBeenCalledWith('/tasks/t1/restore', undefined, expect.objectContaining({ headers: expect.objectContaining({ 'Idempotency-Key': expect.any(String) }) }))
     expect(r.result.current.actions.restoring).toBe(true)
 
     await act(async () => { resolvePost?.(); await Promise.resolve() })

@@ -106,7 +106,7 @@ describe('useVacancyRecord · restoreVacancy re-entrancy guard', () => {
       hook.current.restoreVacancy('v1')
     })
     expect(mockPost).toHaveBeenCalledTimes(1)
-    expect(mockPost).toHaveBeenCalledWith('/vacancies/v1/restore')
+    expect(mockPost).toHaveBeenCalledWith('/vacancies/v1/restore', undefined, expect.objectContaining({ headers: expect.objectContaining({ 'Idempotency-Key': expect.any(String) }) }))
     expect(hook.current.restoring).toBe(true)
 
     await act(async () => { resolvePost?.(); await Promise.resolve() })

@@ -15,6 +15,7 @@
  */
 import type { AxiosResponse } from 'axios'
 import api, { unwrap } from '@/lib/api'
+import { withIdempotencyKey } from '@/lib/idempotency'
 import type { operations } from '@/types/api-generated'
 
 // Request param shapes lifted from the generated spec (getAdminJobsList /
@@ -90,7 +91,8 @@ export const fetchFailedJobs = (params: FailedJobsParams, signal?: AbortSignal):
 export const cancelJob = (id: string | number) => api.delete(`/admin/jobs/${id}`)
 
 // POST /admin/jobs/failed/{uuid}/retry — re-queue one failed job.
-export const retryFailedJob = (uuid: string) => api.post(`/admin/jobs/failed/${uuid}/retry`)
+// IDEMP-KEY-BODYLESS-1: a click-triggered retry — a per-submit key.
+export const retryFailedJob = (uuid: string) => api.post(`/admin/jobs/failed/${uuid}/retry`, undefined, withIdempotencyKey())
 
 // Hand-written — response for bulk actions includes metadata about what was acted upon.
 export interface BulkJobActionResponse {

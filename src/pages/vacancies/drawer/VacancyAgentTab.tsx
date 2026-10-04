@@ -8,6 +8,7 @@ import CreatableSelect from '@/components/ui/CreatableSelect'
 import ConfirmDialog from '@/components/ui/ConfirmDialog'
 import { InterviewFlowSection } from '@/components/ai/management/InterviewFlowSection'
 import api, { unwrap } from '@/lib/api'
+import { withIdempotencyKey } from '@/lib/idempotency'
 import { notifySuccess, notifyError } from '@/lib/notify'
 import { extractApiError } from '@/lib/extractApiError'
 import Button from '@/components/ui/Button'
@@ -80,7 +81,8 @@ function BackfillInterviewsAction({ vacancyId, applicationsCount }: { vacancyId:
     if (vacancyId == null || busy) return
     setBusy(true)
     try {
-      const res = await api.post(`/vacancies/${vacancyId}/start-interviews`)
+      // One fresh Idempotency-Key per click (IDEMP-KEY-BODYLESS-1): a body-less start is never derived by the BE, and this sends real WhatsApp messages.
+      const res = await api.post(`/vacancies/${vacancyId}/start-interviews`, undefined, withIdempotencyKey())
       const result = unwrap<BackfillResult>(res)
       const started = result?.started ?? 0
       const skipped = result?.skipped ?? []

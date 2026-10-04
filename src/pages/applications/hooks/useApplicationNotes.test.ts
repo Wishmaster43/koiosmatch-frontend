@@ -138,7 +138,7 @@ describe('useApplicationNotes · previous-version undo (NOTE-UNDO-FE-1)', () => 
     ]
     const { result } = renderHook(() => useApplicationNotes('app1', initial))
     const landed = await act(() => result.current.restorePreviousVersion(0))
-    expect(api.post).toHaveBeenCalledWith('/applications/app1/notes/n1/restore-previous')
+    expect(api.post).toHaveBeenCalledWith('/applications/app1/notes/n1/restore-previous', undefined, expect.objectContaining({ headers: expect.objectContaining({ 'Idempotency-Key': expect.any(String) }) }))
     expect(landed).toBe(true)
     expect(result.current.notes[0].text).toBe('Restored')
     // K-172 is a REVERSIBLE one-slot swap: after a restore the slot holds the

@@ -21,7 +21,7 @@ describe('useAgentSessionControl', () => {
     const { result } = renderHook(() => useAgentSessionControl(onChanged, 'whatsapp:conversations.agentControlFailed'))
     let ok = false
     await act(async () => { ok = await result.current.run('c1', 'pause') })
-    expect(postMock).toHaveBeenCalledWith('/conversations/c1/agent-session/pause')
+    expect(postMock).toHaveBeenCalledWith('/conversations/c1/agent-session/pause', undefined, expect.objectContaining({ headers: expect.objectContaining({ 'Idempotency-Key': expect.any(String) }) }))
     expect(onChanged).toHaveBeenCalledTimes(1)
     expect(ok).toBe(true)
     expect(result.current.busy).toBeNull()
@@ -31,7 +31,7 @@ describe('useAgentSessionControl', () => {
     postMock.mockResolvedValue({ data: {} })
     const { result } = renderHook(() => useAgentSessionControl(vi.fn(), 'test:failed'))
     await act(async () => { await result.current.run('c1', 'resume') })
-    expect(postMock).toHaveBeenCalledWith('/conversations/c1/agent-session/resume')
+    expect(postMock).toHaveBeenCalledWith('/conversations/c1/agent-session/resume', undefined, expect.objectContaining({ headers: expect.objectContaining({ 'Idempotency-Key': expect.any(String) }) }))
   })
 
   it('ONIX N-007: two run calls in one tick POST once, the second resolves false', async () => {
@@ -49,7 +49,7 @@ describe('useAgentSessionControl', () => {
     expect(await second).toBe(false)
     await first
     expect(postMock).toHaveBeenCalledTimes(1)
-    expect(postMock).toHaveBeenCalledWith('/conversations/c1/agent-session/pause')
+    expect(postMock).toHaveBeenCalledWith('/conversations/c1/agent-session/pause', undefined, expect.objectContaining({ headers: expect.objectContaining({ 'Idempotency-Key': expect.any(String) }) }))
     expect(onChanged).toHaveBeenCalledTimes(1)
   })
 

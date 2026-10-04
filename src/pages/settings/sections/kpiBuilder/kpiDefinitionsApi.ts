@@ -7,6 +7,7 @@
  * One file, no React — the hooks in this folder own query state.
  */
 import api, { unwrap, unwrapList } from '@/lib/api'
+import { withIdempotencyKey } from '@/lib/idempotency'
 import type { operations } from '@/types/api-generated'
 
 // Request shapes lifted from the generated spec — the write body is the same
@@ -88,8 +89,9 @@ export const deleteKpiDefinition = (id: string): Promise<void> =>
   api.delete(`/kpi-definitions/${id}`).then(() => undefined)
 
 // POST /kpi-definitions/{id}/restore — undoes the delete above (session-only undo, R3).
+// IDEMP-KEY-BODYLESS-1: a click-triggered restore — a per-submit key.
 export const restoreKpiDefinition = (id: string): Promise<KpiDefinition> =>
-  api.post(`/kpi-definitions/${id}/restore`).then(res => unwrap<KpiDefinition>(res))
+  api.post(`/kpi-definitions/${id}/restore`, undefined, withIdempotencyKey()).then(res => unwrap<KpiDefinition>(res))
 
 // PUT /kpi-definitions/order — persists a drag/keyboard reorder as the full id order.
 export const putKpiDefinitionsOrder = (ids: string[]): Promise<void> => {

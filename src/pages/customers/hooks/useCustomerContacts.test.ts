@@ -563,7 +563,8 @@ describe('useCustomerContacts · archiveContact / restoreContact (ARCHIVE-SUBENT
 
     await archiveContact('cust1', 'c1')
 
-    expect(mockPost).toHaveBeenCalledWith('/customers/cust1/contacts/c1/archive')
+    expect(mockPost).toHaveBeenCalledWith('/customers/cust1/contacts/c1/archive', undefined,
+      expect.objectContaining({ headers: expect.objectContaining({ 'Idempotency-Key': expect.any(String) }) }))
     expect(onChanged).toHaveBeenCalledTimes(1)
     window.removeEventListener(CONTACTS_CHANGED_EVENT, onChanged)
   })
@@ -575,7 +576,8 @@ describe('useCustomerContacts · archiveContact / restoreContact (ARCHIVE-SUBENT
 
     const restored = await restoreContact('cust1', 'c1')
 
-    expect(mockPost).toHaveBeenCalledWith('/customers/cust1/contacts/c1/restore')
+    expect(mockPost).toHaveBeenCalledWith('/customers/cust1/contacts/c1/restore', undefined,
+      expect.objectContaining({ headers: expect.objectContaining({ 'Idempotency-Key': expect.any(String) }) }))
     expect(restored.id).toBe('c1')
     expect(onChanged).toHaveBeenCalledTimes(1)
     window.removeEventListener(CONTACTS_CHANGED_EVENT, onChanged)

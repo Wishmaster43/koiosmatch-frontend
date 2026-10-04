@@ -182,7 +182,9 @@ describe('useCandidateNotes · previous-version undo (NOTE-UNDO-FE-1)', () => {
     const { result } = renderHook(() => useCandidateNotes('c1'))
     await waitFor(() => expect(result.current.notes).toHaveLength(1))
     const landed = await act(() => result.current.restorePreviousVersion(0))
-    expect(api.post).toHaveBeenCalledWith('/candidates/c1/notes/n1/restore-previous')
+    expect(api.post).toHaveBeenCalledWith('/candidates/c1/notes/n1/restore-previous', undefined, expect.objectContaining({
+      headers: expect.objectContaining({ 'Idempotency-Key': expect.any(String) }),
+    }))
     expect(landed).toBe(true)
     await waitFor(() => expect(result.current.notes[0].body).toBe('Restored'))
   })

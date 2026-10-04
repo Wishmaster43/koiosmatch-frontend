@@ -10,6 +10,7 @@
 import { useState, useEffect, useCallback } from 'react'
 import { useTranslation } from 'react-i18next'
 import api, { unwrap, unwrapList } from '@/lib/api'
+import { withIdempotencyKey } from '@/lib/idempotency'
 import { notifyError } from '@/lib/notify'
 import { mapDepartment } from '../data/mapCustomer'
 // Shared mount-effect + change-event refetch tail (archived list only — the live
@@ -143,13 +144,15 @@ export function useCustomerDepartments(customerId: Id | undefined) {
  * import-refetch path already dispatches.
  */
 export async function archiveDepartment(customerId: Id, id: Id): Promise<void> {
-  await api.post(`/customers/${customerId}/departments/${id}/archive`)
+  // One Idempotency-Key per click (IDEMP-KEY-BODYLESS-1): a body-less archive/restore POST needs
+  // an explicit key so a double click never fires the same mutation twice at the server.
+  await api.post(`/customers/${customerId}/departments/${id}/archive`, undefined, withIdempotencyKey())
   window.dispatchEvent(new CustomEvent(DEPARTMENTS_CHANGED_EVENT))
 }
 // Bring a soft-deleted department back and broadcast the change event so every
 // open department list (top-level tab + location section) refetches.
 export async function restoreDepartment(customerId: Id, id: Id): Promise<Department> {
-  const res = await api.post(`/customers/${customerId}/departments/${id}/restore`)
+  const res = await api.post(`/customers/${customerId}/departments/${id}/restore`, undefined, withIdempotencyKey())
   window.dispatchEvent(new CustomEvent(DEPARTMENTS_CHANGED_EVENT))
   return mapDepartment(unwrap<ApiDepartment>(res))
 }

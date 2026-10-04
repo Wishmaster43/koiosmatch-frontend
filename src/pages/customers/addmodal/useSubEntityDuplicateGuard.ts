@@ -23,6 +23,7 @@ import { LOCATIONS_CHANGED_EVENT } from '../hooks/useCustomerLocations'
 import { DEPARTMENTS_CHANGED_EVENT } from '../hooks/useCustomerDepartments'
 import { CONTACTS_CHANGED_EVENT } from '../hooks/useCustomerContacts'
 import api from '@/lib/api'
+import { withIdempotencyKey } from '@/lib/idempotency'
 import { notifyError } from '@/lib/notify'
 import { useDuplicateProbe } from '@/hooks/useDuplicateProbe'
 import type { DuplicateMatch } from '@/components/forms/DuplicateNotice'
@@ -66,7 +67,9 @@ export function useSubEntityDuplicateGuard(
     if (!customerId) return
     setRestoring(true)
     try {
-      await api.post(`/customers/${customerId}/${entity}/${id}/restore`)
+      // One Idempotency-Key per click (IDEMP-KEY-BODYLESS-1): a body-less restore POST needs an
+      // explicit key so a double click never restores twice at the server.
+      await api.post(`/customers/${customerId}/${entity}/${id}/restore`, undefined, withIdempotencyKey())
       // The live lists refetch only on their own change event (useAbortableListLoad), so the
       // restored record must be announced before it is opened, or it never appears.
       window.dispatchEvent(new CustomEvent(CHANGED_EVENT[entity]))

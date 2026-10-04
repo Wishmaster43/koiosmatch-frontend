@@ -19,8 +19,10 @@ export const CANCELLABLE = new Set(['running', 'waiting'])
 async function cancelWorkflowRun(runId: string | number): Promise<void> {
   const { default: api } = await import('@/lib/api')
   const { resolveWorkflowBaseURL } = await import('@/lib/workflowApi')
+  const { withIdempotencyKey } = await import('@/lib/idempotency')
   try {
-    await api.post(`/workflow-runs/${runId}/cancel`, undefined, { baseURL: resolveWorkflowBaseURL() })
+    // IDEMP-KEY-BODYLESS-1: a bare cancel POST carries its own per-click key so a double click never cancels twice.
+    await api.post(`/workflow-runs/${runId}/cancel`, undefined, withIdempotencyKey({ baseURL: resolveWorkflowBaseURL() }))
   } catch (err) {
     const e = err as { response?: { data?: { message?: string } }; message?: string }
     throw new Error(e.response?.data?.message ?? e.message ?? '', { cause: err })

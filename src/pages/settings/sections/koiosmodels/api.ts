@@ -3,6 +3,7 @@
  * One place so every card PATCHes the same endpoint the same way (§10, §11).
  */
 import api, { unwrap } from '@/lib/api'
+import { withIdempotencyKey } from '@/lib/idempotency'
 import type { KoiosModelsAdminData, KoiosModelsAdminPatch } from './types'
 import { normalizeFlavors } from './types'
 import { normalizeFlavorKey } from '@/lib/koiosModelTiers'
@@ -42,6 +43,7 @@ export async function patchKoiosModelsAdmin(patch: KoiosModelsAdminPatch): Promi
 // (API-CREDITS-1 does not apply here, but the endpoint itself must stay click-only
 // per the brief, so it can't fire from a mount effect or a poll).
 export async function refreshKoiosModelsAdmin(): Promise<KoiosModelsAdminData> {
-  const res = await api.post(`${ENDPOINT}/refresh`)
+  // IDEMP-KEY-BODYLESS-1: a click-triggered vendor re-pull — a per-submit key.
+  const res = await api.post(`${ENDPOINT}/refresh`, undefined, withIdempotencyKey())
   return normalizeResponse(unwrap<KoiosModelsAdminData>(res))
 }

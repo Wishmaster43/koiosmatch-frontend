@@ -14,6 +14,7 @@ import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import api from '@/lib/api'
 import { notify } from '@/lib/notify'
+import { withIdempotencyKey } from '@/lib/idempotency'
 import { useConfirm } from '@/hooks/useConfirm'
 import type { Id } from '@/types/common'
 
@@ -54,7 +55,8 @@ export function useEntityArchive<Id_ extends Id | undefined = Id>({ resource, na
     if (id == null || restoring) return
     setRestoring(true)
     try {
-      await api.post(`/${resource}/${id}/restore`)
+      // Restore is a user-triggered, irreversible-feeling action: one Idempotency-Key per click.
+      await api.post(`/${resource}/${id}/restore`, undefined, withIdempotencyKey())
       onPatch(id, { archived: false, archivedAt: null })
       onReload()
       notify('success', t('drawer.archivedBanner.restored'))

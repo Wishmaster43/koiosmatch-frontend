@@ -8,6 +8,7 @@
 import { useState, useRef } from 'react'
 import type { Dispatch, SetStateAction } from 'react'
 import api, { unwrap } from '@/lib/api'
+import { withIdempotencyKey } from '@/lib/idempotency'
 import { notifyError, notifySuccess } from '@/lib/notify'
 import { extractApiError } from '@/lib/extractApiError'
 import { mergePatch } from '@/lib/mergePatch'
@@ -118,7 +119,8 @@ export function useVacancyRecord({ setVacancies, setTotal, statusMeta, users, cu
     if (id == null || restoringRef.current) return
     restoringRef.current = true
     setRestoring(true)
-    api.post(`/vacancies/${id}/restore`)
+    // One fresh Idempotency-Key per click (IDEMP-KEY-BODYLESS-1): a body-less restore is never derived by the BE.
+    api.post(`/vacancies/${id}/restore`, undefined, withIdempotencyKey())
       .then(() => {
         notifySuccess(t('drawer.archivedBanner.restored'))
         const clear = { archived: false, archivedAt: null }

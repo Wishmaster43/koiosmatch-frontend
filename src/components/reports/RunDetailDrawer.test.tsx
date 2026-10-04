@@ -79,7 +79,8 @@ describe('RunDetailDrawer — stop button', () => {
 
     fireEvent.click(screen.getByText('Stoppen'))
 
-    await waitFor(() => expect(api.post).toHaveBeenCalledWith('/workflow-runs/5/cancel', undefined, { baseURL: 'http://engine.test/api' }))
+    await waitFor(() => expect(api.post).toHaveBeenCalledWith('/workflow-runs/5/cancel', undefined,
+      expect.objectContaining({ baseURL: 'http://engine.test/api', headers: expect.objectContaining({ 'Idempotency-Key': expect.any(String) }) })))
     // Refresh-after-cancel: fetched right away, not on the next 3s poll tick.
     await waitFor(() => expect(api.get).toHaveBeenCalledWith('/workflows/10/runs', { baseURL: 'http://engine.test/api' }))
     await waitFor(() => expect(screen.queryByText('Stoppen')).not.toBeInTheDocument())

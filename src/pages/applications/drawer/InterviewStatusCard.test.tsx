@@ -407,7 +407,7 @@ describe('InterviewStatusCard · takeover (stop) button', () => {
     const btn = screen.getByRole('button', { name: 'interview.status.takeover' })
     expect(btn).not.toBeDisabled()
     await userEvent.click(btn)
-    expect(mockPost).toHaveBeenCalledWith('/applications/app-1/stop-interview')
+    expect(mockPost).toHaveBeenCalledWith('/applications/app-1/stop-interview', undefined, expect.objectContaining({ headers: expect.objectContaining({ 'Idempotency-Key': expect.any(String) }) }))
   })
 
   it('disables the button with an honest reason when applicationId is missing (no route to call)', () => {
@@ -428,7 +428,7 @@ describe('InterviewStatusCard · takeover (stop) button', () => {
     mockPost.mockResolvedValueOnce({ data: { status: 'paused', paused_at: '2026-07-31T10:00:00+02:00' } })
     render(<InterviewStatusCard interview={fullInterview()} applicationId="app-1" />)
     await userEvent.click(screen.getByRole('button', { name: 'interview.status.takeover' }))
-    expect(mockPost).toHaveBeenCalledWith('/applications/app-1/stop-interview')
+    expect(mockPost).toHaveBeenCalledWith('/applications/app-1/stop-interview', undefined, expect.objectContaining({ headers: expect.objectContaining({ 'Idempotency-Key': expect.any(String) }) }))
     await waitFor(() => expect(screen.getByText('interview.status.turn.recruiter')).toBeInTheDocument())
     expect(mockNotifySuccess).toHaveBeenCalledWith('interview.status.takeoverSuccess')
   })
@@ -461,7 +461,7 @@ describe('InterviewStatusCard · takeover (stop) button', () => {
     mockPost.mockResolvedValueOnce({ data: { status: 'paused', paused_at: null } })
     await userEvent.click(btn)
     expect(mockPost).toHaveBeenCalledTimes(2)
-    expect(mockPost).toHaveBeenLastCalledWith('/applications/app-1/stop-interview')
+    expect(mockPost).toHaveBeenLastCalledWith('/applications/app-1/stop-interview', undefined, expect.objectContaining({ headers: expect.objectContaining({ 'Idempotency-Key': expect.any(String) }) }))
     await waitFor(() => expect(screen.queryByText('interview.status.noRunningSession')).toBeNull())
   })
 
@@ -494,7 +494,7 @@ describe('InterviewStatusCard · resume button (paused category)', () => {
     const btn = screen.getByRole('button', { name: 'interview.resume' })
     expect(btn).not.toBeDisabled()
     await userEvent.click(btn)
-    expect(mockPost).toHaveBeenCalledWith('/applications/app-1/resume-interview')
+    expect(mockPost).toHaveBeenCalledWith('/applications/app-1/resume-interview', undefined, expect.objectContaining({ headers: expect.objectContaining({ 'Idempotency-Key': expect.any(String) }) }))
   })
 
   it("POSTs /applications/{id}/resume-interview and takes the turn from the refetch, never a guess", async () => {
@@ -506,7 +506,7 @@ describe('InterviewStatusCard · resume button (paused category)', () => {
     }))
     render(<InterviewStatusCard interview={fullInterview({ category: 'paused', turn: 'recruiter' })} applicationId="app-1" />)
     await userEvent.click(screen.getByRole('button', { name: 'interview.resume' }))
-    expect(mockPost).toHaveBeenCalledWith('/applications/app-1/resume-interview')
+    expect(mockPost).toHaveBeenCalledWith('/applications/app-1/resume-interview', undefined, expect.objectContaining({ headers: expect.objectContaining({ 'Idempotency-Key': expect.any(String) }) }))
     await waitFor(() => expect(mockGet).toHaveBeenCalledWith('/applications/app-1', { params: { include_archived: 1 } }))
     await waitFor(() => expect(screen.getByText('interview.status.turn.candidate')).toBeInTheDocument())
     expect(mockNotifySuccess).toHaveBeenCalledWith('interview.status.resumeSuccess')
@@ -536,7 +536,7 @@ describe('InterviewStatusCard · resume button (paused category)', () => {
     mockPost.mockRejectedValueOnce({ response: { status: 404 } })
     await userEvent.click(btn)
     expect(mockPost).toHaveBeenCalledTimes(2)
-    expect(mockPost).toHaveBeenLastCalledWith('/applications/app-1/resume-interview')
+    expect(mockPost).toHaveBeenLastCalledWith('/applications/app-1/resume-interview', undefined, expect.objectContaining({ headers: expect.objectContaining({ 'Idempotency-Key': expect.any(String) }) }))
   })
 
   it('surfaces a non-404 failure via extractApiError but keeps the button retryable', async () => {

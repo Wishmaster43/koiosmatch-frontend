@@ -96,7 +96,9 @@ describe('useTrashFlow · unmark', () => {
     const onUnmarked = vi.fn()
     const { result } = renderHook(() => useTrashFlow({ entityPath, onUnmarked }))
     await act(async () => { await result.current.unmark(id) })
-    expect(api.post).toHaveBeenCalledWith(`/${entityPath}/${id}/unmark-deletion`)
+    expect(api.post).toHaveBeenCalledWith(`/${entityPath}/${id}/unmark-deletion`, undefined, expect.objectContaining({
+      headers: expect.objectContaining({ 'Idempotency-Key': expect.any(String) }),
+    }))
     expect(onUnmarked).toHaveBeenCalledWith(id)
     // Success feedback is the shared trash.unmarked toast.
     expect(notifySuccess).toHaveBeenCalled()
@@ -117,7 +119,9 @@ describe('useTrashFlow · unmark', () => {
     await act(async () => { resolvePost({ data: {} }) })
     await act(async () => { await Promise.all([first, second]) })
     expect(api.post).toHaveBeenCalledTimes(1)
-    expect(api.post).toHaveBeenCalledWith('/matches/m1/unmark-deletion')
+    expect(api.post).toHaveBeenCalledWith('/matches/m1/unmark-deletion', undefined, expect.objectContaining({
+      headers: expect.objectContaining({ 'Idempotency-Key': expect.any(String) }),
+    }))
     expect(onUnmarked).toHaveBeenCalledTimes(1)
     expect(result.current.unmarkBusy).toBe(false)
   })

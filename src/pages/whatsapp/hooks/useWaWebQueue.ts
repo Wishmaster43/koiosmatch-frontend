@@ -13,6 +13,7 @@
 import { useRef } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import api, { unwrapList } from '@/lib/api'
+import { withIdempotencyKey } from '@/lib/idempotency'
 
 const POLL_MS = 5000
 
@@ -102,9 +103,12 @@ export function useWaWebQueueActions() {
     qc.invalidateQueries({ queryKey: ['wa-web-queue'] })
     qc.invalidateQueries({ queryKey: ['wa-web-queue-stats'] })
   }
-  const sendNow = useLatchedMutation((id: string) => api.post(`/whatsapp-web/queue/${id}/send-now`), invalidate)
+  // send-now/retry carry a per-click Idempotency-Key (IDEMP-KEY-BODYLESS-1): body-less sends the BE
+  // cannot derive, and a second firing would actually re-send/re-queue the message to the candidate.
+  // pause stays unkeyed: pausing an already-paused row twice has no extra side effect.
+  const sendNow = useLatchedMutation((id: string) => api.post(`/whatsapp-web/queue/${id}/send-now`, undefined, withIdempotencyKey()), invalidate)
   const pause = useLatchedMutation((id: string) => api.post(`/whatsapp-web/queue/${id}/pause`), invalidate)
-  const retry = useLatchedMutation((id: string) => api.post(`/whatsapp-web/queue/${id}/retry`), invalidate)
+  const retry = useLatchedMutation((id: string) => api.post(`/whatsapp-web/queue/${id}/retry`, undefined, withIdempotencyKey()), invalidate)
   const cancel = useLatchedMutation((id: string) => api.delete(`/whatsapp-web/queue/${id}`), invalidate)
   return { sendNow, pause, retry, cancel }
 }

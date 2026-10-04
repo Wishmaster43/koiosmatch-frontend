@@ -14,6 +14,7 @@ import DeletionPreviewModal from '@/components/ui/DeletionPreviewModal'
 import PendingEraseBanner from '@/components/drawer/PendingEraseBanner'
 import { useDeletionLifecycle, eraseAroundDate } from '@/hooks/useDeletionLifecycle'
 import api from '@/lib/api'
+import { withIdempotencyKey } from '@/lib/idempotency'
 import { notifyError, notifySuccess } from '@/lib/notify'
 import { useDateFormat } from '@/lib/datetime'
 import type { Id } from '@/types/common'
@@ -80,7 +81,8 @@ export default function TrashLifecycleSection({
   const doUnmark = () => {
     if (id == null || unmarkBusy) return
     setUnmarkBusy(true)
-    api.post(`/${entityPath}/${id}/unmark-deletion`)
+    // IDEMP-KEY-BODYLESS-1: a bare unmark POST carries its own per-click key so a double click never double-fires.
+    api.post(`/${entityPath}/${id}/unmark-deletion`, undefined, withIdempotencyKey())
       .then(() => { notifySuccess(t('trash.unmarked')); onUnmarked(id) })
       .catch(() => notifyError(t('actionFailed')))
       .finally(() => setUnmarkBusy(false))

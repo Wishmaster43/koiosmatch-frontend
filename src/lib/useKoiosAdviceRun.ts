@@ -25,6 +25,7 @@
 import { useCallback, useEffect, useSyncExternalStore } from 'react'
 import { useTranslation } from 'react-i18next'
 import api, { unwrap } from '@/lib/api'
+import { withIdempotencyKey } from '@/lib/idempotency'
 import { extractApiError } from '@/lib/extractApiError'
 import { mapKoiosAiAdvice, type ApiKoiosAiAdvice, type KoiosAiAdvice } from '@/lib/koiosAdviceMap'
 import type { Id } from '@/types/common'
@@ -151,7 +152,8 @@ export function useKoiosAdviceRun(
       // quietStatuses: the hook renders its own notice — never the
       // interceptor's generic dev toast on top of it (api.ts A-7).
       const res = unwrap<RunStartResponse>(
-        await api.post(`/${entityPath}/${id}/koios-advice`, undefined, { quietStatuses: [403, 409, 422] }),
+        // A paid AI run must never double-fire on a double click: one Idempotency-Key per submit.
+        await api.post(`/${entityPath}/${id}/koios-advice`, undefined, withIdempotencyKey({ quietStatuses: [403, 409, 422] })),
       )
       pollForRun(entityPath, id, key, res?.run_id ?? null, gen, POLL_MAX_TICKS, t('koios.advice.timeout'))
     } catch (e) {

@@ -38,6 +38,7 @@ import { useTranslation } from 'react-i18next'
 import api from '@/lib/api'
 import { notifyError } from '@/lib/notify'
 import { extractApiError } from '@/lib/extractApiError'
+import { withIdempotencyKey } from '@/lib/idempotency'
 import { TRANSIENT_STATUSES } from './statusMeta'
 import type { WhatsAppDevice } from './statusMeta'
 
@@ -102,8 +103,9 @@ export function useWhatsAppWeb(basePath: string = '/profile/whatsapp-web') {
   // Create a new device session; the user then links it from its card. `body` is
   // omitted on the own-device surface (matches the pre-generalisation request
   // exactly) and carries {location_ids[], label?, phone_number?} on the branch surface.
+  // IDEMP-KEY-BODYLESS-1: the bodyless own-device create carries a per-click key so a double click never creates two devices.
   const createDevice = useCallback((body?: Record<string, unknown>) =>
-    run('new', () => (body ? api.post(basePath, body) : api.post(basePath))), [run, basePath])
+    run('new', () => (body ? api.post(basePath, body) : api.post(basePath, undefined, withIdempotencyKey()))), [run, basePath])
 
   // WA-WEB-BRANCHES-1: replace the set of branches a device serves (PATCH, full set,
   // min 1 — the server 422s an empty set, never a silent orphan). Shares run()'s
@@ -119,7 +121,8 @@ export function useWhatsAppWeb(basePath: string = '/profile/whatsapp-web') {
     setUnreachableId(null)
     setBusyId(id)
     try {
-      await api.post(`${basePath}/${id}/connect`)
+      // IDEMP-KEY-BODYLESS-1: a per-click key so a double click never starts two connect attempts.
+      await api.post(`${basePath}/${id}/connect`, undefined, withIdempotencyKey())
       await refetch()
     } catch (e) {
       const status = statusOf(e)
@@ -133,7 +136,8 @@ export function useWhatsAppWeb(basePath: string = '/profile/whatsapp-web') {
   }, [refetch, basePath, t])
 
   // Disconnect this device; shares run()'s busy-tracking + error handling.
-  const disconnect = useCallback((id: WhatsAppDevice['id']) => run(id, () => api.post(`${basePath}/${id}/disconnect`)), [run, basePath])
+  // IDEMP-KEY-BODYLESS-1: a per-click key so a double click never disconnects twice.
+  const disconnect = useCallback((id: WhatsAppDevice['id']) => run(id, () => api.post(`${basePath}/${id}/disconnect`, undefined, withIdempotencyKey())), [run, basePath])
   // Remove this device entirely; shares run()'s busy-tracking + error handling.
   const remove      = useCallback((id: WhatsAppDevice['id']) => run(id, () => api.delete(`${basePath}/${id}`)), [run, basePath])
 

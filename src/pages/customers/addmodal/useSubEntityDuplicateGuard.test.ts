@@ -59,7 +59,8 @@ describe('useSubEntityDuplicateGuard', () => {
 
     await act(async () => { await result.current.restore('loc-9') })
 
-    expect(api.post).toHaveBeenCalledWith('/customers/cust-1/locations/loc-9/restore')
+    expect(api.post).toHaveBeenCalledWith('/customers/cust-1/locations/loc-9/restore', undefined,
+      expect.objectContaining({ headers: expect.objectContaining({ 'Idempotency-Key': expect.any(String) }) }))
     expect(onOpenExisting).toHaveBeenCalledWith('loc-9', false)
   })
 

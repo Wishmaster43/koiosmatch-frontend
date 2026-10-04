@@ -11,6 +11,7 @@ import { useState, useEffect, useRef } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Check, Copy, Inbox, KeyRound, Plus, Trash2, Edit2, Save, X } from 'lucide-react'
 import api, { unwrap, unwrapList } from '@/lib/api'
+import { withIdempotencyKey } from '@/lib/idempotency'
 import { useConfirm } from '@/hooks/useConfirm'
 import Button from '@/components/ui/Button'
 import { PageTitle, SectionTitle, Caption, Mono } from '@/components/ui/typography'
@@ -128,7 +129,8 @@ export default function IncomingWebhooks() {
   const regenerateSecret = (id: string) => {
     confirm(t('webhooks.incoming.regenerateConfirm'), async () => {
       try {
-        const res = await api.post(`/webhooks/${id}/regenerate-secret`)
+        // IDEMP-KEY-BODYLESS-1: a click-triggered secret rotation — a per-submit key.
+        const res = await api.post(`/webhooks/${id}/regenerate-secret`, undefined, withIdempotencyKey())
         const secret = unwrap<Webhook>(res)?.signing_secret
         // Verifier fix: the server has already rotated the secret by the time it responds —
         // a 200 without the field must not read as "nothing happened" and leave it unknown.

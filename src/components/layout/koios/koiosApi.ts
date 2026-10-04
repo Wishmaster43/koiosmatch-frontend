@@ -23,6 +23,7 @@ import type { KoiosContextRef } from '@/types/koios'
 import { isContextResolvable } from './koiosContextTypes'
 import type { KoiosChatTurn, KoiosConfirmActionResponse, KoiosEffort } from './koiosTypes'
 import { normalizeFlavorKey } from '@/lib/koiosModelTiers'
+import { withIdempotencyKey } from '@/lib/idempotency'
 
 // Send one chat turn. `model` is optional (defaults to the tenant's active
 // model); `context` is the @-mentioned records, filtered to backend-resolvable
@@ -77,11 +78,13 @@ export const getKoiosSettings = () =>
 // DECLINE-1); the caller still treats a bare 404/410 (no `declined` status) as
 // "expired/already resolved".
 export const confirmPendingAction = (id: string) =>
-  api.post<KoiosConfirmActionResponse>(`/ai/koios/actions/${id}/confirm`).then((r) => r.data)
+  // IDEMP-KEY-BODYLESS-1: a bare confirm POST carries its own per-click key so a double click never executes the action twice.
+  api.post<KoiosConfirmActionResponse>(`/ai/koios/actions/${id}/confirm`, undefined, withIdempotencyKey()).then((r) => r.data)
 
 // Cancel a pending action — same dormant/expiry handling as confirm.
 export const cancelPendingAction = (id: string) =>
-  api.post(`/ai/koios/actions/${id}/cancel`).then((r) => r.data)
+  // IDEMP-KEY-BODYLESS-1: a bare cancel POST carries its own per-click key so a double click never double-fires.
+  api.post(`/ai/koios/actions/${id}/cancel`, undefined, withIdempotencyKey()).then((r) => r.data)
 
 // One-click staging (CMBE 03f2630c): park an assistant descriptor's
 // {tool,input} as a ring-2 pending action WITHOUT executing anything —

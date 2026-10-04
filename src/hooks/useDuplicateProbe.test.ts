@@ -52,7 +52,7 @@ describe('useRestoreArchivedDuplicate', () => {
     let ok: boolean | undefined
     await act(async () => { ok = await result.current.restore('c1') })
 
-    expect(api.post).toHaveBeenCalledWith('/candidates/c1/restore')
+    expect(api.post).toHaveBeenCalledWith('/candidates/c1/restore', undefined, expect.objectContaining({ headers: expect.objectContaining({ 'Idempotency-Key': expect.any(String) }) }))
     expect(invalidateSpy).toHaveBeenCalledWith({ queryKey: ['candidates'] })
     expect(notifySuccess).toHaveBeenCalledWith('Hersteld')
     expect(ok).toBe(true)
@@ -66,7 +66,7 @@ describe('useRestoreArchivedDuplicate', () => {
 
     await act(async () => { await result.current.restore('k9') })
 
-    expect(api.post).toHaveBeenCalledWith('/customers/k9/restore')
+    expect(api.post).toHaveBeenCalledWith('/customers/k9/restore', undefined, expect.objectContaining({ headers: expect.objectContaining({ 'Idempotency-Key': expect.any(String) }) }))
     expect(invalidateSpy).toHaveBeenCalledWith({ queryKey: ['customers'] })
   })
 

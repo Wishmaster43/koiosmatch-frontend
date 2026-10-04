@@ -57,7 +57,7 @@ describe('useWhatsAppWeb', () => {
 
     await act(async () => { await result.current.connect(7) })
 
-    expect(api.post).toHaveBeenCalledWith('/profile/whatsapp-web/7/connect')
+    expect(api.post).toHaveBeenCalledWith('/profile/whatsapp-web/7/connect', undefined, expect.objectContaining({ headers: expect.objectContaining({ 'Idempotency-Key': expect.any(String) }) }))
     // refetch runs after the mutation
     expect(api.get).toHaveBeenCalledTimes(2)
   })
@@ -81,7 +81,7 @@ describe('useWhatsAppWeb', () => {
 
     await act(async () => { await result.current.disconnect(3) })
 
-    expect(api.post).toHaveBeenCalledWith('/profile/whatsapp-web/3/disconnect')
+    expect(api.post).toHaveBeenCalledWith('/profile/whatsapp-web/3/disconnect', undefined, expect.objectContaining({ headers: expect.objectContaining({ 'Idempotency-Key': expect.any(String) }) }))
   })
 
   it('remove() deletes the exact route', async () => {
@@ -103,7 +103,7 @@ describe('useWhatsAppWeb', () => {
 
     await act(async () => { await result.current.createDevice() })
 
-    expect(api.post).toHaveBeenCalledWith('/profile/whatsapp-web')
+    expect(api.post).toHaveBeenCalledWith('/profile/whatsapp-web', undefined, expect.objectContaining({ headers: expect.objectContaining({ 'Idempotency-Key': expect.any(String) }) }))
   })
 
   it('polls every 3s only while a device is transient, then stops', async () => {
@@ -173,10 +173,10 @@ describe('useWhatsAppWeb', () => {
       await waitFor(() => expect(result.current.phase).toBe('ready'))
 
       await act(async () => { await result.current.connect(5) })
-      expect(api.post).toHaveBeenCalledWith('/settings/whatsapp-web-numbers/5/connect')
+      expect(api.post).toHaveBeenCalledWith('/settings/whatsapp-web-numbers/5/connect', undefined, expect.objectContaining({ headers: expect.objectContaining({ 'Idempotency-Key': expect.any(String) }) }))
 
       await act(async () => { await result.current.disconnect(5) })
-      expect(api.post).toHaveBeenCalledWith('/settings/whatsapp-web-numbers/5/disconnect')
+      expect(api.post).toHaveBeenCalledWith('/settings/whatsapp-web-numbers/5/disconnect', undefined, expect.objectContaining({ headers: expect.objectContaining({ 'Idempotency-Key': expect.any(String) }) }))
 
       await act(async () => { await result.current.remove(5) })
       expect(api.delete).toHaveBeenCalledWith('/settings/whatsapp-web-numbers/5')

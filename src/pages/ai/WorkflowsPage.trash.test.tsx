@@ -105,7 +105,8 @@ describe('WorkflowsPage · Prullenbak view (TRASH-OVERAL-2)', () => {
     render(<WorkflowsPage />)
     await openTrashView(user)
     await user.click(screen.getByRole('button', { name: 'Terugzetten naar archief' }))
-    await waitFor(() => expect(api.post).toHaveBeenCalledWith('/workflows/wf-1/unmark-deletion'))
+    await waitFor(() => expect(api.post).toHaveBeenCalledWith('/workflows/wf-1/unmark-deletion', undefined,
+      expect.objectContaining({ headers: expect.objectContaining({ 'Idempotency-Key': expect.any(String) }) })))
     expect(retryLoad).toHaveBeenCalled()
   })
 

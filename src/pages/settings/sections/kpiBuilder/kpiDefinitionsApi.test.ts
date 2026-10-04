@@ -70,10 +70,15 @@ describe('deleteKpiDefinition', () => {
 })
 
 describe('restoreKpiDefinition', () => {
-  it('POSTs the restore route', async () => {
+  it('POSTs the restore route with a per-click Idempotency-Key', async () => {
     vi.mocked(api.post).mockResolvedValueOnce({ data: { data: { id: 'kd-1' } } } as never)
     await restoreKpiDefinition('kd-1')
-    expect(api.post).toHaveBeenCalledWith('/kpi-definitions/kd-1/restore')
+    // IDEMP-KEY-BODYLESS-1: a body-less, click-triggered restore.
+    expect(api.post).toHaveBeenCalledWith(
+      '/kpi-definitions/kd-1/restore',
+      undefined,
+      expect.objectContaining({ headers: expect.objectContaining({ 'Idempotency-Key': expect.any(String) }) }),
+    )
   })
 })
 

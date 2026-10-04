@@ -12,6 +12,7 @@ import api, { unwrap } from '@/lib/api'
 import { notifyError, notifySuccess } from '@/lib/notify'
 import { extractApiError } from '@/lib/extractApiError'
 import { mergePatch } from '@/lib/mergePatch'
+import { withIdempotencyKey } from '@/lib/idempotency'
 import { mapTaskDetail } from '../data/mapTask'
 import { useTaskLookupIds } from './useTaskLookupIds'
 import type { Task, TaskDetail, ApiTask } from '@/types/task'
@@ -187,7 +188,8 @@ export function useTaskDrawerActions({ setTasks, archivedTasks, setArchivedTasks
     restoringRef.current = true
     setRestoring(true)
     const row = archivedTasks.find(x => x.id === id)
-    api.post(`/tasks/${id}/restore`)
+    // One fresh Idempotency-Key per click (IDEMP-KEY-BODYLESS-1): a body-less restore is never derived by the BE.
+    api.post(`/tasks/${id}/restore`, undefined, withIdempotencyKey())
       .then(() => {
         setArchivedTasks(prev => prev.filter(x => x.id !== id))
         if (row) setTasks(prev => [{ ...row, archived: false, archivedAt: null }, ...prev])

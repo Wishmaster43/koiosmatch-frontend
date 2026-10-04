@@ -112,7 +112,7 @@ describe('KoiosModelsAdminSettings', () => {
     expect(api.post).not.toHaveBeenCalled()
     vi.mocked(api.post).mockResolvedValueOnce({ data: { data: REGISTRY } })
     await userEvent.click(screen.getByRole('button', { name: 'Refresh' }))
-    expect(api.post).toHaveBeenCalledWith('/superadmin/koios/models/refresh')
+    expect(api.post).toHaveBeenCalledWith('/superadmin/koios/models/refresh', undefined, expect.objectContaining({ headers: expect.objectContaining({ 'Idempotency-Key': expect.any(String) }) }))
   })
 
   it('PATCHes only the flavors section from the Flavours card', async () => {

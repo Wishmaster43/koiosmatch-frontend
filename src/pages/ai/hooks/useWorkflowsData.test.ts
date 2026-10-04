@@ -209,7 +209,9 @@ describe('useWorkflowsData · handleArchive / handleRestore (TRASH-OVERAL-1b)', 
 
     await act(async () => { await result.current.handleRestore(result.current.workflows[0]) })
 
-    expect(mockedPost).toHaveBeenCalledWith('/workflows/wf-1/restore')
+    expect(mockedPost).toHaveBeenCalledWith('/workflows/wf-1/restore', undefined, expect.objectContaining({
+      headers: expect.objectContaining({ 'Idempotency-Key': expect.any(String) }),
+    }))
     expect(notify).toHaveBeenCalledWith('success', 'page.restoreSuccess')
     await waitFor(() => expect(mockedGet.mock.calls.length).toBeGreaterThan(getCallsBefore))
   })
@@ -257,7 +259,7 @@ describe('useWorkflowsData · handleRun (K-3 workflow-execution base URL)', () =
 
     expect(mockedPost).toHaveBeenCalledWith(
       '/workflows/wf-1/run', undefined,
-      { quietStatuses: [409], baseURL: expect.any(String) },
+      { quietStatuses: [409], baseURL: expect.any(String), headers: expect.objectContaining({ 'Idempotency-Key': expect.any(String) }) },
     )
   })
 
@@ -431,7 +433,7 @@ describe('useWorkflowsData · handleRunBulk (S1 run-bulk confirm)', () => {
 
     expect(mockedPost).toHaveBeenCalledWith(
       '/workflows/wf-1/run-bulk', undefined,
-      { quietStatuses: [409], baseURL: expect.any(String) },
+      { quietStatuses: [409], baseURL: expect.any(String), headers: expect.objectContaining({ 'Idempotency-Key': expect.any(String) }) },
     )
     expect(notify).toHaveBeenCalledWith('success', 'page.runBulkStarted')
   })
@@ -468,11 +470,11 @@ describe('useWorkflowsData · handleRunBulk (S1 run-bulk confirm)', () => {
 
     expect(mockedPost).toHaveBeenNthCalledWith(
       1, '/workflows/wf-1/run-bulk', undefined,
-      { quietStatuses: [409], baseURL: expect.any(String) },
+      { quietStatuses: [409], baseURL: expect.any(String), headers: expect.objectContaining({ 'Idempotency-Key': expect.any(String) }) },
     )
     await waitFor(() => expect(mockedPost).toHaveBeenNthCalledWith(
       2, '/workflows/wf-1/run-bulk', { confirm: true },
-      { quietStatuses: [409], baseURL: expect.any(String) },
+      { quietStatuses: [409], baseURL: expect.any(String), headers: expect.objectContaining({ 'Idempotency-Key': expect.any(String) }) },
     ))
     await waitFor(() => expect(notify).toHaveBeenCalledWith('success', 'page.runBulkStarted'))
   })

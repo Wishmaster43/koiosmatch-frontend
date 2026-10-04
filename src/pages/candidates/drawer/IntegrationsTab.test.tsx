@@ -117,7 +117,9 @@ describe('IntegrationsTab · PDOK manual "Bijwerken" (CAND-PDOK-GEOCODE-FE-1, ca
     // the POST's .then chain and every setTimeout-based poll step settle here —
     // covers the POST resolution plus all 5 poll ticks (~10s) in one go.
     await act(async () => { await vi.advanceTimersByTimeAsync(11000) })
-    expect(mockPost).toHaveBeenCalledWith('/candidates/1/geocode')
+    expect(mockPost).toHaveBeenCalledWith('/candidates/1/geocode', undefined, expect.objectContaining({
+      headers: expect.objectContaining({ 'Idempotency-Key': expect.any(String) }),
+    }))
     expect(mockNotifySuccess).toHaveBeenCalledWith('backofficeLinks.geocode.refreshStarted')
     expect(mockGet).toHaveBeenCalledWith('/candidates/1')
   })
@@ -300,7 +302,7 @@ describe('IntegrationsTab · Shiftmanager linked state (who/when + manual sync)'
     await user.click(screen.getByRole('button', { name: /backofficeLinks.shiftmanager.syncNow/ }))
     // Assert the REQUEST itself (§13) — route + no accidental body — not just that
     // a callback fired.
-    expect(mockPost).toHaveBeenCalledWith('/sm_candidates/sync/428')
+    expect(mockPost).toHaveBeenCalledWith('/sm_candidates/sync/428', undefined, expect.objectContaining({ headers: expect.objectContaining({ 'Idempotency-Key': expect.any(String) }) }))
     await waitFor(() => expect(mockNotifySuccess).toHaveBeenCalledWith('backofficeLinks.shiftmanager.syncSuccess'))
   })
 

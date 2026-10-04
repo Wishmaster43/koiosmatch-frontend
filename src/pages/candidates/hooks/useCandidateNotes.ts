@@ -33,6 +33,7 @@ import type { NotePayload } from '@/components/drawer/tabs/NotesTab'
 import { useTranslation } from 'react-i18next'
 import api, { unwrapList } from '@/lib/api'
 import { notifyError } from '@/lib/notify'
+import { withIdempotencyKey } from '@/lib/idempotency'
 import { runGuardedNoteEdit } from '@/hooks/runGuardedNoteEdit'
 
 // One note as the drawer renders it — matches NotesTab's NoteItem + the API shape.
@@ -127,7 +128,8 @@ export function useCandidateNotes(candidateId: string | number | undefined, opts
     if (!candidateId) return Promise.resolve(false)
     const target = notes[index]
     if (!target) return Promise.resolve(false)
-    return api.post(`/candidates/${candidateId}/notes/${target.id}/restore-previous`)
+    // IDEMP-KEY-BODYLESS-1: a per-click key so a sibling-tab/retry double click never undoes twice.
+    return api.post(`/candidates/${candidateId}/notes/${target.id}/restore-previous`, undefined, withIdempotencyKey())
       .then(() => { load(); return true })
       .catch(() => false)
   }, [candidateId, notes, load])

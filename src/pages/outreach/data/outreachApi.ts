@@ -4,6 +4,7 @@
  * unwrap/unwrapList adapters so call sites get a stable shape.
  */
 import api, { unwrap, unwrapList } from '@/lib/api'
+import { withIdempotencyKey } from '@/lib/idempotency'
 
 // List campaigns for the active tenant (server-side filter + pagination).
 export const listCampaigns = (params?: Record<string, unknown>) =>
@@ -31,7 +32,9 @@ export const deleteCampaign = (id: string) => api.delete(`/outreach-campaigns/${
 
 // Un-archive a campaign (enkelstuks-sweep, BE 9170e40: POST /outreach-campaigns/
 // {id}/restore, gated outreach.update). Returns the fresh campaign detail.
-export const restoreCampaign = (id: string) => api.post(`/outreach-campaigns/${id}/restore`).then(unwrap)
+// One Idempotency-Key per click (IDEMP-KEY-BODYLESS-1): the restore POST carries no body, so it
+// needs an explicit key so a double click never un-archives twice at the server.
+export const restoreCampaign = (id: string) => api.post(`/outreach-campaigns/${id}/restore`, undefined, withIdempotencyKey()).then(unwrap)
 
 // Target-status/outcome/assignee distribution for a campaign (G31). Accepts an
 // optional AbortSignal so an entity-keyed load effect can cancel a stale request.

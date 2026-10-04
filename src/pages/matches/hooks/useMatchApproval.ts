@@ -8,6 +8,7 @@
 import { useState, useEffect, useCallback } from 'react'
 import { useTranslation } from 'react-i18next'
 import api, { unwrap } from '@/lib/api'
+import { withIdempotencyKey } from '@/lib/idempotency'
 import { notify } from '@/lib/notify'
 import type { MatchRow } from '@/types/match'
 import type { Id } from '@/types/common'
@@ -49,7 +50,9 @@ export function useMatchApproval(match: MatchRow | null, onUpdate?: (id: MatchRo
     setBusy(true)
     onUpdate?.(match.id, { approval_status: 'approved' })
     try {
-      await api.post(`/matches/${match.id}/approve`)
+      // One Idempotency-Key per click (IDEMP-KEY-BODYLESS-1): the approve POST carries no body,
+      // so it needs an explicit key so a double click never approves twice at the server.
+      await api.post(`/matches/${match.id}/approve`, undefined, withIdempotencyKey())
     } catch (err) {
       handleError(err, match.id, prev)
     } finally { setBusy(false) }

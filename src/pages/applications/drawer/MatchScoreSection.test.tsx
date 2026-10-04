@@ -112,7 +112,7 @@ describe('MatchScoreSection · recalculate score (W29, moved from the retired st
     render(<MatchScoreSection application={app({ score: 40 })} />)
     expect(screen.getByText('40%')).toBeInTheDocument()
     await userEvent.click(screen.getByRole('button', { name: 'status.recalculateScore' }))
-    expect(mockPost).toHaveBeenCalledWith('/applications/1/score')
+    expect(mockPost).toHaveBeenCalledWith('/applications/1/score', undefined, expect.objectContaining({ headers: expect.objectContaining({ 'Idempotency-Key': expect.any(String) }) }))
     await waitFor(() => expect(screen.getByText('91%')).toBeInTheDocument())
     expect(screen.queryByText('40%')).toBeNull()
     expect(mockNotifySuccess).toHaveBeenCalledWith('status.recalculateDone')

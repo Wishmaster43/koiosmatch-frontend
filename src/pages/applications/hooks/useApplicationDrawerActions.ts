@@ -16,6 +16,7 @@ import type { TFunction } from 'i18next'
 import api, { unwrap } from '@/lib/api'
 import { notifyError, notifySuccess } from '@/lib/notify'
 import { extractApiError } from '@/lib/extractApiError'
+import { withIdempotencyKey } from '@/lib/idempotency'
 import { initialsOf } from '@/lib/initials'
 import { mapApplication, mapApplicationDetail } from '../data/mapApplication'
 import { bucketOfPhase } from '../data/applicationsShared'
@@ -351,7 +352,8 @@ export function useApplicationDrawerActions({ applications, wideRows, setApplica
     setApplications(prev => prev.map(a => a.id === id ? { ...a, archived: false } : a))
     setTotal(prev => prev + 1)
     closeDrawer()
-    api.post(`/applications/${id}/restore`)
+    // IDEMP-KEY-BODYLESS-1: a per-click key so a sibling-tab/retry double click never restores twice.
+    api.post(`/applications/${id}/restore`, undefined, withIdempotencyKey())
       .then(() => notifySuccess(t('restore.done')))
       .catch(() => {
         setApplications(prev => prev.map(a => a.id === id ? { ...a, archived: true } : a))

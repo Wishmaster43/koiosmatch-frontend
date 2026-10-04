@@ -21,6 +21,7 @@ import { extractApiError, apiErrorKey } from '@/lib/extractApiError'
 import { useTranslation } from 'react-i18next'
 import { HelloflexCard, ShiftmanagerCard } from './backofficeLinkCards'
 import { backofficeLinkOf } from '@/lib/backofficeLink'
+import { withIdempotencyKey } from '@/lib/idempotency'
 import type { ApiBackofficeLink, BackofficeLink } from '@/lib/backofficeLink'
 import type { Id } from '@/types/common'
 import type { operations } from '@/types/api-generated'
@@ -157,7 +158,8 @@ export default function BackofficeLinksTab({ entity, id, helloflexLink, shiftman
     if (!smExternalId || syncing || !canSyncNow) return
     setSyncing(true)
     try {
-      await api.post(`/sm_${entity}/sync/${smExternalId}`)
+      // IDEMP-KEY-BODYLESS-1: a bare resync POST carries its own per-click key so a double click never resyncs twice.
+      await api.post(`/sm_${entity}/sync/${smExternalId}`, undefined, withIdempotencyKey())
       notifySuccess(t('backofficeLinks.shiftmanager.syncSuccess'))
       // KOPPELINGEN-REFRESH-1: same self-refetch after a manual resync.
       await refetchLinks()

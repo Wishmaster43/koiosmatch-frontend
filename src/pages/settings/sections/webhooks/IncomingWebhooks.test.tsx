@@ -127,7 +127,7 @@ describe('IncomingWebhooks — Secret vernieuwen (regenerate)', () => {
     await user.click(screen.getByRole('button', { name: st('webhooks.incoming.regenerate') }))
     await user.click(screen.getByRole('button', { name: i18n.t('confirm') }))
 
-    await waitFor(() => expect(mockedApi.post).toHaveBeenCalledWith('/webhooks/wh-1/regenerate-secret'))
+    await waitFor(() => expect(mockedApi.post).toHaveBeenCalledWith('/webhooks/wh-1/regenerate-secret', undefined, expect.objectContaining({ headers: expect.objectContaining({ 'Idempotency-Key': expect.any(String) }) })))
     expect(screen.getByText('fresh-secret')).toBeInTheDocument()
   })
 
@@ -141,7 +141,7 @@ describe('IncomingWebhooks — Secret vernieuwen (regenerate)', () => {
     await user.click(screen.getByRole('button', { name: st('webhooks.incoming.regenerate') }))
     await user.click(screen.getByRole('button', { name: i18n.t('confirm') }))
 
-    await waitFor(() => expect(mockedApi.post).toHaveBeenCalledWith('/webhooks/wh-1/regenerate-secret'))
+    await waitFor(() => expect(mockedApi.post).toHaveBeenCalledWith('/webhooks/wh-1/regenerate-secret', undefined, expect.objectContaining({ headers: expect.objectContaining({ 'Idempotency-Key': expect.any(String) }) })))
     await waitFor(() => expect(notifyError).toHaveBeenCalledWith(expect.any(String)))
   })
 
@@ -157,7 +157,7 @@ describe('IncomingWebhooks — Secret vernieuwen (regenerate)', () => {
     await user.click(screen.getByRole('button', { name: st('webhooks.incoming.regenerate') }))
     await user.click(screen.getByRole('button', { name: i18n.t('confirm') }))
 
-    await waitFor(() => expect(mockedApi.post).toHaveBeenCalledWith('/webhooks/wh-1/regenerate-secret'))
+    await waitFor(() => expect(mockedApi.post).toHaveBeenCalledWith('/webhooks/wh-1/regenerate-secret', undefined, expect.objectContaining({ headers: expect.objectContaining({ 'Idempotency-Key': expect.any(String) }) })))
     await waitFor(() => expect(notifyError).toHaveBeenCalledWith(expect.any(String)))
   })
 })

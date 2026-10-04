@@ -11,6 +11,7 @@ import type { ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
 import { RefreshCw, Search } from 'lucide-react'
 import api, { unwrap } from '@/lib/api'
+import { withIdempotencyKey } from '@/lib/idempotency'
 import { useAuth } from '@/context/AuthContext'
 import { Field, SelectField } from '@/components/forms/fields'
 import { useWhatsAppConnections } from './whatsapp/useWhatsAppConnections'
@@ -134,7 +135,8 @@ export default function WhatsAppSettings() {
   const syncNumbers = async () => {
     if (!selectedConnId) return
     setSyncing('numbers'); setSyncMsg(null)
-    try { await api.post(`/whatsapp/${selectedConnId}/sync-numbers`); await reloadDetail(); setSyncMsg({ ok: true, text: t('whatsapp.numbersSynced') }) }
+    // IDEMP-KEY-BODYLESS-1: a click-triggered sync — a per-submit key.
+    try { await api.post(`/whatsapp/${selectedConnId}/sync-numbers`, undefined, withIdempotencyKey()); await reloadDetail(); setSyncMsg({ ok: true, text: t('whatsapp.numbersSynced') }) }
     catch { setSyncMsg({ ok: false, text: t('whatsapp.syncFailed') }) }
     setSyncing(null)
   }
@@ -143,7 +145,8 @@ export default function WhatsAppSettings() {
   const syncTemplates = async () => {
     if (!selectedConnId) return
     setSyncing('templates'); setSyncMsg(null)
-    try { await api.post(`/whatsapp/${selectedConnId}/sync-templates`); await reloadDetail(); setSyncMsg({ ok: true, text: t('whatsapp.templatesSynced') }) }
+    // IDEMP-KEY-BODYLESS-1: a click-triggered sync — a per-submit key.
+    try { await api.post(`/whatsapp/${selectedConnId}/sync-templates`, undefined, withIdempotencyKey()); await reloadDetail(); setSyncMsg({ ok: true, text: t('whatsapp.templatesSynced') }) }
     catch { setSyncMsg({ ok: false, text: t('whatsapp.syncFailed') }) }
     setSyncing(null)
   }

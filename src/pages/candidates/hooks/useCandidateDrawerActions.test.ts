@@ -33,6 +33,7 @@ vi.mock('@/lib/api', async () => {
 import api from '@/lib/api'
 
 const get = api.get as unknown as ReturnType<typeof vi.fn>
+const post = api.post as unknown as ReturnType<typeof vi.fn>
 const notifyMsg = vi.fn()
 const t = (key: string) => key
 
@@ -65,6 +66,7 @@ beforeEach(() => {
   vi.mocked(needsLiveCheck).mockClear()
   vi.mocked(fetchLiveBlockers).mockClear()
   get.mockReset()
+  post.mockReset()
   notifyMsg.mockClear()
 })
 
@@ -96,5 +98,31 @@ describe('useCandidateDrawerActions · archive guard threads the live tenant fun
     await act(async () => { await r.result.current.archiveOne(3) })
     expect(needsLiveCheck).toHaveBeenCalledWith(c, undefined)
     expect(fetchLiveBlockers).toHaveBeenCalledWith(3, undefined)
+  })
+})
+
+// IDEMP-KEY-BODYLESS-1: both body-less POSTs (mark-deletion, restore) carry a
+// fresh per-click Idempotency-Key so a sibling-tab/retry double click never fires twice.
+describe('useCandidateDrawerActions · body-less POSTs carry an Idempotency-Key', () => {
+  it('markDeletionOne POSTs mark-deletion with the header, after confirming', async () => {
+    get.mockResolvedValue({ data: { data: { applications: [], matches: [] } } })
+    post.mockResolvedValue({ data: {} })
+    const c = cand({ id: 4, stage: 'proposal', status: 'available' })
+    const r = harness([c], TENANT_RENAMED_FUNNEL)
+    await act(async () => { await r.result.current.markDeletionOne(4) })
+    await act(async () => { r.result.current.dialog.props.onConfirm() })
+    expect(post).toHaveBeenCalledWith('/candidates/4/mark-deletion', {}, expect.objectContaining({
+      headers: expect.objectContaining({ 'Idempotency-Key': expect.any(String) }),
+    }))
+  })
+
+  it('restoreOne POSTs restore with the header', async () => {
+    post.mockResolvedValue({ data: {} })
+    const c = cand({ id: 5, stage: 'proposal', status: 'available' })
+    const r = harness([c], TENANT_RENAMED_FUNNEL)
+    await act(async () => { await r.result.current.restoreOne(5) })
+    expect(post).toHaveBeenCalledWith('/candidates/5/restore', undefined, expect.objectContaining({
+      headers: expect.objectContaining({ 'Idempotency-Key': expect.any(String) }),
+    }))
   })
 })

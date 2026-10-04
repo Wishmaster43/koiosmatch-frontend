@@ -11,6 +11,7 @@
  */
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import api, { unwrapList } from '@/lib/api'
+import { withIdempotencyKey } from '@/lib/idempotency'
 import type { Id } from '@/types/common'
 
 export interface Proposal {
@@ -58,7 +59,8 @@ export function useProposals(applicationId: Id | null | undefined) {
   // Revoke is idempotent server-side; invalidate the list on success so the
   // revoked state (and the removed revoke button) reflects immediately.
   const revokeMutation = useMutation({
-    mutationFn: (proposalId: Id) => api.post(`/proposals/${proposalId}/revoke`),
+    // Revoke is user-triggered and feels irreversible: one Idempotency-Key per click.
+    mutationFn: (proposalId: Id) => api.post(`/proposals/${proposalId}/revoke`, undefined, withIdempotencyKey()),
     onSuccess: () => queryClient.invalidateQueries({ queryKey }),
   })
 

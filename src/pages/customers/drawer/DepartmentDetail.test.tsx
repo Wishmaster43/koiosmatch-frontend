@@ -459,7 +459,7 @@ describe('DepartmentDetail · honest delete (SUBENTITEIT-DELETE-1)', () => {
 
     await user.click(within(dialog).getByRole('button', { name: ct('inUse.archive') }))
 
-    expect(mockPost).toHaveBeenCalledWith('/customers/cust-1/departments/d1/archive')
+    expect(mockPost).toHaveBeenCalledWith('/customers/cust-1/departments/d1/archive', undefined, expect.objectContaining({ headers: expect.objectContaining({ 'Idempotency-Key': expect.any(String) }) }))
     await waitFor(() => expect(close).toHaveBeenCalled())
   })
 })
@@ -477,7 +477,7 @@ describe('DepartmentDetail · archive/restore (ARCHIVE-SUBENTITY-1)', () => {
     await user.click(screen.getByTitle(ct('departments.detail.archiveDepartment')))
     await user.click(screen.getByRole('button', { name: cm('confirm') }))
 
-    expect(mockPost).toHaveBeenCalledWith('/customers/cust-1/departments/d1/archive')
+    expect(mockPost).toHaveBeenCalledWith('/customers/cust-1/departments/d1/archive', undefined, expect.objectContaining({ headers: expect.objectContaining({ 'Idempotency-Key': expect.any(String) }) }))
     await waitFor(() => expect(close).toHaveBeenCalled())
   })
 
@@ -494,7 +494,7 @@ describe('DepartmentDetail · archive/restore (ARCHIVE-SUBENTITY-1)', () => {
 
     await user.click(screen.getByRole('button', { name: ct('departments.archivedBanner.restore') }))
 
-    expect(mockPost).toHaveBeenCalledWith('/customers/cust-1/departments/d1/restore')
+    expect(mockPost).toHaveBeenCalledWith('/customers/cust-1/departments/d1/restore', undefined, expect.objectContaining({ headers: expect.objectContaining({ 'Idempotency-Key': expect.any(String) }) }))
     await waitFor(() => expect(close).toHaveBeenCalled())
   })
 })

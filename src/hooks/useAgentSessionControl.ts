@@ -10,6 +10,7 @@ import { useCallback, useRef, useState } from 'react'
 import api from '@/lib/api'
 import { notifyError } from '@/lib/notify'
 import { extractApiError } from '@/lib/extractApiError'
+import { withIdempotencyKey } from '@/lib/idempotency'
 
 type AgentSessionAction = 'pause' | 'resume'
 
@@ -27,7 +28,8 @@ export function useAgentSessionControl(onChanged: () => void, failMessage: strin
     busyRef.current = true
     setBusy(action)
     try {
-      await api.post(`/conversations/${conversationId}/agent-session/${action}`)
+      // IDEMP-KEY-BODYLESS-1: a per-click key so a double click never pauses/resumes the session twice.
+      await api.post(`/conversations/${conversationId}/agent-session/${action}`, undefined, withIdempotencyKey())
       onChanged()
       return true
     } catch (err) {

@@ -37,7 +37,10 @@ describe('useKoiosAdviceRun', () => {
 
     await act(async () => { await result.current.request() })
 
-    expect(api.post).toHaveBeenCalledWith('/candidates/c1/koios-advice', undefined, expect.objectContaining({ quietStatuses: [403, 409, 422] }))
+    expect(api.post).toHaveBeenCalledWith('/candidates/c1/koios-advice', undefined, expect.objectContaining({
+      quietStatuses: [403, 409, 422],
+      headers: expect.objectContaining({ 'Idempotency-Key': expect.any(String) }),
+    }))
   })
 
   it('202 sets pending and polls until the run_id lands, then exposes freshAdvice', async () => {

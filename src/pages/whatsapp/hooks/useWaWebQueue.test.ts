@@ -47,7 +47,7 @@ describe('useWaWebQueueActions', () => {
     vi.mocked(api.post).mockResolvedValue({ data: {} })
     const { result } = renderHook(() => useWaWebQueueActions(), { wrapper })
     result.current.sendNow.mutate('row-1')
-    await waitFor(() => expect(api.post).toHaveBeenCalledWith('/whatsapp-web/queue/row-1/send-now'))
+    await waitFor(() => expect(api.post).toHaveBeenCalledWith('/whatsapp-web/queue/row-1/send-now', undefined, expect.objectContaining({ headers: expect.objectContaining({ 'Idempotency-Key': expect.any(String) }) })))
   })
 
   it('pause posts to the exact per-row route', async () => {
@@ -61,7 +61,7 @@ describe('useWaWebQueueActions', () => {
     vi.mocked(api.post).mockResolvedValue({ data: {} })
     const { result } = renderHook(() => useWaWebQueueActions(), { wrapper })
     result.current.retry.mutate('row-3')
-    await waitFor(() => expect(api.post).toHaveBeenCalledWith('/whatsapp-web/queue/row-3/retry'))
+    await waitFor(() => expect(api.post).toHaveBeenCalledWith('/whatsapp-web/queue/row-3/retry', undefined, expect.objectContaining({ headers: expect.objectContaining({ 'Idempotency-Key': expect.any(String) }) })))
   })
 
   it('cancel DELETEs the exact per-row route', async () => {

@@ -3,7 +3,7 @@
  * K-147: verify that flavor and effort are sent only when set, not when undefined.
  */
 import { describe, it, expect, vi, beforeEach } from 'vitest'
-import { sendChat } from './koiosApi'
+import { sendChat, confirmPendingAction, cancelPendingAction } from './koiosApi'
 import api from '@/lib/api'
 
 vi.mock('@/lib/api', () => ({
@@ -135,5 +135,22 @@ describe('sendChat', () => {
     expect(mockPost).toHaveBeenLastCalledWith('/ai/koios/chat', { message: 'wie is hem?', history: [{ role: 'user', content: 'welke kandidaat hoort bij +316?' }, { role: 'assistant', content: 'Niels Groen' }] })
     await sendChat('hallo', null, [], null, null, false, [])
     expect(mockPost).toHaveBeenLastCalledWith('/ai/koios/chat', { message: 'hallo' })
+  })
+})
+
+// IDEMP-KEY-BODYLESS-1: confirm/cancel are bare POSTs; each submit carries a fresh Idempotency-Key.
+describe('confirmPendingAction / cancelPendingAction', () => {
+  it('sends a per-call Idempotency-Key header on confirm', async () => {
+    mockPost.mockResolvedValueOnce({ data: { status: 'confirmed' } })
+    await confirmPendingAction('action-1')
+    expect(mockPost).toHaveBeenCalledWith('/ai/koios/actions/action-1/confirm', undefined,
+      expect.objectContaining({ headers: expect.objectContaining({ 'Idempotency-Key': expect.any(String) }) }))
+  })
+
+  it('sends a per-call Idempotency-Key header on cancel', async () => {
+    mockPost.mockResolvedValueOnce({ data: { status: 'cancelled' } })
+    await cancelPendingAction('action-1')
+    expect(mockPost).toHaveBeenCalledWith('/ai/koios/actions/action-1/cancel', undefined,
+      expect.objectContaining({ headers: expect.objectContaining({ 'Idempotency-Key': expect.any(String) }) }))
   })
 })

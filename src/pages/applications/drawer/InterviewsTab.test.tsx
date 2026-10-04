@@ -140,7 +140,9 @@ describe('InterviewsTab · start-interview action (Flow B)', () => {
     renderTab(app({ interviewWorkflow: OWN_WF }))
     await clickStart()
 
-    expect(mockPost).toHaveBeenCalledWith('/applications/app-1/interview')
+    expect(mockPost).toHaveBeenCalledWith('/applications/app-1/interview', undefined, expect.objectContaining({
+      headers: expect.objectContaining({ 'Idempotency-Key': expect.any(String) }),
+    }))
     await waitFor(() => expect(mockNotifySuccess).toHaveBeenCalledWith('interview.start.started'))
     // The freshly-started session now shows in the status card — no session placeholder.
     await waitFor(() => expect(screen.queryByText('interview.status.none')).toBeNull())
@@ -232,7 +234,9 @@ describe('InterviewsTab · start-interview action (Flow B)', () => {
       renderTab(app({ interviewWorkflow: OWN_WF, vacancyInterviewWorkflow: VACANCY_WF }))
       await waitFor(() => screen.getByRole('button', { name: 'interview.start.label' }))
       await userEvent.click(screen.getByRole('button', { name: 'interview.start.label' }))
-      expect(mockPost).toHaveBeenCalledWith('/applications/app-1/interview')
+      expect(mockPost).toHaveBeenCalledWith('/applications/app-1/interview', undefined, expect.objectContaining({
+      headers: expect.objectContaining({ 'Idempotency-Key': expect.any(String) }),
+    }))
     })
 
     it('falls back to the vacancy default when the application has no workflow of its own', async () => {
@@ -241,7 +245,9 @@ describe('InterviewsTab · start-interview action (Flow B)', () => {
       await waitFor(() => screen.getByRole('button', { name: 'interview.start.label' }))
       expect(screen.getByRole('button', { name: 'interview.start.label' })).not.toBeDisabled()
       await userEvent.click(screen.getByRole('button', { name: 'interview.start.label' }))
-      expect(mockPost).toHaveBeenCalledWith('/applications/app-1/interview')
+      expect(mockPost).toHaveBeenCalledWith('/applications/app-1/interview', undefined, expect.objectContaining({
+      headers: expect.objectContaining({ 'Idempotency-Key': expect.any(String) }),
+    }))
     })
 
     it('disables Start and shows the needs-workflow caption when neither the application nor the vacancy has a workflow', async () => {
@@ -270,7 +276,9 @@ describe('InterviewsTab · start-interview action (Flow B)', () => {
       await waitFor(() => screen.getByRole('button', { name: 'interview.start.label' }))
       expect(screen.getByRole('button', { name: 'interview.start.label' })).not.toBeDisabled()
       await userEvent.click(screen.getByRole('button', { name: 'interview.start.label' }))
-      expect(mockPost).toHaveBeenCalledWith('/applications/app-1/interview')
+      expect(mockPost).toHaveBeenCalledWith('/applications/app-1/interview', undefined, expect.objectContaining({
+      headers: expect.objectContaining({ 'Idempotency-Key': expect.any(String) }),
+    }))
     })
 
     // A workflow that resolved but carries NO known agent name still enables

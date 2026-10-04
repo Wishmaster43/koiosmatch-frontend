@@ -88,10 +88,13 @@ describe('useCvParseProposals', () => {
 
     await act(async () => { await result.current.decide('p1', 'accept') })
 
-    // Exactly one argument — the applier owns the merge rule, the client sends no
-    // field selection (there is no per-field accept route on the backend).
+    // No body (undefined) and only the per-click Idempotency-Key config: the applier
+    // owns the merge rule, the client sends no field selection (there is no per-field
+    // accept route on the backend).
     expect(apiPost).toHaveBeenCalledTimes(1)
-    expect(apiPost).toHaveBeenCalledWith('/candidates/c1/cv-parse-proposals/p1/accept')
+    expect(apiPost).toHaveBeenCalledWith('/candidates/c1/cv-parse-proposals/p1/accept', undefined, expect.objectContaining({
+      headers: expect.objectContaining({ 'Idempotency-Key': expect.any(String) }),
+    }))
   })
 
   it('POSTs the reject route with no body at all', async () => {
@@ -102,7 +105,9 @@ describe('useCvParseProposals', () => {
     await act(async () => { await result.current.decide('p1', 'reject') })
 
     expect(apiPost).toHaveBeenCalledTimes(1)
-    expect(apiPost).toHaveBeenCalledWith('/candidates/c1/cv-parse-proposals/p1/reject')
+    expect(apiPost).toHaveBeenCalledWith('/candidates/c1/cv-parse-proposals/p1/reject', undefined, expect.objectContaining({
+      headers: expect.objectContaining({ 'Idempotency-Key': expect.any(String) }),
+    }))
   })
 
   it('exposes the accept response summary (applied/skipped) to the caller', async () => {

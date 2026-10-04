@@ -68,7 +68,7 @@ describe('useOpportunityArchive · restoreOpportunity', () => {
     post.mockResolvedValue({ data: { restored: true } })
     const { hook, onPatch, onReload } = harness()
     await act(async () => { await hook.result.current.restoreOpportunity('o1') })
-    expect(post).toHaveBeenCalledWith('/opportunities/o1/restore')
+    expect(post).toHaveBeenCalledWith('/opportunities/o1/restore', undefined, expect.objectContaining({ headers: expect.objectContaining({ 'Idempotency-Key': expect.any(String) }) }))
     expect(onPatch).toHaveBeenCalledWith('o1', { archived: false, archivedAt: null })
     expect(onReload).toHaveBeenCalled()
     await waitFor(() => expect(notify).toHaveBeenCalledWith('success', expect.any(String)))

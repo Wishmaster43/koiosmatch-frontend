@@ -211,7 +211,7 @@ describe('VacancyAgentTab · backfill existing applicants (INTERVIEW-BACKFILL-1)
     mockPost.mockResolvedValueOnce({ data: { data: { started: 3, skipped: [], eligible_total: 3 } } })
     await user.click(screen.getByRole('button', { name: 'Bevestigen' }))
 
-    expect(mockPost).toHaveBeenCalledWith('/vacancies/v1/start-interviews')
+    expect(mockPost).toHaveBeenCalledWith('/vacancies/v1/start-interviews', undefined, expect.objectContaining({ headers: expect.objectContaining({ 'Idempotency-Key': expect.any(String) }) }))
     await waitFor(() => expect(mockNotifySuccess).toHaveBeenCalledWith('3 van 3 gestart.'))
   })
 

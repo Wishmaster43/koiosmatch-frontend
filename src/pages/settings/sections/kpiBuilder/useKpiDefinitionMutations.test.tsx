@@ -75,7 +75,7 @@ describe('useKpiDefinitionMutations', () => {
     expect(api.delete).toHaveBeenCalledWith('/kpi-definitions/kd-1')
 
     await act(async () => { await result.current.restore.mutateAsync('kd-1') })
-    expect(api.post).toHaveBeenCalledWith('/kpi-definitions/kd-1/restore')
+    expect(api.post).toHaveBeenCalledWith('/kpi-definitions/kd-1/restore', undefined, expect.objectContaining({ headers: expect.objectContaining({ 'Idempotency-Key': expect.any(String) }) }))
   })
 
   it('reorder optimistically writes the new order and PUTs the ids', async () => {

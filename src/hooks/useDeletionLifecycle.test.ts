@@ -117,7 +117,8 @@ describe('useDeletionLifecycle — unmark', () => {
     await waitFor(() => expect(result.current.preview).not.toBeNull())
 
     await act(async () => { await result.current.unmark() })
-    expect(api.post).toHaveBeenCalledWith('/workflows/wf-1/unmark-deletion')
+    expect(api.post).toHaveBeenCalledWith('/workflows/wf-1/unmark-deletion', undefined,
+      expect.objectContaining({ headers: expect.objectContaining({ 'Idempotency-Key': expect.any(String) }) }))
     expect(result.current.preview?.lifecycle).toBe('archived')
   })
 })

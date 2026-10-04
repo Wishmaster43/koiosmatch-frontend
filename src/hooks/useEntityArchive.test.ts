@@ -99,7 +99,9 @@ describe('useEntityArchive · restore', () => {
 
     await act(async () => { await result.current.restore('m1') })
 
-    expect(mockPost).toHaveBeenCalledWith('/matches/m1/restore')
+    expect(mockPost).toHaveBeenCalledWith('/matches/m1/restore', undefined, expect.objectContaining({
+      headers: expect.objectContaining({ 'Idempotency-Key': expect.any(String) }),
+    }))
     expect(onPatch).toHaveBeenCalledWith('m1', { archived: false, archivedAt: null })
     expect(onReload).toHaveBeenCalledTimes(1)
     expect(notify).toHaveBeenCalledWith('success', 'drawer.archivedBanner.restored')

@@ -7,6 +7,7 @@
  * rule: hand-write what the generated spec doesn't cover).
  */
 import api, { unwrap, unwrapList } from '@/lib/api'
+import { withIdempotencyKey } from '@/lib/idempotency'
 
 // The three supported connectors (contract §1).
 export type ConnectorId = 'shiftmanager' | 'helloflex' | 'werkzoeken'
@@ -162,7 +163,8 @@ export async function putIntegrationSettings<C extends ConnectorId>(
 export async function testIntegration(connector: ConnectorId): Promise<TestResult> {
   // quietStatuses: the 422 is a contract-expected, caller-rendered outcome —
   // the A-7 dev guard must not double it with a raw toast (house convention).
-  const res = await api.post(`/integrations/${connector}/test`, undefined, { quietStatuses: [422] })
+  // IDEMP-KEY-BODYLESS-1: a click-triggered connection test — a per-submit key.
+  const res = await api.post(`/integrations/${connector}/test`, undefined, withIdempotencyKey({ quietStatuses: [422] }))
   return unwrap<TestResult>(res)
 }
 

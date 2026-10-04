@@ -44,10 +44,15 @@ describe('jobsApi', () => {
     expect(api.delete).toHaveBeenCalledWith('/admin/jobs/42')
   })
 
-  it('retryFailedJob sends POST /admin/jobs/failed/{uuid}/retry', async () => {
+  it('retryFailedJob sends POST /admin/jobs/failed/{uuid}/retry with a per-click Idempotency-Key', async () => {
     vi.mocked(api.post).mockResolvedValue({ data: {} })
     await retryFailedJob('abc-123')
-    expect(api.post).toHaveBeenCalledWith('/admin/jobs/failed/abc-123/retry')
+    // IDEMP-KEY-BODYLESS-1: a body-less, click-triggered retry.
+    expect(api.post).toHaveBeenCalledWith(
+      '/admin/jobs/failed/abc-123/retry',
+      undefined,
+      expect.objectContaining({ headers: expect.objectContaining({ 'Idempotency-Key': expect.any(String) }) }),
+    )
   })
 
   it('retryAllFailedJobs sends POST /admin/jobs/failed/retry-all with no body when no filters are specified', async () => {

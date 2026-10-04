@@ -684,7 +684,8 @@ describe('AddCustomerModal · duplicate 409 panel (CUST-DUP-FE-1)', () => {
     expect(await screen.findByText(ct('duplicate.stateArchived'))).toBeInTheDocument()
     await user.click(screen.getByRole('button', { name: ct('duplicate.restoreAndOpen') }))
     // Assert the REQUEST (method + route), then the follow-up navigation.
-    await waitFor(() => expect(postMock).toHaveBeenCalledWith('/customers/dup-2/restore'))
+    await waitFor(() => expect(postMock).toHaveBeenCalledWith('/customers/dup-2/restore', undefined,
+      expect.objectContaining({ headers: expect.objectContaining({ 'Idempotency-Key': expect.any(String) }) })))
     await waitFor(() => expect(goTo).toHaveBeenCalledWith('customers', { open: 'dup-2' }))
   })
 

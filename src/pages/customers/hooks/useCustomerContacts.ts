@@ -25,6 +25,7 @@
 import { useState, useCallback } from 'react'
 import { useTranslation } from 'react-i18next'
 import api, { unwrap, unwrapList } from '@/lib/api'
+import { withIdempotencyKey } from '@/lib/idempotency'
 import { notifyError } from '@/lib/notify'
 import { toLinkedinSlug } from '@/components/drawer/contactLinks'
 import { mapContact } from '../data/mapCustomer'
@@ -376,12 +377,14 @@ export function useCustomerContacts(customerId: Id | undefined) {
  * SAME CONTACTS_CHANGED_EVENT the merge path already dispatches.
  */
 export async function archiveContact(customerId: Id, id: Id): Promise<void> {
-  await api.post(`/customers/${customerId}/contacts/${id}/archive`)
+  // One Idempotency-Key per click (IDEMP-KEY-BODYLESS-1): a body-less archive/restore POST needs
+  // an explicit key so a double click never fires the same mutation twice at the server.
+  await api.post(`/customers/${customerId}/contacts/${id}/archive`, undefined, withIdempotencyKey())
   window.dispatchEvent(new CustomEvent(CONTACTS_CHANGED_EVENT))
 }
 // Undo an archived contact (TRASH-OVERAL-1b pair with archiveContact above); broadcasts the same change event so every open list refetches.
 export async function restoreContact(customerId: Id, id: Id): Promise<Contact> {
-  const res = await api.post(`/customers/${customerId}/contacts/${id}/restore`)
+  const res = await api.post(`/customers/${customerId}/contacts/${id}/restore`, undefined, withIdempotencyKey())
   window.dispatchEvent(new CustomEvent(CONTACTS_CHANGED_EVENT))
   return mapContactRow(unwrap<ApiContact>(res))
 }

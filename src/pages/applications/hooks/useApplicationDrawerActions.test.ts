@@ -399,3 +399,19 @@ describe('useApplicationDrawerActions · handleUpdateSource', () => {
     expect(result.current.actions.selected?.sourceKey).toBeNull()
   })
 })
+
+// IDEMP-KEY-BODYLESS-1: handleRestore's POST has no body, so a sibling-tab/retry
+// double click must still carry a per-click Idempotency-Key for the server to dedupe on.
+describe('useApplicationDrawerActions · handleRestore', () => {
+  beforeEach(() => { vi.clearAllMocks() })
+
+  it('POSTs restore with a fresh Idempotency-Key header', async () => {
+    post.mockResolvedValue({ data: {} })
+    const { result } = harness([app({ archived: true })])
+    act(() => { result.current.actions.handleRestore(1) })
+    await waitFor(() => expect(post).toHaveBeenCalled())
+    expect(post).toHaveBeenCalledWith('/applications/1/restore', undefined, expect.objectContaining({
+      headers: expect.objectContaining({ 'Idempotency-Key': expect.any(String) }),
+    }))
+  })
+})

@@ -148,7 +148,7 @@ describe('BackofficeLinksTab · Shiftmanager "Nu synchroniseren" (entity-prefixe
     const sm = link({ status: 'linked', externalId: '428' })
     render(<BackofficeLinksTab entity="candidates" id="1" helloflexLink={null} shiftmanagerLink={sm} canLink />)
     await user.click(screen.getByRole('button', { name: /backofficeLinks.shiftmanager.syncNow/ }))
-    expect(mockPost).toHaveBeenCalledWith('/sm_candidates/sync/428')
+    expect(mockPost).toHaveBeenCalledWith('/sm_candidates/sync/428', undefined, expect.objectContaining({ headers: expect.objectContaining({ 'Idempotency-Key': expect.any(String) }) }))
     await waitFor(() => expect(mockNotifySuccess).toHaveBeenCalledWith('backofficeLinks.shiftmanager.syncSuccess'))
   })
 
@@ -206,7 +206,7 @@ describe('BackofficeLinksTab · self-refresh after a mutation (KOPPELINGEN-REFRE
     const user = userEvent.setup()
     render(<BackofficeLinksTab entity="candidates" id="1" helloflexLink={null} shiftmanagerLink={link} canLink />)
     await user.click(screen.getByRole('button', { name: /backofficeLinks.shiftmanager.syncNow/ }))
-    expect(mockPost).toHaveBeenCalledWith('/sm_candidates/sync/428')
+    expect(mockPost).toHaveBeenCalledWith('/sm_candidates/sync/428', undefined, expect.objectContaining({ headers: expect.objectContaining({ 'Idempotency-Key': expect.any(String) }) }))
     await waitFor(() => expect(mockGet).toHaveBeenCalledWith('/candidates/1'))
   })
 

@@ -22,6 +22,7 @@ import api from '@/lib/api'
 import { useGeocodePoll } from '@/hooks/useGeocodePoll'
 import { notifySuccess, notifyError } from '@/lib/notify'
 import { extractApiError } from '@/lib/extractApiError'
+import { withIdempotencyKey } from '@/lib/idempotency'
 import { formatCoord } from '@/lib/formatters'
 import { Mono } from '@/components/ui/typography'
 import type { Candidate } from '@/types/candidate'
@@ -90,7 +91,8 @@ export default function IntegrationsTab({ c, onUpdate }: {
     if (pdokRefreshing) return
     setPdokRefreshing(true)
     try {
-      await api.post(`/candidates/${c.id}/geocode`)
+      // IDEMP-KEY-BODYLESS-1: a per-click key so a sibling-tab/retry double click never queues the geocode twice.
+      await api.post(`/candidates/${c.id}/geocode`, undefined, withIdempotencyKey())
       notifySuccess(t('backofficeLinks.geocode.refreshStarted'))
     } catch (err) {
       notifyError(extractApiError(err, t('backofficeLinks.geocode.refreshFailed')))

@@ -86,7 +86,11 @@ describe('POST /integrations/{connector}/test', () => {
   it('POSTs the test route and returns the success body', async () => {
     mockPost.mockResolvedValue({ data: { data: { ok: true, connected_as: 'Bureau X', details: {} } } })
     const result = await testIntegration('helloflex')
-    expect(mockPost).toHaveBeenCalledWith('/integrations/helloflex/test', undefined, { quietStatuses: [422] })
+    // IDEMP-KEY-BODYLESS-1: a per-click key alongside the existing quietStatuses config.
+    expect(mockPost).toHaveBeenCalledWith('/integrations/helloflex/test', undefined, expect.objectContaining({
+      quietStatuses: [422],
+      headers: expect.objectContaining({ 'Idempotency-Key': expect.any(String) }),
+    }))
     expect(result).toEqual({ ok: true, connected_as: 'Bureau X', details: {} })
   })
 

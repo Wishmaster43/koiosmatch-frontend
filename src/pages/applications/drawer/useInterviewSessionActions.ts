@@ -6,6 +6,7 @@ import { useTranslation } from 'react-i18next'
 import api, { unwrap } from '@/lib/api'
 import { notifySuccess, notifyError } from '@/lib/notify'
 import { extractApiError } from '@/lib/extractApiError'
+import { withIdempotencyKey } from '@/lib/idempotency'
 import { mapInterview } from '../data/mapApplication'
 import type { ApiApplication, ApplicationInterview } from '@/types/application'
 import type { Id } from '@/types/common'
@@ -55,7 +56,8 @@ export function useInterviewSessionActions({
     setBusy(true)
     setNoSession(false)
     try {
-      const res = await api.post(`/applications/${applicationId}/${route}`)
+      // IDEMP-KEY-BODYLESS-1: a per-click key so a sibling-tab/retry double click never stops/resumes twice.
+      const res = await api.post(`/applications/${applicationId}/${route}`, undefined, withIdempotencyKey())
       const body = unwrap<{ status?: string; paused_at?: string | null }>(res)
       const paused = body?.status === 'paused'
       if (!alive.current) return

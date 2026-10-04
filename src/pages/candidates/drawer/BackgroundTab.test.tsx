@@ -100,7 +100,9 @@ describe('BackgroundTab · references verify wiring (KAND-REFERENTIES-1)', () =>
     expect(screen.getByText('Jan Jansen')).toBeInTheDocument()
 
     await user.click(screen.getByTitle('Verifiëren'))
-    expect(api.post).toHaveBeenCalledWith('/candidates/1/references/r1/verify')
+    expect(api.post).toHaveBeenCalledWith('/candidates/1/references/r1/verify', undefined, expect.objectContaining({
+      headers: expect.objectContaining({ 'Idempotency-Key': expect.any(String) }),
+    }))
     await waitFor(() => expect(screen.getByText(/Geverifieerd/)).toBeInTheDocument())
     expect(screen.queryByTitle('Verifiëren')).toBeNull()
   })

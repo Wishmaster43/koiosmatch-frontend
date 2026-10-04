@@ -15,6 +15,7 @@ import type { NoteActionItemWire } from '@/components/drawer/tabs/NotesTab'
 import { useState, useEffect, useCallback } from 'react'
 import { useTranslation } from 'react-i18next'
 import api from '@/lib/api'
+import { withIdempotencyKey } from '@/lib/idempotency'
 import { notifyError } from '@/lib/notify'
 import { extractApiError } from '@/lib/extractApiError'
 import { fetchCalmList } from '@/hooks/fetchCalmList'
@@ -146,7 +147,9 @@ export function useOpportunityNotes(id?: Id) {
     if (!id) return Promise.resolve(false)
     const target = items[index]
     if (!target?.id) return Promise.resolve(false)
-    return api.post(`/opportunities/${id}/notes/${target.id}/restore-previous`)
+    // One Idempotency-Key per click (IDEMP-KEY-BODYLESS-1): the undo POST carries no body, so
+    // it needs an explicit key to stay a single undo on a double click.
+    return api.post(`/opportunities/${id}/notes/${target.id}/restore-previous`, undefined, withIdempotencyKey())
       .then(() => { load(); return true })
       .catch(() => false)
   }, [id, items, load])

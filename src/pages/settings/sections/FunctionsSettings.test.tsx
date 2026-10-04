@@ -144,7 +144,7 @@ describe('FunctionsSettings — strict preflight (FUNC-STRICT-PREFLIGHT-1)', () 
     api.put.mockResolvedValue({ data: { allow_free_entry: false } })
     await user.click(await screen.findByRole('button', { name: i18n.t('settings:functionsSettings.gatherMissing') }))
 
-    await waitFor(() => expect(api.post).toHaveBeenCalledWith('/functions/gather-missing'))
+    await waitFor(() => expect(api.post as unknown as (...args: unknown[]) => unknown).toHaveBeenCalledWith('/functions/gather-missing', undefined, expect.objectContaining({ headers: expect.objectContaining({ 'Idempotency-Key': expect.any(String) }) })))
     await waitFor(() => expect(api.put).toHaveBeenCalledWith('/functions/free-entry', { allow_free_entry: false }))
   })
 

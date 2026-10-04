@@ -427,7 +427,7 @@ describe('NotificationBell · NOTIF-I18N-1 (bell speaks the user\'s language, na
     const restoreButton = screen.getByRole('button', { name: /restore|terugzetten/i })
     fireEvent.click(restoreButton)
     await waitFor(() => expect(mockPost).toHaveBeenCalledWith('/ai/koios/actions/stage', { tool: 'restore_candidate', input: { candidate_id: 'c-1' } }))
-    await waitFor(() => expect(mockPost).toHaveBeenCalledWith('/ai/koios/actions/pa-1/confirm'))
+    await waitFor(() => expect(mockPost).toHaveBeenCalledWith('/ai/koios/actions/pa-1/confirm', undefined, expect.objectContaining({ headers: expect.objectContaining({ 'Idempotency-Key': expect.any(String) }) })))
   })
 
   // Lens 1 fix (29-09, §6): Enter/Space on a child control must run THAT control, never

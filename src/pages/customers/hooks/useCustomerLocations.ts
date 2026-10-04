@@ -8,6 +8,7 @@
 import { useState, useCallback } from 'react'
 import { useTranslation } from 'react-i18next'
 import api, { unwrap, unwrapList } from '@/lib/api'
+import { withIdempotencyKey } from '@/lib/idempotency'
 import { notifyError } from '@/lib/notify'
 import { mapLocation } from '../data/mapCustomer'
 // Shared mount-effect + change-event refetch tail, joined by useCustomerContacts
@@ -204,12 +205,14 @@ export function useCustomerLocations(customerId: Id | undefined) {
  * without prop-drilling a reload callback through every intermediate component.
  */
 export async function archiveLocation(customerId: Id, id: Id): Promise<void> {
-  await api.post(`/customers/${customerId}/locations/${id}/archive`)
+  // One Idempotency-Key per click (IDEMP-KEY-BODYLESS-1): a body-less archive/restore POST needs
+  // an explicit key so a double click never fires the same mutation twice at the server.
+  await api.post(`/customers/${customerId}/locations/${id}/archive`, undefined, withIdempotencyKey())
   window.dispatchEvent(new CustomEvent(LOCATIONS_CHANGED_EVENT))
 }
 // Restores a previously archived location and notifies other hook instances via LOCATIONS_CHANGED_EVENT so their lists refetch (see the doc block above).
 export async function restoreLocation(customerId: Id, id: Id): Promise<Location> {
-  const res = await api.post(`/customers/${customerId}/locations/${id}/restore`)
+  const res = await api.post(`/customers/${customerId}/locations/${id}/restore`, undefined, withIdempotencyKey())
   window.dispatchEvent(new CustomEvent(LOCATIONS_CHANGED_EVENT))
   return mapLocation(unwrap<ApiLocation>(res))
 }

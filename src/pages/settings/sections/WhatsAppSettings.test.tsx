@@ -116,4 +116,52 @@ describe('WhatsAppSettings · Numbers tab reflects a WABA switch (F2)', () => {
     await screen.findByText('+31612345678')
     expect(screen.queryByText(st('whatsapp.numberInactive'))).not.toBeInTheDocument()
   })
+
+  // IDEMP-KEY-BODYLESS-1: the sync buttons are body-less, click-triggered server
+  // writes — each submit must carry its own fresh Idempotency-Key header.
+  it('syncNumbers sends a per-click Idempotency-Key header', async () => {
+    vi.mocked(api.get).mockImplementation((url: string) => {
+      if (url === '/whatsapp') return Promise.resolve({ data: { data: [CONN] } })
+      if (url === '/whatsapp/conn-1') {
+        return Promise.resolve({ data: { data: { phone_numbers: [{ id: 'p1', display_number: '+31612345678', active: true }], templates: [] } } })
+      }
+      return Promise.resolve({ data: { data: [] } })
+    })
+    vi.mocked(api.post).mockResolvedValue({ data: {} })
+
+    const user = userEvent.setup()
+    renderPage()
+    await screen.findByText('10229012934')
+    await user.click(screen.getByRole('tab', { name: new RegExp(st('whatsapp.phoneNumbers')) }))
+    await user.click(screen.getByRole('button', { name: new RegExp(st('whatsapp.sync')) }))
+
+    expect(api.post).toHaveBeenCalledWith(
+      '/whatsapp/conn-1/sync-numbers',
+      undefined,
+      expect.objectContaining({ headers: expect.objectContaining({ 'Idempotency-Key': expect.any(String) }) }),
+    )
+  })
+
+  it('syncTemplates sends a per-click Idempotency-Key header', async () => {
+    vi.mocked(api.get).mockImplementation((url: string) => {
+      if (url === '/whatsapp') return Promise.resolve({ data: { data: [CONN] } })
+      if (url === '/whatsapp/conn-1') {
+        return Promise.resolve({ data: { data: { phone_numbers: [], templates: [] } } })
+      }
+      return Promise.resolve({ data: { data: [] } })
+    })
+    vi.mocked(api.post).mockResolvedValue({ data: {} })
+
+    const user = userEvent.setup()
+    renderPage()
+    await screen.findByText('10229012934')
+    await user.click(screen.getByRole('tab', { name: new RegExp(st('whatsapp.templates')) }))
+    await user.click(screen.getByRole('button', { name: new RegExp(st('whatsapp.sync')) }))
+
+    expect(api.post).toHaveBeenCalledWith(
+      '/whatsapp/conn-1/sync-templates',
+      undefined,
+      expect.objectContaining({ headers: expect.objectContaining({ 'Idempotency-Key': expect.any(String) }) }),
+    )
+  })
 })

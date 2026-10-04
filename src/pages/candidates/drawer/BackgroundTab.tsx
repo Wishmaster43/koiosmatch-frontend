@@ -13,6 +13,7 @@ import { notifyError } from '@/lib/notify'
 // ("action failed") where the backend told us exactly what is wrong
 // (DOC-1-EIGENAAR-1's 422, a validation error, …).
 import { extractApiError } from '@/lib/extractApiError'
+import { withIdempotencyKey } from '@/lib/idempotency'
 import { ExperienceTab as ExperienceTabJs } from './ExperienceTab'
 import { EducationTab as EducationTabJs } from './EducationTab'
 import { CertificationsTab as CertificationsTabJs } from './CertificationsTab'
@@ -249,7 +250,8 @@ export default function BackgroundTab({ c, onLocalMerge, onJump }: { c: Candidat
     if (!isPersisted(id) || verifyingRef.current.has(id)) return
     verifyingRef.current.add(id)
     setVerifyingIds(new Set(verifyingRef.current))
-    api.post(`/candidates/${c.id}/references/${id}/verify`)
+    // IDEMP-KEY-BODYLESS-1: a per-click key so a sibling-tab/retry double click never verifies twice.
+    api.post(`/candidates/${c.id}/references/${id}/verify`, undefined, withIdempotencyKey())
       .then(r => { const it = unwrap<RelItem>(r); if (it) setReferences(p => p.map(x => x.id === id ? { ...x, ...it } : x)) })
       .catch(err => notifyError(extractApiError(err, t('actionFailed'))))
       .finally(() => { verifyingRef.current.delete(id); setVerifyingIds(new Set(verifyingRef.current)) })

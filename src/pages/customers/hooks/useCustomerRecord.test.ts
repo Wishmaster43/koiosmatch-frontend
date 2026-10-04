@@ -524,7 +524,8 @@ describe('useCustomerRecord · previous-version undo (NOTE-UNDO-FE-1)', () => {
 
     const landed = await act(() => r.result.current.record.restorePreviousVersion(1, 'n-1'))
 
-    expect(vi.mocked(api.post)).toHaveBeenCalledWith('/customers/1/notes/n-1/restore-previous')
+    expect(vi.mocked(api.post)).toHaveBeenCalledWith('/customers/1/notes/n-1/restore-previous', undefined,
+      expect.objectContaining({ headers: expect.objectContaining({ 'Idempotency-Key': expect.any(String) }) }))
     expect(landed).toBe(true)
     expect(r.result.current.record.detail?.notes?.[0]).toMatchObject({ id: 'n-1', text: '<p>Restored</p>', has_previous_version: true })
   })
@@ -546,7 +547,8 @@ describe('useCustomerRecord · restoreCustomer (TRASH-OVERAL-2)', () => {
 
     act(() => { r.result.current.record.restoreCustomer(1) })
 
-    await waitFor(() => expect(api.post).toHaveBeenCalledWith('/customers/1/restore'))
+    await waitFor(() => expect(api.post).toHaveBeenCalledWith('/customers/1/restore', undefined,
+      expect.objectContaining({ headers: expect.objectContaining({ 'Idempotency-Key': expect.any(String) }) })))
     await waitFor(() => expect(r.result.current.customers[0].archived).toBe(false))
     expect(r.result.current.customers[0].lifecycle).toBe('active')
     expect(r.result.current.customers[0].archivedAt).toBeNull()

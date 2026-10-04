@@ -41,6 +41,7 @@ import { useAuth } from '@/context/AuthContext'
 import api from '@/lib/api'
 import { notifyError } from '@/lib/notify'
 import { extractApiError } from '@/lib/extractApiError'
+import { withIdempotencyKey } from '@/lib/idempotency'
 import { actionItemsWire } from '@/components/drawer/tabs/notes/notesTabTypes'
 import { runGuardedNoteEdit } from '@/hooks/runGuardedNoteEdit'
 import type { NoteActionItemWire } from '@/components/drawer/tabs/NotesTab'
@@ -173,7 +174,8 @@ export function useApplicationNotes(applicationId: Id | undefined, initialNotes:
     if (!applicationId) return Promise.resolve(false)
     const target = notes[index]
     if (!target) return Promise.resolve(false)
-    return api.post(`/applications/${applicationId}/notes/${target.id}/restore-previous`)
+    // IDEMP-KEY-BODYLESS-1: a per-click key so a sibling-tab/retry double click never undoes twice.
+    return api.post(`/applications/${applicationId}/notes/${target.id}/restore-previous`, undefined, withIdempotencyKey())
       .then(res => {
         const raw = (res.data as { data?: { notes?: Array<{ id?: Id; text?: string; has_previous_version?: boolean }> } })?.data
         const restored = raw?.notes?.find(n => String(n.id) === String(target.id))

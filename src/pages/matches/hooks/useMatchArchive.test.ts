@@ -76,7 +76,7 @@ describe('useMatchArchive · restoreMatch', () => {
     post.mockResolvedValue({})
     const { hook, onPatch, onReload } = harness()
     await act(async () => { await hook.result.current.restoreMatch('m1') })
-    expect(post).toHaveBeenCalledWith('/matches/m1/restore')
+    expect(post).toHaveBeenCalledWith('/matches/m1/restore', undefined, expect.objectContaining({ headers: expect.objectContaining({ 'Idempotency-Key': expect.any(String) }) }))
     expect(onPatch).toHaveBeenCalledWith('m1', { archived: false, archivedAt: null })
     expect(onReload).toHaveBeenCalled()
     await waitFor(() => expect(notify).toHaveBeenCalledWith('success', expect.any(String)))

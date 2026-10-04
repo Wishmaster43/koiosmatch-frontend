@@ -16,6 +16,7 @@ import { useTranslation } from 'react-i18next'
 import api, { unwrap } from '@/lib/api'
 import { notifyError, notifySuccess } from '@/lib/notify'
 import { extractApiError } from '@/lib/extractApiError'
+import { withIdempotencyKey } from '@/lib/idempotency'
 import type { ApplicationDetail } from '@/types/application'
 
 // The slice of ApplicationDetail this hook actually needs — keeps the hook
@@ -73,7 +74,8 @@ export function useMatchScoreOverride(application: ScoreCarrier): MatchScoreOver
     if (recalculating || application.id == null) return
     setRecalculating(true)
     try {
-      const res = await api.post(`/applications/${application.id}/score`)
+      // IDEMP-KEY-BODYLESS-1: a per-click key so a sibling-tab/retry double click never recalculates twice.
+      const res = await api.post(`/applications/${application.id}/score`, undefined, withIdempotencyKey())
       const body = unwrap<{ match_score?: number | null; match_score_source?: string; ai_match_score?: number | null }>(res)
       if (!alive.current) return
       setOverride({ score: body?.match_score ?? null, source: body?.match_score_source ?? 'ai', aiScore: body?.ai_match_score ?? null })

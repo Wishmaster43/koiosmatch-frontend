@@ -137,7 +137,7 @@ describe('OpportunityDrawer · trash lifecycle (TRASH-OVERAL-2)', () => {
 
     await user.click(screen.getByRole('button', { name: tc('trash.unmarkAction') as string }))
 
-    await waitFor(() => expect(api.post).toHaveBeenCalledWith('/opportunities/o1/unmark-deletion'))
+    await waitFor(() => expect(api.post).toHaveBeenCalledWith('/opportunities/o1/unmark-deletion', undefined, expect.objectContaining({ headers: expect.objectContaining({ 'Idempotency-Key': expect.any(String) }) })))
     expect(wiring.onUnmarked).toHaveBeenCalledWith('o1')
   })
 })
