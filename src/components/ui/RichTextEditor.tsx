@@ -11,6 +11,7 @@ import { useTranslation } from 'react-i18next'
 import { useEditor, EditorContent } from '@tiptap/react'
 import StarterKit from '@tiptap/starter-kit'
 import TextAlign from '@tiptap/extension-text-align'
+import { sanitizeHtml } from '@/lib/sanitizeHtml'
 import { Bold, Italic, List, ListOrdered, Heading2, AlignLeft, AlignCenter, AlignRight, Undo2, Redo2, Maximize2, Minimize2, Code } from 'lucide-react'
 import SelectMenu from './SelectMenu'
 import RichTextAssistBar from './RichTextAssistBar'
@@ -128,9 +129,19 @@ export default function RichTextEditor({ value, onChange, expanded, onToggleExpa
 
   if (!editor) return null
 
-  // Toggle source mode; when returning to WYSIWYG, re-sync from the edited HTML.
+  // ONIX M-002: whatever was typed in source mode passes the ONE allow-list before it
+  // becomes content or leaves this component — the renderer applies the same list, so
+  // a <form>/<style>/class typed here can never reach the server as "saved HTML".
+  const sanitizeSource = () => {
+    const raw = value || ''
+    const clean = sanitizeHtml(raw)
+    if (clean !== raw) onChange(clean)
+    return clean
+  }
+
+  // Toggle source mode; when returning to WYSIWYG, re-sync from the sanitised HTML.
   const toggleHtml = () => {
-    if (htmlMode) editor.commands.setContent(value || '')
+    if (htmlMode) editor.commands.setContent(sanitizeSource())
     setHtmlMode(m => !m)
   }
 
@@ -211,7 +222,7 @@ export default function RichTextEditor({ value, onChange, expanded, onToggleExpa
         )}
       </div>
       {htmlMode ? (
-        <textarea value={value || ''} onChange={e => onChange(e.target.value)} spellCheck={false}
+        <textarea value={value || ''} onChange={e => onChange(e.target.value)} onBlur={sanitizeSource} spellCheck={false}
           style={{ width: '100%', boxSizing: 'border-box', minHeight: expanded ? 320 : minHeight, padding: '10px 12px',
             fontSize: 12, ...monoStyle, color: 'var(--text)', background: 'var(--surface)',
             border: 'none', outline: 'none', resize: 'vertical', ...(fill ? { flex: 1 } : null) }} />

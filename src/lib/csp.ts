@@ -85,6 +85,10 @@ export function buildCsp(env: CspEnv): string {
     "frame-src https://staticxx.facebook.com https://www.facebook.com",
     "object-src 'none'",
     "base-uri 'self'",
+    // ONIX M-002: belt-and-braces under the sanitiser — should a <form> ever reach the
+    // DOM, it cannot submit credentials to another origin. The SPA posts nothing as a
+    // native form (grep '<form' → 7 onSubmit handlers, 0 `action=` attributes, 05-10).
+    "form-action 'self'",
     // frame-ancestors cannot be set via a <meta http-equiv> CSP tag (the spec
     // ignores it there) — clickjacking protection for this app is a webserver/CDN
     // RESPONSE header on the app, portal and career-site hosts (frame-ancestors 'none',

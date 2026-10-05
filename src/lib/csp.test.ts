@@ -17,6 +17,7 @@ describe('buildCsp', () => {
         "frame-src https://staticxx.facebook.com https://www.facebook.com",
         "object-src 'none'",
         "base-uri 'self'",
+        "form-action 'self'",
       ].join('; '),
     )
   })
@@ -52,6 +53,7 @@ describe('buildCsp', () => {
         "frame-src https://staticxx.facebook.com https://www.facebook.com",
         "object-src 'none'",
         "base-uri 'self'",
+        "form-action 'self'",
       ].join('; '),
     )
   })
