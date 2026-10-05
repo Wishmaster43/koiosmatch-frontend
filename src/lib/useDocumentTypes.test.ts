@@ -7,7 +7,7 @@
  * useCachedLookup.test.ts — this file only asserts the new document-type surface.
  */
 import { describe, it, expect, vi, afterEach } from 'vitest'
-import { renderHook } from '@testing-library/react'
+import { renderHook, waitFor } from '@testing-library/react'
 import api from '@/lib/api'
 import { useDocumentTypes, resolveDocTypeIcon, DOC_TYPE_ICON_NAMES } from './useDocumentTypes'
 
@@ -101,5 +101,40 @@ describe('useDocumentTypes — entity scope (V20b)', () => {
     renderHook(() => freshUseDocumentTypes('vacancy'))
 
     expect(freshApi.get).toHaveBeenCalledWith('/document-types?entity=vacancy&active=1', undefined)
+  })
+})
+
+// N008-DOC-EXPIRY-FE-1: toOption() reads requires_expiry/default_validity_months
+// tolerantly — present on the row maps through, absent never crashes and
+// defaults to false/null (the BE lane that adds them may land separately).
+describe('useDocumentTypes — expiry mapping (N008-DOC-EXPIRY-FE-1)', () => {
+  it('maps requires_expiry/default_validity_months onto requiresExpiry/defaultValidityMonths', async () => {
+    vi.resetModules()
+    const freshApi = (await import('@/lib/api')).default
+    vi.mocked(freshApi.get).mockResolvedValue({
+      data: { data: [{ id: 1, name: 'VOG', label: 'VOG', requires_expiry: true, default_validity_months: 12 }] },
+    })
+    const { useDocumentTypes: freshUseDocumentTypes } = await import('./useDocumentTypes')
+
+    // The seed already has its own 'VOG' entry — wait for the FETCHED single-row
+    // list to replace it, not for the (trivially-true) seed presence.
+    const { result } = renderHook(() => freshUseDocumentTypes())
+    await waitFor(() => expect(result.current.types).toHaveLength(1))
+    const vog = result.current.types.find((tp: { value: string }) => tp.value === 'VOG')
+    expect(vog).toMatchObject({ requiresExpiry: true, defaultValidityMonths: 12 })
+  })
+
+  it('defaults to requiresExpiry false / defaultValidityMonths null when the row carries neither field', async () => {
+    vi.resetModules()
+    const freshApi = (await import('@/lib/api')).default
+    vi.mocked(freshApi.get).mockResolvedValue({
+      data: { data: [{ id: 2, name: 'CV', label: 'CV' }] },
+    })
+    const { useDocumentTypes: freshUseDocumentTypes } = await import('./useDocumentTypes')
+
+    const { result } = renderHook(() => freshUseDocumentTypes())
+    await waitFor(() => expect(result.current.types).toHaveLength(1))
+    const cv = result.current.types.find((tp: { value: string }) => tp.value === 'CV')
+    expect(cv).toMatchObject({ requiresExpiry: false, defaultValidityMonths: null })
   })
 })

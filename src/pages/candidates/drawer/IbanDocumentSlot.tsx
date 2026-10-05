@@ -14,17 +14,19 @@
  * — never a second upload client (§11); a fresh upload is remembered locally
  * so it resolves before the drawer's next refresh.
  */
-import { useRef, useState } from 'react'
+import { useId, useRef, useState } from 'react'
 import type { ComponentType } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Eye, Download, Edit2, X, Upload, Link2 } from 'lucide-react'
 import api from '@/lib/api'
 import { downloadFilesSequentially } from '@/lib/downloadFiles'
 import { useDocumentTypes } from '@/lib/useDocumentTypes'
+import { extractApiError } from '@/lib/extractApiError'
 import Button from '@/components/ui/Button'
 import Spinner from '@/components/ui/Spinner'
 import SearchSelectJs from '@/components/ui/SearchSelect'
 import { Caption, Mono } from '@/components/ui/typography'
+import { DateField } from '@/components/forms/fields'
 import DocPreviewModal from '@/components/drawer/DocPreviewModal'
 
 type Loose = Record<string, unknown>
@@ -51,12 +53,21 @@ export default function IbanDocumentSlot({ candidateId, documents = [], linkedDo
   // Fresh uploads resolve immediately from here until the drawer refreshes.
   const [localDocs, setLocalDocs] = useState<Loose[]>([])
   const [uploading, setUploading] = useState(false)
-  const [uploadError, setUploadError] = useState(false)
+  // N008-DOC-EXPIRY-FE-1: a string reason (the server's own 422 text when the
+  // upload is refused), not a boolean — a generic line discarded the actual
+  // reason before this.
+  const [uploadError, setUploadError] = useState<string | null>(null)
   const { types } = useDocumentTypes('candidate')
   const [uploadType, setUploadType] = useState('')
+  // N008-DOC-EXPIRY-FE-1: the chosen (or default) type's expiry requirement
+  // decides whether the date field renders at all, and whether it is required.
+  const [expiresAt, setExpiresAt] = useState('')
   const preferredAvailable = preferredType && types.some((tp: { value: string }) => String(tp.value) === preferredType)
   const defaultType = preferredAvailable ? String(preferredType) : String(types[0]?.value ?? '')
+  const activeTypeOpt = types.find((tp: { value: string }) => String(tp.value) === (uploadType || defaultType)) as { requiresExpiry?: boolean; defaultValidityMonths?: number | null } | undefined
+  const expiryRequired = Boolean(activeTypeOpt?.requiresExpiry) && activeTypeOpt?.defaultValidityMonths == null
   const fileRef = useRef<HTMLInputElement | null>(null)
+  const expiryFieldId = useId()
 
   if (linkedDocumentId === undefined) return null
 
@@ -69,11 +80,15 @@ export default function IbanDocumentSlot({ candidateId, documents = [], linkedDo
   // Inline upload through the ONE existing multipart route, then link the
   // fresh id — the type defaults to the first lookup value until picked.
   const uploadAndLink = (file: File) => {
-    setUploading(true); setUploadError(false)
+    setUploading(true); setUploadError(null)
     const fd = new FormData()
     fd.append('file', file)
     fd.append('type', uploadType || defaultType)
     fd.append('name', file.name)
+    // N008-DOC-EXPIRY-FE-1: only sent when picked — an omitted expires_at lets
+    // the backend auto-compute it from the type's default validity, or answer
+    // its own 422 when the type requires one with no default.
+    if (expiresAt) fd.append('expires_at', expiresAt)
     api.post(`/candidates/${candidateId}/documents`, fd, { headers: { 'Content-Type': 'multipart/form-data' } })
       .then(res => {
         const doc = ((res.data as Loose)?.data ?? res.data) as Loose
@@ -82,10 +97,12 @@ export default function IbanDocumentSlot({ candidateId, documents = [], linkedDo
           onLink(String(doc.id))
           setPicking(false)
         } else {
-          setUploadError(true)
+          setUploadError(t('common:actionFailed'))
         }
       })
-      .catch(() => setUploadError(true))
+      // The server's own reason (e.g. the 422 on a requires_expiry type with no
+      // date) reaches the recruiter instead of a generic line.
+      .catch(err => setUploadError(extractApiError(err, t('common:actionFailed'))))
       .finally(() => setUploading(false))
   }
 
@@ -133,7 +150,21 @@ export default function IbanDocumentSlot({ candidateId, documents = [], linkedDo
               </Button>
             )}
           </div>
-          {uploadError && <Caption as="div" style={{ color: 'var(--color-danger-text)' }}>{t('bankDoc.uploadFailed')}</Caption>}
+          {/* N008-DOC-EXPIRY-FE-1: the chosen type decides whether the expiry
+              field renders at all, required only without a default validity. */}
+          {Boolean(activeTypeOpt?.requiresExpiry) && (
+            <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+              <label htmlFor={expiryFieldId} className="sr-only">{t('documents.expiryFor', { name: uploadType || defaultType })}</label>
+              <div style={{ width: 140, flexShrink: 0 }}>
+                <DateField id={expiryFieldId} required={expiryRequired}
+                  value={expiresAt} onChange={setExpiresAt} style={{ fontSize: 11, padding: '4px 8px' }} />
+              </div>
+              {!expiryRequired && (
+                <Caption>{t('documents.expiryDefault', { months: activeTypeOpt?.defaultValidityMonths })}</Caption>
+              )}
+            </div>
+          )}
+          {uploadError && <Caption as="div" style={{ color: 'var(--color-danger-text)' }}>{uploadError}</Caption>}
           <input ref={fileRef} type="file" accept="application/pdf,image/*" style={{ display: 'none' }}
             aria-label={t('bankDoc.uploadNew')}
             onChange={e => { const f = e.target.files?.[0]; if (f) uploadAndLink(f); e.target.value = '' }} />

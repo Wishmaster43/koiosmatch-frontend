@@ -3,7 +3,7 @@ import { renderHook, act } from '@testing-library/react'
 import { useUploadQueueItems } from './useUploadQueueItems'
 
 // Minimal item shape used by every test below.
-interface TestItem { objectUrl: string; type: string; name: string; linkTo?: string }
+interface TestItem { objectUrl: string; type: string; name: string; linkTo?: string; expiresAt?: string }
 
 describe('useUploadQueueItems', () => {
   beforeEach(() => {
@@ -38,6 +38,16 @@ describe('useUploadQueueItems', () => {
     act(() => result.current.setItemLink(0, 'education:5'))
     expect(result.current.pending[0].linkTo).toBe('education:5')
     expect(result.current.pending[1].linkTo).toBe('')
+  })
+
+  it('setItemExpiry updates only the targeted item expiry date', () => {
+    const { result } = renderHook(() => useUploadQueueItems<TestItem>([
+      { objectUrl: 'blob:a', type: 'VOG', name: 'a.pdf' },
+      { objectUrl: 'blob:b', type: 'VOG', name: 'b.pdf' },
+    ]))
+    act(() => result.current.setItemExpiry(0, '2027-01-31'))
+    expect(result.current.pending[0].expiresAt).toBe('2027-01-31')
+    expect(result.current.pending[1].expiresAt).toBeUndefined()
   })
 
   it('removePending revokes the correct blob URL BEFORE the filtered array replaces state (HEAD order)', () => {

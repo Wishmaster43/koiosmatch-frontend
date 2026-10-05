@@ -108,6 +108,10 @@ interface PendingUploadFooterProps {
   cancelLabel: ReactNode
   onAdd: () => void
   onCancel: () => void
+  // N008-DOC-EXPIRY-FE-1: disables the Add button while a queued row still
+  // needs a required expiry date — an honest disabled control, never a
+  // silent one (§3). Optional so the customers' twin keeps passing nothing.
+  addDisabled?: boolean
 }
 
 /** Shared upload/cancel action row under the queued-file list — labels arrive
@@ -116,10 +120,10 @@ interface PendingUploadFooterProps {
  * twin: the inverse --text fill is retired on both cards — the primary action
  * wears the house Button, next to a real secondary Button for cancel.
  */
-export function PendingUploadFooter({ addLabel, cancelLabel, onAdd, onCancel }: PendingUploadFooterProps) {
+export function PendingUploadFooter({ addLabel, cancelLabel, onAdd, onCancel, addDisabled }: PendingUploadFooterProps) {
   return (
     <div style={{ display: 'flex', gap: 8 }}>
-      <Button variant="primary" size="sm" onClick={onAdd}>{addLabel}</Button>
+      <Button variant="primary" size="sm" onClick={onAdd} disabled={addDisabled}>{addLabel}</Button>
       <Button variant="secondary" size="sm" onClick={onCancel}>{cancelLabel}</Button>
     </div>
   )

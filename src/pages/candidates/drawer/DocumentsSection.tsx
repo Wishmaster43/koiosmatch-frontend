@@ -55,7 +55,7 @@ export default function DocumentsSection({ c, onRefresh }: { c: Candidate; onRef
   const {
     docs, pending, setPending,
     educationsForLink, certificationsForLink, languagesForLink, skillsForLink, referencesForLink, linkableLists,
-    uploadAll, setItemType, setAllTypes, setItemLink, removePending, cancelPending,
+    uploadAll, setItemType, setAllTypes, setItemLink, setItemExpiry, removePending, cancelPending,
     replaceDoc, rename, removeDoc, removeSelected, relinkDocument, resolveDocLink,
   } = useCandidateDocuments(c, onRefresh)
   const [renamingDoc, setRenamingDoc] = useState<number | null>(null)
@@ -170,7 +170,7 @@ export default function DocumentsSection({ c, onRefresh }: { c: Candidate; onRef
           the queue used to omit them while the list row already offered them. */}
       <PendingUploadQueue pending={pending} docTypes={docTypes} educations={educationsForLink} certifications={certificationsForLink}
         languages={languagesForLink} skills={skillsForLink} references={referencesForLink}
-        onSetType={setItemType} onSetAllTypes={setAllTypes} onSetLink={setItemLink} onRemove={removePending}
+        onSetType={setItemType} onSetAllTypes={setAllTypes} onSetLink={setItemLink} onSetExpiry={setItemExpiry} onRemove={removePending}
         onUploadAll={uploadAll} onCancel={cancelPending} />
       {docs.length === 0 && pending.length === 0 && <div style={{ fontSize: 12, color: 'var(--text-muted)' }}>{t('sections.documentsEmpty')}</div>}
       {docs.length > 0 && (

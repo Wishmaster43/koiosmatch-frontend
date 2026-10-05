@@ -72,7 +72,7 @@ export function useCandidateDocuments(c: Candidate, onRefresh?: () => void) {
   const [docs, setDocs] = useState<LinkedDocItem[]>(c.documents ?? [])
   // DRY round 11, DOCS: setItemType/setItemLink/removePending (with the blob-URL
   // revoke) are shared with the customer drawer's useDocumentUploadQueue.
-  const { pending, setPending, setItemType, setAllTypes, setItemLink, removePending } = useUploadQueueItems<PendingItem>()
+  const { pending, setPending, setItemType, setAllTypes, setItemLink, setItemExpiry, removePending } = useUploadQueueItems<PendingItem>()
 
   // DOC-ENTRY-LINK-1 / DOC-LANG-SKILL-LINK-1: PATCH the chosen education/
   // certification/language/skill with the freshly uploaded document's id,
@@ -162,6 +162,10 @@ export function useCandidateDocuments(c: Candidate, onRefresh?: () => void) {
       setDocs(d => [...d, optimistic])
       const fd = new FormData()
       fd.append('file', p.file); fd.append('type', p.type); fd.append('name', p.name)
+      // N008-DOC-EXPIRY-FE-1: only sent when the recruiter actually picked a
+      // date — an omitted expires_at lets the backend auto-compute it from the
+      // type's default validity (or answer its own 422 when it must have one).
+      if (p.expiresAt) fd.append('expires_at', p.expiresAt)
       api.post(`/candidates/${c.id}/documents`, fd, { headers: { 'Content-Type': 'multipart/form-data' } })
         .then(r => {
           const it = unwrap<DocItem>(r)
@@ -259,7 +263,7 @@ export function useCandidateDocuments(c: Candidate, onRefresh?: () => void) {
   return {
     docs, setDocs, pending, setPending,
     educationsForLink, certificationsForLink, languagesForLink, skillsForLink, referencesForLink, linkableLists,
-    uploadAll, setItemType, setAllTypes, setItemLink, removePending, cancelPending,
+    uploadAll, setItemType, setAllTypes, setItemLink, setItemExpiry, removePending, cancelPending,
     replaceDoc, rename, removeDoc, removeSelected, relinkDocument, resolveDocLink,
   }
 }

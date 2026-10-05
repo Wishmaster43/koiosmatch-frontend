@@ -15,7 +15,12 @@ vi.mock('@/lib/api', async (importOriginal) => {
 })
 vi.mock('react-i18next', () => ({ useTranslation: () => ({ t: (k: string) => k }) }))
 vi.mock('@/i18n', () => ({ LOCALE_BY_LANG: { nl: 'nl-NL', en: 'en-GB' } }))
-vi.mock('@/lib/useDocumentTypes', () => ({ useDocumentTypes: () => ({ types: [{ value: 'ID-bewijs', label: 'ID-bewijs' }, { value: 'Bankpas privé', label: 'Bankpas privé' }, { value: 'Overig', label: 'Overig' }] }) }))
+// A plain vi.fn default so individual tests can override the returned types
+// (N008-DOC-EXPIRY-FE-1 needs a per-test requiresExpiry type) without touching
+// the other cases, which keep this same default list.
+type MockDocType = { value: string; label: string; requiresExpiry?: boolean; defaultValidityMonths?: number | null }
+const mockUseDocumentTypes = vi.fn((): { types: MockDocType[] } => ({ types: [{ value: 'ID-bewijs', label: 'ID-bewijs' }, { value: 'Bankpas privé', label: 'Bankpas privé' }, { value: 'Overig', label: 'Overig' }] }))
+vi.mock('@/lib/useDocumentTypes', () => ({ useDocumentTypes: () => mockUseDocumentTypes() }))
 vi.mock('@/components/drawer/DocPreviewModal', () => ({ default: () => <div data-testid="preview-modal" /> }))
 vi.mock('@/lib/downloadFiles', () => ({ downloadFilesSequentially: vi.fn() }))
 
@@ -25,7 +30,11 @@ const docs = [
 ]
 
 describe('IbanDocumentSlot', () => {
-  beforeEach(() => { vi.mocked(api.post).mockReset() })
+  beforeEach(() => {
+    vi.mocked(api.post).mockReset()
+    mockUseDocumentTypes.mockReset()
+    mockUseDocumentTypes.mockReturnValue({ types: [{ value: 'ID-bewijs', label: 'ID-bewijs' }, { value: 'Bankpas privé', label: 'Bankpas privé' }, { value: 'Overig', label: 'Overig' }] })
+  })
 
   it('renders nothing while the server omitted the field (no financial permission)', () => {
     const { container } = render(<IbanDocumentSlot candidateId="c1" documents={docs} linkedDocumentId={undefined} onLink={vi.fn()} />)
@@ -80,5 +89,35 @@ describe('IbanDocumentSlot', () => {
     expect(url).toBe('/candidates/c1/documents')
     expect((body as FormData).get('type')).toBe('ID-bewijs')
     expect(((body as FormData).get('file') as File).name).toBe('nieuw.pdf')
+  })
+
+  // N008-DOC-EXPIRY-FE-1: the server's own 422 reason for expires_at reaches the
+  // recruiter instead of a generic "action failed" line.
+  it("shows the server's reason when the upload is refused (422 expires_at)", async () => {
+    const user = userEvent.setup()
+    vi.mocked(api.post).mockRejectedValue({ response: { status: 422, data: { errors: { expires_at: ['X reason'] } } } })
+    render(<IbanDocumentSlot candidateId="c1" documents={docs} linkedDocumentId={null} onLink={vi.fn()} />)
+    await user.click(screen.getByRole('button', { name: /bankDoc\.link/ }))
+    const input = screen.getByLabelText('bankDoc.uploadNew', { selector: 'input' })
+    await user.upload(input as HTMLInputElement, new File(['x'], 'vog.pdf', { type: 'application/pdf' }))
+    expect(await screen.findByText('X reason')).toBeInTheDocument()
+  })
+
+  // N008-DOC-EXPIRY-FE-1: a type that requires an expiry sends expires_at on the
+  // multipart upload once the recruiter has filled the date field.
+  it('sends expires_at when the type requires one', async () => {
+    const user = userEvent.setup()
+    mockUseDocumentTypes.mockReturnValue({ types: [{ value: 'VOG', label: 'VOG', requiresExpiry: true, defaultValidityMonths: null }] })
+    vi.mocked(api.post).mockResolvedValue({ data: { data: { id: 'd9', name: 'vog.pdf' } } })
+    render(<IbanDocumentSlot candidateId="c1" documents={docs} linkedDocumentId={null} onLink={vi.fn()} />)
+    await user.click(screen.getByRole('button', { name: /bankDoc\.link/ }))
+    // react-datepicker's customInput parses typed text in MM/dd/yyyy (its own
+    // locale default) — mirrors PendingUploadQueue.test.tsx's own pattern.
+    const dateInput = screen.getByRole('textbox')
+    await user.type(dateInput, '01/31/2027')
+    const input = screen.getByLabelText('bankDoc.uploadNew', { selector: 'input' })
+    await user.upload(input as HTMLInputElement, new File(['x'], 'vog.pdf', { type: 'application/pdf' }))
+    await waitFor(() => expect(api.post).toHaveBeenCalled())
+    expect((vi.mocked(api.post).mock.calls[0][1] as FormData).get('expires_at')).toBe('2027-01-31')
   })
 })

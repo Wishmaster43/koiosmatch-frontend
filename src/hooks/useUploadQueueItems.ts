@@ -11,6 +11,10 @@ interface UploadQueueItemBase {
   // uses it; a caller without the concept (customers) simply omits the field,
   // which still satisfies this optional constraint.
   linkTo?: string
+  // N008-DOC-EXPIRY-FE-1: optional Y-m-d expiry date for a queued file — only
+  // the candidate queue reads/writes it; a caller without the concept
+  // (customers) simply omits the field.
+  expiresAt?: string
 }
 
 interface UseUploadQueueItemsResult<T extends UploadQueueItemBase> {
@@ -19,6 +23,7 @@ interface UseUploadQueueItemsResult<T extends UploadQueueItemBase> {
   setItemType: (idx: number, type: string) => void
   setAllTypes: (type: string) => void
   setItemLink: (idx: number, linkTo: string) => void
+  setItemExpiry: (idx: number, expiresAt: string) => void
   removePending: (idx: number) => void
 }
 
@@ -45,6 +50,10 @@ export function useUploadQueueItems<T extends UploadQueueItemBase>(initial: T[] 
   const setItemLink = (idx: number, linkTo: string) =>
     setPending(items => items.map((it, i) => (i === idx ? { ...it, linkTo } : it)))
 
+  // N008-DOC-EXPIRY-FE-1: set one item's expiry date without touching the others.
+  const setItemExpiry = (idx: number, expiresAt: string) =>
+    setPending(items => items.map((it, i) => (i === idx ? { ...it, expiresAt } : it)))
+
   // Drop one queued item and revoke its blob preview URL so it never leaks —
   // reads the target from the ORIGINAL array, before it is filtered out.
   const removePending = (idx: number) =>
@@ -54,5 +63,5 @@ export function useUploadQueueItems<T extends UploadQueueItemBase>(initial: T[] 
       return items.filter((_, i) => i !== idx)
     })
 
-  return { pending, setPending, setItemType, setAllTypes, setItemLink, removePending }
+  return { pending, setPending, setItemType, setAllTypes, setItemLink, setItemExpiry, removePending }
 }
