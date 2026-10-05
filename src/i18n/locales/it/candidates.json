@@ -1133,6 +1133,10 @@
     "matchesTitle": "Match attivo/i",
     "resolutionReject": "Respingi candidatura/e",
     "resolutionEndMatch": "Termina match",
+    "rejectionReason": "Motivo di rifiuto",
+    "rejectionReasonPlaceholder": "Scegli un motivo…",
+    "rejectionReasonRequired": "Scegli prima un motivo di rifiuto; le candidature saranno rifiutate con questo motivo.",
+    "applicationFailed": "Non rifiutato: {{message}}",
     "matchStatus": {
       "open": "Attivo",
       "closed": "Chiuso"

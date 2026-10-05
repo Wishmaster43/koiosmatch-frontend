@@ -192,25 +192,34 @@ describe('normalizeLivePayload / liveFromError', () => {
 })
 
 describe('resolveApplication / resolveMatch', () => {
-  it('resolveApplication PATCHes the rejected phase and reports success', async () => {
+  it('resolveApplication PATCHes the rejected phase + reason and reports success', async () => {
     vi.mocked(api.patch).mockResolvedValue({ data: {} })
-    const ok = await resolveApplication('a1')
-    expect(ok).toBe(true)
-    expect(api.patch).toHaveBeenCalledWith('/applications/a1', { phase_key: 'rejected' })
+    const result = await resolveApplication('a1', 'r1')
+    expect(result).toEqual({ ok: true, message: null })
+    expect(api.patch).toHaveBeenCalledWith('/applications/a1', { phase_key: 'rejected', rejection_reason_id: 'r1' })
   })
 
   it('resolveApplication reports failure without throwing', async () => {
     vi.mocked(api.patch).mockRejectedValue(new Error('500'))
-    await expect(resolveApplication('a1')).resolves.toBe(false)
+    const result = await resolveApplication('a1', 'r1')
+    expect(result.ok).toBe(false)
   })
 
   // A1 root-cause: with a renamed funnel, resolveApplication must PATCH the FLAGGED
   // is_rejected stage's slug ('afgewezen'), never the hardcoded 'rejected' literal.
   it('resolveApplication resolves the is_rejected-flagged stage from the passed lookup', async () => {
     vi.mocked(api.patch).mockResolvedValue({ data: {} })
-    const ok = await resolveApplication('a1', RENAMED_FUNNEL)
-    expect(ok).toBe(true)
-    expect(api.patch).toHaveBeenCalledWith('/applications/a1', { phase_key: 'afgewezen' })
+    const result = await resolveApplication('a1', 'r1', RENAMED_FUNNEL)
+    expect(result).toEqual({ ok: true, message: null })
+    expect(api.patch).toHaveBeenCalledWith('/applications/a1', { phase_key: 'afgewezen', rejection_reason_id: 'r1' })
+  })
+
+  // N012: the model invariant 422s a rejection move without a reason; the caller
+  // surfaces the server's message instead of a swallowed false.
+  it('resolveApplication returns the server message on a 422 (missing reason)', async () => {
+    vi.mocked(api.patch).mockRejectedValue({ response: { status: 422, data: { message: 'Een afwijzing heeft een reden nodig.' } } })
+    const result = await resolveApplication('a1', 'r1')
+    expect(result).toEqual({ ok: false, message: 'Een afwijzing heeft een reden nodig.' })
   })
 
   it('resolveMatch DELETEs and reports success', async () => {

@@ -12,12 +12,15 @@ import { useTranslation } from 'react-i18next'
 import { AlertTriangle } from 'lucide-react'
 import SoftChip from '@/components/ui/SoftChip'
 import FloatingPanel from '@/components/ui/FloatingPanel'
+import CreatableSelect from '@/components/ui/CreatableSelect'
+import { FieldRow } from '@/components/forms/fields'
 import { resolveApplication, resolveMatch } from '../data/archiveGuard'
 import type { BlockingApplication, BlockingMatch } from '../data/archiveGuard'
 import Button from '@/components/ui/Button'
-import { BodyText, GroupLabel, PageTitle } from '@/components/ui/typography'
+import { BodyText, Caption, GroupLabel, PageTitle } from '@/components/ui/typography'
 import { DEFAULT_FUNNEL_TYPES } from '@/context/LookupsContext'
 import type { LookupItem } from '@/context/LookupsContext'
+import { useRejectionReasons } from '@/lib/useRejectionReasons'
 
 const sectionHeader: React.CSSProperties = {
   display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 6, gap: 8,
@@ -48,32 +51,46 @@ interface Props {
 // hangs on the candidate(s); "resolve all" walks each blocker before proceeding.
 export default function ArchiveGuardModal({ mode, candidateName, aggregate, applications: initialApps, matches: initialMatches, funnelTypes = DEFAULT_FUNNEL_TYPES, onClose, onResolved }: Props) {
   const { t } = useTranslation(['candidates', 'common'])
+  const { reasons, loading: reasonsLoading } = useRejectionReasons()
+  const [reasonId, setReasonId] = useState<string>('')
   const [applications, setApplications] = useState(initialApps)
   const [matches, setMatches] = useState(initialMatches)
+  const [appErrors, setAppErrors] = useState<Record<string, string>>({})
   const [matchErrors, setMatchErrors] = useState<Record<string, boolean>>({})
   const [resolving, setResolving] = useState(false)
 
   const hasBlockers = applications.length > 0 || matches.length > 0
   const anyConflict = Object.values(matchErrors).some(Boolean)
+  // N012: a reason is required whenever there are applications to reject —
+  // the resolve button stays disabled, with an honest reason, until picked.
+  const reasonMissing = applications.length > 0 && !reasonId
 
-  // Resolve every listed blocker: applications → reject, matches → soft-delete.
-  // Whatever fails (e.g. a HelloFlex-conflict match) stays listed + errored; the
-  // parent action only proceeds once nothing remains.
+  // N012: applications reject WITH the picked reason FIRST; only once every
+  // one of them succeeds do matches get ended — a failed application must
+  // never leave its matches already deleted underneath it. A failure stops
+  // here (message shown per row) and leaves the matches untouched.
   const resolveAll = async () => {
+    if (reasonMissing) return
     setResolving(true)
-    const appResults = await Promise.all(applications.map(a => resolveApplication(a.id, funnelTypes)))
-    const stillApps = applications.filter((_, i) => !appResults[i])
+    if (applications.length > 0) {
+      const appResults = await Promise.all(applications.map(a => resolveApplication(a.id, reasonId, funnelTypes)))
+      const stillApps = applications.filter((_, i) => !appResults[i].ok)
+      const errs: Record<string, string> = {}
+      applications.forEach((a, i) => { if (!appResults[i].ok) errs[String(a.id)] = appResults[i].message || t('common:error.title') })
+      setApplications(stillApps)
+      setAppErrors(errs)
+      if (stillApps.length) { setResolving(false); return }
+    }
 
     const matchResults = await Promise.all(matches.map(m => resolveMatch(m.id)))
     const stillMatches = matches.filter((_, i) => !matchResults[i].ok)
     const errs: Record<string, boolean> = {}
     matches.forEach((m, i) => { if (!matchResults[i].ok) errs[String(m.id)] = matchResults[i].conflict })
 
-    setApplications(stillApps)
     setMatches(stillMatches)
     setMatchErrors(errs)
     setResolving(false)
-    if (!stillApps.length && !stillMatches.length) onResolved()
+    if (!stillMatches.length) onResolved()
   }
 
   return (
@@ -100,14 +117,27 @@ export default function ArchiveGuardModal({ mode, candidateName, aggregate, appl
               <GroupLabel as="span" style={{ letterSpacing: '0.04em' }}>{t('archiveGuard.applicationsTitle')}</GroupLabel>
               <span style={{ fontSize: 11.5, color: 'var(--color-danger-text)', fontWeight: 600 }}>{t('archiveGuard.resolutionReject')}</span>
             </div>
-            <div style={{ border: '1px solid var(--border)', borderRadius: 8, overflow: 'hidden' }}>
+            {/* N012: the reason picked here travels on every application's PATCH
+                below — one reason for the whole list, single or bulk mode alike. */}
+            <FieldRow label={t('archiveGuard.rejectionReason')} required>
+              <CreatableSelect allowCreate={false} clearable value={reasonId || null} onChange={v => setReasonId(v || '')}
+                placeholder={reasonsLoading ? t('common:loading') : t('archiveGuard.rejectionReasonPlaceholder')}
+                options={reasonsLoading ? [] : reasons.map(r => ({ value: r.value, label: r.label }))} />
+            </FieldRow>
+            {reasonMissing && <Caption style={{ color: 'var(--color-danger-text)', marginTop: 4, marginBottom: 8 }}>{t('archiveGuard.rejectionReasonRequired')}</Caption>}
+            <div style={{ border: '1px solid var(--border)', borderRadius: 8, overflow: 'hidden', marginTop: 8 }}>
               {applications.map((a, i) => (
-                <div key={a.id} style={rowStyle(i === applications.length - 1)}>
-                  <span style={{ flex: 1, minWidth: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                    {a.candidateName && <strong style={{ fontWeight: 600 }}>{a.candidateName} · </strong>}
-                    {a.vacancyTitle}
-                  </span>
-                  <SoftChip label={a.stageLabel} color={a.stageColor} />
+                <div key={a.id} style={{ borderBottom: i === applications.length - 1 ? 'none' : '1px solid var(--border)' }}>
+                  <div style={rowStyle(true)}>
+                    <span style={{ flex: 1, minWidth: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                      {a.candidateName && <strong style={{ fontWeight: 600 }}>{a.candidateName} · </strong>}
+                      {a.vacancyTitle}
+                    </span>
+                    <SoftChip label={a.stageLabel} color={a.stageColor} />
+                  </div>
+                  {appErrors[String(a.id)] && (
+                    <div style={{ padding: '0 12px 8px', fontSize: 11.5, color: 'var(--color-danger-text)' }}>{t('archiveGuard.applicationFailed', { message: appErrors[String(a.id)] })}</div>
+                  )}
                 </div>
               ))}
             </div>
@@ -147,7 +177,7 @@ export default function ArchiveGuardModal({ mode, candidateName, aggregate, appl
           <Button variant="secondary" onClick={onClose}>
             {t('common:cancel')}
           </Button>
-          <Button variant="danger" onClick={resolveAll} disabled={resolving || !hasBlockers}>
+          <Button variant="danger" onClick={resolveAll} disabled={resolving || !hasBlockers || reasonMissing}>
             {resolving ? t('archiveGuard.resolving') : t(mode === 'trash' ? 'archiveGuard.resolveButtonTrash' : 'archiveGuard.resolveButtonArchive')}
           </Button>
         </div>

@@ -1133,6 +1133,10 @@
     "matchesTitle": "Match(es) activo(s)",
     "resolutionReject": "Rechazar solicitud(es)",
     "resolutionEndMatch": "Finalizar match(es)",
+    "rejectionReason": "Motivo de rechazo",
+    "rejectionReasonPlaceholder": "Elige un motivo…",
+    "rejectionReasonRequired": "Elige primero un motivo de rechazo; las solicitudes se rechazarán con este motivo.",
+    "applicationFailed": "No rechazado: {{message}}",
     "matchStatus": {
       "open": "Activo",
       "closed": "Cerrado"

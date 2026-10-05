@@ -12,6 +12,7 @@
  *     'open' | 'closed' (confirmed via /matches PATCH's documented enum).
  */
 import api, { unwrap } from '@/lib/api'
+import { extractApiError } from '@/lib/extractApiError'
 import { DEFAULT_FUNNEL_TYPES, DEFAULT_STATUSES } from '@/context/LookupsContext'
 import type { LookupItem } from '@/context/LookupsContext'
 import type { Candidate } from '@/types/candidate'
@@ -127,17 +128,27 @@ export function liveFromError(e: unknown): LiveBlockers | null {
 }
 
 // Resolve ONE blocking application: PATCH it to the FLAGGED is_rejected funnel
-// stage — never the literal 'rejected' key (A1: a tenant may rename it). At most
-// one stage carries is_rejected (backend singleton guard); if a stale/multi-flagged
-// list is ever passed, take the first by sort order (the array is assumed
-// pre-sorted, mirrors LookupsContext.normalize()'s ordering). `funnelTypes`
-// defaults to the seed only as the pre-load fallback — ArchiveGuardModal now
-// threads the live tenant lookup through from CandidatesPage (HERAUDIT-2-REST-b).
-// Mirrors ApplicationsPage.handleMove's own phase-move call (same endpoint/body).
-export async function resolveApplication(id: Id, funnelTypes: LookupItem[] = DEFAULT_FUNNEL_TYPES): Promise<boolean> {
+// stage, WITH a rejection_reason_id — the model invariant (Application.php)
+// 422s a move to an is_rejected stage without one, so the reason travels in the
+// same request, never a second call. Never the literal 'rejected' key (A1: a
+// tenant may rename it). At most one stage carries is_rejected (backend
+// singleton guard); if a stale/multi-flagged list is ever passed, take the
+// first by sort order (the array is assumed pre-sorted, mirrors
+// LookupsContext.normalize()'s ordering). `funnelTypes` defaults to the seed
+// only as the pre-load fallback — ArchiveGuardModal threads the live tenant
+// lookup through from CandidatesPage (HERAUDIT-2-REST-b). Mirrors
+// ApplicationsPage.handleMove's own phase-move call (same endpoint/body, plus
+// the reason). N012: the caller message is the server's 422 text, or null on
+// success — the modal surfaces it per row instead of silently swallowing it.
+export async function resolveApplication(id: Id, rejectionReasonId: string, funnelTypes: LookupItem[] = DEFAULT_FUNNEL_TYPES): Promise<{ ok: boolean; message: string | null }> {
   const rejectedKey = funnelTypes.find(f => f.is_rejected)?.value ?? 'rejected'
-  try { await api.patch(`/applications/${id}`, { phase_key: rejectedKey }); return true }
-  catch { return false }
+  try {
+    await api.patch(`/applications/${id}`, { phase_key: rejectedKey, rejection_reason_id: rejectionReasonId })
+    return { ok: true, message: null }
+  } catch (e) {
+    const message = extractApiError(e, '')
+    return { ok: false, message: message || null }
+  }
 }
 
 // Resolve ONE blocking match: soft-delete it. A 409 means an active HelloFlex

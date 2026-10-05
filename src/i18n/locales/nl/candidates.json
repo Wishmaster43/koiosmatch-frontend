@@ -1133,6 +1133,10 @@
     "matchesTitle": "Actieve match(es)",
     "resolutionReject": "Sollicitatie(s) afwijzen",
     "resolutionEndMatch": "Match(es) beëindigen",
+    "rejectionReason": "Afwijsreden",
+    "rejectionReasonPlaceholder": "Kies een reden…",
+    "rejectionReasonRequired": "Kies eerst een afwijsreden; de sollicitaties worden met deze reden afgewezen.",
+    "applicationFailed": "Niet afgewezen: {{message}}",
     "matchStatus": {
       "open": "Actief",
       "closed": "Gesloten"

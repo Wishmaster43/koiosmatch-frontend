@@ -1133,6 +1133,10 @@
     "matchesTitle": "Aktive Match(es)",
     "resolutionReject": "Bewerbung(en) ablehnen",
     "resolutionEndMatch": "Match(es) beenden",
+    "rejectionReason": "Ablehnungsgrund",
+    "rejectionReasonPlaceholder": "Grund wählen…",
+    "rejectionReasonRequired": "Wählen Sie zuerst einen Ablehnungsgrund; die Bewerbungen werden mit diesem Grund abgelehnt.",
+    "applicationFailed": "Nicht abgelehnt: {{message}}",
     "matchStatus": {
       "open": "Aktiv",
       "closed": "Geschlossen"

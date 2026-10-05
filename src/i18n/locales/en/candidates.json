@@ -1133,6 +1133,10 @@
     "matchesTitle": "Active match(es)",
     "resolutionReject": "Reject application(s)",
     "resolutionEndMatch": "End match(es)",
+    "rejectionReason": "Rejection reason",
+    "rejectionReasonPlaceholder": "Choose a reason…",
+    "rejectionReasonRequired": "Choose a rejection reason first; the applications will be rejected with this reason.",
+    "applicationFailed": "Not rejected: {{message}}",
     "matchStatus": {
       "open": "Active",
       "closed": "Closed"
