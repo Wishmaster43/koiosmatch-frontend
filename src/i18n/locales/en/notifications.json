@@ -3,6 +3,9 @@
     "created": {
       "title": "New application"
     },
+    "reapplied_restored": {
+      "title": "Archived candidate restored by a new application"
+    },
     "rejection_not_sent": {
       "title": "Rejection not sent, call the candidate yourself",
       "body": "A rejected candidate has no WhatsApp or e-mail consent. Give the result by phone. ({{workflow}})"

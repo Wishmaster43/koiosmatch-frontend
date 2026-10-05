@@ -1490,6 +1490,8 @@
       "phaseSet": "Fase establecida en {{to}}",
       "archived": "Archivado",
       "restored": "Restaurado desde el archivo",
+      "restoredCareerApply": "Restaurado por una nueva candidatura (sitio de empleo)",
+      "restoredPartnerApi": "Restaurado por una nueva candidatura (socio)",
       "markedForDeletion": "Eliminación programada",
       "eraseAt": " · Se eliminará el {{date}}"
     }

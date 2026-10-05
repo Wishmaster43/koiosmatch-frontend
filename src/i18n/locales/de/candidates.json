@@ -1490,6 +1490,8 @@
       "phaseSet": "Phase gesetzt auf {{to}}",
       "archived": "Archiviert",
       "restored": "Aus dem Archiv wiederhergestellt",
+      "restoredCareerApply": "Durch eine neue Bewerbung wiederhergestellt (Karriereseite)",
+      "restoredPartnerApi": "Durch eine neue Bewerbung wiederhergestellt (Partner)",
       "markedForDeletion": "Löschung geplant",
       "eraseAt": " · Wird gelöscht am {{date}}"
     }

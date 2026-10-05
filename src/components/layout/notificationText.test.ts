@@ -40,6 +40,22 @@ describe('notificationText', () => {
     expect(body).toBe('Server body')
   })
 
+  // ARCHIVED-REAPPLY-1 (BE 20ab3dc1): the new application.reapplied_restored type has a
+  // catalogue title in every FE locale, so the viewer reads it in their own language and
+  // never the bureau-language server literal; it carries no body in the catalogue, so the
+  // body half honestly falls back to the (empty) server body.
+  it('translates the application.reapplied_restored title from the catalogue', () => {
+    const n = {
+      id: 4, seen: false, title: 'SERVER TITLE', body: null,
+      title_key: 'notifications.application.reapplied_restored.title',
+      body_key: 'notifications.application.reapplied_restored.body',
+      params: {},
+    } as unknown as AppNotification
+    const { title, body } = notificationText(n, i18n.t.bind(i18n))
+    expect(title).toBe('Gearchiveerde kandidaat hersteld door nieuwe sollicitatie')
+    expect(body).toBe('')
+  })
+
   it('renders the server text verbatim for a free-typed row (no title_key/body_key)', () => {
     const n = {
       id: 3, seen: false, title: 'Free typed title', body: 'Free typed body',

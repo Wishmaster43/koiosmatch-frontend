@@ -107,6 +107,23 @@ describe('noteMetaSentence', () => {
     expect(noteMetaSentence(meta, ctx)).toBe('notes.meta.restored|{}')
   })
 
+  // ARCHIVED-REAPPLY-1: a restore caused by a new application names its source so the
+  // English body the BE stores for it is never what a Dutch tenant reads.
+  it('restored names the career-site source when the restore came from a career apply', () => {
+    const meta: NoteMeta = { kind: 'restored', source: 'career_apply' }
+    expect(noteMetaSentence(meta, ctx)).toBe('notes.meta.restoredCareerApply|{}')
+  })
+
+  it('restored names the partner source when the restore came from the partner API', () => {
+    const meta: NoteMeta = { kind: 'restored', source: 'partner_api' }
+    expect(noteMetaSentence(meta, ctx)).toBe('notes.meta.restoredPartnerApi|{}')
+  })
+
+  it('restored falls back to the bare sentence for an unknown or null source', () => {
+    expect(noteMetaSentence({ kind: 'restored', source: 'something_else' }, ctx)).toBe('notes.meta.restored|{}')
+    expect(noteMetaSentence({ kind: 'restored', source: null }, ctx)).toBe('notes.meta.restored|{}')
+  })
+
   // K-225 H2: marked_for_deletion — its own eraseAt suffix, distinct from effectiveFrom.
   it('markedForDeletion appends the eraseAt suffix when erase_at is present', () => {
     const meta: NoteMeta = { kind: 'marked_for_deletion', erase_at: '2026-10-01' }

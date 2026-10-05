@@ -7,16 +7,20 @@
  * older backend. K-225 H2 adds phase_change/archived/restored/marked_for_deletion
  * alongside the original status_change — each kind is one template string + one
  * switch case. An unknown/missing kind returns null so the caller falls back to the
- * note's stored `body`.
+ * note's stored `body`. ARCHIVED-REAPPLY-1 (BE 20ab3dc1): a restore caused by a new
+ * application carries `source` (career_apply | partner_api) and an ENGLISH body, so the
+ * restored sentence reads the source and the body is never shown to a Dutch tenant.
  */
 // i18n-scan: candidates
 import type { TFunction } from 'i18next'
 
 // One note's structured meta payload. `from_value`/`to_value` serve both status_change
 // and phase_change; `reason_value` also serves archived; `erase_at` serves
-// marked_for_deletion; `restored` carries none of these (kind alone is enough).
+// marked_for_deletion; `restored` carries only the optional `source` of a re-application
+// restore (ARCHIVED-REAPPLY-1), a staff/bulk restore carries no source key at all.
 export interface NoteMeta {
   kind?: string | null
+  source?: string | null
   from_value?: string | null
   to_value?: string | null
   reason_value?: string | null
@@ -74,9 +78,19 @@ function archivedSentence(meta: NoteMeta, ctx: NoteMetaContext): string {
   return appendSuffixes(ctx.t('notes.meta.archived'), meta, ctx)
 }
 
-// Builds the restored sentence: "Restored from archive" — the kind carries no optional fields.
-function restoredSentence(ctx: NoteMetaContext): string {
-  return ctx.t('notes.meta.restored')
+// The two re-application restore sources the BE writes (CareerApplicationHandler /
+// the partner API) and the key each one renders; a source outside this map falls back
+// to the bare sentence rather than leaking a raw slug.
+const RESTORE_SOURCE_KEYS: Record<string, string> = {
+  career_apply: 'notes.meta.restoredCareerApply',
+  partner_api: 'notes.meta.restoredPartnerApi',
+}
+
+// Builds the restored sentence: "Restored by a new application (career site / partner)"
+// when the restore came from a re-application, else the bare "Restored from archive".
+function restoredSentence(meta: NoteMeta, ctx: NoteMetaContext): string {
+  const key = meta.source && Object.hasOwn(RESTORE_SOURCE_KEYS, meta.source) ? RESTORE_SOURCE_KEYS[meta.source] : null
+  return ctx.t(key ?? 'notes.meta.restored')
 }
 
 // Builds the marked_for_deletion sentence: "Deletion scheduled", plus an erase-at
@@ -101,7 +115,7 @@ export function noteMetaSentence(meta: NoteMeta | null | undefined, ctx: NoteMet
     case 'archived':
       return archivedSentence(meta, ctx)
     case 'restored':
-      return restoredSentence(ctx)
+      return restoredSentence(meta, ctx)
     case 'marked_for_deletion':
       return markedForDeletionSentence(meta, ctx)
     default:

@@ -3,6 +3,9 @@
     "created": {
       "title": "Nieuwe sollicitatie"
     },
+    "reapplied_restored": {
+      "title": "Gearchiveerde kandidaat hersteld door nieuwe sollicitatie"
+    },
     "rejection_not_sent": {
       "title": "Afwijzing niet verstuurd, bel de kandidaat zelf",
       "body": "Een afgewezen kandidaat heeft geen WhatsApp- of e-mailtoestemming. Geef de uitslag telefonisch door. ({{workflow}})"

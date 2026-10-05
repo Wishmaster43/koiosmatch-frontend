@@ -1490,6 +1490,8 @@
       "phaseSet": "Fase gezet op {{to}}",
       "archived": "Gearchiveerd",
       "restored": "Hersteld uit archief",
+      "restoredCareerApply": "Hersteld door een nieuwe sollicitatie (carrièresite)",
+      "restoredPartnerApi": "Hersteld door een nieuwe sollicitatie (partner)",
       "markedForDeletion": "Verwijdering gepland",
       "eraseAt": " · Wordt gewist op {{date}}"
     }

@@ -3,6 +3,9 @@
     "created": {
       "title": "Nouvelle candidature"
     },
+    "reapplied_restored": {
+      "title": "Candidat archivé restauré par une nouvelle candidature"
+    },
     "rejection_not_sent": {
       "title": "Refus non envoyé, appelez le candidat vous-même",
       "body": "Un candidat refusé n'a pas de consentement WhatsApp ni e-mail. Communiquez le résultat par téléphone. ({{workflow}})"

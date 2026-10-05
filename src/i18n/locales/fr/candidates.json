@@ -1490,6 +1490,8 @@
       "phaseSet": "Phase définie sur {{to}}",
       "archived": "Archivé",
       "restored": "Restauré depuis les archives",
+      "restoredCareerApply": "Restauré par une nouvelle candidature (site carrière)",
+      "restoredPartnerApi": "Restauré par une nouvelle candidature (partenaire)",
       "markedForDeletion": "Suppression planifiée",
       "eraseAt": " · Sera supprimé le {{date}}"
     }

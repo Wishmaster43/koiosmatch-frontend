@@ -3,6 +3,9 @@
     "created": {
       "title": "Neue Bewerbung"
     },
+    "reapplied_restored": {
+      "title": "Archivierter Kandidat durch neue Bewerbung wiederhergestellt"
+    },
     "rejection_not_sent": {
       "title": "Absage nicht gesendet, kontaktieren Sie den Kandidaten selbst",
       "body": "Ein abgelehnter Kandidat hat keine WhatsApp- oder E-Mail-Zustimmung. Teilen Sie das Ergebnis telefonisch mit. ({{workflow}})"
