@@ -70,6 +70,7 @@ import { useContractTypes } from '@/lib/useContractTypes'
 import { useContactFunctions } from '@/lib/useContactFunctions'
 import { useCao } from '@/lib/useCao'
 import { useLocations } from '@/lib/useLocations'
+import { useAssignableBranches, withCurrentOption } from '@/lib/useAssignableBranches'
 import { useRateProposal } from '@/pages/candidates/hooks/useRateProposal'
 import { useActionRulePreflight } from '@/components/actionrules'
 import { useCustomerCascade } from '@/hooks/useCustomerCascade'
@@ -146,8 +147,13 @@ export function useMatchForm({
   // Contact function/job title (Danny 24-07 addendum) — the inline new-contact
   // form's Functie picker; allowFreeEntry mirrors AddContactPersonModal exactly.
   const { contactFunctions, allowFreeEntry: contactFunctionsAllowFreeEntry } = useContactFunctions()
-  // Tenant establishments (7.4) — feeds both the Vestiging picker and its default proposal.
-  const branchLocations = useLocations()
+  // Tenant establishments (7.4) — feeds both the Vestiging picker and its default
+  // proposal. ONIX D-003: the picker itself is narrowed to the user's own branch
+  // grants (empty = unrestricted); the unnarrowed list still resolves the LABEL
+  // of a loaded match's branch that sits outside those grants, so editing an
+  // existing match never shows a blank for a real value.
+  const allLocations = useLocations()
+  const branchLocations = useAssignableBranches()
 
   // AXIS-MATRIX-2 preflight (item 22, pattern-prover): POST /matches enforces
   // match.create against the candidate server-side (MatchController::store) —
@@ -348,6 +354,13 @@ export function useMatchForm({
   const { creatingContact, setCreatingContact, nc, setNc, saveContact, saving: savingContact, duplicateContact, setDuplicateContact } =
     useInlineContactCreate({ customerId, locationId, contacts, refetchCustomer, setContactId })
 
+  // ONIX D-003: the currently-picked branch stays visible even outside the user's
+  // own grants — its label resolves from the unnarrowed tenant list.
+  const exposedBranchLocations = withCurrentOption(
+    branchLocations,
+    branchId ? { value: branchId, label: allLocations.find(l => String(l.value) === branchId)?.label ?? '' } : null,
+  )
+
   return {
     t, editing,
     fixedCandidateId, pickedCandidateId, setPickedCandidateId, candidateOptions: exposedCandidateOptions, candidateOptionsError,
@@ -360,7 +373,7 @@ export function useMatchForm({
     creatingContact, setCreatingContact, nc, setNc, saveContact, savingContact,
     duplicateContact, setDuplicateContact,
     func, setFunc, vacancyId, setVacancyId, ownerId, setOwnerId,
-    branchId, setBranchId, setBranchDirty, branchLocations,
+    branchId, setBranchId, setBranchDirty, branchLocations: exposedBranchLocations,
     branchMismatch, candBranch, mismatchChoice, setMismatchChoice,
     contractType, setContractType, startDate, setStartDate, endDate, setEndDate, setEndDateDirty, hours, setHours, cao, setCao,
     // MATCH-SOORT-1: Contractvorm + its conditional CONTRACTREGELS editor.

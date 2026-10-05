@@ -19,6 +19,7 @@ import { useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useAuth } from '@/context/AuthContext'
 import { useLocations } from '@/lib/useLocations'
+import { narrowToGrants } from '@/lib/useAssignableBranches'
 
 export interface BranchOption { value: string; label: string }
 
@@ -36,9 +37,10 @@ export function useBranchOptions(): BranchOption[] {
   const locations = useLocations()
 
   return useMemo(() => {
-    const ids = (me?.branch_ids ?? []).map(String)
     const all = locations.map(l => ({ value: String(l.value), label: l.label }))
-    const scoped = ids.length ? all.filter(o => ids.includes(o.value)) : all
+    // Shared narrowing with useAssignableBranches (lib/useAssignableBranches) — one
+    // implementation of "which branches does this user hold" for both hooks.
+    const scoped = narrowToGrants(all, me?.branch_ids)
     // FILTER options only (this hook's whole purpose) — "Zonder vestiging" is a
     // real server token, never an assignable branch, so no form may reuse this
     // hook for assignment pickers.

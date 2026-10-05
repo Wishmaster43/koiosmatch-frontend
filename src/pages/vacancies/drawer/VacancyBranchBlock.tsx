@@ -1,6 +1,6 @@
 import { useTranslation } from 'react-i18next'
 import SharedBranchSection from '@/components/drawer/BranchSection'
-import { useLocations } from '@/lib/useLocations'
+import { useAssignableBranches } from '@/lib/useAssignableBranches'
 import type { VacancyDetail } from '@/types/vacancy'
 import type { Id } from '@/types/common'
 
@@ -19,7 +19,10 @@ type UpdateFn = (id: Id | undefined, patch: Record<string, unknown>) => void
  */
 export default function VacancyBranchBlock({ vacancy: v, onUpdate }: { vacancy: VacancyDetail; onUpdate?: UpdateFn }) {
   const { t } = useTranslation(['vacancies', 'candidates'])
-  const options = useLocations()
+  // ONIX D-003: narrowed to the user's own branch grants (empty = unrestricted);
+  // the current branch still renders via the `branches` prop below even when it
+  // sits outside those grants, so a foreign-branch vacancy never shows a blank.
+  const options = useAssignableBranches()
 
   // Single-value toggle: same id again = clear; another id = replace.
   const handleToggle = (id: string) => {

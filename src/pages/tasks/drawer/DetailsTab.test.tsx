@@ -51,6 +51,10 @@ vi.mock('@/lib/settings/useAllSettings', () => ({
 vi.mock('@/lib/useLocations', () => ({
   useLocations: () => [{ value: 'loc-1', label: 'Vestiging Noord' }, { value: 'loc-2', label: 'Vestiging Zuid' }],
 }))
+// ONIX D-003: a hoisted, mutable `me` — default stays unrestricted (branch_ids
+// absent) so every existing case above is unaffected.
+const authUser = vi.hoisted(() => ({ current: { id: 'me-1', name: 'Piet' } as { id: string; name: string; branch_ids?: Array<string | number> } }))
+vi.mock('@/context/AuthContext', () => ({ useAuth: () => ({ user: authUser.current }) }))
 // TEAM-1: the tenant's INTERNAL departments (Backoffice, Planning, …) — the axis
 // that says where a task waits. Not the customer department behind the
 // `department` LINK token, which lives on the Koppelingen tab.
@@ -294,6 +298,27 @@ describe('tasks DetailsTab — branch/vestiging picker (TASK-LOCATION-READ-1)', 
     // (TEAM-1 added the department row), so a bare getByText('—') is ambiguous.
     const branchRow = screen.getByText(i18n.t('tasks:details.location')).parentElement
     expect(branchRow).toHaveTextContent('—')
+  })
+
+  // ONIX D-003: the picker narrows to the user's own branch grants; a task's
+  // EXISTING branch stays visible even outside those grants (withCurrentOption).
+  afterEach(() => { authUser.current = { id: 'me-1', name: 'Piet' } })
+
+  it('ONIX D-003: narrows the options to the user\'s own grants', () => {
+    authUser.current = { id: 'me-1', name: 'Piet', branch_ids: ['loc-2'] }
+    const { container } = render(<DetailsTab task={task} onUpdate={vi.fn()} />)
+    fireEvent.click(container.querySelector('button[aria-haspopup="listbox"]')!)
+    expect(screen.getByRole('button', { name: 'Vestiging Zuid' })).toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: 'Vestiging Noord' })).not.toBeInTheDocument()
+  })
+
+  it('ONIX D-003: keeps the current out-of-grant branch visible on the trigger (withCurrentOption)', () => {
+    authUser.current = { id: 'me-1', name: 'Piet', branch_ids: ['loc-2'] }
+    const { container } = render(
+      <DetailsTab task={{ ...task, location: { id: 'loc-1', name: 'Vestiging Noord' } }} onUpdate={vi.fn()} />,
+    )
+    const trigger = container.querySelector('button[aria-haspopup="listbox"]')
+    expect(trigger).toHaveTextContent('Vestiging Noord')
   })
 })
 

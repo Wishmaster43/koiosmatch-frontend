@@ -91,6 +91,26 @@ describe('useVacancyRecord · updateVacancy interview-workflow re-sync', () => {
   })
 })
 
+// ONIX D-003: a plain patch (e.g. a branch assignment outside the user's grants)
+// used to fall back to a generic toast — the server's own 403 reason is now
+// surfaced instead, and the promise resolves false so a caller never reads it
+// as a success.
+describe('useVacancyRecord · updateVacancy surfaces the server\'s own error message', () => {
+  it('a 403 branch-not-assignable PATCH notifies with the server message, not the generic fallback', async () => {
+    mockGet.mockResolvedValue({ data: { data: rawDetail() } })
+    const { result: hook } = setup()
+    act(() => { hook.current.selectVacancy(vacancyRow) })
+    await waitFor(() => expect(hook.current.detail).not.toBeNull())
+
+    mockPatch.mockRejectedValue({ response: { status: 403, data: { message: 'Geen recht op deze vestiging' } } })
+    let ok: boolean | undefined
+    await act(async () => { ok = await hook.current.updateVacancy('v1', { branchId: 'x', branchName: 'X' }) })
+
+    expect(mockNotifyError).toHaveBeenCalledWith('Geen recht op deze vestiging')
+    expect(ok).toBe(false)
+  })
+})
+
 // ONIX N-007: a double-click on the restore banner must POST the restore route
 // exactly once; `restoring` disables the banner's button while it runs.
 describe('useVacancyRecord · restoreVacancy re-entrancy guard', () => {

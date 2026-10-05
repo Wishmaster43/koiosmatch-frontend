@@ -23,7 +23,7 @@ import { useAllSettings, getBoolSetting } from '@/lib/settings/useAllSettings'
 import type { TaskLookupItem } from '@/context/TaskLookupsContext'
 import { useUsers } from '@/lib/queries'
 import { useTeams } from '@/lib/useTeams'
-import { useLocations } from '@/lib/useLocations'
+import { useAssignableBranches, withCurrentOption } from '@/lib/useAssignableBranches'
 import { useDateFormat } from '@/lib/datetime'
 import { initialsOf } from '@/lib/initials'
 import { useTextPopoutHost } from '@/hooks/useTextPopoutHost'
@@ -95,7 +95,8 @@ export default function DetailsTab({ task, onUpdate, onSubtaskCreated }: {
   const { teams } = useTeams()
   // TASK-LOCATION-READ-1: the tenant's own establishments, same hook every other
   // entity's branch picker uses (candidates/customers/opportunities/vacancies).
-  const locations = useLocations()
+  // ONIX D-003: narrowed to the user's own branch grants (empty = unrestricted).
+  const locations = useAssignableBranches()
 
   const [editing, setEditing] = useState(false)
   const [draft, setDraft] = useState<Record<string, unknown>>({})
@@ -166,7 +167,13 @@ export default function DetailsTab({ task, onUpdate, onSubtaskCreated }: {
   // meta-style field (no separate pencil, mirrors the header's status/priority/
   // assignee pickers) — it rebuilds the display object alongside the id so the
   // optimistic UI shows the branch name immediately, same as the assignee handler.
-  const locationOpts = locations.map(l => ({ value: String(l.value), label: l.label }))
+  // The task's current branch stays visible even outside the user's grants (a task
+  // someone else placed on a branch they themselves hold no grant on) — the current
+  // value is appended read-only rather than silently vanishing from the field.
+  const locationOpts = withCurrentOption(
+    locations.map(l => ({ value: String(l.value), label: l.label })),
+    task.location?.id != null ? { value: String(task.location.id), label: task.location.name ?? '' } : null,
+  )
   // Persists the picked location, rebuilding the display object alongside the id so the optimistic UI shows the branch name immediately.
   const onLocationChange = (v: string) => {
     const sel = locations.find(l => String(l.value) === v)

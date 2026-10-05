@@ -108,9 +108,11 @@ export function useVacancyRecord({ setVacancies, setTotal, statusMeta, users, cu
             : {}),
         } : prev))
         return true
-      }).catch(() => { notifyError(t('common:actionFailed')); return false })
+      }).catch(err => { notifyError(extractApiError(err, t('common:actionFailed'))); return false })
     }
-    return request.then(() => true).catch(() => { notifyError(t('common:actionFailed')); return false })
+    // ONIX D-003: a branch assignment outside the user's grants answers 403 with a
+    // translated reason — surface the server's own message, never a generic toast.
+    return request.then(() => true).catch(err => { notifyError(extractApiError(err, t('common:actionFailed'))); return false })
   }
 
   // VAC-RESTORE-1 (BE 1ac4e14): bring an archived vacancy back; reconcile all three

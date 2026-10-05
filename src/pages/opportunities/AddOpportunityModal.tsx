@@ -21,6 +21,7 @@ import { needsLostReason } from './hooks/lostReasonGuard'
 // K2: the tenant's own establishments (Vestiging) — the same shared lookup
 // MatchModal uses for its own branch picker (mirrors §3A, one hook not a copy).
 import { useLocations } from '@/lib/useLocations'
+import { useAssignableBranches, withCurrentOption } from '@/lib/useAssignableBranches'
 import { useCustomerCascade } from './hooks/useCustomerCascade'
 // The shared "Name — Function" contact-option label (§11 — one shared builder,
 // not a per-screen copy); imported straight from the real implementation since
@@ -92,7 +93,8 @@ interface ModalCustomer { id: Id; name: string }
  * field on the opportunity (StoreOpportunityRequest: `exists:locations,id`) that
  * carries the TENANT's own branch handling the deal — distinct from the existing
  * customer→location cascade above (the customer's own site, `customer_location_id`).
- * Uses the same shared `useLocations` hook MatchModal's own branch picker uses.
+ * Uses the same shared `useAssignableBranches` hook MatchModal's own branch picker
+ * uses (ONIX D-003: narrowed to the user's own branch grants).
  * K3 — SUPERSEDED (2026-08-08, OPP-DESCRIPTION-1, CMBE golf 2a/2b): the "kans-tekst"
  * rich description that was verified absent above now landed on the backend —
  * `opportunities.description` (nullable HTML, max 20000; `create_opportunities_table`
@@ -200,7 +202,13 @@ export default function AddOpportunityModal({ onClose, onCreated, users = [], cu
   // cascade above (customer/location/department/contact) — never reset when the
   // client changes, exactly like MatchModal's own branch picker.
   const [branchId, setBranchId] = useState(existing?.branchId != null ? String(existing.branchId) : '')
-  const branchLocations = useLocations()
+  // ONIX D-003: narrowed to the user's own branch grants (empty = unrestricted); the
+  // existing deal's branch stays visible even outside those grants (a foreign-branch
+  // opportunity never shows a blank) — its label resolves from the unnarrowed tenant
+  // list, never from `existing.branch` alone, so a record whose own label wasn't
+  // carried along still renders a real name.
+  const branchLocations = useAssignableBranches()
+  const allBranchLocations = useLocations()
 
   // OPP-MODAL-PREFILL-2: a department implies its parent location — a department-scoped
   // "+ Kans" arrives with only initialDepartmentId, which would leave the department
@@ -355,7 +363,10 @@ export default function AddOpportunityModal({ onClose, onCreated, users = [], cu
               departmentOptions={departments.map(d => ({ value: String(d.id), label: d.name ?? '—' }))}
               ownerId={form.ownerId} onOwnerChange={v => set('ownerId', v)} ownerOptions={userOptions}
               branchId={branchId} onBranchChange={setBranchId}
-              branchOptions={branchLocations.map(l => ({ value: String(l.value), label: l.label }))}
+              branchOptions={withCurrentOption(
+                branchLocations.map(l => ({ value: String(l.value), label: l.label })),
+                branchId ? { value: branchId, label: allBranchLocations.find(l => String(l.value) === branchId)?.label || existing?.branch || '' } : null,
+              )}
             />
 
             {/* Waarde & fase — pipeline stage, service/agreement type, value/hours,

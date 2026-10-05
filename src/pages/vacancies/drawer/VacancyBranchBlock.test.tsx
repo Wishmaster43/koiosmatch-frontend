@@ -15,13 +15,16 @@ vi.mock('@/lib/useLocations', () => ({
     { value: 'branch-2', label: 'Vestiging Zuid' },
   ],
 }))
+// ONIX D-003: default unrestricted (no branch_ids) — the per-test override below narrows it.
+const authUser = vi.hoisted(() => ({ current: {} as { branch_ids?: Array<string | number> } }))
+vi.mock('@/context/AuthContext', () => ({ useAuth: () => ({ user: authUser.current }) }))
 
 const vacancy = (over: Partial<VacancyDetail> = {}) =>
   ({ id: 'v1', branchId: '', branchName: '', ...over }) as VacancyDetail
 
 describe('VacancyBranchBlock (chips-look, single-value)', () => {
   const onUpdate = vi.fn()
-  beforeEach(() => onUpdate.mockClear())
+  beforeEach(() => { onUpdate.mockClear(); authUser.current = {} })
 
   it('shows the empty state and picks a branch through the "+" picker — persists immediately', async () => {
     const user = userEvent.setup()
@@ -48,5 +51,23 @@ describe('VacancyBranchBlock (chips-look, single-value)', () => {
     await user.click(screen.getByRole('button', { name: 'candidates:sections.branchLink' }))
     await user.click(await screen.findByText('Hoofdkantoor Assen'))
     expect(onUpdate).toHaveBeenCalledWith('v1', { branchId: 'branch-1', branchName: 'Hoofdkantoor Assen' })
+  })
+
+  // ONIX D-003: a branch-restricted user's "+" picker only offers the branches they hold.
+  it('narrows the "+" picker to the user own branch grants', async () => {
+    authUser.current = { branch_ids: ['branch-2'] }
+    const user = userEvent.setup()
+    render(<VacancyBranchBlock vacancy={vacancy()} onUpdate={onUpdate} />)
+    await user.click(screen.getByRole('button', { name: 'candidates:sections.branchLink' }))
+    expect(await screen.findByText('Vestiging Zuid')).toBeInTheDocument()
+    expect(screen.queryByText('Hoofdkantoor Assen')).not.toBeInTheDocument()
+  })
+
+  // The current chip stays visible even when the vacancy's branch sits outside the
+  // user's own grants — the `branches` prop renders it independent of the options list.
+  it('keeps the current chip visible even outside the user own branch grants', () => {
+    authUser.current = { branch_ids: ['branch-2'] }
+    render(<VacancyBranchBlock vacancy={vacancy({ branchId: 'branch-1', branchName: 'Hoofdkantoor Assen' })} onUpdate={onUpdate} />)
+    expect(screen.getByText('Hoofdkantoor Assen')).toBeInTheDocument()
   })
 })

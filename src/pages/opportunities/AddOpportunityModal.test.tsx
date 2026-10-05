@@ -56,7 +56,10 @@ vi.mock('./hooks/useCustomerCascade', () => ({
     contacts: [{ id: 'con-1', name: 'Jan Jansen' }, { id: 'con-2', name: 'Eva Bos', function: 'HR Manager' }],
   }),
 }))
-vi.mock('@/context/AuthContext', () => ({ useAuth: () => ({ user: { id: 'me-1', name: 'Piet' } }) }))
+// ONIX D-003: a hoisted, mutable `me` so one test can narrow branch_ids without
+// affecting the others (default stays unrestricted, same as before this change).
+const authUser = vi.hoisted(() => ({ current: { id: 'me-1', name: 'Piet' } as { id: string; name: string; branch_ids?: Array<string | number> } }))
+vi.mock('@/context/AuthContext', () => ({ useAuth: () => ({ user: authUser.current }) }))
 // Tiptap needs a real browser to mount — stubbed with a plain controlled textarea,
 // mirrors the house convention (AddLocationModal.test.tsx / DescriptionTab.test.tsx).
 vi.mock('@/components/ui/RichTextEditor', () => ({
@@ -99,6 +102,9 @@ beforeEach(() => {
   // OPP-LOST-FE-1: no curated reasons by default — the guard describe block below
   // overrides this per test when it needs the gate (or the loading race) to fire.
   mockedLostReasons.mockReturnValue({ reasons: [], loading: false, invalidate: vi.fn() })
+  // ONIX D-003: reset the branch-grants mock to unrestricted so a failed
+  // assertion in one test can never leak grants into the next one.
+  authUser.current = { id: 'me-1', name: 'Piet' }
 })
 
 describe('AddOpportunityModal · house wide frame (Danny 27-07)', () => {
@@ -387,6 +393,32 @@ describe('AddOpportunityModal · edit mode (existing prop) — PATCH, never POST
     expect(fieldTrigger('modal.fields.branch')).toHaveTextContent('Bijkantoor')
     await user.click(screen.getByRole('button', { name: 'modal.save' }))
     expect(api.patch).toHaveBeenCalledWith('/opportunities/opp-9', expect.objectContaining({ location_id: 'branch-2' }))
+  })
+
+  // ONIX D-003: the Vestiging picker narrows to the user's own branch grants, but
+  // a deal's EXISTING branch stays visible/selectable even outside those grants.
+  it('ONIX D-003: narrows the branch picker to the user grants, keeping an out-of-scope existing branch visible', async () => {
+    authUser.current = { id: 'me-1', name: 'Piet', branch_ids: ['branch-1'] }
+    const user = userEvent.setup()
+    const existingWithBranch = { ...existing, branchId: 'branch-2' } as unknown as Opportunity
+    render(<AddOpportunityModal onClose={noop} existing={existingWithBranch} customers={[{ id: 'cust-1', name: 'Acme' }]} />)
+    // The existing (out-of-grant) branch still shows and re-sends unchanged.
+    expect(fieldTrigger('modal.fields.branch')).toHaveTextContent('Bijkantoor')
+    await user.click(screen.getByRole('button', { name: 'modal.save' }))
+    expect(api.patch).toHaveBeenCalledWith('/opportunities/opp-9', expect.objectContaining({ location_id: 'branch-2' }))
+  })
+
+  // ONIX D-003 verifier: HEAD (unrestricted) would also pass the test above since
+  // withCurrentOption re-adds the existing out-of-grant branch to an otherwise-full
+  // list. This create-mode case proves the actual NARROWING: no `existing` branch to
+  // re-add, so a restricted grant must genuinely hide the other branch option.
+  it('ONIX D-003: create mode narrows the branch picker options to the user\'s own grants', async () => {
+    authUser.current = { id: 'me-1', name: 'Piet', branch_ids: ['branch-1'] }
+    const user = userEvent.setup()
+    render(<AddOpportunityModal onClose={noop} />)
+    await user.click(fieldTrigger('modal.fields.branch'))
+    expect(await screen.findByRole('button', { name: 'Hoofdkantoor' })).toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: 'Bijkantoor' })).not.toBeInTheDocument()
   })
 
   it('OPP-DESCRIPTION-1: prefills the Kanstekst collapsed preview from existing.description and re-sends it unchanged', async () => {
