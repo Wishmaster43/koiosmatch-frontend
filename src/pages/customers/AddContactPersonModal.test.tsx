@@ -66,6 +66,7 @@ vi.mock('@/lib/settings/useAllSettings', async importOriginal => {
 const ct = (key: string, opts?: Record<string, unknown>) => i18n.t(key, { ns: 'customers', ...opts })
 // The reused import-wizard steps (PreviewStep/ResultStep) are in the 'settings' bundle.
 const st = (key: string, opts?: Record<string, unknown>) => i18n.t(key, { ns: 'settings', ...opts })
+const common = (key: string, opts?: Record<string, unknown>) => i18n.t(key, { ns: 'common', ...opts })
 
 const locations = [{ id: 'loc-1', name: 'Locatie Noord' }, { id: 'loc-2', name: 'Locatie Zuid' }]
 const statuses = [{ value: 'st-1', label: 'Actief' }]
@@ -789,5 +790,24 @@ describe('AddContactPersonModal · one create per click (ONIX N-007)', () => {
     resolve()
     await waitFor(() => expect(onClose).toHaveBeenCalledTimes(1))
     expect(onCreate).toHaveBeenCalledTimes(1)
+  })
+})
+
+// ONIX N-005: a 422 bag key no field renders (a required tenant custom field) must
+// not fail silently — it lands in the create banner alongside any mapped field errors.
+describe('AddContactPersonModal · unmapped 422 key (ONIX N-005)', () => {
+  it('shows the banner for a dotted 422 key no field maps to, and sets no visible field flag for it', async () => {
+    const err = {
+      response: { data: { errors: { 'custom_fields.vog': ['The custom_fields.vog field is required.'] } } },
+    }
+    const onCreate = vi.fn().mockRejectedValue(err)
+    const user = userEvent.setup()
+    render(<AddContactPersonModal onClose={() => {}} onCreate={onCreate} locations={locations} statuses={statuses} />)
+    await user.type(screen.getByLabelText(ct('subModal.firstName'), { exact: false }), 'Jan')
+    await user.type(screen.getByLabelText(ct('subModal.lastName'), { exact: false }), 'Jansen')
+
+    await user.click(screen.getByRole('button', { name: ct('subModal.create') }))
+
+    expect(await screen.findByText(common('validation.fieldRequiredNamed', { field: 'vog' }))).toBeInTheDocument()
   })
 })

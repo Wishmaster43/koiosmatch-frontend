@@ -14,9 +14,10 @@ vi.mock('@/pages/settings/shared', () => ({
   })),
 }))
 
-// Mock extractApiError
+// Mock extractApiError — keeps the real RAW_REQUIRED_RE (formatUnmappedErrors imports it).
 vi.mock('@/lib/extractApiError', () => ({
   extractApiError: vi.fn((_err, fallback) => fallback),
+  RAW_REQUIRED_RE: /^The .+ field is required\.$/,
 }))
 
 const mockT = vi.fn((key: string) => key) as unknown as TFunction
@@ -128,6 +129,64 @@ describe('useSubEntitySave', () => {
     })
 
     expect(result.current.createError).toBe('common:errorGeneric')
+  })
+
+  it('ONIX N-005: surfaces an unmapped dotted 422 key as a banner alongside the field flags', () => {
+    const { result } = renderHook(() => useSubEntitySave({
+      initial: null,
+      apiToFormMap: API_TO_FORM,
+      t: mockT,
+      onImported: vi.fn(),
+      onClose: vi.fn(),
+      importEntity: 'departments',
+    }))
+
+    const mockError = {
+      response: {
+        data: {
+          errors: {
+            first_name: ['Name is required'],
+            'custom_fields.vog': ['The custom_fields.vog field is required.'],
+          },
+        },
+      },
+    }
+
+    act(() => {
+      result.current.handleApiError(mockError)
+    })
+
+    expect(result.current.errors).toEqual({ firstName: true, 'custom_fields.vog': true })
+    expect(result.current.createError).toBe('common:validation.fieldRequiredNamed')
+  })
+
+  it('ONIX N-005: a renderedKeys match keeps the dotted key out of the banner', () => {
+    const { result } = renderHook(() => useSubEntitySave({
+      initial: null,
+      apiToFormMap: API_TO_FORM,
+      t: mockT,
+      onImported: vi.fn(),
+      onClose: vi.fn(),
+      importEntity: 'departments',
+    }))
+
+    const mockError = {
+      response: {
+        data: {
+          errors: {
+            first_name: ['Name is required'],
+            'custom_fields.vog': ['Required'],
+          },
+        },
+      },
+    }
+
+    act(() => {
+      result.current.handleApiError(mockError, ['custom_fields.vog'])
+    })
+
+    expect(result.current.errors).toEqual({ firstName: true, 'custom_fields.vog': true })
+    expect(result.current.createError).toBeNull()
   })
 
   it('toggles import panel open/closed', () => {

@@ -18,7 +18,9 @@ interface ServerErrorBody { message?: string; code?: string; errors?: Record<str
 // throughout app/Http/Controllers) is authored Dutch/English prose and never
 // matches this literal template, so the fingerprint safely tells the two apart
 // without touching any of those already-working, already-readable messages.
-const RAW_REQUIRED_RE = /^The .+ field is required\.$/
+// N005-UNMAPPED-422-A1: exported so formatUnmappedErrors shares one fingerprint
+// for Laravel's raw untranslated "required" template instead of a second copy.
+export const RAW_REQUIRED_RE = /^The .+ field is required\.$/
 
 /**
  * @param fieldLabels Optional map of backend field key → an ALREADY-TRANSLATED

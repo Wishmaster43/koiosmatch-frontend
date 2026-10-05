@@ -9,7 +9,9 @@ import { useState, useEffect, useRef } from 'react'
 import type { TFunction } from 'i18next'
 import { useImportWizard } from '@/pages/settings/shared'
 import { extractApiError } from '@/lib/extractApiError'
-import { extractFormErrors } from '@/lib/extractFormErrors'
+import { extractFormErrors, unmappedFormErrors } from '@/lib/extractFormErrors'
+// ONIX N-005: a 422 key no rendered field maps to still lands somewhere.
+import { formatUnmappedErrors } from '@/lib/formatUnmappedErrors'
 
 // Shared state/effect management for customer sub-entity modals: import wizard
 // and error handling. The modal manages its own form state via useState.
@@ -45,10 +47,16 @@ export function useSubEntitySave({
   }, [importWizard.run])
 
   // Handle 422 field errors: translate API snake_case keys back to camelCase form fields.
-  const handleApiError = (err: unknown) => {
+  // `renderedKeys` (optional) names the dotted keys an actual field renders (e.g.
+  // required custom fields) so those never ALSO trigger the unmapped-error banner.
+  const handleApiError = (err: unknown, renderedKeys?: string[]) => {
     const fieldErrors = extractFormErrors(err, apiToFormMap)
     if (fieldErrors) {
       setErrors(fieldErrors)
+      // A bag key no rendered field maps to would otherwise silently fail — surface it.
+      const unmapped = unmappedFormErrors(err, apiToFormMap, renderedKeys)
+      const banner = formatUnmappedErrors(unmapped, t)
+      if (banner) setCreateError(banner)
     } else {
       setCreateError(extractApiError(err, t('common:errorGeneric')))
     }

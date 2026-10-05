@@ -16,7 +16,9 @@ import { useLiveFieldValidation } from '@/hooks/useLiveFieldValidation'
 import { isValidEmailFormat } from '@/lib/contactFieldValidation'
 import { useSubEntitySave } from './hooks/useSubEntitySave'
 // DRY-1: one shared 422-bag mapper (field flags + server message text).
-import { extractFormErrorsWithMessages } from '@/lib/extractFormErrors'
+import { extractFormErrorsWithMessages, unmappedFormErrors } from '@/lib/extractFormErrors'
+// ONIX N-005: a 422 key no rendered field maps to still lands somewhere.
+import { formatUnmappedErrors } from '@/lib/formatUnmappedErrors'
 import { useSubEntityDuplicateGuard } from './addmodal/useSubEntityDuplicateGuard'
 import type { ContactPayload } from './hooks/useCustomerContacts'
 import type { Contact, Department } from '@/types/customer'
@@ -189,6 +191,11 @@ export function useAddContactPersonForm({
       if (fieldErrors) {
         setErrors(fieldErrors.errors)
         setFieldMessages(fieldErrors.messages)
+        // A bag key no rendered field maps to (e.g. a required custom field) would
+        // otherwise silently fail — surface it as a banner alongside the field flags.
+        const unmapped = unmappedFormErrors(err, API_TO_FORM)
+        const banner = formatUnmappedErrors(unmapped, t)
+        if (banner) setCreateError(banner)
       } else {
         setCreateError(e?.response?.data?.message ?? t('common:errorGeneric'))
       }

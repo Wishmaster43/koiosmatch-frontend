@@ -298,7 +298,7 @@ export function usePlanIntakeForm({
     } catch (err) {
       // Show field-level errors from 422 validation responses; fall back to the
       // server's message (or a generic one) so the user isn't left guessing.
-      failWith(err, API_TO_FORM, t('common:errorGeneric'))
+      failWith(err, API_TO_FORM, t('common:errorGeneric'), t)
     } finally { setSaving(false) }
   }
 

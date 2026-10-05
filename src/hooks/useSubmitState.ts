@@ -8,9 +8,11 @@
  * carries no bag at all.
  */
 import { useCallback, useState } from 'react'
-import { extractFormErrors } from '@/lib/extractFormErrors'
+import { extractFormErrors, unmappedFormErrors } from '@/lib/extractFormErrors'
 // DUP-04: one shared axios-error → message extractor, never a re-derived inline dance.
 import { extractApiError } from '@/lib/extractApiError'
+// ONIX N-005: a 422 key no rendered field maps to still lands somewhere.
+import { formatUnmappedErrors } from '@/lib/formatUnmappedErrors'
 
 export interface UseSubmitStateResult {
   saving: boolean
@@ -22,7 +24,10 @@ export interface UseSubmitStateResult {
   /** Clears both error channels — call right before a submit attempt. */
   resetErrors: () => void
   /** Maps a thrown error onto field errors (422 bag) or the fallback banner. */
-  failWith: (err: unknown, apiToForm: Record<string, string>, genericMessage: string) => void
+  failWith: (
+    err: unknown, apiToForm: Record<string, string>, genericMessage: string,
+    translate?: (key: string, opts?: Record<string, unknown>) => string,
+  ) => void
 }
 
 // The saving flag + the two error channels (field-level vs a fallback banner) every submit hook needs.
@@ -35,10 +40,24 @@ export function useSubmitState(): UseSubmitStateResult {
   const resetErrors = useCallback(() => { setErrors({}); setSubmitErr(null) }, [])
 
   // Same branching as both former inline catch blocks: a 422 bag (even an empty one) maps onto field errors, anything else falls back to the server/generic message.
-  const failWith = useCallback((err: unknown, apiToForm: Record<string, string>, genericMessage: string) => {
+  const failWith = useCallback((
+    err: unknown, apiToForm: Record<string, string>, genericMessage: string,
+    translate?: (key: string, opts?: Record<string, unknown>) => string,
+  ) => {
     const formErrors = extractFormErrors(err, apiToForm)
-    if (formErrors) setErrors(formErrors)
-    else setSubmitErr(extractApiError(err, genericMessage))
+    if (formErrors) {
+      setErrors(formErrors)
+      // A bag key no rendered field maps to (e.g. a required custom field) would
+      // otherwise silently fail — surface it as a banner alongside the field flags,
+      // falling back to the raw joined messages when the caller passes no translate fn.
+      const unmapped = unmappedFormErrors(err, apiToForm)
+      const banner = translate
+        ? formatUnmappedErrors(unmapped, translate)
+        : (unmapped.map((u) => u.message ?? u.key).join(' ') || null)
+      if (banner) setSubmitErr(banner)
+    } else {
+      setSubmitErr(extractApiError(err, genericMessage))
+    }
   }, [])
 
   return { saving, errors, submitErr, setSaving, setErrors, setSubmitErr, resetErrors, failWith }

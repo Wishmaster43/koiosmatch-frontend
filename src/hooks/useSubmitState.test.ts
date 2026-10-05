@@ -41,6 +41,27 @@ describe('useSubmitState', () => {
     expect(result.current.submitErr).toBe('Server says no')
   })
 
+  it('ONIX N-005: surfaces an unmapped 422 key as a banner alongside the field flags, when a translate fn is passed', () => {
+    const { result } = renderHook(() => useSubmitState())
+    const err = { response: { data: { errors: { function_title: ['Required'], 'custom_fields.vog': ['The custom_fields.vog field is required.'] } } } }
+    const t = (key: string, opts?: Record<string, unknown>) => `${key}:${JSON.stringify(opts)}`
+
+    act(() => { result.current.failWith(err, API_TO_FORM, 'Something went wrong', t) })
+
+    expect(result.current.errors).toEqual({ func: true, 'custom_fields.vog': true })
+    expect(result.current.submitErr).toBe('common:validation.fieldRequiredNamed:{"field":"vog"}')
+  })
+
+  it('without a translate fn, an unmapped 422 key sets field flags and falls back to the raw joined message', () => {
+    const { result } = renderHook(() => useSubmitState())
+    const err = { response: { data: { errors: { 'custom_fields.vog': ['Required'] } } } }
+
+    act(() => { result.current.failWith(err, API_TO_FORM, 'Something went wrong') })
+
+    expect(result.current.errors).toEqual({ 'custom_fields.vog': true })
+    expect(result.current.submitErr).toBe('Required')
+  })
+
   it('resetErrors clears both channels right before a submit attempt', () => {
     const { result } = renderHook(() => useSubmitState())
     act(() => { result.current.failWith({ response: { data: { message: 'x' } } }, API_TO_FORM, 'fallback') })

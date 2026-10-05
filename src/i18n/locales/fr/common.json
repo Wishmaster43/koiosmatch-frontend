@@ -515,6 +515,9 @@
   "comingSoon": "bientôt",
   "justNow": "à l'instant",
   "errorGeneric": "Une erreur s'est produite",
+  "validation": {
+    "fieldRequiredNamed": "Le champ '{{field}}' est obligatoire."
+  },
   "loadingShort": "…",
   "openInNewTab": "Ouvrir dans un nouvel onglet",
   "editor": {

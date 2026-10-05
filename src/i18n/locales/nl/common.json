@@ -515,6 +515,9 @@
   "comingSoon": "binnenkort",
   "justNow": "zojuist",
   "errorGeneric": "Er is iets misgegaan",
+  "validation": {
+    "fieldRequiredNamed": "Het veld '{{field}}' is verplicht."
+  },
   "loadingShort": "…",
   "openInNewTab": "Openen in nieuw tabblad",
   "editor": {

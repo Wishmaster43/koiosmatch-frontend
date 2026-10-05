@@ -25,7 +25,7 @@ export function extractFormErrors(err: unknown, apiToForm: Record<string, string
 // toast/banner through extractApiError — same contract as extractFormErrors.
 export function extractFormErrorsWithMessages(
   err: unknown, apiToForm: Record<string, string>,
-): { errors: Record<string, boolean>; messages: Record<string, string> } | null {
+): { errors: Record<string, boolean>; messages: Record<string, string>; unmapped: UnmappedEntry[] } | null {
   const apiErrors = (err as ApiErrorResponse)?.response?.data?.errors
   if (!apiErrors) return null
   const errors: Record<string, boolean> = {}
@@ -36,5 +36,31 @@ export function extractFormErrorsWithMessages(
     const msg = Array.isArray(value) ? value[0] : value
     if (typeof msg === 'string') messages[field] = msg
   })
-  return { errors, messages }
+  return { errors, messages, unmapped: unmappedFormErrors(err, apiToForm) }
+}
+
+// ONIX N-005: a 422 bag entry whose key no rendered field maps to (the caller's
+// apiToForm has no entry for it, or — when renderedKeys is given — the key is
+// not among the keys an actual input shows), so it would otherwise disappear.
+export interface UnmappedEntry { key: string; message: string | null }
+
+// unmappedFormErrors — the bag entries no form field will ever display: not in
+// apiToForm AND (renderedKeys given: not in renderedKeys; renderedKeys absent:
+// the key is a nested/dotted key such as `custom_fields.vog`, which no flat
+// form field can render). Pure — never called without a bag already confirmed.
+export function unmappedFormErrors(
+  err: unknown, apiToForm: Record<string, string>, renderedKeys?: string[],
+): UnmappedEntry[] {
+  const apiErrors = (err as ApiErrorResponse)?.response?.data?.errors
+  if (!apiErrors) return []
+  const rendered = renderedKeys ? new Set(renderedKeys) : null
+  return Object.entries(apiErrors)
+    .filter(([key]) => {
+      if (apiToForm[key] !== undefined) return false
+      return rendered ? !rendered.has(key) : key.includes('.')
+    })
+    .map(([key, value]) => {
+      const msg = Array.isArray(value) ? value[0] : value
+      return { key, message: typeof msg === 'string' ? msg : null }
+    })
 }

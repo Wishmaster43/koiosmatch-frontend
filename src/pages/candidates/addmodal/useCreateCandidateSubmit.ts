@@ -13,7 +13,9 @@ import { canonicalPhone } from '@/lib/phoneNumber'
 // DUP-04: one shared axios-error → message extractor, never a re-derived inline dance.
 import { extractApiError } from '@/lib/extractApiError'
 // DRY-1: one shared 422-bag mapper (field flags + server message text).
-import { extractFormErrorsWithMessages } from '@/lib/extractFormErrors'
+import { extractFormErrorsWithMessages, unmappedFormErrors } from '@/lib/extractFormErrors'
+// ONIX N-005: a 422 key no rendered field maps to still lands somewhere.
+import { formatUnmappedErrors } from '@/lib/formatUnmappedErrors'
 import type { Candidate } from '@/types/candidate'
 import type { FormState } from '../AddCandidateModal'
 import type { DuplicateMatch } from './useDuplicateProbe'
@@ -47,12 +49,14 @@ interface Args {
   onCreated?: (candidate: Candidate) => void
   onClose: () => void
   t: TFunction
+  /** Dotted 422 keys an actual field already renders (e.g. required custom fields) — excluded from the unmapped banner. */
+  renderedKeys?: string[]
 }
 
 // Owns validation and the create submit handler for the "+ Kandidaat" form.
 export function useCreateCandidateSubmit({
   setErrors, setSubmitErr, setFieldMessages, setDupBlock,
-  form, status, branchIds, requiredForm, touchInvalidFields, createCandidate, onCreated, onClose, t,
+  form, status, branchIds, requiredForm, touchInvalidFields, createCandidate, onCreated, onClose, t, renderedKeys,
 }: Args) {
   // Validates required + live-format fields, then submits the create; a 409 renders
   // the duplicate panel, a 422 maps field errors, anything else shows a generic message.
@@ -148,6 +152,11 @@ export function useCreateCandidateSubmit({
         const fieldErrors = extractFormErrorsWithMessages(ex, API_TO_FORM)
         setErrors(fieldErrors?.errors ?? {})
         setFieldMessages(fieldErrors?.messages ?? {})
+        // A bag key no rendered field maps to (e.g. a required custom field) would
+        // otherwise silently fail — surface it as a banner alongside the field flags.
+        const unmapped = unmappedFormErrors(ex, API_TO_FORM, renderedKeys)
+        const banner = formatUnmappedErrors(unmapped, t)
+        if (banner) setSubmitErr(banner)
       } else {
         // Fallback: show the server message or a generic error so the user isn't left guessing.
         setSubmitErr(extractApiError(ex, t('common:errorGeneric', 'Er is iets misgegaan')))

@@ -324,6 +324,19 @@ describe('AddCandidateModal · live format validation (VALIDATIE-LIVE-1)', () =>
     // The typed value is untouched — nothing was cleared on the rejected save.
     expect(emailInput.value).toBe('jan@example.nl')
   })
+
+  // ONIX N-005: a 422 bag key no field renders (a required custom field) must not
+  // fail silently — the banner picks it up alongside any mapped field errors.
+  it('a 422 key no field renders (custom_fields.vog) lands in the submit banner', async () => {
+    createCandidate.mockRejectedValue({
+      response: { status: 422, data: { errors: { 'custom_fields.vog': ['The custom_fields.vog field is required.'] } } },
+    })
+    const user = userEvent.setup()
+    render(<AddCandidateModal onClose={noop} onCreated={noop} />)
+    await fillRequired(user)
+    await user.click(screen.getByRole('button', { name: 'modal.create' }))
+    expect(await screen.findByText('common:validation.fieldRequiredNamed')).toBeInTheDocument()
+  })
 })
 
 // C-29 duplicate handling: the 409 used to dump the server's Dutch sentence into

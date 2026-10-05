@@ -515,6 +515,9 @@
   "comingSoon": "demnächst",
   "justNow": "gerade eben",
   "errorGeneric": "Etwas ist schiefgelaufen",
+  "validation": {
+    "fieldRequiredNamed": "Das Feld '{{field}}' ist erforderlich."
+  },
   "loadingShort": "…",
   "openInNewTab": "In neuem Tab öffnen",
   "editor": {

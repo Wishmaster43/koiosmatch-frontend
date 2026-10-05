@@ -515,6 +515,9 @@
   "comingSoon": "prossimamente",
   "justNow": "adesso",
   "errorGeneric": "Qualcosa è andato storto",
+  "validation": {
+    "fieldRequiredNamed": "Il campo '{{field}}' è obbligatorio."
+  },
   "loadingShort": "…",
   "openInNewTab": "Apri in una nuova scheda",
   "editor": {
