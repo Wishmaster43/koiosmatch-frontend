@@ -49,6 +49,10 @@ vi.mock('@/lib/settings/useAllSettings', async importOriginal => {
   const actual = await importOriginal<typeof import('@/lib/settings/useAllSettings')>()
   return { ...actual, useAllSettings: () => settingsState.settings }
 })
+// ONIX N-005: one required def ('vog') for the describe block at the bottom of
+// this file — every other describe block above renders no field for it (fields: []).
+const { customFieldsState } = vi.hoisted(() => ({ customFieldsState: { fields: [] as unknown[] } }))
+vi.mock('@/lib/useCustomFields', () => ({ useCustomFields: () => ({ fields: customFieldsState.fields, allFields: customFieldsState.fields, loading: false, error: false, invalidate: vi.fn(), refetch: vi.fn() }) }))
 
 // Resolve the active locale's own copy so assertions never guess/hardcode a language.
 const ct = (key: string, opts?: Record<string, unknown>) => i18n.t(key, { ns: 'customers', ...opts })
@@ -69,6 +73,7 @@ const statuses = [{ value: 'st-1', label: 'Actief' }]
 beforeEach(() => {
   authState.hasPermission = () => true
   settingsState.settings = {}
+  customFieldsState.fields = []
   vi.mocked(dryRunImport).mockReset()
   vi.mocked(runImport).mockReset()
 })
@@ -379,5 +384,26 @@ describe('AddDepartmentModal · one create per click (ONIX N-007)', () => {
     resolve()
     await waitFor(() => expect(onClose).toHaveBeenCalledTimes(1))
     expect(onCreate).toHaveBeenCalledTimes(1)
+  })
+})
+
+// ONIX N-005: the department create form renders + submits the tenant's REQUIRED custom fields.
+describe('AddDepartmentModal · required custom fields (ONIX N-005)', () => {
+  it('renders the required def, blocks submit while empty, and submits the typed value', async () => {
+    customFieldsState.fields = [{ key: 'vog', label: 'VOG', type: 'text', sort_order: 0, active: true, has_data: false, visible_in_ui: true, required_always: true, required_for: [] }]
+    const onCreate = vi.fn()
+    const user = userEvent.setup()
+    render(<AddDepartmentModal onClose={() => {}} onCreate={onCreate} locations={locations} statuses={statuses} />)
+    await user.type(screen.getByLabelText(ct('subModal.departmentName'), { exact: false }), 'Thuiszorg')
+
+    const createBtn = screen.getByRole('button', { name: ct('subModal.create') })
+    // The required custom field is empty — submit stays blocked even though name+location are filled.
+    expect(createBtn).toBeDisabled()
+
+    await user.type(screen.getByRole('textbox', { name: 'VOG' }), 'VOG-12345')
+    expect(createBtn).not.toBeDisabled()
+    await user.click(createBtn)
+    await waitFor(() => expect(onCreate).toHaveBeenCalledTimes(1))
+    expect(onCreate.mock.calls[0][0].customFields).toEqual({ vog: 'VOG-12345' })
   })
 })

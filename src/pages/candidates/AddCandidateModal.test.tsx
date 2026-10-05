@@ -37,6 +37,11 @@ const { state, createCandidate, getMock, postMock } = vi.hoisted(() => ({
 // the tests can assert the REQUEST (route + params/body), not just a callback.
 vi.mock('@/lib/api', () => ({ default: { get: getMock, post: postMock } }))
 vi.mock('@/lib/notify', () => ({ notifyError: vi.fn(), notifySuccess: vi.fn() }))
+// ONIX N-005: this modal's own RequiredCustomFieldsCard calls useCustomFields
+// directly — mocked here (as every other create-modal test does, see
+// AddApplicationModal.test.tsx) so it never reaches the above @/lib/api stub,
+// which does not implement getActiveTenantId. No required def by default.
+vi.mock('@/lib/useCustomFields', () => ({ useCustomFields: () => ({ fields: [], allFields: [], loading: false, error: false, invalidate: vi.fn(), refetch: vi.fn() }) }))
 
 // Tenant lookups/auth/users/locations are network-backed hooks — mocked directly
 // so the test isolates this modal's own wiring.

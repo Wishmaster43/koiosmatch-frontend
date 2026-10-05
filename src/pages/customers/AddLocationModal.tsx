@@ -59,6 +59,10 @@ import LocationAddressCard from './addmodal/LocationAddressCard'
 import LocationBusinessCard from './addmodal/LocationBusinessCard'
 import ContactOnSiteCard from './addmodal/ContactOnSiteCard'
 import LocationDescriptionCard from './addmodal/LocationDescriptionCard'
+// ONIX N-005: the entity's REQUIRED tenant custom fields (renders nothing when none exist).
+import RequiredCustomFieldsCard from '@/components/forms/RequiredCustomFieldsCard'
+import { requiredCustomFieldKeys, isRequiredCustomField, isCustomFieldFilled, requiredCustomFieldErrors, makeCustomFieldChangeHandler } from '@/components/forms/requiredCustomFields'
+import { useCustomFields } from '@/lib/useCustomFields'
 import { setLocationPrimaryContact, quickContactPayload } from './hooks/useCustomerContacts'
 import type { LocationPayload } from './hooks/useCustomerLocations'
 import type { ContactPayload } from './hooks/useCustomerContacts'
@@ -190,6 +194,10 @@ export default function AddLocationModal({
   // ter plaatse" e-mail — own sibling hook, same idiom as AddCandidateModal.
   const { markTouched, fieldMessage, touchInvalidFields, hasFormatError } =
     useLiveFieldValidation(form, t, EMAIL_VALIDATORS, EMAIL_ERROR_KEYS)
+  // ONIX N-005: this entity's REQUIRED tenant custom fields.
+  const { fields: customFieldDefs } = useCustomFields('customer_location')
+  const requiredCustomDefs = customFieldDefs.filter(isRequiredCustomField)
+  const customFieldsValid = requiredCustomDefs.every(def => isCustomFieldFilled(form.customFields[def.key]))
   // KVK/BTW-PER-LAND-1 (Danny 08-08, points 10 + 11): the KvK/BTW format follows the
   // country picked in THIS form (live — switching country re-checks both), and only a
   // tenant on 'block' mode is actually stopped from submitting.
@@ -229,6 +237,9 @@ export default function AddLocationModal({
     // KVK/BTW-PER-LAND-1: only a BLOCKING (tenant setting = 'block') identifier
     // mismatch stops the submit — a warning is shown but never refuses the save.
     if (hasIdentifierError) return
+    // ONIX N-005: block on an empty required custom field, same as the name check above.
+    const customFieldErrors = requiredCustomFieldErrors(requiredCustomDefs, form.customFields)
+    if (customFieldErrors) { setErrors(customFieldErrors); return }
     const payload = { ...form, name: form.name.trim() }
     // Edit path: update() keeps its existing toast-based error handling — unchanged,
     // closes immediately. The contact picker above only renders on CREATE (see the
@@ -279,7 +290,8 @@ export default function AddLocationModal({
       }
       onClose()
     } catch (err) {
-      handleApiError(err)
+      // ONIX N-005: a dotted custom_fields.* key this card already shows never also hits the generic banner.
+      handleApiError(err, requiredCustomFieldKeys(requiredCustomDefs))
     }
   })
 
@@ -287,7 +299,7 @@ export default function AddLocationModal({
   // K-283: the tenant's own establishments — same GET /locations list
   // LocationAddressTab's own branch field and the match form offer.
   const branchOptions = useLocations().map(b => ({ value: String(b.value), label: b.label }))
-  const canSubmit = !!form.name.trim() && !hasFormatError && !hasIdentifierError
+  const canSubmit = !!form.name.trim() && !hasFormatError && !hasIdentifierError && customFieldsValid
 
   // Render the error alert banner if present.
   const alertElement = createError && (
@@ -374,6 +386,10 @@ export default function AddLocationModal({
           />
 
           <LocationDescriptionCard value={form.description} onChange={v => set('description', v)} />
+
+          {/* ONIX N-005: LAST card, renders nothing on a tenant with no required custom fields. */}
+          <RequiredCustomFieldsCard entityType="customer_location" values={form.customFields}
+            onChange={makeCustomFieldChangeHandler(form.customFields, v => set('customFields', v), setErrors)} errors={errors} />
         </div>
       </div>
     </SubEntityModalFrame>

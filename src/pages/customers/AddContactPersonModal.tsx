@@ -71,6 +71,9 @@ import ContactDetailsCard from './addmodal/ContactDetailsCard'
 import ContactLinkCard from './ContactLinkCard'
 import { useAddContactPersonForm } from './useAddContactPersonForm'
 import SubEntityDuplicateNotice from './addmodal/SubEntityDuplicateNotice'
+// ONIX N-005: the entity's REQUIRED tenant custom fields (renders nothing when none exist).
+import RequiredCustomFieldsCard from '@/components/forms/RequiredCustomFieldsCard'
+import { makeCustomFieldChangeHandler } from '@/components/forms/requiredCustomFields'
 import type { ContactPayload } from './hooks/useCustomerContacts'
 import type { Contact, Department } from '@/types/customer'
 import type { Id, LookupOption } from '@/types/common'
@@ -122,7 +125,7 @@ export default function AddContactPersonModal({
   // All cross-card orchestration (form/error state, primary-replace confirm,
   // duplicate check, location→department cascade, submit + 422 mapping).
   const {
-    isEdit, importWizard, importOpen, setImportOpen, form, set, errors, createError, dialog,
+    isEdit, importWizard, importOpen, setImportOpen, form, set, errors, setErrors, createError, dialog,
     markTouched, emailDup, phoneDup, mobileDup, submit, saving, canSubmit,
     departmentOptions, departmentPlaceholder, showLocationPicker, showDepartmentPicker,
     emailMessage, phoneMessage, mobileMessage, handlePrimaryToggle, dup,
@@ -208,6 +211,10 @@ export default function AddContactPersonModal({
             onStatusChange={v => set('statusId', v || null)}
             onPrimaryToggle={handlePrimaryToggle}
           />
+
+          {/* ONIX N-005: LAST card, renders nothing on a tenant with no required custom fields. */}
+          <RequiredCustomFieldsCard entityType="customer_contact" values={form.customFields}
+            onChange={makeCustomFieldChangeHandler(form.customFields, v => set('customFields', v), setErrors)} errors={errors} />
         </div>
       </div>
 

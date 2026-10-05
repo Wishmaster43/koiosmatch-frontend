@@ -42,6 +42,10 @@ import { subEntityFrameProps } from './addmodal/subEntityFrameProps'
 import CreateErrorAlert from '@/components/forms/CreateErrorAlert'
 import { useSubEntitySave } from './hooks/useSubEntitySave'
 import SubEntityDuplicateNotice from './addmodal/SubEntityDuplicateNotice'
+// ONIX N-005: the entity's REQUIRED tenant custom fields (renders nothing when none exist).
+import RequiredCustomFieldsCard from '@/components/forms/RequiredCustomFieldsCard'
+import { requiredCustomFieldKeys, isRequiredCustomField, isCustomFieldFilled, requiredCustomFieldErrors, makeCustomFieldChangeHandler } from '@/components/forms/requiredCustomFields'
+import { useCustomFields } from '@/lib/useCustomFields'
 import { useSubEntityDuplicateGuard } from './addmodal/useSubEntityDuplicateGuard'
 import type { DepartmentPayload } from './hooks/useCustomerDepartments'
 import type { Department } from '@/types/customer'
@@ -101,6 +105,10 @@ export default function AddDepartmentModal({ onClose, onCreate, onImported, loca
   // advisory only. customerId is withheld on edit (see AddLocationModal's own note).
   const dup = useSubEntityDuplicateGuard('departments', isEdit ? undefined : customerId, DEPARTMENT_DUP_KEYS, form.name, String(form.locationId ?? ''), '', onOpenExisting,
     { restoreFailed: t('duplicate.departments.restoreFailed'), restoreForbidden: t('duplicate.departments.restoreForbidden') })
+  // ONIX N-005: this entity's REQUIRED tenant custom fields.
+  const { fields: customFieldDefs } = useCustomFields('customer_department')
+  const requiredCustomDefs = customFieldDefs.filter(isRequiredCustomField)
+  const customFieldsValid = requiredCustomDefs.every(def => isCustomFieldFilled(form.customFields[def.key]))
 
   const set = <K extends keyof DepartmentPayload>(k: K, v: DepartmentPayload[K]) => {
     setForm(f => ({ ...f, [k]: v }))
@@ -124,6 +132,9 @@ export default function AddDepartmentModal({ onClose, onCreate, onImported, loca
       setErrors({ name: !form.name.trim(), locationId: !form.locationId })
       return
     }
+    // ONIX N-005: block on an empty required custom field, same as the name/location check above.
+    const customFieldErrors = requiredCustomFieldErrors(requiredCustomDefs, form.customFields)
+    if (customFieldErrors) { setErrors(customFieldErrors); return }
     const payload = { ...form, name: form.name.trim() }
     // Edit path: update() keeps its existing toast-based error handling — unchanged,
     // closes immediately.
@@ -134,11 +145,12 @@ export default function AddDepartmentModal({ onClose, onCreate, onImported, loca
       await onCreate?.(payload)
       onClose()
     } catch (err) {
-      handleApiError(err)
+      // ONIX N-005: a dotted custom_fields.* key this card already shows never also hits the generic banner.
+      handleApiError(err, requiredCustomFieldKeys(requiredCustomDefs))
     }
   })
 
-  const canSubmit = !!form.name.trim() && !!form.locationId
+  const canSubmit = !!form.name.trim() && !!form.locationId && customFieldsValid
   const statusOptions = statuses.map(s => ({ value: String(s.id ?? s.value), label: s.label }))
   const showLocationPicker = !lockLocationId
 
@@ -254,6 +266,10 @@ export default function AddDepartmentModal({ onClose, onCreate, onImported, loca
             placeholder={t('common:add')} ariaLabel={t('departments.detail.description')} />
         </div>
       </div>
+
+      {/* ONIX N-005: LAST card, renders nothing on a tenant with no required custom fields. */}
+      <RequiredCustomFieldsCard entityType="customer_department" values={form.customFields}
+        onChange={makeCustomFieldChangeHandler(form.customFields, v => set('customFields', v), setErrors)} errors={errors} />
     </SubEntityModalFrame>
   )
 }

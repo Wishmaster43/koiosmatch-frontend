@@ -51,12 +51,15 @@ interface Args {
   t: TFunction
   /** Dotted 422 keys an actual field already renders (e.g. required custom fields) — excluded from the unmapped banner. */
   renderedKeys?: string[]
+  // ONIX N-005: the RequiredCustomFieldsCard's current values — rides along in
+  // the create body only when non-empty (mirrors every other optional section).
+  customFields?: Record<string, unknown>
 }
 
 // Owns validation and the create submit handler for the "+ Kandidaat" form.
 export function useCreateCandidateSubmit({
   setErrors, setSubmitErr, setFieldMessages, setDupBlock,
-  form, status, branchIds, requiredForm, touchInvalidFields, createCandidate, onCreated, onClose, t, renderedKeys,
+  form, status, branchIds, requiredForm, touchInvalidFields, createCandidate, onCreated, onClose, t, renderedKeys, customFields,
 }: Args) {
   // Validates required + live-format fields, then submits the create; a 409 renders
   // the duplicate panel, a 422 maps field errors, anything else shows a generic message.
@@ -125,6 +128,8 @@ export function useCreateCandidateSubmit({
         // Punt 10: only an explicit, non-empty choice rides along (explicit wins
         // server-side); empty = omit → auto-assign of the maker's branches.
         ...(branchIds.length ? { location_ids: branchIds } : {}),
+        // ONIX N-005: only ride along when at least one value was actually entered.
+        ...(customFields && Object.keys(customFields).length ? { custom_fields: customFields } : {}),
       }
       // Create via the hook; it rethrows so the 422 handling below still runs.
       // Create FIRST, then notify: `onCreated?.(await …)` short-circuits the whole

@@ -46,6 +46,10 @@ vi.mock('../hooks/useCandidateMutations', () => ({ useCreateCandidate: () => ({ 
 vi.mock('@/lib/useFunctions', () => ({ useFunctions: () => ({ functions: [], functionOptions: [].map(n => ({ value: n, label: n })), allowFreeEntry: true }) }))
 vi.mock('@/hooks/useProvinces', () => ({ useProvinces: () => ({ provinces: [] }) }))
 vi.mock('@/lib/useLocations', () => ({ useLocations: () => [] }))
+// ONIX N-005: the modal's RequiredCustomFieldsCard fetches GET /custom-fields through
+// useCustomFields; neutralised here so the positional api.get assertions below keep
+// seeing only the parse-cv poll (same stub as AddCandidateModal.test.tsx).
+vi.mock('@/lib/useCustomFields', () => ({ useCustomFields: () => ({ fields: [], allFields: [], loading: false, error: false, invalidate: vi.fn(), refetch: vi.fn() }) }))
 // Swap the rich-text editor for a plain textarea — this test proves the badge
 // LIFECYCLE (apply → mark, edit → clear), not the tiptap editing mechanics,
 // and prosemirror throws in jsdom (elementFromPoint/getClientRects missing).

@@ -5,18 +5,18 @@
  * candidates/vacancies exception (they keep their own pre-existing tabs).
  */
 import { useState, useId } from 'react'
-import type { CSSProperties } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Edit2, Save, X } from 'lucide-react'
 import { useCustomFields } from '@/lib/useCustomFields'
 import type { CustomFieldDef, CustomFieldEntityType } from '@/lib/useCustomFields'
+// ONIX N-005: the simple-type input moved to the shared forms kit so the create
+// modals' RequiredCustomFieldsCard renders the exact same control (§0.4).
+import { CustomFieldInput as FieldInput } from '@/components/forms/CustomFieldInput'
 // X-37: the read-only value rendering is shared with the merge modal's conflict step.
 import { displayCustomFieldValue } from '@/lib/customFieldDisplay'
 import { useDateFormat } from '@/lib/datetime'
 import RichTextEditor from '@/components/ui/RichTextEditor'
 import SafeHtml from '@/components/ui/SafeHtml'
-// G34: the house searchable dropdown replaces the native <select> field type.
-import CreatableSelect from '@/components/ui/CreatableSelect'
 // Job 45 / Danny 22-07 point 12: the SHARED titled-card frame — this tab is reused
 // across all 11 entity drawers, so both the bordered frame AND the uppercase group
 // title use the generic ui/SectionCard (never a candidate-only constants file),
@@ -24,27 +24,9 @@ import CreatableSelect from '@/components/ui/CreatableSelect'
 // groups (Persoonlijk/Contact) are boxed. The simple-fields grid used to float with
 // no title above it — that read as out of tone next to those sibling cards.
 import SectionCard, { sectionBlock } from '@/components/ui/SectionCard'
-import { fieldInputStyle } from '@/components/forms/fieldMetrics'
 import Button from '@/components/ui/Button'
 import ErrorBanner from '@/components/ui/ErrorBanner'
 import { GroupLabel } from '@/components/ui/typography'
-
-// Canon field style (G33/fieldMetrics) — was its own padding-6/font-12/radius-6 copy.
-const inputStyle: CSSProperties = fieldInputStyle
-
-// Render the edit control for one non-textarea field type.
-function FieldInput({ def, value, onChange, labelId }: { def: CustomFieldDef; value: unknown; onChange: (v: unknown) => void; labelId?: string }) {
-  if (def.type === 'boolean') return <input type="checkbox" checked={Boolean(value)} onChange={e => onChange(e.target.checked)} aria-labelledby={labelId} />
-  if (def.type === 'select') return (
-    <CreatableSelect aria-labelledby={labelId} value={value != null && value !== '' ? String(value) : null}
-      onChange={onChange} allowCreate={false} clearable placeholder="—"
-      options={(def.options ?? []).map(o => ({ value: o, label: o }))} style={inputStyle} />
-  )
-  return (
-    <input type={def.type === 'number' ? 'number' : def.type === 'date' ? 'date' : 'text'}
-      value={String(value ?? '')} onChange={e => onChange(e.target.value)} style={inputStyle} aria-labelledby={labelId} />
-  )
-}
 
 // One textarea-type custom field — its OWN rich-text block with an independent
 // pencil → save/✕ (house rule: every free-text field is rich text, RichTextEditor +

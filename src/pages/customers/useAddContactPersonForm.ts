@@ -20,6 +20,9 @@ import { extractFormErrorsWithMessages, unmappedFormErrors } from '@/lib/extract
 // ONIX N-005: a 422 key no rendered field maps to still lands somewhere.
 import { formatUnmappedErrors } from '@/lib/formatUnmappedErrors'
 import { useSubEntityDuplicateGuard } from './addmodal/useSubEntityDuplicateGuard'
+// ONIX N-005: the entity's REQUIRED tenant custom fields.
+import { requiredCustomFieldKeys, isRequiredCustomField, isCustomFieldFilled, requiredCustomFieldErrors } from '@/components/forms/requiredCustomFields'
+import { useCustomFields } from '@/lib/useCustomFields'
 import type { ContactPayload } from './hooks/useCustomerContacts'
 import type { Contact, Department } from '@/types/customer'
 import type { Id, LookupOption } from '@/types/common'
@@ -109,6 +112,10 @@ export function useAddContactPersonForm({
   // mobile, advisory only. customerId is withheld on edit (see AddLocationModal's own note).
   const dup = useSubEntityDuplicateGuard('contacts', isEdit ? undefined : customerId, CONTACT_DUP_KEYS, form.email, form.phone, form.mobile, onOpenExisting,
     { restoreFailed: t('duplicate.contacts.restoreFailed'), restoreForbidden: t('duplicate.contacts.restoreForbidden') })
+  // ONIX N-005: this entity's REQUIRED tenant custom fields.
+  const { fields: customFieldDefs } = useCustomFields('customer_contact')
+  const requiredCustomDefs = customFieldDefs.filter(isRequiredCustomField)
+  const customFieldsValid = requiredCustomDefs.every(def => isCustomFieldFilled(form.customFields[def.key]))
 
   const set = <K extends keyof ContactPayload>(k: K, v: ContactPayload[K]) => {
     setForm(f => ({ ...f, [k]: v }))
@@ -164,6 +171,9 @@ export function useAddContactPersonForm({
       setErrors(e => ({ ...e, email: !!emailDup, phone: !!phoneDup, mobile: !!mobileDup }))
       return
     }
+    // ONIX N-005: block on an empty required custom field, same as the identity checks above.
+    const customFieldErrors = requiredCustomFieldErrors(requiredCustomDefs, form.customFields)
+    if (customFieldErrors) { setErrors(e => ({ ...e, ...customFieldErrors })); return }
     // The pickers here are single-value on purpose — a new contact gets its FIRST
     // coupling; more are added in the drill-down. The arrays are derived from them so the
     // pivots are right from the first write instead of only after the next edit.
@@ -193,7 +203,8 @@ export function useAddContactPersonForm({
         setFieldMessages(fieldErrors.messages)
         // A bag key no rendered field maps to (e.g. a required custom field) would
         // otherwise silently fail — surface it as a banner alongside the field flags.
-        const unmapped = unmappedFormErrors(err, API_TO_FORM)
+        // ONIX N-005: a dotted custom_fields.* key this card already shows never also hits the generic banner.
+        const unmapped = unmappedFormErrors(err, API_TO_FORM, requiredCustomFieldKeys(requiredCustomDefs))
         const banner = formatUnmappedErrors(unmapped, t)
         if (banner) setCreateError(banner)
       } else {
@@ -202,7 +213,7 @@ export function useAddContactPersonForm({
     }
   })
 
-  const canSubmit = !!form.firstName.trim() && !!form.lastName.trim() && !emailDup && !phoneDup && !mobileDup && !hasFormatError
+  const canSubmit = !!form.firstName.trim() && !!form.lastName.trim() && !emailDup && !phoneDup && !mobileDup && !hasFormatError && customFieldsValid
   // Department options stay EMPTY until a location is picked — mirrors AddShiftModal's
   // customer->department cascade (PLAN-LOOKUP-1). Never fall back to "every department
   // of this customer": a department belongs to exactly one location, so offering the
@@ -235,7 +246,7 @@ export function useAddContactPersonForm({
   const mobileMessage = mobileDup ? t('subModal.duplicate.mobile', { name: mobileDup.name }) : fieldMessages.mobile
 
   return {
-    isEdit, importWizard, importOpen, setImportOpen, form, set, errors, createError, dialog,
+    isEdit, importWizard, importOpen, setImportOpen, form, set, errors, setErrors, createError, dialog,
     markTouched, emailDup, phoneDup, mobileDup, submit, saving, canSubmit,
     departmentOptions, departmentPlaceholder, showLocationPicker, showDepartmentPicker,
     emailMessage, phoneMessage, mobileMessage, handlePrimaryToggle, dup,

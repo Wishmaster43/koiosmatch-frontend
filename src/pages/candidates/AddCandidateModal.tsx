@@ -48,6 +48,10 @@ import WorkCard from './addmodal/WorkCard'
 import AddressCard from './addmodal/AddressCard'
 import ProfileTextCard from './addmodal/ProfileTextCard'
 import BranchesCard from './addmodal/BranchesCard'
+// ONIX N-005: the entity's REQUIRED tenant custom fields (renders nothing when none exist).
+import RequiredCustomFieldsCard from '@/components/forms/RequiredCustomFieldsCard'
+import { requiredCustomFieldKeys, isRequiredCustomField, isCustomFieldFilled } from '@/components/forms/requiredCustomFields'
+import { useCustomFields } from '@/lib/useCustomFields'
 import CvUploadCard from './addmodal/CvUploadCard'
 import PasteCvCard from './addmodal/PasteCvCard'
 import { CvFilledContext } from './addmodal/cvFilledContext'
@@ -146,6 +150,16 @@ export default function AddCandidateModal({ onClose, onCreated, onImported }: Ad
   const locations = useLocations()
   const seedBranchIds = (me?.branch_ids ?? []).map(String)
   const [branchIds, setBranchIds] = useState<string[]>(seedBranchIds)
+  // ONIX N-005: this entity's REQUIRED tenant custom fields (empty on a tenant
+  // with none configured — RequiredCustomFieldsCard then renders nothing).
+  const { fields: customFieldDefs } = useCustomFields('candidate')
+  const requiredCustomDefs = customFieldDefs.filter(isRequiredCustomField)
+  const [customFields, setCustomFields] = useState<Record<string, unknown>>({})
+  const setCustomField = (key: string, v: unknown) => {
+    setCustomFields(cf => ({ ...cf, [key]: v }))
+    const bagKey = `custom_fields.${key}`
+    if (errors[bagKey]) setErrors(e => ({ ...e, [bagKey]: false }))
+  }
   const [form, setForm] = useState<FormState>({
     firstName: '', middleName: '', lastName: '',
     functionTitle: '',
@@ -192,7 +206,7 @@ export default function AddCandidateModal({ onClose, onCreated, onImported }: Ad
   // VALIDATIE-LIVE-1 (§3 size split): live format checks + the 422 field message
   // resolution — own sibling hook, fed the live form so a message always reflects
   // the value currently on screen.
-  const { setFieldMessages, markTouched, fieldMessage, clearFieldMessage, touchInvalidFields, hasFormatError } =
+  const { fieldMessages, setFieldMessages, markTouched, fieldMessage, clearFieldMessage, touchInvalidFields, hasFormatError } =
     useLiveFieldValidation(form, t)
 
   // Central field-change handler: updates the form value and clears every stale
@@ -236,14 +250,19 @@ export default function AddCandidateModal({ onClose, onCreated, onImported }: Ad
   const { handleSubmit } = useCreateCandidateSubmit({
     setErrors, setSubmitErr, setFieldMessages, setDupBlock,
     form, status, branchIds, requiredForm, touchInvalidFields, createCandidate, onCreated, onClose, t,
+    // ONIX N-005: the custom-field values ride along in the body, and the dotted
+    // bag keys a field here already renders are excluded from the generic banner.
+    customFields, renderedKeys: requiredCustomFieldKeys(requiredCustomDefs),
   })
 
   const selectedStatus = phases.find(s => s.value === status)
   // CAND-IMPORT-FE-1: blocked while an import is past its upload step (preview or
   // result) — never let the manual form fire a SECOND create while the import is
   // mid-decision or has just written its own records (mirrors AddVacancyModal).
+  // ONIX N-005: an empty required custom field blocks submit, same as a required form field.
+  const customFieldsValid = requiredCustomDefs.every(def => isCustomFieldFilled(customFields[def.key]))
   const canSubmit       = !!status && requiredForm.every(k => String(form[k] ?? '').trim()) && !hasFormatError
-    && importWizard.step === 'upload'
+    && customFieldsValid && importWizard.step === 'upload'
   const statusLabel     = selectedStatus?.label ?? ''
   // RECHTEN-DETAIL-1: both parse routes gate on candidates.create now
   // (routes/api/tenant/candidates.php:60-61, re-measured 06-08).
@@ -324,6 +343,9 @@ export default function AddCandidateModal({ onClose, onCreated, onImported }: Ad
                   <ContactCard form={form} errors={errors} set={set} isReq={isReq} onBlur={markTouched} fieldMessage={fieldMessage} />
                   <WorkCard form={form} set={set} isReq={isReq} allowFreeEntry={allowFreeEntry} functions={functionOptions} ownerOptions={ownerOptions} />
                   <AddressCard form={form} errors={errors} set={set} isReq={isReq} provinces={provinces} />
+                  {/* ONIX N-005: full-width, directly after the address card — renders NOTHING (no wrapper,
+                      no extra grid row) on a tenant with no required custom fields. */}
+                  <RequiredCustomFieldsCard entityType="candidate" values={customFields} onChange={setCustomField} errors={errors} messages={fieldMessages} style={{ gridColumn: '1 / -1' }} />
                   <ProfileTextCard form={form} set={set} />
                   <BranchesCard branchIds={branchIds} setBranchIds={setBranchIds} locations={locations} />
                 </div>
