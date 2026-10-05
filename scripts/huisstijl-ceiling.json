@@ -261,7 +261,7 @@
   "src/pages/applications/ApplicationsBoard.test.tsx": 1,
   "src/pages/applications/ApplicationsListPanel.tsx": 1,
   "src/pages/applications/ApplicationsPage.tsx": 2,
-  "src/pages/applications/ApplicationsTable.tsx": 2,
+  "src/pages/applications/ApplicationsTable.tsx": 1,
   "src/pages/applications/data/applicationInsights.ts": 8,
   "src/pages/applications/data/applicationsShared.test.ts": 3,
   "src/pages/applications/data/mapApplication.test.ts": 1,
