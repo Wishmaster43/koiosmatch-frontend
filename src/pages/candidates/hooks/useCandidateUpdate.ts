@@ -10,6 +10,19 @@ import { mergePatch } from '@/lib/mergePatch'
 import type { Candidate } from '@/types/candidate'
 import type { Id } from '@/types/common'
 
+// ONIX K-011 (BE 7fe6b281): a status change CLEARS on the model whatever the new
+// status's flags no longer call for (status_reason, available_again_date,
+// blacklist_reason) and stamps status_changed_at — columns the FE never patched, so
+// adopting only the patched keys left the old reason and return date on screen until
+// the next refetch. Any patch that carries `status` adopts these server values too.
+export const STATUS_CHANGE_SERVER_KEYS = ['statusReason', 'statusReturnDate', 'blacklistReason', 'blacklistReasonKey', 'statusChangedAt'] as const
+
+// The keys to adopt from the server answer: the patched keys, plus the status-side
+// columns the model derives when the patch changed the status (K-011).
+export function serverAdoptKeys(patchKeys: string[]): string[] {
+  return patchKeys.includes('status') ? Array.from(new Set([...patchKeys, ...STATUS_CHANGE_SERVER_KEYS])) : patchKeys
+}
+
 interface UseCandidateUpdateArgs {
   candidates: Candidate[]; setCandidates: Dispatch<SetStateAction<Candidate[]>>
   selected: Candidate | null; setSelected: Dispatch<SetStateAction<Candidate | null>>
@@ -57,9 +70,11 @@ export function useCandidateUpdate({ candidates, setCandidates, selected, setSel
       // record — a parallel edit to another field must survive. Guarded with
       // `k in server`: a patched key mapCandidate never produces (e.g. a UI-only
       // key from useCandidatePlacedMatch) is skipped instead of writing `undefined`.
+      // K-011: a status change also adopts the reason/return-date/blacklist columns the
+      // model cleared or kept, so a stale reason never outlives the status it belonged to.
       const server = serverCandidate as unknown as Record<string, unknown>
       const fromServer: Record<string, unknown> = {}
-      keys.forEach(k => { if (k in server) fromServer[k] = server[k] })
+      serverAdoptKeys(keys).forEach(k => { if (k in server) fromServer[k] = server[k] })
       setCandidates(prev => prev.map(x => x.id === id ? { ...x, ...fromServer } as Candidate : x))
       setSelected(prev => (prev && prev.id === id ? { ...prev, ...fromServer } as Candidate : prev))
       setDetail(prev => (prev && prev.id === id ? { ...prev, ...fromServer } as Candidate : prev))
