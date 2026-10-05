@@ -108,6 +108,7 @@ describe('useTasksData · reference-number lookup (NUMMER-1)', () => {
     await waitFor(() => expect(result.current.loading).toBe(false))
     const call = mockedGet.mock.calls.find(c => c[0] === '/tasks')
     expect((call?.[1] as { params?: Record<string, unknown> })?.params?.ref).toBeUndefined()
+    expect((call?.[1] as { params?: Record<string, unknown> })?.params?.q).toBeUndefined()
   })
 
   it('sends ?ref= on the active list when the search box holds a reference number', async () => {
@@ -152,5 +153,47 @@ describe('useTasksData · reference-number lookup (NUMMER-1)', () => {
     const { result } = renderHook(() => useTasksData({ showArchived: false, refQuery: 'T-00042', ...lookupProps }))
     await waitFor(() => expect(result.current.all).toHaveLength(1))
     expect(result.current.all[0].referenceNumber).toBe('T-00042')
+  })
+})
+
+/**
+ * J013-SEARCH-1 (J4) — the free-text term must reach the server as `?q=` (the backend
+ * matches every typed word across title, description and the linked candidate/contact/
+ * customer/vacancy names), never stay a client-side `.includes()` over the loaded page.
+ * These assert the REQUEST (route + params), because that is the seam.
+ */
+describe('useTasksData · free-text search (J013-SEARCH-1 J4)', () => {
+  it('sends ?q= on the active list page loop when the search box holds free text', async () => {
+    mockedGet.mockResolvedValue({ data: { data: [] } })
+    const { result } = renderHook(() => useTasksData({ showArchived: false, searchQuery: 'Lotte Bakker', ...lookupProps }))
+    await waitFor(() => expect(result.current.loading).toBe(false))
+    const call = mockedGet.mock.calls.find(c => c[0] === '/tasks')
+    expect(call?.[1]?.params).toEqual({ q: 'Lotte Bakker', per_page: 500, page: 1 })
+  })
+
+  it('rides ?q= alongside archived=1 so an archived task is searchable by name too', async () => {
+    mockedGet.mockResolvedValue({ data: { data: [] } })
+    const { result } = renderHook(() => useTasksData({ showArchived: true, searchQuery: 'Lotte Bakker', ...lookupProps }))
+    await waitFor(() => expect(result.current.loading).toBe(false))
+    const archivedCall = mockedGet.mock.calls.find(c => (c[1] as { params?: Record<string, unknown> })?.params?.archived)
+    expect(archivedCall?.[1]?.params).toEqual({ archived: 1, q: 'Lotte Bakker', per_page: 500, page: 1 })
+  })
+
+  it('refetches when the search term changes and drops ?q= again when the box is cleared', async () => {
+    mockedGet.mockResolvedValue({ data: { data: [] } })
+    const { result, rerender } = renderHook(
+      ({ q }: { q: string | null }) => useTasksData({ showArchived: false, searchQuery: q, ...lookupProps }),
+      { initialProps: { q: null as string | null } },
+    )
+    await waitFor(() => expect(result.current.loading).toBe(false))
+    rerender({ q: 'Bakker' })
+    await waitFor(() => expect(mockedGet.mock.calls.some(c => (c[1] as { params?: Record<string, unknown> })?.params?.q === 'Bakker')).toBe(true))
+    // Clearing must go back to the full list with a NEW, q-less request (a stale
+    // narrowed result would read as "these are all the tasks").
+    mockedGet.mockClear()
+    rerender({ q: null })
+    await waitFor(() => expect(mockedGet.mock.calls.some(
+      c => c[0] === '/tasks' && (c[1] as { params?: Record<string, unknown> })?.params?.q === undefined,
+    )).toBe(true))
   })
 })

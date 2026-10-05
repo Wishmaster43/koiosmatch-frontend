@@ -19,6 +19,11 @@ interface UseTasksDataParams {
   // send `?ref=` and the server returns just that task (TaskQuery returns early on
   // ref, so no other filter can hide it). Null = the normal free-text page.
   refQuery?: string | null
+  // J013-SEARCH-1 (J4): the free-text search term, sent as `?q=` on both fetches so the
+  // backend's every-word-matches rule (title, description, linked names) does the
+  // searching; null = no search. Never set together with refQuery (the filters hook
+  // picks one shape per typed value).
+  searchQuery?: string | null
   statuses: TaskLookupItem[]
   priorities: TaskLookupItem[]
   types: TaskLookupItem[]
@@ -57,7 +62,7 @@ async function fetchAllTaskPages(baseParams: Record<string, unknown>, ref: strin
 
 // Data layer for TasksPage (see the module doc above): loads the active list, lazily loads archived tasks while that toggle is on, and decorates every row with its lookup label/colour.
 export function useTasksData({
-  showArchived, refQuery = null, statuses, priorities, types, statusMeta, priorityMeta, typeMeta, doneStatusValues,
+  showArchived, refQuery = null, searchQuery = null, statuses, priorities, types, statusMeta, priorityMeta, typeMeta, doneStatusValues,
 }: UseTasksDataParams) {
   const [tasks,    setTasks]    = useState<Task[]>([])
   const [loading,  setLoading]  = useState(true)
@@ -88,8 +93,9 @@ export function useTasksData({
     const ctrl = new AbortController()
     setLoading(true); setError(false)
     // NUMMER-1: `?ref=` narrows the fetch to the one task carrying that number
-    // (single request); otherwise the full set (page loop, see above).
-    fetchAllTaskPages({}, refQuery, ctrl.signal)
+    // (single request); otherwise the full set (page loop, see above), narrowed by
+    // the server-side `?q=` free-text search when the box holds a term (J4).
+    fetchAllTaskPages(searchQuery ? { q: searchQuery } : {}, refQuery, ctrl.signal)
       .then(rows => setTasks(rows.map(mapTask)))
       .catch(err => {
         if (isAbortError(err)) return
@@ -97,7 +103,7 @@ export function useTasksData({
       })
       .finally(() => { if (!ctrl.signal.aborted) setLoading(false) })
     return () => ctrl.abort()
-  }, [refQuery])
+  }, [refQuery, searchQuery])
 
   // All tasks decorated with their lookup labels/colours — the basis for KPIs/donuts/view.
   // Archived (soft-deleted) tasks, fetched lazily while the archived toggle is on
@@ -109,7 +115,7 @@ export function useTasksData({
     if (!showArchived) return
     const ctrl = new AbortController()
     setArchivedError(false); setArchivedLoading(true)
-    fetchAllTaskPages({ archived: 1 }, refQuery, ctrl.signal)
+    fetchAllTaskPages(searchQuery ? { archived: 1, q: searchQuery } : { archived: 1 }, refQuery, ctrl.signal)
       .then(rows => setArchivedTasks(rows.map(mapTask).map(x => ({ ...x, archived: true }))))
       .catch(err => {
         if (isAbortError(err)) return
@@ -120,7 +126,7 @@ export function useTasksData({
       })
       .finally(() => { if (!ctrl.signal.aborted) setArchivedLoading(false) })
     return () => ctrl.abort()
-  }, [showArchived, refQuery])
+  }, [showArchived, refQuery, searchQuery])
 
   const all = useMemo(() => (showArchived ? archivedTasks : tasks).map(decorate), [tasks, archivedTasks, showArchived, statuses, priorities, types]) // eslint-disable-line react-hooks/exhaustive-deps
 

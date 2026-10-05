@@ -87,7 +87,7 @@ function TasksPageInner({ intent }: { intent?: unknown }) {
   usePublishSelection('tasks', selectedIds)
   // ALL filter state + the row predicate live in one hook (§0.3 size split).
   const {
-    showArchived, setShowArchived, showTrash, setShowTrash, query, setQuery, refQuery,
+    showArchived, setShowArchived, showTrash, setShowTrash, query, setQuery, refQuery, searchQuery,
     selectedStatus, setSelectedStatus, selectedPriority, setSelectedPriority,
     selectedType, setSelectedType, selectedAssignee, setSelectedAssignee,
     selectedTeam, setSelectedTeam, selectedLinkType, setSelectedLinkType,
@@ -112,11 +112,11 @@ function TasksPageInner({ intent }: { intent?: unknown }) {
 
   // Data layer: load + decorate tasks/archived tasks (§0.3 split → hook).
   // NUMMER-1: `refQuery` (T-00042) turns the header search into an exact server-side
-  // `?ref=` lookup; anything else stays the client-side free-text filter.
+  // `?ref=` lookup; J013-SEARCH-1 (J4): any other text is the server's `?q=` search.
   // TRASH-OVERAL-2: the trash view rides the SAME ?archived=1 fetch as the
   // archived view — the lifecycle filter below splits the soft-deleted set.
   const { setTasks, archivedTasks, setArchivedTasks, loading, error, all, decorate } = useTasksData({
-    showArchived: showArchived || showTrash, refQuery, statuses, priorities, types, statusMeta, priorityMeta, typeMeta, doneStatusValues,
+    showArchived: showArchived || showTrash, refQuery, searchQuery, statuses, priorities, types, statusMeta, priorityMeta, typeMeta, doneStatusValues,
   })
 
   // Donut/filter/KPI derivations from the decorated list (§0.3 split → hook).
