@@ -259,6 +259,7 @@
       "expiresIn": "Expires in {{count}} min",
       "expiresSoon": "Expires within a minute",
       "confirmed": "Done.",
+      "warnings": "Note",
       "cancelled": "Cancelled.",
       "expired": "This proposal has expired. Ask again.",
       "error": "Something went wrong. Please try again.",

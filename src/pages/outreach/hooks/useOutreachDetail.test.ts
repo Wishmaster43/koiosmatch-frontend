@@ -156,6 +156,28 @@ describe('useOutreachDetail · setFields (Information tab)', () => {
     await act(async () => { await result.current.setFields('c1', { channel: 'whatsapp' }) })
     expect(result.current.detail?.channel).toBe('whatsapp')
   })
+
+  // CALLLIST-KEY-1: the two name-collision codes show their translated text,
+  // not the generic save-failed toast.
+  it('shows the translated live-duplicate text on a call_list_name_taken 422', async () => {
+    vi.mocked(api.get).mockResolvedValue({ data: { data: campaign } })
+    vi.mocked(api.patch).mockRejectedValue({ response: { data: { code: 'call_list_name_taken' } } })
+    const { result } = renderHook(() => useOutreachDetail('c1'))
+    await waitFor(() => expect(result.current.detail).not.toBeNull())
+
+    await act(async () => { await result.current.setFields('c1', { name: 'Bellijst Zorg' }) })
+    expect(notifyError).toHaveBeenCalledWith('create.nameTaken')
+  })
+
+  it('shows the translated archived-duplicate text on a call_list_name_taken_archived 422', async () => {
+    vi.mocked(api.get).mockResolvedValue({ data: { data: campaign } })
+    vi.mocked(api.patch).mockRejectedValue({ response: { data: { code: 'call_list_name_taken_archived' } } })
+    const { result } = renderHook(() => useOutreachDetail('c1'))
+    await waitFor(() => expect(result.current.detail).not.toBeNull())
+
+    await act(async () => { await result.current.setFields('c1', { name: 'Bellijst Zorg' }) })
+    expect(notifyError).toHaveBeenCalledWith('create.nameTakenArchived')
+  })
 })
 
 // DRILL-REFRESH-AUDIT-1: every successful mutation reports upstream — owner as

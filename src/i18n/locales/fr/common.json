@@ -259,6 +259,7 @@
       "expiresIn": "Expire dans {{count}} min",
       "expiresSoon": "Expire dans moins d'une minute",
       "confirmed": "Terminé.",
+      "warnings": "Remarque",
       "cancelled": "Annulé.",
       "expired": "Cette proposition a expiré. Redemandez-la.",
       "error": "Une erreur s'est produite. Veuillez réessayer.",

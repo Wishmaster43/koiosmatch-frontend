@@ -79,7 +79,11 @@
     "submit": "Criar lista de chamadas",
     "saving": "A criar…",
     "error": "Falha ao criar. Tente novamente.",
-    "poolsLoadError": "Falha ao carregar os pools de talentos."
+    "poolsLoadError": "Falha ao carregar os pools de talentos.",
+    "nameTaken": "Já existe uma lista de chamadas com este nome.",
+    "nameTakenRef": "Já existe uma lista de chamadas com este nome ({{reference}}).",
+    "nameTakenArchived": "Já existe uma lista de chamadas arquivada com este nome.",
+    "nameTakenArchivedRef": "Já existe uma lista de chamadas arquivada com este nome ({{reference}})."
   },
   "page": {
     "searchPlaceholder": "Pesquisar lista de chamadas, pool ou candidato…"

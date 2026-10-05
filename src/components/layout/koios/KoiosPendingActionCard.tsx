@@ -25,7 +25,7 @@ import { Check, AlertTriangle } from 'lucide-react'
 import { ActionRuleBanner } from '@/components/actionrules'
 import Button from '@/components/ui/Button'
 import CalloutBox from '@/components/ui/CalloutBox'
-import { Caption } from '@/components/ui/typography'
+import { Caption, GroupLabel } from '@/components/ui/typography'
 import SoftChip from '@/components/ui/SoftChip'
 import { useNumberFormat } from '@/lib/formatters'
 import { confirmPendingAction, cancelPendingAction } from './koiosApi'
@@ -88,6 +88,9 @@ export default function KoiosPendingActionCard({ action }: { action: KoiosPendin
   const [existingRef, setExistingRef] = useState<{ type: string; id: Id; archived?: boolean } | null>(null)
   // The record the tool created (§0B; Danny 09-09: "I'm missing the hyperlinks on created tasks").
   const [created, setCreated] = useState<KoiosContextRef | null>(null)
+  // CALLLIST-KEY-1: English warning strings from a reuse that could not apply a
+  // requested channel/owner (the existing list kept its own stored values).
+  const [warnings, setWarnings] = useState<string[] | null>(null)
 
   // The tool's connection gate (KOIOS-AGENT-FE-1 rule 1): an integration tool with
   // an inactive connection is never offered as a silent-failing confirm.
@@ -154,6 +157,10 @@ export default function KoiosPendingActionCard({ action }: { action: KoiosPendin
           return
         }
         setCreated(createdRefFromToolResult(data, action.title))
+        // CALLLIST-KEY-1: `warnings` (English strings) only present when a reuse
+        // could not apply a requested channel/owner — never shown otherwise.
+        const toolWarnings = (data as Record<string, unknown> | null)?.warnings
+        setWarnings(Array.isArray(toolWarnings) && toolWarnings.length ? (toolWarnings as string[]) : null)
         setStatus('confirmed')
       })
       .catch((e) => {
@@ -300,6 +307,14 @@ export default function KoiosPendingActionCard({ action }: { action: KoiosPendin
           <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}><Check size={14} /> {t('koios.pendingAction.confirmed')}</span>
           {/* The record the tool created, as the shared deep-link chip (§0B). */}
           {created && <KoiosRefChip item={created} />}
+        </div>
+      )}
+      {/* CALLLIST-KEY-1: a reuse's channel/owner warnings — English server strings,
+          never translated (the contract carries them as-is), listed under the chip. */}
+      {status === 'confirmed' && warnings && (
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+          <GroupLabel>{t('koios.pendingAction.warnings')}</GroupLabel>
+          {warnings.map((w, i) => <Caption key={i} as="p" style={{ margin: 0 }}>{w}</Caption>)}
         </div>
       )}
       {status === 'cancelled' && (

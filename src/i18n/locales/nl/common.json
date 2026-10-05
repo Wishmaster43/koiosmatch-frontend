@@ -259,6 +259,7 @@
       "expiresIn": "Verloopt over {{count}} min",
       "expiresSoon": "Verloopt binnen een minuut",
       "confirmed": "Gelukt.",
+      "warnings": "Let op",
       "cancelled": "Geannuleerd.",
       "expired": "Dit voorstel is verlopen. Vraag het opnieuw.",
       "error": "Er ging iets mis. Probeer het opnieuw.",

@@ -79,7 +79,11 @@
     "submit": "Anrufliste erstellen",
     "saving": "Wird erstellt…",
     "error": "Erstellung fehlgeschlagen. Bitte erneut versuchen.",
-    "poolsLoadError": "Talentpools konnten nicht geladen werden."
+    "poolsLoadError": "Talentpools konnten nicht geladen werden.",
+    "nameTaken": "Es gibt bereits eine Anrufliste mit diesem Namen.",
+    "nameTakenRef": "Es gibt bereits eine Anrufliste mit diesem Namen ({{reference}}).",
+    "nameTakenArchived": "Es gibt bereits eine archivierte Anrufliste mit diesem Namen.",
+    "nameTakenArchivedRef": "Es gibt bereits eine archivierte Anrufliste mit diesem Namen ({{reference}})."
   },
   "page": {
     "searchPlaceholder": "Anrufliste, Pool oder Kandidat suchen…"

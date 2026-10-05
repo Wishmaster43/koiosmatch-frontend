@@ -22,5 +22,13 @@ export function createdRefFromToolResult(data: unknown, fallbackLabel: string): 
     const title = pick<string>(d, 'title', 'titel')
     return { type: 'task', id: String(taskId), label: typeof title === 'string' && title ? title : fallbackLabel }
   }
+  // CALLLIST-KEY-1: create_call_list → { ok, call_list_id, name, reused, warnings[] }.
+  // Keys are English-only (CALLLIST-KEY-1 round 1 already removed the Dutch twins).
+  // A REUSED list is still a valid created-record chip; only `ok === false` links nothing.
+  const callListId = d.call_list_id
+  if (callListId != null && callListId !== '') {
+    const name = d.name
+    return { type: 'calllist', id: String(callListId), label: typeof name === 'string' && name ? name : fallbackLabel }
+  }
   return null
 }

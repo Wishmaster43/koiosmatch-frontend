@@ -259,6 +259,7 @@
       "expiresIn": "Läuft in {{count}} Min. ab",
       "expiresSoon": "Läuft innerhalb einer Minute ab",
       "confirmed": "Erledigt.",
+      "warnings": "Hinweis",
       "cancelled": "Abgebrochen.",
       "expired": "Dieser Vorschlag ist abgelaufen. Bitte erneut fragen.",
       "error": "Etwas ist schiefgelaufen. Bitte erneut versuchen.",

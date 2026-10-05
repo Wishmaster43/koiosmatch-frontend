@@ -259,6 +259,7 @@
       "expiresIn": "Caduca en {{count}} min",
       "expiresSoon": "Caduca en menos de un minuto",
       "confirmed": "Hecho.",
+      "warnings": "Aviso",
       "cancelled": "Cancelado.",
       "expired": "Esta propuesta ha caducado. Vuelve a pedirlo.",
       "error": "Algo salió mal. Inténtalo de nuevo.",

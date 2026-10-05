@@ -79,7 +79,11 @@
     "submit": "Bellijst aanmaken",
     "saving": "Aanmaken…",
     "error": "Aanmaken is mislukt. Probeer het opnieuw.",
-    "poolsLoadError": "Bronpools laden is mislukt."
+    "poolsLoadError": "Bronpools laden is mislukt.",
+    "nameTaken": "Er bestaat al een bellijst met deze naam.",
+    "nameTakenRef": "Er bestaat al een bellijst met deze naam ({{reference}}).",
+    "nameTakenArchived": "Er bestaat al een gearchiveerde bellijst met deze naam.",
+    "nameTakenArchivedRef": "Er bestaat al een gearchiveerde bellijst met deze naam ({{reference}})."
   },
   "page": {
     "searchPlaceholder": "Zoek bellijst, pool of kandidaat…"

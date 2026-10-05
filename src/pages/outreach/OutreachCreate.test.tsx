@@ -151,3 +151,71 @@ describe('OutreachCreate · validation + submit payload (unchanged behaviour)', 
     await waitFor(() => expect(createCampaign).toHaveBeenCalledWith({ name: 'Bellijst Zuid', channel: 'call', from_pool_id: 'p1' }))
   })
 })
+
+// CALLLIST-KEY-1: a same-name (any case) collision 422s with a stable `code` — a
+// calm field error under the name, never the raw server message, never an id.
+describe('OutreachCreate · name-collision 422 (CALLLIST-KEY-1)', () => {
+  it('shows the live-duplicate field error, without a reference when meta is absent', async () => {
+    const user = userEvent.setup()
+    createCampaign.mockRejectedValueOnce({ response: { data: { code: 'call_list_name_taken' } } })
+    render(<OutreachCreate onClose={vi.fn()} onCreated={vi.fn()} />)
+    await user.type(screen.getByPlaceholderText('create.namePlaceholder'), 'Bellijst Noord')
+    await user.click(screen.getByRole('button', { name: 'create.submit' }))
+    expect(await screen.findByText('create.nameTaken')).toBeInTheDocument()
+  })
+
+  it('shows the live-duplicate field error WITH the reference when meta is present (never the raw id)', async () => {
+    const user = userEvent.setup()
+    createCampaign.mockRejectedValueOnce({
+      response: { data: { code: 'call_list_name_taken', meta: { existing_call_list_id: 'uuid-1', existing_reference_number: 'CL-042' } } },
+    })
+    render(<OutreachCreate onClose={vi.fn()} onCreated={vi.fn()} />)
+    await user.type(screen.getByPlaceholderText('create.namePlaceholder'), 'Bellijst Noord')
+    await user.click(screen.getByRole('button', { name: 'create.submit' }))
+    expect(await screen.findByText('create.nameTakenRef')).toBeInTheDocument()
+    expect(screen.queryByText(/uuid-1/)).toBeNull()
+  })
+
+  it('shows the archived-duplicate field error, without a reference when meta is absent', async () => {
+    const user = userEvent.setup()
+    createCampaign.mockRejectedValueOnce({ response: { data: { code: 'call_list_name_taken_archived' } } })
+    render(<OutreachCreate onClose={vi.fn()} onCreated={vi.fn()} />)
+    await user.type(screen.getByPlaceholderText('create.namePlaceholder'), 'Bellijst Noord')
+    await user.click(screen.getByRole('button', { name: 'create.submit' }))
+    expect(await screen.findByText('create.nameTakenArchived')).toBeInTheDocument()
+  })
+
+  it('shows the archived-duplicate field error WITH the reference when meta is present (never the raw id)', async () => {
+    const user = userEvent.setup()
+    createCampaign.mockRejectedValueOnce({
+      response: { data: { code: 'call_list_name_taken_archived', meta: { existing_call_list_id: 'uuid-2', existing_reference_number: 'CL-099' } } },
+    })
+    render(<OutreachCreate onClose={vi.fn()} onCreated={vi.fn()} />)
+    await user.type(screen.getByPlaceholderText('create.namePlaceholder'), 'Bellijst Noord')
+    await user.click(screen.getByRole('button', { name: 'create.submit' }))
+    expect(await screen.findByText('create.nameTakenArchivedRef')).toBeInTheDocument()
+    expect(screen.queryByText(/uuid-2/)).toBeNull()
+  })
+
+  it('a different failure keeps the generic error state, not a field error', async () => {
+    const user = userEvent.setup()
+    createCampaign.mockRejectedValueOnce(new Error('network'))
+    render(<OutreachCreate onClose={vi.fn()} onCreated={vi.fn()} />)
+    await user.type(screen.getByPlaceholderText('create.namePlaceholder'), 'Bellijst Noord')
+    await user.click(screen.getByRole('button', { name: 'create.submit' }))
+    expect(await screen.findByText('create.error')).toBeInTheDocument()
+    expect(screen.queryByText('create.nameTaken')).toBeNull()
+  })
+
+  it('typing clears the field error', async () => {
+    const user = userEvent.setup()
+    createCampaign.mockRejectedValueOnce({ response: { data: { code: 'call_list_name_taken' } } })
+    render(<OutreachCreate onClose={vi.fn()} onCreated={vi.fn()} />)
+    const input = screen.getByPlaceholderText('create.namePlaceholder')
+    await user.type(input, 'Bellijst Noord')
+    await user.click(screen.getByRole('button', { name: 'create.submit' }))
+    expect(await screen.findByText('create.nameTaken')).toBeInTheDocument()
+    await user.type(input, '2')
+    expect(screen.queryByText('create.nameTaken')).toBeNull()
+  })
+})

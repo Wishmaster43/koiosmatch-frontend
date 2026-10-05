@@ -23,6 +23,7 @@ import { useState, useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
 import api from '@/lib/api'
 import { createCampaign } from './data/outreachApi'
+import { callListNameConflict } from './data/callListNameConflict'
 import type { Campaign } from './hooks/useOutreachCampaigns'
 import FloatingPanel from '@/components/ui/FloatingPanel'
 import { WIDE_MODAL_PANEL_SIZE } from '@/components/ui/wideModalPanelSize'
@@ -32,6 +33,8 @@ import CreatableSelect from '@/components/ui/CreatableSelect'
 import ModalFooter from '@/components/ui/ModalFooter'
 import { Caption } from '@/components/ui/typography'
 import ErrorBanner from '@/components/ui/ErrorBanner'
+import FieldNotice from '@/components/ui/FieldNotice'
+import { CANON_LABEL_WIDTH } from '@/components/drawer/fieldRowCanon'
 import TitleBarPills from '@/components/ui/TitleBarPills'
 import ModalTitleBarPillsRow from '@/components/forms/ModalTitleBarPillsRow'
 import { CHANNEL_META } from './outreachChannelMeta'
@@ -52,6 +55,9 @@ export default function OutreachCreate({ onClose, onCreated }: Props) {
   const [poolsError, setPoolsError] = useState(false)
   const [saving, setSaving] = useState(false)
   const [error, setError]   = useState(false)
+  // CALLLIST-KEY-1: a calm field error for the two name-collision 422 codes,
+  // separate from the generic error state — cleared as soon as the name changes.
+  const [nameError, setNameError] = useState<string | null>(null)
 
   // Load talent pools for the optional source picker (shared /pools resource) —
   // an honest error state, never a silently empty "this tenant has no pools" list.
@@ -70,6 +76,7 @@ export default function OutreachCreate({ onClose, onCreated }: Props) {
     if (!canSubmit) return
     setSaving(true)
     setError(false)
+    setNameError(null)
     try {
       // DD-FE-3: createCampaign now unwraps to the record (was the raw envelope);
       // `unwrap` returns `unknown` by design (mirrors OutreachPage's own
@@ -77,8 +84,20 @@ export default function OutreachCreate({ onClose, onCreated }: Props) {
       const created = await createCampaign({ name: name.trim(), channel, ...(poolId ? { from_pool_id: poolId } : {}) })
       onCreated(created as Campaign)
       onClose()
-    } catch {
-      setError(true)
+    } catch (err) {
+      // CALLLIST-KEY-1: a same-name (any case) live/archived call list 422s with
+      // a stable code; show a calm field error (+ its reference when visible),
+      // never the raw id — any other failure keeps the generic error state.
+      const body = (err as { response?: { data?: { code?: string; meta?: { existing_reference_number?: string } } } })?.response?.data
+      const reference = body?.meta?.existing_reference_number
+      const conflict = callListNameConflict(body?.code)
+      if (conflict === 'live') {
+        setNameError(reference ? t('create.nameTakenRef', { reference }) : t('create.nameTaken'))
+      } else if (conflict === 'archived') {
+        setNameError(reference ? t('create.nameTakenArchivedRef', { reference }) : t('create.nameTakenArchived'))
+      } else {
+        setError(true)
+      }
       setSaving(false)
     }
   }
@@ -110,12 +129,19 @@ export default function OutreachCreate({ onClose, onCreated }: Props) {
           <div>
             <div style={cardHead}>{t('create.generalCard')}</div>
             <div style={cardBox}>
-              <FieldRow label={t('create.name')} required>
-                {/* Enter-to-submit (restored SPLITS-R2 regression): the old bare input
-                    had this before the FieldRow/TextField conversion. */}
-                <TextField value={name} onChange={setName} placeholder={t('create.namePlaceholder')}
-                  onKeyDown={e => e.key === 'Enter' && submit()} />
-              </FieldRow>
+              <div>
+                <FieldRow label={t('create.name')} required>
+                  {/* Enter-to-submit (restored SPLITS-R2 regression): the old bare input
+                      had this before the FieldRow/TextField conversion. */}
+                  <TextField value={name} onChange={v => { setName(v); setNameError(null) }}
+                    placeholder={t('create.namePlaceholder')} error={!!nameError}
+                    onKeyDown={e => e.key === 'Enter' && submit()} />
+                </FieldRow>
+                {/* CALLLIST-KEY-1: the field error for a same-name collision — the shared
+                    FieldNotice atom (mirrors LocationAddressTab), indented under the input
+                    column (label width + the FieldRow gap), not the label column. */}
+                <FieldNotice text={nameError} style={{ marginLeft: CANON_LABEL_WIDTH + 10 }} />
+              </div>
             </div>
           </div>
 

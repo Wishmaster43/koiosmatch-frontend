@@ -352,4 +352,37 @@ describe('KoiosPendingActionCard', () => {
     await waitFor(() => expect(screen.getByTestId('koios-pending-action')).toHaveAttribute('data-status', 'refused'))
     expect(screen.queryByText('koios.pendingAction.confirmed')).not.toBeInTheDocument()
   })
+
+  // CALLLIST-KEY-1: a create_call_list result shows the created/reused list as a
+  // deep-link chip, plus any reuse channel/owner warnings (English, from the server).
+  it('renders the created call list as a deep-link chip on confirm', async () => {
+    mockConfirm.mockResolvedValue({ status: 'executed', data: { ok: true, call_list_id: 'cl-1', name: 'Bellijst Noord' } })
+    const user = userEvent.setup()
+    renderCard(action({ tool: 'create_call_list' }))
+    await user.click(screen.getByText('koios.pendingAction.confirm'))
+    await waitFor(() => expect(screen.getByTestId('koios-pending-action')).toHaveAttribute('data-status', 'confirmed'))
+    expect(screen.getByText('Bellijst Noord')).toBeInTheDocument()
+  })
+
+  it('renders the reuse warnings list under the chip when present', async () => {
+    mockConfirm.mockResolvedValue({
+      status: 'executed',
+      data: { ok: true, call_list_id: 'cl-1', name: 'Bellijst Noord', reused: true, warnings: ['channel not applied: an existing list keeps its own channel'] },
+    })
+    const user = userEvent.setup()
+    renderCard(action({ tool: 'create_call_list' }))
+    await user.click(screen.getByText('koios.pendingAction.confirm'))
+    await waitFor(() => expect(screen.getByTestId('koios-pending-action')).toHaveAttribute('data-status', 'confirmed'))
+    expect(screen.getByText('koios.pendingAction.warnings')).toBeInTheDocument()
+    expect(screen.getByText('channel not applied: an existing list keeps its own channel')).toBeInTheDocument()
+  })
+
+  it('shows no warnings block when the server sent none', async () => {
+    mockConfirm.mockResolvedValue({ status: 'executed', data: { ok: true, call_list_id: 'cl-1', name: 'Bellijst Noord' } })
+    const user = userEvent.setup()
+    renderCard(action({ tool: 'create_call_list' }))
+    await user.click(screen.getByText('koios.pendingAction.confirm'))
+    await waitFor(() => expect(screen.getByTestId('koios-pending-action')).toHaveAttribute('data-status', 'confirmed'))
+    expect(screen.queryByText('koios.pendingAction.warnings')).not.toBeInTheDocument()
+  })
 })

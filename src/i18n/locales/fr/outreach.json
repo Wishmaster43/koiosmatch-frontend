@@ -79,7 +79,11 @@
     "submit": "Créer la liste",
     "saving": "Création…",
     "error": "Échec de la création. Veuillez réessayer.",
-    "poolsLoadError": "Le chargement des viviers de talents a échoué."
+    "poolsLoadError": "Le chargement des viviers de talents a échoué.",
+    "nameTaken": "Une liste d'appels avec ce nom existe déjà.",
+    "nameTakenRef": "Une liste d'appels avec ce nom existe déjà ({{reference}}).",
+    "nameTakenArchived": "Une liste d'appels archivée avec ce nom existe déjà.",
+    "nameTakenArchivedRef": "Une liste d'appels archivée avec ce nom existe déjà ({{reference}})."
   },
   "page": {
     "searchPlaceholder": "Rechercher une liste d'appel, un pool ou un candidat…"

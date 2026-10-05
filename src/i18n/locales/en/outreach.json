@@ -79,7 +79,11 @@
     "submit": "Create call list",
     "saving": "Creating…",
     "error": "Creating failed. Please try again.",
-    "poolsLoadError": "Loading talent pools failed."
+    "poolsLoadError": "Loading talent pools failed.",
+    "nameTaken": "A call list with this name already exists.",
+    "nameTakenRef": "A call list with this name already exists ({{reference}}).",
+    "nameTakenArchived": "An archived call list with this name already exists.",
+    "nameTakenArchivedRef": "An archived call list with this name already exists ({{reference}})."
   },
   "page": {
     "searchPlaceholder": "Search call list, pool or candidate…"

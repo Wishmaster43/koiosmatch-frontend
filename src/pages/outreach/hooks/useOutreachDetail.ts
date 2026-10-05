@@ -11,6 +11,7 @@
  */
 import { useState, useEffect, useCallback } from 'react'
 import { getCampaign, updateCampaign, updateTarget, assignTargets as assignTargetsApi } from '../data/outreachApi'
+import { callListNameConflict } from '../data/callListNameConflict'
 import { notifyError } from '@/lib/notify'
 import { useTranslation } from 'react-i18next'
 import type { Campaign } from './useOutreachCampaigns'
@@ -147,7 +148,17 @@ export function useOutreachDetail(id: string | null, onMutated?: (delta?: { owne
       return d ? { ...d, ...patch } : d
     })
     try { await updateCampaign(campaignId, patch); onMutated?.() }
-    catch { setDetail(d => (d && prev ? { ...d, ...prev } : d)); notifyError(t('drawer.fields.saveFailed')) }
+    catch (err) {
+      setDetail(d => (d && prev ? { ...d, ...prev } : d))
+      // CALLLIST-KEY-1: a same-name (any case) 422 on rename shows the same translated
+      // text as the create form, instead of the generic save-failed toast.
+      const conflict = callListNameConflict((err as { response?: { data?: { code?: string } } })?.response?.data?.code)
+      notifyError(
+        conflict === 'live' ? t('create.nameTaken')
+        : conflict === 'archived' ? t('create.nameTakenArchived')
+        : t('drawer.fields.saveFailed'),
+      )
+    }
   }, [onMutated, t])
 
   // Save the Extra tab's tenant custom fields (§3B) — optimistic, merges the partial

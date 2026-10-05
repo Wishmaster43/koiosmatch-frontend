@@ -79,7 +79,11 @@
     "submit": "Crea lista di chiamate",
     "saving": "Creazione…",
     "error": "Creazione non riuscita. Riprova.",
-    "poolsLoadError": "Caricamento dei pool di talenti non riuscito."
+    "poolsLoadError": "Caricamento dei pool di talenti non riuscito.",
+    "nameTaken": "Esiste già una lista di chiamate con questo nome.",
+    "nameTakenRef": "Esiste già una lista di chiamate con questo nome ({{reference}}).",
+    "nameTakenArchived": "Esiste già una lista di chiamate archiviata con questo nome.",
+    "nameTakenArchivedRef": "Esiste già una lista di chiamate archiviata con questo nome ({{reference}})."
   },
   "page": {
     "searchPlaceholder": "Cerca lista di chiamate, pool o candidato…"
