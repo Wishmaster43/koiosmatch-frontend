@@ -719,4 +719,18 @@ describe('AddCustomerModal · duplicate 409 panel (CUST-DUP-FE-1)', () => {
     expect(await screen.findByRole('alert')).toHaveTextContent('Er ging iets mis op de server')
     expect(screen.queryByText(ct('duplicate.blockedTitle'))).not.toBeInTheDocument()
   })
+
+  // ONIX N-005: a 422 bag key no form field maps to (a required tenant custom
+  // field) must still surface as a banner, never a silent failed submit.
+  it('shows a banner for a 422 key no field renders (unmapped custom field)', async () => {
+    const onCreate = vi.fn().mockRejectedValue({
+      response: { data: { errors: { 'custom_fields.vog': ['The custom_fields.vog field is required.'] } } },
+    })
+    const user = userEvent.setup()
+    mountWithNav(onCreate)
+    await submit(user)
+    expect(await screen.findByRole('alert')).toHaveTextContent("vog")
+    // ONIX N-005 verifier: no field renders the dotted key as a red-bordered input.
+    expect(document.querySelector('[aria-invalid="true"]')).toBeNull()
+  })
 })

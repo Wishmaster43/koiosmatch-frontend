@@ -9,7 +9,8 @@
 import { useState } from 'react'
 import type { TFunction } from 'i18next'
 import { extractApiError } from '@/lib/extractApiError'
-import { extractFormErrors } from '@/lib/extractFormErrors'
+import { extractFormErrors, unmappedFormErrors } from '@/lib/extractFormErrors'
+import { formatUnmappedErrors } from '@/lib/formatUnmappedErrors'
 import api, { unwrap } from '@/lib/api'
 import { composeAddress } from '../hooks/useVacancyDetailsForm'
 import { mapVacancy } from '../data/mapVacancy'
@@ -160,6 +161,9 @@ export function useAddVacancySubmit({
       } else {
         setCreateError(extractApiError(err, t('common:errorGeneric')))
       }
+      // ONIX N-005: a 422 key no field renders (e.g. a required custom field) gets a banner too.
+      const banner = formatUnmappedErrors(unmappedFormErrors(err, API_TO_FORM), t)
+      if (banner) setCreateError(banner)
     } finally {
       setSaving(false)
     }

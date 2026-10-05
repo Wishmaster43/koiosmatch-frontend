@@ -8,7 +8,8 @@ import { useTranslation } from 'react-i18next'
 import api, { unwrap } from '@/lib/api'
 // DUP-04: one shared axios-error → message extractor, never a re-derived inline dance.
 import { extractApiError } from '@/lib/extractApiError'
-import { extractFormErrors } from '@/lib/extractFormErrors'
+import { extractFormErrors, unmappedFormErrors } from '@/lib/extractFormErrors'
+import { formatUnmappedErrors } from '@/lib/formatUnmappedErrors'
 import { useAuth } from '@/context/AuthContext'
 import { useOpportunityStages } from '@/lib/useOpportunityStages'
 import { useOpportunityServiceTypes, useOpportunityAgreementTypes } from '@/lib/useOpportunityLookups'
@@ -280,6 +281,9 @@ export default function AddOpportunityModal({ onClose, onCreated, users = [], cu
         // one) instead of failing silently.
         setCreateError(extractApiError(err, t('common:errorGeneric')))
       }
+      // ONIX N-005: a 422 key no field renders (e.g. a required custom field) gets a banner too.
+      const banner = formatUnmappedErrors(unmappedFormErrors(err, API_TO_FORM), t)
+      if (banner) setCreateError(banner)
     } finally {
       setSaving(false)
       setShowLostReasonModal(false)

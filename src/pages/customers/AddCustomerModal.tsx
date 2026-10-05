@@ -9,7 +9,8 @@ import { useTranslation } from 'react-i18next'
 import FloatingPanel from '@/components/ui/FloatingPanel'
 // DUP-04: one shared axios-error → message extractor, never a re-derived inline dance.
 import { extractApiError } from '@/lib/extractApiError'
-import { extractFormErrors } from '@/lib/extractFormErrors'
+import { extractFormErrors, unmappedFormErrors } from '@/lib/extractFormErrors'
+import { formatUnmappedErrors } from '@/lib/formatUnmappedErrors'
 import { useSafePermission } from '@/hooks/useSafePermission'
 import { useIndustries } from '@/lib/useIndustries'
 import { useCustomerSources } from '@/lib/useCustomerSources'
@@ -243,6 +244,9 @@ export default function AddCustomerModal({ onClose, onCreate, onImported, users 
         } else {
           setCreateError(extractApiError(err, t('common:errorGeneric')))
         }
+        // ONIX N-005: a 422 key no field renders (e.g. a required custom field) gets a banner too.
+        const banner = formatUnmappedErrors(unmappedFormErrors(err, API_TO_FORM), t)
+        if (banner) setCreateError(banner)
       }
     } finally {
       setSaving(false)

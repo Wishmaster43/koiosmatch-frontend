@@ -22,7 +22,8 @@ import { useTranslation } from 'react-i18next'
 import api, { unwrap } from '@/lib/api'
 import { notifyError, notifySuccess } from '@/lib/notify'
 import { extractApiError } from '@/lib/extractApiError'
-import { extractFormErrors } from '@/lib/extractFormErrors'
+import { extractFormErrors, unmappedFormErrors } from '@/lib/extractFormErrors'
+import { formatUnmappedErrors } from '@/lib/formatUnmappedErrors'
 import { useApplicationOwnerChain } from './useApplicationOwnerChain'
 import type { VacancyOption } from '@/pages/candidates/shared'
 import type { Id } from '@/types/common'
@@ -229,6 +230,9 @@ export function useAddApplicationForm({
       } else {
         notifyError(extractApiError(err, t(editing ? 'work.applicationUpdateFailed' : 'work.applicationFailed')))
       }
+      // ONIX N-005: a 422 key no field renders (e.g. a required custom field) gets a banner too.
+      const banner = formatUnmappedErrors(unmappedFormErrors(err, API_TO_FORM), t)
+      if (banner) notifyError(banner)
     } finally { setSaving(false) }
   }
 

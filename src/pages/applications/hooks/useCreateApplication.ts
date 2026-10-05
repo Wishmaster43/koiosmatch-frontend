@@ -8,7 +8,8 @@ import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import api, { unwrap } from '@/lib/api'
 import { extractApiError } from '@/lib/extractApiError'
-import { extractFormErrors } from '@/lib/extractFormErrors'
+import { extractFormErrors, unmappedFormErrors } from '@/lib/extractFormErrors'
+import { formatUnmappedErrors } from '@/lib/formatUnmappedErrors'
 import { useLookups } from '@/context/LookupsContext'
 import { mapApplication } from '../data/mapApplication'
 import type { Application } from '@/types/application'
@@ -90,7 +91,10 @@ export function useCreateApplication({
       if (formErrors) {
         setErrors(formErrors)
       }
-      setCreateError(extractApiError(err, t('common:errorGeneric')))
+      // ONIX N-005: a 422 key no field renders (e.g. a required custom field) wins
+      // the banner over the generic message, since it names the real reason.
+      const banner = formatUnmappedErrors(unmappedFormErrors(err, API_TO_FORM), t)
+      setCreateError(banner ?? extractApiError(err, t('common:errorGeneric')))
     } finally { setSaving(false) }
   }
 

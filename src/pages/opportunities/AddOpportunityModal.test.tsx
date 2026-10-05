@@ -145,6 +145,24 @@ describe('AddOpportunityModal · validation unchanged (title required)', () => {
   })
 })
 
+// ONIX N-005: a 422 bag key no form field maps to (a required tenant custom
+// field) must still surface as a banner, never a silent failed submit.
+describe('AddOpportunityModal · unmapped 422 banner (ONIX N-005)', () => {
+  it('shows a banner for a 422 key no field renders (unmapped custom field)', async () => {
+    const api = (await import('@/lib/api')).default
+    vi.mocked(api.post).mockRejectedValueOnce({
+      response: { data: { errors: { 'custom_fields.vog': ['The custom_fields.vog field is required.'] } } },
+    })
+    const user = userEvent.setup()
+    render(<AddOpportunityModal onClose={noop} />)
+    await user.type(screen.getByPlaceholderText('modal.titlePlaceholder'), '5 verpleegkundigen')
+    await user.click(screen.getByRole('button', { name: 'modal.create' }))
+    expect(await screen.findByRole('alert')).toHaveTextContent('common:validation.fieldRequiredNamed')
+    // ONIX N-005 verifier: no field renders the dotted key as a red-bordered input.
+    expect(document.querySelector('[aria-invalid="true"]')).toBeNull()
+  })
+})
+
 describe('AddOpportunityModal · same POST payload as before, searchable picks included', () => {
   it('posts the same body shape, with the searchable customer/stage picks riding it', async () => {
     const user = userEvent.setup()

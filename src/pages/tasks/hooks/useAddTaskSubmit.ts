@@ -10,7 +10,8 @@ import type { TFunction } from 'i18next'
 import api, { unwrap } from '@/lib/api'
 // DUP-04: one shared axios-error → message extractor, never a re-derived inline dance.
 import { extractApiError } from '@/lib/extractApiError'
-import { extractFormErrors } from '@/lib/extractFormErrors'
+import { extractFormErrors, unmappedFormErrors } from '@/lib/extractFormErrors'
+import { formatUnmappedErrors } from '@/lib/formatUnmappedErrors'
 import { API_TO_FORM } from '../addmodal/formHelpers'
 import type { NewLink } from '../links/AddLinkRow'
 import type { TaskForm } from '../AddTaskModal'
@@ -60,6 +61,9 @@ export function useAddTaskSubmit({
     } else {
       setCreateError(extractApiError(err, t('common:errorGeneric')))
     }
+    // ONIX N-005: a 422 key no field renders (e.g. a required custom field) gets a banner too.
+    const banner = formatUnmappedErrors(unmappedFormErrors(err, API_TO_FORM), t)
+    if (banner) setCreateError(banner)
   }
 
   // Assemble the polymorphic links: free-vocabulary couplings first (in edit mode
