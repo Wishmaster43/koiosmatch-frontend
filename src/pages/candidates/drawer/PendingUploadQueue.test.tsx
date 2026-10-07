@@ -44,6 +44,15 @@ describe('PendingUploadQueue · expiry field (N008-DOC-EXPIRY-FE-1)', () => {
     expect(screen.getByRole('button', { name: /common:add/ })).toBeDisabled()
   })
 
+  // 07-10 fix: the star is decorative — aria-required on the field is the real
+  // signal a screen reader must announce, never "star".
+  it('marks the required star aria-hidden while the field keeps aria-required', () => {
+    render(<PendingUploadQueue {...baseProps} pending={[item({ type: 'VOG' })]} onSetExpiry={vi.fn()} />)
+    const field = screen.getByRole('textbox')
+    expect(field).toHaveAttribute('aria-required', 'true')
+    expect(screen.getByText('*')).toHaveAttribute('aria-hidden', 'true')
+  })
+
   it('renders an optional date field with the default-validity caption when the type has one', () => {
     render(<PendingUploadQueue {...baseProps} pending={[item({ type: 'Diploma' })]} onSetExpiry={vi.fn()} />)
     const field = screen.getByRole('textbox')

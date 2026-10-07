@@ -150,12 +150,16 @@ export function useOutreachDetail(id: string | null, onMutated?: (delta?: { owne
     try { await updateCampaign(campaignId, patch); onMutated?.() }
     catch (err) {
       setDetail(d => (d && prev ? { ...d, ...prev } : d))
-      // CALLLIST-KEY-1: a same-name (any case) 422 on rename shows the same translated
-      // text as the create form, instead of the generic save-failed toast.
-      const conflict = callListNameConflict((err as { response?: { data?: { code?: string } } })?.response?.data?.code)
+      // CALLLIST-KEY-1 (+ reference follow-up, 07-10): a same-name (any case) 422 on
+      // rename shows the same translated text as the create form, including the
+      // conflicting list's reference when the server sends one, instead of the
+      // generic save-failed toast.
+      const body = (err as { response?: { data?: { code?: string; meta?: { existing_reference_number?: string } } } })?.response?.data
+      const reference = body?.meta?.existing_reference_number
+      const conflict = callListNameConflict(body?.code)
       notifyError(
-        conflict === 'live' ? t('create.nameTaken')
-        : conflict === 'archived' ? t('create.nameTakenArchived')
+        conflict === 'live' ? (reference ? t('create.nameTakenRef', { reference }) : t('create.nameTaken'))
+        : conflict === 'archived' ? (reference ? t('create.nameTakenArchivedRef', { reference }) : t('create.nameTakenArchived'))
         : t('drawer.fields.saveFailed'),
       )
     }

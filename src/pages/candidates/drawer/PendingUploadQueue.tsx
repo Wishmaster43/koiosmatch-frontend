@@ -116,7 +116,10 @@ export default function PendingUploadQueue({
                       style={{ fontSize: 11, padding: '4px 8px' }} />
                   </div>
                   {expiryRequired
-                    ? <Caption style={{ color: 'var(--color-danger-text)' }}>*</Caption>
+                    // a11y: the star is decoration — aria-required on the field already
+                    // carries the meaning, so screen readers must not announce "star"
+                    // (Caption's typed props carry no aria-hidden, so a plain span here).
+                    ? <span aria-hidden="true" style={{ fontSize: 11, color: 'var(--color-danger-text)' }}>*</span>
                     : <Caption>{t('documents.expiryDefault', { months: opt?.defaultValidityMonths })}</Caption>}
                 </div>
               )}

@@ -13,7 +13,7 @@ vi.mock('@/lib/api', async (importOriginal) => {
   const actual = await importOriginal<typeof import('@/lib/api')>()
   return { ...actual, default: { get: vi.fn(), post: vi.fn() } }
 })
-vi.mock('react-i18next', () => ({ useTranslation: () => ({ t: (k: string) => k }) }))
+vi.mock('react-i18next', () => ({ useTranslation: () => ({ t: (k: string, o?: { name?: string }) => (o?.name ? `${k}|${o.name}` : k) }) }))
 vi.mock('@/i18n', () => ({ LOCALE_BY_LANG: { nl: 'nl-NL', en: 'en-GB' } }))
 // A plain vi.fn default so individual tests can override the returned types
 // (N008-DOC-EXPIRY-FE-1 needs a per-test requiresExpiry type) without touching
@@ -119,5 +119,28 @@ describe('IbanDocumentSlot', () => {
     await user.upload(input as HTMLInputElement, new File(['x'], 'vog.pdf', { type: 'application/pdf' }))
     await waitFor(() => expect(api.post).toHaveBeenCalled())
     expect((vi.mocked(api.post).mock.calls[0][1] as FormData).get('expires_at')).toBe('2027-01-31')
+  })
+
+  // 07-10 fix: the sr-only expiry label names the type's LABEL, not its (often
+  // Dutch slug) value — the mocked type here deliberately differs from its value.
+  it('names the expiry field after the type label, not its value', async () => {
+    const user = userEvent.setup()
+    mockUseDocumentTypes.mockReturnValue({ types: [{ value: 'vog_slug', label: 'VOG certificate', requiresExpiry: true, defaultValidityMonths: null }] })
+    render(<IbanDocumentSlot candidateId="c1" documents={docs} linkedDocumentId={null} onLink={vi.fn()} />)
+    await user.click(screen.getByRole('button', { name: /bankDoc\.link/ }))
+    expect(screen.getByText('documents.expiryFor|VOG certificate')).toBeInTheDocument()
+    expect(screen.queryByText('documents.expiryFor|vog_slug')).toBeNull()
+  })
+
+  // 07-10 fix: a rejected upload without a server message falls back to the
+  // slot's OWN key, not the generic common:actionFailed.
+  it("shows the slot's own upload-failed text when the server sends no message", async () => {
+    const user = userEvent.setup()
+    vi.mocked(api.post).mockRejectedValue(new Error('network down'))
+    render(<IbanDocumentSlot candidateId="c1" documents={docs} linkedDocumentId={null} onLink={vi.fn()} />)
+    await user.click(screen.getByRole('button', { name: /bankDoc\.link/ }))
+    const input = screen.getByLabelText('bankDoc.uploadNew', { selector: 'input' })
+    await user.upload(input as HTMLInputElement, new File(['x'], 'vog.pdf', { type: 'application/pdf' }))
+    expect(await screen.findByText('bankDoc.uploadFailed')).toBeInTheDocument()
   })
 })

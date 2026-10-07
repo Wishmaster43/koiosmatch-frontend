@@ -64,7 +64,7 @@ export default function IbanDocumentSlot({ candidateId, documents = [], linkedDo
   const [expiresAt, setExpiresAt] = useState('')
   const preferredAvailable = preferredType && types.some((tp: { value: string }) => String(tp.value) === preferredType)
   const defaultType = preferredAvailable ? String(preferredType) : String(types[0]?.value ?? '')
-  const activeTypeOpt = types.find((tp: { value: string }) => String(tp.value) === (uploadType || defaultType)) as { requiresExpiry?: boolean; defaultValidityMonths?: number | null } | undefined
+  const activeTypeOpt = types.find((tp: { value: string }) => String(tp.value) === (uploadType || defaultType)) as { label?: string; requiresExpiry?: boolean; defaultValidityMonths?: number | null } | undefined
   const expiryRequired = Boolean(activeTypeOpt?.requiresExpiry) && activeTypeOpt?.defaultValidityMonths == null
   const fileRef = useRef<HTMLInputElement | null>(null)
   const expiryFieldId = useId()
@@ -97,12 +97,12 @@ export default function IbanDocumentSlot({ candidateId, documents = [], linkedDo
           onLink(String(doc.id))
           setPicking(false)
         } else {
-          setUploadError(t('common:actionFailed'))
+          setUploadError(t('bankDoc.uploadFailed'))
         }
       })
       // The server's own reason (e.g. the 422 on a requires_expiry type with no
       // date) reaches the recruiter instead of a generic line.
-      .catch(err => setUploadError(extractApiError(err, t('common:actionFailed'))))
+      .catch(err => setUploadError(extractApiError(err, t('bankDoc.uploadFailed'))))
       .finally(() => setUploading(false))
   }
 
@@ -154,7 +154,7 @@ export default function IbanDocumentSlot({ candidateId, documents = [], linkedDo
               field renders at all, required only without a default validity. */}
           {Boolean(activeTypeOpt?.requiresExpiry) && (
             <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-              <label htmlFor={expiryFieldId} className="sr-only">{t('documents.expiryFor', { name: uploadType || defaultType })}</label>
+              <label htmlFor={expiryFieldId} className="sr-only">{t('documents.expiryFor', { name: activeTypeOpt?.label ?? (uploadType || defaultType) })}</label>
               <div style={{ width: 140, flexShrink: 0 }}>
                 <DateField id={expiryFieldId} required={expiryRequired}
                   value={expiresAt} onChange={setExpiresAt} style={{ fontSize: 11, padding: '4px 8px' }} />

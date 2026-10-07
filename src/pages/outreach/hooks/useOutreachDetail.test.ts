@@ -178,6 +178,32 @@ describe('useOutreachDetail · setFields (Information tab)', () => {
     await act(async () => { await result.current.setFields('c1', { name: 'Bellijst Zorg' }) })
     expect(notifyError).toHaveBeenCalledWith('create.nameTakenArchived')
   })
+
+  // CALLLIST-KEY-1 follow-up (07-10): when the 422 carries the conflicting list's
+  // reference, the rename path shows it too (mirrors the create form).
+  it('shows the ref-carrying live-duplicate text when the server sends existing_reference_number', async () => {
+    vi.mocked(api.get).mockResolvedValue({ data: { data: campaign } })
+    vi.mocked(api.patch).mockRejectedValue({
+      response: { data: { code: 'call_list_name_taken', meta: { existing_reference_number: 'CL-042' } } },
+    })
+    const { result } = renderHook(() => useOutreachDetail('c1'))
+    await waitFor(() => expect(result.current.detail).not.toBeNull())
+
+    await act(async () => { await result.current.setFields('c1', { name: 'Bellijst Zorg' }) })
+    expect(notifyError).toHaveBeenCalledWith('create.nameTakenRef')
+  })
+
+  it('shows the ref-carrying archived-duplicate text when the server sends existing_reference_number', async () => {
+    vi.mocked(api.get).mockResolvedValue({ data: { data: campaign } })
+    vi.mocked(api.patch).mockRejectedValue({
+      response: { data: { code: 'call_list_name_taken_archived', meta: { existing_reference_number: 'CL-099' } } },
+    })
+    const { result } = renderHook(() => useOutreachDetail('c1'))
+    await waitFor(() => expect(result.current.detail).not.toBeNull())
+
+    await act(async () => { await result.current.setFields('c1', { name: 'Bellijst Zorg' }) })
+    expect(notifyError).toHaveBeenCalledWith('create.nameTakenArchivedRef')
+  })
 })
 
 // DRILL-REFRESH-AUDIT-1: every successful mutation reports upstream — owner as
