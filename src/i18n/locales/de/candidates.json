@@ -1499,6 +1499,8 @@
       "restored": "Aus dem Archiv wiederhergestellt",
       "restoredCareerApply": "Durch eine neue Bewerbung wiederhergestellt (Karriereseite)",
       "restoredPartnerApi": "Durch eine neue Bewerbung wiederhergestellt (Partner)",
+      "cvNotAttached": "Lebenslauf vom Typ {{type}} nicht angehängt: dieser Dokumenttyp verlangt ein Ablaufdatum ohne Standardwert. Laden Sie den Lebenslauf manuell mit Ablaufdatum hoch.",
+      "cvNotAttachedNoType": "Lebenslauf nicht angehängt: der Dokumenttyp verlangt ein Ablaufdatum ohne Standardwert. Laden Sie den Lebenslauf manuell mit Ablaufdatum hoch.",
       "markedForDeletion": "Löschung geplant",
       "eraseAt": " · Wird gelöscht am {{date}}"
     }

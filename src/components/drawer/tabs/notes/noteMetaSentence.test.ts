@@ -124,6 +124,17 @@ describe('noteMetaSentence', () => {
     expect(noteMetaSentence({ kind: 'restored', source: null }, ctx)).toBe('notes.meta.restored|{}')
   })
 
+  // N008-DOC-EXPIRY-1: the parsed CV was not attached because its type requires an expiry.
+  it('cv_not_attached names the type when the BE sends type_name', () => {
+    const meta: NoteMeta = { kind: 'cv_not_attached', reason: 'expiry_required', type_id: 7, type_name: 'CV' }
+    expect(noteMetaSentence(meta, ctx)).toBe('notes.meta.cvNotAttached|{"type":"CV"}')
+  })
+
+  it('cv_not_attached stays type-less with only a type_id, and falls back to the body for an unknown reason', () => {
+    expect(noteMetaSentence({ kind: 'cv_not_attached', reason: 'expiry_required', type_id: 7 }, ctx)).toBe('notes.meta.cvNotAttachedNoType|{}')
+    expect(noteMetaSentence({ kind: 'cv_not_attached', reason: 'something_else', type_id: 7 }, ctx)).toBeNull()
+  })
+
   // K-225 H2: marked_for_deletion — its own eraseAt suffix, distinct from effectiveFrom.
   it('markedForDeletion appends the eraseAt suffix when erase_at is present', () => {
     const meta: NoteMeta = { kind: 'marked_for_deletion', erase_at: '2026-10-01' }

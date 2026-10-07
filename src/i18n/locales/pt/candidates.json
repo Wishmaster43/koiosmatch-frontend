@@ -1499,6 +1499,8 @@
       "restored": "Restaurado do arquivo",
       "restoredCareerApply": "Restaurado por uma nova candidatura (site de carreiras)",
       "restoredPartnerApi": "Restaurado por uma nova candidatura (parceiro)",
+      "cvNotAttached": "CV do tipo {{type}} não anexado: este tipo de documento exige uma data de validade sem valor padrão. Carregue o CV manualmente com uma data de validade.",
+      "cvNotAttachedNoType": "CV não anexado: o tipo de documento exige uma data de validade sem valor padrão. Carregue o CV manualmente com uma data de validade.",
       "markedForDeletion": "Exclusão agendada",
       "eraseAt": " · Será excluído em {{date}}"
     }

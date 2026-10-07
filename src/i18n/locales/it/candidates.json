@@ -1499,6 +1499,8 @@
       "restored": "Ripristinato dall'archivio",
       "restoredCareerApply": "Ripristinato da una nuova candidatura (sito carriere)",
       "restoredPartnerApi": "Ripristinato da una nuova candidatura (partner)",
+      "cvNotAttached": "CV di tipo {{type}} non allegato: questo tipo di documento richiede una data di scadenza senza valore predefinito. Carica il CV manualmente con una data di scadenza.",
+      "cvNotAttachedNoType": "CV non allegato: il tipo di documento richiede una data di scadenza senza valore predefinito. Carica il CV manualmente con una data di scadenza.",
       "markedForDeletion": "Eliminazione pianificata",
       "eraseAt": " · Verrà eliminato il {{date}}"
     }

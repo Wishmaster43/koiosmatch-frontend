@@ -1499,6 +1499,8 @@
       "restored": "Restored from archive",
       "restoredCareerApply": "Restored by a new application (career site)",
       "restoredPartnerApi": "Restored by a new application (partner)",
+      "cvNotAttached": "CV of type {{type}} not attached: this document type requires an expiry date without a default. Upload the CV manually with an expiry date.",
+      "cvNotAttachedNoType": "CV not attached: the document type requires an expiry date without a default. Upload the CV manually with an expiry date.",
       "markedForDeletion": "Deletion scheduled",
       "eraseAt": " · Will be deleted on {{date}}"
     }

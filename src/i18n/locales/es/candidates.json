@@ -1499,6 +1499,8 @@
       "restored": "Restaurado desde el archivo",
       "restoredCareerApply": "Restaurado por una nueva candidatura (sitio de empleo)",
       "restoredPartnerApi": "Restaurado por una nueva candidatura (socio)",
+      "cvNotAttached": "CV de tipo {{type}} no adjuntado: este tipo de documento exige una fecha de caducidad sin valor predeterminado. Suba el CV manualmente con una fecha de caducidad.",
+      "cvNotAttachedNoType": "CV no adjuntado: el tipo de documento exige una fecha de caducidad sin valor predeterminado. Suba el CV manualmente con una fecha de caducidad.",
       "markedForDeletion": "Eliminación programada",
       "eraseAt": " · Se eliminará el {{date}}"
     }

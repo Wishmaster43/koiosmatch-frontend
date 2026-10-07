@@ -1499,6 +1499,8 @@
       "restored": "Restauré depuis les archives",
       "restoredCareerApply": "Restauré par une nouvelle candidature (site carrière)",
       "restoredPartnerApi": "Restauré par une nouvelle candidature (partenaire)",
+      "cvNotAttached": "CV de type {{type}} non joint : ce type de document exige une date d'expiration sans valeur par défaut. Téléversez le CV manuellement avec une date d'expiration.",
+      "cvNotAttachedNoType": "CV non joint : le type de document exige une date d'expiration sans valeur par défaut. Téléversez le CV manuellement avec une date d'expiration.",
       "markedForDeletion": "Suppression planifiée",
       "eraseAt": " · Sera supprimé le {{date}}"
     }

@@ -21,6 +21,11 @@ import type { TFunction } from 'i18next'
 export interface NoteMeta {
   kind?: string | null
   source?: string | null
+  // cv_not_attached (N008-DOC-EXPIRY-1): why the parsed CV was left off and which type;
+  // `type_name` is asked of the BE (today it sends only type_id, which the FE cannot name).
+  reason?: string | null
+  type_id?: string | number | null
+  type_name?: string | null
   from_value?: string | null
   to_value?: string | null
   reason_value?: string | null
@@ -93,6 +98,18 @@ function restoredSentence(meta: NoteMeta, ctx: NoteMetaContext): string {
   return ctx.t(key ?? 'notes.meta.restored')
 }
 
+// Builds the cv_not_attached sentence (N008-DOC-EXPIRY-1): "create candidate from CV" met a
+// CV type that requires an expiry date without a default, so the candidate exists but the
+// CV was not attached. Names the type when the BE sends `type_name`; today it sends only
+// `type_id`, which no FE lookup can resolve, so the sentence then stays type-less rather
+// than showing a raw id. Any other reason is unknown: null, so the stored body renders.
+function cvNotAttachedSentence(meta: NoteMeta, ctx: NoteMetaContext): string | null {
+  if (meta.reason !== 'expiry_required') return null
+  return meta.type_name
+    ? ctx.t('notes.meta.cvNotAttached', { type: meta.type_name })
+    : ctx.t('notes.meta.cvNotAttachedNoType')
+}
+
 // Builds the marked_for_deletion sentence: "Deletion scheduled", plus an erase-at
 // suffix when the automation set one. Its own suffix key (not the shared
 // effectiveFrom one): this date means "will be erased on", not "in effect since".
@@ -118,6 +135,8 @@ export function noteMetaSentence(meta: NoteMeta | null | undefined, ctx: NoteMet
       return restoredSentence(meta, ctx)
     case 'marked_for_deletion':
       return markedForDeletionSentence(meta, ctx)
+    case 'cv_not_attached':
+      return cvNotAttachedSentence(meta, ctx)
     default:
       return null
   }
