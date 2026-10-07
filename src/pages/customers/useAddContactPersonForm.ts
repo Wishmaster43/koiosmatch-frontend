@@ -246,7 +246,7 @@ export function useAddContactPersonForm({
   const mobileMessage = mobileDup ? t('subModal.duplicate.mobile', { name: mobileDup.name }) : fieldMessages.mobile
 
   return {
-    isEdit, importWizard, importOpen, setImportOpen, form, set, errors, setErrors, createError, dialog,
+    isEdit, importWizard, importOpen, setImportOpen, form, set, errors, setErrors, fieldMessages, setFieldMessages, createError, dialog,
     markTouched, emailDup, phoneDup, mobileDup, submit, saving, canSubmit,
     departmentOptions, departmentPlaceholder, showLocationPicker, showDepartmentPicker,
     emailMessage, phoneMessage, mobileMessage, handlePrimaryToggle, dup,

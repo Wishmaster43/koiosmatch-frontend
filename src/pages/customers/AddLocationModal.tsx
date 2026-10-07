@@ -41,7 +41,6 @@ import { useState, useEffect } from 'react'
 import { useGuardedSubmit } from '@/hooks/useGuardedSubmit'
 import { useTranslation } from 'react-i18next'
 import { MapPin } from 'lucide-react'
-import { useSubEntityImportPermissions } from './hooks/useSubEntityImportPermissions'
 import { useProvinces } from '@/hooks/useProvinces'
 import { notifyError } from '@/lib/notify'
 import { useLiveFieldValidation } from '@/hooks/useLiveFieldValidation'
@@ -131,10 +130,10 @@ export default function AddLocationModal({
   onOpenExisting?: (id: Id, archived?: boolean) => void
 }) {
   const { t } = useTranslation(['customers', 'common'])
-  const { canViewImportTemplate, canRunImport } = useSubEntityImportPermissions()
-  // Shared state/error management (DRY-SUBENTITY-1): import wizard
-  // and 422 error handling extracted into a reusable hook.
-  const { isEdit, importWizard, importOpen, setImportOpen, errors, setErrors, createError, setCreateError, handleApiError } =
+  // Shared state/error management (DRY-SUBENTITY-1): import wizard, the import
+  // permissions gate riding along with it (DRY-11), and 422 error handling.
+  const { isEdit, importWizard, importOpen, setImportOpen, errors, setErrors, fieldMessages, setFieldMessages, createError,
+    setCreateError, handleApiError, canViewImportTemplate, canRunImport } =
     useSubEntitySave({ initial, apiToFormMap: API_TO_FORM, t, onImported, onClose, importEntity: 'locations' })
   // CONTACT-PRIMAIR-LOCATIE-1: which existing contact (if any) was picked as "contact
   // ter plaatse" — distinct from the free-text name, since only a REAL id can be
@@ -389,7 +388,8 @@ export default function AddLocationModal({
 
           {/* ONIX N-005: LAST card, renders nothing on a tenant with no required custom fields. */}
           <RequiredCustomFieldsCard entityType="customer_location" values={form.customFields}
-            onChange={makeCustomFieldChangeHandler(form.customFields, v => set('customFields', v), setErrors)} errors={errors} />
+            onChange={makeCustomFieldChangeHandler(form.customFields, v => set('customFields', v), setErrors, setFieldMessages)}
+            errors={errors} messages={fieldMessages} />
         </div>
       </div>
     </SubEntityModalFrame>

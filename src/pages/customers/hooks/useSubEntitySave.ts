@@ -9,9 +9,10 @@ import { useState, useEffect, useRef } from 'react'
 import type { TFunction } from 'i18next'
 import { useImportWizard } from '@/pages/settings/shared'
 import { extractApiError } from '@/lib/extractApiError'
-import { extractFormErrors, unmappedFormErrors } from '@/lib/extractFormErrors'
+import { extractFormErrorsWithMessages, unmappedFormErrors } from '@/lib/extractFormErrors'
 // ONIX N-005: a 422 key no rendered field maps to still lands somewhere.
 import { formatUnmappedErrors } from '@/lib/formatUnmappedErrors'
+import { useSubEntityImportPermissions } from './useSubEntityImportPermissions'
 
 // Shared state/effect management for customer sub-entity modals: import wizard
 // and error handling. The modal manages its own form state via useState.
@@ -27,8 +28,14 @@ export function useSubEntitySave({
 }) {
   const isEdit = Boolean(initial)
   const importWizard = useImportWizard(importEntity)
+  // DRY-11: the import-affordance gate rides along with the import wizard it
+  // gates — a sibling sub-entity modal needs both together every time.
+  const { canViewImportTemplate, canRunImport } = useSubEntityImportPermissions()
   const [importOpen, setImportOpen] = useState(false)
   const [errors, setErrors] = useState<Record<string, boolean>>({})
+  // Server message per dotted 422 key (e.g. `custom_fields.vog`), so the
+  // required-custom-fields card can show the server's own text, not a generic flag.
+  const [fieldMessages, setFieldMessages] = useState<Record<string, string>>({})
   const [createError, setCreateError] = useState<string | null>(null)
 
   // SUBENTITY-IMPORT-1: a real run that landed at least one row closes the modal
@@ -50,9 +57,10 @@ export function useSubEntitySave({
   // `renderedKeys` (optional) names the dotted keys an actual field renders (e.g.
   // required custom fields) so those never ALSO trigger the unmapped-error banner.
   const handleApiError = (err: unknown, renderedKeys?: string[]) => {
-    const fieldErrors = extractFormErrors(err, apiToFormMap)
-    if (fieldErrors) {
-      setErrors(fieldErrors)
+    const mapped = extractFormErrorsWithMessages(err, apiToFormMap)
+    if (mapped) {
+      setErrors(mapped.errors)
+      setFieldMessages(mapped.messages)
       // A bag key no rendered field maps to would otherwise silently fail — surface it.
       const unmapped = unmappedFormErrors(err, apiToFormMap, renderedKeys)
       const banner = formatUnmappedErrors(unmapped, t)
@@ -63,6 +71,7 @@ export function useSubEntitySave({
   }
 
   return {
-    isEdit, importWizard, importOpen, setImportOpen, errors, setErrors, createError, setCreateError, handleApiError,
+    isEdit, importWizard, importOpen, setImportOpen, errors, setErrors, fieldMessages, setFieldMessages,
+    createError, setCreateError, handleApiError, canViewImportTemplate, canRunImport,
   }
 }

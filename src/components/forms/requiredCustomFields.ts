@@ -38,13 +38,17 @@ export function requiredCustomFieldErrors(requiredDefs: CustomFieldDef[], values
 // modals (location/department/contact): updates the field AND clears its own
 // dotted 422 flag (`custom_fields.<key>`) so a fixed value stops showing the
 // stale server message — mirrors the candidate modal's `setCustomField`.
+// `setMessages` (optional) also drops the stale server TEXT for that key, so a
+// fixed field stops showing yesterday's 422 sentence once the user retypes it.
 export function makeCustomFieldChangeHandler(
   values: Record<string, unknown>,
   setValues: (v: Record<string, unknown>) => void,
   setErrors: (fn: (e: Record<string, boolean>) => Record<string, boolean>) => void,
+  setMessages?: (fn: (m: Record<string, string>) => Record<string, string>) => void,
 ): (key: string, value: unknown) => void {
   return (key, value) => {
     setValues({ ...values, [key]: value })
     setErrors(e => ({ ...e, [`custom_fields.${key}`]: false }))
+    if (setMessages) setMessages(m => { const rest = { ...m }; delete rest[`custom_fields.${key}`]; return rest })
   }
 }

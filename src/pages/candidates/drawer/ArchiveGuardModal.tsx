@@ -136,7 +136,7 @@ export default function ArchiveGuardModal({ mode, candidateName, aggregate, appl
                     <SoftChip label={a.stageLabel} color={a.stageColor} />
                   </div>
                   {appErrors[String(a.id)] && (
-                    <div style={{ padding: '0 12px 8px', fontSize: 11.5, color: 'var(--color-danger-text)' }}>{t('archiveGuard.applicationFailed', { message: appErrors[String(a.id)] })}</div>
+                    <Caption as="div" style={{ padding: '0 12px 8px', color: 'var(--color-danger-text)' }}>{t('archiveGuard.applicationFailed', { message: appErrors[String(a.id)] })}</Caption>
                   )}
                 </div>
               ))}
@@ -161,7 +161,7 @@ export default function ArchiveGuardModal({ mode, candidateName, aggregate, appl
                     <SoftChip label={t(`archiveGuard.matchStatus.${m.statusKey}`, { defaultValue: m.statusKey })} color="var(--color-warning)" />
                   </div>
                   {matchErrors[String(m.id)] && (
-                    <div style={{ padding: '0 12px 8px', fontSize: 11.5, color: 'var(--color-danger-text)' }}>{t('archiveGuard.matchConflict')}</div>
+                    <Caption as="div" style={{ padding: '0 12px 8px', color: 'var(--color-danger-text)' }}>{t('archiveGuard.matchConflict')}</Caption>
                   )}
                 </div>
               ))}
@@ -170,7 +170,7 @@ export default function ArchiveGuardModal({ mode, candidateName, aggregate, appl
         )}
 
         {anyConflict && (
-          <p style={{ fontSize: 11.5, color: 'var(--color-danger-text)', marginBottom: 10 }}>{t('archiveGuard.stillBlocked')}</p>
+          <Caption as="p" style={{ color: 'var(--color-danger-text)', marginBottom: 10 }}>{t('archiveGuard.stillBlocked')}</Caption>
         )}
 
         <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 8, marginTop: 6 }}>

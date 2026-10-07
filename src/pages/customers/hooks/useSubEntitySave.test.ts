@@ -4,7 +4,10 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { renderHook, act } from '@testing-library/react'
 import type { TFunction } from 'i18next'
+import * as authModule from '@/context/AuthContext'
 import { useSubEntitySave } from './useSubEntitySave'
+
+vi.mock('@/context/AuthContext')
 
 // Mock useImportWizard
 vi.mock('@/pages/settings/shared', () => ({
@@ -30,6 +33,24 @@ const API_TO_FORM = {
 describe('useSubEntitySave', () => {
   beforeEach(() => {
     vi.clearAllMocks()
+    const hasPermission = vi.fn((perm: string) => perm === 'customers.view' || perm === 'customers.create')
+    vi.mocked(authModule.useAuth).mockReturnValue({ hasPermission } as unknown as ReturnType<typeof authModule.useAuth>)
+  })
+
+  // DRY-11: the import permissions gate rides along with the hook that already
+  // gates the import wizard it belongs to — one combined call, not two siblings.
+  it('surfaces the import-affordance gate alongside the import wizard', () => {
+    const { result } = renderHook(() => useSubEntitySave({
+      initial: null,
+      apiToFormMap: API_TO_FORM,
+      t: mockT,
+      onImported: vi.fn(),
+      onClose: vi.fn(),
+      importEntity: 'departments',
+    }))
+
+    expect(result.current.canViewImportTemplate).toBe(true)
+    expect(result.current.canRunImport).toBe(true)
   })
 
   it('initializes with edit/import state', () => {
@@ -187,6 +208,42 @@ describe('useSubEntitySave', () => {
 
     expect(result.current.errors).toEqual({ firstName: true, 'custom_fields.vog': true })
     expect(result.current.createError).toBeNull()
+  })
+
+  it('ONIX N-005 (POLISH): keeps the server message under its dotted custom-fields key', () => {
+    const { result } = renderHook(() => useSubEntitySave({
+      initial: null,
+      apiToFormMap: API_TO_FORM,
+      t: mockT,
+      onImported: vi.fn(),
+      onClose: vi.fn(),
+      importEntity: 'departments',
+    }))
+
+    const mockError = {
+      response: {
+        data: {
+          errors: {
+            'custom_fields.vog': ['Only digits'],
+          },
+        },
+      },
+    }
+
+    act(() => {
+      result.current.handleApiError(mockError, ['custom_fields.vog'])
+    })
+
+    expect(result.current.fieldMessages).toEqual({ 'custom_fields.vog': 'Only digits' })
+
+    // A later reset (e.g. a fresh submit) clears both the flags and the messages together.
+    act(() => {
+      result.current.setErrors({})
+      result.current.setFieldMessages({})
+    })
+
+    expect(result.current.errors).toEqual({})
+    expect(result.current.fieldMessages).toEqual({})
   })
 
   it('toggles import panel open/closed', () => {

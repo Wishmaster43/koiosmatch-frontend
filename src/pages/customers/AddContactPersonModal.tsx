@@ -125,7 +125,7 @@ export default function AddContactPersonModal({
   // All cross-card orchestration (form/error state, primary-replace confirm,
   // duplicate check, location→department cascade, submit + 422 mapping).
   const {
-    isEdit, importWizard, importOpen, setImportOpen, form, set, errors, setErrors, createError, dialog,
+    isEdit, importWizard, importOpen, setImportOpen, form, set, errors, setErrors, fieldMessages, setFieldMessages, createError, dialog,
     markTouched, emailDup, phoneDup, mobileDup, submit, saving, canSubmit,
     departmentOptions, departmentPlaceholder, showLocationPicker, showDepartmentPicker,
     emailMessage, phoneMessage, mobileMessage, handlePrimaryToggle, dup,
@@ -214,7 +214,8 @@ export default function AddContactPersonModal({
 
           {/* ONIX N-005: LAST card, renders nothing on a tenant with no required custom fields. */}
           <RequiredCustomFieldsCard entityType="customer_contact" values={form.customFields}
-            onChange={makeCustomFieldChangeHandler(form.customFields, v => set('customFields', v), setErrors)} errors={errors} />
+            onChange={makeCustomFieldChangeHandler(form.customFields, v => set('customFields', v), setErrors, setFieldMessages)}
+            errors={errors} messages={fieldMessages} />
         </div>
       </div>
 

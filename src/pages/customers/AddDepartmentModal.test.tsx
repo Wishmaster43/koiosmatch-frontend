@@ -406,4 +406,21 @@ describe('AddDepartmentModal · required custom fields (ONIX N-005)', () => {
     await waitFor(() => expect(onCreate).toHaveBeenCalledTimes(1))
     expect(onCreate.mock.calls[0][0].customFields).toEqual({ vog: 'VOG-12345' })
   })
+
+  // POLISH-ARCHIVE-GUARD-CUSTOMFIELDS: a 422 on the dotted custom_fields key shows
+  // the SERVER's own message under the field, not only the generic required sentence.
+  it('shows the server 422 message under the required custom field', async () => {
+    customFieldsState.fields = [{ key: 'vog', label: 'VOG', type: 'text', sort_order: 0, active: true, has_data: false, visible_in_ui: true, required_always: true, required_for: [] }]
+    const onCreate = vi.fn().mockRejectedValue({
+      response: { data: { errors: { 'custom_fields.vog': ['Only digits'] } } },
+    })
+    const user = userEvent.setup()
+    render(<AddDepartmentModal onClose={() => {}} onCreate={onCreate} locations={locations} statuses={statuses} />)
+    await user.type(screen.getByLabelText(ct('subModal.departmentName'), { exact: false }), 'Thuiszorg')
+    await user.type(screen.getByRole('textbox', { name: 'VOG' }), 'VOG-12345')
+    await user.click(screen.getByRole('button', { name: ct('subModal.create') }))
+
+    await waitFor(() => expect(onCreate).toHaveBeenCalledTimes(1))
+    expect(await screen.findByText('Only digits')).toBeInTheDocument()
+  })
 })

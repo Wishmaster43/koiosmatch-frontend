@@ -30,7 +30,6 @@ import { useState } from 'react'
 import { useGuardedSubmit } from '@/hooks/useGuardedSubmit'
 import { useTranslation } from 'react-i18next'
 import { Building } from 'lucide-react'
-import { useSubEntityImportPermissions } from './hooks/useSubEntityImportPermissions'
 import { FieldRow, TextField } from '@/components/forms/fields'
 import CreatableSelect from '@/components/ui/CreatableSelect'
 import CollapsibleRichText from '@/components/ui/CollapsibleRichText'
@@ -82,10 +81,10 @@ export default function AddDepartmentModal({ onClose, onCreate, onImported, loca
   onOpenExisting?: (id: Id, archived?: boolean) => void
 }) {
   const { t } = useTranslation(['customers', 'common'])
-  const { canViewImportTemplate, canRunImport } = useSubEntityImportPermissions()
-  // Shared state/error management (DRY-SUBENTITY-1): import wizard
-  // and 422 error handling extracted into a reusable hook.
-  const { isEdit, importWizard, importOpen, setImportOpen, errors, setErrors, createError, handleApiError } =
+  // Shared state/error management (DRY-SUBENTITY-1): import wizard, the import
+  // permissions gate riding along with it (DRY-11), and 422 error handling.
+  const { isEdit, importWizard, importOpen, setImportOpen, errors, setErrors, fieldMessages, setFieldMessages, createError,
+    handleApiError, canViewImportTemplate, canRunImport } =
     useSubEntitySave({ initial, apiToFormMap: API_TO_FORM, t, onImported, onClose, importEntity: 'departments' })
   const [form, setForm] = useState<DepartmentPayload>({
     name: initial?.name ?? '',
@@ -269,7 +268,8 @@ export default function AddDepartmentModal({ onClose, onCreate, onImported, loca
 
       {/* ONIX N-005: LAST card, renders nothing on a tenant with no required custom fields. */}
       <RequiredCustomFieldsCard entityType="customer_department" values={form.customFields}
-        onChange={makeCustomFieldChangeHandler(form.customFields, v => set('customFields', v), setErrors)} errors={errors} />
+        onChange={makeCustomFieldChangeHandler(form.customFields, v => set('customFields', v), setErrors, setFieldMessages)}
+        errors={errors} messages={fieldMessages} />
     </SubEntityModalFrame>
   )
 }

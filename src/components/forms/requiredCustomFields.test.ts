@@ -2,7 +2,7 @@
  * requiredCustomFields — pure-helper tests (ONIX N-005, SHARED-UNIT-TEST-1).
  */
 import { describe, it, expect } from 'vitest'
-import { isRequiredCustomField, requiredCustomFieldKeys, isCustomFieldFilled, requiredCustomFieldErrors } from './requiredCustomFields'
+import { isRequiredCustomField, requiredCustomFieldKeys, isCustomFieldFilled, requiredCustomFieldErrors, makeCustomFieldChangeHandler } from './requiredCustomFields'
 import type { CustomFieldDef } from '@/lib/useCustomFields'
 
 const def = (overrides: Partial<CustomFieldDef>): CustomFieldDef => ({
@@ -47,4 +47,35 @@ describe('requiredCustomFieldErrors', () => {
     )).toEqual({ 'custom_fields.vog': true, 'custom_fields.bhv': true })
   })
   it('returns null for an empty def list', () => { expect(requiredCustomFieldErrors([], {})).toBeNull() })
+})
+
+describe('makeCustomFieldChangeHandler (POLISH)', () => {
+  it('clears the dotted error flag AND the server message when the field changes', () => {
+    let values: Record<string, unknown> = { vog: '' }
+    let errors: Record<string, boolean> = { 'custom_fields.vog': true }
+    let messages: Record<string, string> = { 'custom_fields.vog': 'Only digits' }
+    const setValues = (v: Record<string, unknown>) => { values = v }
+    const setErrors = (fn: (e: Record<string, boolean>) => Record<string, boolean>) => { errors = fn(errors) }
+    const setMessages = (fn: (m: Record<string, string>) => Record<string, string>) => { messages = fn(messages) }
+
+    const onChange = makeCustomFieldChangeHandler(values, setValues, setErrors, setMessages)
+    onChange('vog', '123')
+
+    expect(values).toEqual({ vog: '123' })
+    expect(errors).toEqual({ 'custom_fields.vog': false })
+    expect(messages).toEqual({})
+  })
+
+  it('works without a messages setter (optional 4th param)', () => {
+    let values: Record<string, unknown> = { vog: '' }
+    let errors: Record<string, boolean> = { 'custom_fields.vog': true }
+    const setValues = (v: Record<string, unknown>) => { values = v }
+    const setErrors = (fn: (e: Record<string, boolean>) => Record<string, boolean>) => { errors = fn(errors) }
+
+    const onChange = makeCustomFieldChangeHandler(values, setValues, setErrors)
+    onChange('vog', '123')
+
+    expect(values).toEqual({ vog: '123' })
+    expect(errors).toEqual({ 'custom_fields.vog': false })
+  })
 })
