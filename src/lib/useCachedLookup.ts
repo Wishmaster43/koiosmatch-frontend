@@ -44,6 +44,33 @@ interface CachedLookupResult<T> {
   invalidate: () => void
 }
 
+// Stable string key for an axios params object, so `/custom-fields?entity_type=task`
+// and `=candidate` dedupe into DIFFERENT in-flight slots instead of colliding.
+function paramsSuffix(params: unknown): string {
+  if (!params || typeof params !== 'object') return ''
+  const sorted = Object.entries(params as Record<string, unknown>).sort(([a], [b]) => a.localeCompare(b))
+  return sorted.length ? `?${JSON.stringify(sorted)}` : ''
+}
+
+// Shared in-flight de-duplication for ANY tenant-scoped GET, not just this hook's
+// own fetch (LOOKUP-DEDUPE-1): concurrent callers for the same tenant+url+params
+// await the SAME promise instead of each firing their own request. The slot clears
+// once the request settles (success or failure), so a later call always refetches —
+// this is purely a concurrency guard, never a result cache (callers keep their own).
+export function dedupedGet(url: string, config?: AxiosRequestConfig): Promise<AxiosResponse> {
+  const key = tenantCacheKey(url) + paramsSuffix(config?.params)
+  let request = inFlight.get(key)
+  if (!request) {
+    request = api.get(url, config)
+    inFlight.set(key, request)
+    // Settle-cleanup runs once (not per caller). The trailing .catch swallows THIS
+    // chain's rejection — the real error is handled per-consumer at their own .catch;
+    // without it a failed lookup fetch surfaced as an unhandled promise rejection.
+    request.finally(() => inFlight.delete(key)).catch(() => {})
+  }
+  return request
+}
+
 // The generic tenant-scoped, session-cached lookup loader.
 export function useCachedLookup<T>(
   url: string,
@@ -65,15 +92,8 @@ export function useCachedLookup<T>(
     const cacheKey = tenantCacheKey(url)
     if (cache.has(cacheKey)) { setData(cache.get(cacheKey) as T); setLoading(false); return }
 
-    let request = inFlight.get(cacheKey)
-    if (!request) {
-      request = api.get(url, requestConfig)
-      inFlight.set(cacheKey, request)
-      // Settle-cleanup runs once (not per mount). The trailing .catch swallows THIS
-      // chain's rejection — the real error is handled per-consumer at the .catch below;
-      // without it a failed lookup fetch surfaced as an unhandled promise rejection.
-      request.finally(() => inFlight.delete(cacheKey)).catch(() => {})
-    }
+    // Concurrent mounts share one in-flight request via the shared dedupe helper.
+    const request = dedupedGet(url, requestConfig)
 
     let alive = true
     request

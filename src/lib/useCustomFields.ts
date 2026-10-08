@@ -15,7 +15,8 @@
  */
 import { useEffect, useState, useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
-import api, { unwrapList, getActiveTenantId } from '@/lib/api'
+import { unwrapList, getActiveTenantId } from '@/lib/api'
+import { dedupedGet } from '@/lib/useCachedLookup'
 
 export type CustomFieldType = 'text' | 'number' | 'date' | 'boolean' | 'select' | 'textarea'
 
@@ -93,7 +94,8 @@ export function useCustomFields(entityType: CustomFieldEntityType) {
     const hit = cacheByEntity.get(key)
     if (hit) { setRaw(hit); setLoading(false); return }
     setLoading(true); setError(false)
-    api.get('/custom-fields', { params: { entity_type: entityType } })
+    // Concurrent hook mounts for the same entity share one in-flight request.
+    dedupedGet('/custom-fields', { params: { entity_type: entityType } })
       .then(r => { const list = (unwrapList(r).rows) as RawDef[]; cacheByEntity.set(key, list); setRaw(list) })
       .catch(() => setError(true))
       .finally(() => setLoading(false))

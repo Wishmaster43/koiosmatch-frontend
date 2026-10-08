@@ -12,7 +12,7 @@ import { describe, it, expect, vi, afterEach } from 'vitest'
 import { renderHook, waitFor } from '@testing-library/react'
 import type { AxiosResponse } from 'axios'
 import api, { getActiveTenantId } from './api'
-import { useCachedLookup } from './useCachedLookup'
+import { useCachedLookup, dedupedGet } from './useCachedLookup'
 
 // This project's tsconfig has no @types/node (browser-only lib/types); Node's real
 // `process` global exists at test runtime regardless, so declare just the two
@@ -197,6 +197,71 @@ describe('useCachedLookup · tenant scoping', () => {
     mockedTenantId.mockReturnValue('tenant-a')
     const backToTenantA = renderHook(() => useCachedLookup(url, mapValue, 'fallback'))
     expect(backToTenantA.result.current.data).toBe('a-value') // still cached, no 3rd GET
+    expect(mockedGet).toHaveBeenCalledTimes(2)
+  })
+})
+
+// dedupedGet — the shared in-flight guard extracted for LOOKUP-DEDUPE-1, used
+// directly by lookupLoader.ts and useCustomFields.ts (not only through this hook).
+describe('dedupedGet', () => {
+  // (i) Two concurrent callers for the same url+tenant → one api.get, both resolve
+  // with the exact same response.
+  it('two concurrent calls share one api.get and resolve with the same response', async () => {
+    const url = '/test-deduped-concurrent'
+    const response = { data: { value: 'shared' } } as AxiosResponse
+    let resolveGet!: (v: AxiosResponse) => void
+    mockedGet.mockImplementation(() => new Promise(resolve => { resolveGet = resolve }))
+
+    const p1 = dedupedGet(url)
+    const p2 = dedupedGet(url)
+    expect(mockedGet).toHaveBeenCalledTimes(1)
+
+    resolveGet(response)
+    const [r1, r2] = await Promise.all([p1, p2])
+    expect(r1).toBe(response)
+    expect(r2).toBe(response)
+  })
+
+  // (j) After the in-flight call settles, a later call fires a brand-new request —
+  // dedupedGet is a concurrency guard, never a result cache.
+  it('a call after settle fires a new request', async () => {
+    const url = '/test-deduped-after-settle'
+    mockedGet.mockResolvedValue({ data: { value: 'v1' } } as AxiosResponse)
+
+    await dedupedGet(url)
+    expect(mockedGet).toHaveBeenCalledTimes(1)
+
+    await dedupedGet(url)
+    expect(mockedGet).toHaveBeenCalledTimes(2)
+  })
+
+  // (k) A rejection rejects every concurrent caller and clears the in-flight slot
+  // (no unhandled-rejection leak — mirrors useCachedLookup's own regression guard).
+  it('a rejection rejects both concurrent callers and clears the slot', async () => {
+    const url = '/test-deduped-reject'
+    const error = new Error('network down')
+    mockedGet.mockRejectedValueOnce(error)
+
+    const p1 = dedupedGet(url)
+    const p2 = dedupedGet(url)
+    await expect(p1).rejects.toBe(error)
+    await expect(p2).rejects.toBe(error)
+
+    mockedGet.mockResolvedValueOnce({ data: { value: 'v2' } } as AxiosResponse)
+    await dedupedGet(url)
+    expect(mockedGet).toHaveBeenCalledTimes(2) // the slot cleared — a new call fires a real request
+  })
+
+  // (l) Different `params` on the same url must dedupe into DIFFERENT slots — e.g.
+  // /custom-fields?entity_type=task must never collide with ?entity_type=candidate.
+  it('different params on the same url dedupe into separate requests', async () => {
+    const url = '/test-deduped-params'
+    mockedGet.mockResolvedValue({ data: {} } as AxiosResponse)
+
+    await Promise.all([
+      dedupedGet(url, { params: { entity_type: 'task' } }),
+      dedupedGet(url, { params: { entity_type: 'candidate' } }),
+    ])
     expect(mockedGet).toHaveBeenCalledTimes(2)
   })
 })

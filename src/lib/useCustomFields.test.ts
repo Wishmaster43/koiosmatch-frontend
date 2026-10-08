@@ -225,3 +225,28 @@ describe('useCustomFields · tenant scoping', () => {
     expect(mockedGet).toHaveBeenCalledTimes(2)
   })
 })
+
+// LOOKUP-DEDUPE-1: two hooks for the SAME entity type mounting before the first
+// answer resolves (the drawer's Extra-tab gate + RequiredCustomFieldsCard, plus
+// StrictMode) must share one in-flight request, not fire one each.
+describe('useCustomFields · concurrent-mount dedupe (LOOKUP-DEDUPE-1)', () => {
+  it('two hooks mounted before the first GET resolves share one request', async () => {
+    // A tenant override gives this test its own cache/in-flight slot, independent
+    // of any entity type already cached by an earlier test in this file.
+    mockedTenantId.mockReturnValue('tenant-cf-concurrent')
+    let resolveGet!: (value: { data: { data: unknown[] } }) => void
+    mockedGet.mockImplementation(() => new Promise(resolve => { resolveGet = resolve }))
+
+    const a = renderHook(() => useCustomFields('task'))
+    const b = renderHook(() => useCustomFields('task'))
+    await waitFor(() => expect(mockedGet).toHaveBeenCalledTimes(1))
+
+    resolveGet({ data: { data: [{ id: '1', key: 'shared', type: 'text', active: true }] } })
+    await waitFor(() => expect(a.result.current.loading).toBe(false))
+    await waitFor(() => expect(b.result.current.loading).toBe(false))
+
+    expect(mockedGet).toHaveBeenCalledTimes(1)
+    expect(a.result.current.allFields.map(f => f.key)).toEqual(['shared'])
+    expect(b.result.current.allFields.map(f => f.key)).toEqual(['shared'])
+  })
+})

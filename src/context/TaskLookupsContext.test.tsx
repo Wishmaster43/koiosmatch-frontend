@@ -79,3 +79,40 @@ describe('TaskLookupsContext seed identity (SEED-IDENTITY-1)', () => {
     expect(result.current.statuses).toBe(first)
   })
 })
+
+// LOOKUP-DEDUPE-1: two providers mounted in the same tick (StrictMode's double
+// mount of the same provider, or two consumers of this provider on one page)
+// must share ONE in-flight request per lookup URL, not fire one each.
+describe('TaskLookupsContext · concurrent-mount dedupe (LOOKUP-DEDUPE-1)', () => {
+  it('two providers mounted together request each lookup URL exactly once', async () => {
+    mockLookups({
+      '/task-statuses': [{ value: 'open', label: 'Open' }],
+      '/task-types': [{ value: 'task', label: 'Taak' }],
+      '/task-priorities': [{ value: 'normal', label: 'Normaal' }],
+    })
+
+    const a = renderHook(() => useTaskLookups(), { wrapper })
+    const b = renderHook(() => useTaskLookups(), { wrapper })
+
+    await waitFor(() => expect(a.result.current.loading).toBe(false))
+    await waitFor(() => expect(b.result.current.loading).toBe(false))
+
+    expect(mockedGet).toHaveBeenCalledTimes(3) // statuses + types + priorities, once each
+  })
+
+  it('a provider mounted after the first settled still refetches (freshness for settings edits)', async () => {
+    mockLookups({
+      '/task-statuses': [{ value: 'open', label: 'Open' }],
+      '/task-types': [{ value: 'task', label: 'Taak' }],
+      '/task-priorities': [{ value: 'normal', label: 'Normaal' }],
+    })
+
+    const first = renderHook(() => useTaskLookups(), { wrapper })
+    await waitFor(() => expect(first.result.current.loading).toBe(false))
+    expect(mockedGet).toHaveBeenCalledTimes(3)
+
+    const second = renderHook(() => useTaskLookups(), { wrapper })
+    await waitFor(() => expect(second.result.current.loading).toBe(false))
+    expect(mockedGet).toHaveBeenCalledTimes(6) // a real second round of requests, not a cache hit
+  })
+})

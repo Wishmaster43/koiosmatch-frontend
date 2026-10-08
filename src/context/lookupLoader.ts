@@ -5,7 +5,8 @@
  * loop around their own differently-shaped normalize() — this factors out just
  * that loop, leaving each provider's own normalize/seed data untouched.
  */
-import api, { unwrap } from '@/lib/api'
+import { unwrap } from '@/lib/api'
+import { dedupedGet } from '@/lib/useCachedLookup'
 
 // One lookup fetch: its URL, its seed fallback, its setter, and (channels only) the pinId flag.
 export interface LookupLoadSpec<T> {
@@ -25,8 +26,10 @@ export function loadTenantLookups<T>(
 ): void {
   const failedUrls: string[] = []
   Promise.allSettled(
+    // Concurrent provider mounts share one request; a later mount still refetches
+    // (freshness for settings edits) — dedupedGet only de-dupes IN-FLIGHT calls.
     specs.map(({ url, fallback, set, pinId }) =>
-      api.get(url)
+      dedupedGet(url)
         .then(r => set(normalize(unwrap(r), fallback, pinId ?? false)))
         .catch(() => { failedUrls.push(url) }),
     ),

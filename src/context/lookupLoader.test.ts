@@ -61,4 +61,24 @@ describe('loadTenantLookups', () => {
 
     await vi.waitFor(() => expect(onDone).toHaveBeenCalled())
   })
+
+  // LOOKUP-DEDUPE-1: two loadTenantLookups calls that hit the SAME url within the
+  // same tick (e.g. two provider mounts) share one api.get for that url.
+  it('shares one request when two calls load the same url concurrently', async () => {
+    vi.mocked(api.get).mockResolvedValue({ data: ['shared'] })
+    const setA1 = vi.fn()
+    const setA2 = vi.fn()
+    const onDoneA = vi.fn()
+    const onDoneB = vi.fn()
+
+    loadTenantLookups<string[]>([{ url: '/shared-lookup', fallback: [], set: setA1 }], (raw) => raw as string[], onDoneA)
+    loadTenantLookups<string[]>([{ url: '/shared-lookup', fallback: [], set: setA2 }], (raw) => raw as string[], onDoneB)
+
+    await vi.waitFor(() => expect(onDoneA).toHaveBeenCalled())
+    await vi.waitFor(() => expect(onDoneB).toHaveBeenCalled())
+
+    expect(api.get).toHaveBeenCalledTimes(1)
+    expect(setA1).toHaveBeenCalledWith(['shared'])
+    expect(setA2).toHaveBeenCalledWith(['shared'])
+  })
 })
