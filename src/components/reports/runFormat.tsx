@@ -4,7 +4,7 @@
  * consistent and is never duplicated. Labels resolve via the `reports` namespace.
  */
 import { useTranslation } from 'react-i18next'
-import { Ban, CheckCircle, XCircle, RotateCcw, Clock, ShieldAlert } from 'lucide-react'
+import { Ban, CheckCircle, XCircle, RotateCcw, Clock, ShieldAlert, SkipForward } from 'lucide-react'
 import { formatDateTimeStr } from '@/lib/localDate'
 import { formatSeconds } from '@/lib/formatters'
 import SoftChip from '@/components/ui/SoftChip'
@@ -47,6 +47,9 @@ export const STATUS_META: Record<string, BadgeMeta> = {
   // LIMITS-FE-F7: a run halted by a connector limit (BE WorkflowRun::STATUSES)
   // — warning token (not danger: it is a cap, not a failed step) + its own icon.
   blocked:   { bg: 'var(--color-warning-bg)', color: 'var(--color-on-warning-bg)', Icon: ShieldAlert },
+  // RUN-SKIPPED-REASON-FE-1: a run the engine skipped (N-006) — neutral/muted
+  // like `waiting`/`cancelled`, never danger: skipping is not a failure.
+  skipped:   { bg: 'var(--hover-bg)',         color: 'var(--text-muted)',    Icon: SkipForward },
 }
 
 

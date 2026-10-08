@@ -414,6 +414,7 @@
       "childRuns": "Esecuzioni figlie",
       "blockedReason": "Motivo del blocco"
     },
+    "reasonLabel": "Motivo",
     "openHistory": "Visualizza nella cronologia",
     "dryRun": {
       "banner": "Prova: passaggi di invio saltati"

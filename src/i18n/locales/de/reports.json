@@ -414,6 +414,7 @@
       "childRuns": "Kind-Runs",
       "blockedReason": "Blockierungsgrund"
     },
+    "reasonLabel": "Grund",
     "openHistory": "In Verlauf anzeigen",
     "dryRun": {
       "banner": "Testlauf: Versandschritte übersprungen"

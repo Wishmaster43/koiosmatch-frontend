@@ -414,6 +414,7 @@
       "childRuns": "Runs enfants",
       "blockedReason": "Motif du blocage"
     },
+    "reasonLabel": "Motif",
     "openHistory": "Voir dans l'historique",
     "dryRun": {
       "banner": "Simulation : étapes d'envoi ignorées"

@@ -414,6 +414,7 @@
       "childRuns": "Ejecuciones hijas",
       "blockedReason": "Motivo del bloqueo"
     },
+    "reasonLabel": "Motivo",
     "openHistory": "Ver en el historial",
     "dryRun": {
       "banner": "Simulación: pasos de envío omitidos"

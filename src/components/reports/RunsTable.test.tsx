@@ -6,7 +6,7 @@
  * the current sort — asserted end-to-end through this table's own columns.
  */
 import { describe, it, expect, vi, afterEach } from 'vitest'
-import { render, screen, within, act, waitFor } from '@testing-library/react'
+import { render, screen, within, act, waitFor, fireEvent } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import '@/i18n'
 import RunsTable, { getWorkflowIdFromHash } from './RunsTable'
@@ -150,15 +150,16 @@ describe('RunsTable — WFB-14 (c) the status filter cannot trap itself', () => 
   // disappears from the panel while the stale selection keeps riding every
   // request, with no way back short of a reload. Options must come from the
   // fixed vocabulary instead, so the group survives a zero-row response.
-  it('keeps the status group registered with all six options, even when the current page has zero runs', () => {
+  it('keeps the status group registered with all seven options, even when the current page has zero runs', () => {
     vi.mocked(useReportList).mockReturnValueOnce({ rows: [], loading: false, error: false })
     render(<RunsTable />)
     const groups = lastRegisteredGroups()
     const status = groups.find((g: { key: string }) => g.key === 'status') as
       { options: { value: string }[] } | undefined
     expect(status).toBeDefined()
+    // RUN-SKIPPED-REASON-FE-1: 'skipped' joined the fixed vocabulary.
     expect(status?.options.map(o => o.value).sort()).toEqual(
-      ['blocked', 'cancelled', 'failed', 'running', 'success', 'waiting'],
+      ['blocked', 'cancelled', 'failed', 'running', 'skipped', 'success', 'waiting'],
     )
   })
 
@@ -178,7 +179,8 @@ describe('RunsTable — WFB-14 (c) the status filter cannot trap itself', () => 
     const statusAfter = groupsAfter.find((g: { key: string }) => g.key === 'status') as
       { options: { value: string }[] }
     // The option list is still the full fixed vocabulary, not collapsed to one.
-    expect(statusAfter.options.length).toBe(6)
+    // RUN-SKIPPED-REASON-FE-1: seven options now, 'skipped' included.
+    expect(statusAfter.options.length).toBe(7)
   })
 })
 
@@ -206,5 +208,59 @@ describe('RunsTable — LIMITS-FE-F7 blocked status', () => {
     render(<RunsTable />)
     expect(screen.getByText('Geblokkeerd').closest('span'))
       .toHaveAttribute('title', 'Limiet bereikt (sm, modus block) — stap overgeslagen, niets gesynchroniseerd.')
+  })
+})
+
+// RUN-SKIPPED-REASON-FE-1 (N-006, additive): a run-level `reason` joins the
+// status vocabulary ('skipped') and is searchable/shown like the F7 block reason.
+describe('RunsTable — RUN-SKIPPED-REASON-FE-1 skipped status + reason', () => {
+  it('keeps the status group registered with seven options, including "skipped"', () => {
+    render(<RunsTable />)
+    const groups = lastRegisteredGroups()
+    const status = groups.find((g: { key: string }) => g.key === 'status') as
+      { options: { value: string }[] } | undefined
+    expect(status).toBeDefined()
+    expect(status?.options.map(o => o.value).sort()).toEqual(
+      ['blocked', 'cancelled', 'failed', 'running', 'skipped', 'success', 'waiting'],
+    )
+  })
+
+  it('renders the skipped badge with its own muted label', () => {
+    vi.mocked(useReportList).mockReturnValueOnce({
+      rows: [{ id: 'r4', workflow_name: 'Skipflow', status: 'skipped' }],
+      loading: false, error: false,
+    })
+    render(<RunsTable />)
+    expect(screen.getByText('Overgeslagen')).toBeInTheDocument()
+  })
+
+  it('shows the run-level reason as the status badge title when there is no blocked-step reason', () => {
+    vi.mocked(useReportList).mockReturnValueOnce({
+      rows: [{ id: 'r5', workflow_name: 'Skipflow', status: 'skipped', reason: 'Geen kandidaten in de selectie' }],
+      loading: false, error: false,
+    })
+    render(<RunsTable />)
+    expect(screen.getByText('Overgeslagen').closest('span'))
+      .toHaveAttribute('title', 'Geen kandidaten in de selectie')
+  })
+
+  it('matches the free-text search against the run-level reason', () => {
+    // mockReturnValue (not -Once): the search keystroke re-renders this
+    // component, which calls the mocked hook a second time — a -Once stub
+    // would fall back to the default 2-row mock on that second call.
+    vi.mocked(useReportList).mockReturnValue({
+      rows: [
+        { id: 'r6', workflow_name: 'Skipflow', status: 'skipped', reason: 'Zeldzame foutreden xyz' },
+        { id: 'r7', workflow_name: 'Anderflow', status: 'success' },
+      ],
+      loading: false, error: false,
+    })
+    render(<RunsTable />)
+    const search = screen.getByPlaceholderText('Zoek op workflow, trigger, fout…')
+    fireEvent.change(search, { target: { value: 'zeldzame' } })
+    expect(screen.getByText('Skipflow')).toBeInTheDocument()
+    expect(screen.queryByText('Anderflow')).not.toBeInTheDocument()
+    // Restore the default mock so a later test in this file never inherits this run list.
+    vi.mocked(useReportList).mockReturnValue({ rows: runs, loading: false, error: false })
   })
 })

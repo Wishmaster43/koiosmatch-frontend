@@ -168,8 +168,9 @@ export default function WorkflowHistoryView({ workflowId, vacancyId, initialRun 
                       </span>
                     </td>
                     {/* F7: the badge's own title/sr-only text carries the block reason on a
-                        blocked run — read from the capped step, not the still-empty error_message. */}
-                    <td style={TD}><StatusBadge status={r.status} reason={blockedReason(r)} /></td>
+                        blocked run — read from the capped step, not the still-empty error_message.
+                        RUN-SKIPPED-REASON-FE-1: falls back to the run-level `reason` otherwise. */}
+                    <td style={TD}><StatusBadge status={r.status} reason={blockedReason(r) ?? r.reason} /></td>
                     <td style={{ ...TD, fontSize: 12, color: 'var(--text-muted)' }}>
                       {formatDuration(r.duration_ms ?? r.duration)}
                     </td>

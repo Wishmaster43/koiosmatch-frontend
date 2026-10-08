@@ -414,6 +414,7 @@
       "childRuns": "Child runs",
       "blockedReason": "Block reason"
     },
+    "reasonLabel": "Reason",
     "openHistory": "View in history",
     "dryRun": {
       "banner": "Dry run: send steps skipped"

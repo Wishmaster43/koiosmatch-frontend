@@ -414,6 +414,7 @@
       "childRuns": "Kind-runs",
       "blockedReason": "Reden blokkering"
     },
+    "reasonLabel": "Reden",
     "openHistory": "Bekijk in geschiedenis",
     "dryRun": {
       "banner": "Proefrun: verzendstappen overgeslagen"

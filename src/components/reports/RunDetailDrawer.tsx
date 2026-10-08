@@ -19,7 +19,7 @@ import CalloutBox from '@/components/ui/CalloutBox'
 import RunStepList from './RunStepList'
 import RunLineage from './RunLineage'
 import { StopRunButton, CANCELLABLE } from '@/components/layout/workflow/runControl'
-import { GroupLabel, Mono } from '@/components/ui/typography'
+import { GroupLabel, Mono, Caption } from '@/components/ui/typography'
 import ReportStatStrip from './ReportStatStrip'
 import CopyIconButton from '@/components/ui/CopyIconButton'
 import type { RunRow } from '@/types/reports'
@@ -121,6 +121,14 @@ export default function RunDetailDrawer({ run, onClose, zIndex }: {
       <div style={{ fontSize: 12, color: 'var(--text-muted)' }}>
         {t('runs.drawer.startedColon')} {formatDT(shown.started_at ?? shown.created_at)}
       </div>
+      {/* RUN-SKIPPED-REASON-FE-1: the run-level reason the engine skipped/stopped
+          this run (N-006) — rendered verbatim, muted, danger-toned only on a
+          failed run; the blocked-run warning callout below stays the capped-step case. */}
+      {shown.reason && (
+        <Caption as="div" style={shown.status === 'failed' ? { color: 'var(--color-danger-text)', marginTop: 4 } : { marginTop: 4 }}>
+          {t('runs.reasonLabel')}: {shown.reason}
+        </Caption>
+      )}
       {stopError && (
         <div style={{ fontSize: 11, color: 'var(--color-danger-text)', marginTop: 4 }}>{stopError}</div>
       )}

@@ -166,3 +166,35 @@ describe('RunDetailDrawer — blocked run (F7)', () => {
     expect(screen.getAllByText('Shiftmanager-limiet bereikt (500/dag)').length).toBeGreaterThanOrEqual(1)
   })
 })
+
+// RUN-SKIPPED-REASON-FE-1 (N-006, additive): a run-level `reason` renders as a
+// muted line under the status when present, and is absent when it is not.
+describe('RunDetailDrawer — RUN-SKIPPED-REASON-FE-1 run-level reason', () => {
+  it('renders the reason line when the run carries one', () => {
+    render(
+      <I18nextProvider i18n={i18n}>
+        <RunDetailDrawer run={{ ...baseRun, status: 'skipped', reason: 'Geen kandidaten in de selectie' }} onClose={() => {}} />
+      </I18nextProvider>,
+    )
+    expect(screen.getByText('Reden: Geen kandidaten in de selectie')).toBeInTheDocument()
+  })
+
+  it('renders nothing extra when the run carries no reason', () => {
+    render(
+      <I18nextProvider i18n={i18n}>
+        <RunDetailDrawer run={{ ...baseRun, status: 'success' }} onClose={() => {}} />
+      </I18nextProvider>,
+    )
+    expect(screen.queryByText(/^Reden:/)).not.toBeInTheDocument()
+  })
+
+  it('renders the reason line in danger color for a failed run', () => {
+    render(
+      <I18nextProvider i18n={i18n}>
+        <RunDetailDrawer run={{ ...baseRun, status: 'failed', reason: 'Workflow gestopt door limiet' }} onClose={() => {}} />
+      </I18nextProvider>,
+    )
+    const line = screen.getByText('Reden: Workflow gestopt door limiet')
+    expect(line).toHaveStyle({ color: 'var(--color-danger-text)' })
+  })
+})

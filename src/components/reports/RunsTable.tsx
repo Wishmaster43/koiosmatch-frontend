@@ -41,7 +41,8 @@ const STATUS_DISPLAY_TO_API: Record<string, string> = { success: 'completed' }
 // request with no UI left to clear it. A fixed list can never disappear.
 // LIMITS-FE-F7: 'blocked' (a run halted by a connector limit) joins the
 // vocabulary — it is a real terminal value on WorkflowRun::STATUSES (backend).
-const RUN_STATUS_VALUES = ['success', 'failed', 'running', 'waiting', 'cancelled', 'blocked']
+// RUN-SKIPPED-REASON-FE-1: 'skipped' joins it too (N-006, additive BE contract).
+const RUN_STATUS_VALUES = ['success', 'failed', 'running', 'waiting', 'cancelled', 'blocked', 'skipped']
 
 // Pure: read the `workflow_id` param out of a hash string (no window access —
 // testable, mirrors useReportSwitch's getViewFromHash). WEBHOOK-RUN-CORRELATION-1:
@@ -114,7 +115,9 @@ export default function RunsTable() {
         (r.workflow_name  ?? '').toLowerCase().includes(q) ||
         (r.trigger        ?? '').toLowerCase().includes(q) ||
         (r.triggered_by   ?? '').toLowerCase().includes(q) ||
-        (r.error_message  ?? '').toLowerCase().includes(q)
+        (r.error_message  ?? '').toLowerCase().includes(q) ||
+        // RUN-SKIPPED-REASON-FE-1: a run-level skip/stop reason is searchable too.
+        (r.reason         ?? '').toLowerCase().includes(q)
       )
     })
   }, [rows, search, selectedStatuses, selectedWorkflows])
@@ -153,7 +156,9 @@ export default function RunsTable() {
       sortValue: r => r.status ?? null,
       // F7: the badge's own title/sr-only text carries the block reason on a
       // blocked run — read from the capped step, not the still-empty error_message.
-      render: r => <StatusBadge status={r.status} reason={blockedReason(r)} />,
+      // RUN-SKIPPED-REASON-FE-1: falls back to the run-level `reason` (e.g. a
+      // `skipped` run) when there is no connector-cap reason.
+      render: r => <StatusBadge status={r.status} reason={blockedReason(r) ?? r.reason} />,
     },
     {
       key: 'candidates_count', header: t('runs.cols.candidates'), sortable: true,

@@ -414,6 +414,7 @@
       "childRuns": "Execuções derivadas",
       "blockedReason": "Motivo do bloqueio"
     },
+    "reasonLabel": "Motivo",
     "openHistory": "Ver no histórico",
     "dryRun": {
       "banner": "Execução de teste: passos de envio ignorados"

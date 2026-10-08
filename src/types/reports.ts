@@ -143,6 +143,9 @@ export interface RunRow {
   // trigger context carried one (e.g. the PDOK geocode scenario / event runs).
   candidate?: { id?: string; reference_number?: string | null; name?: string | null } | null
   error_message?: string
+  // RUN-SKIPPED-REASON-FE-1: run-level reason the engine skipped or stopped
+  // this run (N-006, additive BE contract) — display text, render verbatim.
+  reason?: string | null
   step_results?: RunStep[]
   steps?: RunStep[]
   // WF-DRYRUN-FE-1: run-level boolean (never read from context — K-116's lesson:
