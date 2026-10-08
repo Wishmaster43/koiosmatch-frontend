@@ -2504,6 +2504,7 @@
       "access": "Accesso (AVG)"
     },
     "accessNotice": "Accesso in sola lettura a questo fascicolo, nessuna modifica (registro accessi AVG).",
+    "scrubbedNotice": "Il contenuto di questa riga è stato cancellato su richiesta dell'interessato (GDPR). L'evento stesso resta registrato.",
     "http": {
       "method": "Metodo",
       "path": "Percorso",

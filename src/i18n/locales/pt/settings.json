@@ -2504,6 +2504,7 @@
       "access": "Acesso (RGPD)"
     },
     "accessNotice": "Acesso apenas de leitura a este dossiê, sem alteração (registo de acesso RGPD).",
+    "scrubbedNotice": "O conteúdo desta linha foi eliminado a pedido do titular dos dados (RGPD). O evento em si continua registado.",
     "http": {
       "method": "Método",
       "path": "Caminho",

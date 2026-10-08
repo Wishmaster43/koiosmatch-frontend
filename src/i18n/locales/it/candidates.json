@@ -989,6 +989,8 @@
     "axisPhase": "Fase",
     "reasonGiven": "motivo indicato",
     "effectiveFrom": "dal {{date}}",
+    "scrubbedErasure": "Dati cancellati su richiesta dell'interessato (GDPR)",
+    "scrubbed": "Dati cancellati (GDPR)",
     "actions": {
       "updated": "Aggiornato",
       "created": "Creato",

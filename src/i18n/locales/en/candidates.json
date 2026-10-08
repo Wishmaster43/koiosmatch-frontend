@@ -989,6 +989,8 @@
     "axisPhase": "Phase",
     "reasonGiven": "reason given",
     "effectiveFrom": "as of {{date}}",
+    "scrubbedErasure": "Data erased at the data subject's request (GDPR)",
+    "scrubbed": "Data erased (GDPR)",
     "actions": {
       "updated": "Updated",
       "created": "Created",

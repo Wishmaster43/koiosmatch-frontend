@@ -2242,6 +2242,7 @@
       "access": "Zugriff (DSGVO)"
     },
     "accessNotice": "Nur-Lese-Zugriff auf diese Akte, keine Änderung (DSGVO-Zugriffsprotokoll).",
+    "scrubbedNotice": "Der Inhalt dieser Zeile wurde auf Antrag der betroffenen Person gelöscht (DSGVO). Das Ereignis selbst bleibt protokolliert.",
     "http": {
       "method": "Methode",
       "path": "Pfad",

@@ -2242,6 +2242,7 @@
       "access": "Acceso (RGPD)"
     },
     "accessNotice": "Acceso de solo lectura a este expediente, sin cambios (registro de acceso RGPD).",
+    "scrubbedNotice": "El contenido de esta fila se ha eliminado a petición del interesado (RGPD). El evento en sí permanece registrado.",
     "http": {
       "method": "Método",
       "path": "Ruta",

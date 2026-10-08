@@ -2504,6 +2504,7 @@
       "access": "Access (AVG)"
     },
     "accessNotice": "Read-only access to this record, no change (AVG access log).",
+    "scrubbedNotice": "The content of this row has been erased at the data subject's request (GDPR). The event itself remains logged.",
     "http": {
       "method": "Method",
       "path": "Path",

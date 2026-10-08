@@ -116,4 +116,41 @@ describe('EntityChangelogTab · CHANGELOG-3 uuid guard', () => {
     render(<EntityChangelogTab items={events} loading={false} error={false} namespace="candidates" fallbackDescription />)
     expect(await screen.findByText('Dossier geopend')).toBeInTheDocument()
   })
+
+  // K004-AUDIT-SCRUB-1: a scrubbed row (erased candidate/contact) renders the one
+  // neutral AVG line, never a diff/field card and never the empty-state dash.
+  it('renders the AVG erasure line for a scrubbed event, no field/old/new', async () => {
+    const events: ChangelogEvent[] = [{
+      id: 'e7', causer_name: 'Danny Polak', created_at: '2026-08-01T10:00:00Z', event: 'updated',
+      properties: { scrubbed: true, reason: 'avg_erasure_request' },
+    }]
+    render(<EntityChangelogTab items={events} loading={false} error={false} namespace="candidates" />)
+    expect(await screen.findByText(nlCandidates.changelog.scrubbedErasure)).toBeInTheDocument()
+    expect(screen.queryByText('—')).not.toBeInTheDocument()
+  })
+
+  // A scrubbed row with an unknown/future reason falls back to the generic key.
+  it('renders the generic scrubbed line for a non-erasure scrub reason', async () => {
+    const events: ChangelogEvent[] = [{
+      id: 'e8', causer_name: 'Danny Polak', created_at: '2026-08-01T10:00:00Z', event: 'updated',
+      changes: { scrubbed: true, reason: 'something_else' },
+    }]
+    render(<EntityChangelogTab items={events} loading={false} error={false} namespace="candidates" />)
+    expect(await screen.findByText(nlCandidates.changelog.scrubbed)).toBeInTheDocument()
+  })
+
+  // A scrubbed row sits beside a normal diff event in the same feed — the normal
+  // event still renders its own field card, proving the scrub branch is per-event.
+  it('still renders a normal field card for a diff event beside a scrubbed one', async () => {
+    const events: ChangelogEvent[] = [
+      { id: 'e9', causer_name: 'Danny Polak', created_at: '2026-08-01T10:00:00Z', event: 'updated',
+        properties: { scrubbed: true, reason: 'avg_erasure_request' } },
+      { id: 'e10', causer_name: 'Danny Polak', created_at: '2026-08-02T10:00:00Z', event: 'updated',
+        changes: { attributes: { first_name: 'Nieuwe naam' }, old: { first_name: 'Oude naam' } } },
+    ]
+    render(<EntityChangelogTab items={events} loading={false} error={false} namespace="candidates" />)
+    expect(await screen.findByText(nlCandidates.changelog.scrubbedErasure)).toBeInTheDocument()
+    expect(screen.getByText('Oude naam')).toBeInTheDocument()
+    expect(screen.getByText('Nieuwe naam')).toBeInTheDocument()
+  })
 })

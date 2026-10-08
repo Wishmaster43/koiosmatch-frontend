@@ -25,13 +25,15 @@ import { useDateFormat } from '@/lib/datetime'
 import { escapeCsvCell } from '@/lib/csv'
 import { isUuid } from '@/lib/uuid'
 import { describeChangelog } from './changelogDescription'
+import { scrubbedBagOf, scrubReasonKey } from './changelogScrub'
 import { Caption } from '@/components/ui/typography'
 import Button from '@/components/ui/Button'
 import SoftChip from '@/components/ui/SoftChip'
 import type { Id } from '@/types/common'
 
-// The Spatie {attributes, old} diff bag every entity's AuditsChanges trait sends.
-export interface ChangelogDiffBag { attributes?: Record<string, unknown>; old?: Record<string, unknown> }
+// The Spatie {attributes, old} diff bag every entity's AuditsChanges trait sends —
+// or, on an erased subject (K004-AUDIT-SCRUB-1), the scrub marker in its place.
+export interface ChangelogDiffBag { attributes?: Record<string, unknown>; old?: Record<string, unknown>; scrubbed?: boolean; reason?: string }
 
 // One raw activity-log entry — the shared shape across every entity's activity feed.
 export interface ChangelogEvent {
@@ -56,7 +58,7 @@ export interface ChangelogEvent {
 // One rendered card: a header line (when · who · action · [subject] · field) plus an
 // old → new row, a single readable `line` (e.g. a status/phase transition), or —
 // only when the caller opts in — a plain fallback description for a diff-less entry.
-interface LogCard { when?: string; who: string; action: string; subject?: string; field?: string; oldVal?: string | null; newVal?: string | null; line?: string; fallback?: string }
+interface LogCard { when?: string; who: string; action: string; subject?: string; field?: string; oldVal?: string | null; newVal?: string | null; line?: string; fallback?: string; muted?: boolean }
 
 // Bookkeeping columns every entity's trait already excludes server-side — this stays
 // defense-in-depth for anything that slips through; entities merge their own extras in.
@@ -161,6 +163,10 @@ export default function EntityChangelogTab<E extends ChangelogEvent = ChangelogE
     const kept = filterEvent ? items.filter(filterEvent) : items
     const all = kept.flatMap((ev): LogCard[] => {
       const base = { when: ev.created_at, who: ev.actor_label ?? ev.causer_name ?? t('changelog.system'), action: actionOf(ev) }
+      // K004-AUDIT-SCRUB-1: an erased candidate/contact leaves no diff behind — render
+      // one neutral AVG line instead of falling through to the diff-less branch.
+      const scrub = scrubbedBagOf(ev)
+      if (scrub) return [{ ...base, subject: subjectLabel?.(ev), line: t(scrubReasonKey((scrub as { reason?: unknown }).reason)), muted: true }]
       const extra = extraCard?.(ev, base)
       if (extra) return [extra]
       const subject = subjectLabel?.(ev)
@@ -263,7 +269,7 @@ export default function EntityChangelogTab<E extends ChangelogEvent = ChangelogE
             {cd.subject && <> {' · '}<span style={chipWrap}><SoftChip label={cd.subject} round /></span></>}
             {cd.field && <> {' · '}<span style={boldSpan}>{cd.field}</span></>}
           </Caption>
-          {cd.line && <div style={{ fontSize: 12, color: 'var(--text)', marginTop: 5 }}>{cd.line}</div>}
+          {cd.line && <div style={{ fontSize: 12, color: cd.muted ? 'var(--text-muted)' : 'var(--text)', marginTop: 5 }}>{cd.line}</div>}
           {!cd.line && cd.field && (
             <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginTop: 5, fontSize: 12 }}>
               {(cd.oldVal === null || cd.newVal === null) ? (

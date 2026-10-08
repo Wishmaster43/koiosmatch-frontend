@@ -989,6 +989,8 @@
     "axisPhase": "Fase",
     "reasonGiven": "reden opgegeven",
     "effectiveFrom": "per {{date}}",
+    "scrubbedErasure": "Gegevens verwijderd op verzoek van de betrokkene (AVG)",
+    "scrubbed": "Gegevens verwijderd (AVG)",
     "actions": {
       "updated": "Bijgewerkt",
       "created": "Aangemaakt",

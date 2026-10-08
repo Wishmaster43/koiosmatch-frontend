@@ -989,6 +989,8 @@
     "axisPhase": "Fase",
     "reasonGiven": "motivo indicado",
     "effectiveFrom": "a partir de {{date}}",
+    "scrubbedErasure": "Dados eliminados a pedido do titular (RGPD)",
+    "scrubbed": "Dados eliminados (RGPD)",
     "actions": {
       "updated": "Atualizado",
       "created": "Criado",

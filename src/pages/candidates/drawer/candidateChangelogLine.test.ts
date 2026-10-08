@@ -49,4 +49,11 @@ describe('buildH2ChangelogLine', () => {
     const result = buildH2ChangelogLine(ev, { statusMeta, phaseMeta }, t, formatDate)
     expect(result?.line).toBe('changelog.emptyValue → Status:available')
   })
+
+  // K004-AUDIT-SCRUB-1: a scrubbed payload has neither axis nor to, so the H2
+  // builder returns null — the shared tab's own scrub branch renders the row instead.
+  it('returns null for a scrubbed payload (no axis/to)', () => {
+    const ev: ChangelogEvent = { properties: { scrubbed: true, reason: 'avg_erasure_request' } }
+    expect(buildH2ChangelogLine(ev, { statusMeta, phaseMeta }, t, formatDate)).toBeNull()
+  })
 })

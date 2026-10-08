@@ -2242,6 +2242,7 @@
       "access": "Accès (RGPD)"
     },
     "accessNotice": "Accès en lecture seule à ce dossier, aucune modification (journal d'accès RGPD).",
+    "scrubbedNotice": "Le contenu de cette ligne a été supprimé à la demande de la personne concernée (RGPD). L'événement lui-même reste enregistré.",
     "http": {
       "method": "Méthode",
       "path": "Chemin",

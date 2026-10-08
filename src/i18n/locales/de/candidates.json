@@ -966,6 +966,8 @@
     "axisPhase": "Phase",
     "reasonGiven": "Grund angegeben",
     "effectiveFrom": "per {{date}}",
+    "scrubbedErasure": "Daten auf Antrag der betroffenen Person gelöscht (DSGVO)",
+    "scrubbed": "Daten gelöscht (DSGVO)",
     "actions": {
       "updated": "Aktualisiert",
       "created": "Erstellt",

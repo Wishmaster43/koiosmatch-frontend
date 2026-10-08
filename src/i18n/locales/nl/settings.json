@@ -2504,6 +2504,7 @@
       "access": "Toegang (AVG)"
     },
     "accessNotice": "Alleen-lezen toegang tot dit dossier, geen wijziging (AVG-toegangslogboek).",
+    "scrubbedNotice": "De inhoud van deze regel is verwijderd op verzoek van de betrokkene (AVG). De gebeurtenis zelf blijft geregistreerd.",
     "http": {
       "method": "Methode",
       "path": "Pad",

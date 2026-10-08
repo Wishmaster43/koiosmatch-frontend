@@ -4,10 +4,11 @@
  */
 import { Fragment } from 'react'
 import { useTranslation } from 'react-i18next'
-import { X, Eye } from 'lucide-react'
+import { X, Eye, ShieldOff } from 'lucide-react'
 import { useFocusTrap } from '@/hooks/useFocusTrap'
 import { useDateFormat } from '@/lib/datetime'
 import { KPI_KEYS, LogBadge, isAccessEvent, buildFieldDiff, entityLabel, type AuditEntry } from './auditShared'
+import { isScrubbedActivity } from '@/components/drawer/tabs/changelogScrub'
 import { GroupLabel, Caption, PageTitle } from '@/components/ui/typography'
 import Button from '@/components/ui/Button'
 import { DiffRow, DetailRow } from '@/pages/settings/shared/DetailRowLayout'
@@ -39,6 +40,21 @@ export function AuditDrawer({ entry, onClose }: AuditDrawerProps) {
   const kpiLabel = (k: string) => KPI_KEYS.includes(k) ? t(`audit.kpi.${k}`) : k
 
   const renderContent = () => {
+    // K004-AUDIT-SCRUB-1: an erased candidate/contact's row carries the scrub marker
+    // instead of a diff bag — show the AVG notice, never a diff (and never http/auth/
+    // roles/settings branches, since those never carry this marker anyway).
+    if (isScrubbedActivity(p)) {
+      return (
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '10px 14px', borderRadius: 8, background: 'var(--hover-bg)' }}>
+            <ShieldOff size={14} style={{ color: 'var(--text-muted)', flexShrink: 0 }} />
+            <span style={{ fontSize: 12.5, color: 'var(--text-muted)' }}>{t('audit.scrubbedNotice')}</span>
+          </div>
+          <DetailRow label={t('audit.colEntity')} value={entry.subject_type ? [entityLabel(entry.subject_type, t), entry.subject_label].filter(Boolean).join(' · ') : '—'} />
+        </div>
+      )
+    }
+
     // Access (read) events — the AVG "Dossier geopend/ingezien" compliance log; no diff rows.
     if (isAccessEvent(entry)) {
       return (
