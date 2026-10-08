@@ -35,10 +35,14 @@ export function clearRecentLookups(): void { recent.clear() }
 // Exported for readers of the RAW rows (useTaskLookupIds needs the uuid ids the provider's
 // normalize() drops) so they ride the provider's own request instead of firing their own.
 export function fetchLookupRecent(url: string): Promise<AxiosResponse> {
+  // With the window closed (every vitest suite by default) nothing is remembered and the
+  // tenant key is never read — a suite that mocks '@/lib/api' without getActiveTenantId
+  // (VacancyDefaultStatusSettings.test, measured 08-10) must keep passing untouched.
+  if (recentMs <= 0) return dedupedGet(url)
   const key = recentKey(url)
   const hit = recent.get(key)
-  if (recentMs > 0 && hit && Date.now() - hit.at < recentMs) return Promise.resolve(hit.response)
-  return dedupedGet(url).then(response => { if (recentMs > 0) recent.set(key, { at: Date.now(), response }); return response })
+  if (hit && Date.now() - hit.at < recentMs) return Promise.resolve(hit.response)
+  return dedupedGet(url).then(response => { recent.set(key, { at: Date.now(), response }); return response })
 }
 
 // One lookup fetch: its URL, its seed fallback, its setter, and (channels only) the pinId flag.

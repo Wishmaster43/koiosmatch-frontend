@@ -57,6 +57,11 @@ function paramsSuffix(params: unknown): string {
 // await the SAME promise instead of each firing their own request. The slot clears
 // once the request settles (success or failure), so a later call always refetches —
 // this is purely a concurrency guard, never a result cache (callers keep their own).
+// Test seam: drops every in-flight promise. A suite whose cases mock the client per case
+// (a never-resolving promise for a loading state, a reset mock) would otherwise hand the
+// previous case's promise to the next mount of the same url.
+export function clearInFlightLookups(): void { inFlight.clear() }
+
 export function dedupedGet(url: string, config?: AxiosRequestConfig): Promise<AxiosResponse> {
   const key = tenantCacheKey(url) + paramsSuffix(config?.params)
   let request = inFlight.get(key)

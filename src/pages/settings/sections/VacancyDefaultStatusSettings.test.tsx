@@ -15,7 +15,9 @@ import VacancyDefaultStatusSettings, { VACANCY_DEFAULT_STATUS_KEY } from './Vaca
 const st = (key: string) => i18n.t(key, { ns: 'settings' })
 
 // Never resolves — VacancyLookupsProvider keeps its DEFAULT_VACANCY_STATUSES seed.
-vi.mock('@/lib/api', () => ({ default: { get: vi.fn(() => new Promise(() => {})) } }))
+vi.mock('@/lib/api', () => ({
+  // LOOKUP-DEDUPE-1: the lookup loader keys its cache by tenant; a partial api mock must declare it.
+  getActiveTenantId: () => null, default: { get: vi.fn(() => new Promise(() => {})) } }))
 
 // Controllable settings blob + a spy on the save path (§13: assert the REQUEST).
 const mockSettings = vi.fn(() => ({}))

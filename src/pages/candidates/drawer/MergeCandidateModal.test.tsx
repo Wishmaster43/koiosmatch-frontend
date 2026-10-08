@@ -36,6 +36,7 @@ vi.mock('@/lib/api', () => ({
   getActiveTenantId: () => null,
 }))
 vi.mock('@/lib/notify', () => ({ notifyError: vi.fn(), notifySuccess: vi.fn() }))
+import { clearInFlightLookups } from '@/lib/useCachedLookup'
 // The tenant's custom-field definitions, flat: labels + types for the conflict step.
 const DEFS = [
   { key: 'region', label: 'Regio', type: 'text', sort_order: 0, active: true, has_data: true, visible_in_ui: true },
@@ -213,7 +214,8 @@ describe('MergeCandidateModal · duplicate picker (punt 20)', () => {
  * is never sent — the chosen map rides inside the merge transaction.
  */
 describe('MergeCandidateModal · custom-field conflicts (X-37)', () => {
-  beforeEach(() => { getMock.mockReset(); postMock.mockReset(); patchMock.mockReset(); vi.mocked(notifyError).mockReset() })
+  // LOOKUP-DEDUPE-1: every case starts with an empty in-flight map (a per-case mock never leaks).
+  beforeEach(() => { clearInFlightLookups(); getMock.mockReset(); postMock.mockReset(); patchMock.mockReset(); vi.mocked(notifyError).mockReset() })
 
   const confirm = () => fireEvent.click(screen.getByRole('button', { name: /^samenvoegen$/i }))
 
