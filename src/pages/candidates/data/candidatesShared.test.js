@@ -101,6 +101,14 @@ describe('buildCandidatePatch', () => {
     expect(buildCandidatePatch({ dob: '1990-01-01', postalCode: '1234AB', houseNumber: '5' }))
       .toEqual({ date_of_birth: '1990-01-01', postcode: '1234AB', house_number: '5' })
   })
+  // CONSENT-TRISTATE-FE-1 (K-008): a flip sends only its own channel; a null passes
+  // through as null (not asked) and an absent channel is never invented as false.
+  it('sends only the channel present in the patch, and a null channel as null', () => {
+    expect(buildCandidatePatch({ consent: { whatsapp_opt_in: true, whatsapp_consent_at: '2026-10-08' } }))
+      .toEqual({ consent: { whatsapp_opt_in: true } })
+    expect(buildCandidatePatch({ consent: { email_opt_in: null } })).toEqual({ consent: { email_opt_in: null } })
+  })
+
   it('sends consent nested with only opt-in flags (never the _consent_at timestamps)', () => {
     expect(buildCandidatePatch({ consent: { whatsapp_opt_in: true, email_opt_in: false, whatsapp_consent_at: '2026-01-01' } }))
       .toEqual({ consent: { whatsapp_opt_in: true, email_opt_in: false } })

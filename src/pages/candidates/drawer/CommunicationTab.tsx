@@ -116,10 +116,12 @@ export default function CommunicationTab({ c, onSave, onEditStatusEvent, initial
   // full consent object; the server stamps `*_consent_at` on a flip (shown inline).
 
   const consent = c.consent as unknown as Record<string, unknown>
+  // CONSENT-TRISTATE-FE-1 (K-008): a channel is true (granted), false (refused) or
+  // null (not asked) — the toggle is ON only for an explicit grant, never by default.
   const CONSENT_CH = [
-    { key: 'whatsapp_opt_in',   at: 'whatsapp_consent_at',   label: t('communication.consentWhatsapp'),   dflt: true },
-    { key: 'email_opt_in',      at: 'email_consent_at',      label: t('communication.consentEmail'),      dflt: true },
-    { key: 'newsletter_opt_in', at: 'newsletter_consent_at', label: t('communication.consentNewsletter'), dflt: false },
+    { key: 'whatsapp_opt_in',   at: 'whatsapp_consent_at',   label: t('communication.consentWhatsapp') },
+    { key: 'email_opt_in',      at: 'email_consent_at',      label: t('communication.consentEmail') },
+    { key: 'newsletter_opt_in', at: 'newsletter_consent_at', label: t('communication.consentNewsletter') },
   ]
   // Optimistic "given at" (Danny punt F, live finding): the server DOES stamp
   // {channel}_consent_at on a flip, but buildCandidatePatch only ever forwards the
@@ -127,17 +129,21 @@ export default function CommunicationTab({ c, onSave, onEditStatusEvent, initial
   // never reach the request body, they only make the date show up immediately
   // instead of waiting for the drawer to reopen. Toggling OFF nulls the local
   // date too, so an unchecked box never shows a stale "gegeven op".
+  // Only the flipped channel travels (the drawer merges the patch deep, buildCandidatePatch
+  // sends the keys present): an untouched channel is never re-sent, so a null (not asked)
+  // can never become a false (refused) or a true (granted) as a side effect of another flip.
   const setConsent = (key: string, val: boolean) => {
     const atKey = CONSENT_CH.find(ch => ch.key === key)?.at
-    onSave?.({ ...consent, [key]: val, ...(atKey ? { [atKey]: val ? new Date().toISOString() : null } : {}) })
+    onSave?.({ [key]: val, ...(atKey ? { [atKey]: val ? new Date().toISOString() : null } : {}) })
   }
   // Retention opt-in (Block B, AVG-RET-2) — CMBE-RET-A shipped the backend validation
   // (consent.retention_opt_in now persists), so this behaves exactly like the 3
   // channel toggles above: same optimistic "given at" stamp, no more honest-gate.
   // Uses the camelCase field names mapCandidate.ts already produces (retentionOptIn/
   // retentionConsentAt) — buildCandidatePatch maps them to the snake_case API keys.
+  // Same rule: the retention flip carries only its own two keys.
   const setRetentionOptIn = (val: boolean) =>
-    onSave?.({ ...consent, retentionOptIn: val, retentionConsentAt: val ? new Date().toISOString() : null })
+    onSave?.({ retentionOptIn: val, retentionConsentAt: val ? new Date().toISOString() : null })
 
   // MATCH-TIMELINE-EVENT-1 (point 3, Danny live P1): a "Geplaatst bij …" card for a
   // match.created timeline event — every part is optional and skipped cleanly
@@ -281,7 +287,7 @@ export default function CommunicationTab({ c, onSave, onEditStatusEvent, initial
         <SectionCard>
           <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
             {CONSENT_CH.map(ch => {
-              const on = (consent[ch.key] as boolean | undefined) ?? ch.dflt
+              const on = consent[ch.key] === true
               const at = consent[ch.at] as string | null | undefined
               return (
                 // House toggle (Danny live review, 04-08: "Vervangen door

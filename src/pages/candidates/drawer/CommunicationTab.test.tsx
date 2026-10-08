@@ -514,3 +514,25 @@ describe('CommunicationTab · initialAction=start (CONVERSATION-START-1)', () =>
     expect(screen.queryByRole('dialog', { name: 'conversations.startModalTitle' })).not.toBeInTheDocument()
   })
 })
+
+// CONSENT-TRISTATE-FE-1 (K-008): a toggle is ON only for an explicit grant (null = not
+// asked renders OFF), and a flip hands the host ONLY its own channel + stamp — an
+// untouched channel is never re-sent, so a null can never turn into false or true.
+describe('CommunicationTab · consent tri-state (CONSENT-TRISTATE-FE-1)', () => {
+  it('renders a not-asked channel OFF and sends only the flipped channel', async () => {
+    const onSave = vi.fn()
+    render(<CommunicationTab c={candidate({ whatsapp_opt_in: null, email_opt_in: true, newsletter_opt_in: null })} onSave={onSave} />)
+    const user = userEvent.setup()
+    await user.click(screen.getByRole('tab', { name: 'communication.consentTitle' }))
+    const wa = screen.getByRole('switch', { name: 'communication.consentWhatsapp' })
+    expect(wa).toHaveAttribute('aria-checked', 'false')
+    expect(screen.getByRole('switch', { name: 'communication.consentEmail' })).toHaveAttribute('aria-checked', 'true')
+    await user.click(wa)
+    expect(onSave).toHaveBeenCalledTimes(1)
+    const sent = onSave.mock.calls[0][0] as Record<string, unknown>
+    expect(sent.whatsapp_opt_in).toBe(true)
+    expect(typeof sent.whatsapp_consent_at).toBe('string')
+    expect(sent).not.toHaveProperty('email_opt_in')
+    expect(sent).not.toHaveProperty('newsletter_opt_in')
+  })
+})

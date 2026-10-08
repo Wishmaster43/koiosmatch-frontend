@@ -140,9 +140,12 @@ describe('mapCandidate — pools / consent / address', () => {
     expect(mapCandidate({ pools: [{ id: 1, name: 'Zorg' }, 'Flex'] }).pools)
       .toEqual([{ id: 1, name: 'Zorg' }, { name: 'Flex' }])
   })
-  it('consent: wa/email default opt-in, newsletter opt-out; reads nested consent', () => {
-    expect(mapCandidate({}).consent.whatsapp_opt_in).toBe(true)
-    expect(mapCandidate({}).consent.email_opt_in).toBe(true)
+  // CONSENT-TRISTATE-FE-1 (K-008): a missing channel flag is "not asked" (null), never a grant.
+  it('consent: wa/email default to null (not asked), newsletter opt-out; reads nested consent', () => {
+    expect(mapCandidate({}).consent.whatsapp_opt_in).toBeNull()
+    expect(mapCandidate({}).consent.email_opt_in).toBeNull()
+    expect(mapCandidate({ consent: { whatsapp_opt_in: null } }).consent.whatsapp_opt_in).toBeNull()
+    expect(mapCandidate({ consent: { whatsapp_opt_in: true } }).consent.whatsapp_opt_in).toBe(true)
     expect(mapCandidate({}).consent.newsletter_opt_in).toBe(false)
     expect(mapCandidate({ consent: { whatsapp_opt_in: false } }).consent.whatsapp_opt_in).toBe(false)
   })

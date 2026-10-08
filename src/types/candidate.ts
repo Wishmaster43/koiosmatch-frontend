@@ -65,11 +65,12 @@ export interface CandidateBranch {
 }
 
 /** Channel consent (AVG): per-channel opt-in flag + the moment it was recorded.
- * Backend contract (C-11): nested under `consent`; WhatsApp/e-mail default true
- * (operational opt-out), newsletter false (opt-in). `_consent_at` is server-stamped. */
+ * Backend contract (C-11, tri-state since K-008 CONSENT-OPTIN-1): nested under
+ * `consent`; WhatsApp/e-mail are true (granted) | false (refused) | null (not asked),
+ * newsletter false (opt-in). `_consent_at` is server-stamped. */
 interface CandidateConsent {
-  whatsapp_opt_in: boolean
-  email_opt_in: boolean
+  whatsapp_opt_in: boolean | null
+  email_opt_in: boolean | null
   newsletter_opt_in: boolean
   whatsapp_consent_at: string | null
   email_consent_at: string | null
@@ -489,8 +490,8 @@ export interface ApiCandidate {
   freelance?: Loose // ZZP=freelance audit: forward-compat if the API key flips (still `zzp` today)
   planning_settings?: Loose
   consent?: {
-    whatsapp_opt_in?: boolean
-    email_opt_in?: boolean
+    whatsapp_opt_in?: boolean | null
+    email_opt_in?: boolean | null
     newsletter_opt_in?: boolean
     whatsapp_consent_at?: string | null
     email_consent_at?: string | null

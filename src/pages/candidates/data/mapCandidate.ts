@@ -335,8 +335,12 @@ export function mapCandidate(c: ApiCandidate, locale: string = 'nl-NL'): Candida
     // Channel consent (AVG, C-11): nested under `consent`. WhatsApp/e-mail default
     // true (operational opt-out), newsletter false (opt-in). `_at` is server-stamped.
     consent: {
-      whatsapp_opt_in:       c.consent?.whatsapp_opt_in       ?? true,
-      email_opt_in:          c.consent?.email_opt_in          ?? true,
+      // CONSENT-TRISTATE-FE-1 (K-008, CMBE 08-10): true = granted, false = refused,
+      // null = not asked. The old `?? true` was an opt-out assumption in the FE
+      // itself — once the BE default flips it would have read every unanswered
+      // channel as a grant and re-sent it as one on the next flip.
+      whatsapp_opt_in:       c.consent?.whatsapp_opt_in       ?? null,
+      email_opt_in:          c.consent?.email_opt_in          ?? null,
       newsletter_opt_in:     c.consent?.newsletter_opt_in     ?? false,
       whatsapp_consent_at:   c.consent?.whatsapp_consent_at   ?? null,
       email_consent_at:      c.consent?.email_consent_at      ?? null,
