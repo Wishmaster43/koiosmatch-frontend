@@ -9,6 +9,7 @@ import type { ReactNode } from 'react'
 import { renderHook, waitFor } from '@testing-library/react'
 import api from '@/lib/api'
 import { TaskLookupsProvider, useTaskLookups } from './TaskLookupsContext'
+import { clearRecentLookups, setRecentLookupWindow, RECENT_LOOKUP_MS } from './lookupLoader'
 
 vi.mock('@/lib/api', async () => {
   const actual = await vi.importActual('@/lib/api')
@@ -26,7 +27,7 @@ function mockLookups(byUrl: Record<string, unknown[]>) {
 
 const wrapper = ({ children }: { children: ReactNode }) => <TaskLookupsProvider>{children}</TaskLookupsProvider>
 
-afterEach(() => vi.clearAllMocks())
+afterEach(() => { clearRecentLookups(); setRecentLookupWindow(0); vi.clearAllMocks() })
 
 describe('TaskLookupsContext icon pass-through', () => {
   it('carries the tenant icon through for task types', async () => {
@@ -100,7 +101,12 @@ describe('TaskLookupsContext · concurrent-mount dedupe (LOOKUP-DEDUPE-1)', () =
     expect(mockedGet).toHaveBeenCalledTimes(3) // statuses + types + priorities, once each
   })
 
-  it('a provider mounted after the first settled still refetches (freshness for settings edits)', async () => {
+  it('a provider mounted after the recent window still refetches (freshness for settings edits)', async () => {
+    // LOOKUP-RECENT-1: inside the window a later mount reuses the answer; this case opens the
+    // window (closed by default under vitest) and steps past it.
+    setRecentLookupWindow(RECENT_LOOKUP_MS)
+    vi.useFakeTimers({ toFake: ['Date'] })
+    vi.setSystemTime(new Date('2026-10-08T10:00:00Z'))
     mockLookups({
       '/task-statuses': [{ value: 'open', label: 'Open' }],
       '/task-types': [{ value: 'task', label: 'Taak' }],
@@ -111,8 +117,25 @@ describe('TaskLookupsContext · concurrent-mount dedupe (LOOKUP-DEDUPE-1)', () =
     await waitFor(() => expect(first.result.current.loading).toBe(false))
     expect(mockedGet).toHaveBeenCalledTimes(3)
 
+    vi.setSystemTime(new Date(Date.parse('2026-10-08T10:00:00Z') + RECENT_LOOKUP_MS + 1))
     const second = renderHook(() => useTaskLookups(), { wrapper })
     await waitFor(() => expect(second.result.current.loading).toBe(false))
     expect(mockedGet).toHaveBeenCalledTimes(6) // a real second round of requests, not a cache hit
+    vi.useRealTimers()
+  })
+
+  it('a provider mounted inside the recent window reuses the answer without a request', async () => {
+    setRecentLookupWindow(RECENT_LOOKUP_MS)
+    vi.useFakeTimers({ toFake: ['Date'] })
+    vi.setSystemTime(new Date('2026-10-08T10:00:00Z'))
+    mockLookups({ '/task-statuses': [{ value: 'open', label: 'Open' }] })
+    const first = renderHook(() => useTaskLookups(), { wrapper })
+    await waitFor(() => expect(first.result.current.loading).toBe(false))
+    vi.setSystemTime(new Date('2026-10-08T10:00:01Z'))
+    const second = renderHook(() => useTaskLookups(), { wrapper })
+    await waitFor(() => expect(second.result.current.loading).toBe(false))
+    expect(mockedGet).toHaveBeenCalledTimes(3)
+    expect(second.result.current.statuses.map(s => s.value)).toContain('open')
+    vi.useRealTimers()
   })
 })

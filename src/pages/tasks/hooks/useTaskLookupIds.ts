@@ -15,7 +15,8 @@
  * board drag, bulk actions) shares ONE copy instead of re-implementing it.
  */
 import { useState, useEffect } from 'react'
-import api, { unwrap } from '@/lib/api'
+import { unwrap } from '@/lib/api'
+import { fetchLookupRecent } from '@/context/lookupLoader'
 
 export interface TaskLookupIdMaps {
   type: Record<string, string>
@@ -41,12 +42,15 @@ export function useTaskLookupIds(): { maps: TaskLookupIdMaps; loading: boolean }
 
   // Fetch each raw lookup once; a failed/empty endpoint just leaves that map empty
   // (callers treat an unresolved slug as "nothing safe to send", never a guess).
+  // LOOKUP-RECENT-1: through the loader's recent/deduped seam — this hook mounts four
+  // times on the tasks page with a drawer open (page bulk bar, drawer actions, related
+  // tasks, subtasks), which used to mean four extra rounds of the same three requests.
   useEffect(() => {
     let alive = true
     Promise.all([
-      api.get('/task-types').catch(() => ({ data: [] })),
-      api.get('/task-statuses').catch(() => ({ data: [] })),
-      api.get('/task-priorities').catch(() => ({ data: [] })),
+      fetchLookupRecent('/task-types').catch(() => ({ data: [] })),
+      fetchLookupRecent('/task-statuses').catch(() => ({ data: [] })),
+      fetchLookupRecent('/task-priorities').catch(() => ({ data: [] })),
     ]).then(([typesRes, statusesRes, prioritiesRes]) => {
       if (!alive) return
       setMaps({ type: idMapOf(unwrap(typesRes)), status: idMapOf(unwrap(statusesRes)), priority: idMapOf(unwrap(prioritiesRes)) })

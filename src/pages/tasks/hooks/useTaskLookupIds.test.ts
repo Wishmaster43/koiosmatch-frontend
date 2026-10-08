@@ -6,6 +6,7 @@
 import { describe, it, expect, vi, afterEach } from 'vitest'
 import { renderHook, waitFor } from '@testing-library/react'
 import { useTaskLookupIds } from './useTaskLookupIds'
+import { clearRecentLookups } from '@/context/lookupLoader'
 
 vi.mock('@/lib/api', async () => {
   const actual = await vi.importActual<typeof import('@/lib/api')>('@/lib/api')
@@ -14,7 +15,7 @@ vi.mock('@/lib/api', async () => {
 
 const mockedGet = vi.mocked((await import('@/lib/api')).default.get)
 
-afterEach(() => vi.clearAllMocks())
+afterEach(() => { clearRecentLookups(); vi.clearAllMocks() })
 
 describe('useTaskLookupIds', () => {
   it('builds slug→uuid maps from the raw lookup endpoints', async () => {
@@ -49,5 +50,19 @@ describe('useTaskLookupIds', () => {
     const { result } = renderHook(() => useTaskLookupIds())
     await waitFor(() => expect(result.current.loading).toBe(false))
     expect(result.current.maps).toEqual({ type: {}, status: {}, priority: {} })
+  })
+})
+
+// LOOKUP-RECENT-1: four callers mount this hook on one tasks screen; they share one
+// request per lookup instead of each firing their own three.
+describe('useTaskLookupIds · shared request (LOOKUP-RECENT-1)', () => {
+  it('two hooks mounted together fetch each lookup once', async () => {
+    mockedGet.mockImplementation((url: string) => Promise.resolve({ data: [{ id: `${url}-id`, value: 'v' }] }))
+    const a = renderHook(() => useTaskLookupIds())
+    const b = renderHook(() => useTaskLookupIds())
+    await waitFor(() => expect(a.result.current.loading).toBe(false))
+    await waitFor(() => expect(b.result.current.loading).toBe(false))
+    expect(mockedGet).toHaveBeenCalledTimes(3)
+    expect(b.result.current.maps.status.v).toBe('/task-statuses-id')
   })
 })

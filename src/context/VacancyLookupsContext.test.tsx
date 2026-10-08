@@ -12,6 +12,7 @@ import type { ReactNode } from 'react'
 import { renderHook, waitFor } from '@testing-library/react'
 import api from '@/lib/api'
 import { VacancyLookupsProvider, useVacancyLookups } from './VacancyLookupsContext'
+import { clearRecentLookups } from './lookupLoader'
 
 vi.mock('@/lib/api', async () => {
   const actual = await vi.importActual('@/lib/api')
@@ -29,7 +30,7 @@ function mockLookups(byUrl: Record<string, unknown[]>) {
 
 const wrapper = ({ children }: { children: ReactNode }) => <VacancyLookupsProvider>{children}</VacancyLookupsProvider>
 
-afterEach(() => vi.clearAllMocks())
+afterEach(() => { clearRecentLookups(); vi.clearAllMocks() })
 
 describe('VacancyLookupsContext defaults', () => {
   it('carries is_default through and resolves the flagged seniority + education', async () => {
