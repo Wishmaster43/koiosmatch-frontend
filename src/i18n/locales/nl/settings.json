@@ -4275,13 +4275,13 @@
         "label": "Ontdubbelsleutels klanten"
       },
       "contact_dedupe_keys": {
-        "label": "Dubbele contactpersonen herkennen op"
+        "label": "Ontdubbelsleutels contactpersonen"
       },
       "location_dedupe_keys": {
-        "label": "Dubbele locaties herkennen op"
+        "label": "Ontdubbelsleutels locaties"
       },
       "department_dedupe_keys": {
-        "label": "Dubbele afdelingen herkennen op"
+        "label": "Ontdubbelsleutels afdelingen"
       },
       "rejection": {
         "label": "Afwijzingsregels"
