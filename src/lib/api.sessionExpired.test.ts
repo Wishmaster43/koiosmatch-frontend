@@ -67,4 +67,15 @@ describe('api · session-gone handling (CONFIRM-EERLIJK-1)', () => {
     await expect(rejected()(err)).rejects.toBe(err)
     expect(seen).toHaveBeenCalledTimes(1)
   })
+
+  // ONIX C-002: the single-use MFA verify answers 401 for a wrong/used code; that must reach the form.
+  it('a 401 on /auth/mfa/verify rejects to the caller without the session-gone side effects', async () => {
+    const seen = vi.fn()
+    window.addEventListener('km:auth-expired', seen, { once: true })
+    const err = { response: { status: 401 }, config: { url: '/auth/mfa/verify', method: 'post' } }
+    await expect(rejected()(err)).rejects.toBe(err)
+    expect(seen).not.toHaveBeenCalled()
+    expect(localStorage.getItem('km_session')).toBe('1')
+    window.removeEventListener('km:auth-expired', seen)
+  })
 })

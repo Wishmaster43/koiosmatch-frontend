@@ -19,6 +19,7 @@
  * hasModule, hasPermission, …) only change identity when that value itself
  * changes — which is exactly when consumers SHOULD re-render anyway.
  */
+import { clearDeviceCaches } from '@/lib/deviceCaches'
 import { createContext, useContext, useState, useEffect, useCallback, useMemo } from 'react'
 import { setBureauTimezone } from '@/lib/bureauTime'
 import type { ReactNode } from 'react'
@@ -177,6 +178,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           const list = unwrapList<Tenant>(res).rows
           if (Array.isArray(list) && list.length) {
             setTenants(list)
+            // A stale stored id (deleted bureau) falls back to the first row; the overwrite below replaces it in one X->Y write (TENANT-TAB-1).
             const active = list.find((t: Tenant) => t.id === savedTenant) ?? list[0]
             if (active) {
               setActiveTenantState(active)
@@ -243,11 +245,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         await setupTenants(u)
       })
       .catch(() => {
-        localStorage.removeItem('auth_token')
-        localStorage.removeItem('auth_user')
-        localStorage.removeItem('active_tenant')
-        localStorage.removeItem('accessible_pages')
-        localStorage.removeItem('km_session')
+        clearDeviceCaches()
         setUser(null)
       })
       .finally(() => setLoading(false))
@@ -268,6 +266,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       if (Array.isArray(list) && list.length > 0) {
         setTenants(list)
         const first = list[0]
+        // A stale stored id is replaced by this single overwrite (X->Y, no null in between, TENANT-TAB-1).
         localStorage.setItem('active_tenant', first.id)
         setActiveTenantState(first)
       }
@@ -344,11 +343,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     // on a failing browser/server call.
     unsubscribePush().catch(() => {})
     try { await api.post('/auth/logout') } catch { /* clear local state regardless */ }
-    localStorage.removeItem('auth_token')
-    localStorage.removeItem('auth_user')
-    localStorage.removeItem('active_tenant')
-    localStorage.removeItem('accessible_pages')
-    localStorage.removeItem('km_session')
+    clearDeviceCaches()
     // Allow the MFA-gate signal to fire again in a fresh session (see api.ts).
     sessionStorage.removeItem('km_mfa_gate')
     // AUDIT 03-09 (frontend-security-quality-1/-15, CRITICAL): the next user in this

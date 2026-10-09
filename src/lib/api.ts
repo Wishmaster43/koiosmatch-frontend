@@ -21,6 +21,7 @@ import axios, {
 } from 'axios'
 import type { ListResult, PaginationMeta } from '../types/api'
 import { CSRF_COOKIE_URL } from './authMode'
+import { clearDeviceCaches } from './deviceCaches'
 import { isMfaEnrollmentError } from './mfaGate'
 import { isNoOrganisationError, NO_ORGANISATION_FLAG } from './orphanAccount'
 import { notifyError } from './notify'
@@ -224,14 +225,11 @@ api.interceptors.response.use(
     // login out. No redirect/event here: the boot path stays quiet by design and
     // AuthContext's catch owns the UI state.
     if (status === 401 && url.includes('/auth/me')) {
-      localStorage.removeItem('auth_token')
-      localStorage.removeItem('auth_user')
-      localStorage.removeItem('active_tenant')
-      localStorage.removeItem('accessible_pages')
-      localStorage.removeItem('km_session')
+      clearDeviceCaches()
     }
 
-    const isAuthCall = url.includes('/auth/login') || url.includes('/auth/me')
+    // ONIX C-002: a 401 on the single-use MFA verify is an invalid code for the form, never a lost session.
+    const isAuthCall = url.includes('/auth/login') || url.includes('/auth/me') || url.includes('/auth/mfa/verify')
     // CONFIRM-EERLIJK-1 (18-09, measured on a 12-hour session that ran out mid-note): a 419
     // that comes back AGAIN after the CSRF re-prime means the session behind the cookie is
     // gone, not the token — treat it exactly like a 401 so the app routes to login instead
@@ -244,11 +242,7 @@ api.interceptors.response.use(
     if (orphaned && !isAuthCall) sessionStorage.setItem(NO_ORGANISATION_FLAG, '1')
     const sessionGone = status === 401 || (status === 419 && config._retried419 === true) || orphaned
     if (sessionGone && !isAuthCall) {
-      localStorage.removeItem('auth_token')
-      localStorage.removeItem('auth_user')
-      localStorage.removeItem('active_tenant')
-      localStorage.removeItem('accessible_pages')
-      localStorage.removeItem('km_session')
+      clearDeviceCaches()
       if (window.location.pathname !== '/login') {
         if (!orphaned) sessionStorage.setItem('km_session_expired', '1')
         window.dispatchEvent(new CustomEvent('km:auth-expired'))

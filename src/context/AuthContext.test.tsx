@@ -221,3 +221,31 @@ describe('AuthContext · verifyMfa re-primes CSRF', () => {
     expect(api.post).toHaveBeenCalledWith('/auth/mfa/verify', { mfa_token: 'tok', code: '123456' })
   })
 })
+
+// ONIX B-005: a stored tenant id that /tenants no longer lists must not survive a login.
+describe('AuthContext · stale stored tenant', () => {
+  it('drops a stored id missing from /tenants and pins the first listed tenant', async () => {
+    vi.mocked(api.get).mockResolvedValue({ data: [{ id: 't1', name: 'One' }, { id: 't2', name: 'Two' }] })
+    localStorage.setItem('active_tenant', 'deleted-bureau')
+    const { result } = renderHook(() => useAuth(), { wrapper })
+    await waitFor(() => expect(result.current?.loading).toBe(false))
+    vi.mocked(api.post).mockResolvedValueOnce({ data: { user: { id: 'u1', roles: [] } } })
+    await result.current?.login('a@b.nl', 'pw')
+    expect(localStorage.getItem('active_tenant')).toBe('t1')
+  })
+
+  it('replaces a stale stored tenant id in one write without an intermediate removal', async () => {
+    vi.mocked(api.get).mockResolvedValue({ data: [{ id: 't1', name: 'One' }] })
+    localStorage.setItem('active_tenant', 'deleted-bureau')
+    const removeSpy = vi.spyOn(Storage.prototype, 'removeItem')
+    const setSpy = vi.spyOn(Storage.prototype, 'setItem')
+    const { result } = renderHook(() => useAuth(), { wrapper })
+    await waitFor(() => expect(result.current?.loading).toBe(false))
+    vi.mocked(api.post).mockResolvedValueOnce({ data: { user: { id: 'u1', roles: [] } } })
+    await result.current?.login('a@b.nl', 'pw')
+    expect(removeSpy.mock.calls.some(c => c[0] === 'active_tenant')).toBe(false)
+    expect(setSpy.mock.calls.filter(c => c[0] === 'active_tenant').map(c => c[1])).toContain('t1')
+    removeSpy.mockRestore()
+    setSpy.mockRestore()
+  })
+})
