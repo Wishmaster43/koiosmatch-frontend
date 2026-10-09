@@ -9,11 +9,22 @@
     // separately. All five advisories sit in the DEV-ONLY chain (vitest/vite dev
     // server/esbuild): never in the production bundle path. Revalidated 03-09-2026
     // (audit frontend-security-quality-4): still dev-only, migration not started;
-    // revalidate again 2026-10-01.
+    // revalidate again 2026-11-01 (revalidated 09-10-2026 with AUDIT-GATE-1: still dev-only).
     "GHSA-5xrq-8626-4rwp", // vitest (critical, dev-only test runner)
     "GHSA-4w7w-66w2-5vf9", // vite dev-server path traversal (dev-only)
     "GHSA-67mh-4wv8-2f99", // esbuild dev-server request forwarding (dev-only)
-    "GHSA-fx2h-pf6j-xcff", // vite server.fs.deny bypass op Windows-paden (dev-only, macOS/CI)
-    "GHSA-v6wh-96g9-6wx3"  // launch-editor NTLM-hash via UNC (dev-only, Windows-vector)
+    "GHSA-fx2h-pf6j-xcff", // vite server.fs.deny bypass on Windows paths (dev-only, macOS/CI)
+    "GHSA-v6wh-96g9-6wx3", // launch-editor NTLM-hash via UNC (dev-only, Windows-vector)
+    // Revalidated 09-10-2026 (AUDIT-GATE-1): the vitest 2 chain also carries two
+    // tinypool advisories (fix = vitest 5, MAJOR, planned separately). `npm ls
+    // tinypool --omit=dev` is empty: dev-only test runner, not in the bundle.
+    // Revalidate again 2026-11-01.
+    "GHSA-5gmw-xhrv-c9v3", // tinypool worker-options prototype pollution (dev-only)
+    "GHSA-85c8-ppgw-ccpr", // tinypool run() options prototype pollution (dev-only)
+    // braces 3.0.3 sits under tailwindcss 3 (fast-glob>micromatch and chokidar),
+    // build-time class scanning only; fix = tailwindcss 4 (MAJOR, planned
+    // separately). `npm ls braces --omit=dev` is empty: not in the production
+    // bundle path. Revalidate again 2026-11-01.
+    "GHSA-vfj7-8cjw-p6xm"  // braces (build-time only, tailwindcss 3 chain)
   ]
 }
