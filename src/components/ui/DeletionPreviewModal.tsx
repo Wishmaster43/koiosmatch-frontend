@@ -12,6 +12,7 @@ import Button from '@/components/ui/Button'
 import { Mono } from '@/components/ui/typography'
 import { useDateFormat } from '@/lib/datetime'
 import { useNumberFormat } from '@/lib/formatters'
+import { graceBoundary, type GraceWindow } from '@/lib/graceWindow'
 import { Z } from '@/lib/zIndexScale'
 import type { DeletionPreview } from '@/types/deletion'
 import Spinner from './Spinner'
@@ -32,11 +33,13 @@ export interface DeletionPreviewModalProps {
   blocked: boolean
   /** Tenant grace window in days (useDeletionLifecycle.graceDays); null/absent = unknown. */
   graceDays?: number | null
+  /** Unit-aware grace window (preferred over graceDays when present). */
+  graceWindow?: GraceWindow | null
 }
 
 // Purely presentational shared trash-confirm dialog (see the module doc above): renders the loading/error/blocked/confirm states from props, owning only the local transfer-picker choice and the projected erase date.
 export default function DeletionPreviewModal({
-  open, onClose, entityLabel, preview, loading, error, users, onConfirm, busy, blocked, graceDays = null,
+  open, onClose, entityLabel, preview, loading, error, users, onConfirm, busy, blocked, graceDays = null, graceWindow = null,
 }: DeletionPreviewModalProps) {
   const { t } = useTranslation('common')
   const { formatDate } = useDateFormat()
@@ -51,8 +54,9 @@ export default function DeletionPreviewModal({
   useEffect(() => {
     if (!open) return
     setTransferTo('')
-    setEraseDate(graceDays != null ? new Date(Date.now() + graceDays * 86400000) : null)
-  }, [open, graceDays])
+    const w = graceWindow ?? graceDays
+    setEraseDate(w != null ? graceBoundary(new Date(), w) : null)
+  }, [open, graceDays, graceWindow])
 
   const blockers = preview?.blocking ?? []
   // The confirm button is honest: disabled while busy, still loading, failed, or

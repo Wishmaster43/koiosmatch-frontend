@@ -16,6 +16,6 @@ export default function TrashPreviewDialogSlot({ trash }: {
     <DeletionPreviewModal open onClose={trash.close} entityLabel={trash.target.label}
       preview={trash.preview} loading={trash.loading} error={trash.error}
       users={[]} onConfirm={trash.confirmMark} busy={trash.busy} blocked={trash.blocked}
-      graceDays={trash.graceDays} />
+      graceDays={trash.graceDays} graceWindow={trash.graceWindow} />
   ) : null
 }

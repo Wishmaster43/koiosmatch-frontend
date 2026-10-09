@@ -55,7 +55,7 @@ export default function TrashLifecycleSection({
   // The hook only gets the id while the modal is open, so the preview GET never
   // fires on a plain drawer open (§8 data minimization); the grace-days lookup
   // inside the hook is a session-shared cache and runs either way.
-  const { preview, loading, error, graceDays, mark } =
+  const { preview, loading, error, graceDays, graceWindow, mark } =
     useDeletionLifecycle(entityPath, modalOpen && id != null ? String(id) : null)
 
   // Modal confirm → POST mark-deletion; a 409 keeps the modal open with the fresh
@@ -91,7 +91,7 @@ export default function TrashLifecycleSection({
   // In the trash: danger banner (since-when + projected erase date, DD-MM-YYYY via
   // the house formatter) + the permission-gated way back to the archive.
   if (lifecycle === 'pending_erase') {
-    const eraseAt = eraseAroundDate(pendingEraseAt, graceDays)
+    const eraseAt = eraseAroundDate(pendingEraseAt, graceWindow)
     const eraseLine = eraseAt ? t('trash.eraseAround', { date: formatDate(eraseAt) }) : t('trash.eraseAutomatic')
     const message = pendingEraseAt ? `${t('trash.pendingSince', { date: formatDate(pendingEraseAt) })} · ${eraseLine}` : eraseLine
     return (
@@ -117,7 +117,7 @@ export default function TrashLifecycleSection({
       </div>
       <DeletionPreviewModal open={modalOpen} onClose={() => setModalOpen(false)} entityLabel={entityLabel}
         preview={preview} loading={loading} error={error} users={users}
-        onConfirm={confirmMark} busy={busy} blocked={blocked} graceDays={graceDays} />
+        onConfirm={confirmMark} busy={busy} blocked={blocked} graceDays={graceDays} graceWindow={graceWindow} />
     </>
   )
 }

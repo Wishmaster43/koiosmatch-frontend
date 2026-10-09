@@ -5,10 +5,12 @@
  * can say "wordt rond {date} definitief verwijderd" honestly (or fall back to
  * neutral wording when the window is unknown — never a fabricated date).
  */
-import { useCallback, useEffect, useRef, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import api, { unwrap } from '@/lib/api'
 import { withIdempotencyKey } from '@/lib/idempotency'
 import { loadSettings } from '@/pages/settings/shared'
+import { readWindowSetting } from '@/lib/settings/readWindowSetting'
+import { graceBoundary, graceWindowDays, type GraceWindow } from '@/lib/graceWindow'
 import type {
   DeletionBlocker, DeletionConflictBody, DeletionMarkResponse, DeletionPreview, MarkDeletionBody,
 } from '@/types/deletion'
@@ -20,36 +22,37 @@ export interface MarkDeletionResult {
   blocking: DeletionBlocker[]
 }
 
-// Module-level promise cache: the tenant's grace window is one number for the whole
+// Module-level promise cache: the tenant's grace window is one value for the whole
 // session, fetched once via the same GET /settings the retention screen uses.
 // Deliberately NEVER aborted — a shared promise cache wants the RESULT (§9).
-let graceDaysPromise: Promise<number | null> | null = null
+let graceWindowPromise: Promise<GraceWindow | null> | null = null
 
-// Resolve deletion_grace_days from tenant settings; null when the call fails or
+// Resolve deletion_grace_days(+_unit) from tenant settings; null when the call fails or
 // the key is absent/invalid (a failed fetch clears the cache so a later mount retries).
-function fetchGraceDays(): Promise<number | null> {
-  if (!graceDaysPromise) {
-    graceDaysPromise = loadSettings()
+function fetchGraceWindow(): Promise<GraceWindow | null> {
+  if (!graceWindowPromise) {
+    graceWindowPromise = loadSettings()
       .then((stored: Record<string, unknown>) => {
-        const n = Number(stored?.deletion_grace_days)
-        return Number.isFinite(n) && n > 0 ? n : null
+        if (stored?.deletion_grace_days == null) return null
+        const n = Number(stored.deletion_grace_days)
+        if (!Number.isFinite(n) || n <= 0) return null
+        return readWindowSetting(stored, 'deletion_grace_days', n)
       })
-      .catch(() => { graceDaysPromise = null; return null })
+      .catch(() => { graceWindowPromise = null; return null })
   }
-  return graceDaysPromise
+  return graceWindowPromise
 }
 
 // Test-only: reset the module cache between tests. Never called from app code.
-export function __resetDeletionGraceCache(): void { graceDaysPromise = null }
+export function __resetDeletionGraceCache(): void { graceWindowPromise = null }
 
 // Projected erasure moment: pending_erase_at + the tenant grace window, or null
 // when either half is unknown/unparseable (caller then shows neutral wording).
-export function eraseAroundDate(pendingEraseAt: string | null | undefined, graceDays: number | null): Date | null {
-  if (!pendingEraseAt || graceDays == null) return null
+export function eraseAroundDate(pendingEraseAt: string | null | undefined, window: GraceWindow | number | null): Date | null {
+  if (!pendingEraseAt || window == null) return null
   const d = new Date(pendingEraseAt)
   if (isNaN(d.getTime())) return null
-  d.setDate(d.getDate() + graceDays)
-  return d
+  return graceBoundary(d, window)
 }
 
 // Loads the entity's soft-delete preview/blockers and the tenant's grace window,
@@ -58,7 +61,7 @@ export function useDeletionLifecycle(entityPath: string, id: string | null) {
   const [preview, setPreview] = useState<DeletionPreview | null>(null)
   const [loading, setLoading] = useState<boolean>(Boolean(id))
   const [error, setError] = useState(false)
-  const [graceDays, setGraceDays] = useState<number | null>(null)
+  const [graceWindow, setGraceWindow] = useState<GraceWindow | null>(null)
   // Epoch guard (§9): a fast id switch or unmount must never let a stale
   // preview response win over the current entity's.
   const epochRef = useRef(0)
@@ -91,7 +94,7 @@ export function useDeletionLifecycle(entityPath: string, id: string | null) {
   // setState only — the promise itself is never aborted.
   useEffect(() => {
     let alive = true
-    fetchGraceDays().then(n => { if (alive) setGraceDays(n) })
+    fetchGraceWindow().then(w => { if (alive) setGraceWindow(w) })
     return () => { alive = false }
   }, [])
 
@@ -126,5 +129,8 @@ export function useDeletionLifecycle(entityPath: string, id: string | null) {
     setPreview(prev => prev ? { ...prev, lifecycle: 'archived' } : prev)
   }, [base])
 
-  return { preview, loading, error, graceDays, refresh, mark, unmark }
+  // Derived whole-day count for consumers that only need days (floored like the BE).
+  const graceDays = useMemo(() => (graceWindow ? graceWindowDays(new Date(), graceWindow) : null), [graceWindow])
+
+  return { preview, loading, error, graceWindow, graceDays, refresh, mark, unmark }
 }

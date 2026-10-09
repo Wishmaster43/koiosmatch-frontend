@@ -153,3 +153,36 @@ describe('eraseAroundDate', () => {
     expect(eraseAroundDate('not-a-date', 30)).toBeNull()
   })
 })
+
+describe('eraseAroundDate — unit-aware window (ONIX S-004)', () => {
+  const FROM = '2026-01-15T10:00:00'
+  const dayDiff = (d: Date | null) => Math.round((d!.getTime() - new Date(FROM).getTime()) / 86400000)
+
+  it('2 weeks lands 14 days later', () => {
+    expect(dayDiff(eraseAroundDate(FROM, { amount: 2, unit: 'weeks' }))).toBe(14)
+  })
+  it('1 month lands one calendar month later', () => {
+    const d = eraseAroundDate(FROM, { amount: 1, unit: 'months' })!
+    expect(d.getMonth()).toBe(1)
+    expect(d.getDate()).toBe(15)
+  })
+  it('floors the RESULTING days at 7 (1 day becomes 7, never the raw amount)', () => {
+    expect(dayDiff(eraseAroundDate(FROM, { amount: 1, unit: 'days' }))).toBe(7)
+  })
+  it('a plain number still means days', () => {
+    expect(dayDiff(eraseAroundDate(FROM, 30))).toBe(30)
+  })
+})
+
+describe('useDeletionLifecycle — grace unit', () => {
+  it('reads deletion_grace_days_unit into graceWindow and derives whole days', async () => {
+    mockGets({ settings: { deletion_grace_days: '2', deletion_grace_days_unit: 'weeks' } })
+    const { result } = renderHook(() => useDeletionLifecycle('customers', 'abc-1'))
+    await waitFor(() => expect(result.current.graceWindow).toEqual({ amount: 2, unit: 'weeks' }))
+    expect(result.current.graceDays).toBe(14)
+  })
+  it('defaults an absent unit to days', async () => {
+    const { result } = renderHook(() => useDeletionLifecycle('customers', 'abc-1'))
+    await waitFor(() => expect(result.current.graceWindow).toEqual({ amount: 30, unit: 'days' }))
+  })
+})

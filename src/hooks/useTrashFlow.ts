@@ -88,6 +88,7 @@ export function useTrashFlow({ entityPath, onMarked, onUnmarked }: Args) {
     target, openFor, close, confirmMark, unmark, busy, blocked, unmarkBusy,
     preview: deletion.preview, loading: deletion.loading, error: deletion.error,
     graceDays: deletion.graceDays,
+    graceWindow: deletion.graceWindow,
   }
 }
 
