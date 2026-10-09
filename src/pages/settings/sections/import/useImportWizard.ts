@@ -7,7 +7,8 @@
  */
 import { useCallback, useState } from 'react'
 import { dryRunImport, runImport, type ImportRunResult } from './importApi'
-import { extractApiError } from '@/lib/extractApiError'
+import { useTranslation } from 'react-i18next'
+import { uploadErrorMessage } from '@/lib/uploadError'
 
 export type WizardStep = 'upload' | 'preview' | 'result'
 
@@ -20,6 +21,7 @@ type AsyncState =
 // One wizard instance per selected entity — the caller remounts it (React `key`)
 // when the entity changes, so switching entities never carries over a stale file.
 export function useImportWizard(entity: string) {
+  const { t } = useTranslation()
   const [step, setStep] = useState<WizardStep>('upload')
   const [file, setFile] = useState<File | null>(null)
   const [preview, setPreview] = useState<AsyncState>({ status: 'idle' })
@@ -42,9 +44,9 @@ export function useImportWizard(entity: string) {
       setPreview({ status: 'success', result })
       setStep('preview')
     } catch (err) {
-      setPreview({ status: 'error', message: extractApiError(err, '') })
+      setPreview({ status: 'error', message: uploadErrorMessage(err, t, '') })
     }
-  }, [entity, file])
+  }, [entity, file, t])
 
   // Step 2 -> 3: the real write. The caller only exposes this once preview.status
   // is 'success' and the summary shows at least one row that would land.
@@ -56,9 +58,9 @@ export function useImportWizard(entity: string) {
       setRun({ status: 'success', result })
       setStep('result')
     } catch (err) {
-      setRun({ status: 'error', message: extractApiError(err, '') })
+      setRun({ status: 'error', message: uploadErrorMessage(err, t, '') })
     }
-  }, [entity, file])
+  }, [entity, file, t])
 
   // Back to step 1 without discarding the file — e.g. the preview only showed
   // errors and the user wants to pick a different one.

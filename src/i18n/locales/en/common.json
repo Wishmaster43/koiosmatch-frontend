@@ -38,6 +38,9 @@
     "unmarked": "Moved back to the archive."
   },
   "actionFailed": "Action failed. Please try again.",
+  "upload": {
+    "tooLarge": "This file is too large for the server. Please choose a smaller file."
+  },
   "eraseDialog": {
     "password": "Password",
     "hint": "Confirm with your own password. This cannot be undone.",

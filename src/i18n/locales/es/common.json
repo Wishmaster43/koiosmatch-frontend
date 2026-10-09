@@ -38,6 +38,9 @@
     "unmarked": "Devuelto al archivo."
   },
   "actionFailed": "La acción falló. Inténtalo de nuevo.",
+  "upload": {
+    "tooLarge": "Este archivo es demasiado grande para el servidor. Elige un archivo más pequeño."
+  },
   "eraseDialog": {
     "password": "Contraseña",
     "hint": "Confirma con tu propia contraseña. Esta acción no se puede deshacer.",

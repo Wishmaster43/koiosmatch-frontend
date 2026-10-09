@@ -20,6 +20,7 @@ import { PageTitle, Caption } from '@/components/ui/typography'
 import { tintBg, tintBorder } from '@/lib/tint'
 import { notifyError } from '@/lib/notify'
 import { extractApiError } from '@/lib/extractApiError'
+import { uploadErrorMessage } from '@/lib/uploadError'
 
 // Preset swatches are tenant brand-colour DATA (persisted as brand_color) — literal hex by design, never tokens.
 /* eslint-disable no-restricted-syntax -- DATA: fixed swatch palette offered to tenants in the brand-colour picker */
@@ -113,8 +114,7 @@ export default function BrandSettings() {
         } catch (err) {
           // 422 (bad type/size, or the SVG script-scan rejection) — show the
           // backend's own message; the rest of the form still saves below.
-          const uploadErr = err as { response?: { data?: { message?: string } } }
-          setLogoError(uploadErr?.response?.data?.message ?? t('brand.logoUploadError'))
+          setLogoError(uploadErrorMessage(err, t, t('brand.logoUploadError')))
         }
       }
       await saveSettings(payload)

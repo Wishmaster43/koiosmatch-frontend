@@ -131,6 +131,7 @@ export const strings = {
     submitting: 'Versturen…',
     success: 'Bedankt voor je sollicitatie! We nemen zo snel mogelijk contact met je op.',
     errorGeneric: 'Versturen is niet gelukt. Probeer het later opnieuw.',
+    errorTooLarge: 'Je bestand is te groot voor de server. Kies een kleiner cv of een kleinere foto.',
     validation: {
       required: 'Dit veld is verplicht.',
       email: 'Vul een geldig e-mailadres in.',

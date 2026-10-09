@@ -13,6 +13,7 @@ import { useTranslation } from 'react-i18next'
 import api from '@/lib/api'
 import { extractApiError } from '@/lib/extractApiError'
 import type { Id } from '@/types/common'
+import { uploadErrorMessage } from '@/lib/uploadError'
 
 export type AttachmentStatus = 'idle' | 'uploading' | 'done' | 'error'
 export interface PendingFile { id: string; file: File; name: string; status: AttachmentStatus; error?: string }
@@ -54,7 +55,7 @@ export function usePostCreateAttachments() {
       await api.post(`/vacancies/${targetVacancyId}/documents`, fd, { headers: { 'Content-Type': 'multipart/form-data' } })
       setFiles(fs => fs.map(x => x.id === pf.id ? { ...x, status: 'done' } : x))
     } catch (err) {
-      setFiles(fs => fs.map(x => x.id === pf.id ? { ...x, status: 'error', error: extractApiError(err, t('common:errorGeneric')) } : x))
+      setFiles(fs => fs.map(x => x.id === pf.id ? { ...x, status: 'error', error: uploadErrorMessage(err, t, t('common:errorGeneric')) } : x))
     }
   }, [t])
 

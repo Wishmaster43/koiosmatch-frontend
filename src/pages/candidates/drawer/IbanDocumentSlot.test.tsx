@@ -143,4 +143,15 @@ describe('IbanDocumentSlot', () => {
     await user.upload(input as HTMLInputElement, new File(['x'], 'vog.pdf', { type: 'application/pdf' }))
     expect(await screen.findByText('bankDoc.uploadFailed')).toBeInTheDocument()
   })
+
+  // UPLOAD-TOO-LARGE-FE-1: a proxy 413 (no body) shows the shared too-large text.
+  it('shows the too-large text on an HTTP 413', async () => {
+    const user = userEvent.setup()
+    vi.mocked(api.post).mockRejectedValue({ response: { status: 413 } })
+    render(<IbanDocumentSlot candidateId="c1" documents={docs} linkedDocumentId={null} onLink={vi.fn()} />)
+    await user.click(screen.getByRole('button', { name: /bankDoc\.link/ }))
+    const input = screen.getByLabelText('bankDoc.uploadNew', { selector: 'input' })
+    await user.upload(input as HTMLInputElement, new File(['x'], 'vog.pdf', { type: 'application/pdf' }))
+    expect(await screen.findByText('common:upload.tooLarge')).toBeInTheDocument()
+  })
 })

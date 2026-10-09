@@ -38,6 +38,9 @@
     "unmarked": "Ripristinato nell'archivio."
   },
   "actionFailed": "Azione non riuscita. Riprova.",
+  "upload": {
+    "tooLarge": "Questo file è troppo grande per il server. Scegli un file più piccolo."
+  },
   "eraseDialog": {
     "password": "Password",
     "hint": "Conferma con la tua password. Questa azione non può essere annullata.",

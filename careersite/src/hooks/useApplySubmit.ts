@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { applyToVacancy } from '../api'
+import { applyToVacancy, ApiError } from '../api'
 import { strings } from '../strings'
 import type { EducationEntry, ExperienceEntry } from '../types'
 
@@ -64,8 +64,10 @@ export function useApplySubmit(tenant: string | undefined, reference: string | u
         interview_consent: values.interviewConsent,
       })
       setState({ status: 'success', errorMessage: null })
-    } catch {
-      setState({ status: 'error', errorMessage: strings.apply.errorGeneric })
+    } catch (err) {
+      // 413: the proxy refused the body before the API ran — say the file is too large.
+      const tooLarge = err instanceof ApiError && err.status === 413
+      setState({ status: 'error', errorMessage: tooLarge ? strings.apply.errorTooLarge : strings.apply.errorGeneric })
     }
   }
 

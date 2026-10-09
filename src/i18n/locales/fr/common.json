@@ -38,6 +38,9 @@
     "unmarked": "Remis aux archives."
   },
   "actionFailed": "Échec de l'action. Veuillez réessayer.",
+  "upload": {
+    "tooLarge": "Ce fichier est trop volumineux pour le serveur. Veuillez choisir un fichier plus petit."
+  },
   "eraseDialog": {
     "password": "Mot de passe",
     "hint": "Confirmez avec votre propre mot de passe. Cette action est irréversible.",

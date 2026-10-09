@@ -26,6 +26,7 @@ import { notifyError } from '@/lib/notify'
 import { formatFileSizeMb, formatNumber } from '@/lib/formatters'
 import { useLocale } from '@/lib/datetime'
 import type { Id } from '@/types/common'
+import { uploadErrorMessage } from '@/lib/uploadError'
 
 export interface EntityDoc {
   id?: Id; name?: string; file_name?: string; type?: string
@@ -111,7 +112,7 @@ export function useEntityDocuments(prefix: string, parentId: Id | undefined, lis
       // Audit R1 🔴: the optimistic row's object URL leaked on every upload — revoke it
       // the moment the server doc replaces (or the failure drops) the temp row.
       .then(res => { const saved = unwrap<EntityDoc>(res); if (objectUrl) URL.revokeObjectURL(objectUrl); setDocs(d => d.map(x => x.id === tmpId ? { ...saved, size: fmtSize(saved.size, locale) } : x)) })
-      .catch(() => { if (objectUrl) URL.revokeObjectURL(objectUrl); setDocs(d => d.filter(x => x.id !== tmpId)); notifyError(t('common:actionFailed')) })
+      .catch(err => { if (objectUrl) URL.revokeObjectURL(objectUrl); setDocs(d => d.filter(x => x.id !== tmpId)); notifyError(uploadErrorMessage(err, t, t('common:actionFailed'))) })
   }, [prefix, parentId, t, locale])
 
   // Rename — optimistic, reverts on failure. A temp (not-yet-persisted) row skips the PATCH.

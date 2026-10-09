@@ -76,6 +76,14 @@ describe('useProfileForm avatar blob URL lifecycle', () => {
     expect(notifyError).toHaveBeenCalledWith('profile.avatarUploadFailed')
   })
 
+  it('shows the too-large message when the avatar upload is rejected with a 413', async () => {
+    vi.mocked(api.post).mockRejectedValue({ response: { status: 413 } })
+    const { result } = renderHook(() => useProfileForm())
+
+    await act(async () => { await result.current.onPickAvatar(pickEvent(file('a.png'))) })
+    expect(notifyError).toHaveBeenCalledWith('common:upload.tooLarge')
+  })
+
   it('revokes the tracked object URL on unmount', () => {
     vi.mocked(api.post).mockReturnValue(new Promise(() => {}))
     const { result, unmount } = renderHook(() => useProfileForm())

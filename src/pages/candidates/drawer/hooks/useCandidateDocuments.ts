@@ -18,6 +18,7 @@ import { docKey, isPersisted, splitExt, formatDocSize } from '../documentHelpers
 import type { DocItem } from '../documentHelpers'
 import type { Candidate } from '@/types/candidate'
 import type { Id } from '@/types/common'
+import { uploadErrorMessage } from '@/lib/uploadError'
 
 // DOC-ENTRY-LINK-1 / DOC-LANG-SKILL-LINK-1 / DOC-LIST-LINK-1 / REFERENTIE-VELDEN-1:
 // maps the "Koppelen aan" picker's "kind:id" prefix to its API relation segment —
@@ -182,7 +183,7 @@ export function useCandidateDocuments(c: Candidate, onRefresh?: () => void) {
         // what to fix.
         .catch(err => {
           setDocs(d => d.filter(x => x.id !== tmpId))
-          notifyError(extractApiError(err, t('common:actionFailed')))
+          notifyError(uploadErrorMessage(err, t, t('common:actionFailed')))
         })
     })
   }
@@ -202,7 +203,7 @@ export function useCandidateDocuments(c: Candidate, onRefresh?: () => void) {
         const it = unwrap<DocItem>(r)
         if (it) setDocs(prev => prev.map(x => x.id === id ? { ...x, ...it, size: formatDocSize(it.size) } : x))
       })
-      .catch(err => notifyError(extractApiError(err, t('common:actionFailed'))))
+      .catch(err => notifyError(uploadErrorMessage(err, t, t('common:actionFailed'))))
   }
 
   // Rename / delete persist once the row has a real (server, non-temp) id.

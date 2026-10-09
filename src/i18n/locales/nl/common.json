@@ -38,6 +38,9 @@
     "unmarked": "Teruggezet naar archief."
   },
   "actionFailed": "Actie mislukt. Probeer het opnieuw.",
+  "upload": {
+    "tooLarge": "Dit bestand is te groot voor de server. Kies een kleiner bestand."
+  },
   "eraseDialog": {
     "password": "Wachtwoord",
     "hint": "Bevestig met je eigen wachtwoord. Dit kan niet ongedaan worden gemaakt.",

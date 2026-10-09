@@ -29,6 +29,7 @@ import { fieldSelectStyle, fieldInputStyle } from '@/components/forms/fieldMetri
 import { postcodePlaceholder } from '@/lib/postcode'
 import CatalogSection from './CatalogSection'
 import Row from './settingsFormRow'
+import { uploadErrorMessage } from '@/lib/uploadError'
 
 // Option lists (data — kept as-is; only labels are translated). Industries and
 // countries are now backend-sourced (Settings → Personalisation → Industries;
@@ -205,8 +206,7 @@ export default function CompanySettings() {
       if (res.data?.banner_url) setBannerUrl(res.data.banner_url)
     } catch (err) {
       // 422 = bad type/size or the SVG script-scan — show the backend's own message.
-      const uploadErr = err as { response?: { data?: { message?: string } } }
-      notifyError(uploadErr?.response?.data?.message ?? t('company.bannerUploadFailed'))
+      notifyError(uploadErrorMessage(err, t, t('company.bannerUploadFailed')))
     } finally {
       e.target.value = ''
     }

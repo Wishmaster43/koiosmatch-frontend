@@ -10,6 +10,7 @@ import { useAuth } from '@/context/AuthContext'
 import api from '@/lib/api'
 import { notifyError } from '@/lib/notify'
 import type { ProfileFormData } from './profileParts'
+import { uploadErrorMessage } from '@/lib/uploadError'
 
 export function useProfileForm() {
   const { t } = useTranslation('auth')
@@ -129,12 +130,12 @@ export function useProfileForm() {
         URL.revokeObjectURL(url); createdUrlRef.current = null
         setAvatarPreview(null); await refreshUser?.()
       }
-    } catch {
+    } catch (err) {
       // Upload failed — revert the optimistic preview and say so; leaving the picked
       // image on screen would look "saved" when the server never persisted it (§3).
       URL.revokeObjectURL(url); createdUrlRef.current = null
       setAvatarPreview(null)
-      notifyError(t('profile.avatarUploadFailed'))
+      notifyError(uploadErrorMessage(err, t, t('profile.avatarUploadFailed')))
     } finally { setAvatarBusy(false); if (fileRef.current) fileRef.current.value = '' }
   }
 

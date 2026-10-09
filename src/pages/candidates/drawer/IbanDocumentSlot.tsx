@@ -21,13 +21,13 @@ import { Eye, Download, Edit2, X, Upload, Link2 } from 'lucide-react'
 import api from '@/lib/api'
 import { downloadFilesSequentially } from '@/lib/downloadFiles'
 import { useDocumentTypes } from '@/lib/useDocumentTypes'
-import { extractApiError } from '@/lib/extractApiError'
 import Button from '@/components/ui/Button'
 import Spinner from '@/components/ui/Spinner'
 import SearchSelectJs from '@/components/ui/SearchSelect'
 import { Caption, Mono } from '@/components/ui/typography'
 import { DateField } from '@/components/forms/fields'
 import DocPreviewModal from '@/components/drawer/DocPreviewModal'
+import { uploadErrorMessage } from '@/lib/uploadError'
 
 type Loose = Record<string, unknown>
 type AnyProps = Record<string, unknown>
@@ -102,7 +102,7 @@ export default function IbanDocumentSlot({ candidateId, documents = [], linkedDo
       })
       // The server's own reason (e.g. the 422 on a requires_expiry type with no
       // date) reaches the recruiter instead of a generic line.
-      .catch(err => setUploadError(extractApiError(err, t('bankDoc.uploadFailed'))))
+      .catch(err => setUploadError(uploadErrorMessage(err, t, t('bankDoc.uploadFailed'))))
       .finally(() => setUploading(false))
   }
 
