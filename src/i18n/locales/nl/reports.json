@@ -414,6 +414,27 @@
       "childRuns": "Kind-runs",
       "blockedReason": "Reden blokkering"
     },
+    "reasons": {
+      "interview_workflow_inactive": "Interviewworkflow is inactief",
+      "interview_workflow_not_selected": "Geen interviewworkflow gekozen",
+      "interview_workflow_conditions_not_met": "Voorwaarden van de interviewworkflow niet voldaan",
+      "already_running": "Loopt al voor deze sollicitatie",
+      "no_candidate": "Geen kandidaat gevonden",
+      "no_active_flow": "Geen actieve interviewflow",
+      "rejected_stage": "Sollicitatie is afgewezen",
+      "placed_stage": "Sollicitatie is geplaatst",
+      "no_mobile_or_consent": "Geen mobiel nummer of geen toestemming",
+      "wa_web_send_not_supported": "Versturen via WhatsApp Web niet ondersteund",
+      "no_active_connection": "Geen actieve WhatsApp-koppeling",
+      "already_has_session": "Er loopt al een interviewsessie",
+      "send_failed": "Versturen mislukt",
+      "ai_tier_blocked": "AI-niveau geblokkeerd door de limiet",
+      "no_application_id": "Geen sollicitatie meegegeven",
+      "application_not_found": "Sollicitatie niet gevonden",
+      "application_override": "Gekozen op de sollicitatie",
+      "vacancy_coupling": "Gekoppeld op de vacature",
+      "bureau_default": "Standaard van het bureau"
+    },
     "reasonLabel": "Reden",
     "openHistory": "Bekijk in geschiedenis",
     "dryRun": {

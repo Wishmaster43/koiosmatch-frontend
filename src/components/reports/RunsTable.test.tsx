@@ -264,3 +264,34 @@ describe('RunsTable — RUN-SKIPPED-REASON-FE-1 skipped status + reason', () => 
     vi.mocked(useReportList).mockReturnValue({ rows: runs, loading: false, error: false })
   })
 })
+
+// RUN-REASON-I18N-1: a run-level `reason` that is a known contract CODE shows
+// its translated sentence as the badge title, and search matches the label too.
+describe('RunsTable — RUN-REASON-I18N-1 translated reason code', () => {
+  it('shows the translated sentence as the status badge title for a known code', () => {
+    vi.mocked(useReportList).mockReturnValueOnce({
+      rows: [{ id: 'r8', workflow_name: 'Skipflow', status: 'skipped', reason: 'rejected_stage' }],
+      loading: false, error: false,
+    })
+    render(<RunsTable />)
+    expect(screen.getByText('Overgeslagen').closest('span'))
+      .toHaveAttribute('title', 'Sollicitatie is afgewezen')
+  })
+
+  it('finds a run by searching the translated label text of its reason code', () => {
+    vi.mocked(useReportList).mockReturnValue({
+      rows: [
+        { id: 'r9', workflow_name: 'Skipflow', status: 'skipped', reason: 'rejected_stage' },
+        { id: 'r10', workflow_name: 'Anderflow', status: 'success' },
+      ],
+      loading: false, error: false,
+    })
+    render(<RunsTable />)
+    const search = screen.getByPlaceholderText('Zoek op workflow, trigger, fout…')
+    fireEvent.change(search, { target: { value: 'afgewezen' } })
+    expect(screen.getByText('Skipflow')).toBeInTheDocument()
+    expect(screen.queryByText('Anderflow')).not.toBeInTheDocument()
+    // Restore the default mock so a later test in this file never inherits this run list.
+    vi.mocked(useReportList).mockReturnValue({ rows: runs, loading: false, error: false })
+  })
+})

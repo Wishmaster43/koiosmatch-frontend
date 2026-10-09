@@ -414,6 +414,27 @@
       "childRuns": "Child runs",
       "blockedReason": "Block reason"
     },
+    "reasons": {
+      "interview_workflow_inactive": "Interview workflow is inactive",
+      "interview_workflow_not_selected": "No interview workflow selected",
+      "interview_workflow_conditions_not_met": "Interview workflow conditions not met",
+      "already_running": "Already running for this application",
+      "no_candidate": "No candidate found",
+      "no_active_flow": "No active interview flow",
+      "rejected_stage": "Application was rejected",
+      "placed_stage": "Application was placed",
+      "no_mobile_or_consent": "No mobile number or no consent",
+      "wa_web_send_not_supported": "Sending via WhatsApp Web not supported",
+      "no_active_connection": "No active WhatsApp connection",
+      "already_has_session": "An interview session is already running",
+      "send_failed": "Sending failed",
+      "ai_tier_blocked": "AI tier blocked by the limit",
+      "no_application_id": "No application given",
+      "application_not_found": "Application not found",
+      "application_override": "Chosen on the application",
+      "vacancy_coupling": "Linked on the vacancy",
+      "bureau_default": "Bureau default"
+    },
     "reasonLabel": "Reason",
     "openHistory": "View in history",
     "dryRun": {

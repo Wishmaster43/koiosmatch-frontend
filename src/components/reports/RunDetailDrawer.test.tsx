@@ -198,3 +198,17 @@ describe('RunDetailDrawer — RUN-SKIPPED-REASON-FE-1 run-level reason', () => {
     expect(line).toHaveStyle({ color: 'var(--color-danger-text)' })
   })
 })
+
+// RUN-REASON-I18N-1: a run-level `reason` that is a known contract CODE
+// renders as its translated sentence, never the raw code.
+describe('RunDetailDrawer — RUN-REASON-I18N-1 translated reason code', () => {
+  it('shows the translated sentence for a known reason code, not the code itself', () => {
+    render(
+      <I18nextProvider i18n={i18n}>
+        <RunDetailDrawer run={{ ...baseRun, status: 'skipped', reason: 'rejected_stage' }} onClose={() => {}} />
+      </I18nextProvider>,
+    )
+    expect(screen.getByText('Reden: Sollicitatie is afgewezen')).toBeInTheDocument()
+    expect(screen.queryByText(/rejected_stage/)).not.toBeInTheDocument()
+  })
+})

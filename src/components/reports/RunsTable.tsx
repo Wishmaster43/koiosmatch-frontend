@@ -20,6 +20,7 @@ import { useReportList } from './useReportList'
 import { resolveWorkflowBaseURL } from '@/lib/workflowApi'
 import { formatDuration, StatusBadge } from './runFormat'
 import { blockedReason } from './blockedReason'
+import { runReasonLabel } from './runReason'
 import RunDetailDrawer from './RunDetailDrawer'
 import { buildStatusGroup, buildWorkflowGroup } from './reportFilterDefs'
 import { distinctSortedValues } from './distinctSortedValues'
@@ -116,11 +117,13 @@ export default function RunsTable() {
         (r.trigger        ?? '').toLowerCase().includes(q) ||
         (r.triggered_by   ?? '').toLowerCase().includes(q) ||
         (r.error_message  ?? '').toLowerCase().includes(q) ||
-        // RUN-SKIPPED-REASON-FE-1: a run-level skip/stop reason is searchable too.
-        (r.reason         ?? '').toLowerCase().includes(q)
+        // RUN-SKIPPED-REASON-FE-1: a run-level skip/stop reason is searchable by
+        // both its raw code AND its translated sentence (a user types what they read).
+        (r.reason ?? '').toLowerCase().includes(q) ||
+        (runReasonLabel(r.reason, t) ?? '').toLowerCase().includes(q)
       )
     })
-  }, [rows, search, selectedStatuses, selectedWorkflows])
+  }, [rows, search, selectedStatuses, selectedWorkflows, t])
 
   // Fallback row id: an object-identity map onto the ORIGINAL fetched list so a
   // run without an `id` (defensive — real API rows always carry one) still gets
@@ -156,9 +159,9 @@ export default function RunsTable() {
       sortValue: r => r.status ?? null,
       // F7: the badge's own title/sr-only text carries the block reason on a
       // blocked run — read from the capped step, not the still-empty error_message.
-      // RUN-SKIPPED-REASON-FE-1: falls back to the run-level `reason` (e.g. a
-      // `skipped` run) when there is no connector-cap reason.
-      render: r => <StatusBadge status={r.status} reason={blockedReason(r) ?? r.reason} />,
+      // RUN-REASON-I18N-1: falls back to the translated run-level reason (e.g. a
+      // `skipped` run) when there is no connector-cap reason — never the raw code.
+      render: r => <StatusBadge status={r.status} reason={blockedReason(r) ?? runReasonLabel(r.reason, t)} />,
     },
     {
       key: 'candidates_count', header: t('runs.cols.candidates'), sortable: true,

@@ -414,6 +414,27 @@
       "childRuns": "Runs enfants",
       "blockedReason": "Motif du blocage"
     },
+    "reasons": {
+      "interview_workflow_inactive": "Le workflow d'entretien est inactif",
+      "interview_workflow_not_selected": "Aucun workflow d'entretien sélectionné",
+      "interview_workflow_conditions_not_met": "Conditions du workflow d'entretien non remplies",
+      "already_running": "Déjà en cours pour cette candidature",
+      "no_candidate": "Aucun candidat trouvé",
+      "no_active_flow": "Aucun flux d'entretien actif",
+      "rejected_stage": "La candidature a été refusée",
+      "placed_stage": "La candidature a été placée",
+      "no_mobile_or_consent": "Pas de numéro mobile ou pas de consentement",
+      "wa_web_send_not_supported": "Envoi via WhatsApp Web non pris en charge",
+      "no_active_connection": "Aucune connexion WhatsApp active",
+      "already_has_session": "Une session d'entretien est déjà en cours",
+      "send_failed": "Envoi échoué",
+      "ai_tier_blocked": "Niveau IA bloqué par la limite",
+      "no_application_id": "Aucune candidature fournie",
+      "application_not_found": "Candidature introuvable",
+      "application_override": "Choisi sur la candidature",
+      "vacancy_coupling": "Lié au poste",
+      "bureau_default": "Valeur par défaut du bureau"
+    },
     "reasonLabel": "Motif",
     "openHistory": "Voir dans l'historique",
     "dryRun": {

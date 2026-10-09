@@ -13,6 +13,7 @@ import { formatDT, formatDuration, StatusBadge, DryRunBanner } from './runFormat
 // GETALLEN-1: formatDuration's own seconds path is locale-aware — pass the active locale.
 import { useLocale } from '@/lib/datetime'
 import { blockedReason } from './blockedReason'
+import { runReasonLabel } from './runReason'
 import ReportDrawerChrome from './ReportDrawerChrome'
 import { DrawerErrorBlock } from './DrawerErrorBlock'
 import CalloutBox from '@/components/ui/CalloutBox'
@@ -121,12 +122,13 @@ export default function RunDetailDrawer({ run, onClose, zIndex }: {
       <div style={{ fontSize: 12, color: 'var(--text-muted)' }}>
         {t('runs.drawer.startedColon')} {formatDT(shown.started_at ?? shown.created_at)}
       </div>
-      {/* RUN-SKIPPED-REASON-FE-1: the run-level reason the engine skipped/stopped
-          this run (N-006) — rendered verbatim, muted, danger-toned only on a
-          failed run; the blocked-run warning callout below stays the capped-step case. */}
+      {/* RUN-REASON-I18N-1: the run-level reason the engine skipped/stopped this
+          run (N-006) — translated to a sentence (never the raw code), muted,
+          danger-toned only on a failed run; the blocked-run warning callout
+          below stays the capped-step case. */}
       {shown.reason && (
         <Caption as="div" style={shown.status === 'failed' ? { color: 'var(--color-danger-text)', marginTop: 4 } : { marginTop: 4 }}>
-          {t('runs.reasonLabel')}: {shown.reason}
+          {t('runs.reasonLabel')}: {runReasonLabel(shown.reason, t)}
         </Caption>
       )}
       {stopError && (

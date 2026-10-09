@@ -414,6 +414,27 @@
       "childRuns": "Ejecuciones hijas",
       "blockedReason": "Motivo del bloqueo"
     },
+    "reasons": {
+      "interview_workflow_inactive": "El flujo de entrevista está inactivo",
+      "interview_workflow_not_selected": "No se seleccionó ningún flujo de entrevista",
+      "interview_workflow_conditions_not_met": "No se cumplen las condiciones del flujo de entrevista",
+      "already_running": "Ya está en curso para esta solicitud",
+      "no_candidate": "No se encontró ningún candidato",
+      "no_active_flow": "Sin flujo de entrevista activo",
+      "rejected_stage": "La solicitud fue rechazada",
+      "placed_stage": "La solicitud fue colocada",
+      "no_mobile_or_consent": "Sin número móvil o sin consentimiento",
+      "wa_web_send_not_supported": "Envío por WhatsApp Web no admitido",
+      "no_active_connection": "Sin conexión activa de WhatsApp",
+      "already_has_session": "Ya hay una sesión de entrevista en curso",
+      "send_failed": "El envío falló",
+      "ai_tier_blocked": "Nivel de IA bloqueado por el límite",
+      "no_application_id": "No se indicó ninguna solicitud",
+      "application_not_found": "Solicitud no encontrada",
+      "application_override": "Elegido en la solicitud",
+      "vacancy_coupling": "Vinculado en la vacante",
+      "bureau_default": "Valor predeterminado de la agencia"
+    },
     "reasonLabel": "Motivo",
     "openHistory": "Ver en el historial",
     "dryRun": {

@@ -414,6 +414,27 @@
       "childRuns": "Kind-Runs",
       "blockedReason": "Blockierungsgrund"
     },
+    "reasons": {
+      "interview_workflow_inactive": "Interview-Workflow ist inaktiv",
+      "interview_workflow_not_selected": "Kein Interview-Workflow ausgewählt",
+      "interview_workflow_conditions_not_met": "Bedingungen des Interview-Workflows nicht erfüllt",
+      "already_running": "Läuft bereits für diese Bewerbung",
+      "no_candidate": "Kein Kandidat gefunden",
+      "no_active_flow": "Kein aktiver Interview-Flow",
+      "rejected_stage": "Bewerbung wurde abgelehnt",
+      "placed_stage": "Bewerbung wurde platziert",
+      "no_mobile_or_consent": "Keine Mobilnummer oder keine Zustimmung",
+      "wa_web_send_not_supported": "Versand über WhatsApp Web nicht unterstützt",
+      "no_active_connection": "Keine aktive WhatsApp-Verbindung",
+      "already_has_session": "Es läuft bereits eine Interviewsitzung",
+      "send_failed": "Versand fehlgeschlagen",
+      "ai_tier_blocked": "KI-Stufe durch das Limit blockiert",
+      "no_application_id": "Keine Bewerbung angegeben",
+      "application_not_found": "Bewerbung nicht gefunden",
+      "application_override": "Auf der Bewerbung ausgewählt",
+      "vacancy_coupling": "An der Vakanz gekoppelt",
+      "bureau_default": "Standard des Büros"
+    },
     "reasonLabel": "Grund",
     "openHistory": "In Verlauf anzeigen",
     "dryRun": {

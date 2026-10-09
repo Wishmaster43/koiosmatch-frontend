@@ -414,6 +414,27 @@
       "childRuns": "Execuções derivadas",
       "blockedReason": "Motivo do bloqueio"
     },
+    "reasons": {
+      "interview_workflow_inactive": "O workflow de entrevista está inativo",
+      "interview_workflow_not_selected": "Nenhum workflow de entrevista selecionado",
+      "interview_workflow_conditions_not_met": "Condições do workflow de entrevista não atendidas",
+      "already_running": "Já está em execução para esta candidatura",
+      "no_candidate": "Nenhum candidato encontrado",
+      "no_active_flow": "Nenhum fluxo de entrevista ativo",
+      "rejected_stage": "A candidatura foi rejeitada",
+      "placed_stage": "A candidatura foi colocada",
+      "no_mobile_or_consent": "Sem número de telemóvel ou sem consentimento",
+      "wa_web_send_not_supported": "Envio via WhatsApp Web não suportado",
+      "no_active_connection": "Sem conexão ativa do WhatsApp",
+      "already_has_session": "Já existe uma sessão de entrevista em andamento",
+      "send_failed": "Envio falhou",
+      "ai_tier_blocked": "Nível de IA bloqueado pelo limite",
+      "no_application_id": "Nenhuma candidatura informada",
+      "application_not_found": "Candidatura não encontrada",
+      "application_override": "Escolhido na candidatura",
+      "vacancy_coupling": "Vinculado na vaga",
+      "bureau_default": "Padrão do escritório"
+    },
     "reasonLabel": "Motivo",
     "openHistory": "Ver no histórico",
     "dryRun": {

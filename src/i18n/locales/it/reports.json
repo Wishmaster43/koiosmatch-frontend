@@ -414,6 +414,27 @@
       "childRuns": "Esecuzioni figlie",
       "blockedReason": "Motivo del blocco"
     },
+    "reasons": {
+      "interview_workflow_inactive": "Il flusso di lavoro dell'intervista è inattivo",
+      "interview_workflow_not_selected": "Nessun flusso di lavoro dell'intervista selezionato",
+      "interview_workflow_conditions_not_met": "Condizioni del flusso di lavoro dell'intervista non soddisfatte",
+      "already_running": "È già in corso per questa candidatura",
+      "no_candidate": "Nessun candidato trovato",
+      "no_active_flow": "Nessun flusso di intervista attivo",
+      "rejected_stage": "La candidatura è stata rifiutata",
+      "placed_stage": "La candidatura è stata collocata",
+      "no_mobile_or_consent": "Nessun numero di cellulare o nessun consenso",
+      "wa_web_send_not_supported": "Invio tramite WhatsApp Web non supportato",
+      "no_active_connection": "Nessuna connessione WhatsApp attiva",
+      "already_has_session": "È già in corso una sessione di intervista",
+      "send_failed": "Invio non riuscito",
+      "ai_tier_blocked": "Livello IA bloccato dal limite",
+      "no_application_id": "Nessuna candidatura indicata",
+      "application_not_found": "Candidatura non trovata",
+      "application_override": "Scelto sulla candidatura",
+      "vacancy_coupling": "Collegato sulla posizione vacante",
+      "bureau_default": "Predefinito dell'agenzia"
+    },
     "reasonLabel": "Motivo",
     "openHistory": "Visualizza nella cronologia",
     "dryRun": {

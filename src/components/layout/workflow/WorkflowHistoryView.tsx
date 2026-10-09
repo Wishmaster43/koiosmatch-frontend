@@ -13,6 +13,7 @@ import { resolveWorkflowBaseURL } from '@/lib/workflowApi'
 import { useDateFormat } from '@/lib/datetime'
 import { formatDuration, StatusBadge, DryRunBanner } from '@/components/reports/runFormat'
 import { blockedReason } from '@/components/reports/blockedReason'
+import { runReasonLabel } from '@/components/reports/runReason'
 import RunDetailDrawer from '@/components/reports/RunDetailDrawer'
 import { PageTitle, Caption, GroupLabel, captionStyle, bodyTextStyle } from '@/components/ui/typography'
 import Button from '@/components/ui/Button'
@@ -169,8 +170,8 @@ export default function WorkflowHistoryView({ workflowId, vacancyId, initialRun 
                     </td>
                     {/* F7: the badge's own title/sr-only text carries the block reason on a
                         blocked run — read from the capped step, not the still-empty error_message.
-                        RUN-SKIPPED-REASON-FE-1: falls back to the run-level `reason` otherwise. */}
-                    <td style={TD}><StatusBadge status={r.status} reason={blockedReason(r) ?? r.reason} /></td>
+                        RUN-REASON-I18N-1: falls back to the translated run-level `reason`, never the raw code. */}
+                    <td style={TD}><StatusBadge status={r.status} reason={blockedReason(r) ?? runReasonLabel(r.reason, t)} /></td>
                     <td style={{ ...TD, fontSize: 12, color: 'var(--text-muted)' }}>
                       {formatDuration(r.duration_ms ?? r.duration)}
                     </td>
