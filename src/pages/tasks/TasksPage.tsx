@@ -115,7 +115,7 @@ function TasksPageInner({ intent }: { intent?: unknown }) {
   // `?ref=` lookup; J013-SEARCH-1 (J4): any other text is the server's `?q=` search.
   // TRASH-OVERAL-2: the trash view rides the SAME ?archived=1 fetch as the
   // archived view — the lifecycle filter below splits the soft-deleted set.
-  const { setTasks, archivedTasks, setArchivedTasks, loading, error, all, decorate } = useTasksData({
+  const { tasks, setTasks, archivedTasks, setArchivedTasks, loading, error, all, decorate } = useTasksData({
     showArchived: showArchived || showTrash, refQuery, searchQuery, statuses, priorities, types, statusMeta, priorityMeta, typeMeta, doneStatusValues,
   })
 
@@ -193,7 +193,7 @@ function TasksPageInner({ intent }: { intent?: unknown }) {
 
   // Bulk selection + mutations (§0.3 split → hook).
   const { clearSelection, toggleRow, toggleAll, bulkSetStatus, bulkSetPriority, bulkSetAssignee, bulkArchive } =
-    useTaskBulkActions({ setTasks, setSelected, selected, closeDrawer, selectedIds, setSelectedIds, decorate, users, t })
+    useTaskBulkActions({ tasks, setTasks, setSelected, selected, closeDrawer, selectedIds, setSelectedIds, decorate, users, t })
 
   // ── Insights strip: 3 donuts (filterable) + 4 KPI cards, equal footprint — pure builder (§0.3 split) ──
   const toggleKpi = (k: string) => setKpiFilter(p => p === k ? null : k)
@@ -242,6 +242,7 @@ function TasksPageInner({ intent }: { intent?: unknown }) {
                     <TasksBulkBar count={selectedIds.size} onClear={clearSelection}
                       onSetStatus={bulkSetStatus} onSetPriority={bulkSetPriority} onSetAssignee={bulkSetAssignee}
                       onArchive={bulkArchive} canArchive={canArchive}
+                      canEdit={canArchive /* same tasks.update right the BE checks for a PATCH */}
                       statuses={statuses} priorities={priorities} users={users} />
                   </div>
                 )}

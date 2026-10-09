@@ -176,7 +176,9 @@
     "searchAssignee": "Benutzer suchen…",
     "noUsers": "Keine Benutzer",
     "archive": "Archivieren",
-    "done": "{{count}} Aufgaben aktualisiert"
+    "done": "{{count}} Aufgaben aktualisiert",
+    "partialFailed": "{{failed}} von {{total}} Aufgaben wurden nicht geändert, der Rest wurde gespeichert.",
+    "allFailed": "Keine der {{count}} Aufgaben wurde geändert."
   },
   "page": {
     "searchPlaceholder": "Aufgabe, Beschreibung, Kommentar suchen…"

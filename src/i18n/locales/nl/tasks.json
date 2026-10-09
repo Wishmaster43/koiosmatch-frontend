@@ -76,7 +76,9 @@
     "searchAssignee": "Zoek gebruiker…",
     "noUsers": "Geen gebruikers",
     "archive": "Archiveren",
-    "done": "{{count}} taken bijgewerkt"
+    "done": "{{count}} taken bijgewerkt",
+    "partialFailed": "{{failed}} van {{total}} taken niet gewijzigd, de rest is opgeslagen.",
+    "allFailed": "Geen van de {{count}} taken is gewijzigd."
   },
   "details": {
     "title": "Taakdetails",

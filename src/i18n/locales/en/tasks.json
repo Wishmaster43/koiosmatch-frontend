@@ -76,7 +76,9 @@
     "searchAssignee": "Search user…",
     "noUsers": "No users",
     "archive": "Archive",
-    "done": "{{count}} tasks updated"
+    "done": "{{count}} tasks updated",
+    "partialFailed": "{{failed}} of {{total}} tasks were not changed, the rest was saved.",
+    "allFailed": "None of the {{count}} tasks was changed."
   },
   "details": {
     "title": "Task details",

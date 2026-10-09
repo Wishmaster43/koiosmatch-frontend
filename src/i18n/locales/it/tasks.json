@@ -76,7 +76,9 @@
     "searchAssignee": "Cerca utente…",
     "noUsers": "Nessun utente",
     "archive": "Archivia",
-    "done": "{{count}} attività aggiornate"
+    "done": "{{count}} attività aggiornate",
+    "partialFailed": "{{failed}} attività su {{total}} non sono state modificate, le altre sono state salvate.",
+    "allFailed": "Nessuna delle {{count}} attività è stata modificata."
   },
   "details": {
     "title": "Dettagli attività",

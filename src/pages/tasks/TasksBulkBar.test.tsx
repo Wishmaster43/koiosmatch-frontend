@@ -15,7 +15,7 @@ const baseProps = () => ({
 describe('TasksBulkBar', () => {
   it('hides Archive unless the user may manage (update-gated)', async () => {
     const user = userEvent.setup()
-    render(<TasksBulkBar {...baseProps()} canArchive={false} />)
+    render(<TasksBulkBar {...baseProps()} canArchive={false} canEdit />)
     await user.click(screen.getByText('bulk.actions'))
     expect(screen.getByText('bulk.changeStatus')).toBeInTheDocument()
     expect(screen.queryByText('bulk.archive')).toBeNull()
@@ -23,8 +23,8 @@ describe('TasksBulkBar', () => {
 
   it('shows Archive and fires onArchive when permitted', async () => {
     const user = userEvent.setup()
-    const props = { ...baseProps(), canArchive: true }
-    render(<TasksBulkBar {...props} />)
+    const props = { ...baseProps(), canArchive: true, canEdit: true }
+    render(<TasksBulkBar {...props} canEdit />)
     await user.click(screen.getByText('bulk.actions'))
     await user.click(screen.getByText('bulk.archive'))
     expect(props.onArchive).toHaveBeenCalledTimes(1)
@@ -33,7 +33,7 @@ describe('TasksBulkBar', () => {
   it('passes the chosen status value through', async () => {
     const user = userEvent.setup()
     const props = baseProps()
-    render(<TasksBulkBar {...props} />)
+    render(<TasksBulkBar {...props} canEdit />)
     await user.click(screen.getByText('bulk.actions'))
     await user.click(screen.getByText('bulk.changeStatus'))
     await user.click(screen.getByText('TeDoen'))
@@ -43,10 +43,26 @@ describe('TasksBulkBar', () => {
   it('resolves a picked assignee to its user id', async () => {
     const user = userEvent.setup()
     const props = baseProps()
-    render(<TasksBulkBar {...props} />)
+    render(<TasksBulkBar {...props} canEdit />)
     await user.click(screen.getByText('bulk.actions'))
     await user.click(screen.getByText('bulk.changeAssignee'))
     await user.click(screen.getByText('Kelly van Vliet'))
     expect(props.onSetAssignee).toHaveBeenCalledWith('u2')
+  })
+
+  // ONIX N-004: without tasks.update the change nodes are not offered at all.
+  it('hides the change nodes without canEdit and shows them with it', async () => {
+    const user = userEvent.setup()
+    const { unmount } = render(<TasksBulkBar {...baseProps()} canArchive />)
+    await user.click(screen.getByText('bulk.actions'))
+    expect(screen.queryByText('bulk.changeStatus')).toBeNull()
+    expect(screen.queryByText('bulk.changePriority')).toBeNull()
+    expect(screen.queryByText('bulk.changeAssignee')).toBeNull()
+    unmount()
+    render(<TasksBulkBar {...baseProps()} canEdit />)
+    await user.click(screen.getByText('bulk.actions'))
+    expect(screen.getByText('bulk.changeStatus')).toBeInTheDocument()
+    expect(screen.getByText('bulk.changePriority')).toBeInTheDocument()
+    expect(screen.getByText('bulk.changeAssignee')).toBeInTheDocument()
   })
 })

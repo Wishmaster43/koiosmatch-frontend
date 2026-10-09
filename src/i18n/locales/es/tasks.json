@@ -176,7 +176,9 @@
     "searchAssignee": "Buscar usuario…",
     "noUsers": "Sin usuarios",
     "archive": "Archivar",
-    "done": "{{count}} tareas actualizadas"
+    "done": "{{count}} tareas actualizadas",
+    "partialFailed": "{{failed}} de {{total}} tareas no se modificaron, el resto se guardó.",
+    "allFailed": "Ninguna de las {{count}} tareas se modificó."
   },
   "page": {
     "searchPlaceholder": "Buscar tarea, descripción, comentario…"

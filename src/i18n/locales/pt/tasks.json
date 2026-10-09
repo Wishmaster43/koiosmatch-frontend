@@ -76,7 +76,9 @@
     "searchAssignee": "Pesquisar utilizador…",
     "noUsers": "Nenhum utilizador",
     "archive": "Arquivar",
-    "done": "{{count}} tarefas atualizadas"
+    "done": "{{count}} tarefas atualizadas",
+    "partialFailed": "{{failed}} de {{total}} tarefas não foram alteradas, as restantes foram guardadas.",
+    "allFailed": "Nenhuma das {{count}} tarefas foi alterada."
   },
   "details": {
     "title": "Detalhes da tarefa",

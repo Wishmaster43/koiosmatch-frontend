@@ -23,7 +23,7 @@ vi.mock('@/lib/notify', () => ({ notifyError: vi.fn(), notifySuccess: vi.fn() })
 
 const mockedGet   = vi.mocked(api.get)
 const mockedPatch = vi.mocked(api.patch)
-const t = ((k: string) => k) as unknown as import('i18next').TFunction
+const t = vi.fn((k: string) => k) as unknown as import('i18next').TFunction
 
 afterEach(() => vi.clearAllMocks())
 
@@ -55,7 +55,7 @@ function harness(initialTasks: Task[], initialSelectedIds: Set<Id>) {
     const [selectedIds, setSelectedIds] = useState<Set<Id>>(initialSelectedIds)
     const [selected, setSelected] = useState<TaskDetail | null>(null)
     const actions = useTaskBulkActions({
-      setTasks: setTasks as Dispatch<SetStateAction<Task[]>>, setSelected, selected,
+      tasks, setTasks: setTasks as Dispatch<SetStateAction<Task[]>>, setSelected, selected,
       closeDrawer: vi.fn(), selectedIds, setSelectedIds, decorate: x => x, users: [], t,
     })
     return { tasks, selectedIds, actions }
@@ -130,5 +130,38 @@ describe('useTaskBulkActions · unresolved slug guard', () => {
     expect(notifySuccess).not.toHaveBeenCalled()
     expect(notifyError).toHaveBeenCalledWith('drawer.lookupNotReady')
     expect(r.result.current.tasks[0].priorityKey).toBe('normal')
+  })
+})
+
+// ONIX N-004: refused rows revert, accepted rows keep the new value, and the toast says how many failed.
+describe('useTaskBulkActions · revert on refusal', () => {
+  it('reverts only the rejected id and shows the partial-failure toast', async () => {
+    seedLookupIds()
+    mockedPatch.mockImplementation((url: string) => url === '/tasks/t2' ? Promise.reject(new Error('403')) : Promise.resolve({}))
+    const r = harness([task({ id: 't1', statusKey: 'todo' }), task({ id: 't2', statusKey: 'todo' })], new Set(['t1', 't2']))
+    await flush()
+
+    await act(async () => { await r.result.current.actions.bulkSetStatus('done') })
+
+    expect(mockedPatch).toHaveBeenCalledWith('/tasks/t2', { status_id: 'status-uuid-2' })
+    expect(r.result.current.tasks.find(x => x.id === 't1')?.statusKey).toBe('done')
+    expect(r.result.current.tasks.find(x => x.id === 't2')?.statusKey).toBe('todo')
+    expect(notifyError).toHaveBeenCalledWith('bulk.partialFailed')
+    expect(t).toHaveBeenCalledWith('bulk.partialFailed', { failed: 1, total: 2 })
+    expect(notifySuccess).not.toHaveBeenCalled()
+  })
+
+  it('restores archived rows in their original order when the archive POST fails', async () => {
+    const mockedPost = vi.mocked(api.post)
+    mockedPost.mockRejectedValue(new Error('500'))
+    const r = harness([task({ id: 'a' }), task({ id: 'b' }), task({ id: 'c' })], new Set(['a', 'c']))
+    await flush()
+
+    await act(async () => { await r.result.current.actions.bulkArchive() })
+
+    expect(mockedPost).toHaveBeenCalledWith('/tasks/bulk/archive', { task_ids: ['a', 'c'] })
+    expect(r.result.current.tasks.map(x => x.id)).toEqual(['a', 'b', 'c'])
+    expect(notifyError).toHaveBeenCalledWith('bulk.allFailed')
+    expect(t).toHaveBeenCalledWith('bulk.allFailed', { count: 2 })
   })
 })

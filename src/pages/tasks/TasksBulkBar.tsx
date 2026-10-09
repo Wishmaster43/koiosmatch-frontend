@@ -23,6 +23,8 @@ interface TasksBulkBarProps {
   onSetAssignee: (userId: string) => void
   onArchive: () => void
   canArchive?: boolean
+  // Change nodes (status/priority/assignee) need the tasks.update right.
+  canEdit?: boolean
   statuses?: TaskLookupItem[]
   priorities?: TaskLookupItem[]
   users?: BulkUser[]
@@ -31,7 +33,7 @@ interface TasksBulkBarProps {
 // Thin assembler for the tasks bulk-action bar (see file docblock above) — every
 // mutation is one ActionMenu config node fed by props, never a forked bar.
 export default function TasksBulkBar({
-  count, onClear, onSetStatus, onSetPriority, onSetAssignee, onArchive, canArchive = false,
+  count, onClear, onSetStatus, onSetPriority, onSetAssignee, onArchive, canArchive = false, canEdit = false,
   statuses = [], priorities = [], users = [],
 }: TasksBulkBarProps) {
   const { t } = useTranslation('tasks')
@@ -43,13 +45,16 @@ export default function TasksBulkBar({
   const assigneeOptions = [{ value: '', label: t('bureau') }, ...users.map(u => ({ value: u.id, label: u.name }))]
 
   // Declarative bulk-action tree; extend with more actions as extra nodes.
-  const items: MenuNode[] = [
+  const changeNodes: MenuNode[] = canEdit ? [
     { key: 'status', label: t('bulk.changeStatus'), icon: Activity,
       searchPlaceholder: t('bulk.searchStatus'), options: statusOptions, onPick: v => onSetStatus(String(v)) },
     { key: 'priority', label: t('bulk.changePriority'), icon: Flag,
       searchPlaceholder: t('bulk.searchPriority'), options: priorityOptions, onPick: v => onSetPriority(String(v)) },
     { key: 'assignee', label: t('bulk.changeAssignee'), icon: UserCog,
-      searchPlaceholder: t('bulk.searchAssignee'), emptyText: t('bulk.noUsers'), options: assigneeOptions, onPick: v => onSetAssignee(String(v)) },
+      searchPlaceholder: t('bulk.searchAssignee'), emptyText: t('bulk.noUsers'), options: assigneeOptions, onPick: v => onSetAssignee(String(v)) }
+  ] : []
+  const items: MenuNode[] = [
+    ...changeNodes,
     ...archiveNode(t, { canArchive, onArchive }),
   ]
 

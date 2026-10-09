@@ -176,7 +176,9 @@
     "searchAssignee": "Rechercher un utilisateur…",
     "noUsers": "Aucun utilisateur",
     "archive": "Archiver",
-    "done": "{{count}} tâches mises à jour"
+    "done": "{{count}} tâches mises à jour",
+    "partialFailed": "{{failed}} tâches sur {{total}} n'ont pas été modifiées, les autres ont été enregistrées.",
+    "allFailed": "Aucune des {{count}} tâches n'a été modifiée."
   },
   "page": {
     "searchPlaceholder": "Rechercher une tâche, une description, un commentaire…"
