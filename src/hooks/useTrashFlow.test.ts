@@ -151,6 +151,11 @@ describe('buildTrashNote', () => {
     expect(note).toContain('common:trash.eraseAround:31-08-2026')
   })
 
+  it('uses the unit-aware window for months (no derived day count)', () => {
+    const note = buildTrashNote(t, formatDate, '2026-08-31T12:00:00Z', { amount: 1, unit: 'months' })
+    expect(note).toContain('common:trash.eraseAround:30-09-2026')
+  })
+
   it('falls back to the neutral wording when the grace window is unknown', () => {
     const note = buildTrashNote(t, formatDate, '2026-08-01T12:00:00Z', null)
     expect(note).toContain('common:trash.eraseAutomatic')

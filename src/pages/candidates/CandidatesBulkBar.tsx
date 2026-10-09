@@ -111,8 +111,6 @@ export default function CandidatesBulkBar({
   const pickPoolHandler = pickPool(pools, onAddToPool)
   const pickPoolRemoveHandler = pickPool(pools, onRemoveFromPool)
 
-  // Declarative bulk-action tree; extend with more actions as extra nodes.
-  // Archive is gated: only present when the user may delete (server re-checks).
   // Mutating nodes, offered only with canEdit (update right); merge/geocode/couple/archive keep their own gates.
   const editNodes: MenuNode[] = [
     ownerNode(t, { users, onSetOwner, userOptions }),
@@ -158,6 +156,8 @@ export default function CandidatesBulkBar({
     ] },
   ]
 
+  // Declarative bulk-action tree; extend with more actions as extra nodes.
+  // Archive is gated: only present when the user may delete (server re-checks).
   const items: MenuNode[] = [
     // 11.1: convenience deep-link to the axis-correct per-application bulk home
     // (ApplicationsBulkBar) — gated on the callback being wired (honest gate, see the

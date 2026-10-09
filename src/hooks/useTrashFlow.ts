@@ -11,6 +11,7 @@ import { useTranslation } from 'react-i18next'
 import api from '@/lib/api'
 import { withIdempotencyKey } from '@/lib/idempotency'
 import { notifyError, notifySuccess } from '@/lib/notify'
+import type { GraceWindow } from '@/lib/graceWindow'
 import { eraseAroundDate, useDeletionLifecycle } from '@/hooks/useDeletionLifecycle'
 
 // The row the preview modal is currently open for (id + human label for the intro).
@@ -99,9 +100,10 @@ export function buildTrashNote(
   t: (key: string, opts?: Record<string, unknown>) => string,
   formatDate: (d?: string | Date | null) => string,
   pendingEraseAt: string | null | undefined,
-  graceDays: number | null,
+  // A unit-aware window is preferred (exact month/workday arithmetic); a bare day count still works.
+  graceWindow: GraceWindow | number | null,
 ): string {
-  const around = eraseAroundDate(pendingEraseAt, graceDays)
+  const around = eraseAroundDate(pendingEraseAt, graceWindow)
   return [
     pendingEraseAt ? t('common:trash.pendingSince', { date: formatDate(pendingEraseAt) }) : null,
     around ? t('common:trash.eraseAround', { date: formatDate(around) }) : t('common:trash.eraseAutomatic'),

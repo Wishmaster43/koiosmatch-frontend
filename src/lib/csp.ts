@@ -31,11 +31,11 @@ function originOf(raw: string | undefined): string | null {
 /**
  * Builds the CSP directive string from the resolved env. Collects the API,
  * workflow-engine and CSRF origins (when absolute) alongside every fixed host
- * this app is known to call: OSM tiles
- * (RadiusMap.tsx), and Facebook's SDK script/graph/frame hosts (facebookSdk.ts,
- * useEmbeddedSignup.ts). Fonts are self-hosted (ONIX M-003), so no font host
- * is allowed. OpenCage geocoding goes through the backend proxy
- * (GEO-GEOCODE-SEARCH-1), so it never reaches the browser.
+ * this app is known to call: OSM tiles (RadiusMap.tsx) and Facebook's SDK
+ * script/graph/frame hosts (facebookSdk.ts, useEmbeddedSignup.ts). Fonts are
+ * self-hosted (ONIX M-003), so no font host is allowed. OpenCage geocoding goes
+ * through the backend proxy (GEO-GEOCODE-SEARCH-1), so it never reaches the
+ * browser.
  */
 export function buildCsp(env: CspEnv): string {
   // De-duplicate extra connect-src origins gathered from env + fixed hosts.

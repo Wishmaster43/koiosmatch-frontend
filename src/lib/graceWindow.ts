@@ -2,7 +2,7 @@
  * graceWindow (ONIX S-004) — the ONE deletion-grace date computation, kept pure
  * and import-light so presentational components can use it without the hook tree.
  */
-import { windowBoundaryAfter, type WindowUnit } from '@/lib/windowUnit'
+import { windowBoundaryAfter, windowDays, type WindowUnit } from '@/lib/windowUnit'
 
 // Tenant grace window as amount + unit (days/workdays/weeks/months).
 export interface GraceWindow { amount: number; unit: WindowUnit }
@@ -16,11 +16,10 @@ const GRACE_FLOOR_DAYS = 7
 export function graceBoundary(from: Date, window: GraceWindow | number): Date {
   const w: GraceWindow = typeof window === 'number' ? { amount: window, unit: 'days' } : window
   const boundary = windowBoundaryAfter(from, w.amount, w.unit)
-  const days = Math.round((boundary.getTime() - from.getTime()) / 86400000)
-  return days < GRACE_FLOOR_DAYS ? windowBoundaryAfter(from, GRACE_FLOOR_DAYS, 'days') : boundary
+  return windowDays(from, boundary, w.unit) < GRACE_FLOOR_DAYS ? windowBoundaryAfter(from, GRACE_FLOOR_DAYS, 'days') : boundary
 }
 
 // Whole days from `from` to the floored grace boundary, for consumers that only need a count.
 export function graceWindowDays(from: Date, window: GraceWindow): number {
-  return Math.round((graceBoundary(from, window).getTime() - from.getTime()) / 86400000)
+  return windowDays(from, graceBoundary(from, window), 'days')
 }

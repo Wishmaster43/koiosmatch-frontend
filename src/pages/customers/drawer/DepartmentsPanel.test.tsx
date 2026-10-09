@@ -372,7 +372,7 @@ describe('DepartmentsPanel · location name resolved from the locations prop (N-
   })
 
   it('keeps the dash when the location id is unknown', () => {
-    render(<DepartmentsPanel {...base} openId={null} onOpenChange={vi.fn()} scope="customer" departments={[department({ locationId: 'loc-x', locationName: '' })]} />)
+    render(<DepartmentsPanel {...base} openId={null} onOpenChange={vi.fn()} scope="customer" departments={[department({ locationId: 'loc-x', locationName: '', statusLabel: 'Actief' })]} />)
     // Neither known location name leaks into the row; the cell falls back to the dash.
     expect(screen.queryByText('Vestiging Noord')).not.toBeInTheDocument()
     expect(screen.queryByText('Vestiging Zuid')).not.toBeInTheDocument()

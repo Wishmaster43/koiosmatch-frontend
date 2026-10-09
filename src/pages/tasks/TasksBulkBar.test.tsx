@@ -24,7 +24,7 @@ describe('TasksBulkBar', () => {
   it('shows Archive and fires onArchive when permitted', async () => {
     const user = userEvent.setup()
     const props = { ...baseProps(), canArchive: true, canEdit: true }
-    render(<TasksBulkBar {...props} canEdit />)
+    render(<TasksBulkBar {...props} />)
     await user.click(screen.getByText('bulk.actions'))
     await user.click(screen.getByText('bulk.archive'))
     expect(props.onArchive).toHaveBeenCalledTimes(1)

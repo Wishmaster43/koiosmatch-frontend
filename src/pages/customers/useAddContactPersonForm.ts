@@ -52,6 +52,9 @@ const API_TO_FORM: Record<string, string> = {
   linkedin_slug: 'linkedin',
 }
 
+// Maps a backend 422 field key to this form's field key (identity when unmapped).
+export const formKeyForApiField = (field: string): string => API_TO_FORM[field] ?? field
+
 // VALIDATIE-LIVE-1-rest: `email` is the only contact field the backend
 // validates with a shape rule (CustomerContactController::validateContact
 // `email` => Laravel's `email` rule) — phone/mobile/linkedin_slug stay plain
@@ -206,7 +209,7 @@ export function useAddContactPersonForm({
         const dupErr = duplicateContactError(err)
         if (dupErr) {
           const holder = existing.find(c => String(c.id) === dupErr.existingId)
-          messages[dupErr.field] = holder
+          messages[formKeyForApiField(dupErr.field)] = holder
             ? t(`subModal.duplicate.${dupErr.field}`, { name: holder.name })
             : t(`subModal.duplicate.${(CONTACT_DUP_KEYS as readonly string[]).includes(dupErr.field) ? dupErr.field : 'any'}Nameless`)
         }

@@ -27,6 +27,7 @@ import { render, screen, waitFor, fireEvent } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import i18n from '@/i18n'
 import AddContactPersonModal from './AddContactPersonModal'
+import { formKeyForApiField } from './useAddContactPersonForm'
 import type { Contact, Department } from '@/types/customer'
 // SUBENTITY-IMPORT-1: only the NETWORK calls are mocked — the real wizard/steps run,
 // so these tests prove the actual wiring (dry-run-before-real-run, xlsx rejection,
@@ -838,5 +839,15 @@ describe('AddContactPersonModal · duplicate-contact 422 (N-001)', () => {
     await submitDup(reject422(true), [])
     expect(await screen.findByText(ct('subModal.duplicate.emailNameless'))).toBeInTheDocument()
     expect(screen.queryByText('contacts.duplicate.email')).not.toBeInTheDocument()
+  })
+})
+
+// Maps backend 422 field keys to the form's own field keys.
+describe('formKeyForApiField', () => {
+  it('maps renamed fields, keeps identical ones and passes unknown keys through', () => {
+    expect(formKeyForApiField('linkedin_slug')).toBe('linkedin')
+    expect(formKeyForApiField('first_name')).toBe('firstName')
+    expect(formKeyForApiField('email')).toBe('email')
+    expect(formKeyForApiField('unknown_x')).toBe('unknown_x')
   })
 })

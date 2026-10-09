@@ -239,10 +239,11 @@ function TasksPageInner({ intent }: { intent?: unknown }) {
                 {/* Bulk action bar — shown above the table when ≥1 row is selected. */}
                 {selectedIds.size > 0 && (
                   <div style={{ padding: '8px 24px', background: 'var(--bg)', borderBottom: '1px solid var(--border)', flexShrink: 0 }}>
+                    {/* canEdit reuses the same tasks.update right the BE checks for a PATCH */}
                     <TasksBulkBar count={selectedIds.size} onClear={clearSelection}
                       onSetStatus={bulkSetStatus} onSetPriority={bulkSetPriority} onSetAssignee={bulkSetAssignee}
                       onArchive={bulkArchive} canArchive={canArchive}
-                      canEdit={canArchive /* same tasks.update right the BE checks for a PATCH */}
+                      canEdit={canArchive}
                       statuses={statuses} priorities={priorities} users={users} />
                   </div>
                 )}
