@@ -7,7 +7,7 @@
  */
 import { describe, it, expect, vi, afterEach } from 'vitest'
 import { renderHook, waitFor } from '@testing-library/react'
-import { useTasksData } from './useTasksData'
+import { useTasksData, TASKS_MAX_PER_PAGE } from './useTasksData'
 import api from '@/lib/api'
 
 vi.mock('@/lib/api', async () => {
@@ -168,7 +168,7 @@ describe('useTasksData · free-text search (J013-SEARCH-1 J4)', () => {
     const { result } = renderHook(() => useTasksData({ showArchived: false, searchQuery: 'Lotte Bakker', ...lookupProps }))
     await waitFor(() => expect(result.current.loading).toBe(false))
     const call = mockedGet.mock.calls.find(c => c[0] === '/tasks')
-    expect(call?.[1]?.params).toEqual({ q: 'Lotte Bakker', per_page: 500, page: 1 })
+    expect(call?.[1]?.params).toEqual({ q: 'Lotte Bakker', per_page: TASKS_MAX_PER_PAGE, page: 1 })
   })
 
   it('rides ?q= alongside archived=1 so an archived task is searchable by name too', async () => {
@@ -176,7 +176,7 @@ describe('useTasksData · free-text search (J013-SEARCH-1 J4)', () => {
     const { result } = renderHook(() => useTasksData({ showArchived: true, searchQuery: 'Lotte Bakker', ...lookupProps }))
     await waitFor(() => expect(result.current.loading).toBe(false))
     const archivedCall = mockedGet.mock.calls.find(c => (c[1] as { params?: Record<string, unknown> })?.params?.archived)
-    expect(archivedCall?.[1]?.params).toEqual({ archived: 1, q: 'Lotte Bakker', per_page: 500, page: 1 })
+    expect(archivedCall?.[1]?.params).toEqual({ archived: 1, q: 'Lotte Bakker', per_page: TASKS_MAX_PER_PAGE, page: 1 })
   })
 
   it('refetches when the search term changes and drops ?q= again when the box is cleared', async () => {

@@ -29,6 +29,9 @@ interface Props {
   page: number
   lastPage: number
   total: number
+  // Server-reported row range for the footer (optional until the BE meta carries it).
+  rangeFrom?: number | null
+  rangeTo?: number | null
   pageSize: number
   pageSizeOptions: number[]
   onPageChange: (p: number) => void
@@ -38,7 +41,7 @@ interface Props {
 // Map view: Leaflet pane (left) + the same filtered rows as a table (right) — one radius search drives both panes.
 export default function CustomersMapPane({
   t, rows, loading, error, selectedId, onSelect, statusMeta, mapCenter, mapRadius, setMapCenter, setMapRadius,
-  page, lastPage, total, pageSize, pageSizeOptions, onPageChange, onPageSizeChange,
+  page, lastPage, total, rangeFrom, rangeTo, pageSize, pageSizeOptions, onPageChange, onPageSizeChange,
 }: Props) {
   return (
     <div style={{ flex: 1, minHeight: 0, display: 'flex', gap: 14, padding: '0 24px 16px' }}>
@@ -59,7 +62,7 @@ export default function CustomersMapPane({
           <CustomersTable rows={rows} loading={loading} selectedId={selectedId}
             onSelect={onSelect} onOpenTab={onSelect} statusMeta={statusMeta} />
         </div>
-        <PaginationBar page={page} totalPages={lastPage} totalRows={total} pageSize={pageSize}
+        <PaginationBar page={page} totalPages={lastPage} totalRows={total} rangeFrom={rangeFrom} rangeTo={rangeTo} pageSize={pageSize}
           onPageChange={onPageChange} onPageSizeChange={onPageSizeChange} pageSizeOptions={pageSizeOptions} />
       </div>
     </div>

@@ -15,6 +15,7 @@ import { useCallback, useMemo } from 'react'
 import { useQuery, useQueryClient, keepPreviousData } from '@tanstack/react-query'
 import type { TFunction } from 'i18next'
 import api, { unwrap, unwrapList } from '@/lib/api'
+import { pickListRange } from '@/lib/listRange'
 import { pickStatsScopeParams } from '@/lib/statsScopeParams'
 import { useRowsEpoch } from '@/hooks/useRowsEpoch'
 import { useListFieldSetter } from '@/hooks/useListFieldSetter'
@@ -35,17 +36,16 @@ export interface PageStats {
 }
 
 interface Args { filterParams: Record<string, unknown>; page: number; pageSize: number; t: TFunction }
-interface ListResult { customers: Customer[]; total: number; lastPage: number }
+interface ListResult { customers: Customer[]; total: number; lastPage: number; rangeFrom?: number | null; rangeTo?: number | null }
 
 // Stable empty default — a fresh `?? []` each render loops the registerFilters effect
 // (see useCandidatesData for the full note).
 const EMPTY_CUSTOMERS: Customer[] = []
 
-// CustomerController::index caps per_page at `between:1,500`. Exported so
-// CustomersPage can clamp the pageSize picker to the SAME ceiling — mirrors
-// useApplicationsData/useVacanciesData's identical constant + defensive
-// re-clamp below.
-export const CUSTOMERS_MAX_PER_PAGE = 500
+// The BE silently clamps per_page via PageSize::from(request, 25, 100) although the
+// validation rule says between:1,500. Exported so CustomersPage clamps the pageSize
+// picker to the SAME effective ceiling (50/100 offered, honestly).
+export const CUSTOMERS_MAX_PER_PAGE = 100
 
 // Composes the customers list/stats React Query data layer for the page (list, filters, pagination and the bulk-selection epoch below).
 export function useCustomersData({ filterParams, page, pageSize, t }: Args) {
@@ -62,8 +62,8 @@ export function useCustomersData({ filterParams, page, pageSize, t }: Args) {
         // caller to have done it — a 422 here is expensive to diagnose (mirrors
         // useApplicationsData/useVacanciesData's identical guard).
         const res = await api.get('/customers', { params: { ...filterParams, page, per_page: Math.min(pageSize, CUSTOMERS_MAX_PER_PAGE) }, signal })
-        const { rows, total, lastPage } = unwrapList<ApiCustomer>(res)
-        return { customers: rows.map(mapCustomer), total, lastPage }
+        const { rows, total, lastPage, from, to } = unwrapList<ApiCustomer>(res)
+        return { customers: rows.map(mapCustomer), total, lastPage, rangeFrom: from, rangeTo: to }
       } catch (err) {
         if ((err as { response?: { status?: number } })?.response?.status === 404) return { customers: [], total: 0, lastPage: 1 }
         throw err
@@ -76,6 +76,8 @@ export function useCustomersData({ filterParams, page, pageSize, t }: Args) {
   const total     = listQuery.data?.total ?? 0
   const lastPage  = listQuery.data?.lastPage ?? 1
   const loading   = listQuery.isLoading
+  // Server-reported row range for the footer (null until the BE meta carries it).
+  const { rangeFrom, rangeTo } = pickListRange(listQuery.data)
   const error     = listQuery.isError ? t('page.loadError') : null
 
   // SELECT-RACE-1 (REFRESH-FIX-2): bump epoch only when settled row-id set changes.
@@ -107,5 +109,5 @@ export function useCustomersData({ filterParams, page, pageSize, t }: Args) {
     queryClient.invalidateQueries({ queryKey: ['customers'] })
   }, [queryClient])
 
-  return { customers, setCustomers, loading, error, total, setTotal, lastPage, stats, refresh, rowsEpoch, fetching: listQuery.isFetching }
+  return { customers, setCustomers, loading, error, total, setTotal, lastPage, rangeFrom, rangeTo, stats, refresh, rowsEpoch, fetching: listQuery.isFetching }
 }

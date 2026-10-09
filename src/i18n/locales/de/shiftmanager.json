@@ -444,6 +444,7 @@
   },
   "mirror": {
     "loadError": "Die Shiftmanager-Daten konnten nicht geladen werden.",
-    "retry": "Erneut versuchen"
+    "retry": "Erneut versuchen",
+    "truncated": "Es gibt mehr Zeilen, als hier geladen werden können. Filter und Zählungen gelten nur für die geladenen Zeilen."
   }
 }

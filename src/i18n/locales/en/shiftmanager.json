@@ -444,6 +444,7 @@
   },
   "mirror": {
     "loadError": "Could not load the Shiftmanager data.",
-    "retry": "Try again"
+    "retry": "Try again",
+    "truncated": "There are more rows than can be loaded here. Filters and counts cover only the loaded rows."
   }
 }

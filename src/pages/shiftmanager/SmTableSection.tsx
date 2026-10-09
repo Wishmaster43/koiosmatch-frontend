@@ -5,6 +5,8 @@
  * children (DRY round P4 — the three pages repeated this shell verbatim).
  */
 import type { ReactNode } from 'react'
+import { useTranslation } from 'react-i18next'
+import CalloutBox from '@/components/ui/CalloutBox'
 import { SmLoadErrorBanner } from './SmLoadErrorBanner'
 import { SmPaginationBar } from './SmPaginationBar'
 
@@ -12,6 +14,8 @@ interface SmTableSectionProps {
   // Table content — each page passes its own <XTable> so this stays table-agnostic.
   children: ReactNode
   isError: boolean
+  // True when the fetch-all hit its page bound: the list is incomplete and says so.
+  truncated?: boolean
   onRetry: () => unknown
   page: number
   totalPages: number
@@ -23,13 +27,15 @@ interface SmTableSectionProps {
 }
 
 // Renders the scrollable table area (error banner + table) followed by the shared pagination bar.
-export function SmTableSection({ children, isError, onRetry, page, totalPages, totalRows, pageSize, onPageChange, setPage, setPageSize }: SmTableSectionProps) {
+export function SmTableSection({ children, truncated = false, isError, onRetry, page, totalPages, totalRows, pageSize, onPageChange, setPage, setPageSize }: SmTableSectionProps) {
+  const { t } = useTranslation('shiftmanager')
   return (
     <>
       {/* Table — shared DataTable (sticky header, sorting, soft-chip colours) */}
       <div style={{ flex: 1, overflowY: 'auto', padding: '0 24px 16px' }}>
         {/* Error state (§3): the mirror fetch failed, say so and offer a retry. */}
         <SmLoadErrorBanner isError={isError} onRetry={onRetry} />
+        {truncated && <CalloutBox variant="warning">{t('mirror.truncated')}</CalloutBox>}
         {children}
       </div>
 

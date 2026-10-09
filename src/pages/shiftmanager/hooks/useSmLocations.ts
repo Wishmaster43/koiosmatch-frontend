@@ -5,7 +5,8 @@
  * dedup + caching + auto-cancel on unmount (A-3 — replaces the raw useEffect fetch).
  */
 import { useQuery } from '@tanstack/react-query'
-import api, { unwrapList } from '@/lib/api'
+import { fetchAllPages } from '@/lib/fetchAllPages'
+import { SM_FETCH_ALL } from './smFetchAll'
 import type { SmLocationRow } from '@/types/shiftmanager'
 
 interface RawLocation {
@@ -24,13 +25,14 @@ interface RawLocation {
 // (LocationsPage's registerFilters loop — 'Maximum update depth exceeded', measured 03-09).
 const EMPTY: SmLocationRow[] = []
 
-export function useSmLocations(): { locations: SmLocationRow[]; isLoading: boolean; isError: boolean; refetch: () => void } {
+export function useSmLocations(): { locations: SmLocationRow[]; truncated: boolean; isLoading: boolean; isError: boolean; refetch: () => void } {
   // Fetch + flatten the raw rows into the shape the table renders (signal = cancel).
   const { data, isLoading, isError, refetch } = useQuery({
     queryKey: ['sm_locations'],
     queryFn: async ({ signal }) => {
-      const { rows } = unwrapList<RawLocation>(await api.get('/sm_locations', { signal }))
-      return rows.map(l => ({
+      // Full set, not one server page: the pages filter and count client-side (cap 200, bounded at 20 pages).
+      const { rows, truncated } = await fetchAllPages<RawLocation>('/sm_locations', {}, signal, SM_FETCH_ALL)
+      const mapped = rows.map(l => ({
         id:          l.id,
         name:        l.name ?? '',
         customer:    (typeof l.customer === 'object' ? l.customer?.name : l.customer) ?? '',
@@ -42,9 +44,10 @@ export function useSmLocations(): { locations: SmLocationRow[]; isLoading: boole
         departments: (l.departments ?? []).map(d => (typeof d === 'object' ? d?.name : d) ?? ''),
         shifts:      l.shift_count ?? 0,
       })) as SmLocationRow[]
+      return { rows: mapped, truncated }
     },
   })
 
   // The page owns the four UI states (§3): loading/error ride along, never swallowed.
-  return { locations: data ?? EMPTY, isLoading, isError, refetch }
+  return { locations: data?.rows ?? EMPTY, truncated: data?.truncated ?? false, isLoading, isError, refetch }
 }

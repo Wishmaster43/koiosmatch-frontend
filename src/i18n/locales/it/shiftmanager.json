@@ -447,6 +447,7 @@
   },
   "mirror": {
     "loadError": "Impossibile caricare i dati di Shiftmanager.",
-    "retry": "Riprova"
+    "retry": "Riprova",
+    "truncated": "Ci sono più righe di quante se ne possano caricare qui. Filtri e conteggi riguardano solo le righe caricate."
   }
 }

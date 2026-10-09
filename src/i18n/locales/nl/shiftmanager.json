@@ -444,6 +444,7 @@
   },
   "mirror": {
     "loadError": "Kon de Shiftmanager-gegevens niet laden.",
-    "retry": "Opnieuw proberen"
+    "retry": "Opnieuw proberen",
+    "truncated": "Er zijn meer rijen dan hier kunnen worden geladen. Filters en tellingen gelden alleen voor de geladen rijen."
   }
 }

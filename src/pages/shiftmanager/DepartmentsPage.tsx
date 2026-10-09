@@ -25,7 +25,7 @@ import { SmTableSection } from './SmTableSection'
 export default function DepartmentsPage() {
   const { t } = useTranslation('shiftmanager')
   // Data (fetch + transform) lives in the shared hook (§3).
-  const { departments, isLoading, isError, refetch } = useSmDepartments()
+  const { departments, truncated, isLoading, isError, refetch } = useSmDepartments()
   const [search,      setSearch]      = useState('')
   const { selected, setSelected, toggleSelected } = useToggleSelected<SmDepartmentRow>()
   // Shared list page-size: honours the tenant's default_per_page, sticky across navigation (§9).
@@ -102,7 +102,7 @@ export default function DepartmentsPage() {
 
       {/* DRY: this SmTableSection call mirrors Contacts/Locations verbatim — it IS the
           shared component's full prop contract; only the table inside differs. */}
-      <SmTableSection isError={isError} onRetry={refetch} page={page} totalPages={totalPages}
+      <SmTableSection truncated={truncated} isError={isError} onRetry={refetch} page={page} totalPages={totalPages}
         totalRows={filtered.length} pageSize={pageSize} onPageChange={setPage} setPage={setPage} setPageSize={setPageSize}>
         <DepartmentsTable rows={paged} loading={isLoading} selectedId={selected?.id} onSelect={toggleSelected} />
       </SmTableSection>

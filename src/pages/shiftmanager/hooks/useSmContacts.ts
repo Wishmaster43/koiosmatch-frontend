@@ -5,7 +5,8 @@
  * caching + auto-cancel on unmount (A-3 — replaces the raw useEffect fetch).
  */
 import { useQuery } from '@tanstack/react-query'
-import api, { unwrapList } from '@/lib/api'
+import { fetchAllPages } from '@/lib/fetchAllPages'
+import { SM_FETCH_ALL } from './smFetchAll'
 import type { SmContactRow } from '@/types/shiftmanager'
 
 interface RawContact {
@@ -23,13 +24,14 @@ interface RawContact {
 // (LocationsPage's registerFilters loop — 'Maximum update depth exceeded', measured 03-09).
 const EMPTY: SmContactRow[] = []
 
-export function useSmContacts(): { contacts: SmContactRow[]; isLoading: boolean; isError: boolean; refetch: () => void } {
+export function useSmContacts(): { contacts: SmContactRow[]; truncated: boolean; isLoading: boolean; isError: boolean; refetch: () => void } {
   // Fetch + flatten the raw rows into the shape the table renders (signal = cancel).
   const { data, isLoading, isError, refetch } = useQuery({
     queryKey: ['sm_contacts'],
     queryFn: async ({ signal }) => {
-      const { rows } = unwrapList<RawContact>(await api.get('/sm_contacts', { signal }))
-      return rows.map(c => ({
+      // Full set, not one server page: the pages filter and count client-side (cap 200, bounded at 20 pages).
+      const { rows, truncated } = await fetchAllPages<RawContact>('/sm_contacts', {}, signal, SM_FETCH_ALL)
+      const mapped = rows.map(c => ({
         id:             c.id,
         firstname:      c.first_name ?? c.firstname ?? '',
         lastname:       c.last_name ?? c.lastname ?? '',
@@ -40,9 +42,10 @@ export function useSmContacts(): { contacts: SmContactRow[]; isLoading: boolean;
         mobile:         c.mobile ?? '',
         planning:       !!c.planning,
       })) as SmContactRow[]
+      return { rows: mapped, truncated }
     },
   })
 
   // The page owns the four UI states (§3): loading/error ride along, never swallowed.
-  return { contacts: data ?? EMPTY, isLoading, isError, refetch }
+  return { contacts: data?.rows ?? EMPTY, truncated: data?.truncated ?? false, isLoading, isError, refetch }
 }

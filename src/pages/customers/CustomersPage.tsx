@@ -180,7 +180,7 @@ export default function CustomersPage({ intent }: { intent?: CustomerIntent } = 
   }
 
   // ── Data layer (§3): list/stats · record/drawer · bulk actions ──
-  const { customers, setCustomers, loading, error, total, setTotal, lastPage, stats, refresh, rowsEpoch, fetching } =
+  const { customers, setCustomers, loading, error, total, setTotal, lastPage, rangeFrom, rangeTo, stats, refresh, rowsEpoch, fetching } =
     useCustomersData({ filterParams, page, pageSize, t })
 
   // SELECT-RACE-1: rowsEpoch (bumped only when a NEW server result actually
@@ -327,7 +327,7 @@ export default function CustomersPage({ intent }: { intent?: CustomerIntent } = 
                       stickyHeader scrollParentRef={tableScrollRef} />
                   </div>
 
-                  <PaginationBar page={page} totalPages={lastPage} totalRows={total} pageSize={pageSize}
+                  <PaginationBar page={page} totalPages={lastPage} totalRows={total} rangeFrom={rangeFrom} rangeTo={rangeTo} pageSize={pageSize}
                     onPageChange={setPage} onPageSizeChange={s => { setPageSize(s); setPage(1) }} pageSizeOptions={pageSizeOptions} />
                 </>
               ),
@@ -339,7 +339,7 @@ export default function CustomersPage({ intent }: { intent?: CustomerIntent } = 
                   t={t} rows={visibleRows} loading={loading} error={error} selectedId={selected?.id}
                   onSelect={selectCustomer} statusMeta={statusMeta}
                   mapCenter={mapCenter} mapRadius={mapRadius} setMapCenter={setMapCenter} setMapRadius={setMapRadius}
-                  page={page} lastPage={lastPage} total={total} pageSize={pageSize} pageSizeOptions={pageSizeOptions}
+                  page={page} lastPage={lastPage} total={total} rangeFrom={rangeFrom} rangeTo={rangeTo} pageSize={pageSize} pageSizeOptions={pageSizeOptions}
                   onPageChange={setPage} onPageSizeChange={s => { setPageSize(s); setPage(1) }}
                 />
               ),

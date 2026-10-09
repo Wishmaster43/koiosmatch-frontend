@@ -5,7 +5,7 @@
  * (measured on #shiftmanager.locations-table, 03-09).
  */
 import { describe, it, expect, vi } from 'vitest'
-import { renderHook } from '@testing-library/react'
+import { renderHook, waitFor } from '@testing-library/react'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import type { ReactNode } from 'react'
 import { useSmLocations } from './useSmLocations'
@@ -27,5 +27,17 @@ describe('useSmLocations', () => {
     rerender()
     expect(result.current.locations).toBe(first)
     expect(first).toEqual([])
+  })
+})
+
+describe('useSmLocations · full set', () => {
+  it('merges two server pages (per_page 200) and reports not truncated', async () => {
+    const api = (await import('@/lib/api')).default
+    const row = (id: number, last: number) => ({ data: { data: [{ id, name: `L${id}` }], meta: { total: 2, current_page: id, last_page: last, per_page: 200 } } })
+    vi.mocked(api.get).mockImplementation(((_u: string, c: { params?: { page?: number } }) => Promise.resolve(row(c?.params?.page ?? 1, 2))) as never)
+    const { result } = renderHook(() => useSmLocations(), { wrapper })
+    await waitFor(() => expect(result.current.locations).toHaveLength(2))
+    expect(result.current.truncated).toBe(false)
+    expect(vi.mocked(api.get).mock.calls[0][1]).toMatchObject({ params: { per_page: 200 } })
   })
 })

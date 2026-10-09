@@ -106,3 +106,34 @@ describe('fetchAllPages', () => {
     expect(api.get).toHaveBeenCalledWith('/test', expect.objectContaining({ signal }))
   })
 })
+
+describe('fetchAllPages · options (perPage / maxPages / truncated)', () => {
+  beforeEach(() => { vi.mocked(api.get).mockReset() })
+  const pageOf = (n: number, last: number) => Promise.resolve({
+    data: { data: [{ id: n }], meta: { total: last, current_page: n, per_page: 200, last_page: last } },
+  })
+
+  it('sends the requested per_page on every request and merges three pages', async () => {
+    vi.mocked(api.get).mockImplementation((_p: unknown, c: unknown) => pageOf(Number(((c as AxiosRequestConfig).params as { page?: number }).page ?? 1), 3))
+    const res = await fetchAllPages<{ id: number }>('/sm_contacts', { q: 'x' }, undefined, { perPage: 200, maxPages: 20 })
+    expect(res.rows.map(r => r.id)).toEqual([1, 2, 3])
+    expect(res.truncated).toBe(false)
+    for (const call of vi.mocked(api.get).mock.calls) {
+      expect(call[0]).toBe('/sm_contacts')
+      expect((call[1] as AxiosRequestConfig).params).toMatchObject({ q: 'x', per_page: 200 })
+    }
+  })
+
+  it('stops at maxPages and flags the result truncated', async () => {
+    vi.mocked(api.get).mockImplementation((_p: unknown, c: unknown) => pageOf(Number(((c as AxiosRequestConfig).params as { page?: number }).page ?? 1), 5))
+    const res = await fetchAllPages<{ id: number }>('/x', {}, undefined, { maxPages: 2 })
+    expect(res.rows).toHaveLength(2)
+    expect(res.truncated).toBe(true)
+    expect(vi.mocked(api.get)).toHaveBeenCalledTimes(2)
+  })
+
+  it('one page is not truncated', async () => {
+    vi.mocked(api.get).mockImplementation(() => pageOf(1, 1))
+    expect((await fetchAllPages('/x')).truncated).toBe(false)
+  })
+})

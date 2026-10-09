@@ -5,7 +5,8 @@
  * dedup + caching + auto-cancel on unmount (A-3 — replaces the raw useEffect fetch).
  */
 import { useQuery } from '@tanstack/react-query'
-import api, { unwrapList } from '@/lib/api'
+import { fetchAllPages } from '@/lib/fetchAllPages'
+import { SM_FETCH_ALL } from './smFetchAll'
 import type { SmDepartmentRow } from '@/types/shiftmanager'
 
 interface RawDepartment {
@@ -25,13 +26,14 @@ interface RawDepartment {
 // (LocationsPage's registerFilters loop — 'Maximum update depth exceeded', measured 03-09).
 const EMPTY: SmDepartmentRow[] = []
 
-export function useSmDepartments(): { departments: SmDepartmentRow[]; isLoading: boolean; isError: boolean; refetch: () => void } {
+export function useSmDepartments(): { departments: SmDepartmentRow[]; truncated: boolean; isLoading: boolean; isError: boolean; refetch: () => void } {
   // Fetch + flatten the raw rows into the shape the table renders (signal = cancel).
   const { data, isLoading, isError, refetch } = useQuery({
     queryKey: ['sm_departments'],
     queryFn: async ({ signal }) => {
-      const { rows } = unwrapList<RawDepartment>(await api.get('/sm_departments', { signal }))
-      return rows.map(d => ({
+      // Full set, not one server page: the pages filter and count client-side (cap 200, bounded at 20 pages).
+      const { rows, truncated } = await fetchAllPages<RawDepartment>('/sm_departments', {}, signal, SM_FETCH_ALL)
+      const mapped = rows.map(d => ({
         id:         d.id,
         name:       d.name ?? '',
         customer:   (typeof d.customer === 'object' ? d.customer?.name : d.customer) ?? '',
@@ -44,9 +46,10 @@ export function useSmDepartments(): { departments: SmDepartmentRow[]; isLoading:
         employees:  d.employee_count ?? 0,
         shifts:     d.shift_count ?? 0,
       })) as SmDepartmentRow[]
+      return { rows: mapped, truncated }
     },
   })
 
   // The page owns the four UI states (§3): loading/error ride along, never swallowed.
-  return { departments: data ?? EMPTY, isLoading, isError, refetch }
+  return { departments: data?.rows ?? EMPTY, truncated: data?.truncated ?? false, isLoading, isError, refetch }
 }

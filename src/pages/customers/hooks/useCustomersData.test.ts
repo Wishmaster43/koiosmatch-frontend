@@ -210,3 +210,17 @@ describe('useCustomersData · rowsEpoch (SELECT-RACE-1)', () => {
     expect(result.current.rowsEpoch).toBe(0)
   })
 })
+
+// N-010: the footer range comes from the server meta, never from the requested size.
+describe('useCustomersData · server range (N-010)', () => {
+  it('returns meta.from/to as rangeFrom/rangeTo and caps the request at 100', async () => {
+    vi.mocked(api.get).mockImplementation((url: string) =>
+      url === '/customers/stats' ? Promise.resolve({ data: { data: null } })
+        : Promise.resolve({ data: { data: [], meta: { total: 104, current_page: 2, last_page: 2, per_page: 100, from: 101, to: 104 } } }))
+    const { result } = renderHook(() => useCustomersData({ filterParams: {}, page: 2, pageSize: 500, t }), { wrapper })
+    await waitFor(() => expect(result.current.rangeFrom).toBe(101))
+    expect(result.current.rangeTo).toBe(104)
+    const call = vi.mocked(api.get).mock.calls.find(([url]) => url === '/customers')
+    expect((call?.[1]?.params as { per_page?: number }).per_page).toBe(100)
+  })
+})

@@ -16,7 +16,8 @@
 import { useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { useTranslation } from 'react-i18next'
-import api, { unwrapList } from '@/lib/api'
+import api from '@/lib/api'
+import { fetchAllPages } from '@/lib/fetchAllPages'
 import { notifyError } from '@/lib/notify'
 import { extractApiError } from '@/lib/extractApiError'
 import type { Candidate, CandidateBranch } from '@/types/candidate'
@@ -37,7 +38,8 @@ function useBranchLocationOptions(): BranchOption[] {
   const { data = [] } = useQuery({
     queryKey: ['locations', 'branch-options'],
     queryFn: async ({ signal }): Promise<BranchOption[]> => {
-      const rows = unwrapList<LocationLite>(await api.get('/locations', { signal })).rows
+      // LocationController clamps per_page at 100: fetch every page so >50 branches keep their options.
+      const rows = (await fetchAllPages<LocationLite>('/locations', {}, signal, { perPage: 100 })).rows
       return rows
         .map(l => { const name = String(l.name ?? l.id ?? ''); return { value: String(l.id ?? name), label: name } })
         .filter(o => o.value && o.label)

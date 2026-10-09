@@ -10,7 +10,7 @@
  * proposal simply falls through to the next default source (no crash, honest).
  */
 import { useQuery } from '@tanstack/react-query'
-import api, { unwrapList } from '@/lib/api'
+import { fetchAllPages } from '@/lib/fetchAllPages'
 import type { Id } from '@/types/common'
 
 export interface LocationOption { value: Id; label: string; is_default?: boolean }
@@ -23,7 +23,8 @@ export function useLocations(): LocationOption[] {
   const { data } = useQuery({
     queryKey: ['locations', 'options'],
     queryFn: async ({ signal }) => {
-      const { rows } = unwrapList<{ id?: Id; name?: string; is_default?: boolean }>(await api.get('/locations', { signal }))
+      // LocationController clamps per_page at 100: fetch every page so >50 branches keep their options.
+      const { rows } = await fetchAllPages<{ id?: Id; name?: string; is_default?: boolean }>('/locations', {}, signal, { perPage: 100 })
       return rows.map(l => ({ value: l.id ?? '', label: l.name ?? '', is_default: Boolean(l.is_default) })) as LocationOption[]
     },
   })

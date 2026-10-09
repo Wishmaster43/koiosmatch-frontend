@@ -23,7 +23,7 @@ import { SmTableSection } from './SmTableSection'
 export default function LocationsPage() {
   const { t } = useTranslation('shiftmanager')
   // Data (fetch + transform) lives in the shared hook (§3).
-  const { locations, isLoading, isError, refetch } = useSmLocations()
+  const { locations, truncated, isLoading, isError, refetch } = useSmLocations()
   const [search]                  = useState('')
   const { selected, setSelected, toggleSelected } = useToggleSelected<SmLocationRow>()
   const [selStatuses,  setSelStatuses]  = useState<string[]>([])
@@ -92,7 +92,7 @@ export default function LocationsPage() {
       {/* KPI strip — shared SmKpiStrip (§3 consolidation) */}
       <SmKpiStrip kpis={kpis} />
 
-      <SmTableSection isError={isError} onRetry={refetch} page={page} totalPages={totalPages}
+      <SmTableSection truncated={truncated} isError={isError} onRetry={refetch} page={page} totalPages={totalPages}
         totalRows={filtered.length} pageSize={pageSize} onPageChange={setPage} setPage={setPage} setPageSize={setPageSize}>
         <LocationsTable rows={paged} loading={isLoading} selectedId={selected?.id} onSelect={toggleSelected} />
       </SmTableSection>

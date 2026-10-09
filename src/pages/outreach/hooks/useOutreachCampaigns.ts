@@ -37,7 +37,8 @@ export interface Campaign {
 // and OutreachPage had no PaginationBar at all to reveal the truncation (mirrors the
 // "84 vs 25" bug useMatches.ts already fixed for matches). Now fetches the FULL set
 // via a page loop, safety-capped at 5 pages (1000 rows), same scale as useMatches.
-export const OUTREACH_MAX_PER_PAGE = 500
+// BE silently clamps per_page via PageSize::from(request, 25, 100) (validation says 500): request the effective cap.
+export const OUTREACH_MAX_PER_PAGE = 100
 const OUTREACH_MAX_PAGES = 5
 
 // Loads the full campaign list (paging past the server's per-page cap, see

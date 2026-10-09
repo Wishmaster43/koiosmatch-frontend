@@ -23,7 +23,7 @@ import { SmTableSection } from './SmTableSection'
 export default function ContactsPage() {
   const { t } = useTranslation('shiftmanager')
   // Data (fetch + transform) lives in the shared hook (§3).
-  const { contacts, isLoading, isError, refetch } = useSmContacts()
+  const { contacts, truncated, isLoading, isError, refetch } = useSmContacts()
   const [search]                      = useState('')
   const { selected, setSelected, toggleSelected } = useToggleSelected<SmContactRow>()
   const [selCustomers,  setSelCustomers]  = useState<string[]>([])
@@ -91,7 +91,7 @@ export default function ContactsPage() {
         ))}
       </div>
 
-      <SmTableSection isError={isError} onRetry={refetch} page={page} totalPages={totalPages}
+      <SmTableSection truncated={truncated} isError={isError} onRetry={refetch} page={page} totalPages={totalPages}
         totalRows={filtered.length} pageSize={pageSize} onPageChange={setPage} setPage={setPage} setPageSize={setPageSize}>
         <ContactsTable rows={paged} loading={isLoading} selectedId={selected?.id} onSelect={toggleSelected} />
       </SmTableSection>
