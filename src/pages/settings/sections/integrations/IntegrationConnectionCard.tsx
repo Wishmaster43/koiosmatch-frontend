@@ -31,6 +31,8 @@ import CalloutBox from '@/components/ui/CalloutBox'
 import Spinner from '@/components/ui/Spinner'
 import { PageTitle, Caption, BodyText, GroupLabel, captionStyle } from '@/components/ui/typography'
 import { fieldInputStyle } from '@/components/forms/fieldMetrics'
+import { useSmLastSync } from '@/components/shiftmanager/useSmLastSync'
+import { useDateFormat } from '@/lib/datetime'
 import { notifyError } from '@/lib/notify'
 import { extractApiError } from '@/lib/extractApiError'
 import IntegrationTestResults, { type TestOutcome } from './IntegrationTestResults'
@@ -135,6 +137,9 @@ function renderFieldsWithGroups(
 // optimistic save with revert on failure, and the live "test connection" action.
 export default function IntegrationConnectionCard({ connector }: { connector: ConnectorId }) {
   const { t } = useTranslation('settings')
+  const { formatDateTime } = useDateFormat()
+  // Shiftmanager only: the mirror's last sync time (no dashboard GET for other connectors).
+  const smLastSync = useSmLastSync(connector === 'shiftmanager')
   const [settings, setSettings] = useState<WorkingSettings | null>(null)
   const [initial, setInitial] = useState<WorkingSettings | null>(null)
   const [secrets, setSecrets] = useState<Record<string, SecretState>>({})
@@ -286,6 +291,14 @@ export default function IntegrationConnectionCard({ connector }: { connector: Co
           return name ? t('integrations.connection.connectedAs', { name }) : t('integrations.connection.notConnected')
         })()}
       </Caption>
+      {/* ONIX G-012: a saved Shiftmanager connection is "not active yet" until a sync ran. */}
+      {connector === 'shiftmanager' && (settings.connected_as || settings.has_api_key || settings.has_auth_token) && (
+        <Caption as="p" style={{ marginTop: 2 }}>
+          {smLastSync
+            ? t('integrations.connection.lastSyncedAt', { date: formatDateTime(smLastSync) })
+            : t('integrations.connection.notActiveYet')}
+        </Caption>
+      )}
 
       <div style={{ display: 'flex', flexDirection: 'column', gap: 16, margin: '16px 0 20px' }}>
         {renderFieldsWithGroups(visibleSpec, hasSmCreds2, t, (field) => {

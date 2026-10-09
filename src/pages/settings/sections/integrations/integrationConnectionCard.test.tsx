@@ -16,6 +16,10 @@ import {
   testIntegration,
 } from './integrationsApi'
 
+// The dashboard sync lookup is mocked: no QueryClient, no network.
+const mockSync = vi.fn()
+vi.mock('@/components/shiftmanager/useSmLastSync', () => ({ useSmLastSync: (enabled: boolean) => mockSync(enabled) }))
+
 vi.mock('./integrationsApi', () => ({
   getIntegrationSettings: vi.fn(),
   putIntegrationSettings: vi.fn(),
@@ -366,5 +370,32 @@ describe('SM-CREDS-2 dual credentials', () => {
     await user.click(screen.getByRole('button', { name: t('integrations.connection.testBoth') }))
     const matches = await screen.findAllByText(t('integrations.connection.testOk', { name: 'Bureau Z' }))
     expect(matches.length).toBeGreaterThan(0)
+  })
+})
+
+describe('Shiftmanager sync status line (ONIX G-012)', () => {
+  it('saved connection and no sync yet: shows "not active yet"', async () => {
+    mockSync.mockReturnValue(null)
+    mockGet.mockResolvedValue({ two_way: true, base_url: 'https://sm.example', has_api_key: true, connected_as: null })
+    await renderCard('shiftmanager')
+    expect(screen.getByText(t('integrations.connection.notActiveYet'))).toBeInTheDocument()
+    expect(mockSync).toHaveBeenCalledWith(true)
+  })
+
+  it('saved connection with a sync timestamp: shows the formatted time instead', async () => {
+    mockSync.mockReturnValue('2026-10-09T12:30:00')
+    mockGet.mockResolvedValue({ two_way: true, base_url: 'https://sm.example', has_api_key: true, connected_as: 'Bureau X' })
+    await renderCard('shiftmanager')
+    expect(screen.queryByText(t('integrations.connection.notActiveYet'))).not.toBeInTheDocument()
+    expect(screen.getByText(/09-10-2026 12:30/)).toBeInTheDocument()
+  })
+
+  it('helloflex renders neither line and does not enable the lookup', async () => {
+    mockSync.mockReturnValue(null)
+    mockGet.mockResolvedValue({ two_way: false, environment: 'uat', client_id: 'c', has_client_secret: true, connected_as: 'X' })
+    await renderCard('helloflex')
+    expect(screen.queryByText(t('integrations.connection.notActiveYet'))).not.toBeInTheDocument()
+    expect(screen.queryByText(/09-10-2026/)).not.toBeInTheDocument()
+    expect(mockSync).toHaveBeenCalledWith(false)
   })
 })

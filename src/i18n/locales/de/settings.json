@@ -4657,6 +4657,8 @@
       "twoWayHint": "Änderungen fließen in beide Richtungen, sobald die Synchronisierung live ist.",
       "connectedAs": "Verbunden als {{name}}",
       "notConnected": "Noch nicht verbunden",
+      "notActiveYet": "Noch nicht aktiv: Es wurde noch keine Synchronisierung durchgeführt.",
+      "lastSyncedAt": "Zuletzt synchronisiert am {{date}}",
       "baseUrl": "Basis-URL",
       "apiKey": "API-Schlüssel",
       "clientId": "Client-ID",

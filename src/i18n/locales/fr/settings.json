@@ -4657,6 +4657,8 @@
       "twoWayHint": "Les modifications circulent dans les deux sens dès que la synchronisation est active.",
       "connectedAs": "Connecté en tant que {{name}}",
       "notConnected": "Pas encore connecté",
+      "notActiveYet": "Pas encore actif : aucune synchronisation n’a encore été effectuée.",
+      "lastSyncedAt": "Dernière synchronisation le {{date}}",
       "baseUrl": "URL de base",
       "apiKey": "Clé API",
       "clientId": "ID client",
