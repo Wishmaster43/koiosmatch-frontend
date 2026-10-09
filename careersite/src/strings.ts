@@ -129,7 +129,7 @@ export const strings = {
       'Ik ga akkoord dat mijn gegevens worden gebruikt om mijn sollicitatie te behandelen. Zie de privacyverklaring van deze werkgever.',
     submit: 'Verstuur sollicitatie',
     submitting: 'Versturen…',
-    success: (reference: string) => `Bedankt voor je sollicitatie! Referentie: ${reference}`,
+    success: 'Bedankt voor je sollicitatie! We nemen zo snel mogelijk contact met je op.',
     errorGeneric: 'Versturen is niet gelukt. Probeer het later opnieuw.',
     validation: {
       required: 'Dit veld is verplicht.',

@@ -1,3 +1,5 @@
+import { DUPLICATE_CONTACT_ID_KEY } from './duplicateContactError'
+
 /**
  * extractFormErrors — map a Laravel 422 validation bag onto the form's own field keys
  * (snake_case API key → camelCase form key via the caller's API_TO_FORM map). Returns
@@ -31,6 +33,8 @@ export function extractFormErrorsWithMessages(
   const errors: Record<string, boolean> = {}
   const messages: Record<string, string> = {}
   Object.entries(apiErrors).forEach(([key, value]) => {
+    // N-001: the existing-contact id is metadata, never a field error.
+    if (key === DUPLICATE_CONTACT_ID_KEY) return
     const field = apiToForm[key] ?? key
     errors[field] = true
     const msg = Array.isArray(value) ? value[0] : value
@@ -56,6 +60,7 @@ export function unmappedFormErrors(
   const rendered = renderedKeys ? new Set(renderedKeys) : null
   return Object.entries(apiErrors)
     .filter(([key]) => {
+      if (key === DUPLICATE_CONTACT_ID_KEY) return false
       if (apiToForm[key] !== undefined) return false
       return rendered ? !rendered.has(key) : key.includes('.')
     })

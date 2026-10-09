@@ -811,3 +811,32 @@ describe('AddContactPersonModal · unmapped 422 key (ONIX N-005)', () => {
     expect(await screen.findByText(common('validation.fieldRequiredNamed', { field: 'vog' }))).toBeInTheDocument()
   })
 })
+
+// ONIX N-001: the BE's duplicate-contact 422 reads as a sentence, never the raw key.
+describe('AddContactPersonModal · duplicate-contact 422 (N-001)', () => {
+  const reject422 = (withId: boolean) => {
+    const errors: Record<string, string[]> = { email: ['contacts.duplicate.email'] }
+    if (withId) errors.duplicate_contact_id = ['c-other']
+    return vi.fn().mockRejectedValue({ response: { status: 422, data: { errors } } })
+  }
+  const submitDup = async (onCreate: ReturnType<typeof vi.fn>, existing: Contact[]) => {
+    const user = userEvent.setup()
+    render(<AddContactPersonModal onClose={() => {}} onCreate={onCreate} locations={locations} statuses={statuses} existing={existing} />)
+    await user.type(screen.getByLabelText(ct('subModal.firstName'), { exact: false }), 'Jan')
+    await user.type(screen.getByLabelText(ct('subModal.lastName'), { exact: false }), 'Jansen')
+    await user.click(screen.getByRole('button', { name: ct('subModal.create') }))
+  }
+
+  it('names the existing contact when its id is among the loaded contacts', async () => {
+    await submitDup(reject422(true), [contact({ id: 'c-other', name: 'Anna Bakker' })])
+    expect(await screen.findByText(ct('subModal.duplicate.email', { name: 'Anna Bakker' }))).toBeInTheDocument()
+    expect(screen.queryByText('contacts.duplicate.email')).not.toBeInTheDocument()
+    expect(screen.queryByText('c-other')).not.toBeInTheDocument()
+  })
+
+  it('falls back to the nameless sentence when the id is not loaded', async () => {
+    await submitDup(reject422(true), [])
+    expect(await screen.findByText(ct('subModal.duplicate.emailNameless'))).toBeInTheDocument()
+    expect(screen.queryByText('contacts.duplicate.email')).not.toBeInTheDocument()
+  })
+})

@@ -818,7 +818,11 @@
     "duplicate": {
       "email": "Bestaat al: {{name}} heeft dit e-mailadres",
       "phone": "Bestaat al: {{name}} heeft dit telefoonnummer",
-      "mobile": "Bestaat al: {{name}} heeft dit mobiele nummer"
+      "mobile": "Bestaat al: {{name}} heeft dit mobiele nummer",
+      "emailNameless": "Bestaat al: een contactpersoon heeft dit e-mailadres",
+      "phoneNameless": "Bestaat al: een contactpersoon heeft dit telefoonnummer",
+      "mobileNameless": "Bestaat al: een contactpersoon heeft dit mobiele nummer",
+      "anyNameless": "Bestaat al: een contactpersoon heeft deze gegevens"
     },
     "primaryReplace": {
       "title": "Primair contact vervangen?",

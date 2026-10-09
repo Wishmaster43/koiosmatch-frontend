@@ -45,7 +45,7 @@ const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
 // box alone never "unlocks" anything; submitting without a required one blocks
 // before any request is sent (CLAUDE.md §8).
 export function ApplyForm({ tenant, reference, applicationSettings }: ApplyFormProps) {
-  const { status, errorMessage, reference: appliedReference, submit } = useApplySubmit(tenant, reference)
+  const { status, errorMessage, submit } = useApplySubmit(tenant, reference)
   const [personal, setPersonal] = useState<PersonalFieldsValues>({
     firstName: '',
     lastName: '',
@@ -74,7 +74,7 @@ export function ApplyForm({ tenant, reference, applicationSettings }: ApplyFormP
   if (status === 'success') {
     return (
       <p className="state-notice state-notice--success" role="status">
-        {strings.apply.success(appliedReference ?? '')}
+        {strings.apply.success}
       </p>
     )
   }

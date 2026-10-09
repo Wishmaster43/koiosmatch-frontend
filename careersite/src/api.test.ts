@@ -185,4 +185,11 @@ describe('api client — request construction', () => {
     mockFetch.mockResolvedValue(mockJsonResponse('secret internal error trace', 500))
     await expect(fetchSite('acme')).rejects.toMatchObject({ status: 500 })
   })
+
+  it('applyToVacancy accepts a success body without a reference (N-011)', async () => {
+    vi.mocked(fetch).mockResolvedValue(mockJsonResponse({ status: 'applied' }, 201))
+    const res = await applyToVacancy('acme', 'REF-1', { first_name: 'Jane', last_name: 'Doe', email: 'jane@example.com', phone: '0612345678', website: '' })
+    expect(res.status).toBe('applied')
+    expect(res.reference).toBeUndefined()
+  })
 })

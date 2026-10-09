@@ -19,6 +19,7 @@ import { useSubEntitySave } from './hooks/useSubEntitySave'
 import { extractFormErrorsWithMessages, unmappedFormErrors } from '@/lib/extractFormErrors'
 // ONIX N-005: a 422 key no rendered field maps to still lands somewhere.
 import { formatUnmappedErrors } from '@/lib/formatUnmappedErrors'
+import { duplicateContactError } from '@/lib/duplicateContactError'
 import { useSubEntityDuplicateGuard } from './addmodal/useSubEntityDuplicateGuard'
 // ONIX N-005: the entity's REQUIRED tenant custom fields.
 import { requiredCustomFieldKeys, isRequiredCustomField, isCustomFieldFilled, requiredCustomFieldErrors } from '@/components/forms/requiredCustomFields'
@@ -200,7 +201,16 @@ export function useAddContactPersonForm({
       const fieldErrors = extractFormErrorsWithMessages(err, API_TO_FORM)
       if (fieldErrors) {
         setErrors(fieldErrors.errors)
-        setFieldMessages(fieldErrors.messages)
+        // N-001: a duplicate-contact 422 reads as the same sentence as the live guard, never the raw key.
+        const messages = { ...fieldErrors.messages }
+        const dupErr = duplicateContactError(err)
+        if (dupErr) {
+          const holder = existing.find(c => String(c.id) === dupErr.existingId)
+          messages[dupErr.field] = holder
+            ? t(`subModal.duplicate.${dupErr.field}`, { name: holder.name })
+            : t(`subModal.duplicate.${(CONTACT_DUP_KEYS as readonly string[]).includes(dupErr.field) ? dupErr.field : 'any'}Nameless`)
+        }
+        setFieldMessages(messages)
         // A bag key no rendered field maps to (e.g. a required custom field) would
         // otherwise silently fail — surface it as a banner alongside the field flags.
         // ONIX N-005: a dotted custom_fields.* key this card already shows never also hits the generic banner.

@@ -27,7 +27,7 @@
  * unlike a contact, it can never be "uncoupled" to none; there is no couple/uncouple
  * action here, only move (via the detail's own location picker).
  */
-import { useState, type ComponentType } from 'react'
+import { useMemo, useState, type ComponentType } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Building, Archive } from 'lucide-react'
 import { useAuth } from '@/context/AuthContext'
@@ -114,6 +114,9 @@ export default function DepartmentsPanel({
   // RIGHTS-GATE-OPENERS-1: mirrors customers.update permission (backend: customers.php:228 POST /customers/{id}/departments).
   const canAddDepartment = (useAuth() as unknown as { hasPermission?: (p: string) => boolean })?.hasPermission?.('customers.update') ?? false
   const [search, setSearch] = useState('')
+  // N-015: the API sends the location id only, so resolve the display name from the loaded locations.
+  const locationNameById = useMemo(() => Object.fromEntries(locations.map(l => [String(l.id), l.name])), [locations])
+  const locationLabel = (d: Department) => d.locationName || locationNameById[String(d.locationId)] || ''
   const [adding, setAdding] = useState(false)
   // ARCHIVE-SUBENTITY-1: "Gearchiveerd" quick-view — REPLACES the live rows with the
   // archived-only sub-fetch (mutually exclusive lens); `active` gates the fetch
@@ -156,11 +159,11 @@ export default function DepartmentsPanel({
         </div>
       ) },
     ...(scope === 'customer' ? [{
-      key: 'location', header: t('departments.col.location'), sortable: true, sortValue: (d: Department) => d.locationName,
+      key: 'location', header: t('departments.col.location'), sortable: true, sortValue: (d: Department) => locationLabel(d),
       // Same tenant-configurable colour the contact list uses for its Locatie chips.
-      render: (d: Department) => !d.locationName ? '—' : colorLocationCol
-        ? <SoftChip label={d.locationName} color={chipColors.location} />
-        : <span style={plainCell}>{d.locationName}</span>,
+      render: (d: Department) => !locationLabel(d) ? '—' : colorLocationCol
+        ? <SoftChip label={locationLabel(d)} color={chipColors.location} />
+        : <span style={plainCell}>{locationLabel(d)}</span>,
     }] : []),
     { key: 'status', header: t('departments.col.status'), sortable: true, sortValue: d => d.statusLabel,
       render: d => !d.statusLabel ? '—' : colorStatusCol

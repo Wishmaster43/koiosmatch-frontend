@@ -136,5 +136,6 @@ export interface ApplyPayload {
 
 export interface ApplyResponse {
   status: 'applied'
-  reference: string
+  // Deliberately absent: the API no longer reveals whether a person already had a dossier.
+  reference?: string
 }

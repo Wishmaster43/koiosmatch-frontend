@@ -818,7 +818,11 @@
     "duplicate": {
       "email": "Esiste già: {{name}} ha questo indirizzo email",
       "phone": "Esiste già: {{name}} ha questo numero di telefono",
-      "mobile": "Esiste già: {{name}} ha questo numero di cellulare"
+      "mobile": "Esiste già: {{name}} ha questo numero di cellulare",
+      "emailNameless": "Esiste già: un contatto ha questo indirizzo email",
+      "phoneNameless": "Esiste già: un contatto ha questo numero di telefono",
+      "mobileNameless": "Esiste già: un contatto ha questo numero di cellulare",
+      "anyNameless": "Esiste già: un contatto ha questi dati"
     },
     "primaryReplace": {
       "title": "Sostituire il contatto principale?",

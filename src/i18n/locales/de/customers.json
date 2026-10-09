@@ -818,7 +818,11 @@
     "duplicate": {
       "email": "Bereits vorhanden: {{name}} hat diese E-Mail-Adresse",
       "phone": "Bereits vorhanden: {{name}} hat diese Telefonnummer",
-      "mobile": "Bereits vorhanden: {{name}} hat diese Mobilnummer"
+      "mobile": "Bereits vorhanden: {{name}} hat diese Mobilnummer",
+      "emailNameless": "Bereits vorhanden: ein Kontakt hat diese E-Mail-Adresse",
+      "phoneNameless": "Bereits vorhanden: ein Kontakt hat diese Telefonnummer",
+      "mobileNameless": "Bereits vorhanden: ein Kontakt hat diese Mobilnummer",
+      "anyNameless": "Bereits vorhanden: ein Kontakt hat diese Angaben"
     },
     "primaryReplace": {
       "title": "Hauptkontakt ersetzen?",

@@ -32,19 +32,18 @@ export interface ApplyFormValues {
 interface ApplySubmitState {
   status: ApplyStatus
   errorMessage: string | null
-  reference: string | null
 }
 
 // Wraps the apply POST with request status and a safe, translated error message —
 // the raw server error body is never surfaced to the applicant (CLAUDE.md §10).
 export function useApplySubmit(tenant: string | undefined, reference: string | undefined) {
-  const [state, setState] = useState<ApplySubmitState>({ status: 'idle', errorMessage: null, reference: null })
+  const [state, setState] = useState<ApplySubmitState>({ status: 'idle', errorMessage: null })
 
   const submit = async (values: ApplyFormValues) => {
     if (!tenant || !reference) return
-    setState({ status: 'submitting', errorMessage: null, reference: null })
+    setState({ status: 'submitting', errorMessage: null })
     try {
-      const res = await applyToVacancy(tenant, reference, {
+      await applyToVacancy(tenant, reference, {
         first_name: values.firstName,
         last_name: values.lastName,
         email: values.email,
@@ -64,9 +63,9 @@ export function useApplySubmit(tenant: string | undefined, reference: string | u
         // the api layer decides the wire format ('1'/'0'), this hook just forwards it.
         interview_consent: values.interviewConsent,
       })
-      setState({ status: 'success', errorMessage: null, reference: res.reference })
+      setState({ status: 'success', errorMessage: null })
     } catch {
-      setState({ status: 'error', errorMessage: strings.apply.errorGeneric, reference: null })
+      setState({ status: 'error', errorMessage: strings.apply.errorGeneric })
     }
   }
 

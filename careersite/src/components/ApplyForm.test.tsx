@@ -28,7 +28,8 @@ const BASE_SETTINGS: ApplicationSettings = {
 
 beforeEach(() => {
   mockedApply.mockReset()
-  mockedApply.mockResolvedValue({ status: 'applied', reference: 'APP-1' })
+  // The API deliberately sends no reference any more (N-011).
+  mockedApply.mockResolvedValue({ status: 'applied' })
 })
 
 // Fills the four required contact fields; consent/CV are each test's own concern.
@@ -57,7 +58,9 @@ describe('ApplyForm — consent gate + honeypot', () => {
     await user.click(screen.getByRole('checkbox'))
     await user.click(screen.getByRole('button', { name: strings.apply.submit }))
 
-    expect(await screen.findByText(strings.apply.success('APP-1'))).toBeTruthy()
+    expect(await screen.findByText(strings.apply.success)).toBeTruthy()
+    // N-011: the thank-you never promises a reference number.
+    expect(screen.queryByText(/Referentie/)).toBeNull()
     expect(mockedApply).toHaveBeenCalledTimes(1)
     const [tenant, reference, payload] = mockedApply.mock.calls[0]
     expect(tenant).toBe('acme')
@@ -83,7 +86,7 @@ describe('ApplyForm — consent gate + honeypot', () => {
 
     await user.click(screen.getByRole('button', { name: strings.apply.submit }))
 
-    expect(await screen.findByText(strings.apply.success('APP-1'))).toBeTruthy()
+    expect(await screen.findByText(strings.apply.success)).toBeTruthy()
     const [, , payload] = mockedApply.mock.calls[0]
     expect(payload.motivation).toBe('<p><strong>Zeer</strong> gemotiveerd</p>')
   })
@@ -138,7 +141,7 @@ describe('ApplyForm — settings-driven field visibility (formulier-v2)', () => 
     await user.click(screen.getByRole('checkbox'))
     await user.click(screen.getByRole('button', { name: strings.apply.submit }))
 
-    expect(await screen.findByText(strings.apply.success('APP-1'))).toBeTruthy()
+    expect(await screen.findByText(strings.apply.success)).toBeTruthy()
     const [, , payload] = mockedApply.mock.calls[0]
     expect(payload.motivation).toBeUndefined()
   })
@@ -198,7 +201,7 @@ describe('ApplyForm — interview consent payload (INTERVIEW-CONSENT-PERSIST-1)'
     await user.click(screen.getByRole('checkbox', { name: strings.apply.consentLabel }))
     await user.click(screen.getByRole('button', { name: strings.apply.submit }))
 
-    expect(await screen.findByText(strings.apply.success('APP-1'))).toBeTruthy()
+    expect(await screen.findByText(strings.apply.success)).toBeTruthy()
     const [, , payload] = mockedApply.mock.calls[0]
     expect(payload.interview_consent).toBe(true)
   })
@@ -212,7 +215,7 @@ describe('ApplyForm — interview consent payload (INTERVIEW-CONSENT-PERSIST-1)'
     await user.click(screen.getByRole('checkbox', { name: strings.apply.consentLabel }))
     await user.click(screen.getByRole('button', { name: strings.apply.submit }))
 
-    expect(await screen.findByText(strings.apply.success('APP-1'))).toBeTruthy()
+    expect(await screen.findByText(strings.apply.success)).toBeTruthy()
     const [, , payload] = mockedApply.mock.calls[0]
     expect(payload.interview_consent).toBe(false)
   })
@@ -226,7 +229,7 @@ describe('ApplyForm — interview consent payload (INTERVIEW-CONSENT-PERSIST-1)'
     await user.click(screen.getByRole('checkbox', { name: strings.apply.consentLabel }))
     await user.click(screen.getByRole('button', { name: strings.apply.submit }))
 
-    expect(await screen.findByText(strings.apply.success('APP-1'))).toBeTruthy()
+    expect(await screen.findByText(strings.apply.success)).toBeTruthy()
     const [, , payload] = mockedApply.mock.calls[0]
     expect(payload.interview_consent).toBeUndefined()
   })
@@ -257,7 +260,7 @@ describe('ApplyForm — payload assembly (address, remarks, phone, repeatable en
     await user.click(screen.getByRole('checkbox'))
     await user.click(screen.getByRole('button', { name: strings.apply.submit }))
 
-    expect(await screen.findByText(strings.apply.success('APP-1'))).toBeTruthy()
+    expect(await screen.findByText(strings.apply.success)).toBeTruthy()
     const [, , payload] = mockedApply.mock.calls[0]
     expect(payload.phone).toBe('+320612345678')
     expect(payload.street).toBe('Kerkstraat')
