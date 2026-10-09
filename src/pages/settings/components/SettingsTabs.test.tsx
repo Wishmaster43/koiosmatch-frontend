@@ -4,7 +4,7 @@
  * scrolled into view on mount/change, edge fades signalling more content.
  */
 import { describe, it, expect, vi } from 'vitest'
-import { act, fireEvent, render, screen } from '@testing-library/react'
+import { act, fireEvent, render, screen, waitFor } from '@testing-library/react'
 import type { SVGProps } from 'react'
 import '@/i18n'
 import SettingsTabs from './SettingsTabs'
@@ -82,13 +82,15 @@ describe('SettingsTabs · overflow handling', () => {
     expect(bare.querySelector('svg')!.style.color).toBe('')
   })
 
-  it('resolves a BE-declared icon name over the registry icon, and never recolours the icon on hover', () => {
+  it('resolves a BE-declared icon name over the registry icon, and never recolours the icon on hover', async () => {
     const RegistryIcon = (props: SVGProps<SVGSVGElement>) => <svg data-testid="icon-registry" {...props} />
     const itemOf = () => ({ id: 'a', icon: 'mail', color: 'var(--color-info)' })
     render(<SettingsTabs items={[{ id: 'a', icon: RegistryIcon }, { id: 'b', icon: RegistryIcon }]} active="b" onSelect={vi.fn()} groupKey="communication" colorOf={() => undefined} itemOf={itemOf} />)
     // The registry icon is replaced by the resolved lucide icon (Mail), not the fallback.
     expect(screen.queryByTestId('icon-registry')).not.toBeInTheDocument()
     const inactiveTab = screen.getAllByRole('tab')[0]
+    // The lazy icon arrives after its chunk resolves.
+    await waitFor(() => expect(inactiveTab.querySelector('svg')).not.toBeNull())
     const icon = inactiveTab.querySelector('svg')!
     expect(icon.style.color).toBe('var(--color-info)')
     fireEvent.mouseEnter(inactiveTab)

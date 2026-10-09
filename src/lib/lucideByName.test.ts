@@ -1,15 +1,29 @@
 import { describe, it, expect } from 'vitest'
-import { Circle, Building2, SlidersHorizontal, BarChart3 } from 'lucide-react'
-import { lucideByName } from './lucideByName'
+import { createElement } from 'react'
+import { render, screen, waitFor } from '@testing-library/react'
+import { Circle } from 'lucide-react'
+import { lucideByName, lucideWrapperCache } from './lucideByName'
 
 describe('lucideByName', () => {
-  it('resolves kebab-case contract names, including digits, and falls back on unknown or empty', () => {
-    // lucide's `icons` map and its named exports are separate component objects with the
-    // same displayName, so the identity check runs on the name.
-    expect(lucideByName('building-2', Circle).displayName).toBe(Building2.displayName)
-    expect(lucideByName('sliders-horizontal', Circle).displayName).toBe(SlidersHorizontal.displayName)
-    expect(lucideByName('bar-chart-3', Circle).displayName).toBe(BarChart3.displayName)
+  it('falls back synchronously on unknown, empty or null names', () => {
     expect(lucideByName('no-such-icon-xyz', Circle)).toBe(Circle)
+    expect(lucideByName('', Circle)).toBe(Circle)
     expect(lucideByName(null, Circle)).toBe(Circle)
+  })
+
+  it('returns one cached wrapper per slug, alias names included', () => {
+    const a = lucideByName('bar-chart-3', Circle)
+    expect(a).not.toBe(Circle)
+    expect(lucideByName('bar-chart-3', Circle)).toBe(a)
+    expect(lucideWrapperCache.get('bar-chart-3')).toBe(a)
+  })
+
+  it('shows a same-sized blank first, then the svg once the lazy import resolves', async () => {
+    const Icon = lucideByName('building-2', Circle)
+    const { container } = render(createElement(Icon, { size: 20, 'data-testid': 'ico' } as never))
+    const blank = container.querySelector('span[aria-hidden]') as HTMLElement | null
+    expect(blank?.style.width).toBe('20px')
+    await waitFor(() => expect(container.querySelector('svg')).not.toBeNull())
+    expect(screen.queryByTestId('ico')).not.toBeNull()
   })
 })

@@ -7,14 +7,14 @@
  * (code-split per icon, nothing of the 1500-icon set in the main bundle), the house
  * set stays static, and emoji/free text still pass through.
  */
-import { lazy, Suspense } from 'react'
-import type { ComponentType, LazyExoticComponent } from 'react'
+import { Suspense } from 'react'
+import type { ComponentType } from 'react'
 import type { LucideProps } from 'lucide-react'
 import {
   Mail, MessageCircle, Building, Building2, Phone, PhoneCall, Video, Calendar,
   User, Users, Star, FileText, Briefcase, MapPin, Clock, CheckCircle, Bell, Globe,
 } from 'lucide-react'
-import dynamicIconImports from 'lucide-react/dynamicIconImports'
+import { isLucideSlug, lazyFor } from '@/lib/lazyLucide'
 
 type IconComponent = ComponentType<LucideProps>
 
@@ -29,24 +29,13 @@ const STATIC_ICONS: Record<string, IconComponent> = {
   bell: Bell, globe: Globe,
 }
 
-// One lazy component per slug, created once and reused (never inside a render).
-const lazyCache = new Map<string, LazyExoticComponent<IconComponent>>()
-function lazyFor(slug: string): LazyExoticComponent<IconComponent> {
-  let Icon = lazyCache.get(slug)
-  if (!Icon) {
-    Icon = lazy(dynamicIconImports[slug as keyof typeof dynamicIconImports])
-    lazyCache.set(slug, Icon)
-  }
-  return Icon
-}
-
 // Renders the actual icon for a lookup: any lucide slug, or the raw value (emoji/free text) as-is.
 export default function LookupIcon({ icon, size = 13, color }: { icon?: string | null; size?: number; color?: string }) {
   if (!icon) return null
   const slug = icon.trim().toLowerCase()
   const Static = STATIC_ICONS[slug]
   if (Static) return <Static size={size} color={color} aria-hidden />
-  if (slug in dynamicIconImports) {
+  if (isLucideSlug(slug)) {
     const Lazy = lazyFor(slug)
     // A same-sized blank keeps the row from jumping while the icon chunk arrives.
     return (

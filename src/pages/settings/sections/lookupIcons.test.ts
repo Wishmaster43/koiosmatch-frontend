@@ -5,14 +5,15 @@
  * distinct glyphs on screen). Any lucide name resolves now; garbage still falls back.
  */
 import { describe, it, expect } from 'vitest'
-import { Tag, SignalLow, VenusAndMars, Calendar } from 'lucide-react'
+import { Tag, Calendar } from 'lucide-react'
 import { GENERIC_LOOKUP_ICON_NAMES, SEEDED_LOOKUP_ICON_NAMES, resolveGenericLookupIcon } from './lookupIcons'
 
 describe('resolveGenericLookupIcon', () => {
   it('resolves a curated name, a seeded lucide name outside the curated map, and falls back only on garbage', () => {
     expect(resolveGenericLookupIcon('calendar')).toBe(Calendar)
-    expect(resolveGenericLookupIcon('signal-low')).toBe(SignalLow)
-    expect(resolveGenericLookupIcon('venus-and-mars')).toBe(VenusAndMars)
+    // Names outside the curated map resolve to a lazy wrapper (N-003), never the fallback.
+    expect(resolveGenericLookupIcon('signal-low').displayName).toBe('LazyLucide(signal-low)')
+    expect(resolveGenericLookupIcon('venus-and-mars').displayName).toBe('LazyLucide(venus-and-mars)')
     expect(resolveGenericLookupIcon('no-such-icon')).toBe(Tag)
     expect(resolveGenericLookupIcon(null)).toBe(Tag)
   })
