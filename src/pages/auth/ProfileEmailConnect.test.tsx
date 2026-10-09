@@ -5,7 +5,7 @@
  * error state with a retry, never the 'disconnected' provider chooser (§0
  * four UI states — a failed fetch must never render as a successful one).
  */
-import { describe, it, expect, vi } from 'vitest'
+import { describe, it, expect, vi, afterEach } from 'vitest'
 import { render, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import ProfileEmailConnect from './ProfileEmailConnect'
@@ -41,5 +41,34 @@ describe('ProfileEmailConnect · load error (§0 four UI states)', () => {
     const user = userEvent.setup()
     await user.click(screen.getByRole('button', { name: 'common:error.retry' }))
     await waitFor(() => expect(vi.mocked(api.get).mock.calls.length).toBeGreaterThan(callsBeforeRetry))
+  })
+})
+
+describe('ProfileEmailConnect · OAuth callback (G-009)', () => {
+  afterEach(() => { window.history.replaceState(null, '', '/') })
+
+  it('shows the reason-aware error banner and strips the params', async () => {
+    window.history.replaceState(null, '', '/#profile?email_oauth=error&context=personal&reason=browser_mismatch&request_id=9')
+    vi.mocked(api.get).mockResolvedValue({ data: { status: 'disconnected' } })
+    render(<ProfileEmailConnect />)
+
+    expect(await screen.findByText('profile.email.oauthReasonBrowserMismatch')).toBeInTheDocument()
+    expect(window.location.hash).toBe('#profile')
+  })
+
+  it('falls back to the generic error for an unknown reason', async () => {
+    window.history.replaceState(null, '', '/#profile?email_oauth=error&reason=weird')
+    vi.mocked(api.get).mockResolvedValue({ data: { status: 'disconnected' } })
+    render(<ProfileEmailConnect />)
+    expect(await screen.findByText('profile.email.oauthError')).toBeInTheDocument()
+  })
+
+  it('shows the success text and reloads the status when connected', async () => {
+    window.history.replaceState(null, '', '/#profile?email_oauth=connected&context=personal&email=a%40b.nl')
+    vi.mocked(api.get).mockResolvedValue({ data: { status: 'connected', provider: 'gmail', email: 'a@b.nl' } })
+    render(<ProfileEmailConnect />)
+    expect(await screen.findByText('profile.email.oauthConnected')).toBeInTheDocument()
+    await waitFor(() => expect(vi.mocked(api.get).mock.calls.length).toBeGreaterThanOrEqual(2))
+    expect(window.location.hash).toBe('#profile')
   })
 })

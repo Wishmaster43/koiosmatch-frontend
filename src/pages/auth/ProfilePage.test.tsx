@@ -2,7 +2,7 @@
  * ProfilePage — K-193 fase 2b: the WhatsApp Web tab shows only when the tenant
  * has the whatsapp_web module AND the role's page.whatsapp permission allows it.
  */
-import { describe, it, expect, vi } from 'vitest'
+import { describe, it, expect, vi, afterEach } from 'vitest'
 import { render, screen, fireEvent } from '@testing-library/react'
 import ProfilePage from './ProfilePage'
 
@@ -15,6 +15,7 @@ vi.mock('./useProfileForm', () => ({
     photo: null, avatarBusy: false, fileRef: { current: null }, onPickAvatar: vi.fn(), removeAvatar: vi.fn(), initials: 'AB',
   }),
 }))
+vi.mock('@/lib/api', () => ({ default: { get: vi.fn().mockResolvedValue({ data: { status: 'disconnected' } }), post: vi.fn() } }))
 vi.mock('./ProfileWhatsAppWeb', () => ({ default: () => <div>whatsapp-web-panel</div> }))
 vi.mock('../settings/sections/MyNotificationsSettings', () => ({ default: () => <div>my-notifications-panel</div> }))
 
@@ -96,5 +97,15 @@ describe('ProfilePage — Mijn meldingen tab (row 32)', () => {
   it('ignores an unknown intent tab and stays on the profile tab', () => {
     render(<ProfilePage intent={{ tab: 'nope' }} />)
     expect(screen.queryByText('my-notifications-panel')).not.toBeInTheDocument()
+  })
+})
+
+describe('ProfilePage — mailbox OAuth callback landing (G-009)', () => {
+  afterEach(() => { window.history.replaceState(null, '', '/') })
+
+  it('opens the email tab and shows the reason text without any nav intent', async () => {
+    window.history.replaceState(null, '', '/#profile?email_oauth=error&context=personal&reason=browser_mismatch')
+    render(<ProfilePage />)
+    expect(await screen.findByText('profile.email.oauthReasonBrowserMismatch')).toBeInTheDocument()
   })
 })

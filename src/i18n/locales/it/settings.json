@@ -1153,8 +1153,11 @@
     "oauthConnectFailed": "Collegamento non riuscito.",
     "oauthDisconnectFailed": "Scollegamento non riuscito.",
     "oauthCallbackConnected": "Account email collegato: {{email}}.",
-    "oauthCallbackBrowserMismatch": "Il collegamento della casella di posta non è riuscito: l’autorizzazione è tornata in un altro browser. Collega di nuovo la casella dal browser in cui hai iniziato.",
-    "oauthCallbackError": "Il collegamento email non è riuscito."
+    "oauthReasonBrowserMismatch": "Il collegamento della casella di posta non è riuscito: l’autorizzazione è tornata in un altro browser. Collega di nuovo la casella dal browser in cui hai iniziato.",
+    "oauthCallbackError": "Il collegamento email non è riuscito.",
+    "oauthReasonProviderDenied": "Il collegamento della casella di posta non è riuscito: il provider ha negato l’accesso.",
+    "oauthReasonTokenExchangeFailed": "Il collegamento della casella di posta non è riuscito: il provider non ha rilasciato un token di accesso. Riprova.",
+    "oauthReasonStateInvalid": "Il collegamento della casella di posta non è riuscito: la sessione di collegamento non è valida o è scaduta. Avvia di nuovo il collegamento."
   },
   "notifications": {
     "email": {

@@ -256,7 +256,7 @@ describe('EmailSettings · OAuth callback landing reads the hash, not location.s
     mockedGet.mockResolvedValue({ data: { data: { connected: false, provider: 'gmail' } } })
     renderPanel(CONTEXT)
 
-    await waitFor(() => expect(screen.getByText(st('email.oauthCallbackBrowserMismatch'))).toBeInTheDocument())
+    await waitFor(() => expect(screen.getByText(st('email.oauthReasonBrowserMismatch'))).toBeInTheDocument())
     expect(screen.queryByText(st('email.oauthCallbackError'))).not.toBeInTheDocument()
     await waitFor(() => expect(window.location.hash).not.toContain('reason'))
     window.location.hash = ''

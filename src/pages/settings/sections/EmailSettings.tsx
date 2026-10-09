@@ -25,18 +25,8 @@ import SegmentedControl from '@/components/ui/SegmentedControl'
 import { fieldInputStyle } from '@/components/forms/fieldMetrics'
 import { PageTitle, Caption } from '@/components/ui/typography'
 import { useAuth } from '@/context/AuthContext'
-import { setHashParam } from '@/lib/hashParams'
+import { getHashParams, oauthReasonKey, stripOauthParams } from '@/lib/hashQuery'
 import { SETTINGS_MAX_W_WIDE } from '@/pages/settings/components/settingsMetrics'
-
-// Pure: read this SPA's hash query string. The app is hash-routed (DashboardLayout
-// boots activePage from window.location.hash, there is no /instellingen path
-// route), so the OAuth callback lands as `#settings/...?email_oauth=...` — it
-// must be read from the hash, never from window.location.search.
-function getHashParams(hash: string) {
-  const raw = hash.replace(/^#/, '')
-  const qIdx = raw.indexOf('?')
-  return new URLSearchParams(qIdx === -1 ? '' : raw.slice(qIdx + 1))
-}
 
 // Email provider settings for one context (klanten/kandidaten); the context prefixes every settings key so the two contexts never share state.
 // Coupling state for this context's OAuth provider (Gmail/Office 365).
@@ -161,17 +151,12 @@ export default function EmailSettings({ context = 'klanten' }: EmailSettingsProp
     if (!forThisTab) return
     // ONIX L-002 (BE 84917a3e): the consent flow is bound to the browser that started
     // it; `reason=browser_mismatch` means the state came back in another browser.
-    const reason = params.get('reason')
+    const suffix = oauthReasonKey(params.get('reason'))
     setOauthBanner(outcome === 'connected'
       ? { ok: true, msg: t('email.oauthCallbackConnected', { email: params.get('email') || '' }) }
-      : { ok: false, msg: reason === 'browser_mismatch' ? t('email.oauthCallbackBrowserMismatch') : t('email.oauthCallbackError') })
+      : { ok: false, msg: suffix ? t(`email.oauthReason${suffix}`) : t('email.oauthCallbackError') })
     if (outcome === 'connected') loadConnStatus()
-    let nextHash = setHashParam(window.location.hash, 'email_oauth', null)
-    nextHash = setHashParam(nextHash, 'context', null)
-    nextHash = setHashParam(nextHash, 'email', null)
-    nextHash = setHashParam(nextHash, 'request_id', null)
-    nextHash = setHashParam(nextHash, 'reason', null)
-    window.history.replaceState(null, '', window.location.pathname + window.location.search + nextHash)
+    stripOauthParams()
   }, [context, loadConnStatus, t])
 
   // Persists the current form values under this context's prefixed keys, and flashes the saved state briefly on success.

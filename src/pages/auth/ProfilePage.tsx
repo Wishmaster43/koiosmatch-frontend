@@ -14,6 +14,7 @@ import Spinner                from '@/components/ui/Spinner'
 import Button                 from '@/components/ui/Button'
 import CalloutBox             from '@/components/ui/CalloutBox'
 import { mfaSignals }         from '@/lib/mfaGate'
+import { getHashParams }      from '@/lib/hashQuery'
 import ProfileEmailConnect    from './ProfileEmailConnect'
 import ProfileWhatsAppWeb      from './ProfileWhatsAppWeb'
 // §2 barrel decision: cross-entity reuse goes through settings/shared.ts, never a deep relative path.
@@ -45,13 +46,21 @@ const PROFILE_TABS = ['profile', 'email', 'display', 'voice', 'notifications', '
 const tabFromIntent = (intent?: { tab?: string } | null): string =>
   intent?.tab && PROFILE_TABS.includes(intent.tab) ? intent.tab : 'profile'
 
+// A mailbox OAuth callback for the personal mailbox lands on the email tab so its result is read.
+const initialTab = (intent?: { tab?: string } | null): string => {
+  const params = getHashParams(window.location.hash)
+  const ctx = params.get('context')
+  if (params.get('email_oauth') && (!ctx || ctx === 'personal')) return 'email'
+  return tabFromIntent(intent)
+}
+
 // The profile page container: form/avatar state + tab routing.
 export default function ProfilePage({ intent = null }: { intent?: { tab?: string } | null }) {
   const { t } = useTranslation('auth')
   const { t: tSettings } = useTranslation('settings')
   const { theme, setTheme, language, setLanguage } = useTheme()
   const auth = useAuth()
-  const [tab, setTab] = useState(() => tabFromIntent(intent))
+  const [tab, setTab] = useState(() => initialTab(intent))
   // A later intent (already on the page, a deep link arrives) re-picks the tab.
   useEffect(() => { if (intent?.tab) setTab(tabFromIntent(intent)) }, [intent])
 

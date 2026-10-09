@@ -1153,8 +1153,11 @@
     "oauthConnectFailed": "Falha ao associar.",
     "oauthDisconnectFailed": "Falha ao desassociar.",
     "oauthCallbackConnected": "Conta de e-mail associada: {{email}}.",
-    "oauthCallbackBrowserMismatch": "A ligação da caixa de correio falhou: a autorização regressou noutro browser. Ligue a caixa de correio novamente a partir do browser em que começou.",
-    "oauthCallbackError": "A associação de e-mail falhou."
+    "oauthReasonBrowserMismatch": "A ligação da caixa de correio falhou: a autorização regressou noutro browser. Ligue a caixa de correio novamente a partir do browser em que começou.",
+    "oauthCallbackError": "A associação de e-mail falhou.",
+    "oauthReasonProviderDenied": "A ligação da caixa de correio falhou: o fornecedor recusou o acesso.",
+    "oauthReasonTokenExchangeFailed": "A ligação da caixa de correio falhou: o fornecedor não emitiu um token de acesso. Tente novamente.",
+    "oauthReasonStateInvalid": "A ligação da caixa de correio falhou: a sessão de ligação é inválida ou expirou. Inicie a ligação novamente."
   },
   "notifications": {
     "email": {

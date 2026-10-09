@@ -12,6 +12,7 @@
  * Everything is driven by ./registry.jsx — add a setting there (a `schema` for the
  * simple ones), no shell changes needed.
  */
+import { getHashParams } from '@/lib/hashQuery'
 import { useEffect, useId, useMemo, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Search } from 'lucide-react'
@@ -84,18 +85,27 @@ const SLUG_ALIASES: Record<string, { category: string; tab: string }> = {
   'catalog/email': { category: 'communication', tab: 'email_general' },
 }
 
+// G-009: the BE's mailbox OAuth callback names no tab (`#settings/communication?email_oauth=…&context=klanten`); the context decides which email tab to open.
+const OAUTH_CONTEXT_TABS: Record<string, string> = {
+  klanten: 'email_customers',
+  kandidaten: 'email_candidates',
+  planning: 'email_planning',
+}
+
 // Parses the location hash into {category, tab}, accepting both the #settings/ prefix and legacy unprefixed links, and rewriting renamed slugs via SLUG_ALIASES.
 // Exported for the SLUG_ALIASES regression test — old deep links must keep resolving.
 // eslint-disable-next-line react-refresh/only-export-components -- pure helper exported for unit tests (mirrors passesModuleOrApp above); relocating would split the hash logic from the shell that owns it
 export function parseHash(): { category: string; tab: string } | null {
-  const raw = window.location.hash.replace(/^#/, '')
+  // G-009: a trailing ?query (OAuth callback) is not part of the tab name; it stays in the hash for the tab to consume.
+  const raw = window.location.hash.replace(/^#/, '').split('?')[0]
   const parts = raw.split('/')
   // Canonical form is #settings/<category>/<tab> — the prefix keeps settings deep-links
   // from colliding with page hashes (#applications/… booted the Applications LIST).
   // The legacy unprefixed #<category>/<tab> is still accepted for old bookmarks.
   const [category, tab] = parts[0] === 'settings' ? parts.slice(1) : parts
-  if (!category || !tab) return null
-  return SLUG_ALIASES[`${category}/${tab}`] ?? { category, tab }
+  const derivedTab = tab ?? (category === 'communication' ? OAUTH_CONTEXT_TABS[getHashParams(window.location.hash).get('context') ?? ''] : undefined)
+  if (!category || !derivedTab) return null
+  return SLUG_ALIASES[`${category}/${derivedTab}`] ?? { category, tab: derivedTab }
 }
 
 // Settings shell: builds the role/module-gated nav, tracks the active category+tab, and keeps it in sync with the URL hash for deep links.

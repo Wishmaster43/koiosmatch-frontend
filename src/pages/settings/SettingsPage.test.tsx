@@ -99,3 +99,31 @@ describe('parseHash — SLUG_ALIASES resolves renamed Dutch slugs to their Engli
     expect(parseHash()).toEqual({ category: 'communication', tab: 'email_general' })
   })
 })
+
+// G-009: a ?query on the hash (OAuth callback) is not part of the tab name.
+describe('parseHash — hash query (G-009)', () => {
+  afterEach(() => { window.location.hash = '' })
+
+  it('derives the email tab from the callback context when no tab is given', () => {
+    window.location.hash = '#settings/communication?email_oauth=connected&context=klanten'
+    expect(parseHash()).toEqual({ category: 'communication', tab: 'email_customers' })
+    window.location.hash = '#settings/communication?email_oauth=error&context=kandidaten'
+    expect(parseHash()).toEqual({ category: 'communication', tab: 'email_candidates' })
+    window.location.hash = '#settings/communication?context=planning'
+    expect(parseHash()).toEqual({ category: 'communication', tab: 'email_planning' })
+  })
+
+  it('strips the query from an explicit tab, prefixed or legacy', () => {
+    window.location.hash = '#settings/communication/email_general?x=1'
+    expect(parseHash()).toEqual({ category: 'communication', tab: 'email_general' })
+    window.location.hash = '#communication/email_customers?x=1'
+    expect(parseHash()).toEqual({ category: 'communication', tab: 'email_customers' })
+  })
+
+  it('stays null without a tab and without a known context', () => {
+    window.location.hash = '#settings/communication'
+    expect(parseHash()).toBeNull()
+    window.location.hash = '#settings/communication?context=unknown'
+    expect(parseHash()).toBeNull()
+  })
+})

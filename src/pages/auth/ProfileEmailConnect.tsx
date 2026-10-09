@@ -14,7 +14,7 @@
  *   POST /profile/email/disconnect      -> { status:'disconnected' }
  * A 404 degrades to a calm "unavailable" state.
  */
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import type { ChangeEvent, CSSProperties } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Mail, Eye, EyeOff } from 'lucide-react'
@@ -25,6 +25,8 @@ import Button from '@/components/ui/Button'
 import Spinner from '@/components/ui/Spinner'
 import SegmentedControl from '@/components/ui/SegmentedControl'
 import CalloutBox from '@/components/ui/CalloutBox'
+import { Check, AlertTriangle } from 'lucide-react'
+import { getHashParams, oauthReasonKey, stripOauthParams } from '@/lib/hashQuery'
 import { SectionTitle, Mono, formLabelStyle } from '@/components/ui/typography'
 
 const PROVIDERS = [
@@ -47,6 +49,21 @@ export default function ProfileEmailConnect() {
   const [showPass, setShowPass] = useState(false)
   const [smtp, setSmtp] = useState<SmtpForm>({ host: '', port: '587', user: '', pass: '', secure: 'tls', from_name: '', from_email: '' })
 
+  // G-009: the OAuth callback returns to `#profile?email_oauth=…&context=personal`; show its outcome once, refresh the status on success, then strip the params.
+  const [oauthBanner, setOauthBanner] = useState<{ ok: boolean; msg: string } | null>(null)
+  useEffect(() => {
+    const params = getHashParams(window.location.hash)
+    const outcome = params.get('email_oauth')
+    const ctx = params.get('context')
+    if (!outcome || (ctx && ctx !== 'personal')) return
+    const suffix = oauthReasonKey(params.get('reason'))
+    setOauthBanner(outcome === 'connected'
+      ? { ok: true, msg: t('profile.email.oauthConnected', { email: params.get('email') || '' }) }
+      : { ok: false, msg: suffix ? t(`profile.email.oauthReason${suffix}`) : t('profile.email.oauthError') })
+    if (outcome === 'connected') void reload()
+    stripOauthParams()
+  }, [t, reload])
+
   // Build a change handler for a single SMTP field.
   const setF = (k: keyof SmtpForm) => (e: ChangeEvent<HTMLInputElement>) => setSmtp(s => ({ ...s, [k]: e.target.value }))
 
@@ -55,6 +72,15 @@ export default function ProfileEmailConnect() {
       <p style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: -6, marginBottom: 16, lineHeight: 1.6 }}>
         {t('profile.email.desc')}
       </p>
+
+      {oauthBanner && (
+        <CalloutBox variant={oauthBanner.ok ? 'success' : 'danger'}>
+          <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}>
+            {oauthBanner.ok ? <Check size={14} /> : <AlertTriangle size={14} />}
+            {oauthBanner.msg}
+          </span>
+        </CalloutBox>
+      )}
 
       {status === 'loading' && <p style={{ fontSize: 13, color: 'var(--text-muted)' }}>{t('profile.email.loading')}</p>}
 
