@@ -49,3 +49,30 @@ describe('WorkflowsListPanel · list⇄queue switch', () => {
     expect(screen.queryByLabelText('Toon gearchiveerde workflows')).not.toBeInTheDocument()
   })
 })
+
+// S004: the panel hands the grace window to every row (list view) so a months window stays exact.
+describe('WorkflowsListPanel · grace window reaches the row (S004)', () => {
+  it('renders the month-end erase date on a trashed row', () => {
+    const wf = {
+      id: 'w1', name: 'Trashed flow', status: 'inactive', archived: true, lifecycle: 'pending_erase',
+      pending_erase_at: '2026-01-31T12:00:00Z', steps: [],
+    } as unknown as React.ComponentProps<typeof WorkflowsListPanel>['visibleWorkflows'][number]
+    function TrashPanel() {
+      const dragWf = useRef<string | number | null>(null)
+      return (
+        <WorkflowsListPanel
+          loading={false} error={false} retryLoad={vi.fn()}
+          visibleWorkflows={[wf]} folders={[]} viewMode="list" setViewMode={vi.fn()}
+          showArchived={false} onToggleArchived={vi.fn()}
+          showTrash onToggleTrash={vi.fn()}
+          selectedFolder={null} dragWf={dragWf}
+          openEditor={vi.fn()} handleRun={vi.fn()} handleToggleStatus={vi.fn()}
+          canManageFolders handleArchive={vi.fn()} handleRestore={vi.fn()}
+          onUnmark={vi.fn()} graceWindow={{ amount: 1, unit: 'months' }}
+        />
+      )
+    }
+    render(<TrashPanel />)
+    expect(screen.getByText(/28-02-2026/)).toBeInTheDocument()
+  })
+})

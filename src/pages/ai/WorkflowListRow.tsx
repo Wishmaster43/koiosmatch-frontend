@@ -94,7 +94,7 @@ function triggerMeta(triggerType?: string): { Icon: LucideIcon; key: string } {
 }
 
 // One row in the workflow list: status/trigger badges plus its run/edit/archive/restore actions, gated on canManageFolders where relevant.
-export default function WorkflowListRow({ workflow, folderName, onRun, canRun = true, onEdit, onToggleStatus, canManageFolders, onArchive, onRestore, onMarkDeletion, onUnmark, unmarkBusy = false, graceDays = null }: WorkflowListRowProps) {
+export default function WorkflowListRow({ workflow, folderName, onRun, canRun = true, onEdit, onToggleStatus, canManageFolders, onArchive, onRestore, onMarkDeletion, onUnmark, unmarkBusy = false, graceWindow = null }: WorkflowListRowProps) {
   const { t } = useTranslation('workflows')
   const { formatDate, formatDateTime } = useDateFormat()
   const seedLabel = useSeedLabel()
@@ -166,7 +166,7 @@ export default function WorkflowListRow({ workflow, folderName, onRun, canRun = 
               it erases for good (DD-MM-YYYY via the house formatter). */}
           {inTrash && (
             <span className="text-xs flex-shrink-0 truncate" style={{ color: 'var(--color-danger-text)', maxWidth: 320 }}>
-              {buildTrashNote(t, formatDate, workflow.pending_erase_at, graceDays)}
+              {buildTrashNote(t, formatDate, workflow.pending_erase_at, graceWindow)}
             </span>
           )}
 

@@ -58,7 +58,7 @@ function StepPill({ type }: { type: string }) {
 }
 
 // One card in the workflow list/board: status badge, step pills, and the run/edit/archive/restore/delete actions for that workflow.
-export default function WorkflowCard({ workflow, onRun, canRun = true, onEdit, canManageFolders, onArchive, onRestore, onMarkDeletion, onUnmark, unmarkBusy = false, graceDays = null }: WorkflowCardProps) {
+export default function WorkflowCard({ workflow, onRun, canRun = true, onEdit, canManageFolders, onArchive, onRestore, onMarkDeletion, onUnmark, unmarkBusy = false, graceWindow = null }: WorkflowCardProps) {
   const { t } = useTranslation('workflows')
   const { formatDate, formatDateTime } = useDateFormat()
   const seedLabel = useSeedLabel()
@@ -159,7 +159,7 @@ export default function WorkflowCard({ workflow, onRun, canRun = true, onEdit, c
               /* TRASH-OVERAL-2: erase note + unmark (settings.update-gated at the page). */
               <>
                 <span className="text-xs truncate" style={{ color: 'var(--color-danger-text)', maxWidth: 220 }}>
-                  {buildTrashNote(t, formatDate, workflow.pending_erase_at, graceDays)}
+                  {buildTrashNote(t, formatDate, workflow.pending_erase_at, graceWindow)}
                 </span>
                 {onUnmark && (
                   // Archive semantic: house secondary chrome, only the ICON/ink colour

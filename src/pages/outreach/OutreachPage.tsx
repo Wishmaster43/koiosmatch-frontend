@@ -230,7 +230,7 @@ export default function OutreachPage({ intent }: { intent?: unknown } = {}) {
           // TRASH-OVERAL-2: trash state + mark (outreach.delete) / unmark (outreach.update).
           inTrash={lifecycleOf(openRow) === 'pending_erase'}
           pendingEraseAt={openRow?.pending_erase_at ?? null}
-          graceDays={trash.graceDays}
+          graceWindow={trash.graceWindow}
           onMarkDeletion={canMarkDeletion ? (cid) => trash.openFor(cid, openRow?.name ?? String(cid)) : undefined}
           onUnmark={canRestore ? (cid) => trash.unmark(cid) : undefined}
           unmarkBusy={trash.unmarkBusy}

@@ -152,7 +152,7 @@ describe('WorkflowListRow · trash lifecycle (TRASH-OVERAL-2)', () => {
   it('a trashed row shows the erase note (DD-MM-YYYY) + unmark, and hides restore/mark', () => {
     const onUnmark = vi.fn()
     render(<WorkflowListRow workflow={trashedWorkflow} onRun={vi.fn()} onEdit={vi.fn()} onToggleStatus={vi.fn()}
-      canManageFolders onRestore={vi.fn()} onMarkDeletion={vi.fn()} onUnmark={onUnmark} graceDays={30} />)
+      canManageFolders onRestore={vi.fn()} onMarkDeletion={vi.fn()} onUnmark={onUnmark} graceWindow={{ amount: 30, unit: 'days' }} />)
     // House date format, never ISO (DATUM-1): pending since 10-08, erased around +30d.
     expect(screen.getByText(/10-08-2026/)).toBeInTheDocument()
     expect(screen.getByText(/09-09-2026/)).toBeInTheDocument()
@@ -228,5 +228,16 @@ describe('WorkflowListRow · WORKFLOW-PERMS-1', () => {
     expect(onRun).not.toHaveBeenCalled()
     rerender(<WorkflowListRow workflow={baseWorkflow} onRun={onRun} onEdit={vi.fn()} onToggleStatus={vi.fn()} />)
     expect(screen.queryByTitle(reason)).toBeNull()
+  })
+})
+
+// S004: a months window reaches the row note as a unit (31-01 + 1 month = 28-02).
+describe('WorkflowListRow · months grace window (S004)', () => {
+  it('renders the exact month-end erase date', () => {
+    const wf: Workflow = { ...baseWorkflow, archived: true, lifecycle: 'pending_erase', pending_erase_at: '2026-01-31T12:00:00Z' }
+    render(<WorkflowListRow workflow={wf} onRun={vi.fn()} onEdit={vi.fn()} onToggleStatus={vi.fn()}
+      canManageFolders onUnmark={vi.fn()} graceWindow={{ amount: 1, unit: 'months' }} />)
+    expect(screen.getByText(/28-02-2026/)).toBeInTheDocument()
+    expect(screen.queryByText(/0[23]-03-2026/)).not.toBeInTheDocument()
   })
 })

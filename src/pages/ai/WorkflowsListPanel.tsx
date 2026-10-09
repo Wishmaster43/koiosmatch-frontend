@@ -23,6 +23,7 @@ import type { WorkflowFolder, FolderId } from './hooks/useWorkflowsData'
 import type { ViewMode } from './hooks/useWorkflowsFilters'
 import Button from '@/components/ui/Button'
 import { BodyText } from '@/components/ui/typography'
+import type { GraceWindow } from '@/lib/graceWindow'
 
 // The handler subset workflowRowActions needs — a slice of WorkflowsListPanelProps
 // (declared below), named here so the function signature never re-spells it.
@@ -34,7 +35,7 @@ interface WorkflowRowActionHandlers {
   onUnmark?: (wf: Workflow) => void | Promise<void>
   // ONIX N-007: disables the unmark button while its own POST is in flight.
   unmarkBusy?: boolean
-  graceDays: number | null
+  graceWindow: GraceWindow | null
 }
 
 // The archive/restore/mark-deletion/unmark prop bag every workflow row/card
@@ -42,7 +43,7 @@ interface WorkflowRowActionHandlers {
 // LAYOUT) — two call sites (grid card, list row) passed the same six props
 // built from `wf` the same way.
 function workflowRowActions(wf: Workflow, {
-  canManageFolders, handleArchive, handleRestore, onMarkDeletion, onUnmark, unmarkBusy, graceDays,
+  canManageFolders, handleArchive, handleRestore, onMarkDeletion, onUnmark, unmarkBusy, graceWindow,
 }: WorkflowRowActionHandlers) {
   return {
     canManageFolders,
@@ -51,7 +52,7 @@ function workflowRowActions(wf: Workflow, {
     onMarkDeletion: onMarkDeletion ? () => onMarkDeletion(wf) : undefined,
     onUnmark: onUnmark ? () => onUnmark(wf) : undefined,
     unmarkBusy,
-    graceDays,
+    graceWindow,
   }
 }
 
@@ -84,11 +85,11 @@ function DraggableWorkflowItem({ id, dragWfRef, style, children }: {
 }
 
 // Props: everything needed to render the toolbar + the visible workflow list.
-// Extends WorkflowRowActionHandlers (minus graceDays, re-declared optional below —
+// Extends WorkflowRowActionHandlers (minus graceWindow, re-declared optional below —
 // the panel's own default is `null`, while workflowRowActions needs it required)
 // so the archive/restore/mark-deletion/unmark handler shapes are declared once.
-interface WorkflowsListPanelProps extends Omit<WorkflowRowActionHandlers, 'graceDays'> {
-  graceDays?: number | null
+interface WorkflowsListPanelProps extends Omit<WorkflowRowActionHandlers, 'graceWindow'> {
+  graceWindow?: GraceWindow | null
   loading: boolean
   error: boolean
   retryLoad: () => void
@@ -117,7 +118,7 @@ interface WorkflowsListPanelProps extends Omit<WorkflowRowActionHandlers, 'grace
 export default function WorkflowsListPanel({
   loading, error, retryLoad, visibleWorkflows, folders, viewMode, setViewMode,
   showArchived, onToggleArchived, showTrash, onToggleTrash, selectedFolder, dragWf: dragWfRef, openEditor, handleRun, handleToggleStatus,
-  canManageFolders, canRun = true, canCreate = true, handleArchive, handleRestore, onMarkDeletion, onUnmark, unmarkBusy, graceDays = null,
+  canManageFolders, canRun = true, canCreate = true, handleArchive, handleRestore, onMarkDeletion, onUnmark, unmarkBusy, graceWindow = null,
 }: WorkflowsListPanelProps) {
   const { t } = useTranslation(['workflows', 'common'])
   // WF-WACHTRIJ-FE-1: the page's own list⇄queue switch — mirrors the app-wide
@@ -196,7 +197,7 @@ export default function WorkflowsListPanel({
                   identical to the list-row call below — that repetition IS the
                   point of the helper (one call per render site, same six props). */}
               <WorkflowCard workflow={wf} onRun={handleRun} onEdit={() => openEditor(wf)} canRun={canRun}
-                {...workflowRowActions(wf, { canManageFolders, handleArchive, handleRestore, onMarkDeletion, onUnmark, unmarkBusy, graceDays })}
+                {...workflowRowActions(wf, { canManageFolders, handleArchive, handleRestore, onMarkDeletion, onUnmark, unmarkBusy, graceWindow })}
               />
             </DraggableWorkflowItem>
           ))}
@@ -215,7 +216,7 @@ export default function WorkflowsListPanel({
                 canRun={canRun}
                 onEdit={() => openEditor(wf)}
                 onToggleStatus={() => handleToggleStatus(wf)}
-                {...workflowRowActions(wf, { canManageFolders, handleArchive, handleRestore, onMarkDeletion, onUnmark, unmarkBusy, graceDays })}
+                {...workflowRowActions(wf, { canManageFolders, handleArchive, handleRestore, onMarkDeletion, onUnmark, unmarkBusy, graceWindow })}
               />
             </DraggableWorkflowItem>
           ))}

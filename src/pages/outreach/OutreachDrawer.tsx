@@ -54,6 +54,7 @@ import PendingEraseBanner from '@/components/drawer/PendingEraseBanner'
 import { buildTrashNote } from '@/hooks/useTrashFlow'
 import { userName, type UserLike } from '@/lib/userDisplay'
 import type { TargetFilter } from './drawer/targetFilter'
+import type { GraceWindow } from '@/lib/graceWindow'
 
 // Campaign status → semantic colour for the header badge (draft calm, done success).
 const STATUS_COLOR: Record<string, string> = {
@@ -62,7 +63,7 @@ const STATUS_COLOR: Record<string, string> = {
 }
 
 // Thin container: wires useOutreachDetail's data into the shared drawer shell and owns the Stats-to-Targets click-to-filter state shared by the two tabs.
-export default function OutreachDrawer({ id, createdAt, archived = false, archivedAt = null, fallbackName, fallbackStatus, onRestore, inTrash = false, pendingEraseAt = null, graceDays = null, onMarkDeletion, onUnmark, unmarkBusy = false, onClose, expanded = false, onToggleExpand, onMutated }: {
+export default function OutreachDrawer({ id, createdAt, archived = false, archivedAt = null, fallbackName, fallbackStatus, onRestore, inTrash = false, pendingEraseAt = null, graceWindow = null, onMarkDeletion, onUnmark, unmarkBusy = false, onClose, expanded = false, onToggleExpand, onMutated }: {
   id: string | null
   createdAt?: string
   // Enkelstuks-sweep: soft-deleted row (flag from the page). W2 delivered (measured:
@@ -79,7 +80,7 @@ export default function OutreachDrawer({ id, createdAt, archived = false, archiv
   // TRASH-OVERAL-2: trash state (lifecycle pending_erase) + its erase-note inputs.
   inTrash?: boolean
   pendingEraseAt?: string | null
-  graceDays?: number | null
+  graceWindow?: GraceWindow | null
   // Mark for erasure (outreach.delete — HIDDEN without) / unmark (outreach.update).
   onMarkDeletion?: (id: string) => void
   onUnmark?: (id: string) => void
@@ -253,7 +254,7 @@ export default function OutreachDrawer({ id, createdAt, archived = false, archiv
               action, outreach.update-gated at the page. */}
           {inTrash && (
             <PendingEraseBanner id={id}
-              message={buildTrashNote(t, formatDate, pendingEraseAt, graceDays)}
+              message={buildTrashNote(t, formatDate, pendingEraseAt, graceWindow)}
               onUnmark={onUnmark ? () => onUnmark(id) : undefined}
               unmarkBusy={unmarkBusy}
               unmarkLabel={t('common:trash.unmarkAction')} />

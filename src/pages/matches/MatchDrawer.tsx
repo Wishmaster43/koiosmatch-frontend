@@ -72,6 +72,7 @@ import type { MatchRow } from '@/types/match'
 import type { Id } from '@/types/common'
 import Button from '@/components/ui/Button'
 import EntityLink from '@/components/ui/EntityLink'
+import type { GraceWindow } from '@/lib/graceWindow'
 
 interface MatchDrawerProps {
   match: MatchRow | null
@@ -107,8 +108,8 @@ interface MatchDrawerProps {
   onUnmark?: (id: MatchRow['id']) => void
   // ONIX N-007: disables the unmark button while its own POST is in flight.
   unmarkBusy?: boolean
-  // Tenant grace window (useTrashFlow.graceDays) — feeds the trash banner's erase note.
-  graceDays?: number | null
+  // Tenant grace window (useTrashFlow.graceWindow) — feeds the trash banner's erase note.
+  graceWindow?: GraceWindow | null
   // EXTRACT-1: the caller's own matches.update permission check for the
   // Koppelingen tab's "Koppelen" buttons (§7 — UI gate, backend re-checks).
   canLinkBackoffice?: boolean
@@ -123,7 +124,7 @@ interface MatchDrawerProps {
 // Thin drawer container (see the module doc above): composes the approval hook + presentational header pieces, wires the tab list, and keeps the match facts read-only.
 export default function MatchDrawer({
   match, allRows = [], onClose, expanded = false, onToggleExpand, onSetStatus, onSetOwner, canApprove = false, onApprovalChange, onUpdate, onUpdateCustomFields,
-  onArchive, onRestore, onMarkDeletion, onUnmark, unmarkBusy = false, graceDays = null, canLinkBackoffice = false, canTerminate: canTerminatePermission = false, canRenew: canRenewPermission = false,
+  onArchive, onRestore, onMarkDeletion, onUnmark, unmarkBusy = false, graceWindow = null, canLinkBackoffice = false, canTerminate: canTerminatePermission = false, canRenew: canRenewPermission = false,
 }: MatchDrawerProps) {
   const { t } = useTranslation('matches')
   const { formatDate, formatDateTime } = useDateFormat()
@@ -380,7 +381,7 @@ export default function MatchDrawer({
               action, matches.update-gated at the page. */}
           {inTrash && (
             <PendingEraseBanner id={match.id}
-              message={buildTrashNote(t, formatDate, match.pendingEraseAt, graceDays)}
+              message={buildTrashNote(t, formatDate, match.pendingEraseAt, graceWindow)}
               onUnmark={onUnmark ? () => onUnmark(match.id) : undefined}
               unmarkBusy={unmarkBusy}
               unmarkLabel={t('common:trash.unmarkAction')} />

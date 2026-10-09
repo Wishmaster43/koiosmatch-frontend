@@ -8,6 +8,7 @@
  */
 import { useCallback, useEffect, useRef, useState } from 'react'
 import type { Workflow } from '@/types/workflow'
+import type { GraceWindow } from '@/lib/graceWindow'
 
 // Shared archive/restore/trash lifecycle props for one workflow card/row
 // (WorkflowCard/WorkflowListRow), on top of each caller's own extras
@@ -32,7 +33,7 @@ export interface WorkflowRowLifecycleProps {
   // ONIX N-007: disables the unmark button while its own POST is in flight.
   unmarkBusy?: boolean
   // Tenant grace window — feeds the trashed card/row's erase note (DD-MM-YYYY).
-  graceDays?: number | null
+  graceWindow?: GraceWindow | null
 }
 
 export function useWorkflowRowState() {

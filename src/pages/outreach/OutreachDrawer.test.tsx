@@ -268,3 +268,13 @@ describe('OutreachDrawer · owner picker clear (DROPDOWN-CLEAR-1)', () => {
     expect(screen.queryByRole('button', { name: /wissen$/ })).toBeNull()
   })
 })
+
+// S004: a months window reaches the trash note as a unit (31-01 + 1 month = 28-02).
+describe('OutreachDrawer · months grace window (S004)', () => {
+  it('renders the exact month-end erase date', () => {
+    render(<OutreachDrawer id="c1" archived inTrash pendingEraseAt="2026-01-31T12:00:00Z"
+      graceWindow={{ amount: 1, unit: 'months' }} onUnmark={vi.fn()} onClose={() => {}} />)
+    expect(screen.getByText(/28-02-2026/)).toBeInTheDocument()
+    expect(screen.queryByText(/0[23]-03-2026/)).not.toBeInTheDocument()
+  })
+})

@@ -377,7 +377,7 @@ export default function MatchesPage({ intent }: { intent?: unknown } = {}) {
         onMarkDeletion={canMarkDeletion ? openMarkDeletion : undefined}
         onUnmark={canArchive ? (id) => { if (id != null) trash.unmark(id) } : undefined}
         unmarkBusy={trash.unmarkBusy}
-        graceDays={trash.graceDays}
+        graceWindow={trash.graceWindow}
         // EXTRACT-1: same matches.update gate as canApprove/canArchive above.
         canLinkBackoffice={hasPermission('matches.update')}
         // MATCH-TERMINATE-1: same gate — the backend re-checks on POST /terminate.

@@ -123,7 +123,7 @@ export default function WorkflowsPage({ intent }: { intent?: WorkflowsIntent } =
         onMarkDeletion={canMarkDeletion ? openMarkDeletion : undefined}
         onUnmark={data.canManageFolders ? (wf) => { if (wf.id != null) trash.unmark(String(wf.id)) } : undefined}
         unmarkBusy={trash.unmarkBusy}
-        graceDays={trash.graceDays}
+        graceWindow={trash.graceWindow}
       />
 
       {data.editingWorkflow && (

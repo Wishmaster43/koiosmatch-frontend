@@ -408,7 +408,7 @@ describe('MatchDrawer · trash lifecycle (TRASH-OVERAL-2)', () => {
     const onUnmark = vi.fn()
     render(<MatchDrawer
       match={{ ...match, archived: true, lifecycle: 'pending_erase', pendingEraseAt: '2026-08-10T12:00:00Z' }}
-      onClose={vi.fn()} onUnmark={onUnmark} onMarkDeletion={vi.fn()} graceDays={30} />)
+      onClose={vi.fn()} onUnmark={onUnmark} onMarkDeletion={vi.fn()} graceWindow={{ amount: 30, unit: 'days' }} />)
     // House date format, never ISO/slash-locale (DATUM-1).
     expect(screen.getByText(new RegExp(i18n.t('trash.pendingSince', { ns: 'common', date: '10-08-2026' })))).toBeInTheDocument()
     // In the trash the mark action is gone; unmark takes over.
@@ -481,5 +481,16 @@ describe('MatchDrawer · AI-sessies tab gate (X-3)', () => {
     mockUseAuth.mockReturnValue(auth(true, ['matches.view']))
     render(<MatchDrawer match={match} onClose={vi.fn()} />)
     expect(screen.queryByRole('tab', { name: tabName })).toBeNull()
+  })
+})
+
+// S004: a months window reaches buildTrashNote as a unit (31-01 + 1 month = 28-02), not a derived day count.
+describe('MatchDrawer · months grace window (S004)', () => {
+  it('renders the exact month-end erase date for a one-month window', () => {
+    render(<MatchDrawer
+      match={{ ...match, archived: true, lifecycle: 'pending_erase', pendingEraseAt: '2026-01-31T12:00:00Z' }}
+      onClose={vi.fn()} onUnmark={vi.fn()} graceWindow={{ amount: 1, unit: 'months' }} />)
+    expect(screen.getByText(/28-02-2026/)).toBeInTheDocument()
+    expect(screen.queryByText(/0[23]-03-2026/)).not.toBeInTheDocument()
   })
 })
