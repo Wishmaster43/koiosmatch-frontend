@@ -1287,6 +1287,10 @@
         "title": "Match verloopt",
         "desc": "Een match is bijna verlopen en eindigt binnenkort."
       },
+      "match_approval_pending": {
+        "title": "Match wacht op goedkeuring",
+        "desc": "Een match wacht langer op goedkeuring dan toegestaan."
+      },
       "missing_cv": {
         "title": "Geen cv",
         "desc": "Een kandidaat heeft geen cv geüpload."
@@ -4255,12 +4259,26 @@
         "label": "Factuur-e-mailadres"
       }
     },
+    "customers": {
+      "customer_identifier_validation": {
+        "label": "Nummervalidatie"
+      }
+    },
     "action_rules": {
       "work_permit_block_matches": {
         "label": "Werkvergunning ontbreekt blokkeert matches"
       },
       "customer_dedupe_keys": {
         "label": "Ontdubbelsleutels klanten"
+      },
+      "contact_dedupe_keys": {
+        "label": "Dubbele contactpersonen herkennen op"
+      },
+      "location_dedupe_keys": {
+        "label": "Dubbele locaties herkennen op"
+      },
+      "department_dedupe_keys": {
+        "label": "Dubbele afdelingen herkennen op"
       },
       "rejection": {
         "label": "Afwijzingsregels"

@@ -1287,6 +1287,10 @@
         "title": "Correspondência expirando",
         "desc": "Uma correspondência está prestes a expirar."
       },
+      "match_approval_pending": {
+        "title": "Match a aguardar aprovação",
+        "desc": "Um match aguarda aprovação além do prazo previsto."
+      },
       "missing_cv": {
         "title": "Sem CV",
         "desc": "Um candidato não enviou seu CV."
@@ -4256,12 +4260,26 @@
         "label": "E-mail de faturação"
       }
     },
+    "customers": {
+      "customer_identifier_validation": {
+        "label": "Validação de número"
+      }
+    },
     "action_rules": {
       "work_permit_block_matches": {
         "label": "Autorização de trabalho em falta bloqueia matches"
       },
       "customer_dedupe_keys": {
         "label": "Chaves de desduplicação de clientes"
+      },
+      "contact_dedupe_keys": {
+        "label": "Chaves de desduplicação de contactos"
+      },
+      "location_dedupe_keys": {
+        "label": "Chaves de desduplicação de locais"
+      },
+      "department_dedupe_keys": {
+        "label": "Chaves de desduplicação de departamentos"
       },
       "rejection": {
         "label": "Regras de rejeição"

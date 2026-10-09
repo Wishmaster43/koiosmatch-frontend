@@ -1028,6 +1028,10 @@
         "title": "Coincidencia venciendo",
         "desc": "Una coincidencia está a punto de vencer."
       },
+      "match_approval_pending": {
+        "title": "Match pendiente de aprobación",
+        "desc": "Un match espera aprobación más allá del plazo previsto."
+      },
       "missing_cv": {
         "title": "Sin CV",
         "desc": "Un candidato no ha cargado un CV."
@@ -4255,12 +4259,26 @@
         "label": "Correo de facturación"
       }
     },
+    "customers": {
+      "customer_identifier_validation": {
+        "label": "Validación de números"
+      }
+    },
     "action_rules": {
       "work_permit_block_matches": {
         "label": "Sin permiso de trabajo se bloquean los matches"
       },
       "customer_dedupe_keys": {
         "label": "Claves de deduplicación de clientes"
+      },
+      "contact_dedupe_keys": {
+        "label": "Claves de deduplicación de contactos"
+      },
+      "location_dedupe_keys": {
+        "label": "Claves de deduplicación de ubicaciones"
+      },
+      "department_dedupe_keys": {
+        "label": "Claves de deduplicación de departamentos"
       },
       "rejection": {
         "label": "Reglas de rechazo"

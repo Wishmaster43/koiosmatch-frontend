@@ -1287,6 +1287,10 @@
         "title": "Corrispondenza in scadenza",
         "desc": "Una corrispondenza sta per scadere."
       },
+      "match_approval_pending": {
+        "title": "Match in attesa di approvazione",
+        "desc": "Un match attende l’approvazione oltre il termine previsto."
+      },
       "missing_cv": {
         "title": "Nessun CV",
         "desc": "Un candidato non ha caricato un CV."
@@ -4256,12 +4260,26 @@
         "label": "Indirizzo e-mail di fatturazione"
       }
     },
+    "customers": {
+      "customer_identifier_validation": {
+        "label": "Validazione numero"
+      }
+    },
     "action_rules": {
       "work_permit_block_matches": {
         "label": "Permesso di lavoro mancante blocca i match"
       },
       "customer_dedupe_keys": {
         "label": "Chiavi di deduplica clienti"
+      },
+      "contact_dedupe_keys": {
+        "label": "Chiavi di deduplica contatti"
+      },
+      "location_dedupe_keys": {
+        "label": "Chiavi di deduplica sedi"
+      },
+      "department_dedupe_keys": {
+        "label": "Chiavi di deduplica reparti"
       },
       "rejection": {
         "label": "Regole di rifiuto"

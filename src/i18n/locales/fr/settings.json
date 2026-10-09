@@ -1028,6 +1028,10 @@
         "title": "Match expire",
         "desc": "Un match expire bientôt."
       },
+      "match_approval_pending": {
+        "title": "Match en attente d’approbation",
+        "desc": "Un match attend son approbation au-delà du délai prévu."
+      },
       "missing_cv": {
         "title": "Pas de CV",
         "desc": "Un candidat n'a pas téléchargé de CV."
@@ -4255,12 +4259,26 @@
         "label": "Adresse e-mail de facturation"
       }
     },
+    "customers": {
+      "customer_identifier_validation": {
+        "label": "Validation des numéros"
+      }
+    },
     "action_rules": {
       "work_permit_block_matches": {
         "label": "Un permis de travail manquant bloque les matches"
       },
       "customer_dedupe_keys": {
         "label": "Clés de dédoublonnage des clients"
+      },
+      "contact_dedupe_keys": {
+        "label": "Clés de dédoublonnage des contacts"
+      },
+      "location_dedupe_keys": {
+        "label": "Clés de dédoublonnage des sites"
+      },
+      "department_dedupe_keys": {
+        "label": "Clés de dédoublonnage des services"
       },
       "rejection": {
         "label": "Règles de refus"

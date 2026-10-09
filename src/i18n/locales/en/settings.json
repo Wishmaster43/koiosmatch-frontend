@@ -1287,6 +1287,10 @@
         "title": "Match expiring",
         "desc": "A match is about to expire soon."
       },
+      "match_approval_pending": {
+        "title": "Match awaiting approval",
+        "desc": "A match has been waiting for approval longer than its window allows."
+      },
       "missing_cv": {
         "title": "No CV",
         "desc": "A candidate has not uploaded a CV."
@@ -4255,12 +4259,26 @@
         "label": "Billing email address"
       }
     },
+    "customers": {
+      "customer_identifier_validation": {
+        "label": "Number validation"
+      }
+    },
     "action_rules": {
       "work_permit_block_matches": {
         "label": "Missing work permit blocks matches"
       },
       "customer_dedupe_keys": {
         "label": "Customer deduplication keys"
+      },
+      "contact_dedupe_keys": {
+        "label": "Contact deduplication keys"
+      },
+      "location_dedupe_keys": {
+        "label": "Location deduplication keys"
+      },
+      "department_dedupe_keys": {
+        "label": "Department deduplication keys"
       },
       "rejection": {
         "label": "Rejection rules"

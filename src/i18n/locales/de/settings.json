@@ -1028,6 +1028,10 @@
         "title": "Match verfällt",
         "desc": "Ein Match verfällt bald."
       },
+      "match_approval_pending": {
+        "title": "Match wartet auf Freigabe",
+        "desc": "Ein Match wartet länger auf Freigabe, als das Zeitfenster erlaubt."
+      },
       "missing_cv": {
         "title": "Kein Lebenslauf",
         "desc": "Ein Kandidat hat keinen Lebenslauf hochgeladen."
@@ -4255,12 +4259,26 @@
         "label": "Rechnungs-E-Mail-Adresse"
       }
     },
+    "customers": {
+      "customer_identifier_validation": {
+        "label": "Nummernprüfung"
+      }
+    },
     "action_rules": {
       "work_permit_block_matches": {
         "label": "Fehlende Arbeitserlaubnis blockiert Matches"
       },
       "customer_dedupe_keys": {
         "label": "Dedupe-Schlüssel für Kunden"
+      },
+      "contact_dedupe_keys": {
+        "label": "Dedupe-Schlüssel für Kontaktpersonen"
+      },
+      "location_dedupe_keys": {
+        "label": "Dedupe-Schlüssel für Standorte"
+      },
+      "department_dedupe_keys": {
+        "label": "Dedupe-Schlüssel für Abteilungen"
       },
       "rejection": {
         "label": "Ablehnungsregeln"
