@@ -17,8 +17,9 @@ import LoginPage from './LoginPage'
 // The login seam is mocked at the AuthContext boundary — the test drives the
 // exact axios-shaped rejection the backend produces for a throttled login.
 const loginMock = vi.fn()
+const verifyMfaMock = vi.fn()
 vi.mock('@/context/AuthContext', () => ({
-  useAuth: () => ({ login: loginMock, verifyMfa: vi.fn() }),
+  useAuth: () => ({ login: loginMock, verifyMfa: verifyMfaMock }),
 }))
 
 // Real NL strings so `login.throttled` interpolates a visible seconds value.
@@ -119,5 +120,33 @@ describe('LoginPage · orphaned account (no_organisation)', () => {
     expect(screen.getByText(nlAuth.login.noOrganisation)).toBeInTheDocument()
     expect(screen.queryByText('raw server text')).toBeNull()
     loginMock.mockReset()
+  })
+})
+
+// ONIX C-002: two submits in one tick fire ONE request.
+describe('LoginPage · re-entrancy latch', () => {
+  afterEach(() => { loginMock.mockReset(); verifyMfaMock.mockReset() })
+
+  it('fires one login for two rapid submits of the credential form', async () => {
+    loginMock.mockReturnValue(new Promise(() => undefined))
+    renderLogin()
+    fireEvent.change(screen.getByLabelText(nlAuth.login.email), { target: { value: 'danny@yesway.nl' } })
+    fireEvent.change(screen.getByLabelText(nlAuth.login.password), { target: { value: 'geheim' } })
+    const form = screen.getByLabelText(nlAuth.login.email).closest('form') as HTMLFormElement
+    await act(async () => { fireEvent.submit(form); fireEvent.submit(form) })
+    expect(loginMock).toHaveBeenCalledTimes(1)
+  })
+
+  it('fires one verifyMfa for two rapid submits of the MFA form', async () => {
+    loginMock.mockResolvedValue({ mfaRequired: true, mfaToken: 'tok' })
+    verifyMfaMock.mockReturnValue(new Promise(() => undefined))
+    renderLogin()
+    await act(async () => { submit() })
+    const input = await screen.findByLabelText(nlAuth.mfa.codeLabel)
+    fireEvent.change(input, { target: { value: '123456' } })
+    const form = input.closest('form') as HTMLFormElement
+    await act(async () => { fireEvent.submit(form); fireEvent.submit(form) })
+    expect(verifyMfaMock).toHaveBeenCalledTimes(1)
+    expect(verifyMfaMock).toHaveBeenCalledWith('tok', '123456')
   })
 })

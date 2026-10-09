@@ -309,6 +309,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
    * On success stores the session and resolves to the user object (same as login).
    */
   const verifyMfa = useCallback(async (mfaToken: string, code: string): Promise<AuthUser> => {
+    // ONIX C-001: the MFA branch regenerates the CSRF token after the password step, so on split
+    // app/api hosts the XSRF cookie is stale; re-prime first. A failed prime never blocks the attempt.
+    try { await primeCsrf() } catch { /* the 419 interceptor still re-primes and retries once */ }
     const res = await api.post('/auth/mfa/verify', { mfa_token: mfaToken, code })
     const { tenant } = res.data
     // Same rule as login(): a body token is never stored (see above, H3).

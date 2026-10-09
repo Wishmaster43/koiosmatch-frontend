@@ -13,6 +13,7 @@ import { useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { Eye, EyeOff, ShieldCheck, ArrowLeft } from 'lucide-react'
 import { useAuth } from '@/context/AuthContext'
+import { useGuardedSubmit } from '@/hooks/useGuardedSubmit'
 import ErrorBanner from '@/components/ui/ErrorBanner'
 import Spinner from '@/components/ui/Spinner'
 import Button from '@/components/ui/Button'
@@ -100,7 +101,6 @@ function CredentialForm({ onMfaRequired }: { onMfaRequired: (token: string) => v
   const [email,    setEmail]   = useState('')
   const [password, setPassword] = useState('')
   const [showPw,   setShowPw]  = useState(false)
-  const [loading,  setLoading] = useState(false)
   const [error,    setError]   = useState('')
   // Seconds until the login throttle lifts (null = not throttled). Counted down live.
   const [retryAfter, setRetryAfter] = useState<number | null>(null)
@@ -122,11 +122,9 @@ function CredentialForm({ onMfaRequired }: { onMfaRequired: (token: string) => v
 
   // Submit credentials: routes to the MFA step when the server asks for it,
   // otherwise navigates straight in; a 429 starts the live throttle countdown.
-  const handleSubmit = async (e: FormEvent) => {
-    e.preventDefault()
+  const runLogin = async () => {
     setError('')
     setRetryAfter(null)
-    setLoading(true)
     try {
       const result = await login?.(email, password)
       if (result && 'mfaRequired' in result && result.mfaRequired) {
@@ -141,10 +139,11 @@ function CredentialForm({ onMfaRequired }: { onMfaRequired: (token: string) => v
       if (secs !== null) setRetryAfter(secs)
       else if (isNoOrganisationError(err)) setError(t('login.noOrganisation'))
       else setError(extractApiError(err, t('login.failed')))
-    } finally {
-      setLoading(false)
     }
   }
+  // ONIX C-002: one login in flight, so two Enter presses in one tick fire a single request.
+  const { submit, saving: loading } = useGuardedSubmit(runLogin)
+  const handleSubmit = (e: FormEvent) => { e.preventDefault(); void submit() }
 
   const throttled = retryAfter !== null && retryAfter > 0
 
@@ -225,18 +224,15 @@ function MfaForm({ mfaToken, onBack }: { mfaToken: string; onBack: () => void })
   const inputRef = useRef<HTMLInputElement>(null)
 
   const [code,    setCode]    = useState('')
-  const [loading, setLoading] = useState(false)
   const [error,   setError]   = useState('')
 
   // Focus the code input as soon as this step mounts, so typing can start immediately.
   useEffect(() => { inputRef.current?.focus() }, [])
 
   // Submit the entered TOTP code; a rejected code clears the field and refocuses it.
-  const handleSubmit = async (e: FormEvent) => {
-    e.preventDefault()
+  const runVerify = async () => {
     if (code.replace(/\s/g, '').length < 6) return
     setError('')
-    setLoading(true)
     try {
       await verifyMfa?.(mfaToken, code.replace(/\s/g, ''))
       navigate('/')
@@ -244,10 +240,11 @@ function MfaForm({ mfaToken, onBack }: { mfaToken: string; onBack: () => void })
       setError(extractApiError(err, t('mfa.invalid')))
       setCode('')
       inputRef.current?.focus()
-    } finally {
-      setLoading(false)
     }
   }
+  // ONIX C-002: one verify in flight, so a double Enter fires a single request.
+  const { submit, saving: loading } = useGuardedSubmit(runVerify)
+  const handleSubmit = (e: FormEvent) => { e.preventDefault(); void submit() }
 
   // Auto-submit when 6 digits are entered
   const handleChange = (e: ChangeEvent<HTMLInputElement>) => {

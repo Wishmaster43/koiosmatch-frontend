@@ -13,13 +13,13 @@
 import { describe, it, expect, afterEach, vi } from 'vitest'
 import type { ReactNode } from 'react'
 import { renderHook, waitFor } from '@testing-library/react'
-import api from '@/lib/api'
+import api, { primeCsrf } from '@/lib/api'
 import { AuthProvider, useAuth } from './AuthContext'
 import { queryClient } from '@/lib/queryClient'
 
 vi.mock('@/lib/api', async () => {
   const actual = await vi.importActual('@/lib/api')
-  return { ...actual, default: { get: vi.fn(), post: vi.fn(async () => ({ data: {} })) } }
+  return { ...actual, primeCsrf: vi.fn(async () => undefined), default: { get: vi.fn(), post: vi.fn(async () => ({ data: {} })) } }
 })
 
 const wrapper = ({ children }: { children: ReactNode }) => <AuthProvider>{children}</AuthProvider>
@@ -192,5 +192,32 @@ describe('AuthContext · tenantsError surfaces a failed super-admin /tenants fet
     await waitFor(() => expect(result.current?.loading).toBe(false))
     expect(result.current?.tenantsError).toBe(false)
     expect(result.current?.tenants).toEqual([{ id: 't1', name: 'Tenant One' }])
+  })
+})
+
+// ONIX C-001: the MFA branch regenerates the CSRF token, so verify re-primes the cookie first.
+describe('AuthContext · verifyMfa re-primes CSRF', () => {
+  const setup = async () => {
+    vi.mocked(api.get).mockResolvedValue({ data: { user: null } })
+    const { result } = renderHook(() => useAuth(), { wrapper })
+    await waitFor(() => expect(result.current?.loading).toBe(false))
+    vi.mocked(api.post).mockClear()
+    return result
+  }
+
+  it('calls primeCsrf BEFORE posting /auth/mfa/verify with the token and code', async () => {
+    const result = await setup()
+    vi.mocked(api.post).mockResolvedValueOnce({ data: { user: { id: 'u1', roles: [] } } })
+    await result.current?.verifyMfa('tok', '123456').catch(() => undefined)
+    expect(api.post).toHaveBeenCalledWith('/auth/mfa/verify', { mfa_token: 'tok', code: '123456' })
+    expect(vi.mocked(primeCsrf).mock.invocationCallOrder[0]).toBeLessThan(vi.mocked(api.post).mock.invocationCallOrder[0])
+  })
+
+  it('still posts when primeCsrf rejects', async () => {
+    const result = await setup()
+    vi.mocked(primeCsrf).mockRejectedValueOnce(new Error('network'))
+    vi.mocked(api.post).mockResolvedValueOnce({ data: { user: { id: 'u1', roles: [] } } })
+    await result.current?.verifyMfa('tok', '123456').catch(() => undefined)
+    expect(api.post).toHaveBeenCalledWith('/auth/mfa/verify', { mfa_token: 'tok', code: '123456' })
   })
 })
