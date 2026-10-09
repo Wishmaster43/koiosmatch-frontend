@@ -6,13 +6,15 @@ import { buildCsp } from './csp'
 describe('buildCsp', () => {
   it('builds the full policy with self plus the measured hosts', () => {
     const policy = buildCsp({ VITE_API_URL: 'https://api.koiosmatch.nl/api' })
+    // ONIX M-003: no Google font host may appear in the policy.
+    expect(policy).not.toMatch(/googleapis|gstatic/)
     expect(policy).toBe(
       [
         "default-src 'self'",
         "script-src 'self' https://connect.facebook.net",
-        "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
+        "style-src 'self' 'unsafe-inline'",
         "img-src 'self' data: blob: https://*.tile.openstreetmap.org https://api.koiosmatch.nl",
-        "font-src 'self' https://fonts.gstatic.com",
+        "font-src 'self'",
         "connect-src 'self' https://graph.facebook.com blob: https://api.koiosmatch.nl",
         "frame-src https://staticxx.facebook.com https://www.facebook.com",
         "object-src 'none'",
@@ -46,9 +48,9 @@ describe('buildCsp', () => {
       [
         "default-src 'self'",
         "script-src 'self' https://connect.facebook.net",
-        "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
+        "style-src 'self' 'unsafe-inline'",
         "img-src 'self' data: blob: https://*.tile.openstreetmap.org",
-        "font-src 'self' https://fonts.gstatic.com",
+        "font-src 'self'",
         "connect-src 'self' https://graph.facebook.com blob:",
         "frame-src https://staticxx.facebook.com https://www.facebook.com",
         "object-src 'none'",

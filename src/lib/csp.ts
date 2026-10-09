@@ -31,9 +31,10 @@ function originOf(raw: string | undefined): string | null {
 /**
  * Builds the CSP directive string from the resolved env. Collects the API,
  * workflow-engine and CSRF origins (when absolute) alongside every fixed host
- * this app is known to call: Google Fonts (stylesheet + font files), OSM tiles
+ * this app is known to call: OSM tiles
  * (RadiusMap.tsx), and Facebook's SDK script/graph/frame hosts (facebookSdk.ts,
- * useEmbeddedSignup.ts). OpenCage geocoding goes through the backend proxy
+ * useEmbeddedSignup.ts). Fonts are self-hosted (ONIX M-003), so no font host
+ * is allowed. OpenCage geocoding goes through the backend proxy
  * (GEO-GEOCODE-SEARCH-1), so it never reaches the browser.
  */
 export function buildCsp(env: CspEnv): string {
@@ -72,9 +73,9 @@ export function buildCsp(env: CspEnv): string {
     "script-src 'self' https://connect.facebook.net",
     // Vite/React inject inline <style> tags at runtime (CSS-in-JS-free but styled
     // components still set style attributes) — 'unsafe-inline' is required here.
-    "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
+    "style-src 'self' 'unsafe-inline'",
     `img-src ${imgSrc}`,
-    "font-src 'self' https://fonts.gstatic.com",
+    "font-src 'self'",
     `connect-src ${connectSrc}`,
     // Facebook's SDK opens hidden xd_arbiter/staticxx iframes for its login flow.
     // This deliberately narrows what default-src 'self' used to allow for frames:
