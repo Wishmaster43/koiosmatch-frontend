@@ -32,6 +32,8 @@ interface VacanciesBulkBarProps {
   onAddNote: (text: string) => void
   onArchive: () => void
   canArchive?: boolean
+  // Mutating (non-archive) nodes are offered only with the update right; the server re-checks.
+  canEdit?: boolean
   users?: BulkUser[]
   statuses?: LookupOption[]
   customers?: BulkCustomer[]
@@ -47,7 +49,7 @@ interface VacanciesBulkBarProps {
 // See the file's top doc above; a thin assembler, all mutation data arrives via props.
 export default function VacanciesBulkBar({
   count, onClear, onSetOwner, onSetStatus, onSetClient, onPublish, onUnpublish, onSetAiAgent,
-  onRemoveTag, onAddNote, onArchive, canArchive = false,
+  onRemoveTag, onAddNote, onArchive, canArchive = false, canEdit = false,
   users = [], statuses = [], customers = [], aiAgents = [], selectedTags = [],
   selectedVacancies = [], onOpenCandidateSearch,
 }: VacanciesBulkBarProps) {
@@ -68,19 +70,8 @@ export default function VacanciesBulkBar({
   const pickCustomerHandler = pickById(customers, onSetClient)
   const pickAgentHandler = pickById(aiAgents, onSetAiAgent)
 
-  // Declarative bulk-action tree; archive is gated (server re-checks). "Kandidaten
-  // zoeken" is navigation, not a mutation, so it goes first: one checked vacancy
-  // opens its search tab directly, several show a drill-in picker (mirrors the
-  // owner/status/client option-list nodes below).
-  const items: MenuNode[] = [
-    ...(onOpenCandidateSearch ? [
-      selectedVacancies.length === 1
-        ? { key: 'candidateSearch', label: t('bulk.searchCandidates'), icon: Search,
-            onSelect: () => onOpenCandidateSearch(selectedVacancies[0].id) }
-        : { key: 'candidateSearch', label: t('bulk.searchCandidates'), icon: Search,
-            searchPlaceholder: t('bulk.searchVacancy'), emptyText: t('bulk.noVacancies'),
-            options: vacancyOptions, onPick: onOpenCandidateSearch },
-    ] as MenuNode[] : []),
+  // Mutating nodes, offered only with canEdit (update right).
+  const editNodes: MenuNode[] = [
     ownerNode(t, { users, onSetOwner, userOptions }),
     { key: 'status', label: t('bulk.changeStatus'), icon: CircleDot,
       searchPlaceholder: t('bulk.searchStatus'), options: statusOptions, onPick: onSetStatus },
@@ -102,6 +93,22 @@ export default function VacanciesBulkBar({
     ] }] : []),
     removeTagNode(t, { tagOptions, onRemoveTag }, { key: 'tag', labelKey: 'bulk.removeTag', iconType: Tag }),
     noteNode(t, () => setNoteModalOpen(true)),
+  ]
+
+  // Declarative bulk-action tree; archive is gated (server re-checks). "Kandidaten
+  // zoeken" is navigation, not a mutation, so it goes first: one checked vacancy
+  // opens its search tab directly, several show a drill-in picker (mirrors the
+  // owner/status/client option-list nodes above).
+  const items: MenuNode[] = [
+    ...(onOpenCandidateSearch ? [
+      selectedVacancies.length === 1
+        ? { key: 'candidateSearch', label: t('bulk.searchCandidates'), icon: Search,
+            onSelect: () => onOpenCandidateSearch(selectedVacancies[0].id) }
+        : { key: 'candidateSearch', label: t('bulk.searchCandidates'), icon: Search,
+            searchPlaceholder: t('bulk.searchVacancy'), emptyText: t('bulk.noVacancies'),
+            options: vacancyOptions, onPick: onOpenCandidateSearch },
+    ] as MenuNode[] : []),
+    ...(canEdit ? editNodes : []),
     ...archiveNode(t, { canArchive, onArchive }),
   ]
 

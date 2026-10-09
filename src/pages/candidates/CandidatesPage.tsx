@@ -152,7 +152,7 @@ export default function CandidatesPage({ intent }: { intent?: CandidateIntent } 
 
   // ── Data layer ──
   const locale = useLocale()
-  const { candidates, setCandidates, loading, error, total, setTotal, lastPage, stats, statsFailed, locations, rowsEpoch, fetching } =
+  const { candidates, setCandidates, loading, error, total, setTotal, lastPage, rangeFrom, rangeTo, stats, statsFailed, locations, rowsEpoch, fetching } =
     useCandidatesData({ filterParams, page, pageSize, t, setActionMsg, sort, locale })
 
   // SELECT-RACE-1: rowsEpoch (bumped only when a NEW server result actually lands,
@@ -335,7 +335,7 @@ export default function CandidatesPage({ intent }: { intent?: CandidateIntent } 
             canArchive: hasPermission('candidates.archive'),
             onMerge: bulkMergePrompt, canMerge: hasPermission('candidates.delete'),
             onManageByApplication: manageByApplication,
-            onGeocode: bulkGeocode, canGeocode: hasPermission('candidates.update'),
+            onGeocode: bulkGeocode, canGeocode: hasPermission('candidates.update'), canEdit: hasPermission('candidates.update'),
             onCoupleBackoffice: bulkCoupleBackoffice,
             users, funnelTypes, candidateTypes, phases, statuses, selectedTags,
           }}
@@ -350,7 +350,7 @@ export default function CandidatesPage({ intent }: { intent?: CandidateIntent } 
           selectedId={selected?.id} onSelectCandidate={selectCandidate}
           selectedIds={selectedIds} onToggleRow={toggleRow} onToggleAll={toggleAll} selectionBusy={fetching}
           sort={sort as ControlledSort | null} onSortChange={next => setSort(next as CandidateSort)}
-          page={page} lastPage={lastPage} pageSize={pageSize} pageSizeOptions={pageSizeOptions}
+          page={page} lastPage={lastPage} rangeFrom={rangeFrom} rangeTo={rangeTo} pageSize={pageSize} pageSizeOptions={pageSizeOptions}
           onPageChange={setPage} onPageSizeChange={handlePageSizeChange}
           mapCenter={mapCenter} mapRadius={mapRadius} mapStraalActive={mapStraalActive}
           onMapCenterChange={(lat, lng) => { setMapCenter({ lat, lng }); setMapStraalActive(true) }}

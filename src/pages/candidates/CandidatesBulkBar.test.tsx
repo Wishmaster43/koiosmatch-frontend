@@ -14,7 +14,7 @@ vi.mock('@/context/AppsContext', () => ({ useApps: () => mockUseApps() }))
 
 // i18n is not initialised in tests → t() returns the key, so we drive/assert on keys.
 const baseProps = () => ({
-  count: 3, onClear: vi.fn(),
+  count: 3, onClear: vi.fn(), canEdit: true,
   bulkScope: 'selected' as const, onSetBulkScope: vi.fn(), filteredTotal: 42, anyFilterActive: false,
   onAddToPool: vi.fn(), onRemoveFromPool: vi.fn(),
   onSetOwner: vi.fn(), onSetStage: vi.fn(), onSetTypes: vi.fn(),
@@ -213,5 +213,25 @@ describe('CandidatesBulkBar', () => {
       await user.click(screen.getByText('common:backofficeLinks.shiftmanager.name'))
       expect(onCoupleBackoffice).toHaveBeenCalledWith('shiftmanager')
     })
+  })
+})
+
+// N004-BULK-RIGHTS-2: mutating nodes are offered only with the update right.
+describe('CandidatesBulkBar · canEdit gate', () => {
+  it('hides the mutating nodes without canEdit but keeps Archive on its own gate', async () => {
+    const user = userEvent.setup()
+    render(<CandidatesBulkBar {...baseProps()} canEdit={false} canArchive />)
+    await user.click(screen.getByText('bulk.actions'))
+    expect(screen.queryByText('bulk.changeOwner')).toBeNull()
+    expect(screen.queryByText('bulk.changeStatus')).toBeNull()
+    expect(screen.getByText('bulk.archive')).toBeInTheDocument()
+  })
+
+  it('shows the mutating nodes with canEdit', async () => {
+    const user = userEvent.setup()
+    render(<CandidatesBulkBar {...baseProps()} canEdit />)
+    await user.click(screen.getByText('bulk.actions'))
+    expect(screen.getByText('bulk.changeOwner')).toBeInTheDocument()
+    expect(screen.getByText('bulk.changeStatus')).toBeInTheDocument()
   })
 })

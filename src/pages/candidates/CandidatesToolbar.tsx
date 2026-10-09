@@ -79,7 +79,7 @@ export default function CandidatesToolbar({
           onSetOwner={bulkBar.onSetOwner} onSetStage={bulkBar.onSetStage} onSetTypes={bulkBar.onSetTypes} onSetConsent={bulkBar.onSetConsent}
           onConvertPhase={bulkBar.onConvertPhase} onSetStatus={bulkBar.onSetStatus} onAddTag={bulkBar.onAddTag}
           onRemoveTag={bulkBar.onRemoveTag} onAddNote={bulkBar.onAddNote} onArchive={bulkBar.onArchive}
-          canArchive={bulkBar.canArchive}
+          canArchive={bulkBar.canArchive} canEdit={bulkBar.canEdit}
           onMerge={bulkBar.onMerge} canMerge={bulkBar.canMerge}
           onManageByApplication={bulkBar.onManageByApplication}
           onGeocode={bulkBar.onGeocode} canGeocode={bulkBar.canGeocode}

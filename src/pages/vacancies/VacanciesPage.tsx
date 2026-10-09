@@ -99,7 +99,7 @@ function VacanciesPageInner({ intent }: { intent?: unknown }) {
   useEffect(() => { setPage(1) }, [sort, setPage])
 
   // ── Data layer ──
-  const { vacancies, setVacancies, loading, error, total, setTotal, lastPage, stats, customers, refresh, rowsEpoch, fetching } =
+  const { vacancies, setVacancies, loading, error, total, setTotal, lastPage, rangeFrom, rangeTo, stats, customers, refresh, rowsEpoch, fetching } =
     useVacanciesData({ filterParams, page, pageSize, t, sort })
   const customerList = customers as { id: Id; name: string }[]
 
@@ -273,7 +273,7 @@ function VacanciesPageInner({ intent }: { intent?: unknown }) {
               onPublish={() => bulkPublish(true)} onUnpublish={() => bulkPublish(false)}
               onSetAiAgent={bulkSetAiAgent}
               onRemoveTag={bulkRemoveTag} onAddNote={bulkAddNote} onArchive={bulkArchive}
-              canArchive={hasPermission('vacancies.delete')}
+              canArchive={hasPermission('vacancies.delete')} canEdit={hasPermission('vacancies.update')}
               users={users} statuses={statuses} customers={customerList} aiAgents={aiAgents} selectedTags={selectedTags}
               selectedVacancies={vacancies.filter((v): v is typeof v & { id: Id } => v.id != null && selectedIds.has(v.id)).map(v => ({ id: v.id, title: v.title }))}
               onOpenCandidateSearch={openCandidateSearch} />
@@ -325,7 +325,7 @@ function VacanciesPageInner({ intent }: { intent?: unknown }) {
                   />
                 </div>
 
-                <PaginationBar page={page} totalPages={lastPage} totalRows={total} pageSize={pageSize}
+                <PaginationBar page={page} totalPages={lastPage} totalRows={total} rangeFrom={rangeFrom} rangeTo={rangeTo} pageSize={pageSize}
                   onPageChange={setPage} onPageSizeChange={handlePageSizeChange} pageSizeOptions={pageSizeOptions} />
               </>
             ),
@@ -352,7 +352,7 @@ function VacanciesPageInner({ intent }: { intent?: unknown }) {
                     <VacanciesTable rows={visibleRows} loading={loading} selectedId={selected?.id} onSelect={openVacancy}
                       onOpenCandidateSearch={openCandidateSearch} onOpenApplicants={openApplicants} onOpenMatches={openMatches} />
                   </div>
-                  <PaginationBar page={page} totalPages={lastPage} totalRows={total} pageSize={pageSize}
+                  <PaginationBar page={page} totalPages={lastPage} totalRows={total} rangeFrom={rangeFrom} rangeTo={rangeTo} pageSize={pageSize}
                     onPageChange={setPage} onPageSizeChange={handlePageSizeChange} pageSizeOptions={pageSizeOptions} />
                 </div>
               </div>

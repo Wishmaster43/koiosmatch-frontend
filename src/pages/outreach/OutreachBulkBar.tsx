@@ -19,17 +19,19 @@ interface Props {
   onSetStatus: (status: string) => void
   onArchive: () => void
   canArchive?: boolean
+  // Mutating (non-archive) nodes are offered only with the update right; the server re-checks.
+  canEdit?: boolean
   statuses: StatusOption[]
 }
 
 // Thin assembler (see the module doc above): builds the ActionMenu config tree from props, mirroring TasksBulkBar/CandidatesBulkBar.
-export default function OutreachBulkBar({ count, onClear, onSetStatus, onArchive, canArchive = false, statuses }: Props) {
+export default function OutreachBulkBar({ count, onClear, onSetStatus, onArchive, canArchive = false, canEdit = false, statuses }: Props) {
   const { t } = useTranslation('outreach')
 
   // Declarative bulk-action tree; extend with more actions as extra nodes.
   const items: MenuNode[] = [
-    { key: 'status', label: t('bulk.changeStatus'), icon: Activity,
-      searchPlaceholder: t('bulk.searchStatus'), options: statuses, onPick: (v) => onSetStatus(String(v)) },
+    ...(canEdit ? [{ key: 'status', label: t('bulk.changeStatus'), icon: Activity,
+      searchPlaceholder: t('bulk.searchStatus'), options: statuses, onPick: (v: string | number) => onSetStatus(String(v)) } as MenuNode] : []),
     ...archiveNode(t, { canArchive, onArchive }),
   ]
 

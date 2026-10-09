@@ -261,6 +261,7 @@ export default function OutreachPage({ intent }: { intent?: unknown } = {}) {
           <div style={{ padding: '8px 24px', flexShrink: 0 }}>
             <OutreachBulkBar count={selectedIds.size} onClear={() => setSelectedIds(new Set())}
               onSetStatus={bulkSetStatus} onArchive={bulkArchive} canArchive={canArchive}
+              canEdit={hasPermission?.('outreach.update') ?? false}
               statuses={columns.map((c) => ({ value: c.key, label: c.label, color: c.color }))} />
           </div>
         )}

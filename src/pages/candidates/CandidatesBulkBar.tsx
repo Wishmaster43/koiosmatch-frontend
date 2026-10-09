@@ -44,6 +44,8 @@ export interface CandidatesBulkBarProps {
   onAddNote: (text: string) => void
   onArchive: () => void
   canArchive?: boolean
+  // Mutating (non-archive) nodes are offered only with the update right; the server re-checks.
+  canEdit?: boolean
   // 11.1 deep-link: navigates to the Applications page with the current selection
   // (NavigationContext intent pattern). Optional — the menu entry only renders once
   // the parent wires it (honest gate: no dead button before that plumbing lands).
@@ -74,7 +76,7 @@ export interface CandidatesBulkBarProps {
 export default function CandidatesBulkBar({
   count, onClear, bulkScope, onSetBulkScope, filteredTotal, anyFilterActive,
   onAddToPool, onRemoveFromPool, onSetOwner, onSetStage, onSetTypes, onSetConsent,
-  onConvertPhase, onSetStatus, onAddTag, onRemoveTag, onAddNote, onArchive, canArchive = false,
+  onConvertPhase, onSetStatus, onAddTag, onRemoveTag, onAddNote, onArchive, canArchive = false, canEdit = false,
   onMerge, canMerge = false, onManageByApplication, onGeocode, canGeocode = false,
   onCoupleBackoffice,
   users = [], funnelTypes = [], candidateTypes = [], phases = [], statuses = [], selectedTags = [],
@@ -111,7 +113,8 @@ export default function CandidatesBulkBar({
 
   // Declarative bulk-action tree; extend with more actions as extra nodes.
   // Archive is gated: only present when the user may delete (server re-checks).
-  const items: MenuNode[] = [
+  // Mutating nodes, offered only with canEdit (update right); merge/geocode/couple/archive keep their own gates.
+  const editNodes: MenuNode[] = [
     ownerNode(t, { users, onSetOwner, userOptions }),
     { key: 'pool', label: t('bulk.pool'), icon: Folder, items: [
       { key: 'add-pool', label: t('bulk.addToPool'), icon: FolderPlus,
@@ -126,10 +129,6 @@ export default function CandidatesBulkBar({
     // if a vacancy could be chosen.
     { key: 'stage', label: t('bulk.changeStage'), icon: Milestone, note: t('bulk.stageNote'),
       searchPlaceholder: t('bulk.searchStage'), options: stageOptions, onPick: (v) => onSetStage(String(v)) },
-    // 11.1: convenience deep-link to the axis-correct per-application bulk home
-    // (ApplicationsBulkBar) — gated on the callback being wired (honest gate, see the
-    // prop comment above).
-    ...(onManageByApplication ? [{ key: 'manage-by-application', label: t('bulk.manageByApplication'), icon: ExternalLink, onSelect: onManageByApplication }] : []),
     { key: 'phase', label: t('bulk.changePhase'), icon: UserCheck,
       searchPlaceholder: t('bulk.searchPhase'), options: phaseOptions, onPick: (v) => onConvertPhase(String(v)) },
     { key: 'status', label: t('bulk.changeStatus'), icon: Activity,
@@ -157,6 +156,14 @@ export default function CandidatesBulkBar({
         { key: 'nl-off', label: t('bulk.consentOff'), onSelect: () => onSetConsent({ newsletter_opt_in: false }, `${t('communication.consentNewsletter')} — ${t('bulk.consentOff')}`) },
       ] },
     ] },
+  ]
+
+  const items: MenuNode[] = [
+    // 11.1: convenience deep-link to the axis-correct per-application bulk home
+    // (ApplicationsBulkBar) — gated on the callback being wired (honest gate, see the
+    // prop comment above).
+    ...(onManageByApplication ? [{ key: 'manage-by-application', label: t('bulk.manageByApplication'), icon: ExternalLink, onSelect: onManageByApplication }] : []),
+    ...(canEdit ? editNodes : []),
     // Bulk-merge (punt 4): only offered with EXACTLY 2 rows selected — merging is
     // pairwise (one survivor absorbs one duplicate), so any other count is ambiguous.
     ...mergeNode(t, { count, canMerge, onMerge }),

@@ -5,7 +5,7 @@ import VacanciesBulkBar from './VacanciesBulkBar'
 
 // i18n is not initialised in tests → t() returns the key, so we drive/assert on keys.
 const baseProps = () => ({
-  count: 3, onClear: vi.fn(),
+  count: 3, onClear: vi.fn(), canEdit: true,
   onSetOwner: vi.fn(), onSetStatus: vi.fn(), onSetClient: vi.fn(),
   onPublish: vi.fn(), onUnpublish: vi.fn(), onSetAiAgent: vi.fn(),
   onRemoveTag: vi.fn(), onAddNote: vi.fn(), onArchive: vi.fn(),
@@ -129,5 +129,25 @@ describe('VacanciesBulkBar · candidate-search node', () => {
     await user.click(screen.getByText('bulk.searchCandidates'))
     await user.click(screen.getByText('Doktersassistent'))
     expect(onOpenCandidateSearch).toHaveBeenCalledWith('v2')
+  })
+})
+
+// N004-BULK-RIGHTS-2: mutating nodes are offered only with the update right.
+describe('VacanciesBulkBar · canEdit gate', () => {
+  it('hides the mutating nodes without canEdit but keeps Archive on its own gate', async () => {
+    const user = userEvent.setup()
+    render(<VacanciesBulkBar {...baseProps()} canEdit={false} canArchive />)
+    await user.click(screen.getByText('bulk.actions'))
+    expect(screen.queryByText('bulk.changeOwner')).toBeNull()
+    expect(screen.queryByText('bulk.changeStatus')).toBeNull()
+    expect(screen.getByText('bulk.archive')).toBeInTheDocument()
+  })
+
+  it('shows the mutating nodes with canEdit', async () => {
+    const user = userEvent.setup()
+    render(<VacanciesBulkBar {...baseProps()} canEdit />)
+    await user.click(screen.getByText('bulk.actions'))
+    expect(screen.getByText('bulk.changeOwner')).toBeInTheDocument()
+    expect(screen.getByText('bulk.changeStatus')).toBeInTheDocument()
   })
 })
