@@ -8,7 +8,7 @@
  * Also covers the four polish refinements: auto-expand, candidate-name heading,
  * WhatsApp-style delivery ticks and per-sender colour coding.
  */
-import { describe, it, expect, vi, beforeEach } from 'vitest'
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 import { render, screen, waitFor, fireEvent, act } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import ConversationsSection from './ConversationsSection'
@@ -41,7 +41,11 @@ const MESSAGES = [
   { id: 'm2', direction: 'outbound', message_content: 'Ja! We plannen een intake.', sent_at: '2026-07-17T09:00:00Z', purpose: 'interview' },
 ]
 
+// ONIX R-001: freeze ONLY Date so the Date.now()-relative recent/stale fixtures and the
+// 24h-window maths cannot drift while a loaded machine is slow; timers stay real here.
 beforeEach(() => {
+  vi.useFakeTimers({ toFake: ['Date'] })
+  vi.setSystemTime(new Date('2026-10-01T12:00:00Z'))
   vi.mocked(api.get).mockReset()
   vi.mocked(api.get).mockImplementation((url: string) => {
     if (url === '/conversations') return Promise.resolve({ data: { data: THREADS } })
@@ -50,6 +54,10 @@ beforeEach(() => {
   })
   vi.mocked(api.post).mockReset()
   vi.mocked(notifyError).mockReset()
+})
+
+afterEach(() => {
+  vi.useRealTimers()
 })
 
 describe('ConversationsSection', () => {
@@ -696,6 +704,16 @@ describe('ConversationsSection · message fetch failure + retry (§8 D8)', () =>
 })
 
 // WA-THREAD-UX-1: channel-aware composer + sort toggle + queued-status refresh.
+// ONIX R-001: step the fake clock in small slices until the condition holds, so a timer
+// scheduled late (loaded machine) is still reached. RTL's waitFor runs on the FAKE clock
+// here, so this is a plain bounded loop (virtual 5 min max), never a longer wall wait.
+async function advanceUntil(cond: () => boolean) {
+  for (let i = 0; i < 60 && !cond(); i += 1) {
+    await act(async () => { await vi.advanceTimersByTimeAsync(5_000) })
+  }
+  expect(cond()).toBe(true)
+}
+
 describe('ConversationsSection · WA-THREAD-UX-1', () => {
   it('shows the free-text composer on a wa_web thread with a closed window, and posts the same request shape', async () => {
     const stale = new Date(Date.now() - 25 * 60 * 60 * 1000).toISOString() // window closed
@@ -761,6 +779,7 @@ describe('ConversationsSection · WA-THREAD-UX-1', () => {
   it('refetches a wa_web thread with a queued send after the 60s drainer-cadence timer', async () => {
     // shouldAdvanceTime keeps RTL's own real-timer polling (findBy*/waitFor) alive
     // while still letting us fast-forward the 60s refresh timer deterministically.
+    vi.useRealTimers() // drop the Date-only freeze before installing the full fake clock
     vi.useFakeTimers({ shouldAdvanceTime: true })
     try {
       const waWebThread = [{ ...THREADS[0], primary_channel: 'wa_web' }]
@@ -778,21 +797,22 @@ describe('ConversationsSection · WA-THREAD-UX-1', () => {
       vi.mocked(api.post).mockResolvedValueOnce({ status: 202, data: { outbox_id: 'ob-2', status: 'queued' } })
       render(<ConversationsSection threadsUrl="/conversations" threadsParams={{ candidate_id: 'cand-1' }} />)
 
-      const input = await screen.findByPlaceholderText('conversations.composerPlaceholder')
+      // Fake-clock steps instead of wall-clock findBy*: a loaded machine cannot starve them.
+      await advanceUntil(() => screen.queryByPlaceholderText('conversations.composerPlaceholder') !== null)
+      const input = screen.getByPlaceholderText('conversations.composerPlaceholder')
       fireEvent.change(input, { target: { value: 'Nog een berichtje' } })
       fireEvent.click(screen.getByRole('button', { name: 'common:send' }))
-      await waitFor(() => expect(api.post).toHaveBeenCalled())
+      await advanceUntil(() => vi.mocked(api.post).mock.calls.length > 0)
       // The refresh timer is scheduled when the 202 lands and the pending bubble renders —
       // wait for the bubble, or a loaded machine advances the clock before the timer exists.
-      await screen.findByText('conversations.delivery.queued')
+      await advanceUntil(() => screen.queryByText('conversations.delivery.queued') !== null)
       const callsBeforeTimer = getCount
 
       // The 60s drainer-cadence timer refetches this thread's messages. Advance PAST the
       // cadence (shouldAdvanceTime moves the fake clock with real time too, so an exact
       // 60_000 can land a few ms short under CPU load) and wait for the refetch instead of
       // asserting synchronously — measured flake in two landings on 02-10.
-      await act(async () => { await vi.advanceTimersByTimeAsync(65_000) })
-      await waitFor(() => expect(getCount).toBeGreaterThan(callsBeforeTimer))
+      await advanceUntil(() => getCount > callsBeforeTimer)
     } finally {
       vi.useRealTimers()
     }
@@ -802,6 +822,7 @@ describe('ConversationsSection · WA-THREAD-UX-1', () => {
   // must not drop the just-sent bubble, and polling must keep going (never a
   // one-shot poll that gives up the moment a read lands empty-handed).
   it('keeps the pending bubble and keeps polling when a refetch resolves without the queued row yet', async () => {
+    vi.useRealTimers() // drop the Date-only freeze before installing the full fake clock
     vi.useFakeTimers({ shouldAdvanceTime: true })
     try {
       const waWebThread = [{ ...THREADS[0], primary_channel: 'wa_web' }]
@@ -819,25 +840,26 @@ describe('ConversationsSection · WA-THREAD-UX-1', () => {
       vi.mocked(api.post).mockResolvedValueOnce({ status: 202, data: { outbox_id: 'ob-4', status: 'queued' } })
       render(<ConversationsSection threadsUrl="/conversations" threadsParams={{ candidate_id: 'cand-1' }} />)
 
-      const input = await screen.findByPlaceholderText('conversations.composerPlaceholder')
+      // Fake-clock steps instead of wall-clock findBy*: a loaded machine cannot starve them.
+      await advanceUntil(() => screen.queryByPlaceholderText('conversations.composerPlaceholder') !== null)
+      const input = screen.getByPlaceholderText('conversations.composerPlaceholder')
       fireEvent.change(input, { target: { value: 'Wachtrij-bericht' } })
       fireEvent.click(screen.getByRole('button', { name: 'common:send' }))
-      await waitFor(() => expect(api.post).toHaveBeenCalled())
+      await advanceUntil(() => vi.mocked(api.post).mock.calls.length > 0)
       // The refresh timer is scheduled when the 202 lands and the pending bubble renders —
       // wait for the bubble, or a loaded machine advances the clock before the timer exists.
-      await screen.findByText('conversations.delivery.queued')
+      await advanceUntil(() => screen.queryByText('conversations.delivery.queued') !== null)
       const callsBeforeTimer = getCount
 
       // First backoff step (60s): the refetch resolves without the queued row.
-      await act(async () => { await vi.advanceTimersByTimeAsync(60_000) })
-      expect(getCount).toBeGreaterThan(callsBeforeTimer)
+      // Advance PAST the cadence and await the refetch (same shape as FLAKE-WA-TIMER-1).
+      await advanceUntil(() => getCount > callsBeforeTimer)
       // The pending bubble is still on screen — a bare replace would have dropped it.
-      expect(await screen.findByText('Wachtrij-bericht')).toBeInTheDocument()
+      expect(screen.getByText('Wachtrij-bericht')).toBeInTheDocument()
 
       // Second backoff step (still 60s, attempt index 1): polling continues.
       const callsBeforeSecondTimer = getCount
-      await act(async () => { await vi.advanceTimersByTimeAsync(60_000) })
-      expect(getCount).toBeGreaterThan(callsBeforeSecondTimer)
+      await advanceUntil(() => getCount > callsBeforeSecondTimer)
       expect(screen.getByText('Wachtrij-bericht')).toBeInTheDocument()
     } finally {
       vi.useRealTimers()

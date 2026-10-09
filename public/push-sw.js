@@ -20,9 +20,21 @@ self.addEventListener('push', (event) => {
 // Clicking the notification focuses an already-open app window on the payload's
 // deep link when present (NOTIF-PAYLOAD, data.url — same hash target the in-app
 // bell/toast use), or opens a new window there; falls back to '/' otherwise.
+// ONIX M-001: resolve the click target and use it ONLY when it is on our own origin;
+// anything else (foreign host, javascript:, malformed) falls back to '/'. The hash
+// deep link survives because the full href is returned.
+function sameOriginTarget(raw, origin) {
+  try {
+    const target = new URL(raw, origin)
+    return target.origin === origin ? target.href : '/'
+  } catch {
+    return '/'
+  }
+}
+
 self.addEventListener('notificationclick', (event) => {
   event.notification.close()
-  const url = (event.notification.data && event.notification.data.url) || '/'
+  const url = sameOriginTarget((event.notification.data && event.notification.data.url) || '/', self.location.origin)
   event.waitUntil(
     self.clients.matchAll({ type: 'window', includeUncontrolled: true }).then((clients) => {
       for (const client of clients) {

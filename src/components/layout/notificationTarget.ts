@@ -6,6 +6,7 @@
  * NotificationBell re-exports these for backward compatibility.
  */
 import type { AppNotification } from '@/hooks/useNotifications'
+import { isApiOrigin } from '@/lib/authMode'
 
 // Backend entity-type slug → the app shell's page key (appPages.tsx PAGE_TITLES).
 export const ENTITY_PAGE: Record<string, string> = {
@@ -144,13 +145,24 @@ export function buildNotificationDeepLink(target: NotificationTarget): string {
   return `${window.location.pathname}#${target.page}?open=${encodeURIComponent(target.id)}`
 }
 
+// ONIX M-001: an external href is trusted only on the API origin or the app's own origin
+// (http(s) only); foreign hosts and non-http schemes leave the row non-clickable.
+function isTrustedHref(raw: string): boolean {
+  if (!/^https?:\/\//i.test(raw)) return false
+  try {
+    return isApiOrigin(raw) || new URL(raw).origin === window.location.origin
+  } catch {
+    return false
+  }
+}
+
 // TRANSFER-FAMILIES ZIP: notification types whose click-through is an EXTERNAL
 // signed URL (meta.download_url), not a record target — resolved separately so
 // the {page,id} model stays untouched. Only http(s) strings pass; anything else
 // leaves the row non-clickable (§3 no fake affordances).
 const CUSTOM_HREF_TYPES: Record<string, (meta: Record<string, unknown>) => string | null> = {
   'documents.zip_ready': (meta) =>
-    typeof meta.download_url === 'string' && /^https?:\/\//i.test(meta.download_url) ? meta.download_url : null,
+    typeof meta.download_url === 'string' && isTrustedHref(meta.download_url) ? meta.download_url : null,
 }
 
 // Pure: resolve a notification whose target is an external download link, or null.

@@ -8,7 +8,7 @@
     "build": "vite build",
     "lint": "eslint .",
     "typecheck": "tsc --noEmit",
-    "gen:types": "npx -y openapi-typescript@7 ../koiosmatch-api/docs/openapi.yaml -o src/types/api-generated.ts",
+    "gen:types": "openapi-typescript ../koiosmatch-api/docs/openapi.yaml -o src/types/api-generated.ts",
     "preview": "vite preview",
     "test": "vitest run",
     "test:watch": "vitest",
@@ -64,7 +64,9 @@
     "eslint-plugin-react-hooks": "^7.1.1",
     "eslint-plugin-react-refresh": "^0.5.2",
     "globals": "^17.6.0",
+    "jscpd": "5.4.1",
     "jsdom": "^29.1.1",
+    "openapi-typescript": "7.13.0",
     "playwright": "^1.61.1",
     "postcss": "^8.5.15",
     "tailwindcss": "^3.4.19",
@@ -74,6 +76,9 @@
     "vitest": "^2.1.9"
   },
   "overrides": {
-    "pdfjs-dist": "$pdfjs-dist"
+    "pdfjs-dist": "$pdfjs-dist",
+    "openapi-typescript": {
+      "typescript": "$typescript"
+    }
   }
 }

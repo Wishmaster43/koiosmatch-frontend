@@ -16,3 +16,18 @@
 export const CSRF_COOKIE_URL =
   import.meta.env.VITE_CSRF_URL ??
   `${(import.meta.env.VITE_API_URL ?? 'http://koiosmatch-api.test/api').replace(/\/api\/?$/, '')}/sanctum/csrf-cookie`
+
+// ONIX M-001: the API origin, derived ONCE from the same base URL api.ts uses, so a
+// link from the server is only trusted when it points at our own API host.
+const API_BASE_URL: string = import.meta.env.VITE_API_URL ?? 'http://koiosmatch-api.test/api'
+
+// Pure: true when the https/http address has exactly the API's origin (relative or foreign → false).
+export function isApiOrigin(url: string): boolean {
+  try {
+    // A relative base (dev proxy) resolves against the app origin, like axios does.
+    const base = typeof window !== 'undefined' ? window.location.origin : undefined
+    return new URL(url).origin === new URL(API_BASE_URL, base).origin
+  } catch {
+    return false
+  }
+}

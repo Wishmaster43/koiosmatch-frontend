@@ -20,7 +20,7 @@ const forceMode = process.argv.includes('--force')
 // One jscpd run, JSON only, into a throwaway directory.
 const out = mkdtempSync(join(tmpdir(), 'dry-ceiling-'))
 try {
-  execFileSync('npx', ['-y', 'jscpd', 'src', '--min-tokens', '60', '--ignore', '**/*.test.*,**/locales/**,**/api-generated.ts',
+  execFileSync('npx', ['jscpd', 'src', '--min-tokens', '60', '--ignore', '**/*.test.*,**/locales/**,**/api-generated.ts',
     '--reporters', 'json', '--output', out, '--silent'], { cwd: ROOT, stdio: 'ignore' })
 } catch { /* jscpd exits non-zero on findings in some versions; the report is what counts */ }
 const report = JSON.parse(readFileSync(join(out, 'jscpd-report.json'), 'utf8'))

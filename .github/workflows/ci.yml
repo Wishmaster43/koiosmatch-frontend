@@ -15,12 +15,12 @@ concurrency:
 
 jobs:
   gates:
-    name: typecheck · lint + huisstijl ceiling · i18n parity · typography ratchet · dependency audit
+    name: typecheck · lint + huisstijl/dry/english ceilings · i18n parity · typography ratchet · dependency audit
     runs-on: ubuntu-latest
     timeout-minutes: 20
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
         with:
           node-version: 22
           cache: npm
@@ -29,6 +29,10 @@ jobs:
         run: npm run --silent typecheck
       - name: eslint errors + huisstijl ceiling (shrink-only)
         run: node scripts/huisstijl-ceiling.mjs
+      - name: dry (jscpd clone) ceiling (shrink-only)
+        run: npm run --silent dry:ceiling
+      - name: english-code ceiling (shrink-only)
+        run: npm run --silent english:ceiling
       - name: i18n parity (seven locales)
         run: npx vitest run src/i18n/localeParity.test.ts
       - name: typography / button / em-dash ratchets
@@ -41,8 +45,8 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 40
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
         with:
           node-version: 22
           cache: npm
