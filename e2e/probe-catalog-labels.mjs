@@ -26,16 +26,15 @@ if (catalog.__status || signals.__status) { console.error('catalog fetch failed'
 const keys = new Set()
 // Section titles render only as a heading/empty-state in some host modes: reported, never failing.
 const advisory = new Set()
-const ns = (k) => String(k)
 for (const section of catalog.data?.sections ?? []) {
   if (section.hidden) continue
   // Pattern rows describe key families and dedicated rows have their own screen: the generic screen skips both.
   const rows = (section.keys ?? []).filter((r) => r.ui === 'generic' && !r.pattern)
   if (rows.length) advisory.add(`catalog.sections.${section.id}.title`)
   for (const row of rows) {
-    if (row.label_key) keys.add(ns(row.label_key))
-    if (row.help_key) keys.add(ns(row.help_key))
-    if (row.group_label_key) keys.add(ns(row.group_label_key))
+    if (row.label_key) keys.add(String(row.label_key))
+    if (row.help_key) keys.add(String(row.help_key))
+    if (row.group_label_key) keys.add(String(row.group_label_key))
     else if (row.group) keys.add(`settings.groups.${row.group}`)
   }
 }

@@ -3,12 +3,17 @@
  * EXTERNAL signed URL (TRANSFER-FAMILIES ZIP), resolved separately from the
  * {page,id} record model. Pins: only http(s) passes, unknown types stay null.
  */
-import { describe, it, expect } from 'vitest'
+import { describe, it, expect, vi } from 'vitest'
+// Pin a distinct API origin so the API-origin branch is really exercised (the .env uses a relative /api).
+vi.mock('@/lib/authMode', () => ({
+  isApiOrigin: (u: string) => new URL(u).origin === 'https://api.example.test',
+}))
+
 import { resolveNotificationHref } from './notificationTarget'
 import type { AppNotification } from '@/hooks/useNotifications'
 
-// The API origin as the app derives it (env-driven, same default as api.ts).
-const API_ORIGIN = new URL(import.meta.env.VITE_API_URL ?? 'http://koiosmatch-api.test/api', window.location.origin).origin
+// The stubbed API origin, distinct from the app origin.
+const API_ORIGIN = 'https://api.example.test'
 
 const row = (type: string, meta: Record<string, unknown>): AppNotification =>
   ({ id: 1, type, meta } as unknown as AppNotification)
@@ -35,6 +40,12 @@ describe('resolveNotificationHref origin gate (M-001)', () => {
     const api = `${API_ORIGIN}/dl/a?sig=1`
     const app = `${window.location.origin}/dl/b`
     expect(resolveNotificationHref(row('documents.zip_ready', { download_url: api }))).toBe(api)
+    expect(resolveNotificationHref(row('documents.zip_ready', { download_url: app }))).toBe(app)
+  })
+
+  it('keeps a same-app-origin URL while the API origin differs', () => {
+    expect(window.location.origin).not.toBe(API_ORIGIN)
+    const app = `${window.location.origin}/dl/c?sig=2`
     expect(resolveNotificationHref(row('documents.zip_ready', { download_url: app }))).toBe(app)
   })
 

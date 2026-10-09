@@ -19,8 +19,8 @@
  * hasModule, hasPermission, …) only change identity when that value itself
  * changes — which is exactly when consumers SHOULD re-render anyway.
  */
-import { clearDeviceCaches } from '@/lib/deviceCaches'
 import { createContext, useContext, useState, useEffect, useCallback, useMemo } from 'react'
+import { clearDeviceCaches } from '@/lib/deviceCaches'
 import { setBureauTimezone } from '@/lib/bureauTime'
 import type { ReactNode } from 'react'
 import api, { primeCsrf, unwrapList } from '../lib/api'
