@@ -4657,7 +4657,7 @@
       "twoWayHint": "Wijzigingen stromen beide kanten op zodra de synchronisatie live is.",
       "connectedAs": "Verbonden als {{name}}",
       "notConnected": "Nog niet verbonden",
-      "notActiveYet": "Nog niet actief: er is nog geen synchronisatie uitgevoerd.",
+      "notActiveYet": "Nog niet actief: de koppeling staat uit of heeft nog geen synchronisatie gedraaid.",
       "lastSyncedAt": "Laatst gesynchroniseerd op {{date}}",
       "baseUrl": "Basis-URL",
       "apiKey": "API-sleutel",
