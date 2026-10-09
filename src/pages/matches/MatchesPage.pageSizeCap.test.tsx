@@ -63,11 +63,11 @@ vi.mock('@/components/ui/ViewSwitch', () => ({
 afterEach(() => { window.location.hash = '' })
 
 describe('MatchesPage · per_page honesty with a 900 stored preference', () => {
-  it('requests per_page=500, never the tenant\'s stored 900 preference', async () => {
+  it('requests per_page=100, never the tenant\'s stored 900 preference', async () => {
     render(<MatchesPage />)
     await waitFor(() => expect(mockedGet).toHaveBeenCalled())
     const matchCall = mockedGet.mock.calls.find(c => c[0] === '/matches')
-    expect(matchCall?.[1]?.params).toMatchObject({ per_page: 500 })
+    expect(matchCall?.[1]?.params).toMatchObject({ per_page: 100 })
     expect(matchCall?.[1]?.params).not.toMatchObject({ per_page: 900 })
   })
 })

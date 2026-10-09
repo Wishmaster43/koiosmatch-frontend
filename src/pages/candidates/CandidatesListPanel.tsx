@@ -57,6 +57,9 @@ interface CandidatesListPanelProps extends CandidatesToolbarProps {
   onSortChange: (sort: ControlledSort) => void
   page: number
   lastPage: number
+  // Server-reported row range for the footer (optional until the BE meta lands).
+  rangeFrom?: number | null
+  rangeTo?: number | null
   pageSize: number
   // Per-endpoint dropdown options (useListPageSize) — falls back to PaginationBar's
   // own full shared list when a caller doesn't pass one.
@@ -80,7 +83,7 @@ export default function CandidatesListPanel({
   anyFilterActive, onClearFilters, blacklistActive, onToggleBlacklist,
   showArchived, onToggleArchived, showTrash, onToggleTrash, view, onToggleView,
   tableScrollRef, error, filtered, loading, selectedId, onSelectCandidate,
-  selectedIds, onToggleRow, onToggleAll, selectionBusy, sort, onSortChange, page, lastPage, pageSize, pageSizeOptions, onPageChange, onPageSizeChange,
+  selectedIds, onToggleRow, onToggleAll, selectionBusy, sort, onSortChange, page, lastPage, rangeFrom, rangeTo, pageSize, pageSizeOptions, onPageChange, onPageSizeChange,
   mapCenter, mapRadius, mapStraalActive, onMapCenterChange, onMapRadiusChange, onMapClearRadius,
 }: CandidatesListPanelProps) {
   const { t } = useTranslation(['candidates', 'common'])
@@ -146,7 +149,7 @@ export default function CandidatesListPanel({
               <PaginationBar
                 page={page}
                 totalPages={lastPage}
-                totalRows={total}
+                totalRows={total} rangeFrom={rangeFrom} rangeTo={rangeTo}
                 pageSize={pageSize}
                 pageSizeOptions={pageSizeOptions}
                 onPageChange={onPageChange}
@@ -175,7 +178,7 @@ export default function CandidatesListPanel({
                     onSelect={onSelectCandidate} onOpenTab={onSelectCandidate}
                     sort={sort} onSortChange={onSortChange} />
                 </div>
-                <PaginationBar page={page} totalPages={lastPage} totalRows={total} pageSize={pageSize}
+                <PaginationBar page={page} totalPages={lastPage} totalRows={total} rangeFrom={rangeFrom} rangeTo={rangeTo} pageSize={pageSize}
                   pageSizeOptions={pageSizeOptions} onPageChange={onPageChange} onPageSizeChange={onPageSizeChange} />
               </div>
             </div>

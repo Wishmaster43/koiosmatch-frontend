@@ -38,6 +38,17 @@ describe('unwrapList', () => {
     expect(r.perPage).toBe(25)
   })
 
+  it('reads the server row range (meta.from/to) and nulls it when absent', () => {
+    const r = unwrapList(res({ data: [{ id: 1 }], meta: { total: 104, current_page: 2, last_page: 2, per_page: 100, from: 101, to: 104 } }))
+    expect(r.from).toBe(101)
+    expect(r.to).toBe(104)
+    const bare = unwrapList(res([1, 2]))
+    expect([bare.from, bare.to]).toEqual([1, 2])
+    const empty = unwrapList(res({ data: [], meta: { total: 0, from: null, to: null } }))
+    expect([empty.from, empty.to]).toEqual([null, null])
+    expect(unwrapList(res({})).from).toBeNull()
+  })
+
   it('defaults gracefully on an empty/garbage body', () => {
     const r = unwrapList(res({}))
     expect(r.rows).toEqual([])

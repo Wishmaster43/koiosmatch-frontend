@@ -104,7 +104,7 @@ export default function ApplicationsPage({ intent }: { intent?: unknown } = {}) 
   // (real by_owner/by_source/avg_score/attention) + a wide (bucket-less) sample
   // that feeds the board and — only when stats itself failed — the same figures'
   // fallback. See useApplicationsData's header comment for the verified contract.
-  const { applications, setApplications, loading, error, total, setTotal, lastPage,
+  const { applications, setApplications, loading, error, total, setTotal, lastPage, rangeFrom, rangeTo,
     wideRows, wideLoading, wideError, wideIsPartial, stats, statsFailed, rowsEpoch, fetching } =
     useApplicationsData({ view, filterParams, bucketParam, page, pageSize, funnelTypes, sort })
   const [selectedIds,    setSelectedIds]    = useState<Set<Id>>(() => new Set())
@@ -316,7 +316,7 @@ export default function ApplicationsPage({ intent }: { intent?: unknown } = {}) 
         selectedId={selected?.id} onSelect={selectApplication}
         selectedIds={selectedIds} onToggleRow={toggleRow} onToggleAll={toggleAll} selectionBusy={fetching}
         sort={sort} onSortChange={setSort}
-        page={page} lastPage={lastPage} total={total} pageSize={pageSize} pageSizeOptions={pageSizeOptions}
+        page={page} lastPage={lastPage} rangeFrom={rangeFrom} rangeTo={rangeTo} total={total} pageSize={pageSize} pageSizeOptions={pageSizeOptions}
         onPageChange={setPage}
         // useListPageSize's setPageSize already clamps to APPLICATIONS_MAX_PER_PAGE.
         onPageSizeChange={n => { setPageSizeClamped(n); setPage(1) }}

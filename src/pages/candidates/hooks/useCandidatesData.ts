@@ -24,10 +24,11 @@ import { useListFieldSetter } from '@/hooks/useListFieldSetter'
 import { mapCandidate } from '../data/mapCandidate'
 import type { ApiCandidate, Candidate, CandidateStats } from '@/types/candidate'
 import type { Id } from '@/types/common'
+import { pickListPaging, pickListRange } from '@/lib/listRange'
 
 interface ActionMsg { type: string; text: string }
 interface LocationOption { id?: Id; name?: string }
-interface ListResult { candidates: Candidate[]; total: number; lastPage: number }
+interface ListResult { candidates: Candidate[]; total: number; lastPage: number; rangeFrom?: number | null; rangeTo?: number | null }
 
 // CAND-SORT-1: the controlled-sort shape CandidatesTable exchanges with this hook —
 // `by` is always the clicked column's own key (see DataTable's ControlledSort).
@@ -53,12 +54,8 @@ interface UseCandidatesDataParams {
 const EMPTY_CANDIDATES: Candidate[] = []
 const EMPTY_LOCATIONS: LocationOption[] = []
 
-// CandidateProfileController::index caps per_page at `between:1,500` — matches the
-// shared PAGE_SIZE_OPTIONS ceiling, so no clamp is actually needed today. Exported
-// anyway (mirrors useApplicationsData/useVacanciesData/useCustomersData) so
-// CandidatesPage documents the real measured backend rule instead of re-deriving
-// a magic 500 — one source of truth if either ceiling ever moves independently.
-export const CANDIDATES_MAX_PER_PAGE = 500
+// BE clamp: PageSize::from(…, 25, 100) silently caps per_page at 100, so the dropdown offers only what the server serves.
+export const CANDIDATES_MAX_PER_PAGE = 100
 
 // CAND-SORT-1: the FE column keys that map to a REAL backend sort_by value —
 // mirrors CandidateQuery::rules()' whitelist (`sort_by` in:last_name,first_name,
@@ -102,8 +99,8 @@ export function useCandidatesData({ filterParams, page, pageSize, t, setActionMs
     queryFn: async ({ signal }): Promise<ListResult> => {
       try {
         const res = await api.get('/candidates', { params: { ...filterParams, ...sortParams(sort), page, per_page: pageSize }, signal })
-        const { rows, total, lastPage } = unwrapList(res)
-        return { candidates: (rows as ApiCandidate[]).map(c => mapCandidate(c, locale)), total, lastPage }
+        const { rows, total, lastPage, from, to } = unwrapList(res)
+        return { candidates: (rows as ApiCandidate[]).map(c => mapCandidate(c, locale)), total, lastPage, rangeFrom: from, rangeTo: to }
       } catch (err) {
         if ((err as { response?: { status?: number } })?.response?.status === 422) {
           setActionMsg({ type: 'error', text: t('page.filterUnsupported', { defaultValue: 'Dit filter wordt (nog) niet door de server ondersteund.' }) })
@@ -116,8 +113,10 @@ export function useCandidatesData({ filterParams, page, pageSize, t, setActionMs
   })
 
   const candidates = listQuery.data?.candidates ?? EMPTY_CANDIDATES
-  const total      = listQuery.data?.total ?? 0
-  const lastPage   = listQuery.data?.lastPage ?? 1
+  // Total rows and last page, with single-page defaults until the first response.
+  const { total, lastPage } = pickListPaging(listQuery.data)
+  // Server-reported row range for the footer (null until the first response).
+  const { rangeFrom, rangeTo } = pickListRange(listQuery.data)
   const loading    = listQuery.isLoading
   const error      = listQuery.isError ? t('page.loadError') : null
 
@@ -160,7 +159,7 @@ export function useCandidatesData({ filterParams, page, pageSize, t, setActionMs
   const setTotal = useListFieldSetter<ListResult, 'total'>(listKey, 'total', { candidates: [], total: 0, lastPage: 1 })
 
   return {
-    candidates, setCandidates, loading, error, total, setTotal, lastPage, stats, statsFailed, locations,
+    candidates, setCandidates, loading, error, total, setTotal, lastPage, rangeFrom, rangeTo, stats, statsFailed, locations,
     // SELECT-RACE-1: rowsEpoch is the clear-selection trigger; fetching (isFetching,
     // not isLoading — a background refetch counts too) drives the header
     // checkbox's inert state while a new result is in flight.

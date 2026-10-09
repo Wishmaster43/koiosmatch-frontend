@@ -94,6 +94,9 @@ export interface ListResult<T = unknown> {
   page: number
   lastPage: number
   perPage: number
+  // Server-reported 1-based row range of this page (Laravel meta.from/to); null on an empty page or when absent.
+  from?: number | null
+  to?: number | null
 }
 
 export interface PaginationMeta {
@@ -101,4 +104,6 @@ export interface PaginationMeta {
   per_page?: number
   current_page?: number
   last_page?: number
+  from?: number | null
+  to?: number | null
 }

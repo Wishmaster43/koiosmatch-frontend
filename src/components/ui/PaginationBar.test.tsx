@@ -56,3 +56,21 @@ describe('PaginationBar · rows-per-page control', () => {
     expect(queryByText(t('rowsPerPage'))).toBeInTheDocument()
   })
 })
+
+// N-010: the server range wins over the requested page size (the server clamps per_page silently).
+describe('PaginationBar server range', () => {
+  it('shows 101–104 of 104 on page 2 even when pageSize 500 was requested', () => {
+    const { container } = render(
+      <PaginationBar page={2} totalPages={2} totalRows={104} pageSize={500}
+        rangeFrom={101} rangeTo={104} onPageChange={vi.fn()} />
+    )
+    expect(container.textContent).toMatch(/101.{1,3}104/)
+  })
+
+  it('falls back to the requested-size formula without a server range', () => {
+    const { container } = render(
+      <PaginationBar page={1} totalPages={2} totalRows={104} pageSize={50} onPageChange={vi.fn()} />
+    )
+    expect(container.textContent).toMatch(/1.{1,3}50/)
+  })
+})

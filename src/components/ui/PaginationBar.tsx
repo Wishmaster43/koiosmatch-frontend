@@ -28,18 +28,22 @@ interface PaginationBarProps {
   // below the shared max (e.g. 200), so the dropdown must never offer a size the
   // server would reject. Defaults to the full shared list for unclamped callers.
   pageSizeOptions?: number[]
+  // Server-reported row range (meta.from/to): wins over the requested-size formula because the server may clamp per_page silently.
+  rangeFrom?: number | null
+  rangeTo?: number | null
 }
 
 // Shared pagination footer (see the module doc above): renders the row-range/page-size/step controls and calls back to the parent, which owns the actual page/pageSize state.
-export default function PaginationBar({ page, totalPages, totalRows, pageSize, onPageChange, onPageSizeChange, pageSizeOptions = PAGE_SIZE_OPTIONS }: PaginationBarProps) {
+export default function PaginationBar({ page, totalPages, totalRows, pageSize, onPageChange, onPageSizeChange, pageSizeOptions = PAGE_SIZE_OPTIONS, rangeFrom, rangeTo }: PaginationBarProps) {
   const { t } = useTranslation('common')
   // Locale-aware grouping (§ FMT-GETAL-1) — "1.501–2.000 van 99.968", never bare digits.
   const { formatNumber } = useNumberFormat()
   // Names the SelectMenu trigger via aria-labelledby (a <button> is not labelable
   // via htmlFor) — the SAME visible "Rows per page" span doubles as the label.
   const rowsLabelId = useId()
-  const from = totalRows === 0 ? 0 : (page - 1) * pageSize + 1
-  const to   = Math.min(page * pageSize, totalRows)
+  const serverRange = typeof rangeFrom === 'number' && typeof rangeTo === 'number'
+  const from = serverRange ? rangeFrom : totalRows === 0 ? 0 : (page - 1) * pageSize + 1
+  const to   = serverRange ? rangeTo : Math.min(page * pageSize, totalRows)
 
   const btn = (onClick: () => void, disabled: boolean, children: ReactNode, title: string) => (
     <Button variant="secondary" iconOnly size="sm" onClick={onClick} disabled={disabled} title={title} aria-label={title}>

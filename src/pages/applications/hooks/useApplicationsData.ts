@@ -34,6 +34,7 @@ import { useListFieldSetter } from '@/hooks/useListFieldSetter'
 import { mapApplication } from '../data/mapApplication'
 import type { ApiApplication, Application } from '@/types/application'
 import type { LookupItem } from '@/context/LookupsContext'
+import { pickListRange } from '@/lib/listRange'
 
 // Exported so applicationInsights.ts (the pure builder layer) shares one shape
 // instead of hand-maintaining a second copy of the same server contract.
@@ -47,7 +48,7 @@ export interface AppStats {
   // — same predicate as the too_long_in_stage=1 list filter and row flag.
   attention?: { new?: number; scored?: number; ai_tasks?: number; too_long_in_stage?: number }
 }
-interface ListResult { applications: Application[]; total: number; lastPage: number }
+interface ListResult { applications: Application[]; total: number; lastPage: number; rangeFrom?: number | null; rangeTo?: number | null }
 interface WideResult { applications: Application[]; total: number }
 
 // DATATABLE-SORT-1 reference adoption: the FE-column-keyed sort DataTable's
@@ -74,18 +75,9 @@ interface UseApplicationsDataParams {
 // Stable empty defaults (module-level so a loading/errored query never hands the
 // memo chain a fresh-identity array every render — see useCandidatesData's note).
 const EMPTY_APPLICATIONS: Application[] = []
-// ApplicationQuery::rules() caps per_page at `between:1,500` — corrected 2026-08-05:
-// the backend raised this ceiling (it was `between:1,200` when first measured
-// 2026-07-15, after a WIP request with per_page=500 422'd); the frontend constant
-// had gone stale and kept clamping the tenant's 500 preference down to 200 for no
-// reason. Re-verified against the current ApplicationQuery.php before changing this
-// number — never adjust this constant without re-checking the live backend rule.
-// Exported so ApplicationsPage can clamp the pageSize picker to the SAME ceiling —
-// one source of truth for both the table's page size and the wide sample's cap. A
-// tenant with more than 500 matching applications still loses cards off the board /
-// precision on the four page-scope figures above; filed as a BE gap, not fixable
-// from the frontend short of a dedicated unpaginated board endpoint.
-export const APPLICATIONS_MAX_PER_PAGE = 500
+// BE clamp: PageSize::from(…, 25, 100) silently caps per_page at 100, so the dropdown offers only what the server serves.
+// Exported so ApplicationsPage clamps its picker to the same ceiling; the board's wide sample is capped at 100 rows too, so a tenant with more matching applications loses cards off the board (BE gap, needs an unpaginated board endpoint).
+export const APPLICATIONS_MAX_PER_PAGE = 100
 const WIDE_MAX_ROWS = APPLICATIONS_MAX_PER_PAGE
 
 // A 404 means the endpoint isn't live yet on this tenant → treat as an empty
@@ -137,8 +129,8 @@ export function useApplicationsData({ view, filterParams, bucketParam, page, pag
         page, per_page: Math.min(pageSize, APPLICATIONS_MAX_PER_PAGE) }
       try {
         const res = await api.get('/applications', { params, signal })
-        const { rows, total, lastPage } = unwrapList<ApiApplication>(res)
-        return { applications: rows.map(a => mapApplication(a, funnelTypes)), total, lastPage }
+        const { rows, total, lastPage, from, to } = unwrapList<ApiApplication>(res)
+        return { applications: rows.map(a => mapApplication(a, funnelTypes)), total, lastPage, rangeFrom: from, rangeTo: to }
       } catch (err) {
         if (isMissingEndpoint(err)) return { applications: [], total: 0, lastPage: 1 }
         throw err
@@ -171,6 +163,8 @@ export function useApplicationsData({ view, filterParams, bucketParam, page, pag
   const applications = listQuery.data?.applications ?? EMPTY_APPLICATIONS
   const total    = listQuery.data?.total ?? 0
   const lastPage = listQuery.data?.lastPage ?? 1
+  // Server-reported row range for the footer (null until the first response).
+  const { rangeFrom, rangeTo } = pickListRange(listQuery.data)
   const loading  = view === 'table' && listQuery.isLoading
   const error    = view === 'table' && listQuery.isError
 
@@ -233,7 +227,7 @@ export function useApplicationsData({ view, filterParams, bucketParam, page, pag
   const setTotal = useListFieldSetter<ListResult, 'total'>(listKey, 'total', { applications: [], total: 0, lastPage: 1 })
 
   return {
-    applications, setApplications, loading, error, total, setTotal, lastPage,
+    applications, setApplications, loading, error, total, setTotal, lastPage, rangeFrom, rangeTo,
     wideRows, wideLoading, wideError, wideIsPartial, stats, statsFailed,
     // SELECT-RACE-1: rowsEpoch is the clear-selection trigger; fetching
     // (isFetching, not isLoading — a background refetch counts too) drives the

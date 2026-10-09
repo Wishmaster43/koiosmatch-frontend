@@ -15,6 +15,7 @@ import { useListFieldSetter } from '@/hooks/useListFieldSetter'
 import { mapVacancy } from '../data/mapVacancy'
 import type { Vacancy, ApiVacancy } from '@/types/vacancy'
 import type { Id } from '@/types/common'
+import { pickListPaging, pickListRange } from '@/lib/listRange'
 
 export interface VacancyCustomer { id: Id | undefined; name: string }
 export type VacancyStats = Record<string, unknown>
@@ -51,6 +52,9 @@ interface UseVacanciesDataResult {
   total: number
   setTotal: Dispatch<SetStateAction<number>>
   lastPage: number
+  // Server-reported row range for the footer (null until the first response).
+  rangeFrom: number | null
+  rangeTo: number | null
   stats: VacancyStats | null
   customers: VacancyCustomer[]
   refresh: () => void
@@ -60,19 +64,16 @@ interface UseVacanciesDataResult {
   rowsEpoch: number
   fetching: boolean
 }
-interface ListResult { vacancies: Vacancy[]; total: number; lastPage: number }
+interface ListResult { vacancies: Vacancy[]; total: number; lastPage: number; rangeFrom?: number | null; rangeTo?: number | null }
 
 // Stable empty defaults — a fresh `?? []` each render loops the registerFilters effect
 // (see useCandidatesData for the full note).
 const EMPTY_VACANCIES: Vacancy[] = []
 const EMPTY_CUSTOMERS: VacancyCustomer[] = []
 
-// VacancyQuery::rules() caps per_page at `between:1,200` — measured 2026-08-05 (the
-// "zet ik hem op 500, klapt deze eruit" bug: the page sent the tenant's raw
-// default_per_page straight through with no clamp, so a 500 preference 422'd).
-// Exported so VacanciesPage can clamp the pageSize picker to the SAME ceiling —
-// one source of truth for both the table's page size and this defensive re-clamp.
-export const VACANCIES_MAX_PER_PAGE = 500
+// Exported so VacanciesPage clamps its picker to the same ceiling.
+// BE clamp: PageSize::from(…, 25, 100) silently caps per_page at 100, so the dropdown offers only what the server serves.
+export const VACANCIES_MAX_PER_PAGE = 100
 
 // Server-paginated vacancy list (React Query) plus the customer picker list; see
 // VACANCIES_MAX_PER_PAGE above for the shared page-size ceiling both this hook and the page respect.
@@ -104,8 +105,8 @@ export function useVacanciesData({ filterParams, page, pageSize, t, sort }: UseV
         // caller to have done it — a 422 here is expensive to diagnose (mirrors
         // useApplicationsData's identical guard).
         const res = await api.get('/vacancies', { params: { ...filterParams, ...sortQuery, page, per_page: Math.min(pageSize, VACANCIES_MAX_PER_PAGE) }, signal })
-        const { rows, total, lastPage } = unwrapList<ApiVacancy>(res)
-        return { vacancies: rows.map(mapVacancy), total, lastPage }
+        const { rows, total, lastPage, from, to } = unwrapList<ApiVacancy>(res)
+        return { vacancies: rows.map(mapVacancy), total, lastPage, rangeFrom: from, rangeTo: to }
       } catch (err) {
         if ((err as { response?: { status?: number } })?.response?.status === 404) return { vacancies: [], total: 0, lastPage: 1 }
         throw err
@@ -115,8 +116,10 @@ export function useVacanciesData({ filterParams, page, pageSize, t, sort }: UseV
   })
 
   const vacancies = listQuery.data?.vacancies ?? EMPTY_VACANCIES
-  const total     = listQuery.data?.total ?? 0
-  const lastPage  = listQuery.data?.lastPage ?? 1
+  // Total rows and last page, with single-page defaults until the first response.
+  const { total, lastPage } = pickListPaging(listQuery.data)
+  // Server-reported row range for the footer (null until the first response).
+  const { rangeFrom, rangeTo } = pickListRange(listQuery.data)
   const loading   = listQuery.isLoading
   const error     = listQuery.isError ? t('page.loadError') : null
 
@@ -149,5 +152,5 @@ export function useVacanciesData({ filterParams, page, pageSize, t, sort }: UseV
     queryClient.invalidateQueries({ queryKey: ['vacancies'] })
   }, [queryClient])
 
-  return { vacancies, setVacancies, loading, error, total, setTotal, lastPage, stats, customers, refresh, rowsEpoch, fetching: listQuery.isFetching }
+  return { vacancies, setVacancies, loading, error, total, setTotal, lastPage, rangeFrom, rangeTo, stats, customers, refresh, rowsEpoch, fetching: listQuery.isFetching }
 }

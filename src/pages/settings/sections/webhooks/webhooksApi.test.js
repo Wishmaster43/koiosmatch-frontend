@@ -20,7 +20,8 @@ describe('webhooksApi — inbound request log', () => {
     vi.mocked(api.get).mockResolvedValue({ data: { data: [], meta: { current_page: 2, last_page: 3, per_page: 25, total: 60 } } })
     const result = await listWebhookRequests('wh-1', 2, 25)
     expect(api.get).toHaveBeenCalledWith('/webhooks/wh-1/requests', { params: { page: 2, per_page: 25 } })
-    expect(result).toEqual({ rows: [], total: 60, page: 2, lastPage: 3, perPage: 25 })
+    // N010-PAGINATION-META-A: unwrapList also carries the server range; this mock meta has none → null.
+    expect(result).toEqual({ rows: [], total: 60, page: 2, lastPage: 3, perPage: 25, from: null, to: null })
   })
 
   it('listWebhookRequests defaults to page 1 / 50 per page', async () => {

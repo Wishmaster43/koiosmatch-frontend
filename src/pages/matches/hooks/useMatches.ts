@@ -21,18 +21,11 @@ import { mergePatch } from '@/lib/mergePatch'
 import { mapKoiosAiAdvice } from '@/lib/koiosAdviceMap'
 import type { RawMatch, MatchRow } from '@/types/match'
 
-// MatchQuery caps per_page at `between:1,200` (measured 2026-08-05 seam-harness:
-// GET /matches 422s above per_page=200). Named the same way as the other
-// 200-capped, full-fetch entities (TASKS_MAX_PER_PAGE in useTasksData.ts,
-// OUTREACH_MAX_PER_PAGE in useOutreachCampaigns.ts) instead of a bare literal, and
-// exported so MatchesPage can pass it as useListPageSize's serverCap — the dropdown
-// must never offer a size (300/400/500) disconnected from what this hook's own
-// fetch loop (and the endpoint) actually caps at.
-export const MATCHES_MAX_PER_PAGE = 500
+// BE clamp: PageSize::from(…, 25, 100) silently caps per_page at 100; exported so MatchesPage can pass it as useListPageSize's serverCap.
+export const MATCHES_MAX_PER_PAGE = 100
 // Safety cap on the fetch-all loop below — same 1000-row scale as tasks/outreach
-// (MATCHES_MAX_PAGES * MATCHES_MAX_PER_PAGE), just reached in fewer, larger requests
-// now that the per-request size doubled from the old bare 100.
-const MATCHES_MAX_PAGES = 5
+// (MATCHES_MAX_PAGES * MATCHES_MAX_PER_PAGE), kept at 1000 now the BE clamps pages to 100.
+const MATCHES_MAX_PAGES = 10
 
 // Map a raw API match → the flat shape the table renders (snake_case-tolerant).
 export function mapMatch(m: RawMatch): MatchRow {

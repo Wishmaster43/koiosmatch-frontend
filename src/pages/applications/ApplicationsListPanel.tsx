@@ -84,6 +84,9 @@ interface ApplicationsListPanelProps {
   // Pagination
   page: number
   lastPage: number
+  // Server-reported row range for the footer (optional until the BE meta lands).
+  rangeFrom?: number | null
+  rangeTo?: number | null
   total: number
   pageSize: number
   pageSizeOptions?: number[]
@@ -106,7 +109,7 @@ export default function ApplicationsListPanel({
   view, onViewChange,
   selectedCount, onClearSelection, onBulkSetPhase, onBulkDetach, canManage, funnelPhases,
   tableScrollRef, tableRows, loading, error, selectedId, onSelect, selectedIds, onToggleRow, onToggleAll, selectionBusy,
-  sort, onSortChange, page, lastPage, total, pageSize, pageSizeOptions, onPageChange, onPageSizeChange,
+  sort, onSortChange, page, lastPage, rangeFrom, rangeTo, total, pageSize, pageSizeOptions, onPageChange, onPageSizeChange,
   boardRows, boardPhases, onMove, wideLoading, wideError,
 }: ApplicationsListPanelProps) {
   const { t } = useTranslation('applications')
@@ -199,7 +202,7 @@ export default function ApplicationsListPanel({
               selectionBusy={selectionBusy}
               scrollParentRef={tableScrollRef} sort={sort} onSortChange={onSortChange} />
           </div>
-          <PaginationBar page={page} totalPages={lastPage} totalRows={total}
+          <PaginationBar page={page} totalPages={lastPage} totalRows={total} rangeFrom={rangeFrom} rangeTo={rangeTo}
             pageSize={pageSize} onPageChange={onPageChange} pageSizeOptions={pageSizeOptions}
             onPageSizeChange={onPageSizeChange} />
       </div>

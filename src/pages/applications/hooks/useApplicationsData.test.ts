@@ -33,7 +33,7 @@ beforeEach(() => {
 // Pull the params object the hook sent for a specific /applications call —
 // there are two (list + wide) in flight per render, so filter by an
 // unambiguous marker each test sets (per_page differs: list uses pageSize,
-// wide always uses the 500 ceiling).
+// wide always uses the 100 ceiling).
 function paramsFor(perPage: number) {
   const call = vi.mocked(api.get).mock.calls.find(([url, cfg]) =>
     url === '/applications' && (cfg as { params?: { per_page?: number } })?.params?.per_page === perPage)
@@ -48,7 +48,7 @@ describe('useApplicationsData · sort request shape (DATATABLE-SORT-1)', () => {
 
     await waitFor(() => expect(api.get).toHaveBeenCalledWith('/applications', expect.anything()))
     const listParams = paramsFor(25)
-    const wideParams = paramsFor(500)
+    const wideParams = paramsFor(100)
     expect(listParams).not.toHaveProperty('sort_by')
     expect(listParams).not.toHaveProperty('sort_dir')
     expect(wideParams).not.toHaveProperty('sort_by')
@@ -63,7 +63,7 @@ describe('useApplicationsData · sort request shape (DATATABLE-SORT-1)', () => {
 
     await waitFor(() => expect(api.get).toHaveBeenCalledWith('/applications', expect.anything()))
     const listParams = paramsFor(25)
-    const wideParams = paramsFor(500)
+    const wideParams = paramsFor(100)
     expect(listParams).toMatchObject({ sort_by: 'created_at', sort_dir: 'desc' })
     expect(wideParams).toMatchObject({ sort_by: 'created_at', sort_dir: 'desc' })
   })
@@ -76,7 +76,7 @@ describe('useApplicationsData · sort request shape (DATATABLE-SORT-1)', () => {
 
     await waitFor(() => expect(api.get).toHaveBeenCalledWith('/applications', expect.anything()))
     const listParams = paramsFor(25)
-    const wideParams = paramsFor(500)
+    const wideParams = paramsFor(100)
     expect(listParams).not.toHaveProperty('sort_by')
     expect(listParams).not.toHaveProperty('sort_dir')
     expect(wideParams).not.toHaveProperty('sort_by')
@@ -121,7 +121,7 @@ describe('useApplicationsData · stats stays server-wide (STATS-SCOPE-1)', () =>
 
     await waitFor(() => expect(api.get).toHaveBeenCalledWith('/applications', expect.anything()))
     expect(paramsFor(25)).toMatchObject({ too_long_in_stage: 1, phase_key: ['applied'], owner_id: ['u1'] })
-    expect(paramsFor(500)).toMatchObject({ too_long_in_stage: 1, phase_key: ['applied'], owner_id: ['u1'] })
+    expect(paramsFor(100)).toMatchObject({ too_long_in_stage: 1, phase_key: ['applied'], owner_id: ['u1'] })
 
     await waitFor(() => expect(api.get).toHaveBeenCalledWith('/applications/stats', expect.anything()))
     expect(statsParamsSent()).toEqual({})
@@ -240,5 +240,17 @@ describe('useApplicationsData · rowsEpoch (SELECT-RACE-1)', () => {
     await waitFor(() => expect(result.current.applications.length).toBe(1))
     await new Promise(r => setTimeout(r, 0))
     expect(result.current.rowsEpoch).toBe(0)
+  })
+})
+
+// N-010: the hook plumbs the server's row range (meta.from/to) to the footer.
+describe('useApplicationsData · server row range', () => {
+  it('exposes rangeFrom/rangeTo from meta.from/to', async () => {
+    vi.mocked(api.get).mockResolvedValue({ data: { data: [], meta: { total: 104, current_page: 2, last_page: 2, per_page: 100, from: 101, to: 104 } } })
+    const { result } = renderHook(() => useApplicationsData({
+      view: 'table', filterParams: {}, page: 2, pageSize: 100, funnelTypes: [], sort: null,
+    }), { wrapper })
+    await waitFor(() => expect(result.current.rangeFrom).toBe(101))
+    expect(result.current.rangeTo).toBe(104)
   })
 })

@@ -312,7 +312,7 @@ export function unwrap<T = unknown>(res: ResponseLike): T {
 export function unwrapList<T = unknown>(res: ResponseLike): ListResult<T> {
   const body = (res as { data?: unknown })?.data ?? res
   if (Array.isArray(body)) {
-    return { rows: body as T[], total: body.length, page: 1, lastPage: 1, perPage: body.length }
+    return { rows: body as T[], total: body.length, page: 1, lastPage: 1, perPage: body.length, from: body.length ? 1 : null, to: body.length || null }
   }
   const obj  = (body ?? {}) as { data?: unknown; meta?: PaginationMeta } & PaginationMeta
   const rows = Array.isArray(obj.data) ? (obj.data as T[]) : []
@@ -323,5 +323,7 @@ export function unwrapList<T = unknown>(res: ResponseLike): ListResult<T> {
     page:     meta.current_page ?? 1,
     lastPage: meta.last_page    ?? 1,
     perPage:  meta.per_page     ?? rows.length,
+    from:     meta.from ?? null,
+    to:       meta.to   ?? null,
   }
 }
