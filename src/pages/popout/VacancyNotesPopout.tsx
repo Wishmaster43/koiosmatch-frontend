@@ -4,7 +4,6 @@
  * (same shared NotesTab, same note-type lookup, same optimistic add) — notes
  * only, no other vacancy tab in this window (mirrors the candidate/customer popouts).
  */
-import { useEffect } from 'react'
 import type { ComponentType } from 'react'
 import { useTranslation } from 'react-i18next'
 import NotesTabJs from '@/components/drawer/tabs/NotesTab'
@@ -15,6 +14,7 @@ import { useAuth } from '@/context/AuthContext'
 import { useVacancyLite } from './hooks/useVacancyLite'
 import { usePopoutVacancyNotes } from './hooks/usePopoutVacancyNotes'
 import { entityNoteLabels } from '@/components/drawer/tabs/notes/entityNoteLabels'
+import { usePopoutWindowTitle } from './usePopoutWindowTitle'
 
 type AnyProps = Record<string, unknown>
 // Still-untyped JS component — accept any props at the boundary (mirrors vacancies/drawer/NotesTab.tsx).
@@ -37,12 +37,7 @@ export default function VacancyNotesPopout({ id }: { id: string | undefined }) {
 
   // Window title — restored on unmount so a reused/closed OS window slot never
   // keeps a stale title (mirrors CandidateNotesPopout).
-  useEffect(() => {
-    if (!vacancy) return
-    const previous = document.title
-    document.title = t('popout.windowTitle', { name: vacancy.name })
-    return () => { document.title = previous }
-  }, [vacancy, t])
+  usePopoutWindowTitle(vacancy, vacancy ? t('popout.windowTitle', { name: vacancy.name }) : '')
 
   const notesProps = {
     // Edit/delete per row, same as the drawer's own tab (NOTITIE-REFERENTIE: all seven identical).

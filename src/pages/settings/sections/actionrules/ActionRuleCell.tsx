@@ -49,7 +49,7 @@ export default function ActionRuleCell({
           style={{ display: 'inline-flex', alignItems: 'center', gap: 5, fontSize: 11, fontWeight: 600,
                    padding: '5px 10px', borderRadius: 6, cursor: 'not-allowed', minWidth: 100, justifyContent: 'center',
                    background: tintBg(color), color: chipInk(color),
-                   border: tintBorder(color), opacity: 0.75 }}>
+                   border: tintBorder(color) }}>
           <Icon size={12} />
           {effectLabel}
         </button>

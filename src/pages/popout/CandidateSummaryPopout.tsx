@@ -1,4 +1,4 @@
-import { useCallback, useEffect } from 'react'
+import { useCallback } from 'react'
 import { useTranslation } from 'react-i18next'
 import PopoutShell from './PopoutShell'
 import TextPopoutEditor from './TextPopoutEditor'
@@ -6,6 +6,7 @@ import { useCandidateLite } from './hooks/useCandidateLite'
 import { useTextPopoutDraft } from './hooks/useTextPopoutDraft'
 import { useCandidateRecord } from '@/pages/candidates/shared'
 import { textPopoutTopic } from '@/lib/secondScreen'
+import { usePopoutWindowTitle } from './usePopoutWindowTitle'
 
 /**
  * CandidateSummaryPopout — TEKST-POPOUT-1 (Danny 08-08 punt 2): the candidate's
@@ -40,12 +41,7 @@ export default function CandidateSummaryPopout({ id }: { id: string | undefined 
 
   // Window title — "Profieltekst — <name>" while this popout is open; restored on
   // unmount so a reused window slot never keeps a stale title.
-  useEffect(() => {
-    if (!candidate) return
-    const previous = document.title
-    document.title = t('popout.summaryWindowTitle', { name: candidate.name })
-    return () => { document.title = previous }
-  }, [candidate, t])
+  usePopoutWindowTitle(candidate, candidate ? t('popout.summaryWindowTitle', { name: candidate.name }) : '')
 
   return (
     <PopoutShell

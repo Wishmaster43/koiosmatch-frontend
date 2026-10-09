@@ -11,6 +11,7 @@
 import { describe, it, expect, vi } from 'vitest'
 import { render, screen, act } from '@testing-library/react'
 import DashboardLayout from './DashboardLayout'
+import i18n from '@/i18n'
 
 // Heavy/irrelevant chrome — stubbed so this suite only exercises the popstate wiring.
 vi.mock('./Sidebar', () => ({ default: () => null }))
@@ -76,5 +77,20 @@ describe('DashboardLayout · popstate kmIntentData (MATCH-APPROVAL-2)', () => {
     // Still on dashboard — an unrecognised route id must never switch the page.
     expect(screen.getByTestId('page-dashboard')).toBeInTheDocument()
     expect(screen.queryByTestId('page-not-a-real-page')).toBeNull()
+  })
+})
+
+describe('DashboardLayout · a11y shell (N-014)', () => {
+  it('renders a main landmark, an h1 page title, a first-focusable skip link and the document title', () => {
+    const { container } = render(<DashboardLayout />)
+    const main = screen.getByRole('main')
+    expect(main.id).toBe('main-content')
+    const h1 = screen.getByRole('heading', { level: 1 })
+    // Expected title resolves like the shell: pageTitles namespace, registry fallback.
+    const expected = i18n.t('dashboard', { ns: 'pageTitles', keySeparator: false, defaultValue: 'Dashboard' })
+    expect(h1.textContent).toBe(expected)
+    const firstFocusable = container.querySelector('a, button, input, [tabindex="0"]')
+    expect(firstFocusable?.getAttribute('href')).toBe('#main-content')
+    expect(document.title).toBe(`${h1.textContent} · KoiosMatch`)
   })
 })

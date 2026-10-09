@@ -52,6 +52,8 @@
   --color-danger-text:   #B91C1C;
   --color-danger-bg:     #FEE2E2;
   --color-info:          #0EA5E9;
+  /* Info as TEXT ink (twin family): the fill #0EA5E9 reads ~2.8:1 on white, an AA fail; sky-700 clears 4.5:1. Never --color-info itself as text. */
+  --color-info-text:     #0369A1;
   --color-info-bg:       #E0F2FE;
   /* Violet — system/AI-ish accents (super-admin, roles/modules/ai audit badges, intake). */
   --color-violet:        #7C3AED;
@@ -267,6 +269,8 @@
   /* Success-as-text twin: green-400 reads 9.60:1 on the dark surface (the fill
      colour manages 5.08 there, but one twin per family keeps the rule simple). */
   --color-success-text:  #4ADE80;
+  /* Info-as-text twin on the dark surfaces: sky-400 clears 4.5:1 on --surface and --bg. */
+  --color-info-text:     #38BDF8;
   /* Warning-as-text twin on the dark surfaces: amber-400 clears both dark
      grounds comfortably where the raw fill sits near the AA line. */
   --color-warning-text:  #FBBF24;
@@ -399,3 +403,11 @@ a:not([class]):hover { text-decoration: underline; }
   font: inherit;
   color: inherit;
 }
+
+/* Skip link (WCAG 2.4.1): visually hidden until keyboard focus reveals it. */
+.skip-link {
+  position: absolute; left: 8px; top: -64px; z-index: var(--z-toast);
+  padding: 8px 14px; border-radius: 6px; font-size: 13px; font-weight: 600;
+  background: var(--button-fill); color: var(--button-ink); border: 1px solid var(--button-border);
+}
+.skip-link:focus { top: 8px; }

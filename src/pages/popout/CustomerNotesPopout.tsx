@@ -8,7 +8,6 @@
  * tasks/consent. READING still shows a note's existing link (soft "linked to X"
  * chip, read-parity with the drawer); only the ADD flow is simplified.
  */
-import { useEffect } from 'react'
 import type { ComponentType, ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
 import NotesTabJs from '@/components/drawer/tabs/NotesTab'
@@ -21,6 +20,7 @@ import { usePopoutCustomerNotes } from './hooks/usePopoutCustomerNotes'
 import type { CustomerNote } from '@/types/customer'
 import { NoteLinkChip } from '@/components/ui/NoteLinkChip'
 import { withNoteLinkChips } from '@/pages/customers/shared'
+import { usePopoutWindowTitle } from './usePopoutWindowTitle'
 
 type AnyProps = Record<string, unknown>
 // Still-untyped JS component — accept any props at the boundary (mirrors CustomerNotesTab).
@@ -50,12 +50,7 @@ export default function CustomerNotesPopout({ id }: { id: string | undefined }) 
 
   // Window title — restored on unmount so a reused/closed OS window slot never
   // keeps a stale title (mirrors CandidateNotesPopout).
-  useEffect(() => {
-    if (!customer) return
-    const previous = document.title
-    document.title = t('popout.windowTitle', { name: customer.name })
-    return () => { document.title = previous }
-  }, [customer, t])
+  usePopoutWindowTitle(customer, customer ? t('popout.windowTitle', { name: customer.name }) : '')
 
   // Read-parity chip decoration — department wins over location (the deepest
   // level, mirrors the backend's own CustomerNote::levelContext() priority),

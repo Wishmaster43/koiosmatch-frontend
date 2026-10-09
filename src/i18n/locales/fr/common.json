@@ -148,6 +148,8 @@
     "valueMax": "Valeur maximale"
   },
   "nav": {
+    "main": "Navigation principale",
+    "skipToContent": "Aller au contenu",
     "dashboard": "Tableau de bord",
     "candidates": "Candidats",
     "applications": "Candidatures",

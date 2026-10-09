@@ -64,7 +64,7 @@ export function buildCandidateInsights({
   const kpis = [
     { key: 'stale',      label: t('analytics.staleMonths', { months: staleMonths }), value: counts.stale, sub: t('analytics.stale6mSub'), color: 'var(--color-warning-text)',
       onClick: () => toggleAttention('stale6m'),    active: attentionFilter === 'stale6m' },
-    { key: 'neverContacted', label: t('analytics.neverContacted'), value: counts.neverContacted, sub: t('analytics.neverContactedSub'), color: 'var(--color-info)',
+    { key: 'neverContacted', label: t('analytics.neverContacted'), value: counts.neverContacted, sub: t('analytics.neverContactedSub'), color: 'var(--color-info-text)',
       onClick: () => toggleAttention('neverContacted'), active: attentionFilter === 'neverContacted' },
     { key: 'noFollowup', label: t('analytics.noFollowup'), value: counts.noFollowup ?? '—', sub: t('analytics.noFollowupSub'), color: 'var(--color-danger-text)',
       onClick: () => toggleAttention('noFollowup'), active: attentionFilter === 'noFollowup' },

@@ -289,7 +289,7 @@ export default function Sidebar({ expanded, activePage, setActivePage, koiosOpen
   const showSettings       = canAccessPage('settings', auth)
 
   return (
-    <div className="flex flex-col flex-shrink-0 overflow-hidden transition-all duration-200"
+    <nav aria-label={t('nav.main')} className="flex flex-col flex-shrink-0 overflow-hidden transition-all duration-200"
       style={{ width: expanded ? 220 : 56, background: 'var(--sidebar-bg)',
                borderRight: '1px solid var(--sidebar-border)' }}>
 
@@ -395,6 +395,6 @@ export default function Sidebar({ expanded, activePage, setActivePage, koiosOpen
             openItems={openItems} toggleOpen={toggleOpen} onNavigate={setActivePage} />
         )}
       </div>
-    </div>
+    </nav>
   )
 }

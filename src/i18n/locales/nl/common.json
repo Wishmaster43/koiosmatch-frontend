@@ -148,6 +148,8 @@
     "valueMax": "Maximumwaarde"
   },
   "nav": {
+    "main": "Hoofdnavigatie",
+    "skipToContent": "Ga naar inhoud",
     "dashboard": "Dashboard",
     "candidates": "Kandidaten",
     "applications": "Sollicitaties",

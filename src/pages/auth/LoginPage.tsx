@@ -84,7 +84,8 @@ function LoginShell({ children }: { children: ReactNode }) {
           </div>
           <div style={{ background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 18,
             padding: '32px 30px 34px', boxShadow: 'var(--shadow-modal)' }}>
-            {children}
+            {/* Landmark for the login card (WCAG 1.3.1) */}
+            <main>{children}</main>
           </div>
           <p className="mt-6 text-xs text-center lg:hidden" style={{ color: 'var(--text-muted)' }}>© {year} KoiosMatch</p>
         </div>

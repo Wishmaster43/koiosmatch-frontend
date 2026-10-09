@@ -22,7 +22,8 @@ import NotificationBell from '@/components/layout/NotificationBell'
 import { useTenantTheme } from '@/hooks/useTenantTheme'
 import { tint, tintBg, tintBorder } from '@/lib/tint'
 import CountBadge from '@/components/ui/CountBadge'
-import { SectionTitle } from '@/components/ui/typography'
+import { SectionTitle, PageTitle } from '@/components/ui/typography'
+import { useDocumentTitle } from '@/hooks/useDocumentTitle'
 import { canSwitchViews, switcherTypes } from '@/pages/dashboard/shared'
 import type { DashboardType } from '@/pages/dashboard/shared'
 import type { ReportFilterGroup } from '@/types/reports'
@@ -69,6 +70,9 @@ export default function DashboardLayout() {
     const fromHash = window.location.hash.replace(/^#/, '').split(/[/?]/)[0]
     return (fromHash && PAGE_TITLES[fromHash]) ? fromHash : (PACKAGE_DEFAULT_PAGE[pkg0 ?? ''] ?? 'dashboard')
   })
+  // Translated page title: feeds the top-bar <h1> and the document title.
+  const pageTitle = t(activePage, { ns: 'pageTitles', keySeparator: false, defaultValue: PAGE_TITLES[activePage] || activePage })
+  useDocumentTitle(pageTitle)
   // Navigation intent: a filter the target page should apply when navigated to
   // (e.g. a dashboard KPI/chart click). Plain navigation (sidebar) clears it.
   const [navIntent,      setNavIntent]      = useState<unknown>(null)
@@ -162,6 +166,8 @@ export default function DashboardLayout() {
     // page (below, publishes) and KoiosPanel (sibling, reads) — see SelectionContext.
     <SelectionProvider>
     <div className="flex h-screen overflow-hidden">
+      {/* Skip link: first focusable element (WCAG 2.4.1) */}
+      <a href="#main-content" className="skip-link">{t('nav.skipToContent')}</a>
 
       {/* ── Left navigation ── */}
       <SidebarTyped
@@ -243,9 +249,9 @@ export default function DashboardLayout() {
               it, and WCAG 1.4.3 exempts decorative text from the contrast floor. Left
               pale on purpose — it must not compete with the labels it separates. */}
           <span aria-hidden="true" style={{ color: 'var(--border)', fontSize: 16 }}>›</span>
-          <span className="font-medium truncate" style={{ fontSize: 13, color: 'var(--text-muted)' }}>
-            {t(activePage, { ns: 'pageTitles', keySeparator: false, defaultValue: PAGE_TITLES[activePage] || activePage })}
-          </span>
+          <PageTitle as="h1" style={{ fontSize: 13, fontWeight: 500, color: 'var(--text-muted)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+            {pageTitle}
+          </PageTitle>
           {/* Back-chip after a cross-entity jump — one click returns to where you came from. */}
           {jumpOrigin && jumpOrigin !== activePage && (
             <button onClick={() => goTo(jumpOrigin)}
@@ -365,13 +371,13 @@ export default function DashboardLayout() {
         {/* Content row: page + optional right filter panel side by side */}
         <div className="flex flex-1 overflow-hidden">
           {/* key on tenant id: switching bureau remounts the page so its data reloads */}
-          <div key={activeTenant?.id ?? 'none'} className="flex-1 overflow-auto">
+          <main id="main-content" tabIndex={-1} key={activeTenant?.id ?? 'none'} className="flex-1 overflow-auto" style={{ outline: 'none' }}>
             <Suspense fallback={<PageLoader />}>
               <NavigationProvider goTo={goTo}>
                 {canAccessPage(activePage, auth) ? renderPage(activePage, { navIntent, goTo, dashView }) : <NoAccessPage />}
               </NavigationProvider>
             </Suspense>
-          </div>
+          </main>
 
           {/* Right filter panel — same height as content, slides next to page */}
           {rightPanelOpen && hasFilters && (

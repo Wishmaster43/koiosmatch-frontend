@@ -45,6 +45,18 @@ describe('Sidebar — nav label i18n', () => {
     render(<Sidebar {...baseProps} />)
     expect(screen.getByText('Kandidaten')).toBeInTheDocument()
   })
+
+  // N-014: the sidebar is a labelled navigation landmark in the active language.
+  it('exposes a labelled navigation landmark (nl and en)', async () => {
+    await i18n.changeLanguage('nl')
+    const { unmount } = render(<Sidebar {...baseProps} />)
+    expect(screen.getByRole('navigation', { name: 'Hoofdnavigatie' })).toBeInTheDocument()
+    unmount()
+    await i18n.changeLanguage('en')
+    render(<Sidebar {...baseProps} />)
+    expect(screen.getByRole('navigation', { name: 'Main navigation' })).toBeInTheDocument()
+    await i18n.changeLanguage('nl')
+  })
 })
 
 // KOIOS-CARDS-MODULE-GATE-1: the Koios toggle follows the tenant's koios_ai module strictly —
