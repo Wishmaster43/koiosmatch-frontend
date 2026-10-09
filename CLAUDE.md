@@ -1461,3 +1461,41 @@ verifier and manager from now on.
   `dev:reset`, hand merges. Paused workflows resume with `resumeFromRunId` after the reset;
   a builder killed mid-work leaves its edits in the working copy, and the resumed lane is
   told so ("continue from this state, never restore").
+
+## 17. Lessons from the ONIX FE landing day (09-10-2026, 19 landings; each rule was paid for with a measured breakage)
+
+- **LANDING-STAGE-FROM-GATED-COPY-1 — a landing commits exactly the blobs its gates measured.** land-hand.sh
+  used to run the gates on the landing worktree's copy of the bucket and then `git add` the bucket from the
+  LIVE working copy minutes later; a sibling lane edited two pages in between and 303a3484 landed with 7 tsc
+  errors on the shared tip. The script now stages every bucket file as the blob from `land-wt`
+  (`git update-index --cacheinfo`), never from the working copy, which other lanes keep editing while the
+  gates run. Committed content == gated content, by construction.
+- **GATE-TREES-1 — three worktrees, three owners.** `land-wt` and `head-wt` belong to land.sh (it resets
+  head-wt for its eslint-vs-HEAD comparison and wiped a manager's full-vitest run mid-flight); a manager's own
+  gate run uses `gate-wt` only. Every gate tree carries the gitignored `.env` (DocPreviewModal.test reads
+  VITE_API_URL from it; without it the tree is red for a reason that is not the bucket's).
+- **FULL-SUITE-FOR-SHARED-MODULES-1.** A bucket that changes `src/lib/api.ts`, a shared fetch/mapper helper,
+  the auth context or the dependency lock runs the FULL vitest in gate-wt before landing; the landing's
+  two-hop importer list misses consumers that reach the helper through a provider (2c6383b0) or a mock of
+  the same module (VacancyDefaultStatusSettings). 1600 files take ten minutes; a red tip costs more.
+- **AUDIT-GATE-IN-LANDING-1.** The pre-commit hook runs `audit-ci`; the landing script replaced the hook
+  with its own gates and so let a dependency bucket pass while 15 HIGH/CRITICAL advisories blocked every
+  ordinary commit. A bucket that touches `package.json` / `package-lock.json` / `audit-ci.jsonc` now runs the
+  same audit-ci check inside the landing and fails on red. A manual `git commit --no-verify` is a CI bypass
+  the auto-mode classifier refuses: land through the script or clear the gate, never route around it.
+- **SHAPE-CHANGE-TOEQUAL-1.** Adding keys to a shared helper's return object (`unwrapList` gained
+  `from`/`to`) breaks every consumer test that asserts the whole object with `toEqual`
+  (webhooksApi.test). A brief for a return-shape change names the consumers
+  (`grep -rln "toEqual({" src --include='*.test.*'` on the helper's importers) and the lane updates them.
+- **LANE-FILE-CAP-1.** A brief's file cap counts the brief's own list: a brief that enumerates 13 files and
+  caps at 12 produces a declined item, not a smaller delivery. Count before writing the cap.
+- **WAITER-LOCK-1.** A serialising lock's TERM/INT trap removes the lock only when the pid file is its own
+  (`$(cat land.lock/pid) = $$`); a killed WAITER must never delete the RUNNER's lock.
+- **BRIEF-FACTS-DRIFT-1.** A measured fact in a brief ("12 popouts hand-roll document.title", "the hook runs
+  three ceilings") is re-verified by the lane with grep before it builds on it; two of today's briefs carried
+  stale counts and the lanes reported the real number instead of building to the wrong one — that is the
+  right behaviour, and the brief says so explicitly ("verify every measured line").
+- **VISIBLE-FIX-IS-REPORTED-1.** A WCAG contrast fix on a known screen (`--color-info-text` on the candidates
+  KPI figure, the ActionRuleCell opacity) is a visible change: it lands because §6 is a hard requirement, and
+  the same status message names it to Danny as a colour change he may veto — never silently.
+
