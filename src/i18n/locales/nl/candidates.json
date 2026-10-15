@@ -302,6 +302,7 @@
       "error": {
         "notPdf": "Alleen een pdf-, jpg-, png-, gif-, webp-, docx- of xlsx-bestand kan gelezen worden.",
         "tooLarge": "Dit bestand is groter dan 10 MB.",
+        "storageUnavailable": "Het cv kon niet worden opgeslagen: de opslag is tijdelijk niet beschikbaar. Probeer het opnieuw.",
         "throttled": "Te veel cv's achter elkaar. Wacht een minuut en probeer het opnieuw.",
         "forbidden": "Je hebt geen rechten om een cv te laten lezen.",
         "expired": "Deze aanvraag is verlopen. Upload het cv opnieuw.",

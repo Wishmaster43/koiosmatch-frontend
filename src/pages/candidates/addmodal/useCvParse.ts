@@ -48,6 +48,7 @@ export const CV_TEXT_MAX_CHARS = 50000
 const CV_ERROR_KEYS = {
   notPdf: 'modal.cv.error.notPdf',
   tooLarge: 'modal.cv.error.tooLarge',
+  storageUnavailable: 'modal.cv.error.storageUnavailable',
   throttled: 'modal.cv.error.throttled',
   forbidden: 'modal.cv.error.forbidden',
   expired: 'modal.cv.error.expired',
@@ -92,6 +93,8 @@ const STATUS_KEYS: Record<number, string> = {
   413: CV_ERROR_KEYS.tooLarge,
   422: CV_ERROR_KEYS.notPdf,
   429: CV_ERROR_KEYS.throttled,
+  // F-013/F-011 (BE b2cb6be5): the disk did not confirm the staged CV — no dossier exists, retry is safe.
+  503: CV_ERROR_KEYS.storageUnavailable,
 }
 
 interface PollBody {

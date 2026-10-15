@@ -141,7 +141,8 @@ export function useEntityDocuments(prefix: string, parentId: Id | undefined, lis
         // the row and shouting "mislukt" would be a lie about what the server holds.
         if (err?.response?.status === 404) return
         if (row) setDocs(d => { const next = [...d]; next.splice(Math.min(index, next.length), 0, row); return next })
-        notifyError(t('common:actionFailed'))
+        // A storage 503 (F-013/F-011) names the real cause; anything else keeps the generic text.
+        notifyError(uploadErrorMessage(err, t, t('common:actionFailed')))
       })
   }, [prefix, parentId, docs, t])
 

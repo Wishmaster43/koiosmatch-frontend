@@ -48,7 +48,8 @@
     "unconfirmed": "Niet bevestigd"
   },
   "upload": {
-    "tooLarge": "Dit bestand is te groot voor de server. Kies een kleiner bestand."
+    "tooLarge": "Dit bestand is te groot voor de server. Kies een kleiner bestand.",
+    "storageUnavailable": "Opslag is tijdelijk niet beschikbaar. Probeer het opnieuw."
   },
   "eraseDialog": {
     "password": "Wachtwoord",

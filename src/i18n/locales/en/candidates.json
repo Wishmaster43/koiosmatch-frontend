@@ -302,6 +302,7 @@
       "error": {
         "notPdf": "Only a pdf, jpg, png, gif, webp, docx or xlsx file can be read.",
         "tooLarge": "This file is larger than 10 MB.",
+        "storageUnavailable": "The CV could not be stored: storage is temporarily unavailable. Please try again.",
         "throttled": "Too many CVs in a row. Wait a minute and try again.",
         "forbidden": "You are not allowed to have a CV read.",
         "expired": "This request has expired. Upload the CV again.",

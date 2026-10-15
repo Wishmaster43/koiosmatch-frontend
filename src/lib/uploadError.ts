@@ -6,8 +6,18 @@ export function isPayloadTooLarge(err: unknown): boolean {
   return (err as { response?: { status?: number } })?.response?.status === 413
 }
 
+// True when the storage disk did not confirm the write or delete (ONIX F-013/F-011, BE b2cb6be5):
+// a 503 whose body carries code "storage_unavailable" — nothing was created or removed.
+export function isStorageUnavailable(err: unknown): boolean {
+  const r = (err as { response?: { status?: number; data?: { code?: string } } })?.response
+  return r?.status === 503 && r?.data?.code === 'storage_unavailable'
+}
+
 // Upload failure text: an HTTP 413 gets the honest "too large" sentence (the proxy answers
-// before Laravel runs, so there is no message); anything else keeps the extractApiError path.
+// before Laravel runs, so there is no message), a storage 503 the "try again" sentence;
+// anything else keeps the extractApiError path.
 export function uploadErrorMessage(err: unknown, t: TFunction, fallback: string): string {
-  return isPayloadTooLarge(err) ? t('common:upload.tooLarge') : extractApiError(err, fallback)
+  if (isPayloadTooLarge(err)) return t('common:upload.tooLarge')
+  if (isStorageUnavailable(err)) return t('common:upload.storageUnavailable')
+  return extractApiError(err, fallback)
 }

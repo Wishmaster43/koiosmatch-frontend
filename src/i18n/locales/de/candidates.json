@@ -279,6 +279,7 @@
       "error": {
         "notPdf": "Es kann nur eine pdf-, jpg-, png-, gif-, webp-, docx- oder xlsx-Datei gelesen werden.",
         "tooLarge": "Diese Datei ist größer als 10 MB.",
+        "storageUnavailable": "Der Lebenslauf konnte nicht gespeichert werden: Der Speicher ist vorübergehend nicht verfügbar. Bitte versuchen Sie es erneut.",
         "throttled": "Zu viele Lebensläufe hintereinander. Warten Sie eine Minute und versuchen Sie es erneut.",
         "forbidden": "Sie haben keine Berechtigung, einen Lebenslauf lesen zu lassen.",
         "expired": "Diese Anfrage ist abgelaufen. Laden Sie den Lebenslauf erneut hoch.",

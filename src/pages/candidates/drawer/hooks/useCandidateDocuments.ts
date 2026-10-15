@@ -84,7 +84,7 @@ export function useCandidateDocuments(c: Candidate, onRefresh?: () => void) {
     if (!relation) return
     api.patch(`/candidates/${c.id}/${relation}/${entryId}`, { document_id: documentId }, LINK_REQUEST_CONFIG)
       .then(() => onRefresh?.())
-      .catch(err => notifyError(extractApiError(err, t('common:actionFailed'))))
+      .catch(err => notifyError(uploadErrorMessage(err, t, t('common:actionFailed'))))
   }
   // DOC-LIST-LINK-1: resolve which (if any) of the candidate's own educations/
   // certifications/languages/skills a document is linked to, from the reverse FK ids
@@ -240,7 +240,8 @@ export function useCandidateDocuments(c: Candidate, onRefresh?: () => void) {
     if (isPersisted(id)) {
       api.delete(`/candidates/${c.id}/documents/${id}`).catch(err => {
         setDocs(prev => (prev.some(x => x.id === id) ? prev : [...prev.slice(0, i), doc, ...prev.slice(i)]))
-        notifyError(extractApiError(err, t('common:actionFailed')))
+        // A storage 503 (F-013/F-011) names the real cause; anything else keeps the generic text.
+        notifyError(uploadErrorMessage(err, t, t('common:actionFailed')))
       })
     }
   }
@@ -256,7 +257,7 @@ export function useCandidateDocuments(c: Candidate, onRefresh?: () => void) {
       if (!isPersisted(d.id)) return
       api.delete(`/candidates/${c.id}/documents/${d.id}`).catch(err => {
         setDocs(prev => (prev.some(x => x.id === d.id) ? prev : [d, ...prev]))
-        notifyError(extractApiError(err, t('common:actionFailed')))
+        notifyError(uploadErrorMessage(err, t, t('common:actionFailed')))
       })
     })
   }

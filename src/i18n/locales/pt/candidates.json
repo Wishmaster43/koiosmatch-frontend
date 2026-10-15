@@ -302,6 +302,7 @@
       "error": {
         "notPdf": "Só é possível ler um ficheiro pdf, jpg, png, gif, webp, docx ou xlsx.",
         "tooLarge": "Este ficheiro tem mais de 10 MB.",
+        "storageUnavailable": "Não foi possível guardar o CV: o armazenamento está temporariamente indisponível. Tente novamente.",
         "throttled": "Demasiados CVs seguidos. Aguarde um minuto e tente novamente.",
         "forbidden": "Não tem permissões para mandar ler um CV.",
         "expired": "Este pedido expirou. Carregue o CV novamente.",

@@ -48,7 +48,8 @@
     "unconfirmed": "Nicht bestätigt"
   },
   "upload": {
-    "tooLarge": "Diese Datei ist für den Server zu groß. Bitte wähle eine kleinere Datei."
+    "tooLarge": "Diese Datei ist für den Server zu groß. Bitte wähle eine kleinere Datei.",
+    "storageUnavailable": "Der Speicher ist vorübergehend nicht verfügbar. Bitte versuchen Sie es erneut."
   },
   "eraseDialog": {
     "password": "Passwort",
