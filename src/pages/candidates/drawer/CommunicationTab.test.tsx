@@ -127,20 +127,21 @@ describe('CommunicationTab · optimistic consent date (Danny punt F)', () => {
     expect(onSave).toHaveBeenCalledWith(expect.objectContaining({ newsletter_opt_in: true, newsletter_consent_at: expect.any(String) }))
   })
 
-  it('renders a given-at line once a channel has both the flag and the date (any channel, incl. newsletter)', async () => {
+  it('renders the server state caption per channel (K-008), granted with its date', async () => {
     const user = userEvent.setup()
-    render(<CommunicationTab c={candidate({ newsletter_opt_in: true, newsletter_consent_at: '2026-01-01T00:00:00.000Z' })} />)
+    render(<CommunicationTab c={candidate({ newsletter_opt_in: true, newsletter_consent_at: '2026-01-01T00:00:00.000Z', newsletterConsentState: 'granted', whatsappConsentState: 'refused', emailConsentState: 'not_asked' })} />)
     await openConsent(user)
-    // Raw-key i18n in this test file (no real i18next instance) — assert the
-    // translation call happened at all, not the interpolated Dutch copy.
-    expect(screen.getAllByText(/consentGivenAt/).length).toBeGreaterThan(0)
+    // Raw-key i18n in this test file (no real i18next instance): assert the keys.
+    expect(screen.getByText(/consentState\.grantedAt/)).toBeTruthy()
+    expect(screen.getByText(/consentState\.refused/)).toBeTruthy()
+    expect(screen.getByText(/consentState\.notAsked/)).toBeTruthy()
   })
 
-  it('shows no given-at line for a channel with no date yet', async () => {
+  it('shows no state caption when the server sent no state', async () => {
     const user = userEvent.setup()
     render(<CommunicationTab c={candidate({ whatsapp_opt_in: true })} />)
     await openConsent(user)
-    expect(screen.queryByText(/consentGivenAt/)).toBeNull()
+    expect(screen.queryByText(/consentState\./)).toBeNull()
   })
 })
 
@@ -534,5 +535,26 @@ describe('CommunicationTab · consent tri-state (CONSENT-TRISTATE-FE-1)', () => 
     expect(typeof sent.whatsapp_consent_at).toBe('string')
     expect(sent).not.toHaveProperty('email_opt_in')
     expect(sent).not.toHaveProperty('newsletter_opt_in')
+  })
+})
+
+// K-008 verifier fixes: the toggle reads the server state; a flip updates the state optimistically.
+describe('CommunicationTab · consent state drives toggle and caption (K-008)', () => {
+  it('renders an unconfirmed legacy row (raw true, no stamp) as an OFF toggle with the unconfirmed caption', async () => {
+    render(<CommunicationTab c={candidate({ whatsapp_opt_in: true, whatsappConsentState: 'unconfirmed' })} />)
+    const user = userEvent.setup()
+    await user.click(screen.getByRole('tab', { name: 'communication.consentTitle' }))
+    expect(screen.getByRole('switch', { name: 'communication.consentWhatsapp' })).toHaveAttribute('aria-checked', 'false')
+    expect(screen.getByText(/consentState\.unconfirmed/)).toBeTruthy()
+  })
+
+  it('a click on a not-asked channel sends the flag and the optimistic granted state', async () => {
+    const onSave = vi.fn()
+    render(<CommunicationTab c={candidate({ whatsapp_opt_in: null, whatsappConsentState: 'not_asked' })} onSave={onSave} />)
+    const user = userEvent.setup()
+    await user.click(screen.getByRole('tab', { name: 'communication.consentTitle' }))
+    await user.click(screen.getByRole('switch', { name: 'communication.consentWhatsapp' }))
+    expect(onSave).toHaveBeenCalledWith(expect.objectContaining({ whatsapp_opt_in: true, whatsappConsentState: 'granted' }))
+    expect(onSave.mock.calls[0][0]).not.toHaveProperty('emailConsentState')
   })
 })

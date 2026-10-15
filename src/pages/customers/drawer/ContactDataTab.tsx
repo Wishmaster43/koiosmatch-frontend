@@ -10,6 +10,8 @@ import type { FieldRow } from '@/components/forms/EditableFieldTable'
 import EditableFieldTable from '@/components/forms/EditableFieldTable'
 import ContactTextSection from './ContactTextSection'
 import RetentionConsentBlock from '@/components/drawer/RetentionConsentBlock'
+import ConsentStateCaption from '@/components/drawer/ConsentStateCaption'
+import { BodyText, GroupLabel } from '@/components/ui/typography'
 import ContactLinkSection from './ContactLinkSection'
 import type { Contact, Department } from '@/types/customer'
 import type { Id } from '@/types/common'
@@ -64,6 +66,21 @@ export default function ContactDataTab({
         namespace="customers"
         viewPermission="customers.update"
       />
+
+      {/* K-008: read-only channel consent states; no toggle, the contact writer has no consent PATCH path. */}
+      <div role="group" aria-labelledby="contact-consent-state-heading" style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+        <GroupLabel id="contact-consent-state-heading">{t('consentState.title', { ns: 'common' })}</GroupLabel>
+        {[
+          { id: 'whatsapp', label: t('communication.consentWhatsapp', { ns: 'candidates' }), state: contact.whatsappConsentState, at: contact.whatsappConsentAt },
+          { id: 'email', label: t('communication.consentEmail', { ns: 'candidates' }), state: contact.emailConsentState, at: contact.emailConsentAt },
+          { id: 'newsletter', label: t('communication.consentNewsletter', { ns: 'candidates' }), state: contact.newsletterConsentState, at: contact.newsletterConsentAt },
+        ].map(ch => (
+          <div key={ch.id} style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+            <BodyText as="span" style={{ flex: 1 }}>{ch.label}</BodyText>
+            <ConsentStateCaption state={ch.state} at={ch.at} />
+          </div>
+        ))}
+      </div>
 
       {/* Koppeling — same shape and behaviour as "+ Vestiging" (Danny 28-07). */}
       <ContactLinkSection locationIds={linkedLocationIds} departmentIds={linkedDepartmentIds}

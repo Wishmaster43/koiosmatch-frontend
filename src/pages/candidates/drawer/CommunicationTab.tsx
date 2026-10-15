@@ -12,6 +12,7 @@ import { useDateFormat } from '@/lib/datetime'
 import NotesTabJs from '@/components/drawer/tabs/NotesTab'
 // K-288: linked-notes feed moved out of the Notities section into its own sub-tab.
 import LinkedNotesTab from '@/components/drawer/tabs/notes/LinkedNotesTab'
+import ConsentStateCaption from '@/components/drawer/ConsentStateCaption'
 import SubTabBar from '@/components/drawer/SubTabBar'
 import SectionCard from '@/components/ui/SectionCard'
 import Toggle from '@/components/ui/Toggle'
@@ -119,22 +120,25 @@ export default function CommunicationTab({ c, onSave, onEditStatusEvent, initial
   // CONSENT-TRISTATE-FE-1 (K-008): a channel is true (granted), false (refused) or
   // null (not asked) — the toggle is ON only for an explicit grant, never by default.
   const CONSENT_CH = [
-    { key: 'whatsapp_opt_in',   at: 'whatsapp_consent_at',   label: t('communication.consentWhatsapp') },
-    { key: 'email_opt_in',      at: 'email_consent_at',      label: t('communication.consentEmail') },
-    { key: 'newsletter_opt_in', at: 'newsletter_consent_at', label: t('communication.consentNewsletter') },
+    { state: c.consent.whatsappConsentState, stateKey: 'whatsappConsentState', key: 'whatsapp_opt_in',   at: 'whatsapp_consent_at',   label: t('communication.consentWhatsapp') },
+    { state: c.consent.emailConsentState, stateKey: 'emailConsentState', key: 'email_opt_in',      at: 'email_consent_at',      label: t('communication.consentEmail') },
+    { state: c.consent.newsletterConsentState, stateKey: 'newsletterConsentState', key: 'newsletter_opt_in', at: 'newsletter_consent_at', label: t('communication.consentNewsletter') },
   ]
-  // Optimistic "given at" (Danny punt F, live finding): the server DOES stamp
+  // Optimistic state and date (Danny punt F, live finding): the server DOES stamp
   // {channel}_consent_at on a flip, but buildCandidatePatch only ever forwards the
-  // *_opt_in flags to the API (candidatesShared.ts) — the `_at` keys we set here
-  // never reach the request body, they only make the date show up immediately
-  // instead of waiting for the drawer to reopen. Toggling OFF nulls the local
-  // date too, so an unchecked box never shows a stale "gegeven op".
+  // *_opt_in flags to the API (candidatesShared.ts) — the `_at` and state keys we set
+  // here never reach the request body, they only make the caption and toggle follow
+  // the click immediately instead of waiting for the server answer. Toggling OFF nulls
+  // the local date too, so an unchecked box never shows a stale "gegeven op".
   // Only the flipped channel travels (the drawer merges the patch deep, buildCandidatePatch
   // sends the keys present): an untouched channel is never re-sent, so a null (not asked)
   // can never become a false (refused) or a true (granted) as a side effect of another flip.
   const setConsent = (key: string, val: boolean) => {
-    const atKey = CONSENT_CH.find(ch => ch.key === key)?.at
-    onSave?.({ [key]: val, ...(atKey ? { [atKey]: val ? new Date().toISOString() : null } : {}) })
+    const chan = CONSENT_CH.find(ch => ch.key === key)
+    onSave?.({
+      [key]: val,
+      ...(chan ? { [chan.at]: val ? new Date().toISOString() : null, [chan.stateKey]: val ? 'granted' : 'refused' } : {}),
+    })
   }
   // Retention opt-in (Block B, AVG-RET-2) — CMBE-RET-A shipped the backend validation
   // (consent.retention_opt_in now persists), so this behaves exactly like the 3
@@ -287,7 +291,8 @@ export default function CommunicationTab({ c, onSave, onEditStatusEvent, initial
         <SectionCard>
           <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
             {CONSENT_CH.map(ch => {
-              const on = consent[ch.key] === true
+              // The toggle follows the server state; the raw flag is only the fallback when no state was sent.
+              const on = ch.state ? ch.state === 'granted' : consent[ch.key] === true
               const at = consent[ch.at] as string | null | undefined
               return (
                 // House toggle (Danny live review, 04-08: "Vervangen door
@@ -295,7 +300,8 @@ export default function CommunicationTab({ c, onSave, onEditStatusEvent, initial
                 <div key={ch.key} style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
                   <Toggle checked={!!on} onChange={v => setConsent(ch.key, v)} ariaLabel={ch.label} />
                   <BodyText as="span" style={{ flex: 1 }}>{ch.label}</BodyText>
-                  {on && at && <Caption as="span">{t('communication.consentGivenAt', { date: formatDate(at) })}</Caption>}
+                  {/* K-008: server-derived state caption (granted · refused · not asked · unconfirmed). */}
+                  <ConsentStateCaption state={ch.state} at={at} />
                 </div>
               )
             })}

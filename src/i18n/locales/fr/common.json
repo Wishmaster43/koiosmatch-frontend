@@ -38,6 +38,15 @@
     "unmarked": "Remis aux archives."
   },
   "actionFailed": "Échec de l'action. Veuillez réessayer.",
+  "consentState": {
+    "title": "Consentements",
+    "granted": "Donné",
+    "grantedAt": "Donné le {{date}}",
+    "refused": "Refusé",
+    "refusedAt": "Refusé le {{date}}",
+    "notAsked": "Pas encore demandé",
+    "unconfirmed": "Non confirmé"
+  },
   "upload": {
     "tooLarge": "Ce fichier est trop volumineux pour le serveur. Veuillez choisir un fichier plus petit."
   },

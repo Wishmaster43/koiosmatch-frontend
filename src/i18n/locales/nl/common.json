@@ -38,6 +38,15 @@
     "unmarked": "Teruggezet naar archief."
   },
   "actionFailed": "Actie mislukt. Probeer het opnieuw.",
+  "consentState": {
+    "title": "Toestemmingen",
+    "granted": "Gegeven",
+    "grantedAt": "Gegeven op {{date}}",
+    "refused": "Geweigerd",
+    "refusedAt": "Geweigerd op {{date}}",
+    "notAsked": "Nog niet gevraagd",
+    "unconfirmed": "Niet bevestigd"
+  },
   "upload": {
     "tooLarge": "Dit bestand is te groot voor de server. Kies een kleiner bestand."
   },

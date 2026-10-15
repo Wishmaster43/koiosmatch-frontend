@@ -38,6 +38,15 @@
     "unmarked": "Moved back to the archive."
   },
   "actionFailed": "Action failed. Please try again.",
+  "consentState": {
+    "title": "Consents",
+    "granted": "Given",
+    "grantedAt": "Given on {{date}}",
+    "refused": "Refused",
+    "refusedAt": "Refused on {{date}}",
+    "notAsked": "Not asked yet",
+    "unconfirmed": "Not confirmed"
+  },
   "upload": {
     "tooLarge": "This file is too large for the server. Please choose a smaller file."
   },

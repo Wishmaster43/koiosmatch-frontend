@@ -38,6 +38,15 @@
     "unmarked": "Zurück ins Archiv verschoben."
   },
   "actionFailed": "Aktion fehlgeschlagen – bitte erneut versuchen.",
+  "consentState": {
+    "title": "Einwilligungen",
+    "granted": "Erteilt",
+    "grantedAt": "Erteilt am {{date}}",
+    "refused": "Abgelehnt",
+    "refusedAt": "Abgelehnt am {{date}}",
+    "notAsked": "Noch nicht gefragt",
+    "unconfirmed": "Nicht bestätigt"
+  },
   "upload": {
     "tooLarge": "Diese Datei ist für den Server zu groß. Bitte wähle eine kleinere Datei."
   },
