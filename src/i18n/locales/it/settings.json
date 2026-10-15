@@ -1780,7 +1780,10 @@
         "opportunities": "Opportunità",
         "settings": "Impostazioni"
       },
+      "fieldsTitle": "Campi inviati: {{fields}}",
+      "piiTitle": "Contiene dati personali",
       "actions": {
+        "erased": "Cancellato (GDPR)",
         "created": "Creato",
         "updated": "Modificato",
         "deleted": "Eliminato",

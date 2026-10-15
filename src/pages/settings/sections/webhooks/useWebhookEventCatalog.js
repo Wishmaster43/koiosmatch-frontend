@@ -13,7 +13,8 @@ import { EVENT_GROUPS as FALLBACK_EVENT_GROUPS } from './webhookEvents'
 
 export const WEBHOOK_EVENT_CATALOG_QUERY_KEY = ['webhook-events']
 
-// Fetch the flat event catalog: [{ key, label, group, pii }, ...].
+// Fetch the flat event catalog: [{ key, label, group, pii, fields }, ...] — `fields` is the
+// allow-list of payload keys that may leave for that event (ONIX G-002, BE lane D f0855053).
 const fetchWebhookEventCatalog = () => api.get('/webhook-events').then(unwrap)
 
 // Groups a flat [{ key, group }] list into [{ group, events: [key, ...] }],
@@ -42,10 +43,18 @@ export function useWebhookEventCatalog() {
   // Stable identity on both paths — EventCatalog memoises its filtered view on
   // `groups`, which would silently stop memoising on the live path otherwise.
   const groups = useMemo(() => (flat ? groupEvents(flat) : FALLBACK_EVENT_GROUPS), [flat])
+  // Per-event meta for the picker's hover text: { pii, fields } keyed by event key; empty on
+  // the static fallback (it carries keys only), so a consumer renders nothing extra there.
+  const meta = useMemo(() => {
+    const out = {}
+    for (const ev of flat ?? []) out[ev.key] = { pii: ev.pii === true, fields: Array.isArray(ev.fields) ? ev.fields : [] }
+    return out
+  }, [flat])
   const isFallback = !flat && query.isError
 
   return {
     groups,
+    meta,
     events: flat,
     isLoading: query.isLoading,
     isError: query.isError,

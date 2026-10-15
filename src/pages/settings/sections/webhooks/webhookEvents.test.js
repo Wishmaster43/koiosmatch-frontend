@@ -13,7 +13,7 @@ import { describe, it, expect } from 'vitest'
 import { EVENT_GROUPS, ALL_EVENTS, actionOf } from './webhookEvents'
 
 // Manual mirror of config/webhooks.php's `events` array (koiosmatch-api) — hand-
-// counted 2026-09-17: 66 rows, 14 groups (ADOPT-A2 addendum added the match
+// counted 2026-09-17: 66 rows, 68 since lane D f0855053 (16-10), 14 groups (ADOPT-A2 addendum added the match
 // approval lifecycle + the new `settings` group's `settings.blank_fallback`).
 // Re-verify by re-grepping `'key' => '...'` in that file if this ever needs updating.
 const BACKEND_WEBHOOK_EVENTS = [
@@ -42,6 +42,8 @@ const BACKEND_WEBHOOK_EVENTS = [
   'interview.started', 'interview.completed', 'interview.disqualified',
   'opportunity.created', 'opportunity.updated', 'opportunity.closing_soon', 'opportunity.stale',
   'settings.blank_fallback',
+  // ONIX K-013 (lane D f0855053): fired after an AVG erasure committed — ids only.
+  'candidate.erased', 'contact.erased',
 ]
 
 // Every shipped locale's settings.json, loaded like localeParity.test.ts does.
@@ -49,9 +51,9 @@ const settingsLocales = import.meta.glob('../../../../i18n/locales/*/settings.js
 const LOCALES = ['nl', 'en', 'de', 'fr', 'es', 'it', 'pt']
 
 describe('EVENT_GROUPS · backend parity (REPAIR N6)', () => {
-  it('mirrors exactly 66 backend webhook events', () => {
-    expect(BACKEND_WEBHOOK_EVENTS.length).toBe(66)
-    expect(ALL_EVENTS.length).toBe(66)
+  it('mirrors exactly 68 backend webhook events', () => {
+    expect(BACKEND_WEBHOOK_EVENTS.length).toBe(68)
+    expect(ALL_EVENTS.length).toBe(68)
   })
 
   it('contains every event the backend catalogue has (no missing subscription option)', () => {

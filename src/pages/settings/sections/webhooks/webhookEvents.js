@@ -44,6 +44,8 @@ export const EVENT_GROUPS = [
     'candidate.availability_overdue', 'candidate.leave_ending_soon', 'candidate.leave_overdue',
     'candidate.unavailable_ending_soon', 'candidate.unavailable_overdue', 'candidate.birthday',
     'candidate.retention_due', 'candidate.status_stale', 'candidate.phase_stale',
+    // ONIX K-013 (lane D f0855053): fired after an AVG erasure committed — ids only; a receiver forgets that id.
+    'candidate.erased',
   ] },
   { group: 'applications', events: [
     'application.created', 'application.updated', 'application.stage_changed',
@@ -70,7 +72,7 @@ export const EVENT_GROUPS = [
   { group: 'backoffice', events: ['backoffice.link.updated'] },
   { group: 'ai', events: ['ai_agent.webhook_received'] },
   { group: 'customers', events: [
-    'contact.retention_due', 'customer.updated', 'customer.no_contact',
+    'contact.retention_due', 'contact.erased', 'customer.updated', 'customer.no_contact',
     'customer.contract_ending', 'customer.task_overdue', 'customer.match_ending',
     'customer.vacancy_stale',
   ] },

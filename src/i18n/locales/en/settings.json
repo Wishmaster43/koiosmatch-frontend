@@ -1780,7 +1780,10 @@
         "opportunities": "Opportunities",
         "settings": "Settings"
       },
+      "fieldsTitle": "Fields that leave: {{fields}}",
+      "piiTitle": "Contains personal data",
       "actions": {
+        "erased": "Erased (GDPR)",
         "created": "Created",
         "updated": "Updated",
         "deleted": "Deleted",

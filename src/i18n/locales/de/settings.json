@@ -1521,7 +1521,10 @@
         "opportunities": "Chancen",
         "settings": "Einstellungen"
       },
+      "fieldsTitle": "Übertragene Felder: {{fields}}",
+      "piiTitle": "Enthält personenbezogene Daten",
       "actions": {
+        "erased": "Gelöscht (DSGVO)",
         "created": "Erstellt",
         "updated": "Geändert",
         "deleted": "Gelöscht",

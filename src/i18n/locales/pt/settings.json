@@ -1780,7 +1780,10 @@
         "opportunities": "Oportunidades",
         "settings": "Definições"
       },
+      "fieldsTitle": "Campos enviados: {{fields}}",
+      "piiTitle": "Contém dados pessoais",
       "actions": {
+        "erased": "Eliminado (RGPD)",
         "created": "Criado",
         "updated": "Alterado",
         "deleted": "Eliminado",

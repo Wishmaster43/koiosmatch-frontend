@@ -8,7 +8,7 @@
  */
 import { useState, useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Search } from 'lucide-react'
+import { Search, ShieldAlert } from 'lucide-react'
 import { actionOf } from './webhookEvents'
 import { useWebhookEventCatalog } from './useWebhookEventCatalog'
 import { PermissionToggle } from '@/pages/settings/components/SettingsControls'
@@ -27,7 +27,7 @@ interface EventCatalogProps {
 export default function EventCatalog({ value = [], onChange }: EventCatalogProps) {
   const { t } = useTranslation('settings')
   const [query, setQuery] = useState('')
-  const { groups: EVENT_GROUPS, isLoading, isFallback } = useWebhookEventCatalog()
+  const { groups: EVENT_GROUPS, isLoading, isFallback, meta } = useWebhookEventCatalog()
   const ALL_EVENTS = useMemo(() => EVENT_GROUPS.flatMap((g) => g.events), [EVENT_GROUPS])
   // Set form of the controlled `value` for O(1) membership checks below.
   const selected = useMemo(() => new Set(value), [value])
@@ -111,13 +111,23 @@ export default function EventCatalog({ value = [], onChange }: EventCatalogProps
                 </span>
               </div>
               {/* Events in the group */}
-              {events.map((ev: string) => (
-                <div key={ev} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '9px 14px', borderTop: '1px solid var(--border)' }}>
-                  <PermissionToggle checked={selected.has(ev)} onChange={() => toggle(ev)} />
-                  <span onClick={() => toggle(ev)} style={{ fontSize: 13, color: 'var(--text)', cursor: 'pointer' }}>{actionLabel(actionOf(ev) ?? '')}</span>
-                  <code style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: 11, color: 'var(--text-muted)', marginLeft: 'auto' }}>{ev}</code>
-                </div>
-              ))}
+              {events.map((ev: string) => {
+                // ONIX G-002 (BE lane D f0855053): the catalogue names the payload keys that may leave
+                // per event (`fields`) and whether they carry personal data (`pii`) — both ride as
+                // hover text on the row (a caveat is a title, never a dot), the pii one also as an icon.
+                const m = (meta as Record<string, { pii: boolean; fields: string[] }> | undefined)?.[ev]
+                const fieldsTitle = m && m.fields.length > 0 ? t('webhooks.events.fieldsTitle', { fields: m.fields.join(', ') }) : undefined
+                const piiTitle = m?.pii ? t('webhooks.events.piiTitle') : undefined
+                const title = [fieldsTitle, piiTitle].filter(Boolean).join(' · ') || undefined
+                return (
+                  <div key={ev} title={title} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '9px 14px', borderTop: '1px solid var(--border)' }}>
+                    <PermissionToggle checked={selected.has(ev)} onChange={() => toggle(ev)} />
+                    <span onClick={() => toggle(ev)} style={{ fontSize: 13, color: 'var(--text)', cursor: 'pointer' }}>{actionLabel(actionOf(ev) ?? '')}</span>
+                    {m?.pii && <ShieldAlert size={12} aria-label={piiTitle} style={{ color: 'var(--text-muted)', flexShrink: 0 }} />}
+                    <code style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: 11, color: 'var(--text-muted)', marginLeft: 'auto' }}>{ev}</code>
+                  </div>
+                )
+              })}
             </div>
           )
         })}
