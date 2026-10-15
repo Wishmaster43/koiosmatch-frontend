@@ -1462,7 +1462,14 @@
       "error": "Motivo",
       "lastAttempt": "Último intento"
     },
+    "erasure": {
+      "pending": "Solicitud de borrado a la espera de confirmación del sistema receptor",
+      "manual_required": "La solicitud de borrado requiere gestión manual",
+      "failed": "La solicitud de borrado ha fallado"
+    },
     "system": {
+      "webhook": "Webhook",
+      "proposal_recipient": "Destinatario de la propuesta",
       "shiftmanager": "Shiftmanager",
       "helloflex": "HelloFlex"
     }

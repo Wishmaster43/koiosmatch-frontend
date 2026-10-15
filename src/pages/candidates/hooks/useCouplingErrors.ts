@@ -14,7 +14,10 @@ export interface CouplingErrorRow {
   entity_type: string
   entity_id: string
   entity_label: string | null
-  system: 'shiftmanager' | 'helloflex'
+  // Sync failures name a backoffice; an open downstream-erasure request (ONIX K-013, BE lane D
+  // f0855053: entity_type erasure_candidate / erasure_contact) names ANY receiving system
+  // (shiftmanager, helloflex, webhook, proposal_recipient, …), so the type stays open.
+  system: string
   error: string
   synced_at: string | null
 }

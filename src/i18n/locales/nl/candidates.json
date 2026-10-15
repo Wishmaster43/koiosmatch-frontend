@@ -1462,7 +1462,14 @@
       "error": "Reden",
       "lastAttempt": "Laatst geprobeerd"
     },
+    "erasure": {
+      "pending": "Wisverzoek wacht op bevestiging van het ontvangende systeem",
+      "manual_required": "Wisverzoek vraagt handmatige afhandeling",
+      "failed": "Wisverzoek is mislukt"
+    },
     "system": {
+      "webhook": "Webhook",
+      "proposal_recipient": "Voorstelontvanger",
       "shiftmanager": "Shiftmanager",
       "helloflex": "HelloFlex"
     }

@@ -1462,7 +1462,14 @@
       "error": "Reason",
       "lastAttempt": "Last attempted"
     },
+    "erasure": {
+      "pending": "Erasure request awaiting confirmation from the receiving system",
+      "manual_required": "Erasure request needs manual handling",
+      "failed": "Erasure request failed"
+    },
     "system": {
+      "webhook": "Webhook",
+      "proposal_recipient": "Proposal recipient",
       "shiftmanager": "Shiftmanager",
       "helloflex": "HelloFlex"
     }

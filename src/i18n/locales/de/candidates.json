@@ -1462,7 +1462,14 @@
       "error": "Grund",
       "lastAttempt": "Zuletzt versucht"
     },
+    "erasure": {
+      "pending": "Löschanfrage wartet auf Bestätigung des empfangenden Systems",
+      "manual_required": "Löschanfrage erfordert manuelle Bearbeitung",
+      "failed": "Löschanfrage ist fehlgeschlagen"
+    },
     "system": {
+      "webhook": "Webhook",
+      "proposal_recipient": "Vorschlagsempfänger",
       "shiftmanager": "Shiftmanager",
       "helloflex": "HelloFlex"
     }

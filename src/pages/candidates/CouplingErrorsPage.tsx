@@ -30,6 +30,13 @@ const SYSTEM_COLOR: Record<string, string> = {
   helloflex: 'var(--color-warning-text)',
 }
 
+// ONIX K-013 (BE lane D f0855053): the feed also lists open downstream-erasure requests,
+// first in the list — entity_type erasure_candidate / erasure_contact, entity_id = the
+// request id (an opaque handle, never the erased person), error = the request status
+// (pending · manual_required · failed). No record exists behind such a row, so it never
+// links (ENTITY_PAGE has no erasure_ key) and its status reads as text, not as a code.
+const isErasureRow = (r: CouplingErrorRow) => r.entity_type.startsWith('erasure_')
+
 // The dashboard KPI tile's deep-link destination (see file docblock above) —
 // lists every failed backoffice mapping so a recruiter can act on it.
 export default function CouplingErrorsPage() {
@@ -58,7 +65,10 @@ export default function CouplingErrorsPage() {
     },
     {
       key: 'error', header: t('couplingErrors.col.error'),
-      render: r => <BodyText title={r.error} style={{ maxWidth: 420, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', display: 'block' }}>{r.error}</BodyText>,
+      render: r => {
+        const text = isErasureRow(r) ? t(`couplingErrors.erasure.${r.error}`, { defaultValue: r.error }) : r.error
+        return <BodyText title={text} style={{ maxWidth: 420, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', display: 'block' }}>{text}</BodyText>
+      },
     },
     {
       key: 'synced_at', header: t('couplingErrors.col.lastAttempt'), sortable: true,

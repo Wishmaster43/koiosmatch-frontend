@@ -1462,7 +1462,14 @@
       "error": "Motivo",
       "lastAttempt": "Última tentativa"
     },
+    "erasure": {
+      "pending": "Pedido de eliminação a aguardar confirmação do sistema recetor",
+      "manual_required": "O pedido de eliminação requer tratamento manual",
+      "failed": "O pedido de eliminação falhou"
+    },
     "system": {
+      "webhook": "Webhook",
+      "proposal_recipient": "Destinatário da proposta",
       "shiftmanager": "Shiftmanager",
       "helloflex": "HelloFlex"
     }

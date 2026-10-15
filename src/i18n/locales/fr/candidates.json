@@ -1462,7 +1462,14 @@
       "error": "Motif",
       "lastAttempt": "Dernière tentative"
     },
+    "erasure": {
+      "pending": "Demande d'effacement en attente de confirmation du système destinataire",
+      "manual_required": "La demande d'effacement nécessite un traitement manuel",
+      "failed": "La demande d'effacement a échoué"
+    },
     "system": {
+      "webhook": "Webhook",
+      "proposal_recipient": "Destinataire de la proposition",
       "shiftmanager": "Shiftmanager",
       "helloflex": "HelloFlex"
     }

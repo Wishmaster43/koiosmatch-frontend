@@ -75,3 +75,17 @@ describe('CouplingErrorsPage — entity_type → drilldown link mapping', () => 
     expect(screen.queryByRole('button', { name: 'Mystery record' })).not.toBeInTheDocument()
   })
 })
+
+// ONIX K-013 (BE lane D f0855053): open downstream-erasure requests ride the same feed.
+describe('CouplingErrorsPage — downstream-erasure rows', () => {
+  it('renders an erasure_candidate row as plain text with its status as text, never a link or a raw code', async () => {
+    mockedUseCouplingErrors.mockReturnValue({ rows: [{ entity_type: 'erasure_candidate', entity_id: 'req-9', entity_label: 'Verwijderde kandidaat',
+      system: 'webhook', error: 'manual_required', synced_at: null }], loading: false, error: false, refetch: vi.fn() })
+    renderPage()
+    expect(await screen.findByText('Verwijderde kandidaat')).toBeInTheDocument()
+    expect(screen.queryByRole('link')).toBeNull()
+    // The real nl bundle renders here (the file's other cases assert 'Shiftmanager' the same way).
+    expect(screen.getByText('Wisverzoek vraagt handmatige afhandeling')).toBeInTheDocument()
+    expect(screen.queryByText('manual_required')).toBeNull()
+  })
+})

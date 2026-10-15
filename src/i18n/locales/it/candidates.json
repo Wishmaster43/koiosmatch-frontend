@@ -1462,7 +1462,14 @@
       "error": "Motivo",
       "lastAttempt": "Ultimo tentativo"
     },
+    "erasure": {
+      "pending": "Richiesta di cancellazione in attesa di conferma dal sistema ricevente",
+      "manual_required": "La richiesta di cancellazione richiede una gestione manuale",
+      "failed": "La richiesta di cancellazione non è riuscita"
+    },
     "system": {
+      "webhook": "Webhook",
+      "proposal_recipient": "Destinatario della proposta",
       "shiftmanager": "Shiftmanager",
       "helloflex": "HelloFlex"
     }
