@@ -301,6 +301,10 @@
     "entryHint": "Empiece a partir de un CV o rellene el formulario usted mismo."
   },
   "drawer": {
+    "subjectExport": "Exportar datos personales (derecho de acceso)",
+    "subjectExportStarted": "Exportación iniciada: la descarga se abre en una pestaña nueva.",
+    "subjectExportQueued": "Exportación iniciada: la descarga llegará por las notificaciones.",
+    "subjectExportFailed": "La exportación de datos personales ha fallado.",
     "availability": "Disponibilidad",
     "label": "Candidato",
     "tabs": {

@@ -324,6 +324,10 @@
     "entryHint": "Start from a CV, or fill in the form yourself."
   },
   "drawer": {
+    "subjectExport": "Export personal data (right of access)",
+    "subjectExportStarted": "Export started: the download opens in a new tab.",
+    "subjectExportQueued": "Export started: the download follows through the notifications.",
+    "subjectExportFailed": "The personal data export failed.",
     "availability": "Availability",
     "label": "Candidate",
     "tabs": {

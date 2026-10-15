@@ -6,7 +6,10 @@
  */
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Download, Edit2, RotateCcw, Save, Trash2, UserCheck, X } from 'lucide-react'
+import { extractApiError } from '@/lib/extractApiError'
+import { notifyError, notifySuccess } from '@/lib/notify'
+import api from '@/lib/api'
+import { Download, Edit2, RotateCcw, Save, Trash2, UserCheck, X, ShieldCheck } from 'lucide-react'
 import { pdf } from '@react-pdf/renderer'
 import { CvDocument } from '../CandidateCvTemplate'
 import type { CvCandidate } from '../CandidateCvTemplate'
@@ -87,15 +90,34 @@ export function CandidateTitle({ c, editing, hf, setHF }: {
 }
 
 // Header actions: convert (entry phase) or CV download, plus the edit/save/cancel toggles.
-export function CandidateHeaderActions({ c, isEntryPhase, nextPhase, converting, onConvert, headerEditing, onStartEdit, onSaveEdit, onCancelEdit }: {
+export function CandidateHeaderActions({ c, isEntryPhase, nextPhase, converting, onConvert, headerEditing, onStartEdit, onSaveEdit, onCancelEdit, canSubjectExport = false }: {
   c: Candidate; isEntryPhase: boolean; nextPhase?: LookupOption; converting: boolean
   onConvert: () => void; headerEditing: boolean
   onStartEdit: () => void; onSaveEdit: () => void; onCancelEdit: () => void
+  // ONIX K-001 (Danny 8a = A): the right-of-access export, shown only to a user with privacy.subject-export.
+  canSubjectExport?: boolean
 }) {
   const { t } = useTranslation('candidates')
   const { settings: cvSettings } = useCvSettings() as { settings?: unknown }
   const locale = useLocale() as string
   const [cvGenerating, setCvGenerating] = useState(false)
+  const [subjectExporting, setSubjectExporting] = useState(false)
+
+  // Right of access (ONIX K-001, BE lane D f0855053): POST /exports/subject-access builds the
+  // subject-access ZIP (audited, tenant_admin's privacy.subject-export) and answers a signed
+  // download URL — opened as a real navigation, the same path the documents ZIP uses.
+  const exportSubjectAccess = async () => {
+    setSubjectExporting(true)
+    try {
+      const res = await api.post('/exports/subject-access', { subject_type: 'candidate', subject_id: c.id })
+      // Hand-written shape: the spec carries no 2xx schema for this route (responses: never).
+      const url = (res.data?.data?.download_url ?? res.data?.download_url) as string | undefined
+      if (url) window.open(url, '_blank', 'noopener,noreferrer')
+      notifySuccess(t(url ? 'drawer.subjectExportStarted' : 'drawer.subjectExportQueued'))
+    } catch (err) {
+      notifyError(extractApiError(err, t('drawer.subjectExportFailed')))
+    } finally { setSubjectExporting(false) }
+  }
 
   // Generate + download the CV PDF client-side (react-pdf; no server round-trip).
   const downloadCv = async () => {
@@ -121,6 +143,13 @@ export function CandidateHeaderActions({ c, isEntryPhase, nextPhase, converting,
       ) : (
         <Button variant="primary" size="sm" disabled={cvGenerating || converting} onClick={downloadCv}>
           <Download size={11} />{cvGenerating ? t('drawer.generating') : t('drawer.downloadCv')}
+        </Button>
+      )}
+      {/* K-001: the right-of-access export sits beside the CV download, admin-only (permission-gated by the drawer). */}
+      {canSubjectExport && (
+        <Button variant="secondary" size="sm" iconOnly disabled={subjectExporting} onClick={exportSubjectAccess}
+          title={t('drawer.subjectExport')} aria-label={t('drawer.subjectExport')}>
+          <ShieldCheck size={13} />
         </Button>
       )}
       {headerEditing ? (

@@ -324,6 +324,10 @@
     "entryHint": "Inizia da un CV, oppure compila tu stesso il modulo."
   },
   "drawer": {
+    "subjectExport": "Esporta i dati personali (diritto di accesso)",
+    "subjectExportStarted": "Esportazione avviata: il download si apre in una nuova scheda.",
+    "subjectExportQueued": "Esportazione avviata: il download arriva tramite le notifiche.",
+    "subjectExportFailed": "L'esportazione dei dati personali non è riuscita.",
     "availability": "Disponibilità",
     "label": "Candidato",
     "tabs": {

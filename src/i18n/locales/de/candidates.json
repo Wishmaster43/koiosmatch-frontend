@@ -301,6 +301,10 @@
     "entryHint": "Beginnen Sie mit einem Lebenslauf oder füllen Sie das Formular selbst aus."
   },
   "drawer": {
+    "subjectExport": "Personenbezogene Daten exportieren (Auskunftsrecht)",
+    "subjectExportStarted": "Export gestartet: der Download öffnet sich in einem neuen Tab.",
+    "subjectExportQueued": "Export gestartet: der Download folgt über die Benachrichtigungen.",
+    "subjectExportFailed": "Der Export der personenbezogenen Daten ist fehlgeschlagen.",
     "availability": "Verfügbarkeit",
     "label": "Kandidat",
     "tabs": {

@@ -324,6 +324,10 @@
     "entryHint": "Begin vanuit een cv, of vul het formulier zelf in."
   },
   "drawer": {
+    "subjectExport": "Exporteer persoonsgegevens (inzagerecht)",
+    "subjectExportStarted": "Export gestart: de download opent in een nieuw tabblad.",
+    "subjectExportQueued": "Export gestart: de download volgt via de meldingen.",
+    "subjectExportFailed": "De export van persoonsgegevens is mislukt.",
     "availability": "Beschikbaarheid",
     "label": "Kandidaat",
     "tabs": {
