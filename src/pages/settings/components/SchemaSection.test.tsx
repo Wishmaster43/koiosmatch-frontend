@@ -261,3 +261,16 @@ describe('SchemaSection · stage_window_map field excluded from the section save
     expect(body).not.toHaveProperty('application_stage_stale_by_phase')
   })
 })
+
+// K-008: a multiline text field renders a textarea (a textbox with a rows-capable element), a plain one an input.
+describe('SchemaSection · multiline text', () => {
+  it('renders a textarea for format multiline', async () => {
+    const schema: Schema = {
+      i18nKey: 'catalog.sections.privacy',
+      fields: [{ key: 'privacy_notice_text_nl', type: 'text', format: 'multiline', default: '', labelKey: 'settings.privacy.privacy_notice_text_nl.label' }],
+    }
+    render(<SchemaSection schema={schema} />)
+    const box = await screen.findByRole('textbox')
+    expect(box.tagName).toBe('TEXTAREA')
+  })
+})

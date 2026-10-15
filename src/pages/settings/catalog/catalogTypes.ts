@@ -16,7 +16,7 @@ export interface CatalogRow {
   aliases: string[]
   label_key: string
   help_key?: string
-  format?: 'required_fields_map' | 'string_list' | 'key_value' | 'kpi_order' | 'vacancy_tab_map' | 'proposal_template' | 'stage_window_map'
+  format?: 'required_fields_map' | 'string_list' | 'key_value' | 'kpi_order' | 'vacancy_tab_map' | 'proposal_template' | 'stage_window_map' | 'multiline'
   constraints?: {
     min?: number
     max?: number | null

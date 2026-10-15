@@ -24,7 +24,7 @@ import { SectionTitle } from '@/components/ui/typography'
 import { lucideByName } from '@/lib/lucideByName'
 import {
   SettingsScaffold, SettingCardList, SettingRow,
-  Toggle, NumberField, TextField, SelectField, ColorField,
+  Toggle, NumberField, TextField, TextareaField, SelectField, ColorField,
 } from './SettingsKit'
 import JsonField from './JsonField'
 import type { JsonFormat } from '../catalog/jsonFormat'
@@ -109,6 +109,16 @@ function FieldControl({ field, value, onChange, t, base, label, disabled, hideUn
         disabled={disabled} clearable={!field.unitOf} />
     }
     case 'text':
+      // K-008: config prose (privacy notice) edits in a plain textarea, not a single line.
+      if (field.format === 'multiline') {
+        // Prose needs room: the row's control slot sizes to content, so give the textarea a real width.
+        return (
+          <div style={{ width: 360 }}>
+            <TextareaField value={String(value ?? '')} onChange={onChange} placeholder={optionalT(t, sibling('placeholder'))}
+              minHeight={120} disabled={disabled} ariaLabel={label} />
+          </div>
+        )
+      }
       return <TextField value={value as string} onChange={onChange} placeholder={optionalT(t, sibling('placeholder'))} disabled={disabled} />
     case 'secret':
       // A secret arrives masked (§1 '••••••••') and is typed blind; an unchanged mask is

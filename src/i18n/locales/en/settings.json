@@ -4133,6 +4133,50 @@
         "label": "Conversation active: unit"
       }
     },
+    "privacy": {
+      "privacy_notice_text_nl": {
+        "label": "Privacy notice (Dutch)"
+      },
+      "privacy_notice_text_en": {
+        "label": "Privacy notice (English)"
+      },
+      "privacy_notice_text_de": {
+        "label": "Privacy notice (German)"
+      },
+      "privacy_notice_text_fr": {
+        "label": "Privacy notice (French)"
+      },
+      "privacy_notice_text_es": {
+        "label": "Privacy notice (Spanish)"
+      },
+      "privacy_notice_text_it": {
+        "label": "Privacy notice (Italian)"
+      },
+      "privacy_notice_text_pt": {
+        "label": "Privacy notice (Portuguese)"
+      },
+      "privacy_notice_optin_nl": {
+        "label": "WhatsApp opt-in sentence (Dutch)"
+      },
+      "privacy_notice_optin_en": {
+        "label": "WhatsApp opt-in sentence (English)"
+      },
+      "privacy_notice_optin_de": {
+        "label": "WhatsApp opt-in sentence (German)"
+      },
+      "privacy_notice_optin_fr": {
+        "label": "WhatsApp opt-in sentence (French)"
+      },
+      "privacy_notice_optin_es": {
+        "label": "WhatsApp opt-in sentence (Spanish)"
+      },
+      "privacy_notice_optin_it": {
+        "label": "WhatsApp opt-in sentence (Italian)"
+      },
+      "privacy_notice_optin_pt": {
+        "label": "WhatsApp opt-in sentence (Portuguese)"
+      }
+    },
     "retention": {
       "message_retention_days": {
         "label": "Message retention (days)"
@@ -4899,6 +4943,10 @@
       "windows": {
         "title": "Time windows and alerts",
         "subtitle": "Configure thresholds for warnings and alerts."
+      },
+      "privacy": {
+        "title": "Privacy",
+        "subtitle": "Privacy notice and opt-in sentence per language."
       },
       "retention": {
         "title": "Data retention",

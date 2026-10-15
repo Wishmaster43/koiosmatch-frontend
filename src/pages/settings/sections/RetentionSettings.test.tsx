@@ -24,9 +24,11 @@ vi.mock('@/lib/api', async () => {
   const actual = await vi.importActual('@/lib/api')
   return { ...actual, default: { get: vi.fn(), post: vi.fn(), put: vi.fn(), delete: vi.fn() } }
 })
+// Mutable catalogue payload so one test can supply a privacy row.
+const catalog = vi.hoisted(() => ({ data: { sections: [] as unknown[], version: '' } }))
 vi.mock('@tanstack/react-query', async (importOriginal) => {
   const actual = await importOriginal<typeof import('@tanstack/react-query')>()
-  return { ...actual, useQuery: () => ({ data: { sections: [], version: '' }, isLoading: false, isError: false, refetch: vi.fn() }) }
+  return { ...actual, useQuery: () => ({ data: catalog.data, isLoading: false, isError: false, refetch: vi.fn() }) }
 })
 
 // The mocked axios instance, typed as its four mocked methods (established pattern).
@@ -36,6 +38,7 @@ const t = (key: string, opts?: Record<string, unknown>) => i18n.t(key, { ns: 'se
 
 beforeEach(() => {
   vi.clearAllMocks()
+  catalog.data = { sections: [], version: '' }
   api.get.mockResolvedValue({ data: {} })
   api.post.mockResolvedValue({ data: {} })
 })
@@ -147,5 +150,19 @@ describe('RetentionSettings — load failure (AVG: never save over an unknown po
     // The hardcoded defaults never render as if they were the confirmed tenant policy.
     expect(screen.queryByDisplayValue('12')).not.toBeInTheDocument()
     expect(screen.getByRole('button', { name: t('common.save') })).toBeDisabled()
+  })
+})
+
+// K-008: the catalogue "privacy" section mounts under the retention screen as a textarea.
+describe('RetentionSettings — privacy section', () => {
+  it('renders the privacy notice rows as textareas', async () => {
+    catalog.data = { version: '1', sections: [{ id: 'privacy', icon: 'Shield', color: 'info', groups: {}, keys: [{
+      key: 'privacy_notice_text_nl', section: 'privacy', group: 'candidates', type: 'string', rules: [], default: null, aliases: [],
+      label_key: 'settings.privacy.privacy_notice_text_nl.label', format: 'multiline', ui: 'generic', fe_screen: null,
+    }] }] }
+    render(<RetentionSettings />)
+    const label = t('settings.privacy.privacy_notice_text_nl.label')
+    const box = await screen.findByLabelText(label)
+    expect(box.tagName).toBe('TEXTAREA')
   })
 })

@@ -4134,6 +4134,50 @@
         "label": "Conversa ativa: unidade"
       }
     },
+    "privacy": {
+      "privacy_notice_text_nl": {
+        "label": "Aviso de privacidade (neerlandês)"
+      },
+      "privacy_notice_text_en": {
+        "label": "Aviso de privacidade (inglês)"
+      },
+      "privacy_notice_text_de": {
+        "label": "Aviso de privacidade (alemão)"
+      },
+      "privacy_notice_text_fr": {
+        "label": "Aviso de privacidade (francês)"
+      },
+      "privacy_notice_text_es": {
+        "label": "Aviso de privacidade (espanhol)"
+      },
+      "privacy_notice_text_it": {
+        "label": "Aviso de privacidade (italiano)"
+      },
+      "privacy_notice_text_pt": {
+        "label": "Aviso de privacidade (português)"
+      },
+      "privacy_notice_optin_nl": {
+        "label": "Frase de opt-in do WhatsApp (neerlandês)"
+      },
+      "privacy_notice_optin_en": {
+        "label": "Frase de opt-in do WhatsApp (inglês)"
+      },
+      "privacy_notice_optin_de": {
+        "label": "Frase de opt-in do WhatsApp (alemão)"
+      },
+      "privacy_notice_optin_fr": {
+        "label": "Frase de opt-in do WhatsApp (francês)"
+      },
+      "privacy_notice_optin_es": {
+        "label": "Frase de opt-in do WhatsApp (espanhol)"
+      },
+      "privacy_notice_optin_it": {
+        "label": "Frase de opt-in do WhatsApp (italiano)"
+      },
+      "privacy_notice_optin_pt": {
+        "label": "Frase de opt-in do WhatsApp (português)"
+      }
+    },
     "retention": {
       "message_retention_days": {
         "label": "Retenção de mensagens (dias)"
@@ -4900,6 +4944,10 @@
       "windows": {
         "title": "Janelas de tempo e alertas",
         "subtitle": "Configure os limiares para avisos e alertas."
+      },
+      "privacy": {
+        "title": "Privacidade",
+        "subtitle": "Aviso de privacidade e frase de opt-in por idioma."
       },
       "retention": {
         "title": "Retenção de dados",

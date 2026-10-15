@@ -120,6 +120,8 @@ export function catalogToSchema(sectionId: string, rows: CatalogRow[], meta: Sch
           options = (row.options ?? []).map(opt => typeof opt === 'string' ? { value: opt, label: opt } : { value: opt.value, label: opt.label_key })
         } else {
           fieldType = 'text'
+          // K-008: a multiline string row renders as a textarea (SchemaSection).
+          format = row.format
         }
         break
       case 'secret':

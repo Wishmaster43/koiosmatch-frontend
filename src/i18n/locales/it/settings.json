@@ -4134,6 +4134,50 @@
         "label": "Conversazione attiva: unità"
       }
     },
+    "privacy": {
+      "privacy_notice_text_nl": {
+        "label": "Informativa sulla privacy (olandese)"
+      },
+      "privacy_notice_text_en": {
+        "label": "Informativa sulla privacy (inglese)"
+      },
+      "privacy_notice_text_de": {
+        "label": "Informativa sulla privacy (tedesco)"
+      },
+      "privacy_notice_text_fr": {
+        "label": "Informativa sulla privacy (francese)"
+      },
+      "privacy_notice_text_es": {
+        "label": "Informativa sulla privacy (spagnolo)"
+      },
+      "privacy_notice_text_it": {
+        "label": "Informativa sulla privacy (italiano)"
+      },
+      "privacy_notice_text_pt": {
+        "label": "Informativa sulla privacy (portoghese)"
+      },
+      "privacy_notice_optin_nl": {
+        "label": "Frase di opt-in WhatsApp (olandese)"
+      },
+      "privacy_notice_optin_en": {
+        "label": "Frase di opt-in WhatsApp (inglese)"
+      },
+      "privacy_notice_optin_de": {
+        "label": "Frase di opt-in WhatsApp (tedesco)"
+      },
+      "privacy_notice_optin_fr": {
+        "label": "Frase di opt-in WhatsApp (francese)"
+      },
+      "privacy_notice_optin_es": {
+        "label": "Frase di opt-in WhatsApp (spagnolo)"
+      },
+      "privacy_notice_optin_it": {
+        "label": "Frase di opt-in WhatsApp (italiano)"
+      },
+      "privacy_notice_optin_pt": {
+        "label": "Frase di opt-in WhatsApp (portoghese)"
+      }
+    },
     "retention": {
       "message_retention_days": {
         "label": "Conservazione messaggi (giorni)"
@@ -4900,6 +4944,10 @@
       "windows": {
         "title": "Finestre di tempo e avvisi",
         "subtitle": "Configurare le soglie per avvisi e notifiche."
+      },
+      "privacy": {
+        "title": "Privacy",
+        "subtitle": "Informativa sulla privacy e frase di opt-in per lingua."
       },
       "retention": {
         "title": "Conservazione dei dati",

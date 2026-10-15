@@ -242,3 +242,17 @@ describe('catalogToSchema · single-group narrowing (CATALOG-EMBED-1)', () => {
     expect(schema.fields[0].windowKeys).toEqual(['koios_suggest_interview_stalled_hours'])
   })
 })
+
+// K-008: a multiline string row keeps its format so SchemaSection renders a textarea.
+describe('catalogToSchema · string format', () => {
+  it('includes format for string rows', () => {
+    const row = {
+      key: 'privacy_notice_text_nl', section: 'privacy', group: 'candidates', type: 'string', rules: [], default: null, aliases: [],
+      label_key: 'settings.privacy.privacy_notice_text_nl.label', format: 'multiline', ui: 'generic', fe_screen: null,
+    } as unknown as Parameters<typeof catalogToSchema>[1][number]
+    const schema = catalogToSchema('privacy', [row])
+    expect(schema.fields[0].type).toBe('text')
+    expect(schema.fields[0].format).toBe('multiline')
+    expect(schema.fields[0].default).toBe('')
+  })
+})

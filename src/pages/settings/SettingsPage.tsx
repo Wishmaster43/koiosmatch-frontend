@@ -81,6 +81,7 @@ const SLUG_ALIASES: Record<string, { category: string; tab: string }> = {
   // every group moved under its own entity's screen (registry CATALOG_GROUP_HOSTS).
   'catalog/windows': { category: 'candidate', tab: 'candidate_windows' },
   'catalog/retention': { category: 'candidate', tab: 'candidate_retention' },
+  'catalog/privacy': { category: 'candidate', tab: 'candidate_retention' },
   'catalog/messaging': { category: 'whatsapp', tab: 'whatsapp' },
   'catalog/email': { category: 'communication', tab: 'email_general' },
 }

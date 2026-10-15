@@ -136,6 +136,8 @@ export default function RetentionSettings() {
         F1 (Opus review 13-09): headedBy="group" reads "Kandidaten", not the section's
         own "Bewaartermijnen" — this page's OWN title already says that. */}
     <div style={{ marginTop: 24, maxWidth: 640 }}><CatalogSection section="retention" group="candidates" headedBy="group" embedded /></div>
+    {/* K-008: the per-language privacy notice and WhatsApp opt-in sentences (catalogue "privacy"). */}
+    <div style={{ marginTop: 24, maxWidth: 640 }}><CatalogSection section="privacy" group="candidates" headedBy="section" embedded /></div>
     </>
   )
 }

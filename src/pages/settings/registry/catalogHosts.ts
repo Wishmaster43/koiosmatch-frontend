@@ -28,6 +28,10 @@ export const CATALOG_GROUP_HOSTS: Record<string, Record<string, string>> = {
     candidates: 'candidate/candidate_retention',
     system: 'administration/system',
   },
+  privacy: {
+    // K-008: the privacy notice texts sit under the candidate retention screen.
+    candidates: 'candidate/candidate_retention',
+  },
   messaging: {
     // Embedded at the bottom of the WhatsApp connection screen (Connection tab).
     whatsapp_limits: 'whatsapp/whatsapp',

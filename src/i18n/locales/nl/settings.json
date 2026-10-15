@@ -4133,6 +4133,50 @@
         "label": "Gesprek actief: eenheid"
       }
     },
+    "privacy": {
+      "privacy_notice_text_nl": {
+        "label": "Privacyverklaring (Nederlands)"
+      },
+      "privacy_notice_text_en": {
+        "label": "Privacyverklaring (Engels)"
+      },
+      "privacy_notice_text_de": {
+        "label": "Privacyverklaring (Duits)"
+      },
+      "privacy_notice_text_fr": {
+        "label": "Privacyverklaring (Frans)"
+      },
+      "privacy_notice_text_es": {
+        "label": "Privacyverklaring (Spaans)"
+      },
+      "privacy_notice_text_it": {
+        "label": "Privacyverklaring (Italiaans)"
+      },
+      "privacy_notice_text_pt": {
+        "label": "Privacyverklaring (Portugees)"
+      },
+      "privacy_notice_optin_nl": {
+        "label": "WhatsApp opt-in-zin (Nederlands)"
+      },
+      "privacy_notice_optin_en": {
+        "label": "WhatsApp opt-in-zin (Engels)"
+      },
+      "privacy_notice_optin_de": {
+        "label": "WhatsApp opt-in-zin (Duits)"
+      },
+      "privacy_notice_optin_fr": {
+        "label": "WhatsApp opt-in-zin (Frans)"
+      },
+      "privacy_notice_optin_es": {
+        "label": "WhatsApp opt-in-zin (Spaans)"
+      },
+      "privacy_notice_optin_it": {
+        "label": "WhatsApp opt-in-zin (Italiaans)"
+      },
+      "privacy_notice_optin_pt": {
+        "label": "WhatsApp opt-in-zin (Portugees)"
+      }
+    },
     "retention": {
       "message_retention_days": {
         "label": "Bewaartermijn berichten (dagen)"
@@ -4899,6 +4943,10 @@
       "windows": {
         "title": "Termijnen en signalen",
         "subtitle": "Configureer de drempels voor waarschuwingen en signalen."
+      },
+      "privacy": {
+        "title": "Privacy",
+        "subtitle": "Privacyverklaring en opt-in-zin per taal."
       },
       "retention": {
         "title": "Bewaartermijnen",

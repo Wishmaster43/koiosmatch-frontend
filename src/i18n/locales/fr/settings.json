@@ -4133,6 +4133,50 @@
         "label": "Conversation active : unité"
       }
     },
+    "privacy": {
+      "privacy_notice_text_nl": {
+        "label": "Déclaration de confidentialité (néerlandais)"
+      },
+      "privacy_notice_text_en": {
+        "label": "Déclaration de confidentialité (anglais)"
+      },
+      "privacy_notice_text_de": {
+        "label": "Déclaration de confidentialité (allemand)"
+      },
+      "privacy_notice_text_fr": {
+        "label": "Déclaration de confidentialité (français)"
+      },
+      "privacy_notice_text_es": {
+        "label": "Déclaration de confidentialité (espagnol)"
+      },
+      "privacy_notice_text_it": {
+        "label": "Déclaration de confidentialité (italien)"
+      },
+      "privacy_notice_text_pt": {
+        "label": "Déclaration de confidentialité (portugais)"
+      },
+      "privacy_notice_optin_nl": {
+        "label": "Phrase d’opt-in WhatsApp (néerlandais)"
+      },
+      "privacy_notice_optin_en": {
+        "label": "Phrase d’opt-in WhatsApp (anglais)"
+      },
+      "privacy_notice_optin_de": {
+        "label": "Phrase d’opt-in WhatsApp (allemand)"
+      },
+      "privacy_notice_optin_fr": {
+        "label": "Phrase d’opt-in WhatsApp (français)"
+      },
+      "privacy_notice_optin_es": {
+        "label": "Phrase d’opt-in WhatsApp (espagnol)"
+      },
+      "privacy_notice_optin_it": {
+        "label": "Phrase d’opt-in WhatsApp (italien)"
+      },
+      "privacy_notice_optin_pt": {
+        "label": "Phrase d’opt-in WhatsApp (portugais)"
+      }
+    },
     "retention": {
       "message_retention_days": {
         "label": "Conservation des messages (jours)"
@@ -4899,6 +4943,10 @@
       "windows": {
         "title": "Fenêtres de temps et alertes",
         "subtitle": "Configurez les seuils pour les avertissements et les alertes."
+      },
+      "privacy": {
+        "title": "Confidentialité",
+        "subtitle": "Déclaration de confidentialité et phrase d’opt-in par langue."
       },
       "retention": {
         "title": "Conservation des données",

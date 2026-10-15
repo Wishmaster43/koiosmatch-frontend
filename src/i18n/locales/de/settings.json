@@ -4133,6 +4133,50 @@
         "label": "Gespräch aktiv: Einheit"
       }
     },
+    "privacy": {
+      "privacy_notice_text_nl": {
+        "label": "Datenschutzerklärung (Niederländisch)"
+      },
+      "privacy_notice_text_en": {
+        "label": "Datenschutzerklärung (Englisch)"
+      },
+      "privacy_notice_text_de": {
+        "label": "Datenschutzerklärung (Deutsch)"
+      },
+      "privacy_notice_text_fr": {
+        "label": "Datenschutzerklärung (Französisch)"
+      },
+      "privacy_notice_text_es": {
+        "label": "Datenschutzerklärung (Spanisch)"
+      },
+      "privacy_notice_text_it": {
+        "label": "Datenschutzerklärung (Italienisch)"
+      },
+      "privacy_notice_text_pt": {
+        "label": "Datenschutzerklärung (Portugiesisch)"
+      },
+      "privacy_notice_optin_nl": {
+        "label": "WhatsApp-Opt-in-Satz (Niederländisch)"
+      },
+      "privacy_notice_optin_en": {
+        "label": "WhatsApp-Opt-in-Satz (Englisch)"
+      },
+      "privacy_notice_optin_de": {
+        "label": "WhatsApp-Opt-in-Satz (Deutsch)"
+      },
+      "privacy_notice_optin_fr": {
+        "label": "WhatsApp-Opt-in-Satz (Französisch)"
+      },
+      "privacy_notice_optin_es": {
+        "label": "WhatsApp-Opt-in-Satz (Spanisch)"
+      },
+      "privacy_notice_optin_it": {
+        "label": "WhatsApp-Opt-in-Satz (Italienisch)"
+      },
+      "privacy_notice_optin_pt": {
+        "label": "WhatsApp-Opt-in-Satz (Portugiesisch)"
+      }
+    },
     "retention": {
       "message_retention_days": {
         "label": "Aufbewahrung Nachrichten (Tage)"
@@ -4899,6 +4943,10 @@
       "windows": {
         "title": "Zeitfenster und Warnungen",
         "subtitle": "Konfigurieren Sie Schwellwerte für Warnungen und Alerts."
+      },
+      "privacy": {
+        "title": "Datenschutz",
+        "subtitle": "Datenschutzerklärung und Opt-in-Satz pro Sprache."
       },
       "retention": {
         "title": "Datenspeicherung",
