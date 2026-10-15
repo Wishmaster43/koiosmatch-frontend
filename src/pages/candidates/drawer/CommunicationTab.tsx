@@ -20,6 +20,7 @@ import RetentionConsentBlock from './RetentionConsentBlock'
 import { useAllSettings } from '@/lib/settings/useAllSettings'
 import { DEFAULT_MESSAGING_LANGUAGE } from '@/modules/messagingLanguages'
 import CandidateTasks from './CandidateTasks'
+import PrivacyNoticeHint from '@/components/drawer/PrivacyNoticeHint'
 import ConversationsSection from '@/components/drawer/ConversationsSection'
 import DrawerAddButton from './DrawerAddButton'
 import StartConversationModal from './StartConversationModal'
@@ -352,11 +353,12 @@ export default function CommunicationTab({ c, onSave, onEditStatusEvent, initial
               gate (not the lazy initializer) is what actually enforces this once
               the full candidate record lands on the second mount. */}
           {showStartModal && canStartConversation && hasValue(c.mobile) && (
-            <StartConversationModal candidateId={c.id}
+            <StartConversationModal candidateId={c.id} privacyNoticeDue={c.privacyNotice?.due === true}
               onClose={() => { setShowStartModal(false); onInitialActionConsumed?.() }}
               onStarted={() => { setConvRefreshKey(k => k + 1); onInitialActionConsumed?.() }} />
           )}
           <ConversationsSection key={convRefreshKey} threadsUrl="/conversations" threadsParams={{ candidate_id: c.id }}
+            composerNotice={c.privacyNotice?.due === true ? <PrivacyNoticeHint /> : undefined}
             headerAction={
               canStartConversation && (
                 <DrawerAddButton onClick={() => setShowStartModal(true)} icon={MessageCircle}

@@ -21,18 +21,21 @@ import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { MessageCircle } from 'lucide-react'
 import ConversationsSection from '@/components/drawer/ConversationsSection'
+import PrivacyNoticeHint from '@/components/drawer/PrivacyNoticeHint'
 import DrawerAddButton from '@/components/drawer/DrawerAddButton'
 import { StartConversationModal } from '@/pages/candidates/shared'
 import { useCanStartConversation } from '@/hooks/useCanStartConversation'
 import type { Id } from '@/types/common'
 
 // See the file's top doc above; a thin wrapper pointing the shared ConversationsSection at the contact-scoped endpoint.
-export default function ContactConversationsSection({ customerId, contactId, mobile }: {
+export default function ContactConversationsSection({ customerId, contactId, mobile, privacyNoticeDue }: {
   customerId: Id
   contactId: Id
   // The contact's mobile number — the start trigger is disabled without one,
   // mirroring CommunicationTab's candidate variant (§3, honest affordances).
   mobile?: string | null
+  // K-008: true while the privacy notice still has to go out with the first message.
+  privacyNoticeDue?: boolean
 }) {
   const { t } = useTranslation('candidates')
   const canStartConversation = useCanStartConversation()
@@ -43,13 +46,14 @@ export default function ContactConversationsSection({ customerId, contactId, mob
   return (
     <>
       {showStartModal && (
-        <StartConversationModal subject={{ kind: 'customer_contact', id: contactId }}
+        <StartConversationModal subject={{ kind: 'customer_contact', id: contactId }} privacyNoticeDue={privacyNoticeDue}
           onClose={() => setShowStartModal(false)} onStarted={() => setRefreshKey(k => k + 1)} />
       )}
       {/* Nested contact route — mirrors the ChangelogTab endpoint shape used
           elsewhere on ContactDetail; already dossier-scoped so it needs no extra
           page.whatsapp gate (ConversationResource docblock, koiosmatch-api). */}
       <ConversationsSection key={refreshKey} threadsUrl={`/customers/${customerId}/contacts/${contactId}/conversations`}
+        composerNotice={privacyNoticeDue ? <PrivacyNoticeHint /> : undefined}
         headerAction={canStartConversation ? (
           <DrawerAddButton onClick={() => setShowStartModal(true)} icon={MessageCircle}
             label={t('conversations.start')} disabled={!mobile}

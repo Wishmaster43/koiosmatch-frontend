@@ -1350,6 +1350,7 @@
     "queued": "Nachricht eingeplant. Sie geht in Kürze raus.",
     "send": "Senden",
     "waWebComposerHint": "Über WhatsApp Web (eigene Nummer): freier Text, wird über die Warteschlange gesendet",
+    "privacyNoticeIncluded": "Mit dieser ersten Nachricht senden wir die Datenschutzerklärung mit.",
     "sortLabel": "Sortierung",
     "messagesRegion": "Nachrichten",
     "sortOldestFirst": "Älteste zuerst",

@@ -149,13 +149,15 @@ const rowSubject = (row: ConversationRow): ConversationSubject | null => {
 // the candidate, so the composer is ON for every caller.
 const SESSION_COMPOSER_ENABLED = true
 
-export default function ConversationsSection({ threadsUrl, threadsParams, headerAction, badgeApplicationId, composerEnabled = SESSION_COMPOSER_ENABLED }: {
+export default function ConversationsSection({ threadsUrl, threadsParams, headerAction, badgeApplicationId, composerEnabled = SESSION_COMPOSER_ENABLED, composerNotice }: {
   // The list request the caller wants — candidate scope passes '/conversations' +
   // { candidate_id }, the contact variant passes its nested contact-conversations route.
   threadsUrl: string
   threadsParams?: Record<string, unknown>
   // Test-only override for the WA-SEND-TRANSPORT-1 gate above.
   composerEnabled?: boolean
+  // K-008: an optional line rendered once above the composer (e.g. the privacy-notice hint).
+  composerNotice?: ReactNode
   // WHATSAPP-COMPOSE-1: an optional caller-supplied action for the section header
   // (e.g. the candidate drawer's "Conversatie starten" trigger) — mirrors
   // SectionCard's own action slot so this stays a candidate-only affordance without
@@ -530,6 +532,8 @@ export default function ConversationsSection({ threadsUrl, threadsParams, header
                     gets the free-text composer, with a hint that it goes through the queue. */}
                 {composerEnabled && (win.open || isWaWeb(row.primary_channel) ? (
                   <>
+                    {/* K-008: the notice rides only a free-text send; a template send defers it. */}
+                    {composerNotice}
                     {/* WA-THREAD-UX-1: a wa_web thread never faces the 24h gate — say so
                         instead of reusing the window countdown that only applies to WABA. */}
                     {isWaWeb(row.primary_channel) ? (

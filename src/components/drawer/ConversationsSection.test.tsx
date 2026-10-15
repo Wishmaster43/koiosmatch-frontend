@@ -909,3 +909,38 @@ describe('mergeLandedMessages · a pre-existing identical outbound row never cla
     expect(merged.map(m => m.id)).toEqual(['m9', 'm10'])
   })
 })
+
+// K-008: composerNotice renders once above the composer, and only when supplied.
+describe('ConversationsSection · composerNotice (K-008)', () => {
+  const open = () => vi.mocked(api.get).mockImplementation((url: string) => {
+    if (url === '/conversations') return Promise.resolve({ data: { data: [{ ...THREADS[0], last_inbound_at: new Date(Date.now() - 60_000).toISOString() }] } })
+    if (url === '/conversations/conv-1/messages') return Promise.resolve({ data: { data: MESSAGES } })
+    return Promise.reject(new Error(`unexpected GET ${url}`))
+  })
+
+  it('renders the supplied notice above the composer', async () => {
+    open()
+    render(<ConversationsSection composerEnabled composerNotice={<p>notice-line</p>} threadsUrl="/conversations" threadsParams={{ candidate_id: 'cand-1' }} />)
+    await screen.findByPlaceholderText('conversations.composerPlaceholder')
+    expect(screen.getAllByText('notice-line')).toHaveLength(1)
+  })
+
+  it('renders no notice by default', async () => {
+    open()
+    render(<ConversationsSection composerEnabled threadsUrl="/conversations" threadsParams={{ candidate_id: 'cand-1' }} />)
+    await screen.findByPlaceholderText('conversations.composerPlaceholder')
+    expect(screen.queryByText('notice-line')).toBeNull()
+  })
+
+  it('renders no notice above the template picker (closed window, not wa_web)', async () => {
+    const stale = new Date(Date.now() - 25 * 60 * 60 * 1000).toISOString()
+    vi.mocked(api.get).mockImplementation((url: string) => {
+      if (url === '/conversations') return Promise.resolve({ data: { data: [{ ...THREADS[0], primary_channel: 'waba', last_inbound_at: stale }] } })
+      if (url === '/conversations/conv-1/messages') return Promise.resolve({ data: { data: MESSAGES } })
+      return Promise.reject(new Error(`unexpected GET ${url}`))
+    })
+    render(<ConversationsSection composerEnabled composerNotice={<p>notice-line</p>} threadsUrl="/conversations" threadsParams={{ candidate_id: 'cand-1' }} />)
+    await screen.findByText('conversations.sessionClosedHint')
+    expect(screen.queryByText('notice-line')).toBeNull()
+  })
+})

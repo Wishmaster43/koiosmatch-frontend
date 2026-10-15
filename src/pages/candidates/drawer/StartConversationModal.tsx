@@ -59,6 +59,7 @@ import type { Id } from '@/types/common'
 import type { AiAgent } from '@/types/ai'
 import Button from '@/components/ui/Button'
 import TitleBarPills from '@/components/ui/TitleBarPills'
+import PrivacyNoticeHint from '@/components/drawer/PrivacyNoticeHint'
 import ThreadComposer from '@/components/drawer/ThreadComposer'
 import ModalTitleBarPillsRow from '@/components/forms/ModalTitleBarPillsRow'
 import { CHANNEL_COLORS } from '@/components/drawer/channelColors'
@@ -101,7 +102,7 @@ function ConfigNotice({ text, t, style }: { text: string; t: (k: string, o?: Rec
   )
 }
 
-export default function StartConversationModal({ candidateId, subject, applicationId, onClose, onStarted }: {
+export default function StartConversationModal({ candidateId, subject, applicationId, privacyNoticeDue, onClose, onStarted }: {
   // DEPRECATED legacy shape — kept so the existing candidate call site
   // (CommunicationTab.tsx) stays byte-compatible. Prefer `subject`.
   candidateId?: Id
@@ -113,6 +114,8 @@ export default function StartConversationModal({ candidateId, subject, applicati
   // 422s it for a customer_contact owner and stamps the started-or-reused thread
   // only when it carried no application yet: context, never ownership).
   applicationId?: Id
+  // K-008: true while the privacy notice still has to go out with the first message.
+  privacyNoticeDue?: boolean
   onClose: () => void
   // Fired after a successful send so the host can refresh its threads list.
   onStarted: () => void
@@ -269,6 +272,7 @@ export default function StartConversationModal({ candidateId, subject, applicati
                   strikethrough in WhatsApp markup + emoji, a tall auto-growing field — with
                   no Send of its own (the popup footer sends). Plain text on purpose: a
                   WhatsApp message travels as text, never HTML. */}
+              {privacyNoticeDue && <PrivacyNoticeHint />}
               <ThreadComposer value={message} onChange={setMessage} placeholder={t('conversations.messagePlaceholder')} minRows={8} />
               <div style={{ fontSize: 11, color: trimmedMessage.length > WA_WEB_MESSAGE_MAX ? 'var(--color-danger-text)' : 'var(--text-muted)', marginTop: 3, textAlign: 'right' }}>
                 {/* GETALLEN-1 through i18next's own number formatting ({{n, number}}) — lib/formatters

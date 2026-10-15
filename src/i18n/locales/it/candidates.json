@@ -1350,6 +1350,7 @@
     "queued": "Messaggio pianificato. Parte a breve.",
     "send": "Invia",
     "waWebComposerHint": "Tramite WhatsApp Web (numero personale): messaggio di testo libero, inviato tramite la coda in uscita",
+    "privacyNoticeIncluded": "Con questo primo messaggio inviamo l'informativa sulla privacy.",
     "sortLabel": "Ordina",
     "messagesRegion": "Messaggi",
     "sortOldestFirst": "Prima i più vecchi",

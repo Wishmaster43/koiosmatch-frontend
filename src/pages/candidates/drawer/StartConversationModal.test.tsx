@@ -381,3 +381,20 @@ describe('StartConversationModal · applicationId (GESPREK-CONSISTENT-1-FE)', ()
     expect(body).toHaveProperty('customer_contact_id', 'contact-1')
   })
 })
+
+// K-008 composer notice: the hint shows above the WhatsApp Web composer only while the notice is due.
+describe('StartConversationModal · privacy notice hint (K-008)', () => {
+  it('shows the hint above the composer when privacyNoticeDue is true', async () => {
+    mockLookups([TEMPLATE], [NUMBER], [], [OWN_DEVICE], [OWN_OPTION])
+    render(<StartConversationModal candidateId={7} privacyNoticeDue onClose={() => {}} onStarted={() => {}} />)
+    await screen.findByPlaceholderText('conversations.messagePlaceholder')
+    expect(screen.getByText('conversations.privacyNoticeIncluded')).toBeInTheDocument()
+  })
+
+  it('omits the hint when privacyNoticeDue is absent', async () => {
+    mockLookups([TEMPLATE], [NUMBER], [], [OWN_DEVICE], [OWN_OPTION])
+    render(<StartConversationModal candidateId={7} onClose={() => {}} onStarted={() => {}} />)
+    await screen.findByPlaceholderText('conversations.messagePlaceholder')
+    expect(screen.queryByText('conversations.privacyNoticeIncluded')).toBeNull()
+  })
+})

@@ -558,3 +558,30 @@ describe('CommunicationTab · consent state drives toggle and caption (K-008)', 
     expect(onSave.mock.calls[0][0]).not.toHaveProperty('emailConsentState')
   })
 })
+
+// K-008 composer notice: the thread composer shows the hint only for due === true.
+describe('CommunicationTab · privacy notice hint in the thread composer (K-008)', () => {
+  beforeEach(() => { mockUseAuth.mockReturnValue({ hasPermission: (p: string) => p === 'page.whatsapp' }) })
+  const THREAD = [{ id: 'conv-1', wa_number: '+31612345678', last_message_at: '2026-07-17T09:00:00Z', is_active: true, escalated: false, last_inbound_at: new Date().toISOString(), primary_channel: 'wa_web' }]
+  const renderWith = async (due: boolean | null | undefined) => {
+    apiGet.mockImplementation((url: string) => {
+      if (url === '/conversations') return Promise.resolve({ data: { data: THREAD } })
+      return Promise.resolve({ data: { data: [] } })
+    })
+    const user = userEvent.setup()
+    const extra = due === undefined ? {} : { privacyNotice: { sentAt: null, due } }
+    render(<CommunicationTab c={candidate({}, extra as Partial<Candidate>)} />)
+    await user.click(screen.getByRole('tab', { name: 'sections.conversations' }))
+    await screen.findByPlaceholderText('conversations.composerPlaceholder')
+  }
+
+  it('shows the hint when due is true', async () => {
+    await renderWith(true)
+    expect(screen.getByText('conversations.privacyNoticeIncluded')).toBeInTheDocument()
+  })
+
+  it.each([false, null, undefined])('omits the hint when due is %s', async due => {
+    await renderWith(due)
+    expect(screen.queryByText('conversations.privacyNoticeIncluded')).toBeNull()
+  })
+})

@@ -76,7 +76,8 @@ export default function ContactSubTabPanels({ subTab, contact, customFieldsActiv
           null on legacy/edge data), so the tab silently shows nothing rather than
           firing a /customers/undefined/… request. */}
       {subTab === 'conversations' && contact.customerId != null && (
-        <ContactConversationsSection customerId={contact.customerId} contactId={contact.id as Id} mobile={contact.mobile} />
+        <ContactConversationsSection customerId={contact.customerId} contactId={contact.id as Id} mobile={contact.mobile}
+          privacyNoticeDue={contact.privacyNotice?.due === true} />
       )}
 
       {subTab === 'extra' && customFieldsActive && (

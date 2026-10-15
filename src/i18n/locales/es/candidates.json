@@ -1350,6 +1350,7 @@
     "queued": "Mensaje programado. Sale en breve.",
     "send": "Enviar",
     "waWebComposerHint": "Vía WhatsApp Web (número propio): mensaje de texto libre, enviado mediante la cola de salida",
+    "privacyNoticeIncluded": "Con este primer mensaje enviamos el aviso de privacidad.",
     "sortLabel": "Ordenar",
     "messagesRegion": "Mensajes",
     "sortOldestFirst": "Más antiguos primero",

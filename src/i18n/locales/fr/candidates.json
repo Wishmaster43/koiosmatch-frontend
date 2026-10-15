@@ -1350,6 +1350,7 @@
     "queued": "Message planifié. Il part sous peu.",
     "send": "Envoyer",
     "waWebComposerHint": "Via WhatsApp Web (numéro personnel) : message libre, envoyé via la file d'attente",
+    "privacyNoticeIncluded": "La déclaration de confidentialité est jointe à ce premier message.",
     "sortLabel": "Trier",
     "messagesRegion": "Messages",
     "sortOldestFirst": "Plus anciens d'abord",
