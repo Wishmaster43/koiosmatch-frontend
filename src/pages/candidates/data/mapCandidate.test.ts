@@ -72,3 +72,30 @@ describe('mapCandidate · KEY-ADOPTION', () => {
     expect(candidate.blacklistReasonKey).toBe('non_compliant')
   })
 })
+
+describe('mapCandidate · consent states and privacy notice (K-008)', () => {
+  it('maps the three states verbatim and the notice passthrough', () => {
+    const c = mapCandidate({
+      id: '1',
+      consent: { whatsapp_consent_state: 'granted', email_consent_state: 'unconfirmed', newsletter_consent_state: 'not_asked' },
+      privacy_notice_sent_at: '2026-10-01T10:00:00+00:00',
+      privacy_notice: { sent_at: '2026-10-01T10:00:00+00:00', due: false },
+    } as ApiCandidate)
+    expect(c.consent.whatsappConsentState).toBe('granted')
+    expect(c.consent.emailConsentState).toBe('unconfirmed')
+    expect(c.consent.newsletterConsentState).toBe('not_asked')
+    expect(c.privacyNoticeSentAt).toBe('2026-10-01T10:00:00+00:00')
+    expect(c.privacyNotice).toEqual({ sentAt: '2026-10-01T10:00:00+00:00', due: false })
+  })
+  it('reads an unknown state as null and passes due=true', () => {
+    const c = mapCandidate({ id: '1', consent: { whatsapp_consent_state: 'bogus' }, privacy_notice: { sent_at: null, due: true } } as ApiCandidate)
+    expect(c.consent.whatsappConsentState).toBeNull()
+    expect(c.privacyNotice).toEqual({ sentAt: null, due: true })
+  })
+  it('absent blocks give nulls', () => {
+    const c = mapCandidate({ id: '1' } as ApiCandidate)
+    expect(c.consent.emailConsentState).toBeNull()
+    expect(c.privacyNoticeSentAt).toBeNull()
+    expect(c.privacyNotice).toEqual({ sentAt: null, due: null })
+  })
+})

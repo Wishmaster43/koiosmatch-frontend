@@ -251,3 +251,27 @@ describe('withNoteLinkChips', () => {
     expect(result[0].title).toBe('chip:Hoofdlocatie')
   })
 })
+
+describe('mapContact · channel consent and privacy notice (K-008)', () => {
+  it('maps flags, stamps, states and the notice', () => {
+    const c = mapContact({
+      id: 'c1', whatsapp_consent: true, email_consent: false, newsletter_consent: false,
+      whatsapp_consent_at: '2026-10-01T10:00:00Z', whatsapp_consent_state: 'granted',
+      email_consent_state: 'refused', newsletter_consent_state: 'zzz',
+      privacy_notice_sent_at: '2026-10-02T10:00:00Z', privacy_notice: { sent_at: '2026-10-02T10:00:00Z', due: true },
+    })
+    expect(c.whatsappConsent).toBe(true)
+    expect(c.emailConsent).toBe(false)
+    expect(c.whatsappConsentAt).toBe('2026-10-01T10:00:00Z')
+    expect(c.whatsappConsentState).toBe('granted')
+    expect(c.emailConsentState).toBe('refused')
+    expect(c.newsletterConsentState).toBeNull()
+    expect(c.privacyNotice).toEqual({ sentAt: '2026-10-02T10:00:00Z', due: true })
+  })
+  it('absent fields give nulls', () => {
+    const c = mapContact({ id: 'c1' })
+    expect(c.whatsappConsent).toBeNull()
+    expect(c.emailConsentState).toBeNull()
+    expect(c.privacyNotice).toEqual({ sentAt: null, due: null })
+  })
+})

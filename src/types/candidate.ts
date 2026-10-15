@@ -9,6 +9,7 @@
  */
 
 import type { Id, Loose } from './common'
+import type { ConsentState, PrivacyNotice } from '@/types/consent'
 import type { ApiBackofficeLink, BackofficeLink } from '@/lib/backofficeLink'
 import type { ApiKoiosAiAdvice, KoiosAiAdvice } from '@/lib/koiosAdviceMap'
 export type { Loose }
@@ -79,6 +80,10 @@ interface CandidateConsent {
   // until CMBE-RET-A ships the write-path validation — see buildCandidatePatch.
   retentionOptIn: boolean
   retentionConsentAt: string | null
+  // K-008: server-derived per-channel states (read-only, never sent back).
+  whatsappConsentState: ConsentState | null
+  emailConsentState: ConsentState | null
+  newsletterConsentState: ConsentState | null
 }
 
 /** A resolved backoffice link for ONE system (KOPPELINGEN-META-1): current sync
@@ -280,6 +285,11 @@ export interface Candidate {
   zzp: Loose
   planningSettings: Loose
   consent: CandidateConsent
+  // K-008: GDPR first-contact notice (read-only, BE verdict).
+  // K-008: the DETAIL resource carries this root field; LIST rows do not (null there) — a consumer that
+  // may render a list row reads privacyNotice.sentAt instead, never this field.
+  privacyNoticeSentAt: string | null
+  privacyNotice: PrivacyNotice
   // AVG-RET-2: derived, read-only retention deadline (tenant retention_months_*
   // windows applied server-side) — GET /candidates/{id} returns this already.
   retentionExpiresAt: string | null
@@ -499,7 +509,14 @@ export interface ApiCandidate {
     // AVG-RET-2: unlimited-retention opt-in flag + when it was recorded.
     retention_opt_in?: boolean
     retention_consent_at?: string | null
+    // K-008 CONSENT-OPTIN-1: derived states, optional until the BE half lands.
+    whatsapp_consent_state?: string | null
+    email_consent_state?: string | null
+    newsletter_consent_state?: string | null
   }
+  // K-008: privacy-notice facts at the resource root (the list row carries only the block).
+  privacy_notice_sent_at?: string | null
+  privacy_notice?: { sent_at?: string | null; due?: boolean | null } | null
   // AVG-RET-2: derived retention deadline (tenant policy applied server-side),
   // already returned by CandidateDetailResource.
   retention_expires_at?: string | null

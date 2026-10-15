@@ -4,6 +4,7 @@
  * Status/industry arrive either as a scalar or a { value/label/color|name } object.
  */
 import type { Id } from './common'
+import type { ConsentState, PrivacyNotice } from '@/types/consent'
 import type { ApiBackofficeLink, BackofficeLink } from '@/lib/backofficeLink'
 import type { ApiKoiosAiAdvice, KoiosAiAdvice } from '@/lib/koiosAdviceMap'
 
@@ -87,6 +88,18 @@ export interface Contact {
   retentionWarnedAt?: string | null
   // RETENTION-CONSENT-BLANK-1 (Danny 08-09 B): the server-derived retention deadline (ISO) or null.
   retentionExpiresAt?: string | null
+  // K-008 CONSENT-OPTIN-1: channel consent facts (read-only; absent until the BE half lands).
+  whatsappConsent?: boolean | null
+  emailConsent?: boolean | null
+  newsletterConsent?: boolean | null
+  whatsappConsentAt?: string | null
+  emailConsentAt?: string | null
+  newsletterConsentAt?: string | null
+  whatsappConsentState?: ConsentState | null
+  emailConsentState?: ConsentState | null
+  newsletterConsentState?: ConsentState | null
+  privacyNoticeSentAt?: string | null
+  privacyNotice?: PrivacyNotice
 }
 
 /** A department nested under a location (flat UI shape). SUB-STATUS-1: lifecycle status. */
@@ -384,6 +397,18 @@ export interface ApiContact {
   retention_warned_at?: string | null
   // RETENTION-CONSENT-BLANK-1: derived deadline from CustomerContactResource (lands with the catalogue bundle).
   retention_expires_at?: string | null
+  // K-008 CONSENT-OPTIN-1 (CustomerContactResource): hand-written, optional.
+  whatsapp_consent?: boolean | null
+  email_consent?: boolean | null
+  newsletter_consent?: boolean | null
+  whatsapp_consent_at?: string | null
+  email_consent_at?: string | null
+  newsletter_consent_at?: string | null
+  whatsapp_consent_state?: string | null
+  email_consent_state?: string | null
+  newsletter_consent_state?: string | null
+  privacy_notice_sent_at?: string | null
+  privacy_notice?: { sent_at?: string | null; due?: boolean | null } | null
   [k: string]: unknown
 }
 

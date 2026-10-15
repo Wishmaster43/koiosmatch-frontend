@@ -3,6 +3,7 @@
 // and table read. One function per entity level; see each function's own comment.
 import { initialsOf } from '@/lib/initials'
 import { toCoord } from '@/lib/coords'
+import { isConsentState, readPrivacyNotice } from '@/types/consent'
 import { backofficeLinkOf } from '@/lib/backofficeLink'
 import { mapKoiosAiAdvice } from '@/lib/koiosAdviceMap'
 import type { Id } from '@/types/common'
@@ -166,6 +167,18 @@ export function mapContact(p: ApiContact = {}): Contact {
     retentionWarnedAt: p.retention_warned_at ?? null,
     // RETENTION-CONSENT-BLANK-1: the server-derived deadline; null = no row on the card.
     retentionExpiresAt: p.retention_expires_at ?? null,
+    // K-008: channel consent facts and the first-contact notice, tolerant of an absent BE half.
+    whatsappConsent: p.whatsapp_consent ?? null,
+    emailConsent: p.email_consent ?? null,
+    newsletterConsent: p.newsletter_consent ?? null,
+    whatsappConsentAt: p.whatsapp_consent_at ?? null,
+    emailConsentAt: p.email_consent_at ?? null,
+    newsletterConsentAt: p.newsletter_consent_at ?? null,
+    whatsappConsentState: isConsentState(p.whatsapp_consent_state) ? p.whatsapp_consent_state : null,
+    emailConsentState: isConsentState(p.email_consent_state) ? p.email_consent_state : null,
+    newsletterConsentState: isConsentState(p.newsletter_consent_state) ? p.newsletter_consent_state : null,
+    privacyNoticeSentAt: p.privacy_notice_sent_at ?? null,
+    privacyNotice: readPrivacyNotice(p.privacy_notice),
   }
 }
 

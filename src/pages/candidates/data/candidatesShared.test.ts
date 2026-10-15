@@ -102,3 +102,14 @@ describe('buildCandidatePatch · KEY-ADOPTION', () => {
     expect('nationality_key' in body).toBe(false)
   })
 })
+
+describe('buildCandidatePatch · read-only consent fields (K-008)', () => {
+  it('never sends states or the privacy notice', () => {
+    const body = buildCandidatePatch({
+      consent: { whatsapp_opt_in: true, whatsappConsentState: 'granted', email_consent_state: 'refused' },
+      privacyNotice: { sentAt: null, due: true }, privacyNoticeSentAt: 'x',
+    } as never) as Record<string, unknown>
+    expect(body.consent).toEqual({ whatsapp_opt_in: true })
+    expect(JSON.stringify(body)).not.toMatch(/state|privacy/i)
+  })
+})

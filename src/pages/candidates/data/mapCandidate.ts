@@ -9,6 +9,7 @@
  */
 import { initialsOf } from '@/lib/initials'
 import { toCoord } from '@/lib/coords'
+import { isConsentState, readPrivacyNotice } from '@/types/consent'
 import { backofficeLinkOf } from '@/lib/backofficeLink'
 import { mapKoiosAiAdvice } from '@/lib/koiosAdviceMap'
 import { formatByteSize } from '@/pages/candidates/data/byteSize'
@@ -349,7 +350,14 @@ export function mapCandidate(c: ApiCandidate, locale: string = 'nl-NL'): Candida
       // validation, so this is now a real, writable flag (see buildCandidatePatch).
       retentionOptIn:        c.consent?.retention_opt_in      ?? false,
       retentionConsentAt:    c.consent?.retention_consent_at  ?? null,
+      // K-008: derived states; an unknown string reads as null, never as a guess.
+      whatsappConsentState:   isConsentState(c.consent?.whatsapp_consent_state)   ? c.consent?.whatsapp_consent_state   : null,
+      emailConsentState:      isConsentState(c.consent?.email_consent_state)      ? c.consent?.email_consent_state      : null,
+      newsletterConsentState: isConsentState(c.consent?.newsletter_consent_state) ? c.consent?.newsletter_consent_state : null,
     },
+    // K-008: GDPR first-contact notice; `due` is the BE verdict, null when absent.
+    privacyNoticeSentAt: c.privacy_notice_sent_at ?? null,
+    privacyNotice: readPrivacyNotice(c.privacy_notice),
     // AVG-RET-2: derived retention deadline (tenant retention_months_never_placed /
     // _ever_placed windows, applied server-side) — feeds the Communication → Consent
     // tab's read-only "Bewaren tot" line.
