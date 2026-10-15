@@ -2111,6 +2111,9 @@
     "retry": "Tentar novamente"
   },
   "export": {
+    "includeArchived": "Incluir registos arquivados",
+    "includeArchivedHint": "Os registos arquivados são incluídos nesta exportação. Só é possível se puder ver todas as filiais; caso contrário o servidor recusa a exportação.",
+    "archivedNotAllowed": "Os registos arquivados não podem ser incluídos: não vê todas as filiais.",
     "title": "Exportar",
     "subtitle": "Exporte os seus dados como CSV. As mesmas colunas da tabela, apenas os registos a que tem acesso.",
     "button": "Exportar CSV",
@@ -2118,6 +2121,10 @@
     "rateLimited": "Demasiadas exportações seguidas. Tente novamente daqui a um minuto.",
     "error": "Falha ao exportar. Tente novamente mais tarde.",
     "entities": {
+      "email_messages": {
+        "title": "Mensagens de e-mail",
+        "desc": "E-mail associado a candidatos, em CSV ou Excel."
+      },
       "candidates": {
         "title": "Candidatos",
         "desc": "Todos os dados de candidatos, excluindo registos eliminados ou anonimizados."

@@ -22,6 +22,9 @@ vi.mock('@/lib/api', async () => {
 
 const mockUseAuth = vi.fn()
 vi.mock('@/context/AuthContext', () => ({ useAuth: () => mockUseAuth() }))
+// The toast layer is a plain spy here: the 422 texts are asserted on the call, not on a rendered toaster.
+vi.mock('@/lib/notify', () => ({ notifyError: vi.fn(), notifySuccess: vi.fn() }))
+import { notifyError } from '@/lib/notify'
 
 const t = (key: string, opts?: Record<string, unknown>) => i18n.t(key, { ns: 'settings', ...opts })
 
@@ -227,5 +230,47 @@ describe('ExportSettings · documents files-ZIP request', () => {
     // The i18n key resolves to real copy; presence of the toast text is asserted
     // via the notify spy the suite's api mock cannot reach — assert the POST ran.
     expect(mockedApi.post).toHaveBeenCalledWith('/exports/documents-zip')
+  })
+})
+
+// Lane D (BE f0855053): the e-mail messages export row and the K-001 archived opt-in (Danny 8a = A).
+describe('ExportSettings · e-mail messages export + archived opt-in', () => {
+  beforeEach(() => mockUseAuth.mockReturnValue({ hasPermission: () => true }))
+
+  it('GETs /exports/email-messages.csv for the new e-mail messages row', async () => {
+    mockedApi.get.mockResolvedValue({ data: new Blob(['a,b\n1,2'], { type: 'text/csv' }), headers: {} })
+    vi.stubGlobal('URL', { ...URL, createObjectURL, revokeObjectURL })
+    const clickSpy = vi.spyOn(HTMLAnchorElement.prototype, 'click').mockImplementation(() => {})
+    const user = userEvent.setup()
+    render(<ExportSettings />)
+    await user.click(screen.getByRole('button', { name: t('export.entities.email_messages.title') }))
+    await user.click(screen.getByRole('button', { name: t('export.formatCsv') }))
+    expect(mockedApi.get).toHaveBeenCalledWith('/exports/email-messages.csv', { responseType: 'blob' })
+    clickSpy.mockRestore(); vi.unstubAllGlobals()
+  })
+
+  it('appends include_archived=1 to a notes export only while the archived toggle is on', async () => {
+    mockedApi.get.mockResolvedValue({ data: new Blob(['a,b\n1,2'], { type: 'text/csv' }), headers: {} })
+    vi.stubGlobal('URL', { ...URL, createObjectURL, revokeObjectURL })
+    const clickSpy = vi.spyOn(HTMLAnchorElement.prototype, 'click').mockImplementation(() => {})
+    const user = userEvent.setup()
+    render(<ExportSettings />)
+    await user.click(screen.getByRole('button', { name: t('export.entities.notes.title') }))
+    await user.click(screen.getByRole('button', { name: t('export.formatCsv') }))
+    expect(mockedApi.get).toHaveBeenLastCalledWith('/exports/notes.csv', { responseType: 'blob' })
+    await user.click(screen.getByRole('switch', { name: t('export.includeArchived') }))
+    await user.click(screen.getByRole('button', { name: t('export.formatCsv') }))
+    expect(mockedApi.get).toHaveBeenLastCalledWith('/exports/notes.csv?include_archived=1', { responseType: 'blob' })
+    clickSpy.mockRestore(); vi.unstubAllGlobals()
+  })
+
+  it('shows the archived-refused text on a 422 instead of the generic failure', async () => {
+    mockedApi.get.mockRejectedValue({ response: { status: 422, data: { message: 'Je ziet niet elke vestiging.' } } })
+    const user = userEvent.setup()
+    render(<ExportSettings />)
+    await user.click(screen.getByRole('button', { name: t('export.entities.contacts.title') }))
+    await user.click(screen.getByRole('switch', { name: t('export.includeArchived') }))
+    await user.click(screen.getByRole('button', { name: t('export.formatCsv') }))
+    expect(vi.mocked(notifyError)).toHaveBeenCalledWith('Je ziet niet elke vestiging.')
   })
 })

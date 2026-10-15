@@ -2111,6 +2111,9 @@
     "retry": "Try again"
   },
   "export": {
+    "includeArchived": "Include archived records",
+    "includeArchivedHint": "Archived records are included in this export. Only possible when you can see every branch; otherwise the server refuses the export.",
+    "archivedNotAllowed": "Archived records cannot be included: you do not see every branch.",
     "title": "Export",
     "subtitle": "Export your data as CSV. The same columns as the table, only records you have access to.",
     "button": "Export CSV",
@@ -2118,6 +2121,10 @@
     "rateLimited": "Too many exports in a row. Please try again in a minute.",
     "error": "Export failed. Please try again later.",
     "entities": {
+      "email_messages": {
+        "title": "E-mail messages",
+        "desc": "E-mail linked to candidates, as CSV or Excel."
+      },
       "candidates": {
         "title": "Candidates",
         "desc": "All candidate data, excluding deleted or anonymised records."

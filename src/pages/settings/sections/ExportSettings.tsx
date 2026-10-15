@@ -15,7 +15,7 @@ import { useTranslation } from 'react-i18next'
 import {
   Upload, Users, ClipboardList, Briefcase, Target, Building2,
   MapPin, Building, Handshake, ListChecks, PhoneCall, CalendarDays,
-  StickyNote, MessageSquare, FileText, FolderArchive,
+  StickyNote, MessageSquare, FileText, FolderArchive, Mail,
 } from 'lucide-react'
 import api from '@/lib/api'
 import { triggerBlobDownload } from '@/lib/downloadBlob'
@@ -24,7 +24,8 @@ import { notifyError, notifySuccess } from '@/lib/notify'
 import { extractApiError } from '@/lib/extractApiError'
 import Button from '@/components/ui/Button'
 import Spinner from '@/components/ui/Spinner'
-import { PageTitle } from '@/components/ui/typography'
+import { PageTitle, BodyText, Caption } from '@/components/ui/typography'
+import Toggle from '@/components/ui/Toggle'
 import SubNavButton from '../components/SubNavButton'
 import type { LucideIcon } from 'lucide-react'
 
@@ -67,8 +68,16 @@ const ENTITIES: ExportEntity[] = [
   // never on a view right — full note/message text is exactly what these rights guard.
   { id: 'notes', icon: StickyNote, base: '/exports/notes', permission: 'notes.export' },
   { id: 'conversations', icon: MessageSquare, base: '/exports/conversations', permission: 'conversations.export' },
+  // Lane D (ONIX K-009/K-013, BE f0855053): e-mail linked to candidates (living, or + archived with the
+  // opt-in below); the BE gates it on conversations.export + candidates.view — the sensitive family right here.
+  { id: 'email_messages', icon: Mail, base: '/exports/email-messages', permission: 'conversations.export' },
   { id: 'documents', icon: FileText, base: '/exports/documents', permission: 'documents.export' },
 ]
+
+// ONIX K-001 (Danny 8a = A; BE lane D f0855053): these exports accept `include_archived=1` (the
+// documents ZIP too); the default population is unchanged and a caller who does not see every
+// branch gets a 422 on `include_archived` — the toggle below says so instead of hiding it.
+const ARCHIVABLE = new Set(['notes', 'documents', 'contacts'])
 
 // Parse the filename the backend sets via Content-Disposition (Laravel's
 // streamDownload default). Only visible on a same-origin response — the API's
@@ -113,10 +122,15 @@ export default function ExportSettings() {
   // TRANSFER-FAMILIES ZIP: the real files ride a QUEUED build (too heavy for a
   // direct download) — this requests it; the bell later delivers the signed URL.
   const [zipPending, setZipPending] = useState(false)
+  // The archived opt-in (K-001): off by default, sent only when on, only for the exports that accept it.
+  const [includeArchived, setIncludeArchived] = useState(false)
+  const archivedParam = (entityId: string) => (ARCHIVABLE.has(entityId) && includeArchived ? '?include_archived=1' : '')
   const requestZip = async () => {
     setZipPending(true)
     try {
-      await api.post('/exports/documents-zip')
+      // The opt-in rides in the body only when on, so the default request stays byte-identical.
+      if (includeArchived) await api.post('/exports/documents-zip', { include_archived: 1 })
+      else await api.post('/exports/documents-zip')
       notifySuccess(t('export.zipQueued'))
     } catch (err) {
       // A 422 carries the server's own honest reason (build already running, or
@@ -135,9 +149,11 @@ export default function ExportSettings() {
   const handleExport = async (entity: ExportEntity, ext: string) => {
     setPendingId(`${entity.id}.${ext}`)
     try {
-      await downloadCsv(`${entity.base}.${ext}`, entity.id)
+      await downloadCsv(`${entity.base}.${ext}${archivedParam(entity.id)}`, entity.id)
     } catch (err) {
       const status = (err as { response?: { status?: number } })?.response?.status
+      // 422 = the archived opt-in refused for a caller who does not see every branch (K-001): say so.
+      if (status === 422) { notifyError(extractApiError(err, t('export.archivedNotAllowed'))); return }
       notifyError(t(status === 429 ? 'export.rateLimited' : 'export.error'))
     } finally {
       setPendingId(null)
@@ -204,6 +220,16 @@ export default function ExportSettings() {
               )}
             </div>
           </div>
+          {/* K-001 archived opt-in (Danny 8a = A): only on the exports that accept it; one honest hint line. */}
+          {ARCHIVABLE.has(entity.id) && (
+            <div style={{ marginTop: 16, paddingTop: 16, borderTop: '1px solid var(--border)' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                <Toggle checked={includeArchived} onChange={setIncludeArchived} ariaLabel={t('export.includeArchived')} disabled={!allowed} />
+                <BodyText as="span">{t('export.includeArchived')}</BodyText>
+              </div>
+              <Caption as="div" style={{ marginTop: 6 }}>{t('export.includeArchivedHint')}</Caption>
+            </div>
+          )}
         </div>
       </div>
     </div>

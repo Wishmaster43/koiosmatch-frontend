@@ -1852,6 +1852,9 @@
     "retry": "Erneut versuchen"
   },
   "export": {
+    "includeArchived": "Archivierte Datensätze einschließen",
+    "includeArchivedHint": "Archivierte Datensätze werden in diesen Export aufgenommen. Nur möglich, wenn Sie jede Niederlassung sehen dürfen; sonst lehnt der Server den Export ab.",
+    "archivedNotAllowed": "Archivierte Datensätze können nicht aufgenommen werden: Sie sehen nicht jede Niederlassung.",
     "title": "Exportieren",
     "subtitle": "Exportieren Sie Ihre Daten als CSV. Dieselben Spalten wie die Tabelle, nur Datensätze, auf die Sie Zugriff haben.",
     "button": "CSV exportieren",
@@ -1859,6 +1862,10 @@
     "rateLimited": "Zu viele Exporte hintereinander. Bitte versuche es in einer Minute erneut.",
     "error": "Export fehlgeschlagen. Bitte später erneut versuchen.",
     "entities": {
+      "email_messages": {
+        "title": "E-Mail-Nachrichten",
+        "desc": "Mit Kandidaten verknüpfte E-Mails als CSV oder Excel."
+      },
       "candidates": {
         "title": "Kandidaten",
         "desc": "Alle Kandidatendaten, ohne gelöschte oder anonymisierte Datensätze."

@@ -1852,6 +1852,9 @@
     "retry": "Réessayer"
   },
   "export": {
+    "includeArchived": "Inclure les enregistrements archivés",
+    "includeArchivedHint": "Les enregistrements archivés sont inclus dans cet export. Possible uniquement si vous voyez chaque agence ; sinon le serveur refuse l'export.",
+    "archivedNotAllowed": "Les enregistrements archivés ne peuvent pas être inclus : vous ne voyez pas chaque agence.",
     "title": "Exporter",
     "subtitle": "Exportez vos données en CSV. Les mêmes colonnes que le tableau, uniquement les enregistrements auxquels vous avez accès.",
     "button": "Exporter en CSV",
@@ -1859,6 +1862,10 @@
     "rateLimited": "Trop d'exports d'affilée. Réessayez dans une minute.",
     "error": "L'export a échoué. Veuillez réessayer plus tard.",
     "entities": {
+      "email_messages": {
+        "title": "Messages e-mail",
+        "desc": "E-mails liés aux candidats, en CSV ou Excel."
+      },
       "candidates": {
         "title": "Candidats",
         "desc": "Toutes les données des candidats, hors enregistrements supprimés ou anonymisés."

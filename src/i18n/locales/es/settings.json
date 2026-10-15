@@ -1852,6 +1852,9 @@
     "retry": "Intentar de nuevo"
   },
   "export": {
+    "includeArchived": "Incluir registros archivados",
+    "includeArchivedHint": "Los registros archivados se incluyen en esta exportación. Solo es posible si puedes ver todas las sucursales; de lo contrario el servidor rechaza la exportación.",
+    "archivedNotAllowed": "No se pueden incluir los registros archivados: no ves todas las sucursales.",
     "title": "Exportar",
     "subtitle": "Exporta tus datos como CSV. Las mismas columnas que la tabla, solo los registros a los que tienes acceso.",
     "button": "Exportar CSV",
@@ -1859,6 +1862,10 @@
     "rateLimited": "Demasiadas exportaciones seguidas. Inténtalo de nuevo dentro de un minuto.",
     "error": "Error al exportar. Inténtalo de nuevo más tarde.",
     "entities": {
+      "email_messages": {
+        "title": "Mensajes de correo",
+        "desc": "Correo vinculado a candidatos, en CSV o Excel."
+      },
       "candidates": {
         "title": "Candidatos",
         "desc": "Todos los datos de candidatos, excluyendo registros eliminados o anonimizados."

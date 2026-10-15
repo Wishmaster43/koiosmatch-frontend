@@ -2111,6 +2111,9 @@
     "retry": "Opnieuw proberen"
   },
   "export": {
+    "includeArchived": "Inclusief gearchiveerde records",
+    "includeArchivedHint": "Gearchiveerde records gaan mee in deze export. Alleen mogelijk als je elke vestiging mag zien; anders weigert de server de export.",
+    "archivedNotAllowed": "Gearchiveerde records kunnen niet mee: je ziet niet elke vestiging.",
     "title": "Exporteren",
     "subtitle": "Exporteer je gegevens als CSV. Dezelfde kolommen als de tabel, alleen records waar je toegang toe hebt.",
     "button": "Exporteer CSV",
@@ -2118,6 +2121,10 @@
     "rateLimited": "Te veel exports achter elkaar. Probeer het over een minuut opnieuw.",
     "error": "Exporteren is mislukt. Probeer het later opnieuw.",
     "entities": {
+      "email_messages": {
+        "title": "E-mailberichten",
+        "desc": "E-mail die aan kandidaten is gekoppeld, als CSV of Excel."
+      },
       "candidates": {
         "title": "Kandidaten",
         "desc": "Alle kandidaatgegevens, exclusief verwijderde of geanonimiseerde records."

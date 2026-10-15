@@ -2111,6 +2111,9 @@
     "retry": "Riprova"
   },
   "export": {
+    "includeArchived": "Includi i record archiviati",
+    "includeArchivedHint": "I record archiviati vengono inclusi in questa esportazione. Possibile solo se puoi vedere ogni filiale; altrimenti il server rifiuta l'esportazione.",
+    "archivedNotAllowed": "I record archiviati non possono essere inclusi: non vedi ogni filiale.",
     "title": "Esporta",
     "subtitle": "Esporta i tuoi dati come CSV. Le stesse colonne della tabella, solo i record a cui hai accesso.",
     "button": "Esporta CSV",
@@ -2118,6 +2121,10 @@
     "rateLimited": "Troppe esportazioni di fila. Riprova tra un minuto.",
     "error": "Esportazione non riuscita. Riprova più tardi.",
     "entities": {
+      "email_messages": {
+        "title": "Messaggi e-mail",
+        "desc": "E-mail collegate ai candidati, in CSV o Excel."
+      },
       "candidates": {
         "title": "Candidati",
         "desc": "Tutti i dati dei candidati, esclusi i record eliminati o anonimizzati."
