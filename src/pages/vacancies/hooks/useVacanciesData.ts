@@ -88,7 +88,9 @@ export function useVacanciesData({ filterParams, page, pageSize, t, sort }: UseV
     queryFn: async ({ signal }): Promise<VacancyCustomer[]> => {
       // per_page 200 = the /customers server cap — without it the server default (25)
       // silently truncated the picker to the first 25 customers (fleet-verify 05-08).
-      const res = await api.get('/customers', { signal, params: { per_page: 200 } })
+      // ONIX N-010 (BE lane A2 6f1f0af6): /customers caps per_page at 100 and answers 422 above it —
+      // 200 broke the vacancies page (smoke pages-render/drill-downs on 101073b5).
+      const res = await api.get('/customers', { signal, params: { per_page: 100 } })
       return unwrapList<{ id?: Id; name?: string; company_name?: string }>(res).rows.map(c => ({ id: c.id, name: c.name ?? c.company_name ?? '—' }))
     },
   })

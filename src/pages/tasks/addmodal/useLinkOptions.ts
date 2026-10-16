@@ -52,7 +52,8 @@ export function useLinkOptions(): LinkOptionsState {
     setError(false)
     // per_page 200 = the shared server cap — the server default (25) silently
     // truncated these pickers to the first 25 rows (fleet-verify 05-08).
-    const load = (url: string) => api.get(url, { params: { per_page: 200 } }).then(r => unwrapList<EntityRow>(r).rows)
+    // ONIX N-010 (BE lane A2 6f1f0af6): every entity list caps per_page at 100 (tasks 200) and 422s above it.
+    const load = (url: string) => api.get(url, { params: { per_page: 100 } }).then(r => unwrapList<EntityRow>(r).rows)
     Promise.allSettled([load('/candidates'), load('/customers'), load('/contacts')]).then(([c, cu, co]) => {
       if (!alive) return
       setRows({

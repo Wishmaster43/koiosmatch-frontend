@@ -625,7 +625,7 @@ describe('AddTaskModal · validation (Danny 27-07: the redesigned popup still bl
     expect(api.post).not.toHaveBeenCalled()
     // Let the link-picker loads (candidates/customers/contacts) settle before the
     // test returns, so their `.then` never lands after RTL's cleanup/unmount.
-    await waitFor(() => expect(api.get).toHaveBeenCalledWith('/candidates', { params: { per_page: 200 } }))
+    await waitFor(() => expect(api.get).toHaveBeenCalledWith('/candidates', { params: { per_page: 100 } }))
   })
 })
 
@@ -652,7 +652,7 @@ describe('AddTaskModal · the three relational pickers report a failed load (§3
     await screen.findByText('links.loadError')
     // /departments still answered — its rows reach the shared link adder.
     const api = (await import('@/lib/api')).default
-    expect(api.get).toHaveBeenCalledWith('/contacts', { params: { per_page: 200 } })
+    expect(api.get).toHaveBeenCalledWith('/contacts', { params: { per_page: 100 } })
   })
 })
 
