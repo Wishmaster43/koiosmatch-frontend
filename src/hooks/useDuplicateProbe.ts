@@ -37,13 +37,17 @@ export function useDuplicateProbe<TMatch>(
     const controller = new AbortController()
     abortRef.current = controller
     const timer = setTimeout(() => {
-      api.post(path, {
+      // Promise.resolve(): a non-promise return (a bare test mock, a stubbed client) must never throw
+      // synchronously inside this timer — that surfaces as an UNHANDLED error outside any test
+      // (FLAKE-PROBE-TIMER-1, 16-10) instead of staying an advisory probe that failed quietly.
+      Promise.resolve(api.post(path, {
         [keys[0]]: a.trim() || undefined,
         [keys[1]]: b.trim() || undefined,
         [keys[2]]: c.trim() || undefined,
-      }, { signal: controller.signal })
+      }, { signal: controller.signal }))
         .then(res => {
-          const data = res.data as { exists?: boolean; match?: TMatch | null }
+          if (controller.signal.aborted) return
+          const data = (res as { data?: { exists?: boolean; match?: TMatch | null } } | undefined)?.data
           setMatch(data?.exists ? (data.match ?? null) : null)
         })
         // Cancelled or failed probes stay silent — advisory only, never blocks typing.
