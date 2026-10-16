@@ -130,7 +130,7 @@ describe('PublishingTab · honest career-site-active state', () => {
   })
 
   it('shows the site-live banner and a PUBLISHED row once career_site_active is on', async () => {
-    mockSettings = { career_site_active: 'true' }
+    mockSettings = { career_site_active: '1' } // S-008 (BE lane A2 6f1f0af6): booleans are stored as 1/0
     render(<PublishingTab vacancy={vacancy([{ value: 'career', label: 'Career page', published: true }])} />)
     await openSitesTab()
 
@@ -140,7 +140,7 @@ describe('PublishingTab · honest career-site-active state', () => {
   })
 
   it('a channel that is simply off always reads Not published, regardless of site state', async () => {
-    mockSettings = { career_site_active: 'true' }
+    mockSettings = { career_site_active: '1' } // S-008 (BE lane A2 6f1f0af6): booleans are stored as 1/0
     // indeed stays ON here so only the career row can match "Not published" —
     // an unambiguous single-element assertion instead of counting duplicates.
     render(<PublishingTab vacancy={vacancy([

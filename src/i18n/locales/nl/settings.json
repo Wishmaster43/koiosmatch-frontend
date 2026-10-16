@@ -4708,7 +4708,7 @@
       "title": "Koppeling",
       "subtitle": "Verbinding en synchronisatie-instellingen voor deze koppeling.",
       "twoWay": "Tweeweg-synchronisatie",
-      "twoWayHint": "Wijzigingen stromen beide kanten op zodra de synchronisatie live is.",
+      "twoWayHint": "Aan: Koios Match schrijft wijzigingen terug naar dit systeem. Uit: alleen lezen, er gaat niets naar buiten.",
       "connectedAs": "Verbonden als {{name}}",
       "notConnected": "Nog niet verbonden",
       "notActiveYet": "Nog niet actief: de koppeling staat uit of heeft nog geen synchronisatie gedraaid.",

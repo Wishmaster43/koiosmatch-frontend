@@ -4709,7 +4709,7 @@
       "title": "Ligação",
       "subtitle": "Definições de ligação e sincronização para esta integração.",
       "twoWay": "Sincronização bidirecional",
-      "twoWayHint": "As alterações fluem em ambos os sentidos assim que a sincronização estiver ativa.",
+      "twoWayHint": "Ligado: o Koios Match escreve as alterações de volta neste sistema. Desligado: só leitura, nada sai.",
       "connectedAs": "Ligado como {{name}}",
       "notConnected": "Ainda não ligado",
       "notActiveYet": "Ainda não ativo: a ligação está desativada ou ainda não executou nenhuma sincronização.",

@@ -4708,7 +4708,7 @@
       "title": "Verbindung",
       "subtitle": "Verbindungs- und Synchronisierungseinstellungen für diese Integration.",
       "twoWay": "Zwei-Wege-Synchronisierung",
-      "twoWayHint": "Änderungen fließen in beide Richtungen, sobald die Synchronisierung live ist.",
+      "twoWayHint": "An: Koios Match schreibt Änderungen in dieses System zurück. Aus: nur lesen, nichts geht nach außen.",
       "connectedAs": "Verbunden als {{name}}",
       "notConnected": "Noch nicht verbunden",
       "notActiveYet": "Noch nicht aktiv: Die Verbindung ist ausgeschaltet oder hat noch keine Synchronisierung durchgeführt.",

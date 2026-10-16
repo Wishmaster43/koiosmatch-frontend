@@ -4708,7 +4708,7 @@
       "title": "Connexion",
       "subtitle": "Paramètres de connexion et de synchronisation pour cette intégration.",
       "twoWay": "Synchronisation bidirectionnelle",
-      "twoWayHint": "Les modifications circulent dans les deux sens dès que la synchronisation est active.",
+      "twoWayHint": "Activé : Koios Match renvoie les modifications vers ce système. Désactivé : lecture seule, rien ne sort.",
       "connectedAs": "Connecté en tant que {{name}}",
       "notConnected": "Pas encore connecté",
       "notActiveYet": "Pas encore actif : la connexion est désactivée ou n’a pas encore effectué de synchronisation.",

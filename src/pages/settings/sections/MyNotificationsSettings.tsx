@@ -46,6 +46,7 @@ import { useUserPreference } from '@/hooks/useUserPreference'
 import { AlertTriangle } from 'lucide-react'
 import api, { unwrap } from '@/lib/api'
 import { notifyError } from '@/lib/notify'
+import { extractApiError } from '@/lib/extractApiError'
 import SegmentedControl from '@/components/ui/SegmentedControl'
 import SoftChip from '@/components/ui/SoftChip'
 import Toggle from '@/components/ui/Toggle'
@@ -135,9 +136,12 @@ function useBrowserPush() {
     try {
       if (next) await subscribe()
       else await unsubscribe()
-    } catch {
+    } catch (err) {
       setSubscribed(prev)
-      notifyError(t(next ? 'notifications.push.subscribeFailed' : 'notifications.push.unsubscribeFailed'))
+      // ONIX G-003 (Danny 10f = A, BE lane A2 6f1f0af6): a registration whose endpoint host is not a known
+      // push service is refused with a 422 that carries its reason — show that reason; the browser-side
+      // failures (unsupported, permission denied) keep the generic sentence.
+      notifyError(next ? extractApiError(err, t('notifications.push.subscribeFailed')) : t('notifications.push.unsubscribeFailed'))
     } finally {
       setBusy(false)
     }

@@ -11,7 +11,10 @@ import { useNumberFormat } from '@/lib/formatters'
 import Button from './Button'
 import SelectMenu from './SelectMenu'
 
-export const PAGE_SIZE_OPTIONS = [50, 100, 200, 300, 400, 500]
+// ONIX N-010 (BE lane A2 6f1f0af6): per_page above an endpoint's ceiling is a 422 and the ceiling is the
+// page size actually served (lists 100, tasks 200; the profile preference accepts 10–200), so 300/400/500
+// are no longer offered anywhere — the per-list cap (useListPageSize) narrows this further.
+export const PAGE_SIZE_OPTIONS = [50, 100, 200]
 
 interface PaginationBarProps {
   page: number

@@ -4709,7 +4709,7 @@
       "title": "Connessione",
       "subtitle": "Impostazioni di connessione e sincronizzazione per questa integrazione.",
       "twoWay": "Sincronizzazione bidirezionale",
-      "twoWayHint": "Le modifiche fluiscono in entrambe le direzioni non appena la sincronizzazione è attiva.",
+      "twoWayHint": "Attivo: Koios Match riscrive le modifiche in questo sistema. Disattivo: sola lettura, nulla esce.",
       "connectedAs": "Connesso come {{name}}",
       "notConnected": "Non ancora connesso",
       "notActiveYet": "Non ancora attivo: la connessione è disattivata o non ha ancora eseguito alcuna sincronizzazione.",

@@ -24,10 +24,11 @@ describe('useListPageSize · seeding', () => {
     expect(result.current.pageSize).toBe(50)
   })
 
-  it('seeds from user.default_per_page when no cap applies', () => {
+  it('seeds from user.default_per_page, clamped to the largest offered option when no explicit cap applies', () => {
+    // ONIX N-010 (BE lane A2 6f1f0af6): nothing serves more than 200 any more, so a legacy 500 lands on 200.
     mockUser = { default_per_page: 500 }
     const { result } = renderHook(() => useListPageSize('test.seed.500'))
-    expect(result.current.pageSize).toBe(500)
+    expect(result.current.pageSize).toBe(200)
   })
 })
 
@@ -48,7 +49,7 @@ describe('useListPageSize · honesty (server cap)', () => {
   it('offers the full shared list when no cap is passed', () => {
     mockUser = { default_per_page: 50 }
     const { result } = renderHook(() => useListPageSize('test.cap.none'))
-    expect(result.current.options).toEqual([50, 100, 200, 300, 400, 500])
+    expect(result.current.options).toEqual([50, 100, 200]) // ONIX N-010: the shared list ends at 200 since BE lane A2
   })
 
   it('re-clamps an explicit setPageSize call above the cap', () => {
