@@ -6,6 +6,7 @@
  */
 import { useCallback, useMemo } from 'react'
 import type { Dispatch, SetStateAction } from 'react'
+import { fetchAllPages } from '@/lib/fetchAllPages'
 import { useQuery, useQueryClient, keepPreviousData } from '@tanstack/react-query'
 import type { TFunction } from 'i18next'
 import api, { unwrap, unwrapList } from '@/lib/api'
@@ -86,12 +87,13 @@ export function useVacanciesData({ filterParams, page, pageSize, t, sort }: UseV
   const { data: customers = EMPTY_CUSTOMERS } = useQuery({
     queryKey: ['vacancies', 'customer-pickers'],
     queryFn: async ({ signal }): Promise<VacancyCustomer[]> => {
-      // per_page 200 = the /customers server cap — without it the server default (25)
-      // silently truncated the picker to the first 25 customers (fleet-verify 05-08).
-      // ONIX N-010 (BE lane A2 6f1f0af6): /customers caps per_page at 100 and answers 422 above it —
-      // 200 broke the vacancies page (smoke pages-render/drill-downs on 101073b5).
-      const res = await api.get('/customers', { signal, params: { per_page: 100 } })
-      return unwrapList<{ id?: Id; name?: string; company_name?: string }>(res).rows.map(c => ({ id: c.id, name: c.name ?? c.company_name ?? '—' }))
+      // CUSTOMER-PRELOAD-1 (16-10): /customers caps per_page at 100 (ONIX N-010, BE lane A2 6f1f0af6)
+      // and a bureau can hold more customers than one page — the shared fetchAllPages walks every
+      // page at the cap so the filter/drawer/modal/bulk pickers never silently miss a customer
+      // (the single-page 200 request before it answered 422 since A2; the server default 25
+      // truncated the picker before that, fleet-verify 05-08). Bounded at 10 pages (1000 customers).
+      const { rows } = await fetchAllPages<{ id?: Id; name?: string; company_name?: string }>('/customers', {}, signal, { perPage: 100, maxPages: 10 })
+      return rows.map(c => ({ id: c.id, name: c.name ?? c.company_name ?? '—' }))
     },
   })
 
