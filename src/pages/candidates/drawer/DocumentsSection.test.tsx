@@ -17,6 +17,7 @@ import DocumentsSection from './DocumentsSection'
 import api from '@/lib/api'
 import { notifyError } from '@/lib/notify'
 import type { Candidate } from '@/types/candidate'
+import { acceptFor } from '@/lib/uploadPolicy'
 
 // The multipart POST + its response envelope — id present so the optimistic row reconciles.
 vi.mock('@/lib/api', () => ({
@@ -965,5 +966,32 @@ describe('DocumentsSection · document-type filter menu (DOC-TYPE-FILTER-1)', ()
     expect(screen.getByRole('dialog')).toBeInTheDocument()
     await user.keyboard('{Escape}')
     expect(screen.queryByRole('dialog')).toBeNull()
+  })
+})
+
+// UPLOAD-POLICY-1: both pickers carry the documents policy and refused types never reach the queue.
+describe('DocumentsSection · upload policy', () => {
+  beforeEach(() => {
+    vi.clearAllMocks()
+    vi.stubGlobal('URL', { createObjectURL: vi.fn((f: File) => `blob:${f.name}`), revokeObjectURL: vi.fn() })
+  })
+  afterEach(() => vi.unstubAllGlobals())
+
+  it('sets the policy accept string on the upload and replace inputs', () => {
+    const { container } = render(<DocumentsSection c={candidate()} />)
+    expect(getFileInput(container).accept).toBe(acceptFor('documents'))
+    expect(getReplaceFileInput(container).accept).toBe(acceptFor('documents'))
+  })
+
+  it('queues only the allowed file and reports the refusal once', async () => {
+    const user = userEvent.setup({ applyAccept: false })
+    const { container } = render(<DocumentsSection c={candidate()} />)
+    await user.upload(getFileInput(container), [new File(['x'], 'cv.pdf'), new File(['x'], 'virus.exe')])
+    expect(getTypeTriggers()).toHaveLength(1)
+    const addButtons = screen.getAllByRole('button', { name: 'common:add' })
+    await user.click(addButtons[addButtons.length - 1])
+    expect(api.post).toHaveBeenCalledTimes(1)
+    expect(vi.mocked(notifyError)).toHaveBeenCalledTimes(1)
+    expect(vi.mocked(notifyError).mock.calls[0][0]).toContain('upload.typeNotAllowed')
   })
 })

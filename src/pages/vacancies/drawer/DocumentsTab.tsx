@@ -5,6 +5,7 @@ import { Search, X, Download, Trash2 } from 'lucide-react'
 import { useDocumentSelection } from '@/hooks/useDocumentSelection'
 import type { VacancyDetail } from '@/types/vacancy'
 import { useEntityDocuments, fmtSize } from '@/hooks/useEntityDocuments'
+import { useUploadPickFilter } from '@/lib/useUploadPickFilter'
 import { useDocumentTypes } from '@/lib/useDocumentTypes'
 import DrawerAddButton from '@/components/drawer/DrawerAddButton'
 import DrawerFilterMenu from '@/components/drawer/DrawerFilterMenu'
@@ -54,6 +55,8 @@ interface PendingDoc { file: File; objectUrl: string; name: string; size: string
  */
 export default function DocumentsTab({ vacancy: v }: { vacancy: VacancyDetail }) {
   const { t } = useTranslation('vacancies')
+  // Upload policy for the documents surface: accept attribute + refusal filter.
+  const { accept: docsAccept, filterPicked } = useUploadPickFilter('documents')
   const { docs, loading, error, upload, rename, remove } = useEntityDocuments('vacancies', v.id)
   // Vacancy's own document-type lookup (entity-scoped) — never a hardcoded list.
   const { types: docTypes, labelOf: docTypeLabel, colorOf: docColor, iconOf: docTypeIcon } = useDocumentTypes('vacancy')
@@ -83,8 +86,8 @@ export default function DocumentsTab({ vacancy: v }: { vacancy: VacancyDetail })
   // Stage the picked file instead of uploading it blind — default type = the
   // tenant's first configured value, so the chip row always shows a selection.
   const onPick = (e: ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0]
-    if (!file) return
+    const file = filterPicked(Array.from(e.target.files ?? []).slice(0, 1))[0]
+    if (!file) { e.target.value = ''; return }
     // Revoke the previous staged preview (if any) before replacing it — picking again
     // without confirming/cancelling first used to leak the earlier blob URL.
     if (pendingUrlRef.current) URL.revokeObjectURL(pendingUrlRef.current)
@@ -266,7 +269,7 @@ export default function DocumentsTab({ vacancy: v }: { vacancy: VacancyDetail })
         </>
       )}
 
-      <input ref={fileRef} type="file" style={{ display: 'none' }} onChange={onPick} />
+      <input ref={fileRef} type="file" accept={docsAccept} style={{ display: 'none' }} onChange={onPick} />
       {previewDoc && <DocPreviewModal doc={previewDoc} onClose={() => setPreviewDoc(null)} />}
       {/* One shared destructive-confirm dialog for both single and bulk delete
           (never a native confirm()) — the same DocumentDeleteDialog the

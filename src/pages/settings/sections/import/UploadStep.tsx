@@ -7,6 +7,7 @@ import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { downloadImportTemplate } from './importApi'
 import { notifyError } from '@/lib/notify'
+import { useUploadPolicy } from '@/lib/uploadPolicy'
 import Button from '@/components/ui/Button'
 import Spinner from '@/components/ui/Spinner'
 import { FileDropZoneUI } from '@/pages/import/shared'
@@ -31,17 +32,19 @@ export default function UploadStep({
   entity, file, onSelectFile, onRunPreview, previewStatus, previewError, canView, canImport,
 }: UploadStepProps) {
   const { t } = useTranslation('settings')
+  const { accept: importAccept, check: importCheck } = useUploadPolicy('import')
   const [typeError, setTypeError] = useState<string | null>(null)
   const [downloadPending, setDownloadPending] = useState(false)
 
   const isZip = ZIP_ENTITIES.includes(entity)
-  const acceptAttribute = isZip ? '.zip' : '.csv,.txt,.xlsx'
+  // Zip stays fixed; spreadsheets follow the shared upload policy (import surface).
+  const acceptAttribute = isZip ? '.zip' : importAccept
 
   // Validate file type and size before staging.
   const acceptFile = (candidate: File) => {
     const lower = candidate.name.toLowerCase()
     const isValidZip = lower.endsWith('.zip')
-    const isValidSpreadsheet = ['.csv', '.txt', '.xlsx'].some(ext => lower.endsWith(ext))
+    const isValidSpreadsheet = importCheck(candidate).ok
 
     if (isZip && !isValidZip) {
       setTypeError(t('import.wrongFileType'))

@@ -14,10 +14,12 @@ interface UseDocumentUploadQueueArgs {
   upload: (file: File, type: string, name: string, objectUrl: string, extra?: Record<string, string>) => void
   uploadExtraFields: Record<string, string> | undefined
   setUploadLink: (v: string) => void
+  // Optional pre-queue filter (upload policy): drops refused files and reports them once.
+  filterFiles?: (files: File[]) => File[]
 }
 
 // Owns the queued-file list and every action that touches it (add/type/remove/upload).
-export function useDocumentUploadQueue({ upload, uploadExtraFields, setUploadLink }: UseDocumentUploadQueueArgs) {
+export function useDocumentUploadQueue({ upload, uploadExtraFields, setUploadLink, filterFiles }: UseDocumentUploadQueueArgs) {
   // DRY round 11, DOCS: setItemType/removePending (with the blob-URL revoke) are
   // shared with the candidate drawer's useCandidateDocuments.
   const { pending, setPending, setItemType, setAllTypes, removePending } = useUploadQueueItems<PendingItem>()
@@ -51,8 +53,9 @@ export function useDocumentUploadQueue({ upload, uploadExtraFields, setUploadLin
   // File-input change handler: every picked file becomes its own queue entry
   // (default type 'CV') — this is the actual bugfix: previously only files?.[0] was kept.
   const onFilesPicked = (e: ChangeEvent<HTMLInputElement>) => {
-    const files = Array.from(e.target.files ?? [])
-    if (!files.length) return
+    const picked = Array.from(e.target.files ?? [])
+    const files = filterFiles ? filterFiles(picked) : picked
+    if (!files.length) { e.target.value = ''; return }
     const items: PendingItem[] = files.map(file => ({
       file, objectUrl: URL.createObjectURL(file), name: file.name,
       size: Math.round(file.size / 1024) + ' KB', type: 'CV',

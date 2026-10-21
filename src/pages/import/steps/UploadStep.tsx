@@ -11,6 +11,7 @@ import { downloadImportTemplate } from '../api'
 import { notifyError } from '@/lib/notify'
 import { FileDropZoneUI } from '../shared'
 
+// Deliberately NARROWER than the import upload policy (UPLOAD-POLICY-1): a surface may stay narrower, never wider.
 // Client-side CSV parsing only — .xlsx would be mojibake (no xlsx reader in this repo).
 const ACCEPTED_EXTENSIONS = ['.csv', '.txt']
 

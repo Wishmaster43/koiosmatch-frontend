@@ -38,6 +38,7 @@ import { useState, useRef, useId } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Search, X, Download, Trash2, AlertTriangle } from 'lucide-react'
 import { useDocumentTypes, resolveDocTypeIcon } from '@/lib/useDocumentTypes'
+import { useUploadPickFilter } from '@/lib/useUploadPickFilter'
 import { useDateFormat } from '@/lib/datetime'
 import { sectionBlock } from '@/components/ui/SectionCard'
 import Spinner from '@/components/ui/Spinner'
@@ -95,9 +96,11 @@ export default function DocumentsTab({ customerId, locations = [], departments =
   // (own hook, §3 — kept this file from crossing the ~400-line split trigger).
   const { uploadLink, setUploadLink, linkOptions, showLinkPicker, uploadExtraFields } =
     useDocumentLinkPicker(locations, departments, lockedLevelFields)
+  // Upload policy for the documents surface: accept attribute + refusal filter.
+  const { accept: docsAccept, filterPicked } = useUploadPickFilter('documents')
   // The queued-but-not-yet-uploaded files + every action that touches that queue.
   const { pending, uploadAll, setItemType, setAllTypes, removePending, cancelPending, onFilesPicked } =
-    useDocumentUploadQueue({ upload, uploadExtraFields, setUploadLink })
+    useDocumentUploadQueue({ upload, uploadExtraFields, setUploadLink, filterFiles: filterPicked })
   const [renamingId,  setRenamingId]  = useState<Id | null>(null)
   const [renameValue, setRenameValue] = useState('')
   const [docSearch,   setDocSearch]   = useState('')
@@ -231,7 +234,7 @@ export default function DocumentsTab({ customerId, locations = [], departments =
             preview={preview} onDelete={(doc, index) => setConfirmDelete({ kind: 'one', doc, index })}
           />
         ))}
-        <input ref={fileRef} type="file" style={{ display: 'none' }} multiple onChange={onFilesPicked} />
+        <input ref={fileRef} type="file" style={{ display: 'none' }} multiple accept={docsAccept} onChange={onFilesPicked} />
         {/* The shared preview dialog reads the SAME docTypeScope so the type chip
             resolves against this level's own document-type lookup, never a
             hardcoded 'customer' once a location/department has its own scope. */}

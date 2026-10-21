@@ -10,6 +10,8 @@ import userEvent from '@testing-library/user-event'
 import DocumentsTab from './DocumentsTab'
 import { useEntityDocuments } from '@/hooks/useEntityDocuments'
 import { useDocumentTypes } from '@/lib/useDocumentTypes'
+import { acceptFor } from '@/lib/uploadPolicy'
+import { notifyError } from '@/lib/notify'
 
 // The real modal fetches over the network (pdf.js, blob fetch) — irrelevant here,
 // where the only thing under test is HOW the eye icon opens it. A marker stand-in
@@ -493,5 +495,32 @@ describe('DocumentsTab · loading/error states never look like "no documents" (�
     render(<DocumentsTab customerId="cust-1" />)
 
     expect(screen.getByText('documents.empty')).toBeInTheDocument()
+  })
+})
+
+vi.mock('@/lib/notify', () => ({ notifyError: vi.fn(), notifySuccess: vi.fn() }))
+
+// UPLOAD-POLICY-1: the picker carries the documents policy and refused types never reach the queue.
+describe('DocumentsTab · upload policy', () => {
+  beforeEach(() => {
+    vi.clearAllMocks()
+    vi.stubGlobal('URL', { createObjectURL: vi.fn((f: File) => `blob:${f.name}`), revokeObjectURL: vi.fn() })
+  })
+  afterEach(() => vi.unstubAllGlobals())
+
+  it('sets the policy accept string and queues only the allowed file', async () => {
+    const upload = vi.fn()
+    vi.mocked(useEntityDocuments).mockReturnValue({ docs: [], loading: false, error: false, upload, rename: vi.fn(), remove: vi.fn() })
+    const user = userEvent.setup({ applyAccept: false })
+    const { container } = render(<DocumentsTab customerId="cust-1" />)
+    expect(getFileInput(container).accept).toBe(acceptFor('documents'))
+    await user.upload(getFileInput(container), [new File(['x'], 'cv.pdf'), new File(['x'], 'virus.exe')])
+    expect(getTypeTriggers()).toHaveLength(1)
+    const addButtons = screen.getAllByRole('button', { name: 'documents.add' })
+    await user.click(addButtons[addButtons.length - 1])
+    expect(upload).toHaveBeenCalledTimes(1)
+    expect(upload.mock.calls[0][2]).toBe('cv.pdf')
+    expect(vi.mocked(notifyError)).toHaveBeenCalledTimes(1)
+    expect(vi.mocked(notifyError).mock.calls[0][0]).toContain('upload.typeNotAllowed')
   })
 })

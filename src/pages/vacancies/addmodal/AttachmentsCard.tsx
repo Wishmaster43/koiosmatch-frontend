@@ -1,5 +1,6 @@
 import { useRef, useState } from 'react'
 import type { ChangeEvent } from 'react'
+import { useUploadPickFilter } from '@/lib/useUploadPickFilter'
 import { useTranslation } from 'react-i18next'
 import { FileText, X } from 'lucide-react'
 import CollapsibleRichText from '@/components/ui/CollapsibleRichText'
@@ -29,6 +30,8 @@ interface Props {
  */
 export default function AttachmentsCard({ files, onAddFile, onRemoveFile, noteText, onNoteChange }: Props) {
   const { t } = useTranslation(['vacancies', 'common'])
+  // Upload policy for the documents surface: accept attribute + refusal filter.
+  const { accept: docsAccept, filterPicked } = useUploadPickFilter('documents')
   const fileRef = useRef<HTMLInputElement>(null)
   // Purely presentational toggle state (mirrors DescriptionCard) — only the
   // note TEXT itself needs to be lifted for the submit/post-create sequence.
@@ -37,8 +40,7 @@ export default function AttachmentsCard({ files, onAddFile, onRemoveFile, noteTe
 
   // Adds every picked file to the pending list and resets the input value so picking the same file again still fires onChange.
   const onPick = (e: ChangeEvent<HTMLInputElement>) => {
-    const picked = e.target.files
-    if (picked) Array.from(picked).forEach(f => onAddFile(f))
+    filterPicked(Array.from(e.target.files ?? [])).forEach(f => onAddFile(f))
     e.target.value = ''
   }
 
@@ -71,7 +73,7 @@ export default function AttachmentsCard({ files, onAddFile, onRemoveFile, noteTe
             ))}
           </div>
         )}
-        <input ref={fileRef} type="file" multiple style={{ display: 'none' }} onChange={onPick} aria-label={t('drawer.tabs.documents')} />
+        <input ref={fileRef} type="file" multiple accept={docsAccept} style={{ display: 'none' }} onChange={onPick} aria-label={t('drawer.tabs.documents')} />
       </div>
 
       {/* Note — its own block, never merged with the Vacaturetekst above. */}

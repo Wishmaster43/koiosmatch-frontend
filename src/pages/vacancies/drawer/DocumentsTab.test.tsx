@@ -11,6 +11,8 @@ import i18n from '@/i18n'
 import DocumentsTab from './DocumentsTab'
 import { useEntityDocuments } from '@/hooks/useEntityDocuments'
 import type { VacancyDetail } from '@/types/vacancy'
+import { acceptFor } from '@/lib/uploadPolicy'
+import { notifyError } from '@/lib/notify'
 
 // Resolve the active locale's own copy so assertions never guess/hardcode a string.
 const t = (key: string, opts?: Record<string, unknown>) => i18n.t(key, { ns: 'vacancies', ...opts })
@@ -277,5 +279,40 @@ describe('DocumentsTab (vacancy) · L8-docs-1 four honest states', () => {
     await userEvent.type(screen.getByPlaceholderText(t('documents.search')), 'nomatch')
     expect(screen.getByText(t('documents.noResults'))).toBeInTheDocument()
     expect(screen.queryByText(t('documents.empty'))).not.toBeInTheDocument()
+  })
+})
+
+vi.mock('@/lib/notify', () => ({ notifyError: vi.fn(), notifySuccess: vi.fn() }))
+
+// UPLOAD-POLICY-1: the picker carries the documents policy and a refused type is never staged.
+describe('DocumentsTab (vacancy) · upload policy', () => {
+  beforeEach(() => {
+    vi.clearAllMocks()
+    vi.stubGlobal('URL', { ...URL, createObjectURL: vi.fn(() => 'blob:cv.pdf'), revokeObjectURL: vi.fn() })
+  })
+  afterEach(() => vi.unstubAllGlobals())
+
+  it('sets the policy accept string and refuses a disallowed file with one toast', async () => {
+    const upload = vi.fn()
+    vi.mocked(useEntityDocuments).mockReturnValue({ docs: [], loading: false, error: false, upload, rename: vi.fn(), remove: vi.fn() })
+    const user = userEvent.setup({ applyAccept: false })
+    const { container } = render(<DocumentsTab vacancy={vacancy} />)
+    expect(getFileInput(container).accept).toBe(acceptFor('documents'))
+    await user.upload(getFileInput(container), new File(['x'], 'virus.exe'))
+    expect(screen.queryByRole('button', { name: 'Contract' })).toBeNull()
+    expect(upload).not.toHaveBeenCalled()
+    expect(vi.mocked(notifyError)).toHaveBeenCalledTimes(1)
+    expect(String(vi.mocked(notifyError).mock.calls[0][0]).length).toBeGreaterThan(0)
+  })
+
+  it('stages the allowed file and confirms only that one into upload()', async () => {
+    const upload = vi.fn()
+    vi.mocked(useEntityDocuments).mockReturnValue({ docs: [], loading: false, error: false, upload, rename: vi.fn(), remove: vi.fn() })
+    const user = userEvent.setup({ applyAccept: false })
+    const { container } = render(<DocumentsTab vacancy={vacancy} />)
+    await user.upload(getFileInput(container), new File(['x'], 'cv.pdf'))
+    await clickConfirm()
+    expect(upload).toHaveBeenCalledTimes(1)
+    expect(upload.mock.calls[0][2]).toBe('cv.pdf')
   })
 })

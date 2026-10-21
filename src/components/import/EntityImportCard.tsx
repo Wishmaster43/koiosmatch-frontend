@@ -44,14 +44,10 @@ import Spinner from '@/components/ui/Spinner'
 // client or a second result renderer.
 import { PreviewStep, ResultStep, downloadImportTemplate } from '@/pages/settings/shared'
 import type { useImportWizard } from '@/pages/settings/shared'
+import { useUploadPolicy } from '@/lib/uploadPolicy'
 import Button from '@/components/ui/Button'
 import { tintBg, tintBorder } from '@/lib/tint'
 import { Caption } from '@/components/ui/typography'
-
-// Mirrors ImportUploadRequest::rules (mimes:csv,txt,xlsx) — this card only forwards
-// the raw File to the backend (no client-side parsing), so .xlsx works exactly like
-// .csv/.txt here; the excel reader recognises it by its ZIP magic server-side.
-const ACCEPTED_EXTENSIONS = ['.csv', '.txt', '.xlsx']
 
 type Wizard = ReturnType<typeof useImportWizard>
 
@@ -79,17 +75,17 @@ interface EntityImportCardProps {
 // mandatory dry-run preview → real import, reusing the Settings wizard's own steps.
 export default function EntityImportCard({ wizard, canView, canImport, entity, intro, wholeTree = false, introExtra, previewBanner, onConfirmImport }: EntityImportCardProps) {
   const { t } = useTranslation('settings')
+  // File-picker filter from the shared upload policy (import surface).
+  const { accept: importAccept, check: importCheck } = useUploadPolicy('import')
   const { step, file, preview, run } = wizard
   const inputRef = useRef<HTMLInputElement>(null)
   const [dragOver, setDragOver] = useState(false)
   const [typeError, setTypeError] = useState<string | null>(null)
   const checking = preview.status === 'loading'
 
-  // Reject anything that isn't .csv/.txt/.xlsx with an honest, actionable message — an
-  // .xlsx must never be silently dropped, nor accepted only to fail server-side.
+  // UPLOAD-POLICY-1: reject anything the shared import policy refuses, with an honest, actionable message.
   const acceptFile = (candidate: File) => {
-    const lower = candidate.name.toLowerCase()
-    if (!ACCEPTED_EXTENSIONS.some(ext => lower.endsWith(ext))) {
+    if (!importCheck(candidate).ok) {
       setTypeError(t('import.wrongFileType'))
       return
     }
@@ -212,7 +208,7 @@ export default function EntityImportCard({ wizard, canView, canImport, entity, i
 
       {/* The real input: labelled for assistive tech, kept out of the tab order and
           out of sight — the visible button is what drives it (§6). */}
-      <input ref={inputRef} type="file" accept=".csv,.txt,.xlsx" onChange={handleChange}
+      <input ref={inputRef} type="file" accept={importAccept} onChange={handleChange}
         aria-label={t('import.selectCsv')} tabIndex={-1} disabled={!canImport}
         style={{ position: 'absolute', width: 0, height: 0, opacity: 0, border: 0, padding: 0 }} />
     </div>

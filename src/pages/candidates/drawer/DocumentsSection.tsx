@@ -12,6 +12,7 @@ import type { ChangeEvent } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Search, X, Download, Trash2 } from 'lucide-react'
 import { sectionBlock } from './constants'
+import { useUploadPickFilter } from '@/lib/useUploadPickFilter'
 import { useDocumentTypes } from '@/lib/useDocumentTypes'
 import { useAuth } from '@/context/AuthContext'
 import { useBulkDocumentDelete } from '@/hooks/useBulkDocumentDelete'
@@ -46,6 +47,8 @@ export default function DocumentsSection({ c, onRefresh }: { c: Candidate; onRef
   // Point 4: every MANAGE action (upload/rename/replace/delete) gates on this
   // permission; read + download stay available under the drawer's own
   // candidates.view gate (unaffected here — never double-gated).
+  // Upload policy for the documents surface: accept attribute + refusal filter.
+  const { accept: docsAccept, filterPicked } = useUploadPickFilter('documents')
   const canManage = useAuth()?.hasPermission('candidates.documents.manage') ?? false
   // Document types + colours + icons from the tenant lookup (seed fallback until /document-types lands).
   // Candidate documents: this entity's types plus the global ones (see DocumentsTab).
@@ -210,12 +213,12 @@ export default function DocumentsSection({ c, onRefresh }: { c: Candidate; onRef
           )
         })
       }
-      <input ref={fileRef} type="file" style={{ display: 'none' }} multiple
+      <input ref={fileRef} type="file" accept={docsAccept} style={{ display: 'none' }} multiple
         onChange={(e: ChangeEvent<HTMLInputElement>) => {
           // Every picked file becomes its own queue entry (default type 'CV') —
           // this is the actual bugfix: previously only files?.[0] was kept.
-          const files = Array.from(e.target.files ?? [])
-          if (!files.length) return
+          const files = filterPicked(Array.from(e.target.files ?? []))
+          if (!files.length) { e.target.value = ''; return }
           const items: PendingItem[] = files.map(file => ({
             file, objectUrl: URL.createObjectURL(file), name: file.name,
             size: Math.round(file.size / 1024) + ' KB', type: 'CV', linkTo: '',
@@ -225,9 +228,9 @@ export default function DocumentsSection({ c, onRefresh }: { c: Candidate; onRef
         }} />
       {/* DOC-VERSIE-1 point 3: single-file, hidden — opened per-row via the Replace
           button above; the picked file is sent straight to replaceDoc, never queued. */}
-      <input ref={replaceFileRef} type="file" style={{ display: 'none' }}
+      <input ref={replaceFileRef} type="file" accept={docsAccept} style={{ display: 'none' }}
         onChange={(e: ChangeEvent<HTMLInputElement>) => {
-          const file = e.target.files?.[0]
+          const file = filterPicked(Array.from(e.target.files ?? []).slice(0, 1))[0]
           const targetId = replaceTargetId
           e.target.value = ''
           setReplaceTargetId(null)

@@ -13,7 +13,8 @@ import { useRef, useState } from 'react'
 import type { ChangeEvent } from 'react'
 import { useTranslation } from 'react-i18next'
 import { FileUp, ClipboardPaste } from 'lucide-react'
-import { CV_ACCEPT_ATTR, CV_TEXT_MIN_CHARS, CV_TEXT_MAX_CHARS } from './useCvParse'
+import { CV_TEXT_MIN_CHARS, CV_TEXT_MAX_CHARS } from './useCvParse'
+import { useUploadPolicy } from '@/lib/uploadPolicy'
 import { useEscapeLayer } from '@/hooks/useEscapeLayer'
 import { useClickOutside } from '@/hooks/useClickOutside'
 import Button from '@/components/ui/Button'
@@ -39,6 +40,8 @@ const iconBtnStyle = (active = false) => ({
 export default function CvEntryIcons({ onFile, onSubmitText }: CvEntryIconsProps) {
   const { t } = useTranslation(['candidates', 'common'])
   const inputRef = useRef<HTMLInputElement>(null)
+  // File-picker filter from the shared upload policy (cv_parse surface).
+  const { accept: cvAccept } = useUploadPolicy('cv_parse')
   const popoverRef = useRef<HTMLDivElement>(null)
   const [pasteOpen, setPasteOpen] = useState(false)
   const [text, setText] = useState('')
@@ -75,7 +78,7 @@ export default function CvEntryIcons({ onFile, onSubmitText }: CvEntryIconsProps
       </Button>
       {/* The real input: labelled for assistive tech, kept out of the tab order and
           out of sight — the visible button is what drives it (§6). */}
-      <input ref={inputRef} type="file" accept={CV_ACCEPT_ATTR} onChange={handleChange}
+      <input ref={inputRef} type="file" accept={cvAccept} onChange={handleChange}
         aria-label={t('modal.cv.choose')} tabIndex={-1}
         style={{ position: 'absolute', width: 0, height: 0, opacity: 0, border: 0, padding: 0 }} />
 
