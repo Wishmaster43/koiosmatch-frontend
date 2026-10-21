@@ -5,11 +5,10 @@
  * ways forward are completing the shared setup wizard or signing out.
  */
 import { useTranslation } from 'react-i18next'
-import { LogOut, ShieldAlert } from 'lucide-react'
+import { ShieldAlert } from 'lucide-react'
 import { useAuth } from '@/context/AuthContext'
 import MfaSetupWizard from '@/components/auth/MfaSetupWizard'
-import Button from '@/components/ui/Button'
-import { PageTitle, BodyText } from '@/components/ui/typography'
+import AuthWallShell from '@/components/auth/AuthWallShell'
 
 export default function MfaEnrollmentGate() {
   const { t } = useTranslation('auth')
@@ -19,35 +18,12 @@ export default function MfaEnrollmentGate() {
   const { setupMfa, confirmMfa, refreshUser, logout } = auth
 
   return (
-    <div className="flex items-center justify-center min-h-screen p-6"
-      style={{ background: 'linear-gradient(160deg, color-mix(in srgb, var(--color-primary) 7%, var(--bg)) 0%, var(--bg) 55%)' }}>
-      <main className="w-full" style={{ maxWidth: 520 }}>
-        <div style={{ background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 18,
-                      padding: '32px 30px 34px', boxShadow: 'var(--shadow-modal)' }}>
-          {/* Why the user is blocked — icon + title + one-line explanation. */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 10 }}>
-            <div style={{ width: 44, height: 44, borderRadius: 12, background: 'var(--color-primary-bg)', flexShrink: 0,
-                          display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-              <ShieldAlert size={22} style={{ color: 'var(--color-primary-text)' }} />
-            </div>
-            <PageTitle as="h1">{t('mfaGate.title')}</PageTitle>
-          </div>
-          <BodyText style={{ color: 'var(--text-muted)', lineHeight: 1.6, marginBottom: 24 }}>
-            {t('mfaGate.desc')}
-          </BodyText>
-
-          {/* The shared enrollment wizard; finishing refreshes /auth/me which lifts the gate. */}
-          <MfaSetupWizard setupMfa={setupMfa} confirmMfa={confirmMfa}
-            onFinished={async () => { await refreshUser() }} />
-        </div>
-
-        {/* Signing out is the only other allowed action while enforcement blocks the app. */}
-        <div style={{ display: 'flex', justifyContent: 'center', marginTop: 16 }}>
-          <Button variant="ghost" size="sm" onClick={() => void logout()}>
-            <LogOut size={13} /> {t('mfaGate.signOut')}
-          </Button>
-        </div>
-      </main>
-    </div>
+    <AuthWallShell icon={<ShieldAlert size={22} style={{ color: 'var(--color-primary-text)' }} />}
+      title={t('mfaGate.title')} description={t('mfaGate.desc')}
+      signOutLabel={t('mfaGate.signOut')} onSignOut={() => void logout()}>
+      {/* The shared enrollment wizard; finishing refreshes /auth/me which lifts the gate. */}
+      <MfaSetupWizard setupMfa={setupMfa} confirmMfa={confirmMfa}
+        onFinished={async () => { await refreshUser() }} />
+    </AuthWallShell>
   )
 }

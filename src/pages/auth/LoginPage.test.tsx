@@ -150,3 +150,38 @@ describe('LoginPage · re-entrancy latch', () => {
     expect(verifyMfaMock).toHaveBeenCalledWith('tok', '123456')
   })
 })
+
+// ONIX C-005 / C-002: revoked sessions and spent MFA challenges explain themselves.
+describe('LoginPage · session_revoked and mfa_challenge_used', () => {
+  afterEach(() => { sessionStorage.clear(); loginMock.mockReset(); verifyMfaMock.mockReset() })
+
+  it('shows the revoked notice instead of the expired one and clears both flags', () => {
+    sessionStorage.setItem('km_session_revoked', '1')
+    sessionStorage.setItem('km_session_expired', '1')
+    renderLogin()
+    expect(screen.getByRole('alert')).toHaveTextContent(nlAuth.login.sessionRevoked)
+    expect(screen.queryByText(nlAuth.login.sessionExpired)).toBeNull()
+    expect(sessionStorage.getItem('km_session_revoked')).toBeNull()
+    expect(sessionStorage.getItem('km_session_expired')).toBeNull()
+  })
+
+  it('keeps the plain expired notice when only the expired flag is set', () => {
+    sessionStorage.setItem('km_session_expired', '1')
+    renderLogin()
+    expect(screen.getByRole('alert')).toHaveTextContent(nlAuth.login.sessionExpired)
+    expect(screen.queryByText(nlAuth.login.sessionRevoked)).toBeNull()
+  })
+
+  it('returns to the credentials step with the challenge-used notice on a 401 mfa_challenge_used', async () => {
+    loginMock.mockResolvedValue({ mfaRequired: true, mfaToken: 'tok' })
+    verifyMfaMock.mockRejectedValueOnce({ response: { status: 401, data: { code: 'mfa_challenge_used' } } })
+    renderLogin()
+    await act(async () => { submit() })
+    const input = await screen.findByLabelText(nlAuth.mfa.codeLabel)
+    fireEvent.change(input, { target: { value: '123456' } })
+    await act(async () => { fireEvent.submit(input.closest('form') as HTMLFormElement) })
+    expect(await screen.findByLabelText(nlAuth.login.email)).toBeInTheDocument()
+    expect(screen.getByText(nlAuth.mfa.challengeUsed)).toBeInTheDocument()
+    expect(screen.queryByText(nlAuth.mfa.invalid)).toBeNull()
+  })
+})

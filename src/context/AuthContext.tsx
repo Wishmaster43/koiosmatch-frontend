@@ -19,11 +19,12 @@
  * hasModule, hasPermission, …) only change identity when that value itself
  * changes — which is exactly when consumers SHOULD re-render anyway.
  */
-import { createContext, useContext, useState, useEffect, useCallback, useMemo } from 'react'
+import { createContext, useContext, useState, useEffect, useCallback, useMemo, useRef } from 'react'
 import { clearDeviceCaches } from '@/lib/deviceCaches'
 import { setBureauTimezone } from '@/lib/bureauTime'
 import type { ReactNode } from 'react'
 import api, { primeCsrf, unwrapList } from '../lib/api'
+import { TENANT_PICK_FLAG, TENANT_REQUIRED_EVENT } from '@/lib/tenantResolution'
 import { queryClient } from '../lib/queryClient'
 import { unsubscribe as unsubscribePush } from '../lib/pushSubscription'
 import { resolveDashboardType } from '../pages/dashboard/templates'
@@ -47,6 +48,9 @@ export interface AuthContextValue {
   // Set when the super-admin /tenants list failed to load (TENANT-HEADER-1); lets the tenant switcher tell "failed to load" apart from "no tenants".
   tenantsError: boolean
   activeTenant: Tenant | null
+  // TENANT-PICKER-FE-1 (ONIX B-003, Danny 4a = A): a super admin without a valid stored bureau
+  // must pick one before any bureau-scoped screen renders; App.tsx's wall reads it.
+  needsTenantPick: boolean
   setActiveTenant: (tenant: Tenant) => Promise<void>
   login: (email: string, password: string) => Promise<LoginResult>
   logout: () => Promise<void>
@@ -83,6 +87,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   // Tracks a failed /tenants fetch so the switcher can render an honest error instead of an empty list (D8).
   const [tenantsError,  setTenantsError]      = useState(false)
   const [activeTenant,  setActiveTenantState] = useState<Tenant | null>(null)
+  // Raised when no valid bureau is stored for a super admin (boot, login or a coded refusal).
+  const [needsTenantPick, setNeedsTenantPick] = useState(false)
   // Pages the backend says this user may open (single source of truth for
   // gated pages — see lib/access.js). Memory only: the cookie flow keeps
   // NOTHING auth-shaped in localStorage (D1; the Bearer flow was removed — H3).
@@ -134,6 +140,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const setActiveTenant = useCallback(async (tenant: Tenant): Promise<void> => {
     localStorage.setItem('active_tenant', tenant.id)
     setActiveTenantState(tenant)
+    // A pick lifts the picker wall and re-arms the once-per-boot refusal signal (api.ts).
+    setNeedsTenantPick(false)
+    sessionStorage.removeItem(TENANT_PICK_FLAG)
     queryClient.clear()
     // React Query is cleared above, but module-level caches (lookups, custom-fields, all-settings,
     // KPI) + context state survive a soft switch and would LEAK the previous tenant's data into the
@@ -162,7 +171,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   /**
    * Populate the tenant list + active tenant based on the user's role.
-   * - super_admin → load ALL tenants and select the saved/first one.
+   * - super_admin → load ALL tenants and select the SAVED one; without a valid saved
+   *   bureau the picker wall is raised (TENANT-PICKER-FE-1, Danny 4a = A: the server has
+   *   no first-bureau fallback any more, so the client never guesses one either).
    * - regular user → use only their own tenant from /auth/me (never call /tenants).
    * Stable forever — every branch overwrites state outright, no read dependency.
    */
@@ -178,15 +189,28 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           const list = unwrapList<Tenant>(res).rows
           if (Array.isArray(list) && list.length) {
             setTenants(list)
-            // A stale stored id (deleted bureau) falls back to the first row; the overwrite below replaces it in one X->Y write (TENANT-TAB-1).
-            const active = list.find((t: Tenant) => t.id === savedTenant) ?? list[0]
+            // Only a stored id that the list still carries is pinned; a stale id (deleted
+            // bureau) or no id at all raises the picker instead of a first-row guess.
+            const active = list.find((t: Tenant) => t.id === savedTenant) ?? null
             if (active) {
               setActiveTenantState(active)
               localStorage.setItem('active_tenant', active.id)
+              setNeedsTenantPick(false)
+            } else {
+              localStorage.removeItem('active_tenant')
+              setActiveTenantState(null)
+              setNeedsTenantPick(true)
             }
           }
         })
-        .catch(() => { setTenantsError(true) })
+        .catch(() => {
+          setTenantsError(true)
+          // The list is unknown: keep a stored id as the working bureau (a stale one is
+          // refused 404 tenant_not_found and lands on the picker through the api event);
+          // without any stored id there is nothing to work in, so the picker shows.
+          if (savedTenant) setActiveTenantState(prev => prev ?? ({ id: savedTenant } as Tenant))
+          else setNeedsTenantPick(true)
+        })
     } else {
       const tenant = u?.tenant
       if (tenant) {
@@ -208,6 +232,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const onExpired = () => {
       setUser(null)
       setMfaBlocked(false)
+      setNeedsTenantPick(false)
       setActiveTenantState(null)
       setTenants([])
       setAccessiblePages([])
@@ -227,6 +252,24 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     window.addEventListener('km:mfa-enrollment-required', onMfaRequired)
     return () => window.removeEventListener('km:mfa-enrollment-required', onMfaRequired)
   }, [applyAuthResponse])
+
+  // TENANT-PICKER-FE-1: api.ts fires this once per boot on a 400 tenant_required / 404
+  // tenant_not_found. For a super admin the stored bureau is gone or missing: drop it (so
+  // no stale X-Tenant rides on the picker's own requests) and raise the wall. Staff never
+  // see these codes (their own bureau is explicit), so for them the refusal stays an
+  // ordinary failed request. The latest user is read from a ref (REFS-IN-EFFECTS-1).
+  const userRef = useRef<AuthUser | null>(null)
+  useEffect(() => { userRef.current = user }, [user])
+  useEffect(() => {
+    const onTenantRequired = () => {
+      if (!userIsSuperAdmin(userRef.current)) return
+      localStorage.removeItem('active_tenant')
+      setActiveTenantState(null)
+      setNeedsTenantPick(true)
+    }
+    window.addEventListener(TENANT_REQUIRED_EVENT, onTenantRequired)
+    return () => window.removeEventListener(TENANT_REQUIRED_EVENT, onTenantRequired)
+  }, [])
 
   // ── Startup: restore session ─────────────────────────────────────────────────
   // The httpOnly cookie is invisible to JS; the NEUTRAL km_session flag (never
@@ -251,26 +294,42 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       .finally(() => setLoading(false))
   }, [applyAuthResponse, setupTenants])
 
-  // Pin the tenant an auth response names, else the first one /tenants lists (shared by
-  // login and verifyMfa — DRY-1 r6). Never pins a hardcoded tenant when the list fails.
+  // Pin the tenant an auth response names (staff); for a super admin (no tenant in the
+  // response) keep a STORED bureau the /tenants list still carries, else raise the picker
+  // (TENANT-PICKER-FE-1, Danny 4a = A: never a first-row guess). Shared by login and
+  // verifyMfa (DRY-1 r6). Never pins a hardcoded tenant when the list fails.
   const pinTenantAfterAuth = useCallback(async (tenant: Tenant | null | undefined) => {
     if (tenant?.id) {
       localStorage.setItem('active_tenant', tenant.id)
       setActiveTenantState(tenant)
       setTenants([tenant])
+      setNeedsTenantPick(false)
       return
     }
+    const savedTenant = localStorage.getItem('active_tenant')
     try {
       const r    = await api.get('/tenants')
       const list = unwrapList<Tenant>(r).rows
       if (Array.isArray(list) && list.length > 0) {
         setTenants(list)
-        const first = list[0]
-        // A stale stored id is replaced by this single overwrite (X->Y, no null in between, TENANT-TAB-1).
-        localStorage.setItem('active_tenant', first.id)
-        setActiveTenantState(first)
+        const saved = list.find((t: Tenant) => t.id === savedTenant) ?? null
+        if (saved) {
+          localStorage.setItem('active_tenant', saved.id)
+          setActiveTenantState(saved)
+          setNeedsTenantPick(false)
+        } else {
+          // A stale or missing id is dropped, never replaced by a guess (ONIX B-003 / B-005).
+          localStorage.removeItem('active_tenant')
+          setActiveTenantState(null)
+          setNeedsTenantPick(true)
+        }
       }
-    } catch { /* fall through with no tenant list — never pin a hardcoded tenant */ }
+    } catch {
+      // No list: keep a stored id as the working bureau (a stale one lands on the picker
+      // through the api event), otherwise the picker shows with its own error state.
+      if (savedTenant) setActiveTenantState(prev => prev ?? ({ id: savedTenant } as Tenant))
+      else setNeedsTenantPick(true)
+    }
   }, [])
 
   // ── Login ────────────────────────────────────────────────────────────────────
@@ -354,6 +413,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     queryClient.clear()
     setUser(null)
     setActiveTenantState(null)
+    setNeedsTenantPick(false)
     setTenants([])
     setAccessiblePages([])
     window.location.reload()
@@ -377,13 +437,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   // so this object's reference only changes on a genuine auth event.
   const value = useMemo<AuthContextValue>(() => ({
     user, loading, accessiblePages, mfaBlocked,
-    tenants, tenantsError, activeTenant, setActiveTenant,
+    tenants, tenantsError, activeTenant, needsTenantPick, setActiveTenant,
     login, logout, refreshUser,
     verifyMfa, setupMfa, confirmMfa, disableMfa,
     hasRole, hasPermission, isAdmin, isSuperAdmin, hasModule, dashboardType,
   }), [
     user, loading, accessiblePages, mfaBlocked,
-    tenants, tenantsError, activeTenant, setActiveTenant,
+    tenants, tenantsError, activeTenant, needsTenantPick, setActiveTenant,
     login, logout, refreshUser,
     verifyMfa, setupMfa, confirmMfa, disableMfa,
     hasRole, hasPermission, isAdmin, isSuperAdmin, hasModule, dashboardType,

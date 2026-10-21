@@ -79,3 +79,23 @@ describe('api · session-gone handling (CONFIRM-EERLIJK-1)', () => {
     window.removeEventListener('km:auth-expired', seen)
   })
 })
+
+// ONIX C-005 / C-008 (BE c5bf84fb): a coded 401 tells the login screen WHY the session ended.
+describe('api · coded 401s (SESSION-CODES-FE-1)', () => {
+  beforeEach(() => { sessionStorage.clear(); localStorage.setItem('km_session', '1') })
+
+  it('a 401 session_revoked sets the revoked flag next to the generic expired flag', async () => {
+    const err = { response: { status: 401, data: { code: 'session_revoked' } }, config: { url: '/candidates', method: 'get' } }
+    await expect(rejected()(err)).rejects.toBe(err)
+    expect(sessionStorage.getItem('km_session_expired')).toBe('1')
+    expect(sessionStorage.getItem('km_session_revoked')).toBe('1')
+    expect(localStorage.getItem('km_session')).toBeNull()
+  })
+
+  it('a 401 session_expired and a bare 401 set only the expired flag', async () => {
+    const coded = { response: { status: 401, data: { code: 'session_expired' } }, config: { url: '/candidates', method: 'get' } }
+    await expect(rejected()(coded)).rejects.toBe(coded)
+    expect(sessionStorage.getItem('km_session_expired')).toBe('1')
+    expect(sessionStorage.getItem('km_session_revoked')).toBeNull()
+  })
+})

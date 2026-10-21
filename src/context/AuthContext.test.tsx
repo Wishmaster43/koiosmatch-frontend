@@ -12,7 +12,7 @@
  */
 import { describe, it, expect, afterEach, vi } from 'vitest'
 import type { ReactNode } from 'react'
-import { renderHook, waitFor } from '@testing-library/react'
+import { renderHook, waitFor, act } from '@testing-library/react'
 import api, { primeCsrf } from '@/lib/api'
 import { AuthProvider, useAuth } from './AuthContext'
 import { queryClient } from '@/lib/queryClient'
@@ -224,30 +224,97 @@ describe('AuthContext · verifyMfa re-primes CSRF', () => {
   })
 })
 
-// ONIX B-005: a stored tenant id that /tenants no longer lists must not survive a login.
+// ONIX B-005 + B-003 (TENANT-PICKER-FE-1, Danny 4a = A): a stored tenant id that /tenants no
+// longer lists must not survive a login, and the client never guesses a first bureau instead.
 describe('AuthContext · stale stored tenant', () => {
-  it('drops a stored id missing from /tenants and pins the first listed tenant', async () => {
+  it('drops a stored id missing from /tenants and raises the bureau picker instead of pinning the first row', async () => {
     vi.mocked(api.get).mockResolvedValue({ data: [{ id: 't1', name: 'One' }, { id: 't2', name: 'Two' }] })
     localStorage.setItem('active_tenant', 'deleted-bureau')
     const { result } = renderHook(() => useAuth(), { wrapper })
     await waitFor(() => expect(result.current?.loading).toBe(false))
     vi.mocked(api.post).mockResolvedValueOnce({ data: { user: { id: 'u1', roles: [] } } })
     await result.current?.login('a@b.nl', 'pw')
-    expect(localStorage.getItem('active_tenant')).toBe('t1')
+    expect(localStorage.getItem('active_tenant')).toBeNull()
+    // The state writes land after the awaited login promise — observe them through waitFor.
+    await waitFor(() => expect(result.current?.needsTenantPick).toBe(true))
+    expect(result.current?.activeTenant).toBeNull()
+    expect(result.current?.tenants).toEqual([{ id: 't1', name: 'One' }, { id: 't2', name: 'Two' }])
   })
 
-  it('replaces a stale stored tenant id in one write without an intermediate removal', async () => {
+  it('removes a stale stored tenant id and never writes a guessed one', async () => {
     vi.mocked(api.get).mockResolvedValue({ data: [{ id: 't1', name: 'One' }] })
     localStorage.setItem('active_tenant', 'deleted-bureau')
-    const removeSpy = vi.spyOn(Storage.prototype, 'removeItem')
     const setSpy = vi.spyOn(Storage.prototype, 'setItem')
     const { result } = renderHook(() => useAuth(), { wrapper })
     await waitFor(() => expect(result.current?.loading).toBe(false))
     vi.mocked(api.post).mockResolvedValueOnce({ data: { user: { id: 'u1', roles: [] } } })
     await result.current?.login('a@b.nl', 'pw')
-    expect(removeSpy.mock.calls.some(c => c[0] === 'active_tenant')).toBe(false)
-    expect(setSpy.mock.calls.filter(c => c[0] === 'active_tenant').map(c => c[1])).toContain('t1')
-    removeSpy.mockRestore()
+    expect(setSpy.mock.calls.filter(c => c[0] === 'active_tenant')).toHaveLength(0)
+    expect(localStorage.getItem('active_tenant')).toBeNull()
     setSpy.mockRestore()
+  })
+
+  it('keeps a stored tenant id that /tenants still lists after a super-admin login', async () => {
+    vi.mocked(api.get).mockResolvedValue({ data: [{ id: 't1', name: 'One' }, { id: 't2', name: 'Two' }] })
+    localStorage.setItem('active_tenant', 't2')
+    const { result } = renderHook(() => useAuth(), { wrapper })
+    await waitFor(() => expect(result.current?.loading).toBe(false))
+    vi.mocked(api.post).mockResolvedValueOnce({ data: { user: { id: 'sa', is_super_admin: true, roles: [] } } })
+    await result.current?.login('a@b.nl', 'pw')
+    expect(localStorage.getItem('active_tenant')).toBe('t2')
+    await waitFor(() => expect(result.current?.activeTenant).toEqual({ id: 't2', name: 'Two' }))
+    expect(result.current?.needsTenantPick).toBe(false)
+  })
+
+  it('raises the picker at boot for a super admin whose stored bureau is gone, and pins a stored one that still exists', async () => {
+    localStorage.setItem('km_session', '1')
+    localStorage.setItem('active_tenant', 'deleted-bureau')
+    vi.mocked(api.get).mockImplementation((url: string) => {
+      if (url === '/auth/me') return Promise.resolve({ data: { user: { id: 'sa', is_super_admin: true, roles: [] } } })
+      if (url === '/tenants') return Promise.resolve({ data: [{ id: 't1', name: 'One' }] })
+      return Promise.reject(new Error(`unexpected GET ${url}`))
+    })
+    const first = renderHook(() => useAuth(), { wrapper })
+    await waitFor(() => expect(first.result.current?.loading).toBe(false))
+    expect(first.result.current?.needsTenantPick).toBe(true)
+    expect(first.result.current?.activeTenant).toBeNull()
+    expect(localStorage.getItem('active_tenant')).toBeNull()
+    first.unmount()
+
+    localStorage.setItem('active_tenant', 't1')
+    const second = renderHook(() => useAuth(), { wrapper })
+    await waitFor(() => expect(second.result.current?.loading).toBe(false))
+    expect(second.result.current?.needsTenantPick).toBe(false)
+    expect(second.result.current?.activeTenant).toEqual({ id: 't1', name: 'One' })
+  })
+
+  it('the km:tenant-required event drops the stored bureau and raises the picker for a super admin only', async () => {
+    localStorage.setItem('km_session', '1')
+    localStorage.setItem('active_tenant', 't1')
+    vi.mocked(api.get).mockImplementation((url: string) => {
+      if (url === '/auth/me') return Promise.resolve({ data: { user: { id: 'sa', is_super_admin: true, roles: [] } } })
+      if (url === '/tenants') return Promise.resolve({ data: [{ id: 't1', name: 'One' }] })
+      return Promise.reject(new Error(`unexpected GET ${url}`))
+    })
+    const sa = renderHook(() => useAuth(), { wrapper })
+    await waitFor(() => expect(sa.result.current?.activeTenant).toEqual({ id: 't1', name: 'One' }))
+    act(() => { window.dispatchEvent(new CustomEvent('km:tenant-required', { detail: { code: 'tenant_not_found' } })) })
+    await waitFor(() => expect(sa.result.current?.needsTenantPick).toBe(true))
+    expect(sa.result.current?.activeTenant).toBeNull()
+    expect(localStorage.getItem('active_tenant')).toBeNull()
+    sa.unmount()
+
+    // Staff carry their own bureau from /auth/me; the event is not theirs to act on.
+    localStorage.clear()
+    localStorage.setItem('km_session', '1')
+    vi.mocked(api.get).mockImplementation((url: string) => {
+      if (url === '/auth/me') return Promise.resolve({ data: { user: { id: 'tom', is_super_admin: false, roles: [], tenant: { id: 't9', name: 'Own' } } } })
+      return Promise.reject(new Error(`unexpected GET ${url}`))
+    })
+    const staff = renderHook(() => useAuth(), { wrapper })
+    await waitFor(() => expect(staff.result.current?.loading).toBe(false))
+    act(() => { window.dispatchEvent(new CustomEvent('km:tenant-required', { detail: { code: 'tenant_required' } })) })
+    expect(staff.result.current?.needsTenantPick).toBe(false)
+    expect(localStorage.getItem('active_tenant')).toBe('t9')
   })
 })

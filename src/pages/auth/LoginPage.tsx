@@ -23,6 +23,7 @@ import { FIELD_FONT_SIZE } from '@/components/forms/fieldMetrics'
 // DUP-04: one shared axios-error → message extractor, never a re-derived inline dance.
 import { extractApiError } from '@/lib/extractApiError'
 import { isNoOrganisationError, NO_ORGANISATION_FLAG } from '@/lib/orphanAccount'
+import { SESSION_REVOKED_FLAG, isMfaChallengeUsedError } from '@/lib/sessionCodes'
 
 // Read the login throttle's machine field off a 429 (LOGIN-THROTTLE-1, Danny 13-08):
 // the backend sends retry_after (integer seconds) beside its message; we count that
@@ -95,7 +96,7 @@ function LoginShell({ children }: { children: ReactNode }) {
 }
 
 // ── Step 1: email + password ──────────────────────────────────────────────────
-function CredentialForm({ onMfaRequired }: { onMfaRequired: (token: string) => void }) {
+function CredentialForm({ onMfaRequired, notice }: { onMfaRequired: (token: string) => void; notice?: string }) {
   const { t } = useTranslation('auth')
   const { login }  = useAuth() ?? {}
   const navigate   = useNavigate()
@@ -109,7 +110,10 @@ function CredentialForm({ onMfaRequired }: { onMfaRequired: (token: string) => v
   const [expired] = useState(() => sessionStorage.getItem('km_session_expired') === '1')
   // ONIX C-003: the previous session ended because the account hangs on no organisation.
   const [orphaned] = useState(() => sessionStorage.getItem(NO_ORGANISATION_FLAG) === '1')
+  // ONIX C-005: a credential event revoked the previous session (wins over the plain expired hint).
+  const [revoked] = useState(() => sessionStorage.getItem(SESSION_REVOKED_FLAG) === '1')
   useEffect(() => { if (expired) sessionStorage.removeItem('km_session_expired') }, [expired])
+  useEffect(() => { if (revoked) sessionStorage.removeItem(SESSION_REVOKED_FLAG) }, [revoked])
   useEffect(() => { if (orphaned) sessionStorage.removeItem(NO_ORGANISATION_FLAG) }, [orphaned])
 
   // Tick the throttle countdown once per second; at 0 the notice clears and the
@@ -158,9 +162,14 @@ function CredentialForm({ onMfaRequired }: { onMfaRequired: (token: string) => v
           <CalloutBox variant="danger">{t('login.noOrganisation')}</CalloutBox>
         </div>
       )}
-      {expired && !orphaned && !error && (
+      {(revoked || expired) && !orphaned && !error && (
         <div style={{ marginBottom: 16 }}>
-          <CalloutBox variant="warning">{t('login.sessionExpired')}</CalloutBox>
+          <CalloutBox variant="warning">{revoked ? t('login.sessionRevoked') : t('login.sessionExpired')}</CalloutBox>
+        </div>
+      )}
+      {notice && !error && (
+        <div style={{ marginBottom: 16 }}>
+          <CalloutBox variant="warning">{notice}</CalloutBox>
         </div>
       )}
 
@@ -218,7 +227,7 @@ function CredentialForm({ onMfaRequired }: { onMfaRequired: (token: string) => v
 }
 
 // ── Step 2: TOTP verification ─────────────────────────────────────────────────
-function MfaForm({ mfaToken, onBack }: { mfaToken: string; onBack: () => void }) {
+function MfaForm({ mfaToken, onBack, onChallengeUsed }: { mfaToken: string; onBack: () => void; onChallengeUsed: () => void }) {
   const { t } = useTranslation('auth')
   const { verifyMfa } = useAuth() ?? {}
   const navigate = useNavigate()
@@ -238,6 +247,8 @@ function MfaForm({ mfaToken, onBack }: { mfaToken: string; onBack: () => void })
       await verifyMfa?.(mfaToken, code.replace(/\s/g, ''))
       navigate('/')
     } catch (err) {
+      // ONIX C-002: a spent challenge cannot be retried, so return to the credentials step.
+      if (isMfaChallengeUsedError(err)) { onChallengeUsed(); return }
       setError(extractApiError(err, t('mfa.invalid')))
       setCode('')
       inputRef.current?.focus()
@@ -305,13 +316,17 @@ function MfaForm({ mfaToken, onBack }: { mfaToken: string; onBack: () => void })
 
 // ── Root: orchestrates the two steps ─────────────────────────────────────────
 export default function LoginPage() {
+  const { t } = useTranslation('auth')
   const [mfaToken, setMfaToken] = useState<string | null>(null) // null = step 1, string = step 2
+  // Notice carried back to the credentials step when the MFA challenge was already used.
+  const [notice, setNotice] = useState<string | undefined>(undefined)
+  const challengeUsed = () => { setMfaToken(null); setNotice(t('mfa.challengeUsed')) }
 
   return (
     <LoginShell>
       {mfaToken
-        ? <MfaForm mfaToken={mfaToken} onBack={() => setMfaToken(null)} />
-        : <CredentialForm onMfaRequired={setMfaToken} />
+        ? <MfaForm mfaToken={mfaToken} onBack={() => setMfaToken(null)} onChallengeUsed={challengeUsed} />
+        : <CredentialForm onMfaRequired={tok => { setNotice(undefined); setMfaToken(tok) }} notice={notice} />
       }
     </LoginShell>
   )

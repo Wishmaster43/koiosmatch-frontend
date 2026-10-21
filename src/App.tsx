@@ -25,6 +25,8 @@ import { mfaSignals } from '@/lib/mfaGate'
 
 // Lazy: only users blocked by tenant-wide MFA enforcement ever load this screen.
 const MfaEnrollmentGate = lazy(() => import('./pages/auth/MfaEnrollmentGate'))
+// Lazy: TENANT-PICKER-FE-1 — only a super admin without a valid stored bureau ever loads it.
+const TenantPickPage = lazy(() => import('./pages/auth/TenantPickPage'))
 // Lazy: NOTITIE-POPOUT-1 F5 — the standalone second-screen notes window, only
 // loaded when a recruiter actually opens one (route-level code splitting, §9).
 const NotesPopoutPage = lazy(() => import('./pages/popout/NotesPopoutPage'))
@@ -63,6 +65,12 @@ function ProtectedRoute({ children }: { children: ReactNode }) {
   // soft policy flag, a profile nudge, never a wall (MFA-GATE-SPLIT-1, CMBE 08-09).
   if (auth.mfaBlocked === true || mfaSignals(auth.user).hard) {
     return <Suspense fallback={<BootLoader />}><MfaEnrollmentGate /></Suspense>
+  }
+  // TENANT-PICKER-FE-1 (ONIX B-003, Danny 4a = A): a super admin without a valid stored bureau
+  // picks one before any bureau-scoped screen renders — the server has no first-bureau
+  // fallback any more (400 tenant_required), so the client never guesses one either.
+  if (auth.user && auth.needsTenantPick) {
+    return <Suspense fallback={<BootLoader />}><TenantPickPage /></Suspense>
   }
   return auth.user ? <>{children}</> : <Navigate to="/login" replace />
 }

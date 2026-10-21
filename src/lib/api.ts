@@ -24,6 +24,8 @@ import { CSRF_COOKIE_URL } from './authMode'
 import { clearDeviceCaches } from './deviceCaches'
 import { isMfaEnrollmentError } from './mfaGate'
 import { isNoOrganisationError, NO_ORGANISATION_FLAG } from './orphanAccount'
+import { isTenantResolutionError, tenantResolutionCode, TENANT_PICK_FLAG, TENANT_REQUIRED_EVENT } from './tenantResolution'
+import { isSessionRevokedError, SESSION_REVOKED_FLAG } from './sessionCodes'
 import { notifyError } from './notify'
 import { requestKey, dedupeInFlight } from './inFlightDedupe'
 
@@ -219,6 +221,16 @@ api.interceptors.response.use(
       window.dispatchEvent(new CustomEvent('km:mfa-enrollment-required'))
     }
 
+    // TENANT-PICKER-FE-1 (ONIX B-003, BE c5bf84fb, Danny 4a = A): a super admin without a
+    // valid bureau is refused 400 tenant_required / 404 tenant_not_found on every bureau
+    // route; there is no first-bureau fallback any more. Signal AuthContext ONCE per boot so
+    // the bureau picker takes over (the flag is cleared when a bureau is picked); every
+    // parallel request that fails the same way stays quiet instead of stacking events.
+    if (isTenantResolutionError(error) && !sessionStorage.getItem(TENANT_PICK_FLAG)) {
+      sessionStorage.setItem(TENANT_PICK_FLAG, '1')
+      window.dispatchEvent(new CustomEvent(TENANT_REQUIRED_EVENT, { detail: { code: tenantResolutionCode(error) } }))
+    }
+
     // AUTH-RETRY-STORM-1: a 401 on /auth/me is TERMINAL — purge the session flags
     // (km_session above all) so no later boot/refresh ever re-probes with a dead
     // token; a /auth/me-storm once filled the global rate bucket and locked the
@@ -245,6 +257,9 @@ api.interceptors.response.use(
       clearDeviceCaches()
       if (window.location.pathname !== '/login') {
         if (!orphaned) sessionStorage.setItem('km_session_expired', '1')
+        // ONIX C-005 (BE c5bf84fb): a 401 session_revoked means a credential event ended this
+        // session; the login screen explains that instead of the generic "expired" hint.
+        if (isSessionRevokedError(error)) sessionStorage.setItem(SESSION_REVOKED_FLAG, '1')
         window.dispatchEvent(new CustomEvent('km:auth-expired'))
       }
     }
