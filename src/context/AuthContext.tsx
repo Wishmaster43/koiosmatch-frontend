@@ -24,6 +24,7 @@ import { clearDeviceCaches } from '@/lib/deviceCaches'
 import { setBureauTimezone } from '@/lib/bureauTime'
 import type { ReactNode } from 'react'
 import api, { primeCsrf, unwrapList } from '../lib/api'
+import { setUploadPolicy } from '@/lib/uploadPolicy'
 import { TENANT_PICK_FLAG, TENANT_REQUIRED_EVENT } from '@/lib/tenantResolution'
 import { queryClient } from '../lib/queryClient'
 import { unsubscribe as unsubscribePush } from '../lib/pushSubscription'
@@ -103,9 +104,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const applyAuthResponse = useCallback((data: unknown): AuthUser => {
     // Pure shaping (session.ts): stamps the sibling tenant id onto the user
     // (SUPERADMIN-FALLBACK-1) and extracts pages/tenant from either response shape.
-    const { user: u, accessiblePages: pages, tenant: t } = shapeAuthResponse(data)
+    const { user: u, accessiblePages: pages, tenant: t, uploads } = shapeAuthResponse(data)
     setUser(u)
     setAccessiblePages(pages)
+    // UPLOAD-POLICY-1: the server's per-surface upload policy (ROOT key of /auth/me, BE lane F)
+    // feeds the shared store once per session; without it the FE seed stays in force.
+    setUploadPolicy(uploads)
     // D1 (Danny 2026-07-04): the profile stays in MEMORY only — no user PII,
     // roles or pages in localStorage. A neutral flag is the "there was a
     // session" boot hint, so the login screen still shows zero 401s.

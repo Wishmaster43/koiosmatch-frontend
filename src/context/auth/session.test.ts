@@ -21,3 +21,13 @@ describe('shapeAuthResponse', () => {
     expect(tenant).toBeNull()
   })
 })
+
+// UPLOAD-POLICY-1: the upload policy rides as a ROOT key next to user/tenant (BE lane F shape).
+describe('shapeAuthResponse · uploads', () => {
+  it('passes the root uploads object through and reads null when absent', () => {
+    const uploads = { documents: { extensions: ['pdf'], mimes: ['application/pdf'], max_bytes: 1048576 } }
+    expect(shapeAuthResponse({ user: { id: 'u1' }, uploads }).uploads).toEqual(uploads)
+    expect(shapeAuthResponse({ user: { id: 'u1' } }).uploads).toBeNull()
+    expect(shapeAuthResponse({ id: 'u2' }).uploads).toBeNull()
+  })
+})

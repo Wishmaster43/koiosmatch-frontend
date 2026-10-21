@@ -16,6 +16,7 @@ import { renderHook, waitFor, act } from '@testing-library/react'
 import api, { primeCsrf } from '@/lib/api'
 import { AuthProvider, useAuth } from './AuthContext'
 import { queryClient } from '@/lib/queryClient'
+import { getUploadPolicy, UPLOAD_POLICY_SEED } from '@/lib/uploadPolicy'
 
 vi.mock('@/lib/api', async () => {
   const actual = await vi.importActual('@/lib/api')
@@ -316,5 +317,24 @@ describe('AuthContext · stale stored tenant', () => {
     act(() => { window.dispatchEvent(new CustomEvent('km:tenant-required', { detail: { code: 'tenant_required' } })) })
     expect(staff.result.current?.needsTenantPick).toBe(false)
     expect(localStorage.getItem('active_tenant')).toBe('t9')
+  })
+})
+
+// UPLOAD-POLICY-1: /auth/me's root `uploads` key feeds the shared upload-policy store.
+describe('AuthContext · upload policy from /auth/me', () => {
+  it('adopts the server policy per surface and keeps the seed for the surfaces it omits', async () => {
+    localStorage.setItem('km_session', '1')
+    vi.mocked(api.get).mockImplementation((url: string) => {
+      if (url === '/auth/me') return Promise.resolve({ data: {
+        user: { id: 'tom', is_super_admin: false, roles: [], tenant: { id: 't1', name: 'One' } },
+        uploads: { documents: { extensions: ['pdf', 'docx'], mimes: ['application/pdf'], max_bytes: 2097152 } },
+      } })
+      return Promise.reject(new Error(`unexpected GET ${url}`))
+    })
+    const { result } = renderHook(() => useAuth(), { wrapper })
+    await waitFor(() => expect(result.current?.loading).toBe(false))
+    expect(getUploadPolicy().documents.extensions).toEqual(['pdf', 'docx'])
+    expect(getUploadPolicy().documents.max_bytes).toBe(2097152)
+    expect(getUploadPolicy().cv_parse.extensions).toEqual(UPLOAD_POLICY_SEED.cv_parse.extensions)
   })
 })
