@@ -1791,5 +1791,9 @@
   "duration": {
     "hoursShort": "{{count}}u",
     "daysShort": "{{count}}d"
+  },
+  "minWidth": {
+    "notice": "Koios Match is gemaakt voor een desktopscherm van minimaal 1024 pixels breed. Maak het venster breder voor een volledige weergave.",
+    "dismiss": "Melding sluiten"
   }
 }

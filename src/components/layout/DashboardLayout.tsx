@@ -25,6 +25,7 @@ import CountBadge from '@/components/ui/CountBadge'
 import { SectionTitle, PageTitle } from '@/components/ui/typography'
 import { useDocumentTitle } from '@/hooks/useDocumentTitle'
 import { canSwitchViews, switcherTypes } from '@/pages/dashboard/shared'
+import MinWidthNotice from '@/components/layout/MinWidthNotice'
 import type { DashboardType } from '@/pages/dashboard/shared'
 import type { ReportFilterGroup } from '@/types/reports'
 import type { KoiosContextRef } from '@/types/koios'
@@ -201,6 +202,8 @@ export default function DashboardLayout() {
 
       {/* ── Right column: topbar + content + filter panel ── */}
       <div className="km-main-bg flex flex-col flex-1 overflow-hidden" style={{ background: 'var(--bg)' }}>
+
+        <MinWidthNotice />
 
         {/* Topbar */}
         <div

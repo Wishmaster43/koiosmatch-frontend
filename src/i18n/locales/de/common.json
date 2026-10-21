@@ -1791,5 +1791,9 @@
   "duration": {
     "hoursShort": "{{count}}Std",
     "daysShort": "{{count}}T"
+  },
+  "minWidth": {
+    "notice": "Koios Match ist für einen Desktop-Bildschirm mit mindestens 1024 Pixeln Breite gemacht. Vergrößern Sie das Fenster für die vollständige Ansicht.",
+    "dismiss": "Hinweis schließen"
   }
 }
