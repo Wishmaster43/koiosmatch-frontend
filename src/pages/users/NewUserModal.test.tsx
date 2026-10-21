@@ -36,6 +36,11 @@ vi.mock('@/lib/api', () => ({
   default: { post: vi.fn(), put: vi.fn().mockResolvedValue({}) },
   unwrap: (r: { data?: { data?: unknown } }) => r?.data?.data,
 }))
+// USER-ROLE-LOCK: the creator's users.assign_roles permission is switchable per test (default granted).
+const perm = vi.hoisted(() => ({ canAssign: true }))
+vi.mock('@/context/AuthContext', () => ({
+  useAuth: () => ({ hasPermission: (p: string) => p === 'users.assign_roles' && perm.canAssign }),
+}))
 vi.mock('@/lib/notify', () => ({ notifyError: vi.fn(), notifySuccess: vi.fn() }))
 
 const roles = [
@@ -233,5 +238,36 @@ describe('NewUserModal · live e-mail format validation (VALIDATIE-LIVE-1-rest)'
     await user.click(screen.getByRole('button', { name: 'create' }))
 
     await waitFor(() => expect(api.post).toHaveBeenCalled())
+  })
+})
+
+// USER-ROLE-LOCK: without users.assign_roles only the default role is offered.
+describe('NewUserModal role lock', () => {
+  afterEach(() => { vi.clearAllMocks(); perm.canAssign = true })
+
+  it('without users.assign_roles: locked hint shown and POST /users carries role readonly', async () => {
+    perm.canAssign = false
+    vi.mocked(api.post).mockResolvedValueOnce({ data: { data: { id: 'u9', email: 'jan@bedrijf.nl' } } })
+    const user = userEvent.setup()
+    render(<NewUserModal onClose={noop} onCreated={noop} />)
+    expect(screen.getByText('roleLocked')).toBeInTheDocument()
+    await waitFor(() => expect(screen.getByRole('button', { name: 'role' })).toHaveAccessibleDescription('readonly'))
+    // No clear cross while locked (DROPDOWN-CLEAR-1 opt-out).
+    expect(screen.queryByRole('button', { name: /clear|wissen/i })).toBeNull()
+    // userEvent refuses pointer-events:none, so open the dropdown with fireEvent.
+    fireEvent.click(screen.getByRole('button', { name: 'role' }))
+    expect(await screen.findByRole('button', { name: 'readonly' })).toBeInTheDocument()
+    for (const n of ['Planner', 'backoffice', 'recruiter']) expect(screen.queryByRole('button', { name: n })).toBeNull()
+    await user.type(screen.getByLabelText('firstName', { exact: false }), 'Jan')
+    await user.type(screen.getByLabelText('email', { exact: false }), 'jan@bedrijf.nl')
+    await user.type(screen.getByLabelText('password', { exact: false }), 'wachtwoord123')
+    await user.click(screen.getByRole('button', { name: 'create' }))
+    await waitFor(() => expect(api.post).toHaveBeenCalledWith('/users', expect.objectContaining({ role: 'readonly' })))
+  })
+
+  it('with users.assign_roles: no hint and planner is still seeded', async () => {
+    render(<NewUserModal onClose={noop} onCreated={noop} />)
+    expect(screen.queryByText('roleLocked')).toBeNull()
+    await waitFor(() => expect(screen.getByRole('button', { name: 'role' })).toHaveAccessibleDescription('Planner'))
   })
 })

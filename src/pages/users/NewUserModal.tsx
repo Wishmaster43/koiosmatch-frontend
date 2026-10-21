@@ -9,6 +9,7 @@ import { useState, useEffect } from 'react'
 import type { CSSProperties, FormEvent } from 'react'
 import { useTranslation } from 'react-i18next'
 import api, { unwrap } from '@/lib/api'
+import { useAuth } from '@/context/AuthContext'
 import FloatingPanel from '@/components/ui/FloatingPanel'
 // G34: the house searchable dropdown replaces the native role <select>.
 import CreatableSelect from '@/components/ui/CreatableSelect'
@@ -36,6 +37,9 @@ import { cardHead, cardBox } from '@/components/ui/modalCards'
 import UserNameCard from './UserNameCard'
 import UserModalColumns from './UserModalColumns'
 
+// The default role every user may be created with (backend default).
+const DEFAULT_ROLE = 'readonly'
+
 // VALIDATIE-LIVE-1-rest: `email` is the only field here the backend validates
 // with a shape rule (UserController's inline POST rules — `'email' =>
 // 'required|email|unique:users,email'`), so this is the only live format gate.
@@ -57,7 +61,11 @@ export default function NewUserModal({ onClose, onCreated }: {
   onCreated: (user: ManagedUser) => void
 }) {
   const { t } = useTranslation('users')
-  const { roles, loading: rolesLoading } = useAssignableRoles()
+  const { roles: allRoles, loading: rolesLoading } = useAssignableRoles()
+  // Creating with a non-default role needs users.assign_roles (lane G CMBE-C-6):
+  // without it only the default role is offered, as a locked pick.
+  const canAssignRoles = useAuth()?.hasPermission?.('users.assign_roles') ?? false
+  const roles = canAssignRoles ? allRoles : allRoles.filter(r => r.name === DEFAULT_ROLE)
   const [form, setForm]     = useState({ firstname: '', lastname: '', email: '', password: '', role: '' })
   const [saving, setSaving] = useState(false)
   const [error,  setError]  = useState<string | null>(null)
@@ -72,10 +80,17 @@ export default function NewUserModal({ onClose, onCreated }: {
   // Seed the role select once the live list arrives — prefer "planner" (the old
   // default) if present, otherwise whatever the tenant's first assignable role is.
   useEffect(() => {
-    if (form.role || roles.length === 0) return
+    if (form.role) return
+    if (!canAssignRoles) { setForm(f => (f.role ? f : { ...f, role: DEFAULT_ROLE })); return }
+    if (roles.length === 0) return
     const preferred = roles.find(r => r.name === 'planner') ?? roles[0]
     setForm(f => (f.role ? f : { ...f, role: preferred.name }))
-  }, [roles, form.role])
+  }, [roles, form.role, canAssignRoles])
+
+  // Locked mode falls back to one synthetic default option when GET /roles omits it.
+  const roleOptions = roles.length === 0 && !canAssignRoles
+    ? [{ value: DEFAULT_ROLE, label: roleLabel(t, DEFAULT_ROLE) }]
+    : roles.map(r => ({ value: r.name, label: roleLabel(t, r.name) }))
 
   // The picked role's id drives the branch-template seed below the select.
   const selectedRoleId = roles.find(r => r.name === form.role)?.id ?? null
@@ -184,12 +199,15 @@ export default function NewUserModal({ onClose, onCreated }: {
                       pick (§3 — no fake affordance); the dimmed style blocks interaction
                       while there is nothing selectable yet, mirroring the old select's
                       disabled look. */}
+                  {/* DROPDOWN-CLEAR-1: without users.assign_roles the role is locked to the default and an emptied value is re-seeded at once, so a clear cross would be a no-op affordance. */}
                   <FieldRow label={t('role')}>
-                    <CreatableSelect value={form.role || null} onChange={setRole} allowCreate={false}
-                      placeholder={rolesLoading ? t('rolesLoading') : (roles.length === 0 ? t('noRoles') : undefined)}
-                      options={roles.map(r => ({ value: r.name, label: roleLabel(t, r.name) }))}
-                      style={(rolesLoading || roles.length === 0) ? { ...input, opacity: 0.6, pointerEvents: 'none' } : input} />
+                    <CreatableSelect value={form.role || null} onChange={setRole} allowCreate={false} clearable={canAssignRoles}
+                      placeholder={rolesLoading ? t('rolesLoading') : (roleOptions.length === 0 ? t('noRoles') : undefined)}
+                      options={roleOptions}
+                      style={(rolesLoading || roleOptions.length === 0 || !canAssignRoles) ? { ...input, opacity: 0.6, pointerEvents: 'none' } : input} />
                   </FieldRow>
+                  {/* Hint sits outside FieldRow, which labels its single child. */}
+                  {!canAssignRoles && <Caption as="p" style={{ marginTop: 4 }}>{t('roleLocked')}</Caption>}
 
                   {/* AGENT-META-SETUP: only asked for a recruiter/manager — the two roles the
                       backend actually provisions an AI agent for. Default on; unchecking sends

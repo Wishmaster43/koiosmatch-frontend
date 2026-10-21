@@ -1,4 +1,5 @@
 {
+  "roleLocked": "You may not assign roles. The new user gets the default role.",
   "newUser": "New user",
   "cardPersonal": "Personal",
   "cardContact": "Contact",

@@ -1,4 +1,5 @@
 {
+  "roleLocked": "Não podes atribuir funções. O novo utilizador recebe a função predefinida.",
   "newUser": "Novo utilizador",
   "cardPersonal": "Pessoal",
   "cardContact": "Contacto",

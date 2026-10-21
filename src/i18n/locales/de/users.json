@@ -1,4 +1,5 @@
 {
+  "roleLocked": "Du darfst keine Rollen zuweisen. Der neue Benutzer erhält die Standardrolle.",
   "newUser": "Neuer Benutzer",
   "cardPersonal": "Persönlich",
   "cardContact": "Kontakt",

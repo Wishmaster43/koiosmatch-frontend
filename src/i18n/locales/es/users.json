@@ -1,4 +1,5 @@
 {
+  "roleLocked": "No puedes asignar roles. El nuevo usuario recibe el rol predeterminado.",
   "newUser": "Nuevo usuario",
   "cardPersonal": "Personal",
   "cardContact": "Contacto",
