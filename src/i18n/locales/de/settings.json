@@ -1564,6 +1564,7 @@
         "status_stale": "Status festgefahren",
         "task_overdue": "Aufgabe überfällig",
         "terminated": "Beendet",
+        "reopened": "Wiedereröffnet",
         "unanswered": "Unbeantwortet",
         "unavailable_ending_soon": "Zeitraum nicht verfügbar endet bald",
         "unavailable_overdue": "Zeitraum nicht verfügbar überfällig",

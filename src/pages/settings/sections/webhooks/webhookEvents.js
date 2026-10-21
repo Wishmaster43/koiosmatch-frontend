@@ -52,7 +52,7 @@ export const EVENT_GROUPS = [
     'application.proposal_sent', 'application.stage_stale',
   ] },
   { group: 'matches', events: [
-    'match.created', 'match.updated', 'match.deleted', 'match.terminated', 'match.expiring',
+    'match.created', 'match.updated', 'match.deleted', 'match.terminated', 'match.reopened', 'match.expiring',
     // ADOPT-A2 addendum (SETTINGS-INCONSISTENCIES-BE-1): the approval lifecycle,
     // MATCH-APPROVAL-PROCES — ids only, no rejection reason (§9).
     'match.approval_pending', 'match.approval_overdue', 'match.approved', 'match.rejected',

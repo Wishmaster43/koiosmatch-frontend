@@ -61,8 +61,8 @@ describe('useWebhookEventCatalog', () => {
     expect(result.current.groups.flatMap((g) => g.events)).toContain('candidate.brand_new_signal')
   })
 
-  it('every server event across all 68 keys / 14 groups is reachable (checklist item 4)', async () => {
-    // Built from the fallback file's own 68 keys/14 groups as the known-good shape
+  it('every server event across all 69 keys / 14 groups is reachable (checklist item 4)', async () => {
+    // Built from the fallback file's own 69 keys/14 groups as the known-good shape
     // (webhookEvents.test.js guards that shape against the backend separately) —
     // here we only assert the LIVE hook reproduces it faithfully from a full response.
     const fullResponse = FALLBACK_EVENT_GROUPS.flatMap(({ group, events }) =>
@@ -73,7 +73,7 @@ describe('useWebhookEventCatalog', () => {
     expect(result.current.isFallback).toBe(false)
     expect(result.current.groups.map((g) => g.group)).toEqual(FALLBACK_EVENT_GROUPS.map((g) => g.group))
     expect(result.current.groups.flatMap((g) => g.events)).toEqual(FALLBACK_ALL_EVENTS)
-    expect(result.current.groups.flatMap((g) => g.events)).toHaveLength(68)
+    expect(result.current.groups.flatMap((g) => g.events)).toHaveLength(69)
     expect(result.current.groups).toHaveLength(14)
   })
 

@@ -1397,6 +1397,7 @@
       "candidate_document_expiring": "Documento del candidato por vencer",
       "match_expiring": "Match por vencer",
       "match_terminated": "Match finalizado",
+      "match_reopened": "Match reabierto",
       "appointment_created": "Cita creada",
       "whatsapp_connection_down": "Conexión de WhatsApp caída",
       "whatsapp_connection_restored": "Conexión de WhatsApp restablecida",

@@ -45,6 +45,7 @@ export const WORKFLOW_EVENT_KEYS = [
   'candidate.document_expiring',
   'match.expiring',
   'match.terminated',
+  'match.reopened',
   'appointment.created',
   'whatsapp.connection_down',
   'whatsapp.connection_restored',

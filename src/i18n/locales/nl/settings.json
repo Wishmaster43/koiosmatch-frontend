@@ -1823,6 +1823,7 @@
         "status_stale": "Status vastgelopen",
         "task_overdue": "Taak verstreken",
         "terminated": "Beëindigd",
+        "reopened": "Heropend",
         "unanswered": "Onbeantwoord",
         "unavailable_ending_soon": "Periode niet beschikbaar loopt bijna af",
         "unavailable_overdue": "Periode niet beschikbaar verstreken",

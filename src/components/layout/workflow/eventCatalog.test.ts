@@ -13,12 +13,12 @@ import { WORKFLOW_EVENT_KEYS, eventKeyToI18nKey } from './eventCatalog'
 // Manual mirror of TriggerModule::configSchema()'s `event.options` (koiosmatch-api,
 // app/Workflow/Modules/TriggerModule.php ~L68-135) — every key here has a real
 // WorkflowDispatcher::dispatch() call site backing it. REPAIR N5 (2026-09-04):
-// re-counted the backend's FULL options array by hand — 66 keys (57 + 4 added by
-// TRIGGER-VOCAB-1, KLEIN-BE-1 + the 5 approval/blank-fallback keys) — this list carries all 66; the two tests below
+// re-counted the backend's FULL options array by hand — 66 keys + match.reopened (BE lane C b8b7dabd4, 21-10) = 67 (57 + 4 added by
+// TRIGGER-VOCAB-1, KLEIN-BE-1 + the 5 approval/blank-fallback keys) — this list carries all 67; the two tests below
 // make this an exact bidirectional mirror (no missing key, no fake affordance),
 // not just a "contains" check.
 const BACKEND_DISPATCHED_EVENTS = [
-  'application.created', 'application.stage_changed', 'match.created', 'match.expiring', 'match.terminated',
+  'application.created', 'application.stage_changed', 'match.created', 'match.expiring', 'match.terminated', 'match.reopened',
   'candidate.created', 'candidate.birthday', 'candidate.address_changed', 'candidate.reactivated',
   'candidate.retention_due', 'candidate.document_expiring', 'candidate.availability_changed',
   'candidate.no_contact', 'appointment.upcoming', 'appointment.created', 'facebook.lead_received',
@@ -66,11 +66,11 @@ describe('WORKFLOW_EVENT_KEYS · backend parity', () => {
   })
 
   // REPAIR N5 / TRIGGER-VOCAB-1: an explicit count pins the FULL mirror
-  // (66/66), not just "no diff either way" — a future backend addition that
+  // (67/67), not just "no diff either way" — a future backend addition that
   // also updates BACKEND_DISPATCHED_EVENTS but not this number would still be caught.
-  it('mirrors exactly 66 backend-dispatched events', () => {
-    expect(BACKEND_DISPATCHED_EVENTS.length).toBe(66)
-    expect(WORKFLOW_EVENT_KEYS.length).toBe(66)
+  it('mirrors exactly 67 backend-dispatched events', () => {
+    expect(BACKEND_DISPATCHED_EVENTS.length).toBe(67)
+    expect(WORKFLOW_EVENT_KEYS.length).toBe(67)
   })
 })
 

@@ -1564,6 +1564,7 @@
         "status_stale": "Statut bloqué",
         "task_overdue": "Tâche en retard",
         "terminated": "Résilié",
+        "reopened": "Rouvert",
         "unanswered": "Sans réponse",
         "unavailable_ending_soon": "Période d'indisponibilité se termine bientôt",
         "unavailable_overdue": "Période d'indisponibilité dépassée",

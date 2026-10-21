@@ -1564,6 +1564,7 @@
         "status_stale": "Estado estancado",
         "task_overdue": "Tarea vencida",
         "terminated": "Terminado",
+        "reopened": "Reabierto",
         "unanswered": "Sin responder",
         "unavailable_ending_soon": "Periodo no disponible termina pronto",
         "unavailable_overdue": "Periodo no disponible vencido",

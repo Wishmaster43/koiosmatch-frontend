@@ -1823,6 +1823,7 @@
         "status_stale": "Stato bloccato",
         "task_overdue": "Attività scaduta",
         "terminated": "Terminato",
+        "reopened": "Riaperto",
         "unanswered": "Senza risposta",
         "unavailable_ending_soon": "Periodo non disponibile in scadenza",
         "unavailable_overdue": "Periodo non disponibile scaduto",

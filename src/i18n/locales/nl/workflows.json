@@ -1395,6 +1395,7 @@
       "candidate_document_expiring": "Document kandidaat verloopt",
       "match_expiring": "Match verloopt",
       "match_terminated": "Match beëindigd",
+      "match_reopened": "Match heropend",
       "appointment_created": "Afspraak aangemaakt",
       "whatsapp_connection_down": "WhatsApp-verbinding verbroken",
       "whatsapp_connection_restored": "WhatsApp-verbinding hersteld",

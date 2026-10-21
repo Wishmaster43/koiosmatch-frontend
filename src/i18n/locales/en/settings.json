@@ -1823,6 +1823,7 @@
         "status_stale": "Status stale",
         "task_overdue": "Overdue linked task",
         "terminated": "Terminated",
+        "reopened": "Reopened",
         "unanswered": "Unanswered",
         "unavailable_ending_soon": "Unavailable period ending soon",
         "unavailable_overdue": "Unavailable period overdue",
