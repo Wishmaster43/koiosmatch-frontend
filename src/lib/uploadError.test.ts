@@ -32,3 +32,21 @@ describe('uploadErrorMessage', () => {
     expect(uploadErrorMessage(err, t, 'fb')).toBe('Service Unavailable')
   })
 })
+
+// UPLOAD-POLICY-1: the three 422 refusal codes.
+describe('uploadErrorMessage 422 codes', () => {
+  const tt = ((k: string, o?: Record<string, string>) => `T:${k}:${o ? JSON.stringify(o) : ''}`) as never
+  const e = (data: object) => ({ response: { status: 422, data } })
+  it('maps file_type_not_allowed with the joined allowed set', () => {
+    expect(uploadErrorMessage(e({ code: 'file_type_not_allowed', context: { surface: 'import', allowed: ['csv', 'txt'] } }), tt, 'fb')).toBe('T:common:upload.typeNotAllowed:{"allowed":"csv, txt"}')
+  })
+  it('maps file_too_large with the formatted ceiling', () => {
+    expect(uploadErrorMessage(e({ code: 'file_too_large', context: { max_bytes: 10 * 1024 * 1024 } }), tt, 'fb', 'en-GB')).toBe('T:common:upload.tooLargeMax:{"max":"10"}')
+  })
+  it('maps file_rejected_by_scanner', () => {
+    expect(uploadErrorMessage(e({ code: 'file_rejected_by_scanner' }), tt, 'fb')).toBe('T:common:upload.rejectedByScanner:')
+  })
+  it('lets an unknown 422 code fall through', () => {
+    expect(uploadErrorMessage(e({ code: 'other', message: 'Nope' }), tt, 'fb')).toBe('Nope')
+  })
+})

@@ -49,7 +49,10 @@
   },
   "upload": {
     "tooLarge": "Dit bestand is te groot voor de server. Kies een kleiner bestand.",
-    "storageUnavailable": "Opslag is tijdelijk niet beschikbaar. Probeer het opnieuw."
+    "storageUnavailable": "Opslag is tijdelijk niet beschikbaar. Probeer het opnieuw.",
+    "typeNotAllowed": "Dit bestandstype is niet toegestaan. Toegestaan: {{allowed}}.",
+    "tooLargeMax": "Dit bestand is te groot. Maximaal {{max}} MB.",
+    "rejectedByScanner": "Dit bestand is geweigerd door de virusscanner."
   },
   "eraseDialog": {
     "password": "Wachtwoord",

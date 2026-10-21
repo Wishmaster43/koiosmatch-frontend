@@ -159,7 +159,9 @@ export default defineConfig([
   // never `.toFixed()` / `.toLocaleString()` / direct `Intl.NumberFormat` calls.
   {
     files: ['src/**/*.{ts,tsx,js,jsx}'],
-    ignores: ['src/lib/formatters.ts', '**/*.test.*'],
+    // numberFormat.ts is the side-effect-free home of the pure formatters (DATETIME-IMPORT-LES, 21-10);
+    // formatters.ts re-exports them — both are the ONE place Intl.NumberFormat may live.
+    ignores: ['src/lib/formatters.ts', 'src/lib/numberFormat.ts', '**/*.test.*'],
     plugins: { getallen: getallenPlugin },
     rules: {
       'getallen/no-restricted-syntax': ['error', {

@@ -10,14 +10,13 @@
 import { useLocale } from './datetime'
 import { useTenantCurrency } from './useTenantCurrency'
 
-type NumberInput = number | string | null | undefined
-
-// Coerces the input to a finite number, or null when it can't be displayed.
-function toFiniteNumber(value: NumberInput): number | null {
-  if (value == null || value === '') return null
-  const n = Number(value)
-  return Number.isFinite(n) ? n : null
-}
+// The pure helpers live in the side-effect-free `./numberFormat` (DATETIME-IMPORT-LES: this
+// module imports `./datetime` and with it the i18n init, so a helper must not import it);
+// they are re-exported here so every existing import keeps working.
+import { toFiniteNumber, formatFileSizeMb } from './numberFormat'
+import type { NumberInput } from './numberFormat'
+export { formatFileSizeMb } from './numberFormat'
+export type { NumberInput } from './numberFormat'
 
 // Full grouped number with the locale's thousands separator — e.g. 99968 → "99.968"
 // (nl-NL) / "99,968" (en-GB). Non-React call sites pass an explicit locale; React
@@ -116,15 +115,6 @@ export function formatCurrency(
 export function formatDistanceKm(value: NumberInput, locale: string = 'nl-NL'): string {
   const n = toFiniteNumber(value)
   return n === null ? '—' : new Intl.NumberFormat(locale, { maximumFractionDigits: 1 }).format(n)
-}
-
-// File size in MB, locale-aware grouping, max 1 decimal — e.g. 123.45 → "123,5 MB" (nl-NL).
-// Caller keeps the unit string in i18n, formatter returns the number only.
-export function formatFileSizeMb(bytes: NumberInput, locale: string = 'nl-NL'): string {
-  const n = toFiniteNumber(bytes)
-  if (n === null) return '—'
-  const mb = n / 1024 / 1024
-  return new Intl.NumberFormat(locale, { maximumFractionDigits: 1 }).format(mb)
 }
 
 // A byte count with an adaptive unit (RUN-INSPECTOR-1, Make's "2,5 MB" summary): below

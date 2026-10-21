@@ -49,7 +49,10 @@
   },
   "upload": {
     "tooLarge": "This file is too large for the server. Please choose a smaller file.",
-    "storageUnavailable": "Storage is temporarily unavailable. Please try again."
+    "storageUnavailable": "Storage is temporarily unavailable. Please try again.",
+    "typeNotAllowed": "This file type is not allowed. Allowed: {{allowed}}.",
+    "tooLargeMax": "This file is too large. Maximum {{max}} MB.",
+    "rejectedByScanner": "This file was rejected by the virus scanner."
   },
   "eraseDialog": {
     "password": "Password",
