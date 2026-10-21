@@ -50,6 +50,11 @@ import { kvkValue, vatValue } from '@/components/drawer/contactLinks'
 import { formatIban, normalizeIban } from '@/lib/iban'
 import { useAuth } from '@/context/AuthContext'
 import { useConfirm } from '@/hooks/useConfirm'
+import api from '@/lib/api'
+import { extractApiError } from '@/lib/extractApiError'
+import { useDateFormat } from '@/lib/datetime'
+import { Check, X, HelpCircle } from 'lucide-react'
+import Button from '@/components/ui/Button'
 import { notifyError } from '@/lib/notify'
 import { useNumberingEntities } from '@/lib/useNumberingEntities'
 import { getCountryName } from '@/lib/countries'
@@ -287,6 +292,37 @@ export function ZzpTab({ c, onSave }: { c: Candidate; onSave?: (v: Record<string
     return <Caption style={{ display: 'block', fontStyle: 'italic', padding: '0 12px' }}>{t('zzp.hintUnverifiable')}</Caption>
   }
 
+  // ZZP-COMPLEET-1 (ONIX G-008): advisory VIES check of the stored VAT number. Initial
+  // verdict comes from the record; a fresh check overrides it locally.
+  const { formatDate } = useDateFormat()
+  const [checking, setChecking] = useState(false)
+  const [vies, setVies] = useState<{ verdict: 'valid' | 'invalid' | 'unknown'; at: string | null } | null>(null)
+  // Drop the local verdict when another candidate or another VAT number is shown, so it never leaks across dossiers.
+  const [viesKey, setViesKey] = useState(`${c.id}|${value.btw}`)
+  if (viesKey !== `${c.id}|${value.btw}`) { setViesKey(`${c.id}|${value.btw}`); setVies(null) }
+  const storedValid = zzp.vat_verified_valid as boolean | null | undefined
+  const viesView = vies ?? (storedValid === undefined ? null : {
+    verdict: storedValid === true ? 'valid' as const : storedValid === false ? 'invalid' as const : 'unknown' as const,
+    at: (zzp.vat_verified_at as string | null | undefined) ?? null,
+  })
+  // Posts the check; the 200 shape is hand-written because the spec carries no 2xx schema.
+  const verifyVat = async () => {
+    const forId = c.id
+    setChecking(true)
+    try {
+      const res = await api.post(`/candidates/${forId}/freelance/verify-vat`)
+      const d = (res.data?.data ?? res.data) as { verdict?: 'valid' | 'invalid' | 'unknown'; vat_verified_at?: string | null }
+      if (mountedRef.current && candidateIdRef.current === forId && d?.verdict) setVies({ verdict: d.verdict, at: d.vat_verified_at ?? null })
+    } catch (err) {
+      if (mountedRef.current && candidateIdRef.current === forId) notifyError(extractApiError(err, t('zzp.viesFailed')))
+    } finally {
+      // Always release the button while mounted: a candidate switch mid-flight must never leave it stuck (Opus lens r2).
+      if (mountedRef.current) setChecking(false)
+    }
+  }
+  const viesIcon = { valid: Check, invalid: X, unknown: HelpCircle }
+  const ViesIcon = viesView ? viesIcon[viesView.verdict] : null
+
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
       <EditableFieldTable title={t('zzp.groupCompany')} fields={blockFields(t('zzp.groupCompany'))} value={value} labelWidth={WIDE_LABEL_WIDTH} onSave={handleSaveCompany} />
@@ -313,6 +349,24 @@ export function ZzpTab({ c, onSave }: { c: Candidate; onSave?: (v: Record<string
       <EditableFieldTable key={`invoicing-${invoicingEpoch}`} title={t('zzp.groupInvoicing')} fields={blockFields(t('zzp.groupInvoicing'))} value={value} labelWidth={WIDE_LABEL_WIDTH} onSave={handleSaveInvoicing} />
       {renderIdentifierHint('kvk')}
       {renderIdentifierHint('vat')}
+      {/* VIES action row: one button and one verdict line, nothing else moves. */}
+      <div style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '0 12px' }}>
+        <Button variant="secondary" size="sm" disabled={!value.btw || checking} onClick={verifyVat}>
+          {checking ? t('zzp.viesChecking') : t('zzp.viesCheck')}
+        </Button>
+        {viesView && ViesIcon && (
+          <Caption style={{
+            display: 'inline-flex', alignItems: 'center', gap: 4,
+            color: viesView.verdict === 'valid' ? 'var(--color-success-text)' : viesView.verdict === 'invalid' ? 'var(--color-danger-text)' : 'var(--text-muted)',
+            fontStyle: viesView.verdict === 'unknown' ? 'italic' : undefined,
+          }}>
+            <ViesIcon size={12} aria-hidden="true" />
+            {viesView.verdict === 'valid'
+              ? (viesView.at ? t('zzp.viesValid', { date: formatDate(viesView.at) }) : t('zzp.viesValidNoDate'))
+              : viesView.verdict === 'invalid' ? t('zzp.viesInvalid') : t('zzp.viesUnknown')}
+          </Caption>
+        )}
+      </div>
       {/* DOC-BANK-2: proof document for the BUSINESS account — same slot as the
           private card, writing freelance.bank_document_id (explicit null clears;
           an omitted key changes nothing — CMBE-measured `sometimes|nullable`).

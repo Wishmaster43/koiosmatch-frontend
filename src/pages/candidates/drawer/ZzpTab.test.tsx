@@ -32,6 +32,12 @@ vi.mock('@/hooks/useProvinces', () => ({
   useProvinces: (country: string) => ({ provinces: country === 'BE' ? ['Antwerpen'] : ['Utrecht', 'Zuid-Holland'] }),
 }))
 
+const apiPostMock = vi.fn()
+vi.mock('@/lib/api', async (orig) => {
+  const actual = await orig<typeof import('@/lib/api')>()
+  return { ...actual, default: Object.assign(actual.default, { post: (...a: unknown[]) => apiPostMock(...a) }) }
+})
+
 const notifyErrorMock = vi.fn()
 vi.mock('@/lib/notify', () => ({ notifyError: (msg: string) => notifyErrorMock(msg) }))
 
@@ -501,5 +507,55 @@ describe('ZzpTab · LANE-I2-1 freelance identifier hints', () => {
     await user.click(screen.getAllByTitle('edit')[2])
     await user.click(screen.getByTitle('save'))
     expect(onSave).toHaveBeenCalledWith(expect.objectContaining({ vat_number: 'BE0123456789' }))
+  })
+})
+
+describe('ZzpTab · VIES check', () => {
+  beforeEach(() => { apiPostMock.mockReset(); notifyErrorMock.mockReset() })
+
+  it('disables the button when no VAT number is stored', () => {
+    render(<ZzpTab c={candidate({ vat_number: '' })} />)
+    expect(screen.getByRole('button', { name: 'zzp.viesCheck' })).toBeDisabled()
+  })
+
+  it('posts to the verify-vat route and shows the valid verdict with its date', async () => {
+    apiPostMock.mockResolvedValue({ data: { data: { verdict: 'valid', vat_verified_at: '2026-10-21T10:00:00Z' } } })
+    render(<ZzpTab c={candidate()} />)
+    await userEvent.setup().click(screen.getByRole('button', { name: 'zzp.viesCheck' }))
+    expect(apiPostMock).toHaveBeenCalledTimes(1)
+    expect(apiPostMock.mock.calls[0][0]).toBe('/candidates/cand-1/freelance/verify-vat')
+    expect(await screen.findByText('zzp.viesValid')).toBeInTheDocument()
+  })
+
+  it('shows the unknown verdict when VIES was unreachable', async () => {
+    apiPostMock.mockResolvedValue({ data: { data: { verdict: 'unknown', vat_verified_at: null } } })
+    render(<ZzpTab c={candidate()} />)
+    await userEvent.setup().click(screen.getByRole('button', { name: 'zzp.viesCheck' }))
+    expect(await screen.findByText('zzp.viesUnknown')).toBeInTheDocument()
+  })
+
+  it('shows the stored verdict from the record and no line when absent', () => {
+    const { unmount } = render(<ZzpTab c={candidate({ vat_verified_valid: false })} />)
+    expect(screen.getByText('zzp.viesInvalid')).toBeInTheDocument()
+    unmount()
+    render(<ZzpTab c={candidate()} />)
+    expect(screen.queryByText('zzp.viesInvalid')).toBeNull()
+  })
+
+  it('reports a failed request through notifyError with the fallback text', async () => {
+    apiPostMock.mockRejectedValue(new Error('Network Error'))
+    render(<ZzpTab c={candidate()} />)
+    await userEvent.setup().click(screen.getByRole('button', { name: 'zzp.viesCheck' }))
+    await vi.waitFor(() => expect(notifyErrorMock).toHaveBeenCalledWith('zzp.viesFailed'))
+  })
+
+  it('drops the local verdict when the drawer switches to another candidate', async () => {
+    apiPostMock.mockResolvedValue({ data: { data: { verdict: 'valid', vat_verified_at: null } } })
+    const { rerender } = render(<ZzpTab c={candidate()} />)
+    await userEvent.setup().click(screen.getByRole('button', { name: 'zzp.viesCheck' }))
+    expect(await screen.findByText('zzp.viesValidNoDate')).toBeInTheDocument()
+    rerender(<ZzpTab c={{ ...candidate(), id: 'cand-2' }} />)
+    expect(screen.queryByText('zzp.viesValidNoDate')).toBeNull()
+    expect(screen.queryByText('zzp.viesValid')).toBeNull()
   })
 })
