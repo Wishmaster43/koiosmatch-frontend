@@ -688,7 +688,8 @@
     "clearDefault": "Klicken, um Standard aufzuheben",
     "valueMark": "Symbol und Farbe: {{label}}",
     "colorMark": "Farbe: {{label}}",
-    "systemValueLocked": "Systemwert: Ein Bildschirm hängt von dieser Phase ab"
+    "systemValueLocked": "Systemwert: Ein Bildschirm hängt von dieser Phase ab",
+    "systemReasonLocked": "Systemgrund: Die Plattform schreibt diesen selbst. Name und Farbe sind änderbar, Löschen ist nicht möglich."
   },
   "phases": {
     "title": "Phasen",
@@ -2380,6 +2381,8 @@
     }
   },
   "lookups": {
+    "openPlacementsBlocked_one": "Diese Phase hat noch {{count}} offene Platzierung. Verschiebe oder schließe sie zuerst, danach klappt die Änderung.",
+    "openPlacementsBlocked_other": "Diese Phase hat noch {{count}} offene Platzierungen. Verschiebe oder schließe sie zuerst, danach klappt die Änderung.",
     "add": "Hinzufügen",
     "colorField": "Farbe",
     "edit": "Bearbeiten",

@@ -710,7 +710,8 @@
     "clearDefault": "Clique para remover a predefinição",
     "valueMark": "Ícone e cor: {{label}}",
     "colorMark": "Cor: {{label}}",
-    "systemValueLocked": "Valor do sistema: um ecrã depende desta fase"
+    "systemValueLocked": "Valor do sistema: um ecrã depende desta fase",
+    "systemReasonLocked": "Motivo do sistema: a plataforma escreve-o por si própria. O nome e a cor podem ser alterados, não pode ser eliminado."
   },
   "phases": {
     "title": "Fases",
@@ -728,6 +729,8 @@
     "add": "Adicionar pool"
   },
   "lookups": {
+    "openPlacementsBlocked_one": "Esta fase ainda tem {{count}} colocação aberta. Mova-a ou feche-a primeiro; depois a alteração funcionará.",
+    "openPlacementsBlocked_other": "Esta fase ainda tem {{count}} colocações abertas. Mova-as ou feche-as primeiro; depois a alteração funcionará.",
     "title": "Listas de referência do candidato",
     "subtitle": "Faça a gestão dos tipos de contrato, fases do funil e estados (etiquetas, cores e ordem).",
     "add": "Adicionar",

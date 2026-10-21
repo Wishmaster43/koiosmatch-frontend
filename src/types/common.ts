@@ -18,6 +18,8 @@ export interface LookupOption {
   // row carries `is_blacklist` (customer/candidate statuses) — drives the
   // status-reason prompt gate.
   isBlacklist?: boolean
+  // LANE-C-FE: set when the lookup row carries `is_system` (platform-written match stop reasons).
+  is_system?: boolean
   // N008-DOC-EXPIRY-FE-1: passed through by useDocumentTypes' own toOption when
   // the lookup row carries `requires_expiry` / `default_validity_months` — drives
   // the pending-upload expiry field. Absent on every other lookup.

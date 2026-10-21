@@ -688,7 +688,8 @@
     "clearDefault": "Haga clic para quitar el valor predeterminado",
     "valueMark": "Icono y color: {{label}}",
     "colorMark": "Color: {{label}}",
-    "systemValueLocked": "Valor del sistema: una pantalla depende de esta fase"
+    "systemValueLocked": "Valor del sistema: una pantalla depende de esta fase",
+    "systemReasonLocked": "Motivo del sistema: la plataforma lo escribe por sí misma. El nombre y el color se pueden cambiar, no se puede eliminar."
   },
   "phases": {
     "title": "Fases",
@@ -2380,6 +2381,8 @@
     }
   },
   "lookups": {
+    "openPlacementsBlocked_one": "Esta fase aún tiene {{count}} colocación abierta. Muévela o ciérrala primero; después el cambio funcionará.",
+    "openPlacementsBlocked_other": "Esta fase aún tiene {{count}} colocaciones abiertas. Muévelas o ciérralas primero; después el cambio funcionará.",
     "add": "Añadir",
     "colorField": "Color",
     "edit": "Editar",

@@ -134,7 +134,15 @@ export function LookupBlock({ slug, title, subtitle, items, setItems, readOnly =
         setItems(p => p.map(x => x.id === modal.id ? { ...x, label: modal.label.trim(), color: modal.color, ...flagFields } : x))
       }
       setModal(null)
-    } catch (e) { notifyError(extractApiError(e, t('statusList.saveFailed'))) } finally { setBusy(false) }
+    } catch (e) {
+      // 409 open_placements: the write would move is_match off a stage that still has open placements; show the count, keep the modal open.
+      const res = (e as { response?: { status?: number; data?: { open_placements?: number } } }).response
+      if (res?.status === 409 && typeof res.data?.open_placements === 'number') {
+        notifyError(t('lookups.openPlacementsBlocked', { count: res.data.open_placements }))
+      } else {
+        notifyError(extractApiError(e, t('statusList.saveFailed')))
+      }
+    } finally { setBusy(false) }
   }
 
   // In-row colour change: applies optimistically, reverts + notifies on failure.

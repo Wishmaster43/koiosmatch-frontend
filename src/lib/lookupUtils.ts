@@ -63,6 +63,8 @@ export function normalizeOptions(raw: unknown, fallback: LookupOption[] | null =
       // this was previously dropped here, so a customer-status consumer never
       // saw the flag even though CustomerLookupController already emits it.
       ...(it.is_blacklist != null ? { isBlacklist: Boolean(it.is_blacklist) } : {}),
+      // Pass `is_system` through only when the row carries it (consumer tests use toEqual).
+      ...(it.is_system !== undefined ? { is_system: Boolean(it.is_system) } : {}),
     }))
 }
 

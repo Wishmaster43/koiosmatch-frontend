@@ -73,3 +73,12 @@ describe('mapLookupRows', () => {
     expect(mapLookupRows(res as never, toOption)).toBeNull()
   })
 })
+
+describe('is_system pass-through (match stop reasons)', () => {
+  it('normalizeOptions passes is_system through and omits the key when absent', () => {
+    expect(normalizeOptions([{ id: 1, value: 'x', label: 'X', color: 'var(--color-primary)', is_system: true }])).toEqual([
+      { id: 1, value: 'x', label: 'X', color: 'var(--color-primary)', is_system: true },
+    ])
+    expect(normalizeOptions([{ id: 1, value: 'x', label: 'X', color: 'var(--color-primary)' }])?.[0]).not.toHaveProperty('is_system')
+  })
+})

@@ -20,5 +20,7 @@ export function toLookupOption(r: Record<string, unknown>, fallbackColor?: strin
     value: String(r.value ?? r.slug ?? r.name ?? r.label ?? r.id ?? ''),
     label: String(r.name ?? r.label ?? r.value ?? ''),
     color: (r.color as string) ?? fallbackColor,
+    // Pass `is_system` through only when the row carries it (never an undefined key).
+    ...(r.is_system !== undefined ? { is_system: Boolean(r.is_system) } : {}),
   }
 }

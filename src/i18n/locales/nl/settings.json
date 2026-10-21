@@ -710,7 +710,8 @@
     "clearDefault": "Klik om standaard op te heffen",
     "valueMark": "Icoon en kleur: {{label}}",
     "colorMark": "Kleur: {{label}}",
-    "systemValueLocked": "Systeemwaarde: een scherm hangt aan deze fase"
+    "systemValueLocked": "Systeemwaarde: een scherm hangt aan deze fase",
+    "systemReasonLocked": "Systeemreden: het platform schrijft deze zelf. Naam en kleur zijn aanpasbaar, verwijderen kan niet."
   },
   "phases": {
     "title": "Fasen",
@@ -728,6 +729,8 @@
     "add": "Pool toevoegen"
   },
   "lookups": {
+    "openPlacementsBlocked_one": "Deze fase heeft nog {{count}} open plaatsing. Verplaats of sluit die eerst; daarna lukt de wijziging.",
+    "openPlacementsBlocked_other": "Deze fase heeft nog {{count}} open plaatsingen. Verplaats of sluit die eerst; daarna lukt de wijziging.",
     "title": "Kandidaat-lookups",
     "subtitle": "Beheer de contractvormen, funnelfasen en statussen (labels, kleuren en volgorde).",
     "add": "Toevoegen",

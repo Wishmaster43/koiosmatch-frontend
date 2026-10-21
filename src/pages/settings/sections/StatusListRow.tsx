@@ -1,7 +1,7 @@
 // Extracted from StatusListEditor (SIZE-SPLIT-B, zero behaviour change): one
 // row's content inside the shared DragList — swatch/icon/badges/actions.
 import { useTranslation } from 'react-i18next'
-import { Trash2, Pencil } from 'lucide-react'
+import { Trash2, Pencil, Lock } from 'lucide-react'
 import Spinner from '@/components/ui/Spinner'
 import Button from '@/components/ui/Button'
 import { Caption, BodyText, monoStyle } from '@/components/ui/typography'
@@ -77,6 +77,8 @@ export default function StatusListRow({
           </>
         )
       })()}
+      {/* System row: the lock is visible, not only on hover. */}
+      {item.is_system === true && <Lock size={11} aria-hidden="true" style={{ color: 'var(--text-muted)', flexShrink: 0 }} />}
       <BodyText as="span">{labelOf(item)}</BodyText>
       {/* One badge per active flag (flagFields) — independent booleans, no singleton rule. */}
       {flagList.map(f => item[f.key] && (
@@ -121,9 +123,9 @@ export default function StatusListRow({
           Accessible name stays the plain "delete" verb even while disabled —
           title carries the reason as a tooltip, aria-label never goes undefined
           (VAC-CLEAR-style regression: name must survive both states). */}
-      <Button variant="dangerSoft" iconOnly onClick={() => remove(item)} disabled={readOnly || deleting === item.id || inUse(item)}
-        title={readOnly ? t('statusList.systemValueLocked') : (inUse(item) ? t('statusList.inUse') : undefined)}
-        aria-label={t('common:delete')} aria-description={readOnly ? t('statusList.systemValueLocked') : undefined}>
+      <Button variant="dangerSoft" iconOnly onClick={() => remove(item)} disabled={readOnly || item.is_system === true || deleting === item.id || inUse(item)}
+        title={readOnly ? t('statusList.systemValueLocked') : (item.is_system === true ? t('statusList.systemReasonLocked') : (inUse(item) ? t('statusList.inUse') : undefined))}
+        aria-label={t('common:delete')} aria-description={readOnly ? t('statusList.systemValueLocked') : (item.is_system === true ? t('statusList.systemReasonLocked') : undefined)}>
         {deleting === item.id ? <Spinner size={11} /> : <Trash2 size={11} />}
       </Button>
     </>

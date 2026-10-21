@@ -710,7 +710,8 @@
     "clearDefault": "Click to clear default",
     "valueMark": "Icon and colour: {{label}}",
     "colorMark": "Colour: {{label}}",
-    "systemValueLocked": "System value: a screen depends on this phase"
+    "systemValueLocked": "System value: a screen depends on this phase",
+    "systemReasonLocked": "System reason: the platform writes this one itself. Name and colour can be changed, it cannot be deleted."
   },
   "phases": {
     "title": "Phases",
@@ -728,6 +729,8 @@
     "add": "Add pool"
   },
   "lookups": {
+    "openPlacementsBlocked_one": "This phase still has {{count}} open placement. Move or close it first, then the change will work.",
+    "openPlacementsBlocked_other": "This phase still has {{count}} open placements. Move or close them first, then the change will work.",
     "title": "Candidate lookups",
     "subtitle": "Manage the contract types, funnel stages and statuses (labels, colours and order).",
     "add": "Add",

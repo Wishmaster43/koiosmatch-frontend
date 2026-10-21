@@ -516,3 +516,22 @@ describe('CandidateLookupsSettings — extractApiError surfaces the server reaso
     await waitFor(() => expect(notifyError).toHaveBeenCalledWith('Deze waarde is al in gebruik.'))
   })
 })
+
+describe('CandidateLookupsSettings — open_placements 409 (LANE-C2)', () => {
+  it('shows the open-placement count and keeps the modal open when the funnel PUT answers 409', async () => {
+    mockedApi.get.mockResolvedValue({ data: { funnel_types: [stage({ id: 'f1', label: 'Aangenomen' })] } })
+    mockedApi.put.mockRejectedValue({ isAxiosError: true, response: { status: 409, data: { message: 'x', open_placements: 2 } } })
+    const user = userEvent.setup()
+    render(<FunnelStagesSettings />)
+
+    await screen.findByText('Aangenomen')
+    await user.click(screen.getByTitle(st('lookups.edit')))
+    await user.click(screen.getByText(st('common.save')))
+
+    const { notifyError } = await import('@/lib/notify')
+    await waitFor(() => expect(notifyError).toHaveBeenCalledWith(st('lookups.openPlacementsBlocked', { count: 2 })))
+    expect(notifyError).not.toHaveBeenCalledWith(st('statusList.saveFailed'))
+    expect(mockedApi.put).toHaveBeenCalledWith('/settings/candidate-lookups/funnel-types/f1', expect.any(Object))
+    expect(screen.getByText(st('common.save'))).toBeInTheDocument()
+  })
+})

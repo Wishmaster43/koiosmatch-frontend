@@ -473,3 +473,35 @@ describe('StatusListEditor — readOnly (system value locked)', () => {
     expect(screen.getByRole('button', { name: 'Fase toevoegen' })).not.toBeDisabled()
   })
 })
+
+describe('StatusListEditor — LANE-C2 lookup integrity', () => {
+  it('a system row has a disabled delete with the lock title and never calls DELETE', async () => {
+    api.get.mockResolvedValue({ data: [{ ...type({ id: 's1', name: 'Systeemreden' }), is_system: true }] })
+    const user = userEvent.setup()
+    render(<StatusListEditor title="Redenen" subtitle="" endpoint="/match-stop-reasons" addLabel="Toevoegen" />)
+
+    await screen.findByText('Systeemreden')
+    const del = screen.getByRole('button', { name: i18n.t('delete', { ns: 'common' }) })
+    expect(del).toBeDisabled()
+    expect(del).toHaveAttribute('title', st('statusList.systemReasonLocked'))
+    await user.click(del)
+    expect(api.delete).not.toHaveBeenCalled()
+  })
+
+  it('a flag flip answering 409 reverts the row and toasts the SERVER message', async () => {
+    api.get.mockResolvedValue({ data: [type({ id: 't1', name: 'Intake', is_default: true }), type({ id: 't2', name: 'Kennismaking' })] })
+    api.put.mockRejectedValue({ isAxiosError: true, response: { status: 409, data: { message: 'Nog 3 matches dragen deze status.', matches: 3 } } })
+    const user = userEvent.setup()
+    render(<StatusListEditor title="Statussen" subtitle="" endpoint="/match-statuses" addLabel="Toevoegen"
+      defaultField={{ key: 'is_default' }} />)
+
+    await screen.findByText('Kennismaking')
+    await user.click(screen.getByRole('button', { name: st('common.setDefault') }))
+
+    await waitFor(() => expect(api.put).toHaveBeenCalledWith('/match-statuses/t2', expect.objectContaining({ is_default: true })))
+    const { notifyError } = await import('@/lib/notify')
+    await waitFor(() => expect(notifyError).toHaveBeenCalledWith('Nog 3 matches dragen deze status.'))
+    // Reverted: the original default is still the only "Standaard" pill.
+    await waitFor(() => expect(screen.getAllByRole('button', { name: st('common.default') })).toHaveLength(1))
+  })
+})

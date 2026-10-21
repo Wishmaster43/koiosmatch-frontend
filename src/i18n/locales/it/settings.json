@@ -710,7 +710,8 @@
     "clearDefault": "Clicca per annullare il predefinito",
     "valueMark": "Icona e colore: {{label}}",
     "colorMark": "Colore: {{label}}",
-    "systemValueLocked": "Valore di sistema: una schermata dipende da questa fase"
+    "systemValueLocked": "Valore di sistema: una schermata dipende da questa fase",
+    "systemReasonLocked": "Motivo di sistema: lo scrive la piattaforma stessa. Nome e colore sono modificabili, l’eliminazione non è possibile."
   },
   "phases": {
     "title": "Fasi",
@@ -728,6 +729,8 @@
     "add": "Aggiungi pool"
   },
   "lookups": {
+    "openPlacementsBlocked_one": "Questa fase ha ancora {{count}} collocamento aperto. Spostalo o chiudilo prima, poi la modifica funzionerà.",
+    "openPlacementsBlocked_other": "Questa fase ha ancora {{count}} collocamenti aperti. Spostali o chiudili prima, poi la modifica funzionerà.",
     "title": "Lookup candidati",
     "subtitle": "Gestisci i tipi di contratto, le fasi del funnel e gli stati (etichette, colori e ordine).",
     "add": "Aggiungi",

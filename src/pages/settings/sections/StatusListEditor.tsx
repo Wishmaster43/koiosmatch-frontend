@@ -194,7 +194,7 @@ export default function StatusListEditor({
 
   // Confirms and deletes a row, blocked upfront when it is in use; a 409 from the server still keeps the row and flags it, since another change could have made it in-use meanwhile.
   const remove = (item: StatusListItem) => {
-    if (inUse(item)) return
+    if (inUse(item) || item.is_system === true) return
     confirm(t('statusList.confirmDelete', { name: labelOf(item) }), () =>
       deleteLookupRow(endpoint, item, setItems, setDeleting, () => notifyError(t('statusList.deleteFailed'))),
     { danger: true })
@@ -205,7 +205,7 @@ export default function StatusListEditor({
     const previous = items
     setItems(p => p.map(x => x.id === item.id ? { ...x, icon } : x))
     try { await api.put(`${endpoint}/${item.id}`, { ...item, icon }) }
-    catch { setItems(previous); notifyError(t('statusList.saveFailed')) }
+    catch (e) { setItems(previous); notifyError(extractApiError(e, t('statusList.saveFailed'))) }
   }
 
   // Optimistic per-row colour update; reverts to the previous colour on a failed save so the row never shows an unsaved value as persisted.
@@ -215,7 +215,7 @@ export default function StatusListEditor({
     // Revert the optimistic colour on failure — otherwise the row keeps showing an
     // unsaved colour as if it had persisted (§3: no silent state drift).
     try { await api.put(`${endpoint}/${item.id}`, { ...item, color }) }
-    catch { setItems(previous); notifyError(t('statusList.saveFailed')) }
+    catch (e) { setItems(previous); notifyError(extractApiError(e, t('statusList.saveFailed'))) }
   }
 
   // Singleton flip (defaultFields[i]): promote a row to that singleton's default,
@@ -233,9 +233,9 @@ export default function StatusListEditor({
     setItems(p => p.map(x => (x.id === item.id ? { ...x, [key]: next } : (next ? { ...x, [key]: false } : x))))
     try {
       await api.put(`${endpoint}/${item.id}`, { ...item, [key]: next })
-    } catch {
+    } catch (e) {
       setItems(previous)
-      notifyError(t('statusList.saveFailed'))
+      notifyError(extractApiError(e, t('statusList.saveFailed')))
     } finally {
       setBusyDefaultKey(null)
     }
@@ -246,9 +246,9 @@ export default function StatusListEditor({
   const persistOrder = async (nextItems: StatusListItem[], previousItems: StatusListItem[]) => {
     try {
       await api.put(`${endpoint}/reorder`, { ids: nextItems.map(x => x.id) })
-    } catch {
+    } catch (e) {
       setItems(previousItems)
-      notifyError(t('statusList.saveFailed'))
+      notifyError(extractApiError(e, t('statusList.saveFailed')))
     }
   }
 

@@ -688,7 +688,8 @@
     "clearDefault": "Cliquer pour retirer la valeur par défaut",
     "valueMark": "Icône et couleur : {{label}}",
     "colorMark": "Couleur : {{label}}",
-    "systemValueLocked": "Valeur système : un écran dépend de cette phase"
+    "systemValueLocked": "Valeur système : un écran dépend de cette phase",
+    "systemReasonLocked": "Motif système : la plateforme l’écrit elle-même. Le nom et la couleur sont modifiables, la suppression est impossible."
   },
   "phases": {
     "title": "Phases",
@@ -2380,6 +2381,8 @@
     }
   },
   "lookups": {
+    "openPlacementsBlocked_one": "Cette phase compte encore {{count}} placement ouvert. Déplacez-le ou clôturez-le d’abord, ensuite la modification fonctionnera.",
+    "openPlacementsBlocked_other": "Cette phase compte encore {{count}} placements ouverts. Déplacez-les ou clôturez-les d’abord, ensuite la modification fonctionnera.",
     "add": "Ajouter",
     "colorField": "Couleur",
     "edit": "Modifier",

@@ -16,13 +16,20 @@ import type { LookupOption } from '@/types/common'
 // mapLookupResponse lives in lookupUtils.ts (DRY round 10, MISC — adopted next
 // to lookupNames/normalizeOptions, its natural home).
 import { mapLookupResponse } from '@/lib/lookupUtils'
+import type { AxiosResponse } from 'axios'
 
 // No seed — see the module doc comment above for why this hook is the exception.
 const NO_STOP_REASONS: LookupOption[] = []
 
 // The tenant's match termination reasons — no seed fallback on purpose (see file
 // doc): an empty result must read as "not configured yet", never faked options.
+// Exported for its test. Platform-written (system) reasons are dropped: POST /matches/{id}/terminate refuses them (422).
+export function mapUserStopReasons(res: AxiosResponse): LookupOption[] | null {
+  const rows = mapLookupResponse(res)
+  return rows ? rows.filter(r => r.is_system !== true) : null
+}
+
 export function useMatchStopReasons() {
-  const { data: reasons, loading } = useCachedLookup('/match-stop-reasons?active=1', mapLookupResponse, NO_STOP_REASONS)
+  const { data: reasons, loading } = useCachedLookup('/match-stop-reasons?active=1', mapUserStopReasons, NO_STOP_REASONS)
   return { reasons, loading }
 }

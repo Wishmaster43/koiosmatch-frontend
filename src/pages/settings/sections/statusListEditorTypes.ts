@@ -18,6 +18,8 @@ export interface StatusListItem {
   in_use?: boolean
   is_used?: boolean
   locked?: boolean
+  // Platform-written row (match stop reasons): delete is locked, label/colour/icon stay editable.
+  is_system?: boolean
   usage_count?: number
   candidates_count?: number
   [key: string]: unknown
