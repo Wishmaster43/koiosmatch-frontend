@@ -1160,7 +1160,10 @@
     "oauthCallbackError": "Il collegamento email non è riuscito.",
     "oauthReasonProviderDenied": "Il collegamento della casella di posta non è riuscito: il provider ha negato l’accesso.",
     "oauthReasonTokenExchangeFailed": "Il collegamento della casella di posta non è riuscito: il provider non ha rilasciato un token di accesso. Riprova.",
-    "oauthReasonStateInvalid": "Il collegamento della casella di posta non è riuscito: la sessione di collegamento non è valida o è scaduta. Avvia di nuovo il collegamento."
+    "oauthReasonStateInvalid": "Il collegamento della casella di posta non è riuscito: la sessione di collegamento non è valida o è scaduta. Avvia di nuovo il collegamento.",
+    "needsReconnect": "La tua casella di posta non funziona più. Collegala di nuovo.",
+    "tenantPolicy": "La tua organizzazione non consente una casella di posta personale.",
+    "statusAt": "Ultimo controllo: {{date}}"
   },
   "notifications": {
     "email": {

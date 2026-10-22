@@ -25,6 +25,7 @@ import SegmentedControl from '@/components/ui/SegmentedControl'
 import { fieldInputStyle } from '@/components/forms/fieldMetrics'
 import { PageTitle, Caption } from '@/components/ui/typography'
 import { useAuth } from '@/context/AuthContext'
+import { useDateFormat } from '@/lib/datetime'
 import { getHashParams, oauthReasonKey, stripOauthParams } from '@/lib/hashQuery'
 import { SETTINGS_MAX_W_WIDE } from '@/pages/settings/components/settingsMetrics'
 
@@ -34,6 +35,11 @@ interface EmailConnStatus {
   connected?: boolean
   provider?: string
   address?: string
+  // BE health check: connected | needs_reconnect | tenant_policy | disconnected (+ bureau-language message).
+  status?: string
+  status_reason?: string | null
+  status_at?: string | null
+  status_message?: string | null
 }
 
 // One test-send or OAuth-callback outcome banner.
@@ -49,6 +55,7 @@ interface EmailSettingsProps {
 
 export default function EmailSettings({ context = 'klanten' }: EmailSettingsProps) {
   const { t } = useTranslation('settings')
+  const { formatDateTime } = useDateFormat()
   const auth = useAuth()
   // DL-10: the OAuth Koppelen/Ontkoppelen actions both require settings.update on
   // the backend (route:list) — a settings.view-only caller must not see live buttons.
@@ -330,12 +337,26 @@ export default function EmailSettings({ context = 'klanten' }: EmailSettingsProp
             <div style={{ marginTop: 14 }}>
               {connLoading ? (
                 <Caption>{t('common.loading')}</Caption>
-              ) : connStatus?.connected ? (
+              ) : connStatus?.connected && (!connStatus.status || connStatus.status === 'connected') ? (
                 <CalloutBox variant="success" title={t('email.oauthConnectedTitle')}>
                   <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12, flexWrap: 'wrap' }}>
                     <span>{t('email.oauthConnected', { provider: connStatus.provider === 'gmail' ? 'Google' : 'Microsoft', address: connStatus.address || '—' })}</span>
                     <Button variant="dangerSoft" size="sm" onClick={disconnectOauth} disabled={disconnecting || !canEditConn}>
                       {disconnecting ? <Spinner size={12} /> : t('email.oauthDisconnect')}
+                    </Button>
+                  </div>
+                </CalloutBox>
+              ) : connStatus?.status === 'tenant_policy' ? (
+                <CalloutBox variant="info">{t('email.tenantPolicy')}</CalloutBox>
+              ) : connStatus?.status === 'needs_reconnect' ? (
+                <CalloutBox variant="warning" title={t('email.oauthWarningTitle')}>
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12, flexWrap: 'wrap' }}>
+                    <div>
+                      {connStatus.status_message || t('email.needsReconnect')}
+                      {connStatus.status_at && <Caption as="div">{t('email.statusAt', { date: formatDateTime(connStatus.status_at) })}</Caption>}
+                    </div>
+                    <Button variant="secondary" size="sm" onClick={connectOauth} disabled={connecting || !canEditConn}>
+                      {connecting ? <Spinner size={12} /> : t('email.oauthConnect')}
                     </Button>
                   </div>
                 </CalloutBox>

@@ -4,7 +4,7 @@
  * endpoint degrades to a calm "unavailable" state. Keeps the panel presentational.
  *
  * Backend contract:
- *   GET  /profile/email                     -> { status, provider?, email? }
+ *   GET  /profile/email                     -> { status: connected|needs_reconnect|tenant_policy|disconnected, status_reason?, status_at?, provider?, email? }
  *   POST /profile/email/connect {provider}  -> { url }   (oauth: we redirect)
  *   POST /profile/email/smtp {host,port,…}  -> { status:'connected', email }
  *   POST /profile/email/disconnect          -> { status:'disconnected' }
@@ -14,8 +14,9 @@ import { useTranslation } from 'react-i18next'
 import api from '@/lib/api'
 import { notifyError } from '@/lib/notify'
 
-export type EmailStatus = 'loading' | 'disconnected' | 'connected' | 'unavailable' | 'error'
-export interface EmailInfo { provider: string | null; email: string | null }
+export type EmailStatus = 'loading' | 'disconnected' | 'connected' | 'needs_reconnect' | 'tenant_policy' | 'unavailable' | 'error'
+// Optional health fields from the BE check (status_reason is a machine code, status_at an ISO instant).
+export interface EmailInfo { provider: string | null; email: string | null; status_reason?: string | null; status_at?: string | null }
 export interface SmtpForm {
   host: string; port: string; user: string; pass: string
   secure: string; from_name: string; from_email: string
@@ -38,7 +39,7 @@ export function useEmailConnection() {
     try {
       const d = (await api.get('/profile/email')).data
       setStatus(d?.status ?? 'disconnected')
-      setInfo({ provider: d?.provider ?? null, email: d?.email ?? null })
+      setInfo({ provider: d?.provider ?? null, email: d?.email ?? null, status_reason: d?.status_reason ?? null, status_at: d?.status_at ?? null })
     } catch (e) {
       setStatus(statusOf(e) === 404 ? 'unavailable' : 'error')
     }

@@ -158,6 +158,8 @@ export function useSettingsLoadState(): { state: LoadState; retry: () => void } 
 export async function saveSettingsKeys(partial: Record<string, unknown>): Promise<void> {
   const stringified: Record<string, string> = {}
   Object.entries(partial).forEach(([k, v]) => {
+    // The BE health check owns email_<group>_status; posting such a key answers 422.
+    if (/^email_[a-z]+_status$/.test(k)) return
     stringified[k] = typeof v === 'string' ? v : JSON.stringify(v)
   })
   const key = activeTenantKey()

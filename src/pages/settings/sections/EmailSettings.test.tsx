@@ -287,3 +287,22 @@ describe('EmailSettings · OAuth callback landing reads the hash, not location.s
     window.location.hash = ''
   })
 })
+
+describe('EmailSettings · mailbox health statuses', () => {
+  it('needs_reconnect shows the server message in a warning, never the green connected box', async () => {
+    loadSettings.mockResolvedValue({ [`email_${CONTEXT}_provider`]: 'gmail' })
+    mockedGet.mockResolvedValue({ data: { data: { connected: false, status: 'needs_reconnect', provider: 'gmail', address: 'x@y.nl', status_message: 'Token ingetrokken door de aanbieder' } } })
+    renderPanel(CONTEXT)
+    expect(await screen.findByText('Token ingetrokken door de aanbieder')).toBeInTheDocument()
+    expect(screen.queryByText(st('email.oauthConnectedTitle'))).not.toBeInTheDocument()
+    expect(screen.getByRole('button', { name: st('email.oauthConnect') })).toBeInTheDocument()
+  })
+
+  it('tenant_policy shows the info text and no connect button', async () => {
+    loadSettings.mockResolvedValue({ [`email_${CONTEXT}_provider`]: 'gmail' })
+    mockedGet.mockResolvedValue({ data: { data: { connected: false, status: 'tenant_policy', provider: 'gmail' } } })
+    renderPanel(CONTEXT)
+    expect(await screen.findByText(st('email.tenantPolicy'))).toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: st('email.oauthConnect') })).not.toBeInTheDocument()
+  })
+})

@@ -72,3 +72,23 @@ describe('ProfileEmailConnect · OAuth callback (G-009)', () => {
     expect(window.location.hash).toBe('#profile')
   })
 })
+
+describe('ProfileEmailConnect · mailbox health', () => {
+  it('needs_reconnect renders the warning and a connect button that posts the provider', async () => {
+    vi.mocked(api.get).mockResolvedValueOnce({ data: { status: 'needs_reconnect', provider: 'gmail', email: 'a@b.nl' } })
+    vi.mocked(api.post).mockResolvedValueOnce({ data: {} })
+    render(<ProfileEmailConnect />)
+    expect(await screen.findByText('profile.email.needsReconnect')).toBeInTheDocument()
+    expect(screen.queryByText('profile.email.connected')).not.toBeInTheDocument()
+    const user = userEvent.setup()
+    await user.click(screen.getByRole('button', { name: 'profile.email.connectWith:Gmail' }))
+    expect(api.post).toHaveBeenCalledWith('/profile/email/connect', { provider: 'gmail' })
+  })
+
+  it('tenant_policy renders the info box and no button', async () => {
+    vi.mocked(api.get).mockResolvedValueOnce({ data: { status: 'tenant_policy' } })
+    render(<ProfileEmailConnect />)
+    expect(await screen.findByText('profile.email.tenantPolicy')).toBeInTheDocument()
+    expect(screen.queryByRole('button')).not.toBeInTheDocument()
+  })
+})

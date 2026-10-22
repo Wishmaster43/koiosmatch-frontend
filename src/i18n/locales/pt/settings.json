@@ -1160,7 +1160,10 @@
     "oauthCallbackError": "A associação de e-mail falhou.",
     "oauthReasonProviderDenied": "A ligação da caixa de correio falhou: o fornecedor recusou o acesso.",
     "oauthReasonTokenExchangeFailed": "A ligação da caixa de correio falhou: o fornecedor não emitiu um token de acesso. Tente novamente.",
-    "oauthReasonStateInvalid": "A ligação da caixa de correio falhou: a sessão de ligação é inválida ou expirou. Inicie a ligação novamente."
+    "oauthReasonStateInvalid": "A ligação da caixa de correio falhou: a sessão de ligação é inválida ou expirou. Inicie a ligação novamente.",
+    "needsReconnect": "A sua caixa de correio deixou de funcionar. Ligue-a novamente.",
+    "tenantPolicy": "A sua organização não permite uma caixa de correio própria.",
+    "statusAt": "Última verificação: {{date}}"
   },
   "notifications": {
     "email": {

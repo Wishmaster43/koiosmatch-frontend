@@ -90,3 +90,15 @@ describe('useEmailConnection', () => {
     expect(result.current.status).toBe('disconnected')
   })
 })
+
+describe('useEmailConnection · mailbox health statuses', () => {
+  beforeEach(() => vi.clearAllMocks())
+
+  it.each(['needs_reconnect', 'tenant_policy'] as const)('load: passes %s through with its reason and timestamp', async (st) => {
+    vi.mocked(api.get).mockResolvedValueOnce({ data: { status: st, provider: 'gmail', status_reason: 'token_revoked', status_at: '2026-10-20T08:00:00Z' } })
+    const { result } = renderHook(() => useEmailConnection())
+    await waitFor(() => expect(result.current.status).toBe(st))
+    expect(result.current.info.status_reason).toBe('token_revoked')
+    expect(result.current.info.status_at).toBe('2026-10-20T08:00:00Z')
+  })
+})

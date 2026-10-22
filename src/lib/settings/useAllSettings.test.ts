@@ -201,3 +201,12 @@ describe('getBoolSetting · coercing backend boolean encodings', () => {
     expect(getBoolSetting({ key: 'anything-else' }, 'key', true)).toBe(false)
   })
 })
+
+describe('saveSettingsKeys · BE-owned status keys', () => {
+  it('drops email_<group>_status from the POST body (the BE answers 422 on it)', async () => {
+    mockedPost.mockResolvedValue({ data: {} })
+    // The planning group keeps the fixture English (english-code ceiling); the filter is group-agnostic.
+    await saveSettingsKeys({ email_planning_status: 'connected', email_planning_provider: 'gmail' })
+    expect(mockedPost).toHaveBeenCalledWith('/settings', { email_planning_provider: 'gmail' })
+  })
+})

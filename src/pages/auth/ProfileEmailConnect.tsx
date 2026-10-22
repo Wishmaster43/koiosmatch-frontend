@@ -101,6 +101,24 @@ export default function ProfileEmailConnect() {
         </CalloutBox>
       )}
 
+      {/* The own mailbox broke: mail falls back to the platform sender until the user links again. */}
+      {status === 'needs_reconnect' && (
+        <CalloutBox variant="warning">
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12, flexWrap: 'wrap' }}>
+            <span>{t('profile.email.needsReconnect')}</span>
+            <Button variant="primary" size="sm" onClick={() => connectOauth(info.provider ?? 'office')} disabled={busy}>
+              {busy ? <Spinner size={12} /> : <Mail size={14} />}
+              {t('profile.email.connectWith', { provider: PROVIDERS.find(p => p.id === info.provider)?.label ?? PROVIDERS[0].label })}
+            </Button>
+          </div>
+        </CalloutBox>
+      )}
+
+      {/* The organisation forbids an own mailbox: informational, no connect action. */}
+      {status === 'tenant_policy' && (
+        <CalloutBox variant="info">{t('profile.email.tenantPolicy')}</CalloutBox>
+      )}
+
       {status === 'connected' && (
         <div style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '14px 16px',
                       background: 'var(--input-bg)', border: '1px solid var(--border)', borderRadius: 10 }}>
