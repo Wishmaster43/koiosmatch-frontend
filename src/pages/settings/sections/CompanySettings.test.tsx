@@ -127,7 +127,7 @@ describe('CompanySettings — field order & grouping (COMPANY-ORDER-1)', () => {
 
     // The full reading order, asserted pairwise on the rendered label nodes.
     const order = [
-      t('company.sectionIdentity'), t('company.banner'), t('company.industry'),
+      t('company.sectionIdentity'), t('company.banner'),
       t('company.sectionAddress'), t('company.street'), t('company.houseNumber'),
       t('company.postcode'), t('company.city'), t('company.province'), t('company.country'),
       t('company.sectionPreferences'), t('company.language'), t('company.currency'), t('company.timezone'),
@@ -238,3 +238,18 @@ describe('CompanySettings — language names from the backend code list', () => 
   })
 })
 
+
+// H2 retired keys: the save POST must never carry company_industry or company_address*.
+describe('CompanySettings: retired keys', () => {
+  it('saves without company_industry or company_address*', async () => {
+    mockedLoadSettings.mockResolvedValue({ company_industry: 'IT', company_address1: 'Old 1' })
+    mockedSaveSettings.mockResolvedValue(undefined)
+    renderPage()
+    await screen.findByRole('button', { name: t('common.upload') })
+    expect(screen.queryByText(t('company.industry'))).toBeNull()
+    fireEvent.click(screen.getByRole('button', { name: t('common.save') }))
+    await waitFor(() => expect(mockedSaveSettings).toHaveBeenCalled())
+    const body = mockedSaveSettings.mock.calls[0][0] as Record<string, unknown>
+    expect(Object.keys(body).filter(k => k === 'company_industry' || k.startsWith('company_address'))).toEqual([])
+  })
+})

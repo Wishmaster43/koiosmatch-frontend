@@ -14,7 +14,6 @@ import api from '@/lib/api'
 import SchemaSection from '../components/SchemaSection'
 import type { Schema } from '../components/SchemaSection'
 import workflowRunHistoryRaw from './workflowRunHistory'
-import { WINDOW_UNIT_OPTIONS } from '../components/windowUnitOptions'
 
 // ./workflowRunHistory.js is plain untyped JS (not on this migration's list); cast once
 // to the real Schema type SchemaSection itself declares.
@@ -79,20 +78,26 @@ describe('workflowRunHistory · save persists the exact backend key', () => {
   })
 })
 
-// O23 UNIT-NAAST-BEDRAG-1: the amount carries an inline unit companion, one row.
-describe('workflowRunHistory · unit companion', () => {
-  it('field shape carries workflow_run_retention_days_unit, unitOf the amount, default days', () => {
+// H2 retired-key: run retention is days only, the retired `_unit` key must never be sent.
+describe('workflowRunHistory · days only', () => {
+  it('field shape is the amount alone, no unit companion', () => {
     expect(workflowRunHistory.fields).toEqual([
       { key: 'workflow_run_retention_days', type: 'number', default: 31, min: 1, max: 31 },
-      { key: 'workflow_run_retention_days_unit', type: 'select', unitOf: 'workflow_run_retention_days', default: 'days',
-        options: WINDOW_UNIT_OPTIONS, labelKey: 'settings.retention.workflow_run_retention_days_unit.label' },
     ])
   })
 
-  it('renders the amount and its unit picker in a single row', async () => {
+  it('renders one row and the POST carries workflow_run_retention_days only', async () => {
+    vi.mocked(api.get).mockResolvedValue({ data: {} } as Awaited<ReturnType<typeof api.get>>)
+    vi.mocked(api.post).mockResolvedValue({ data: {} } as Awaited<ReturnType<typeof api.post>>)
     render(<SchemaSection schema={workflowRunHistory} />)
     await waitFor(() => expect(screen.getByRole('textbox')).toHaveValue('31'))
-    expect(screen.getAllByRole('textbox')).toHaveLength(1)
-    expect(screen.getByRole('button', { name: st('settings.retention.workflow_run_retention_days_unit.label') })).toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: st('settings.retention.workflow_run_retention_days_unit.label') })).toBeNull()
+    fireEvent.change(screen.getByRole('textbox'), { target: { value: '10' } })
+    fireEvent.click(screen.getByRole('button', { name: st('common.save') }))
+    await waitFor(() => expect(api.post).toHaveBeenCalled())
+    const [url, body] = vi.mocked(api.post).mock.calls[0] as [string, Record<string, unknown>]
+    expect(url).toBe('/settings')
+    expect(body.workflow_run_retention_days).toBe('10')
+    expect(body).not.toHaveProperty('workflow_run_retention_days_unit')
   })
 })

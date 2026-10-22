@@ -1,6 +1,6 @@
 /**
  * CompanySettings — the tenant's company-profile form (identity/address/
- * preferences), grouped into titled cards. Industries/countries come from
+ * preferences), grouped into titled cards. Countries come from
  * backend lookups; currencies/timezones stay a fixed local list (data, not
  * comments — see the constants below).
  */
@@ -11,7 +11,6 @@ import { AlertTriangle, RefreshCw } from 'lucide-react'
 import api from '@/lib/api'
 import { notifyError } from '@/lib/notify'
 import { loadSettings, saveSettings } from '../lib/settingsApi'
-import { useIndustries } from '@/lib/useIndustries'
 import { useCountriesLookup } from '@/lib/useCountriesLookup'
 import { useProvinces } from '@/hooks/useProvinces'
 import { useSettingsSectionState } from '@/hooks/useSettingsSectionState'
@@ -31,9 +30,7 @@ import CatalogSection from './CatalogSection'
 import Row from './settingsFormRow'
 import { uploadErrorMessage } from '@/lib/uploadError'
 
-// Option lists (data — kept as-is; only labels are translated). Industries and
-// countries are now backend-sourced (Settings → Personalisation → Industries;
-// GET /countries, COUNTRY-LOOKUP-1) — never a hardcoded list of either.
+// Option lists (data — kept as-is; only labels are translated). Countries are now backend-sourced (GET /countries, COUNTRY-LOOKUP-1) — never a hardcoded list of either.
 // Value = locale CODE (what the setting stores and i18n understands), label =
 // the language NAME (Danny 25-08: "Language must be Dutch, not nl").
 const LANGUAGES = APP_LANGUAGES.map(l => ({ value: l.value, label: l.label }))
@@ -127,7 +124,7 @@ function Select({ value, onChange, options }: SelectProps) {
 // (DevResetCommand.php) and GET /countries — a plain English name here used to
 // mismatch that seed and render as a raw unmatched value (COUNTRY-LOOKUP-1).
 const EMPTY = {
-  company_industry: '', company_country: 'NL',
+  company_country: 'NL',
   company_street: '', company_house_number: '', company_house_number_suffix: '',
   company_postcode: '', company_city: '', company_province: '',
   company_language: 'nl', company_currency: 'EUR', company_timezone: 'Europe/Amsterdam',
@@ -136,9 +133,6 @@ const EMPTY = {
 // Renders the company-profile form (see file docblock above) and owns its load/save state.
 export default function CompanySettings() {
   const { t, i18n } = useTranslation('settings')
-  // Tenant-configurable industry options for the dropdown below.
-  // Options pair the STORED industry name with a translated label (LOOKUP-I18N-1).
-  const { industryOptions: industries } = useIndustries()
   // Closed locale vocabularies (currency / timezone / language) as code+label pairs.
   const { options: localeOptions } = useLocaleOptions()
   const currencyOptions = localeOptions.currencies.map(o => ({ value: o.code, label: o.label }))
@@ -170,10 +164,8 @@ export default function CompanySettings() {
     loadSettings().then(s => {
       setForm(f => ({
         ...f,
-        company_industry: s.company_industry ?? '',
         company_country:  s.company_country  ?? 'NL',
-        // Migrate legacy single-line address into the street field if needed.
-        company_street:              s.company_street              ?? s.company_address1 ?? '',
+        company_street:              s.company_street              ?? '',
         company_house_number:        s.company_house_number        ?? '',
         company_house_number_suffix: s.company_house_number_suffix ?? '',
         company_postcode: s.company_postcode ?? '',
@@ -254,7 +246,7 @@ export default function CompanySettings() {
         <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
           {/* 1. Identity — what the company IS, before any address detail. */}
           <Group title={t('company.sectionIdentity')}>
-            <Row label={t('company.banner')}>
+            <Row label={t('company.banner')} last>
               <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
                 {bannerUrl && <img src={bannerUrl} alt={t('company.banner')} style={{ width: '100%', maxWidth: 400, height: 100, objectFit: 'cover', borderRadius: 8, border: '1px solid var(--border)' }} />}
                 <div style={{ display: 'flex', gap: 8 }}>
@@ -267,7 +259,6 @@ export default function CompanySettings() {
                 </div>
               </div>
             </Row>
-            <Row label={t('company.industry')} last><Select value={form.company_industry} onChange={v => set('company_industry', v)} options={industries} /></Row>
           </Group>
 
           {/* 2. Address, in the order an address is WRITTEN (Danny 09-08): street →

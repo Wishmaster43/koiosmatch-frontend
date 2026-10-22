@@ -6,11 +6,9 @@
  * key already live on the backend) — the tenant may only shorten the platform's
  * 31-day ceiling, never raise it (RunRetentionSettings::MAX_DAYS); the pruner
  * itself always keeps each workflow's single most recent run regardless of age,
- * so this field never risks a workflow reading "never ran".
+ * so this field never risks a workflow reading "never ran". Days only: the BE
+ * refuses the retired `_unit` key with a 422 (H2 450c59957), so no unit picker.
  */
-// O23 UNIT-NAAST-BEDRAG-1: the unit picker rendering inline right of the amount.
-import { unitFieldFor } from '../components/windowUnitOptions'
-
 export default {
   i18nKey: 'workflowRunHistory',
   // Reuse the nav label as the section title (mirrors the kpis.js schemas) —
@@ -18,6 +16,5 @@ export default {
   titleI18n: 'nav.workflow_run_history',
   fields: [
     { key: 'workflow_run_retention_days', type: 'number', default: 31, min: 1, max: 31 },
-    unitFieldFor('workflow_run_retention_days', 'retention'),
   ],
 }
