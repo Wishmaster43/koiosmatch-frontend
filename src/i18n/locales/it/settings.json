@@ -550,7 +550,6 @@
     "subtitle": "Gestisci i dati e le preferenze della tua azienda.",
     "managedUnder": "Nome azienda e logo si gestiscono in Generale → Identità visiva.",
     "banner": "Banner aziendale",
-    "industry": "Settore",
     "country": "Paese",
     "postcode": "CAP",
     "city": "Città",
@@ -3697,6 +3696,9 @@
     "urlHint": "URL assoluto con il placeholder {ref} dove deve apparire il numero di posizione, ad esempio https://carriere.example.it/offerte/{ref}",
     "urlInvalid": "Utilizzare un URL assoluto contenente {ref}.",
     "urlPlaceholder": "https://lavoro.esempio.it/annuncio/{ref}",
+    "phoneLabel": "Numero di telefono (pubblico)",
+    "phoneHint": "Pubblico, anche nel feed di Werkzoeken",
+    "phonePlaceholder": "+39 02 1234 5678",
     "tabs": {
       "settings": "Impostazioni"
     }
@@ -4226,9 +4228,6 @@
       },
       "message_retention_days_unit": {
         "label": "Conservazione messaggi: unità"
-      },
-      "workflow_run_retention_days_unit": {
-        "label": "Conservazione esecuzioni workflow: unità"
       },
       "workflow_run_metadata_retention_days_unit": {
         "label": "Conservazione metadati esecuzioni workflow: unità"
@@ -4807,7 +4806,11 @@
   },
   "interview": {
     "title": "Colloquio IA",
-    "subtitle": "Configurazione per colloqui IA: modalità di rifiuto, link di prenotazione e numero di contatto",
+    "subtitle": "Configurazione per colloqui IA: modalità di rifiuto e link di prenotazione",
+    "bookingLink": "Link di prenotazione",
+    "bookingLinkHelp": "Il candidato riceve questo link nell’invito al colloquio con l’IA",
+    "bookingLinkPlaceholder": "https://prenota.esempio.it/intake",
+    "bookingLinkInvalid": "Utilizzare un URL assoluto che inizi con http:// o https://.",
     "rejectionMode": {
       "label": "Modalità di rifiuto",
       "description": "Come Koios gestisce i candidati non idonei all'intervista IA: proporre un rifiuto (il reclutatore conferma) o rifiutare automaticamente",

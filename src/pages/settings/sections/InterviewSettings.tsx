@@ -2,17 +2,19 @@
  * InterviewSettings (X-12) — the tenant-wide AI-interview configuration: the
  * rejection mode (Koios proposes vs. automatic), POSTed through the shared
  * /settings form path with the backend validating it against the enum. The
- * recruiter phone is a per-agent field (Danny 09-09), and the booking link left
- * this screen on Danny's row 53 (17-09: "kan weg") — the tenant key stays on the
- * backend under career_site/personal (measured: no reader), so nothing else changes.
+ * recruiter phone is a per-agent field (Danny 09-09), and the booking link
+ * (feeds the AI-interview invitation) saves on its own blur through the shared BlurSaveField.
  */
 import { useTranslation } from 'react-i18next'
+import { useAllSettings } from '@/lib/settings/useAllSettings'
+import BlurSaveField from './careerSite/BlurSaveField'
 import { useSettingsForm } from '../lib/useSettingsForm'
 import { SettingsScaffold, SettingCardList, SettingRow, SelectField } from '../components/SettingsKit'
 
 // AI-interview settings editor: the rejection mode.
 export default function InterviewSettings() {
   const { t } = useTranslation('settings')
+  const stored = useAllSettings()
   // Tenant default: proposal mode.
   const form = useSettingsForm({
     interview_rejection_mode: 'proposal',
@@ -37,6 +39,18 @@ export default function InterviewSettings() {
           />
         </SettingRow>
 
+        {/* Booking link: saves exactly { booking_link } on blur, separate from the form's save. */}
+        <BlurSaveField
+          key={`booking:${typeof stored.booking_link === 'string' ? stored.booking_link : ''}`}
+          settingKey="booking_link"
+          stored={typeof stored.booking_link === 'string' ? stored.booking_link : ''}
+          type="url"
+          label={t('interview.bookingLink')}
+          description={t('interview.bookingLinkHelp')}
+          placeholder={t('interview.bookingLinkPlaceholder')}
+          isValid={v => /^https?:\/\/\S+$/i.test(v)}
+          invalidMessage={t('interview.bookingLinkInvalid')}
+        />
       </SettingCardList>
     </SettingsScaffold>
   )

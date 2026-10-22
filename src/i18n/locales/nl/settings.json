@@ -550,7 +550,6 @@
     "subtitle": "Beheer je bedrijfsgegevens en voorkeuren.",
     "managedUnder": "Bedrijfsnaam en logo beheer je onder Algemeen → Huisstijl.",
     "banner": "Bedrijfsbanner",
-    "industry": "Industrie",
     "country": "Land",
     "postcode": "Postcode",
     "city": "Plaats",
@@ -3696,6 +3695,9 @@
     "urlHint": "Absolute URL met {ref} op de plek van het vacaturenummer, bijvoorbeeld https://werkenbij.example.nl/vacature/{ref}",
     "urlInvalid": "Gebruik een absolute URL met {ref}.",
     "urlPlaceholder": "https://werkenbij.voorbeeld.nl/vacature/{ref}",
+    "phoneLabel": "Telefoonnummer (openbaar)",
+    "phoneHint": "Openbaar, ook in de Werkzoeken-feed",
+    "phonePlaceholder": "+31 20 123 4567",
     "tabs": {
       "settings": "Instellingen"
     }
@@ -4225,9 +4227,6 @@
       },
       "message_retention_days_unit": {
         "label": "Bewaartermijn berichten: eenheid"
-      },
-      "workflow_run_retention_days_unit": {
-        "label": "Bewaartermijn workflow-runs: eenheid"
       },
       "workflow_run_metadata_retention_days_unit": {
         "label": "Bewaartermijn metadata workflow-runs: eenheid"
@@ -4806,7 +4805,11 @@
   },
   "interview": {
     "title": "AI-interview",
-    "subtitle": "Configuratie voor AI-interviews: afwijzingsmodus, boekingslink en contactnummer",
+    "subtitle": "Configuratie voor AI-interviews: afwijzingsmodus en boekingslink",
+    "bookingLink": "Boekingslink",
+    "bookingLinkHelp": "De kandidaat krijgt deze link in de AI-interviewuitnodiging",
+    "bookingLinkPlaceholder": "https://boeken.voorbeeld.nl/intake",
+    "bookingLinkInvalid": "Gebruik een absolute URL die met http:// of https:// begint.",
     "rejectionMode": {
       "label": "Afwijzingsmodus",
       "description": "Hoe gaat Koios om met kandidaten die door de AI-interview zijn afgekeurd: voorstel doen (recruiter bevestigt) of automatisch afwijzen",

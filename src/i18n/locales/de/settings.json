@@ -528,7 +528,6 @@
     "subtitle": "Verwalten Sie Ihre Unternehmensdaten und Einstellungen.",
     "managedUnder": "Firmenname und Logo werden unter Allgemein → Marke verwaltet.",
     "banner": "Unternehmensbanner",
-    "industry": "Branche",
     "country": "Land",
     "postcode": "Postleitzahl",
     "city": "Stadt",
@@ -3696,6 +3695,9 @@
     "urlHint": "Absolute URL mit {ref} Platzhalter an der Stelle der Stellennummer, zum Beispiel https://karrieren.example.de/stellen/{ref}",
     "urlInvalid": "Verwenden Sie eine absolute URL mit {ref}.",
     "urlPlaceholder": "https://karriere.beispiel.de/stelle/{ref}",
+    "phoneLabel": "Telefonnummer (öffentlich)",
+    "phoneHint": "Öffentlich, auch im Werkzoeken-Feed",
+    "phonePlaceholder": "+49 30 123 4567",
     "tabs": {
       "settings": "Einstellungen"
     }
@@ -4225,9 +4227,6 @@
       },
       "message_retention_days_unit": {
         "label": "Aufbewahrung Nachrichten: Einheit"
-      },
-      "workflow_run_retention_days_unit": {
-        "label": "Aufbewahrung Workflow-Läufe: Einheit"
       },
       "workflow_run_metadata_retention_days_unit": {
         "label": "Aufbewahrung Metadaten Workflow-Läufe: Einheit"
@@ -4806,7 +4805,11 @@
   },
   "interview": {
     "title": "KI-Interview",
-    "subtitle": "Konfiguration für KI-Interviews: Ablehnungsmodus, Buchungslink und Kontaktnummer",
+    "subtitle": "Konfiguration für KI-Interviews: Ablehnungsmodus und Buchungslink",
+    "bookingLink": "Buchungslink",
+    "bookingLinkHelp": "Der Kandidat erhält diesen Link in der Einladung zum KI-Interview",
+    "bookingLinkPlaceholder": "https://buchen.beispiel.de/intake",
+    "bookingLinkInvalid": "Verwenden Sie eine absolute URL, die mit http:// oder https:// beginnt.",
     "rejectionMode": {
       "label": "Ablehnungsmodus",
       "description": "Wie Koios mit Kandidaten umgeht, die vom KI-Interview disqualifiziert wurden: Ablehnung vorschlagen (Recruiter bestätigt) oder automatisch ablehnen",

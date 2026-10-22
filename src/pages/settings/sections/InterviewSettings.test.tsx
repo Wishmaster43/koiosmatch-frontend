@@ -6,7 +6,7 @@
  * screen on Danny's row 53 (17-09).
  */
 import { describe, it, expect, vi, beforeEach } from 'vitest'
-import { render, screen, waitFor } from '@testing-library/react'
+import { render, screen, waitFor, fireEvent } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import i18n from '@/i18n'
 import api from '@/lib/api'
@@ -19,22 +19,30 @@ vi.mock('@/lib/api', async () => {
   return { ...actual, default: { get: vi.fn(), post: vi.fn(), put: vi.fn(), delete: vi.fn() } }
 })
 
+// Stored tenant blob read by the booking-link row (the real loader is bypassed).
+const blobRef = vi.hoisted(() => ({ current: {} as Record<string, unknown> }))
+vi.mock('@/lib/settings/useAllSettings', async () => {
+  const actual = await vi.importActual<typeof import('@/lib/settings/useAllSettings')>('@/lib/settings/useAllSettings')
+  return { ...actual, useAllSettings: () => blobRef.current }
+})
+
 const t = (key: string, opts?: Record<string, unknown>) => i18n.t(key, { ns: 'settings', ...opts })
 
 beforeEach(() => {
   vi.clearAllMocks()
+  blobRef.current = {}
   mockedApi.get.mockResolvedValue({ data: {} })
   mockedApi.post.mockResolvedValue({ data: {} })
 })
 
 describe('InterviewSettings — load', () => {
-  it('GETs /settings and renders the tenant default (proposal mode) without a booking-link field', async () => {
+  it('GETs /settings and renders the tenant default (proposal mode) with the booking-link row', async () => {
     render(<InterviewSettings />)
     await waitFor(() => expect(mockedApi.get).toHaveBeenCalledWith('/settings'))
     // Proposal mode is the default (shows as the trigger label).
     expect(await screen.findByText(t('interview.rejectionMode.options.proposal'))).toBeInTheDocument()
-    // Row 53 (Danny 17-09): the booking link no longer lives on this screen.
-    expect(screen.queryByRole('textbox')).toBeNull()
+    // Danny 9a = A: the booking link lives on this screen again.
+    expect(screen.getByLabelText(t('interview.bookingLink'))).toBeInTheDocument()
   })
 
   it('renders the stored rejection mode', async () => {
@@ -86,5 +94,34 @@ describe('InterviewSettings — errors', () => {
 
     expect(await screen.findByText(t('common.loadError'))).toBeInTheDocument()
     expect(screen.getByRole('button', { name: t('common.save') })).toBeDisabled()
+  })
+})
+
+describe('InterviewSettings — booking link', () => {
+  it('POSTs exactly { booking_link } on blur for a valid URL', async () => {
+    render(<InterviewSettings />)
+    const input = await screen.findByLabelText(t('interview.bookingLink'))
+    fireEvent.change(input, { target: { value: 'https://boeken.example.nl/intake' } })
+    fireEvent.blur(input)
+    expect(mockedApi.post).toHaveBeenCalledWith('/settings', { booking_link: 'https://boeken.example.nl/intake' })
+  })
+
+  it('refuses a non-URL with a hint and no request', async () => {
+    render(<InterviewSettings />)
+    const input = await screen.findByLabelText(t('interview.bookingLink'))
+    fireEvent.change(input, { target: { value: 'not a url' } })
+    fireEvent.blur(input)
+    expect(screen.getByText(t('interview.bookingLinkInvalid'))).toBeInTheDocument()
+    expect(mockedApi.post).not.toHaveBeenCalled()
+  })
+
+  it('reverts the draft when the save is refused', async () => {
+    blobRef.current = { booking_link: 'https://a.example.nl/x' }
+    mockedApi.post.mockRejectedValueOnce(new Error('422'))
+    render(<InterviewSettings />)
+    const input = await screen.findByLabelText(t('interview.bookingLink'))
+    fireEvent.change(input, { target: { value: 'https://b.example.nl/y' } })
+    fireEvent.blur(input)
+    await waitFor(() => expect(input).toHaveValue('https://a.example.nl/x'))
   })
 })

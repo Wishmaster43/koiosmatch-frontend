@@ -23,12 +23,14 @@ import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useAllSettings, saveSettingsKeys, invalidateAllSettingsCache } from '@/lib/settings/useAllSettings'
 import { notifyError } from '@/lib/notify'
-import { extractApiError } from '@/lib/extractApiError'
 import { SettingRow, Toggle } from '../components/SettingsKit'
 import PublicUrlsCard from './careerSite/PublicUrlsCard'
+import BlurSaveField from './careerSite/BlurSaveField'
 import SubTabBar from '@/components/drawer/SubTabBar'
-import { PageTitle, Caption } from '@/components/ui/typography'
-import { fieldInputStyle } from '@/components/forms/fieldMetrics'
+import { PageTitle } from '@/components/ui/typography'
+
+// Settings values arrive untyped; anything but a string reads as empty.
+const str = (v: unknown) => (typeof v === 'string' ? v : '')
 
 type CareerSiteTab = 'settings' | 'public_urls'
 
@@ -40,11 +42,6 @@ export default function CareerSiteSettings() {
   // Booleans round-trip through the settings store as strings — coerce every truthy form.
   const raw = values.career_site_active
   const active = raw === true || raw === 1 || raw === '1' || raw === 'true'
-
-  // Track the URL field's draft and validation state.
-  const urlStoredValue = typeof values.career_site_url === 'string' ? values.career_site_url : ''
-  const [urlDraft, setUrlDraft] = useState(urlStoredValue)
-  const [urlInvalid, setUrlInvalid] = useState(false)
 
   // SUB-TABS: one tab per existing titled block (mirrors VacancyCandidateTabSettings).
   const [activeTab, setActiveTab] = useState<CareerSiteTab>('settings')
@@ -63,26 +60,6 @@ export default function CareerSiteSettings() {
     })
   }
 
-  // Client-side validation: the URL must contain {ref} as a placeholder; on valid
-  // commit, save via saveSettingsKeys; backend 422 flows through extractApiError.
-  const handleUrlBlur = () => {
-    const trimmed = urlDraft.trim()
-    const stored = typeof values.career_site_url === 'string' ? values.career_site_url : ''
-    // Empty is valid (optional field); otherwise it must contain {ref}.
-    if (trimmed === '' || trimmed.includes('{ref}')) {
-      setUrlInvalid(false)
-      if (trimmed !== stored) {
-        saveSettingsKeys({ career_site_url: trimmed }).catch(err => {
-          notifyError(extractApiError(err, t('common:actionFailed')))
-          // Revert the draft on error.
-          setUrlDraft(stored)
-        })
-      }
-    } else {
-      setUrlInvalid(true)
-    }
-  }
-
   return (
     <div style={{ maxWidth: 640 }}>
       <PageTitle>{t('careerSite.title')}</PageTitle>
@@ -97,23 +74,27 @@ export default function CareerSiteSettings() {
               <Toggle checked={active} onChange={toggle} />
             </SettingRow>
 
-            <SettingRow label={t('careerSite.urlLabel')} description={t('careerSite.urlHint')}>
-              <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: 4 }}>
-                <input
-                  type="text"
-                  value={urlDraft}
-                  onChange={e => setUrlDraft(e.target.value)}
-                  onBlur={handleUrlBlur}
-                  placeholder={t('careerSite.urlPlaceholder')}
-                  style={{
-                    ...fieldInputStyle,
-                    width: 280,
-                    borderColor: urlInvalid ? 'var(--color-danger)' : 'var(--border)',
-                  }}
-                />
-                {urlInvalid && <span role="alert"><Caption as="span" style={{ color: 'var(--color-danger-text)' }}>{t('careerSite.urlInvalid')}</Caption></span>}
-              </div>
-            </SettingRow>
+            <BlurSaveField
+              key={`url:${str(values.career_site_url)}`}
+              settingKey="career_site_url"
+              stored={str(values.career_site_url)}
+              label={t('careerSite.urlLabel')}
+              description={t('careerSite.urlHint')}
+              placeholder={t('careerSite.urlPlaceholder')}
+              isValid={v => v.includes('{ref}')}
+              invalidMessage={t('careerSite.urlInvalid')}
+            />
+
+            {/* Bureau-wide public phone (E.164 on the server). */}
+            <BlurSaveField
+              key={`phone:${str(values.company_phone_public)}`}
+              settingKey="company_phone_public"
+              stored={str(values.company_phone_public)}
+              type="tel"
+              label={t('careerSite.phoneLabel')}
+              description={t('careerSite.phoneHint')}
+              placeholder={t('careerSite.phonePlaceholder')}
+            />
           </div>
         )}
 

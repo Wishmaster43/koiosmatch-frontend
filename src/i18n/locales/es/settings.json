@@ -528,7 +528,6 @@
     "subtitle": "Gestiona los datos y preferencias de tu empresa.",
     "managedUnder": "El nombre y el logo de la empresa se gestionan en General → Marca.",
     "banner": "Banner de la empresa",
-    "industry": "Sector",
     "country": "País",
     "postcode": "Código postal",
     "city": "Ciudad",
@@ -3696,6 +3695,9 @@
     "urlHint": "URL absoluta con el placeholder {ref} donde debe aparecer el número de vacante, por ejemplo https://carreras.example.es/empleos/{ref}",
     "urlInvalid": "Use una URL absoluta que contenga {ref}.",
     "urlPlaceholder": "https://empleo.ejemplo.es/oferta/{ref}",
+    "phoneLabel": "Número de teléfono (público)",
+    "phoneHint": "Público, también en el feed de Werkzoeken",
+    "phonePlaceholder": "+34 91 123 45 67",
     "tabs": {
       "settings": "Configuración"
     }
@@ -4225,9 +4227,6 @@
       },
       "message_retention_days_unit": {
         "label": "Retención de mensajes: unidad"
-      },
-      "workflow_run_retention_days_unit": {
-        "label": "Retención de ejecuciones de workflow: unidad"
       },
       "workflow_run_metadata_retention_days_unit": {
         "label": "Retención de metadatos de ejecuciones de workflow: unidad"
@@ -4806,7 +4805,11 @@
   },
   "interview": {
     "title": "Entrevista por IA",
-    "subtitle": "Configuración para entrevistas por IA: modo de rechazo, enlace de reserva y número de contacto",
+    "subtitle": "Configuración para entrevistas por IA: modo de rechazo y enlace de reserva",
+    "bookingLink": "Enlace de reserva",
+    "bookingLinkHelp": "El candidato recibe este enlace en la invitación a la entrevista con IA",
+    "bookingLinkPlaceholder": "https://reservas.ejemplo.es/intake",
+    "bookingLinkInvalid": "Use una URL absoluta que empiece por http:// o https://.",
     "rejectionMode": {
       "label": "Modo de rechazo",
       "description": "Cómo maneja Koios los candidatos descalificados por la entrevista por IA: proponer un rechazo (el reclutador confirma) o rechazar automáticamente",

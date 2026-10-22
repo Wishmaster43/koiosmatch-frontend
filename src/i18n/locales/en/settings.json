@@ -550,7 +550,6 @@
     "subtitle": "Manage your company details and preferences.",
     "managedUnder": "Company name and logo are managed under General → Brand.",
     "banner": "Company banner",
-    "industry": "Industry",
     "country": "Country",
     "postcode": "Postal code",
     "city": "City",
@@ -3696,6 +3695,9 @@
     "urlHint": "Absolute URL with {ref} placeholder where the vacancy number should appear, for example https://careers.example.com/jobs/{ref}",
     "urlInvalid": "Use an absolute URL containing {ref}.",
     "urlPlaceholder": "https://jobs.example.com/vacancy/{ref}",
+    "phoneLabel": "Phone number (public)",
+    "phoneHint": "Public, also in the Werkzoeken feed",
+    "phonePlaceholder": "+31 20 123 4567",
     "tabs": {
       "settings": "Settings"
     }
@@ -4225,9 +4227,6 @@
       },
       "message_retention_days_unit": {
         "label": "Message retention: unit"
-      },
-      "workflow_run_retention_days_unit": {
-        "label": "Workflow run retention: unit"
       },
       "workflow_run_metadata_retention_days_unit": {
         "label": "Workflow run metadata retention: unit"
@@ -4806,7 +4805,11 @@
   },
   "interview": {
     "title": "AI Interview",
-    "subtitle": "Configuration for AI interviews: rejection mode, booking link, and contact number",
+    "subtitle": "Configuration for AI interviews: rejection mode and booking link",
+    "bookingLink": "Booking link",
+    "bookingLinkHelp": "The candidate receives this link in the AI interview invitation",
+    "bookingLinkPlaceholder": "https://booking.example.com/intake",
+    "bookingLinkInvalid": "Use an absolute URL starting with http:// or https://.",
     "rejectionMode": {
       "label": "Rejection Mode",
       "description": "How Koios handles candidates disqualified by the AI interview: propose a rejection (recruiter confirms) or reject automatically",

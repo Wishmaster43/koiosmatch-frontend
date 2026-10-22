@@ -141,3 +141,21 @@ describe('CareerSiteSettings — sub-tabs (13-09)', () => {
     expect(screen.getByText(t('careerSite.urls.subtitle'))).toBeInTheDocument()
   })
 })
+
+describe('CareerSiteSettings — company phone (Danny 9a = A)', () => {
+  it('renders the stored E.164 phone read back from GET /settings', () => {
+    blobRef.current = { company_phone_public: '+31201234567', booking_link: 'https://boeken.example.nl/intake' }
+    render(<CareerSiteSettings />)
+    expect(screen.getByLabelText(t('careerSite.phoneLabel'))).toHaveValue('+31201234567')
+    // The booking link now lives on the interview settings screen.
+    expect(screen.queryByLabelText(t('interview.bookingLink'))).toBeNull()
+  })
+
+  it('POSTs exactly company_phone_public on blur, never recruiter_phone', () => {
+    render(<CareerSiteSettings />)
+    const input = screen.getByLabelText(t('careerSite.phoneLabel'))
+    fireEvent.change(input, { target: { value: '020 123 4567' } })
+    fireEvent.blur(input)
+    expect(postMock).toHaveBeenCalledWith('/settings', { company_phone_public: '020 123 4567' })
+  })
+})
