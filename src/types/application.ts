@@ -264,7 +264,9 @@ export interface ApplicationDetail extends Application {
   // fields once rejected; channel/sent_at were dropped on the floor before
   // (RejectionSummary now renders them), so they are typed properly here
   // rather than escaping through the old index signature.
-  rejection?: { reason_id?: Id; reason_label?: string; note?: string; channel?: string; sent_at?: string | null }
+  rejection?: { reason_id?: Id; reason_label?: string; note?: string; channel?: string; sent_at?: string | null;
+    // Mail delivery truth of the rejection mail (BE lane E 6afeb619b); hand-written, the spec has no 2xx schema.
+    delivery_status?: 'sent' | 'delivered' | 'bounced' | 'complained' | 'failed' | 'queued' | null; undelivered?: boolean }
   // Tenant custom-field values (§3B "Eigen velden" — the drawer's gated Extra tab).
   customFields: Record<string, unknown>
   // MOTIVATIE-ZICHTBAAR-1 (landed): the applicant's motivation letter

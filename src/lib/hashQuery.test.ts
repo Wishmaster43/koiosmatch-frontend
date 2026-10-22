@@ -19,6 +19,14 @@ describe('hashQuery', () => {
     expect(oauthReasonKey(null)).toBeNull()
   })
 
+  it('maps the tenant-policy and SMTP reason codes', () => {
+    expect(oauthReasonKey('tenant_policy')).toBe('TenantPolicy')
+    expect(oauthReasonKey('smtp_auth_refused')).toBe('SmtpAuthRefused')
+    expect(oauthReasonKey('smtp_unreachable')).toBe('SmtpUnreachable')
+    expect(oauthReasonKey('tenant_not_ready')).toBe('TenantNotReady')
+    expect(oauthReasonKey('unknown_code')).toBeNull()
+  })
+
   it('strips only the OAuth params and keeps the page and other params', () => {
     window.history.replaceState(null, '', '/#profile?email_oauth=connected&context=personal&email=a%40b.nl&request_id=1&reason=x&keep=1')
     stripOauthParams()

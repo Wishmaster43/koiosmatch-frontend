@@ -36,14 +36,28 @@ interface ProposalsBlockProps {
   application: ApplicationDetail
 }
 
+// Human hint for a failed send's error code; null keeps the raw fallback for other codes.
+const SEND_ERROR_HINT_KEYS: Record<string, string> = {
+  recipient_suppressed: 'propose.sendError.recipientSuppressed',
+  worker_lost: 'propose.sendError.workerLost',
+  claim_expired: 'propose.sendError.claimExpired',
+}
+
 // K-248: resolves a proposal's delivery-truth chip, or null for a legacy row
-// with neither send_status nor sent_at. sent/failed/no_consent/not_sent are the
-// only values the backend stamps (ApplicationProposalResource); a failed send
+// with neither send_status nor sent_at. queued/sent/failed/no_consent/not_sent are
+// the only values the backend stamps (ApplicationProposalResource); a failed send
 // carries send_error as the chip's tooltip.
 function sendStatusChip(p: Proposal, t: TFunction) {
   const status = p.send_status ?? (p.sent_at ? 'sent' : null)
   if (!status) return null
+  // A sent mail that bounced, was reported or is still queued shows the DELIVERY state instead.
+  const delivery = status === 'sent' && p.delivery_status && ['queued', 'delivered', 'failed', 'bounced', 'complained'].includes(p.delivery_status)
+    ? p.delivery_status : null
+  if (delivery) {
+    return <SoftChip label={t(`propose.delivery.${delivery}`)} color={delivery === 'queued' ? 'var(--color-warning)' : delivery === 'delivered' ? 'var(--color-success)' : 'var(--color-danger)'} />
+  }
   const colorByStatus: Record<string, string> = {
+    queued: 'var(--color-warning)',
     sent: 'var(--color-success)',
     failed: 'var(--color-danger)',
     no_consent: 'var(--color-warning)',
@@ -51,7 +65,8 @@ function sendStatusChip(p: Proposal, t: TFunction) {
   }
   return (
     <SoftChip label={t(`propose.sendStatus.${status}`)} color={colorByStatus[status]}
-      title={status === 'failed' && p.send_error ? p.send_error : undefined} />
+      title={status === 'failed' && p.send_error
+        ? (SEND_ERROR_HINT_KEYS[p.send_error] ? t(SEND_ERROR_HINT_KEYS[p.send_error]) : p.send_error) : undefined} />
   )
 }
 
@@ -113,6 +128,9 @@ export default function ProposalsBlock({ application }: ProposalsBlockProps) {
                   status (rows older than the column) falls back to sent_at, mirroring
                   the resource's own fallback (ApplicationProposalResource::send_status). */}
               {sendStatusChip(p, t)}
+              {p.send_status === 'failed' && p.send_error && SEND_ERROR_HINT_KEYS[p.send_error] && (
+                <Caption as="div" style={{ color: 'var(--color-danger-text)' }}>{t(SEND_ERROR_HINT_KEYS[p.send_error])}</Caption>
+              )}
               <Caption as="div" style={{ minWidth: 90 }}>
                 {p.sent_at ? t('propose.sentOn', { date: formatDate(p.sent_at) }) : '—'}
               </Caption>

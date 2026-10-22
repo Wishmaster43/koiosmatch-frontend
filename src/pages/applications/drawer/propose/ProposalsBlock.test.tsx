@@ -33,6 +33,12 @@ const setProposals = (proposals: Proposal[], over: Partial<{ loading: boolean; e
   return revoke
 }
 
+// Ink of a chip label: the closest ancestor carrying an inline colour (SoftChip paints chipInk there).
+const inkOf = (label: string): string => {
+  const el = screen.getByText(label).closest<HTMLElement>('[style*="color"]')
+  return el?.style.color ?? ''
+}
+
 describe('ProposalsBlock', () => {
   it('renders nothing while loading', () => {
     setProposals([], { loading: true })
@@ -183,6 +189,29 @@ describe('ProposalsBlock', () => {
   })
 })
 
+// MAIL-PRECISIONS: queued send, delivered delivery and the worker_lost/claim_expired hints.
+describe('ProposalsBlock · mail precisions', () => {
+  it('renders a queued send_status in the warning ink, not as an error', () => {
+    setProposals([proposal({ send_status: 'queued', sent_at: null })])
+    render(<ProposalsBlock application={app} />)
+    expect(screen.getByText('propose.sendStatus.queued')).toBeInTheDocument()
+    expect(inkOf('propose.sendStatus.queued')).not.toMatch(/danger/)
+  })
+
+  it('renders a delivered delivery_status chip', () => {
+    setProposals([proposal({ delivery_status: 'delivered' })])
+    render(<ProposalsBlock application={app} />)
+    expect(screen.getByText('propose.delivery.delivered')).toBeInTheDocument()
+  })
+
+  it.each([['worker_lost', 'propose.sendError.workerLost'], ['claim_expired', 'propose.sendError.claimExpired']])(
+    'shows the %s hint on a failed send', (code, key) => {
+      setProposals([proposal({ send_status: 'failed', send_error: code })])
+      render(<ProposalsBlock application={app} />)
+      expect(screen.getByText(key)).toBeInTheDocument()
+    })
+})
+
 // VOORSTEL-AFZENDER-FE-1: the resolved sender shows on a row only when the API carries one.
 describe('ProposalsBlock · sender line', () => {
   it('names the sender when present and shows nothing for a null sender', () => {
@@ -198,5 +227,35 @@ describe('ProposalsBlock · sender line', () => {
     setProposals([proposal({ id: 'p1', sender: { id: 'u1', name: null } })])
     render(<ProposalsBlock application={app} />)
     expect(screen.queryByText(/propose\.sentBy/)).toBeNull()
+  })
+
+  // BE lane E: a sent mail that did not arrive shows the delivery state instead of "sent".
+  it('shows the bounced delivery chip instead of sent', () => {
+    setProposals([proposal({ send_status: 'sent', delivery_status: 'bounced', undelivered: true })])
+    render(<ProposalsBlock application={app} />)
+    expect(screen.getByText('propose.delivery.bounced')).toBeInTheDocument()
+    expect(screen.queryByText('propose.sendStatus.sent')).toBeNull()
+    expect(inkOf('propose.delivery.bounced')).toContain('var(--color-danger)')
+  })
+
+  it('shows queued as a delivery chip', () => {
+    setProposals([proposal({ send_status: 'sent', delivery_status: 'queued', undelivered: true })])
+    render(<ProposalsBlock application={app} />)
+    expect(screen.getByText('propose.delivery.queued')).toBeInTheDocument()
+    expect(inkOf('propose.delivery.queued')).toContain('var(--color-warning)')
+  })
+
+  it('keeps the sent chip for an unknown delivery value or a null one', () => {
+    setProposals([proposal({ id: 'a', delivery_status: null }), proposal({ id: 'b', delivery_status: 'weird' as never })])
+    render(<ProposalsBlock application={app} />)
+    expect(screen.getAllByText('propose.sendStatus.sent')).toHaveLength(2)
+  })
+
+  it('shows the suppressed hint for a failed recipient_suppressed row', () => {
+    setProposals([proposal({ send_status: 'failed', send_error: 'recipient_suppressed' })])
+    render(<ProposalsBlock application={app} />)
+    expect(screen.getAllByText('propose.sendError.recipientSuppressed').length).toBeGreaterThan(0)
+    expect(screen.queryByText('recipient_suppressed')).toBeNull()
+    expect(document.querySelector('[title="propose.sendError.recipientSuppressed"]')).not.toBeNull()
   })
 })

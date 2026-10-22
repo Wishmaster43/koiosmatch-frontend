@@ -51,3 +51,16 @@ describe('useProposals · revoke', () => {
     expect(key1).not.toBe(key2)
   })
 })
+
+describe('useProposals · polling', () => {
+  it('keeps a 60 s refetchInterval while a row has send_status queued', async () => {
+    const qc = new QueryClient({ defaultOptions: { queries: { retry: false } } })
+    const wrap = ({ children }: { children: ReactNode }) => createElement(QueryClientProvider, { client: qc }, children)
+    ;(api.get as unknown as ReturnType<typeof vi.fn>).mockResolvedValueOnce({ data: { data: [{ id: 'p1', send_status: 'queued' }] } })
+    const { result } = renderHook(() => useProposals('app-1'), { wrapper: wrap })
+    await vi.waitFor(() => expect(result.current.proposals.length).toBe(1))
+    const query = qc.getQueryCache().find({ queryKey: ['applications', 'app-1', 'proposals'] })!
+    const interval = (query.options as { refetchInterval: (q: unknown) => number | false }).refetchInterval(query)
+    expect(interval).toBe(60_000)
+  })
+})

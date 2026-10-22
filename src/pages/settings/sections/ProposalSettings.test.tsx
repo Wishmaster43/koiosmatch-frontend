@@ -190,3 +190,12 @@ describe('ProposalSettings · template, phase, variant, notice', () => {
     expect(screen.getByText(st('proposal.notSentYet'))).toBeInTheDocument()
   })
 })
+
+describe('ProposalSettings · token chips', () => {
+  it('lists the short candidate token next to the full one', () => {
+    mockSettings.mockReturnValue({ application_proposal: JSON.stringify(STORED) })
+    render(<ProposalSettings />)
+    expect(screen.getByText('{candidate_short}')).toBeInTheDocument()
+    expect(screen.getByText('{candidate}')).toBeInTheDocument()
+  })
+})

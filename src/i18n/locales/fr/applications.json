@@ -435,6 +435,11 @@
     "done": "Candidature rejetée",
     "sentOn": "Message envoyé le {{date}}",
     "notSent": "Aucun message envoyé pour l'instant",
+    "deliveryQueued": "Envoi en cours",
+    "deliveryFailed": "Non distribué",
+    "deliveryBounced": "Rejeté (bounce)",
+    "deliveryComplained": "Signalé comme indésirable",
+    "deliveryDelivered": "Remis",
     "viaChannel": "via {{channel}}",
     "channels": {
       "email": "e-mail",
@@ -497,8 +502,8 @@
     "recorded": "Proposition enregistrée",
     "loading": "Chargement…",
     "noteTitle": "Candidat proposé",
-    "defaultSubject": "Candidat {candidate} proposé pour {vacancy}",
-    "defaultBody": "<p>Cher/Chère {contact},</p><p>Je souhaite vous proposer {candidate} pour le poste {vacancy} chez {customer}.</p><p>Cordialement,<br/>{recruiter}</p>",
+    "defaultSubject": "Candidat {candidate_short} proposé pour {vacancy}",
+    "defaultBody": "<p>Cher/Chère {contact},</p><p>Je souhaite vous proposer {candidate_short} pour le poste {vacancy} chez {customer}.</p><p>Cordialement,<br/>{recruiter}</p>",
     "historyTitle": "Historique des propositions",
     "sentOn": "Enregistré le {{date}}",
     "openedOn": "Ouvert le {{date}}",
@@ -521,7 +526,20 @@
       "forceSend": "Envoyer malgré tout",
       "openExisting": "Voir la proposition existante"
     },
+    "delivery": {
+      "queued": "Envoi en cours",
+      "delivered": "Remis",
+      "failed": "Non distribué",
+      "bounced": "Rejeté (bounce)",
+      "complained": "Signalé comme indésirable"
+    },
+    "sendError": {
+      "recipientSuppressed": "Adresse bloquée après un rebond ou une plainte antérieurs ; aucune nouvelle tentative",
+      "workerLost": "Échec, réessayez",
+      "claimExpired": "Échec, réessayez"
+    },
     "sendStatus": {
+      "queued": "Envoi en cours",
       "sent": "Envoyé",
       "failed": "Échec",
       "no_consent": "Pas de consentement",

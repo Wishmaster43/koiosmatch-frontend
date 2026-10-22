@@ -200,3 +200,31 @@ describe('RejectionSummary · correction pencil (W28)', () => {
     expect(screen.getAllByText('Niet gekwalificeerd').length).toBeGreaterThan(0)
   })
 })
+
+// BE lane E: delivery truth of the rejection mail, shown as a flag line only.
+describe('RejectionSummary · delivery status', () => {
+  const withDelivery = (delivery_status: 'sent' | 'delivered' | 'queued' | 'failed' | 'bounced' | 'complained' | null) =>
+    app({ rejection: { reason_label: 'Te ver weg', sent_at: '2026-07-20', delivery_status, undelivered: delivery_status === 'failed' } })
+
+  it.each([
+    ['queued', 'rejection.deliveryQueued', 'var(--color-warning-text)'],
+    ['delivered', 'rejection.deliveryDelivered', 'var(--color-success-text)'],
+    ['failed', 'rejection.deliveryFailed', 'var(--color-danger-text)'],
+    ['bounced', 'rejection.deliveryBounced', 'var(--color-danger-text)'],
+    ['complained', 'rejection.deliveryComplained', 'var(--color-danger-text)'],
+  ] as const)('renders %s with its text and ink', (status, key, ink) => {
+    render(<RejectionSummary application={withDelivery(status)} />)
+    const el = screen.getByTestId('rejection-delivery')
+    expect(el).toHaveTextContent(key)
+    expect(el).toHaveStyle({ color: ink })
+  })
+
+  it('adds nothing for sent, null or absent fields', () => {
+    const { rerender } = render(<RejectionSummary application={withDelivery('sent')} />)
+    expect(screen.queryByTestId('rejection-delivery')).toBeNull()
+    rerender(<RejectionSummary application={withDelivery(null)} />)
+    expect(screen.queryByTestId('rejection-delivery')).toBeNull()
+    rerender(<RejectionSummary application={app({ rejection: { reason_label: 'X', sent_at: null } })} />)
+    expect(screen.queryByTestId('rejection-delivery')).toBeNull()
+  })
+})

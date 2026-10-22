@@ -84,6 +84,7 @@ export default function RejectionSummary({ application: a }: { application: Appl
       setCorrected(fresh?.rejection ?? {
         reason_id: payload.reason_id, reason_label: payload.reason_label, note: payload.note,
         channel: rejection?.channel, sent_at: rejection?.sent_at,
+        delivery_status: rejection?.delivery_status, undelivered: rejection?.undelivered,
       })
       setCorrectionOpen(false)
       notifySuccess(t('rejection.correctionDone'))
@@ -132,6 +133,16 @@ export default function RejectionSummary({ application: a }: { application: Appl
     channel ? t('rejection.viaChannel', { channel: channelLabel }) : '',
   ].filter(Boolean)
 
+  // Delivery truth of the rejection mail: queued reads warning, undelivered states danger, sent adds nothing.
+  const deliveryStatus = rejection.delivery_status
+  const deliveryKey = deliveryStatus === 'queued' ? 'rejection.deliveryQueued'
+    : deliveryStatus === 'failed' ? 'rejection.deliveryFailed'
+    : deliveryStatus === 'bounced' ? 'rejection.deliveryBounced'
+    : deliveryStatus === 'complained' ? 'rejection.deliveryComplained'
+    : deliveryStatus === 'delivered' ? 'rejection.deliveryDelivered' : null
+  const deliveryInk = deliveryStatus === 'queued' ? 'var(--color-warning-text)'
+    : deliveryStatus === 'delivered' ? 'var(--color-success-text)' : 'var(--color-danger-text)'
+
   return (
     <>
       <div style={card}>
@@ -146,6 +157,9 @@ export default function RejectionSummary({ application: a }: { application: Appl
           <div style={{ fontSize: 12, color: 'var(--text)', marginTop: 6 }}>{reasonLabel}</div>
         )}
         <Caption as="div" style={{ marginTop: 4 }}>{metaParts.join(' · ')}</Caption>
+        {deliveryKey && (
+          <Caption as="div" data-testid="rejection-delivery" style={{ marginTop: 2, color: deliveryInk }}>{t(deliveryKey)}</Caption>
+        )}
         {note && (
           <div style={{ marginTop: 8 }}>
             <Caption as="div" style={{ marginBottom: 4 }}>{t('rejection.note')}</Caption>

@@ -247,6 +247,13 @@ describe('mapApplicationDetail', () => {
     expect(detail.rejection?.note).toBe('Geen ervaring')
   })
 
+  it('passes the delivery flags through, absent stays undefined', () => {
+    const d = mapApplicationDetail({ id: 4, rejection: { reason_label: 'X', delivery_status: 'bounced', undelivered: true } })
+    expect(d.rejection?.delivery_status).toBe('bounced')
+    expect(d.rejection?.undelivered).toBe(true)
+    expect(mapApplicationDetail({ id: 5, rejection: { reason_label: 'X' } }).rejection?.delivery_status).toBeUndefined()
+  })
+
   it('leaves rejection undefined (never null) when the application was never rejected', () => {
     expect(mapApplicationDetail({ id: 2, rejection: null }).rejection).toBeUndefined()
     expect(mapApplicationDetail({ id: 3 }).rejection).toBeUndefined()

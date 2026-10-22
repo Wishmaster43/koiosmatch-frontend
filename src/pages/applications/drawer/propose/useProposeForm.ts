@@ -19,7 +19,7 @@ import api, { unwrap } from '@/lib/api'
 // DOUBLE-SUBMIT-FE-1 point 2: one Idempotency-Key per click on an irreversible action (BE IDEMP-1 replays).
 import { withIdempotencyKey } from '@/lib/idempotency'
 import { notifyError, notifySuccess } from '@/lib/notify'
-import { extractApiError } from '@/lib/extractApiError'
+import { apiErrorKey, extractApiError } from '@/lib/extractApiError'
 import { useLookups } from '@/context/LookupsContext'
 import { useCvSettings } from '@/lib/useCvSettings'
 import { useAllSettings, getJsonSetting, getStringSetting } from '@/lib/settings/useAllSettings'
@@ -71,13 +71,14 @@ function fillTemplate(template: string, tokens: Record<string, string>): string 
     contact: tokens.contact ?? '',
     recruiter: tokens.recruiter ?? '',
     agency: tokens.agency ?? '',
+    candidate_short: tokens.candidate_short ?? '',
     // Legacy Dutch aliases
     kandidaat: tokens.candidate ?? '',
     vacature: tokens.vacancy ?? '',
     klant: tokens.customer ?? '',
     bureau: tokens.agency ?? '',
   }
-  return template.replace(/\{(candidate|vacancy|customer|contact|recruiter|agency|kandidaat|vacature|klant|bureau)\}/g, (_m, key: string) => tokenMap[key] ?? '')
+  return template.replace(/\{(candidate_short|candidate|vacancy|customer|contact|recruiter|agency|kandidaat|vacature|klant|bureau)\}/g, (_m, key: string) => tokenMap[key] ?? '')
 }
 
 // VOORSTEL-AFZENDER-FE-1: the tenant-wide default sender — a bare uuid string
@@ -217,6 +218,10 @@ export function useProposeForm(application: ApplicationDetail) {
 
   useEffect(() => {
     if (dirtyRef.current || !recipient) return
+    // Mirrors BE ProposalTemplate::shortName: first name + uppercased last initial.
+    const first = candidate?.firstname?.trim() ?? ''
+    const last = candidate?.lastname?.trim() ?? ''
+    const shortName = last ? `${first} ${last.charAt(0).toUpperCase()}.`.trim() : first
     // Tenant company_name setting (agency token) or empty string fallback.
     const companyName = getStringSetting(settingsValues, 'company_name', null) ?? ''
     // One canonical token map with both English names and legacy Dutch aliases
@@ -228,6 +233,7 @@ export function useProposeForm(application: ApplicationDetail) {
       contact: recipient.name,
       recruiter: senderName,
       agency: companyName,
+      candidate_short: shortName,
     }
     const subjectTpl = proposalSettings.subject_template || t('propose.defaultSubject')
     const bodyTpl = proposalSettings.body_template || t('propose.defaultBody')
@@ -237,7 +243,7 @@ export function useProposeForm(application: ApplicationDetail) {
     // name, not the whole `application`/`proposalSettings`/`users` objects (a new
     // identity every render would re-fire this on every keystroke elsewhere) or `t`.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [recipient?.id, recipient?.name, senderName, settingsValues])
+  }, [recipient?.id, recipient?.name, senderName, settingsValues, candidate?.id])
 
   const hasMotivation = Boolean(application.coverLetter)
 
@@ -347,7 +353,9 @@ export function useProposeForm(application: ApplicationDetail) {
         setConflict({ code, proposalId: response.data?.proposal_id, sentAt: response.data?.sent_at })
         return false
       }
-      notifyError(extractApiError(err, t('common:actionFailed')))
+      // A coded refusal (422 recipient_suppressed) reads as translated copy, never the English server message.
+      const errorKey = apiErrorKey(err)
+      notifyError(errorKey ? t(`common:${errorKey}`) : extractApiError(err, t('common:actionFailed')))
       return false
     } finally {
       setSubmitting(false)

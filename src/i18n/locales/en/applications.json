@@ -456,6 +456,11 @@
     "done": "Application rejected",
     "sentOn": "Message sent on {{date}}",
     "notSent": "No message sent yet",
+    "deliveryQueued": "Sending",
+    "deliveryFailed": "Not delivered",
+    "deliveryBounced": "Bounced",
+    "deliveryComplained": "Reported as spam",
+    "deliveryDelivered": "Delivered",
     "viaChannel": "via {{channel}}",
     "channels": {
       "email": "email",
@@ -517,8 +522,8 @@
     "recorded": "Proposal recorded",
     "loading": "Loading…",
     "noteTitle": "Candidate proposed",
-    "defaultSubject": "Candidate {candidate} proposed for {vacancy}",
-    "defaultBody": "<p>Dear {contact},</p><p>I would like to propose {candidate} for the {vacancy} role at {customer}.</p><p>Kind regards,<br/>{recruiter}</p>",
+    "defaultSubject": "Candidate {candidate_short} proposed for {vacancy}",
+    "defaultBody": "<p>Dear {contact},</p><p>I would like to propose {candidate_short} for the {vacancy} role at {customer}.</p><p>Kind regards,<br/>{recruiter}</p>",
     "historyTitle": "Proposal history",
     "sentOn": "Recorded on {{date}}",
     "openedOn": "Opened on {{date}}",
@@ -541,7 +546,20 @@
       "forceSend": "Send anyway",
       "openExisting": "View existing proposal"
     },
+    "delivery": {
+      "queued": "Sending",
+      "delivered": "Delivered",
+      "failed": "Not delivered",
+      "bounced": "Bounced",
+      "complained": "Reported as spam"
+    },
+    "sendError": {
+      "recipientSuppressed": "Address blocked after an earlier bounce or complaint; no new attempt",
+      "workerLost": "Failed, try again",
+      "claimExpired": "Failed, try again"
+    },
     "sendStatus": {
+      "queued": "Being sent",
       "sent": "Sent",
       "failed": "Failed",
       "no_consent": "No consent",

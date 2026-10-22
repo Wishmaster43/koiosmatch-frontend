@@ -20,6 +20,10 @@ const OAUTH_REASON_SUFFIX: Record<string, string> = {
   provider_denied: 'ProviderDenied',
   token_exchange_failed: 'TokenExchangeFailed',
   state_invalid: 'StateInvalid',
+  tenant_policy: 'TenantPolicy',
+  smtp_auth_refused: 'SmtpAuthRefused',
+  smtp_unreachable: 'SmtpUnreachable',
+  tenant_not_ready: 'TenantNotReady',
 }
 
 // Pure: i18n key suffix for a reason code, or null for an unknown/absent code (caller shows its generic text).

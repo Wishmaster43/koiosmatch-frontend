@@ -39,7 +39,7 @@ export function DirectionPill({ direction }: { direction?: string }) {
 export function StatusPill({ status, label, title }: { status?: string; label?: ReactNode; title?: string }) {
   if (!status) return <span style={{ color: 'var(--text-muted)' }}>—</span>
   const s = status.toLowerCase()
-  const color = /fail|error|bounce|reject/.test(s) ? 'var(--color-danger)'
+  const color = /fail|error|bounce|reject|suppress/.test(s) ? 'var(--color-danger)'
     : /deliver|sent|read|ok|success/.test(s) ? 'var(--color-success)'
     : /queue|pending|sending/.test(s) ? 'var(--color-warning)'
     : 'var(--text-muted)'

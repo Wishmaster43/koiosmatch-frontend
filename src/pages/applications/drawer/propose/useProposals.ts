@@ -21,8 +21,11 @@ export interface Proposal {
   cv_variant: 'proposal' | 'full'
   // K-248 PROPOSE-SEND-1: the delivery truth, stamped after the mailer reported
   // (null on rows older than the column — ProposalsBlock falls back to sent_at).
-  send_status: 'sent' | 'failed' | 'no_consent' | 'not_sent' | null
+  send_status: 'queued' | 'sent' | 'failed' | 'no_consent' | 'not_sent' | null
   send_error: string | null
+  // Mail delivery truth of THIS proposal mail (BE lane E); null/absent on rows filed before the column.
+  delivery_status?: 'queued' | 'sent' | 'delivered' | 'bounced' | 'complained' | 'failed' | null
+  undelivered?: boolean
   sent_at: string | null
   revoked_at: string | null
   opened_at: string | null
@@ -54,6 +57,8 @@ export function useProposals(applicationId: Id | null | undefined) {
       const { rows } = unwrapList<Proposal>(await api.get(`/applications/${applicationId}/proposals`, { signal }))
       return rows
     },
+    // A queued send (send_status or delivery_status) settles on its own: poll every 60 s while one is in flight.
+    refetchInterval: query => (query.state.data?.some(r => r.send_status === 'queued' || r.delivery_status === 'queued') ? 60_000 : false),
   })
 
   // Revoke is idempotent server-side; invalidate the list on success so the

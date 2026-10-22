@@ -1161,6 +1161,10 @@
     "oauthReasonProviderDenied": "Il collegamento della casella di posta non è riuscito: il provider ha negato l’accesso.",
     "oauthReasonTokenExchangeFailed": "Il collegamento della casella di posta non è riuscito: il provider non ha rilasciato un token di accesso. Riprova.",
     "oauthReasonStateInvalid": "Il collegamento della casella di posta non è riuscito: la sessione di collegamento non è valida o è scaduta. Avvia di nuovo il collegamento.",
+    "oauthReasonTenantPolicy": "Il collegamento della casella di posta non è riuscito: la tua organizzazione non consente una casella personale.",
+    "oauthReasonSmtpAuthRefused": "Il collegamento della casella di posta non è riuscito: il server di posta ha rifiutato le credenziali.",
+    "oauthReasonSmtpUnreachable": "Il collegamento della casella di posta non è riuscito: il server di posta non era raggiungibile. Riprova più tardi.",
+    "oauthReasonTenantNotReady": "Il collegamento della casella di posta non è riuscito: questa agenzia non è ancora completamente configurata. Riprova più tardi.",
     "needsReconnect": "La tua casella di posta non funziona più. Collegala di nuovo.",
     "tenantPolicy": "La tua organizzazione non consente una casella di posta personale.",
     "statusAt": "Ultimo controllo: {{date}}"

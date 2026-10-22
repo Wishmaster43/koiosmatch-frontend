@@ -55,6 +55,8 @@ const ERROR_CODE_KEYS: Record<string, string> = {
   // match's contract form has no row in Settings → HelloFlex → Contractmap yet —
   // an honest "not configured" notice, never a raw server message.
   helloflex_contract_type_unmapped: 'errors.helloflexContractTypeUnmapped',
+  // The proposal send is refused up front (422) for a suppressed recipient address.
+  recipient_suppressed: 'errors.recipientSuppressed',
 }
 
 /**

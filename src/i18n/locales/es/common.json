@@ -790,6 +790,7 @@
     "koiosCreditExhausted": "El crédito de Koios de esta organización se ha agotado o aún no está activado. Recarga el saldo o contacta con tu administrador.",
     "koiosUnavailable": "Koios no está disponible en este momento. Inténtalo de nuevo en breve.",
     "helloflexContractTypeUnmapped": "Todavía no hay ningún tipo de contrato de HelloFlex vinculado a esta forma de contrato. Configúralo en Configuración → HelloFlex.",
+    "recipientSuppressed": "Esta dirección está bloqueada tras un rebote o queja anterior; no se volverá a enviar.",
     "fieldRequired": "{{field}} es obligatorio."
   },
   "timeline": {

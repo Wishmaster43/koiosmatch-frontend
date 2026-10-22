@@ -436,6 +436,11 @@
     "done": "Bewerbung abgelehnt",
     "sentOn": "Nachricht gesendet am {{date}}",
     "notSent": "Noch keine Nachricht gesendet",
+    "deliveryQueued": "Wird gesendet",
+    "deliveryFailed": "Nicht zugestellt",
+    "deliveryBounced": "Zurückgewiesen (Bounce)",
+    "deliveryComplained": "Als unerwünscht gemeldet",
+    "deliveryDelivered": "Zugestellt",
     "viaChannel": "über {{channel}}",
     "channels": {
       "email": "E-Mail",
@@ -497,8 +502,8 @@
     "recorded": "Vorschlag festgehalten",
     "loading": "Wird geladen…",
     "noteTitle": "Kandidat vorgeschlagen",
-    "defaultSubject": "Kandidat {candidate} für {vacancy} vorgeschlagen",
-    "defaultBody": "<p>Liebe(r) {contact},</p><p>ich möchte Ihnen {candidate} für die Position {vacancy} bei {customer} vorschlagen.</p><p>Mit freundlichen Grüßen,<br/>{recruiter}</p>",
+    "defaultSubject": "Kandidat {candidate_short} für {vacancy} vorgeschlagen",
+    "defaultBody": "<p>Liebe(r) {contact},</p><p>ich möchte Ihnen {candidate_short} für die Position {vacancy} bei {customer} vorschlagen.</p><p>Mit freundlichen Grüßen,<br/>{recruiter}</p>",
     "historyTitle": "Vorschlagsverlauf",
     "sentOn": "Festgehalten am {{date}}",
     "openedOn": "Geöffnet am {{date}}",
@@ -521,7 +526,20 @@
       "forceSend": "Trotzdem senden",
       "openExisting": "Bestehenden Vorschlag ansehen"
     },
+    "delivery": {
+      "queued": "Wird gesendet",
+      "delivered": "Zugestellt",
+      "failed": "Nicht zugestellt",
+      "bounced": "Zurückgewiesen (Bounce)",
+      "complained": "Als unerwünscht gemeldet"
+    },
+    "sendError": {
+      "recipientSuppressed": "Adresse nach früherem Bounce oder früherer Beschwerde gesperrt; kein neuer Versuch",
+      "workerLost": "Fehlgeschlagen, erneut versuchen",
+      "claimExpired": "Fehlgeschlagen, erneut versuchen"
+    },
     "sendStatus": {
+      "queued": "Wird gesendet",
       "sent": "Gesendet",
       "failed": "Fehlgeschlagen",
       "no_consent": "Keine Einwilligung",

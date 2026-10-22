@@ -790,6 +790,7 @@
     "koiosCreditExhausted": "O saldo Koios desta organização está esgotado ou ainda não foi ativado. Reforce o saldo ou contacte o administrador.",
     "koiosUnavailable": "O Koios não está disponível neste momento. Tente novamente dentro de instantes.",
     "helloflexContractTypeUnmapped": "Não existe nenhum tipo de contrato HelloFlex associado a este tipo de contrato. Configure isto em Definições → HelloFlex.",
+    "recipientSuppressed": "Este endereço está bloqueado após um bounce ou queixa anterior; não será enviado novamente.",
     "fieldRequired": "{{field}} é obrigatório."
   },
   "timeline": {

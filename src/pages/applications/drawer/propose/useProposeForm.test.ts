@@ -25,7 +25,7 @@ vi.mock('react-i18next', () => ({ useTranslation: () => ({ t: (k: string) => k }
 
 const { notifyError, notifySuccess } = vi.hoisted(() => ({ notifyError: vi.fn(), notifySuccess: vi.fn() }))
 vi.mock('@/lib/notify', () => ({ notifyError, notifySuccess }))
-vi.mock('@/lib/extractApiError', () => ({ extractApiError: (_err: unknown, fallback: string) => fallback }))
+vi.mock('@/lib/extractApiError', async () => ({ extractApiError: (_err: unknown, fallback: string) => fallback, apiErrorKey: (await vi.importActual<typeof import('@/lib/extractApiError')>('@/lib/extractApiError')).apiErrorKey }))
 
 const { buildProposalCvBlob } = vi.hoisted(() => ({ buildProposalCvBlob: vi.fn(() => Promise.resolve(new Blob(['pdf']))) }))
 vi.mock('@/lib/proposalCv', () => ({ buildProposalCvBlob }))
@@ -409,6 +409,18 @@ describe('useProposeForm', () => {
     expect(result.current.conflict).toBeNull()
   })
 
+  // The send refuses a suppressed recipient with a 422 code; the toast is the translated copy.
+  it('shows the translated notice on a 422 recipient_suppressed', async () => {
+    apiPost.mockRejectedValueOnce({ response: { status: 422, data: { code: 'recipient_suppressed', message: 'Recipient is suppressed' } } })
+    const { result } = renderHook(() => useProposeForm(app()), { wrapper })
+    await waitFor(() => expect(result.current.candidateLoading).toBe(false))
+    act(() => { result.current.setConsentConfirmed(true) })
+    await waitFor(() => expect(result.current.disabledReason).toBeNull())
+    await act(async () => { await result.current.submit() })
+    expect(apiPost).toHaveBeenLastCalledWith(`/applications/${app().id}/propose`, expect.anything(), expect.anything())
+    expect(notifyError).toHaveBeenCalledWith('common:errors.recipientSuppressed')
+  })
+
   // Agency token reads the tenant's company_name setting, falls back to empty.
   it('fills {agency} from the company_name setting, defaults to empty', async () => {
     settingsFixture = { application_proposal: JSON.stringify({ body_template: 'Agency: {agency}' }) }
@@ -421,5 +433,17 @@ describe('useProposeForm', () => {
     const { result: result2 } = renderHook(() => useProposeForm(app()), { wrapper })
     await waitFor(() => expect(result2.current.contactsLoading).toBe(false))
     expect(result2.current.body).toBe('Agency: My Company GmbH')
+  })
+  // Regression: {candidate_short} is filled client-side like the BE shortName (first name + last initial).
+  it('fills {candidate_short} as "Sanne D." and leaves no raw token behind', async () => {
+    settingsFixture = { application_proposal: JSON.stringify({ subject_template: 'Voorstel {candidate_short}' }) }
+    apiGet.mockImplementation((url: string) => {
+      if (url.startsWith('/customers/')) return Promise.resolve({ data: { contacts: [{ id: 'ct1', name: 'Piet Klaassen', email: 'piet@zorggroep.nl' }] } })
+      if (url.startsWith('/candidates/')) return Promise.resolve({ data: { id: 'c1', firstname: 'Sanne', lastname: 'de Vries' } })
+      return Promise.resolve({ data: {} })
+    })
+    const { result } = renderHook(() => useProposeForm(app()), { wrapper })
+    await waitFor(() => expect(result.current.subject).toContain('Sanne D.'))
+    expect(result.current.subject).not.toContain('{candidate_short}')
   })
 })

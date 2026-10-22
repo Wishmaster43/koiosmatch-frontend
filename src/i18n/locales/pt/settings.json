@@ -1161,6 +1161,10 @@
     "oauthReasonProviderDenied": "A ligação da caixa de correio falhou: o fornecedor recusou o acesso.",
     "oauthReasonTokenExchangeFailed": "A ligação da caixa de correio falhou: o fornecedor não emitiu um token de acesso. Tente novamente.",
     "oauthReasonStateInvalid": "A ligação da caixa de correio falhou: a sessão de ligação é inválida ou expirou. Inicie a ligação novamente.",
+    "oauthReasonTenantPolicy": "A ligação da caixa de correio falhou: a sua organização não permite uma caixa de correio própria.",
+    "oauthReasonSmtpAuthRefused": "A ligação da caixa de correio falhou: o servidor de correio recusou as credenciais.",
+    "oauthReasonSmtpUnreachable": "A ligação da caixa de correio falhou: o servidor de correio não estava acessível. Tente novamente mais tarde.",
+    "oauthReasonTenantNotReady": "A ligação da caixa de correio falhou: esta agência ainda não está totalmente configurada. Tente novamente mais tarde.",
     "needsReconnect": "A sua caixa de correio deixou de funcionar. Ligue-a novamente.",
     "tenantPolicy": "A sua organização não permite uma caixa de correio própria.",
     "statusAt": "Última verificação: {{date}}"

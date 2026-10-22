@@ -456,6 +456,11 @@
     "done": "Sollicitatie afgewezen",
     "sentOn": "Bericht verstuurd op {{date}}",
     "notSent": "Nog geen bericht verstuurd",
+    "deliveryQueued": "Wordt verzonden",
+    "deliveryFailed": "Niet afgeleverd",
+    "deliveryBounced": "Gebounced",
+    "deliveryComplained": "Gemeld als ongewenst",
+    "deliveryDelivered": "Afgeleverd",
     "viaChannel": "via {{channel}}",
     "channels": {
       "email": "e-mail",
@@ -517,8 +522,8 @@
     "recorded": "Voorstel vastgelegd",
     "loading": "Laden…",
     "noteTitle": "Kandidaat voorgesteld",
-    "defaultSubject": "Kandidaat {candidate} voorgesteld voor {vacancy}",
-    "defaultBody": "<p>Beste {contact},</p><p>Graag stel ik u {candidate} voor de functie {vacancy} bij {customer} voor.</p><p>Met vriendelijke groet,<br/>{recruiter}</p>",
+    "defaultSubject": "Kandidaat {candidate_short} voorgesteld voor {vacancy}",
+    "defaultBody": "<p>Beste {contact},</p><p>Graag stel ik u {candidate_short} voor de functie {vacancy} bij {customer} voor.</p><p>Met vriendelijke groet,<br/>{recruiter}</p>",
     "historyTitle": "Voorstelgeschiedenis",
     "sentOn": "Vastgelegd op {{date}}",
     "openedOn": "Geopend op {{date}}",
@@ -541,7 +546,20 @@
       "forceSend": "Toch versturen",
       "openExisting": "Bekijk bestaand voorstel"
     },
+    "delivery": {
+      "queued": "Wordt verzonden",
+      "delivered": "Afgeleverd",
+      "failed": "Niet afgeleverd",
+      "bounced": "Gebounced",
+      "complained": "Gemeld als ongewenst"
+    },
+    "sendError": {
+      "recipientSuppressed": "Adres geblokkeerd na een eerdere bounce of klacht; geen nieuwe poging",
+      "workerLost": "Mislukt, opnieuw proberen",
+      "claimExpired": "Mislukt, opnieuw proberen"
+    },
     "sendStatus": {
+      "queued": "Wordt verzonden",
       "sent": "Verzonden",
       "failed": "Mislukt",
       "no_consent": "Geen toestemming",
