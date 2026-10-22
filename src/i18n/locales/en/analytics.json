@@ -1,6 +1,16 @@
 {
   "title": "Reports",
   "thresholdDays": "Threshold: {{n}} days",
+  "thresholdWindow": {
+    "days_one": "Threshold: {{n}} day",
+    "days_other": "Threshold: {{n}} days",
+    "workdays_one": "Threshold: {{n}} working day",
+    "workdays_other": "Threshold: {{n}} working days",
+    "weeks_one": "Threshold: {{n}} week",
+    "weeks_other": "Threshold: {{n}} weeks",
+    "months_one": "Threshold: {{n}} month",
+    "months_other": "Threshold: {{n}} months"
+  },
   "drill": {
     "breakdown": "Breakdown",
     "records": "Underlying records",

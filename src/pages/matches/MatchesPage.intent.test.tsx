@@ -40,8 +40,9 @@ const rows = [
   { id: 'm-2', candidate: 'John Roe', vacancy: 'Verzorgende IG', client: 'Beta', owner: 'John', status: 'open', archived: false, contractForm: { value: 'flex', label: 'Flex', color: '#000' }, contractType: 'detachering' },
   { id: 'm-3', candidate: 'Ann Poe', vacancy: 'Verzorgende IG', client: 'Gamma', owner: 'John', status: 'open', archived: false, contractForm: { value: 'flex', label: 'Flex', color: '#000' }, contractType: 'Uitzendbeding' },
 ]
+const spyUseMatches = vi.hoisted(() => vi.fn())
 vi.mock('./hooks/useMatches', () => ({
-  useMatches: () => ({ rows, loading: false, error: false, updateMatch: vi.fn(), reload: vi.fn() }),
+  useMatches: (...args: unknown[]) => (spyUseMatches(...args), { rows, loading: false, error: false, updateMatch: vi.fn(), reload: vi.fn() }),
   mapMatch: (r: unknown) => r,
   MATCHES_MAX_PER_PAGE: 200,
 }))
@@ -99,5 +100,14 @@ describe('MatchesPage · contract_form intent', () => {
     await waitFor(() => expect(screen.getByTestId('table-rows')).toHaveTextContent('m-3'))
     expect(screen.getByTestId('table-rows')).not.toHaveTextContent('m-1')
     expect(screen.getByTestId('table-rows')).not.toHaveTextContent('m-2')
+  })
+})
+
+// ONIX S-004: the expiring horizon reaches the data hook (which sends the GET /matches params).
+describe('MatchesPage · expiring intent', () => {
+  it('forwards { expiring_within_days, expiring_within_unit } to useMatches', () => {
+    spyUseMatches.mockClear()
+    render(<MatchesPage intent={{ expiring_within_days: 1, expiring_within_unit: 'months' }} />)
+    expect(spyUseMatches).toHaveBeenCalledWith(null, false, undefined, { days: 1, unit: 'months' })
   })
 })

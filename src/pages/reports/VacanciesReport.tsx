@@ -162,7 +162,11 @@ export default function VacanciesReport({ period, filters = EMPTY_REPORT_FILTERS
     unitFallback: { fill_rate: 'ratio' },
     // KPI-DREMPELS-FE-1: threshold cards keep their tenant-threshold caption.
     subFor: key => totalCompareSubFor(totalCompare)(key)
-      ?? thresholdCaption(t, key, { stale_online: data?.summary?.advice_stale_days, closing_soon: data?.summary?.closing_soon_days }),
+      ?? thresholdCaption(t, key, {
+        // ONIX S-004: the {amount, unit} window wins; the legacy *_days stays the fallback.
+        stale_online: data?.summary?.advice_stale_window ?? data?.summary?.advice_stale_days,
+        closing_soon: data?.summary?.closing_soon_window ?? data?.summary?.closing_soon_days,
+      }, formatNumber),
   })
   // Which nine keys render, and in what order, is the tenant's Settings → Reports
   // choice (falls back to today's order when nothing is stored, or a stored key

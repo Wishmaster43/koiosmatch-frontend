@@ -81,7 +81,13 @@ export default function MatchesPage({ intent }: { intent?: unknown } = {}) {
   const { approvalMode } = useMatchApprovalMode()
   const approvalReviewVisible = approvalMode !== 'off'
   // Data (fetch + mapping) lives in the hook (§3); the page only derives + renders.
-  const { rows, loading, error, updateMatch, reload } = useMatches(refQuery, showArchived || showTrash)
+  // ONIX S-004: the reports-hub expiring card lands here with its horizon; it is derived from the intent, never sticky.
+  const expiringDays = Number((intent as { expiring_within_days?: unknown } | undefined)?.expiring_within_days)
+  const expiringUnit = (intent as { expiring_within_unit?: unknown } | undefined)?.expiring_within_unit
+  const expiring = useMemo(
+    () => (Number.isFinite(expiringDays) && expiringDays > 0 ? { days: expiringDays, unit: typeof expiringUnit === 'string' ? expiringUnit : undefined } : null),
+    [expiringDays, expiringUnit])
+  const { rows, loading, error, updateMatch, reload } = useMatches(refQuery, showArchived || showTrash, undefined, expiring)
   // MATCH-APPROVAL-QUICKVIEW: bumped alongside `reload()` so the /matches/stats
   // KPI refetches whenever the row list does (create / archive / restore).
   const [statsRefreshTick, setStatsRefreshTick] = useState(0)

@@ -8,6 +8,10 @@
 // Shared shapes repeated across nearly every report envelope below: the
 // day/week timeseries block, and the nine-card KPI suite (KPI-MATCHES-1 idiom
 // — key/label/count/unit, unit optional since not every card carries one).
+// A tenant time window as the bureau configured it (BE lane H2): amount plus unit.
+export type ReportWindowUnit = 'days' | 'workdays' | 'weeks' | 'months'
+export interface ReportWindow { amount: number; unit: ReportWindowUnit }
+
 export interface ReportTimeseries { bucket: 'day' | 'week'; series: CandidateTimeseriesPoint[] }
 export interface ReportKpiCard { key: string; label?: string; count: number | null; unit?: 'pct' | 'ratio' | 'euro' | 'days' }
 
@@ -74,12 +78,15 @@ interface VacancyReportSummary {
   // settings lookup for its caption.
   advice_stale: number
   advice_stale_days: number
+  // Tenant window as {amount, unit} (BE lane H2); the legacy *_days above carry the AMOUNT in the bureau's unit.
+  advice_stale_window?: ReportWindow
   // The vacancy's application_deadline falls within `closing_soon_days`
   // (`vacancy_closing_soon_days`) — open vacancies only. Drillable via its own
   // `closing_soon` boolean XOR key on the VacanciesDrillRequest/VacanciesAdviceRequest
   // whitelist (VAC-CLOSING-SOON-DRILL-1, mirrors stale_online) — never a `signal` param.
   closing_soon: number
   closing_soon_days: number
+  closing_soon_window?: ReportWindow
 }
 
 // Portie-4 additions are ADDITIVE (RAPPORTEN-SUITE-1): the C-34 envelope above
@@ -533,6 +540,11 @@ export interface TasksReportData {
 // was computed with. `label` is the server's Dutch label — deliberately not the
 // primary source (DEMO-TAAL/§5): the frontend translates by `key` and falls back
 // to this only when a key has no i18n entry yet.
-interface ReportsHubCard { key: string; label: string; count: number; report: string; filters: Record<string, unknown> }
+// `matches_expiring` carries the bureau's horizon AMOUNT plus its unit (ONIX S-004), optional until the BE sends them.
+interface ReportsHubCardFilters extends Record<string, unknown> {
+  expiring_within_days?: number
+  expiring_within_unit?: ReportWindowUnit
+}
+interface ReportsHubCard { key: string; label: string; count: number; report: string; filters: ReportsHubCardFilters }
 
 export interface ReportsHubData { signals: ReportsHubCard[] }

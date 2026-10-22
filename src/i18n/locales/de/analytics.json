@@ -1,6 +1,16 @@
 {
   "title": "Berichte",
   "thresholdDays": "Schwelle: {{n}} Tage",
+  "thresholdWindow": {
+    "days_one": "Schwelle: {{n}} Tag",
+    "days_other": "Schwelle: {{n}} Tage",
+    "workdays_one": "Schwelle: {{n}} Werktag",
+    "workdays_other": "Schwelle: {{n}} Werktage",
+    "weeks_one": "Schwelle: {{n}} Woche",
+    "weeks_other": "Schwelle: {{n}} Wochen",
+    "months_one": "Schwelle: {{n}} Monat",
+    "months_other": "Schwelle: {{n}} Monate"
+  },
   "drill": {
     "breakdown": "Aufschlüsselung",
     "records": "Zugrunde liegende Datensätze",

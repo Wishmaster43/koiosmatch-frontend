@@ -1,6 +1,16 @@
 {
   "title": "Relatórios",
   "thresholdDays": "Limiar: {{n}} dias",
+  "thresholdWindow": {
+    "days_one": "Limiar: {{n}} dia",
+    "days_other": "Limiar: {{n}} dias",
+    "workdays_one": "Limiar: {{n}} dia útil",
+    "workdays_other": "Limiar: {{n}} dias úteis",
+    "weeks_one": "Limiar: {{n}} semana",
+    "weeks_other": "Limiar: {{n}} semanas",
+    "months_one": "Limiar: {{n}} mês",
+    "months_other": "Limiar: {{n}} meses"
+  },
   "drill": {
     "breakdown": "Distribuição",
     "records": "Registos subjacentes",

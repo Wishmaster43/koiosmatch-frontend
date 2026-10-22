@@ -9,6 +9,7 @@
 import type { ReactNode } from 'react'
 import type { TFunction } from 'i18next'
 import type { KpiSpec } from '@/components/insights/InsightsRow'
+import type { ReportWindow } from '@/types/analytics'
 import type { DrillSpec } from '../ReportDrillDrawer'
 import { renderKpiValue } from '../renderKpiValue'
 
@@ -106,10 +107,14 @@ export function serverKpiSpecs(o: ServerKpiSpecsOpts): Record<string, KpiSpec> {
 // tenant-configured day threshold (stale/closing-soon-style cards) — the same
 // ternary-by-key shape opportunities and vacancies both build (DRY round).
 export function thresholdCaption(
-  t: TFunction, key: string, byKey: Partial<Record<string, number | null | undefined>>,
+  t: TFunction, key: string, byKey: Partial<Record<string, number | ReportWindow | null | undefined>>,
+  formatNumber: (n: number) => string = String,
 ): ReactNode | undefined {
-  const days = byKey[key]
-  return days != null ? t('thresholdDays', { n: days }) : undefined
+  const v = byKey[key]
+  if (v == null) return undefined
+  // ONIX S-004: a {amount, unit} window reads in its own unit (weeks/months never pass as days).
+  if (typeof v === 'object') return t(`thresholdWindow.${v.unit}`, { count: v.amount, n: formatNumber(v.amount) })
+  return t('thresholdDays', { n: v })
 }
 
 // The unit-aware server-keyed idiom matches/opportunities/vacancies all share:

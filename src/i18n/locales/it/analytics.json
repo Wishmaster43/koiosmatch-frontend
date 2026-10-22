@@ -1,6 +1,16 @@
 {
   "title": "Report",
   "thresholdDays": "Soglia: {{n}} giorni",
+  "thresholdWindow": {
+    "days_one": "Soglia: {{n}} giorno",
+    "days_other": "Soglia: {{n}} giorni",
+    "workdays_one": "Soglia: {{n}} giorno lavorativo",
+    "workdays_other": "Soglia: {{n}} giorni lavorativi",
+    "weeks_one": "Soglia: {{n}} settimana",
+    "weeks_other": "Soglia: {{n}} settimane",
+    "months_one": "Soglia: {{n}} mese",
+    "months_other": "Soglia: {{n}} mesi"
+  },
   "drill": {
     "breakdown": "Composizione",
     "records": "Record sottostanti",

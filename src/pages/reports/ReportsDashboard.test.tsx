@@ -254,3 +254,18 @@ describe('ReportsDashboard · chart grid (PART B)', () => {
     expect(screen.getByText('Taken per status')).toBeInTheDocument()
   })
 })
+
+// ONIX S-004: the expiring card opens the matches LIST with the horizon it counted.
+describe('ReportsDashboard · matches_expiring card (S-004)', () => {
+  it('navigates to the matches list with the amount and unit from the card filters', async () => {
+    setSuccess()
+    mockNavigate.mockClear()
+    mockHub.mockReturnValue({
+      data: { signals: HUB_CARDS.map(c => (c.key === 'matches_expiring' ? { ...c, filters: { expiring_within_days: 2, expiring_within_unit: 'weeks' } } : c)) },
+      loading: false, error: false, errorObject: undefined, refetch: vi.fn(),
+    })
+    renderDashboard()
+    await userEvent.click(screen.getByRole('button', { name: '5 Matches die aflopen' }))
+    expect(mockNavigate).toHaveBeenCalledWith('matches', { expiring_within_days: 2, expiring_within_unit: 'weeks' })
+  })
+})

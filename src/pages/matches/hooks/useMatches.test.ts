@@ -360,3 +360,21 @@ describe('mapMatch · koiosAiAdvice', () => {
     expect(mapMatch({ id: 'm1' }).koiosAiAdvice).toBeNull()
   })
 })
+
+describe('useMatches · expiring window (ONIX S-004)', () => {
+  it('sends expiring_within_days and expiring_within_unit on GET /matches', async () => {
+    mockedGet.mockResolvedValue({ data: { data: [], meta: { last_page: 1 } } })
+    const { result } = renderHook(() => useMatches(null, false, undefined, { days: 2, unit: 'weeks' }))
+    await waitFor(() => expect(result.current.loading).toBe(false))
+    expect(mockedGet).toHaveBeenCalledWith('/matches', { params: expect.objectContaining({ expiring_within_days: 2, expiring_within_unit: 'weeks' }) })
+  })
+
+  it('sends neither param without a window', async () => {
+    mockedGet.mockResolvedValue({ data: { data: [], meta: { last_page: 1 } } })
+    const { result } = renderHook(() => useMatches())
+    await waitFor(() => expect(result.current.loading).toBe(false))
+    const params = mockedGet.mock.calls[0][1]?.params as Record<string, unknown>
+    expect(params).not.toHaveProperty('expiring_within_days')
+    expect(params).not.toHaveProperty('expiring_within_unit')
+  })
+})

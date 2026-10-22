@@ -150,7 +150,9 @@ export function mapMatch(m: RawMatch): MatchRow {
 // `approvalStatus` (MATCH-APPROVAL-QUICKVIEW): the 'Te beoordelen' quick view sends
 // `approval_status=pending` as a server param (MatchQuery.php:60,119) instead of
 // filtering the already-loaded rows client-side — undefined sends no filter.
-export function useMatches(ref: string | null = null, includeArchived: boolean = false, approvalStatus?: string) {
+// `expiring` (ONIX S-004): the horizon the reports-hub card counted, sent as expiring_within_days (amount) + expiring_within_unit.
+export interface ExpiringWindow { days: number; unit?: string }
+export function useMatches(ref: string | null = null, includeArchived: boolean = false, approvalStatus?: string, expiring?: ExpiringWindow | null) {
   const [rows,    setRows]    = useState<MatchRow[]>([])
   const [loading, setLoading] = useState(true)
   const [error,   setError]   = useState(false)
@@ -159,6 +161,9 @@ export function useMatches(ref: string | null = null, includeArchived: boolean =
   // after an archive/restore (useMatchArchive) so a just-archived row drops out of
   // the list and a just-restored one comes back.
   const [refreshTick, setRefreshTick] = useState(0)
+  // Primitives keep the effect stable when a caller passes a fresh window object each render.
+  const expiringDays = expiring?.days
+  const expiringUnit = expiring?.unit
 
   // Loads the full match set (paginating past the server cap) so KPIs/board never undercount, unless a reference-number query narrows it to one exact lookup.
   useEffect(() => {
@@ -172,6 +177,10 @@ export function useMatches(ref: string | null = null, includeArchived: boolean =
     const base: Record<string, unknown> = { per_page: MATCHES_MAX_PER_PAGE }
     if (includeArchived) base.include_archived = 1
     if (approvalStatus) base.approval_status = approvalStatus
+    if (expiringDays != null) {
+      base.expiring_within_days = expiringDays
+      if (expiringUnit) base.expiring_within_unit = expiringUnit
+    }
     const loadAll = async () => {
       // A reference-number query (NUMMER-1) is an exact server-side lookup — one
       // request, no pagination loop; the server ignores other filters when `ref` is set.
@@ -196,7 +205,7 @@ export function useMatches(ref: string | null = null, includeArchived: boolean =
       .catch(e => { if (alive && e?.response?.status && e.response.status !== 404) setError(true) })
       .finally(() => { if (alive) setLoading(false) })
     return () => { alive = false }
-  }, [refreshTick, ref, includeArchived, approvalStatus])
+  }, [refreshTick, ref, includeArchived, approvalStatus, expiringDays, expiringUnit])
 
   // Patch one match in place (optimistic board drag / stage change / archive flag).
   // ZZP-MERGE-1: deep-merge (never shallow-spread) so a patch touching only part of

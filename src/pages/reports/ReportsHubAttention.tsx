@@ -44,6 +44,14 @@ export default function ReportsHubAttention() {
   const hasWhatsapp = (auth?.hasModule ?? (() => false))('whatsapp')
   const { data, loading, error, errorObject, refetch } = useReportsHub()
 
+  // The expiring-matches card opens the matches LIST with the horizon it counted (counter == drill-down); every other row opens its report.
+  const openSignal = (s: { key: string; report: string; filters: { expiring_within_days?: number; expiring_within_unit?: string } }) => {
+    const target = resolveReportId(s.report, hasWhatsapp)
+    if (s.key === 'matches_expiring' && s.filters?.expiring_within_days != null) {
+      navigate('matches', { expiring_within_days: s.filters.expiring_within_days, expiring_within_unit: s.filters.expiring_within_unit })
+    } else if (target) navigate(`reports.${target}`)
+  }
+
   // No reports.view: the block is simply absent — the KPI band above stays.
   if (error && isReportsHubForbidden(errorObject)) return null
 
@@ -69,7 +77,7 @@ export default function ReportsHubAttention() {
         }
         return (
           <Button key={s.key} variant="ghost" size="sm"
-            onClick={() => navigate(`reports.${target}`)}
+            onClick={() => openSignal(s)}
             aria-label={`${s.count} ${label}`}
             style={{ width: '100%', justifyContent: 'space-between', padding: '0 8px' }}>
             {body}

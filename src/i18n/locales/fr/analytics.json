@@ -1,6 +1,16 @@
 {
   "title": "Rapports",
   "thresholdDays": "Seuil : {{n}} jours",
+  "thresholdWindow": {
+    "days_one": "Seuil : {{n}} jour",
+    "days_other": "Seuil : {{n}} jours",
+    "workdays_one": "Seuil : {{n}} jour ouvré",
+    "workdays_other": "Seuil : {{n}} jours ouvrés",
+    "weeks_one": "Seuil : {{n}} semaine",
+    "weeks_other": "Seuil : {{n}} semaines",
+    "months_one": "Seuil : {{n}} mois",
+    "months_other": "Seuil : {{n}} mois"
+  },
   "drill": {
     "breakdown": "Répartition",
     "records": "Enregistrements sous-jacents",

@@ -1,6 +1,16 @@
 {
   "title": "Rapporten",
   "thresholdDays": "Drempel: {{n}} dagen",
+  "thresholdWindow": {
+    "days_one": "Drempel: {{n}} dag",
+    "days_other": "Drempel: {{n}} dagen",
+    "workdays_one": "Drempel: {{n}} werkdag",
+    "workdays_other": "Drempel: {{n}} werkdagen",
+    "weeks_one": "Drempel: {{n}} week",
+    "weeks_other": "Drempel: {{n}} weken",
+    "months_one": "Drempel: {{n}} maand",
+    "months_other": "Drempel: {{n}} maanden"
+  },
   "drill": {
     "breakdown": "Opbouw",
     "records": "Onderliggende records",

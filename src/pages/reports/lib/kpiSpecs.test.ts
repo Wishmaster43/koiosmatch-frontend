@@ -133,6 +133,12 @@ describe('thresholdCaption', () => {
     expect(thresholdCaption(t, 'stale', { stale: null })).toBeUndefined()
     expect(thresholdCaption(t, 'missing', {})).toBeUndefined()
   })
+
+  // ONIX S-004: a {amount, unit} window reads in its own unit with a plural count.
+  it.each(['days', 'workdays', 'weeks', 'months'] as const)('renders the %s window with count and formatted n', unit => {
+    const tt = vi.fn((k: string, o?: unknown) => `${k}|${JSON.stringify(o)}`) as unknown as TFunction
+    expect(thresholdCaption(tt, 'stale', { stale: { amount: 3, unit } }, n => `#${n}`)).toBe(`thresholdWindow.${unit}|{"count":3,"n":"#3"}`)
+  })
 })
 
 describe('unitMapFor', () => {

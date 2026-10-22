@@ -1,6 +1,16 @@
 {
   "title": "Informes",
   "thresholdDays": "Umbral: {{n}} días",
+  "thresholdWindow": {
+    "days_one": "Umbral: {{n}} día",
+    "days_other": "Umbral: {{n}} días",
+    "workdays_one": "Umbral: {{n}} día laborable",
+    "workdays_other": "Umbral: {{n}} días laborables",
+    "weeks_one": "Umbral: {{n}} semana",
+    "weeks_other": "Umbral: {{n}} semanas",
+    "months_one": "Umbral: {{n}} mes",
+    "months_other": "Umbral: {{n}} meses"
+  },
   "drill": {
     "breakdown": "Desglose",
     "records": "Registros subyacentes",
