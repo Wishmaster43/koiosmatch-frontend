@@ -9,9 +9,13 @@ import { render, screen } from '@testing-library/react'
 import CustomersMapView from './CustomersMapView'
 import type { Customer } from '@/types/customer'
 
+// Captures the points array each render hands to the panel (identity assertions).
+const capture = vi.hoisted(() => ({ fn: (p: unknown): unknown => p }))
+
 // Leaflet is out of scope — the shared panel is stubbed to expose its points.
 vi.mock('@/components/map/RadiusMapPanel', () => ({
   default: ({ points }: { points: Array<{ id: unknown; label: string }> }) => (
+    capture.fn(points),
     <div data-testid="map-panel">{points.map(p => <span key={String(p.id)}>{p.label}</span>)}</div>
   ),
 }))
@@ -64,5 +68,19 @@ describe('CustomersMapView · pending geocode banner', () => {
     ] as unknown as Customer[]
     render(<CustomersMapView rows={rows} {...base} />)
     expect(screen.queryByText('customers:map.pendingGeocode')).toBeNull()
+  })
+})
+
+// MAP-HOST-MEMO: same rows keep the SAME points array; a changed rows array rebuilds it.
+describe('CustomersMapView · points identity', () => {
+  it('passes a stable points array on re-render and a new one when rows change', () => {
+    const seen: unknown[] = []
+    capture.fn = (p: unknown) => seen.push(p)
+    const r1 = [{ id: 'x', name: 'A', lat: 52.09, lng: 5.12, city: 'Utrecht' }] as unknown as Customer[]
+    const { rerender } = render(<CustomersMapView rows={r1} {...base} />)
+    rerender(<CustomersMapView rows={r1} {...base} />)
+    expect(seen[1]).toBe(seen[0])
+    rerender(<CustomersMapView rows={[...r1]} {...base} />)
+    expect(seen[2]).not.toBe(seen[0])
   })
 })

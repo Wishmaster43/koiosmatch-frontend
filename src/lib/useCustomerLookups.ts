@@ -77,6 +77,12 @@ const mapCustomerLookups = (res: AxiosResponse): CustomerLookupsData => {
   }
 }
 
+// value → item helper with a neutral fallback so the UI never crashes. Module scope: a pure
+// factory, so the hook can memoise each list's helper and consumers keep a stable identity
+// (the customers map pane keys a useCallback on it; a fresh closure per render redrew every layer).
+// eslint-disable-next-line no-restricted-syntax -- DATA fallback, not a UI colour choice
+const metaIn = (list: LookupOption[]) => (v?: string | null): LookupOption => list.find(s => s.value === v) ?? { value: v ?? '', label: v || '—', color: '#9CA3AF' }
+
 // Tenant customer/location/department/contact status lookups, with translated seed
 // fallbacks and a value→item meta helper per list (mirrors useGenders/useFunctions).
 export function useCustomerLookups() {
@@ -92,15 +98,17 @@ export function useCustomerLookups() {
   const departmentStatuses = useMemo(() => translateSeedList(t, 'subStatuses', data.departmentStatuses), [data.departmentStatuses, t])
   const contactStatuses    = useMemo(() => translateSeedList(t, 'subStatuses', data.contactStatuses), [data.contactStatuses, t])
 
-  // value → item helper with a neutral fallback so the UI never crashes.
-  // eslint-disable-next-line no-restricted-syntax -- DATA fallback, not a UI colour choice
-  const metaIn = (list: LookupOption[]) => (v?: string | null): LookupOption => list.find(s => s.value === v) ?? { value: v ?? '', label: v || '—', color: '#9CA3AF' }
+  // One memoised helper per list: its identity only changes when the list does (§9 stable reference).
+  const statusMeta           = useMemo(() => metaIn(statuses), [statuses])
+  const locationStatusMeta   = useMemo(() => metaIn(locationStatuses), [locationStatuses])
+  const departmentStatusMeta = useMemo(() => metaIn(departmentStatuses), [departmentStatuses])
+  const contactStatusMeta    = useMemo(() => metaIn(contactStatuses), [contactStatuses])
 
   return {
-    statuses, statusMeta: metaIn(statuses),
-    locationStatuses,   locationStatusMeta:   metaIn(locationStatuses),
-    departmentStatuses, departmentStatusMeta: metaIn(departmentStatuses),
-    contactStatuses,    contactStatusMeta:    metaIn(contactStatuses),
+    statuses, statusMeta,
+    locationStatuses,   locationStatusMeta,
+    departmentStatuses, departmentStatusMeta,
+    contactStatuses,    contactStatusMeta,
     loading,
   }
 }

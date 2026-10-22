@@ -3,6 +3,7 @@
  * Thin: maps rows → MapPoints (status colour, city · distance sub) and hands them
  * to the shared RadiusMapPanel; the host page owns centre/radius and the drawer.
  */
+import { useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
 import RadiusMapPanel, { type MapPoint } from '@/components/map/RadiusMapPanel'
 import PendingGeocodeBanner from '@/components/map/PendingGeocodeBanner'
@@ -16,14 +17,15 @@ export default function VacanciesMapView({ rows, center, radiusKm, onCenterChang
   const { t } = useTranslation(['vacancies', 'common'])
 
   // Only rows with geocoded coordinates land on the map (PDOK fills them on save).
-  const points: MapPoint[] = rows
+  // Memoised so the imperative map only redraws when the rows (or their label inputs) change.
+  const points: MapPoint[] = useMemo(() => rows
     .filter(v => typeof v.lat === 'number' && typeof v.lng === 'number' && v.id != null)
     .map(v => ({
       id: v.id as Id, lat: v.lat as number, lng: v.lng as number, label: v.title,
       sub: [v.city, v.distanceKm != null ? t('common:map.kmAway', { km: v.distanceKm }) : null].filter(Boolean).join(' · '),
       // eslint-disable-next-line no-restricted-syntax -- DATA fallback marker colour, not a UI colour choice (mirrors Avatar.tsx's identical constant)
       color: v.statusColor || '#9CA3AF',
-    }))
+    })), [rows, t])
 
   // Rij 34: addressed rows still waiting for the background geocoder get one calm line above the map.
   const pending = countPendingGeocode(rows)

@@ -3,7 +3,7 @@
  * same server-filtered rows as a table right. Pure extraction from
  * CustomersPage (§0.3 split) — no behavior change.
  */
-import { Suspense, lazy } from 'react'
+import { Suspense, lazy, useCallback } from 'react'
 import type { TFunction } from 'i18next'
 import ErrorBanner from '@/components/ui/ErrorBanner'
 import PaginationBar from '@/components/ui/PaginationBar'
@@ -43,12 +43,14 @@ export default function CustomersMapPane({
   t, rows, loading, error, selectedId, onSelect, statusMeta, mapCenter, mapRadius, setMapCenter, setMapRadius,
   page, lastPage, total, rangeFrom, rangeTo, pageSize, pageSizeOptions, onPageChange, onPageSizeChange,
 }: Props) {
+  // Stable colour resolver so the memoised map host does not redraw on pane re-renders.
+  const statusColor = useCallback((v: Customer['status']) => statusMeta(String(v)).color, [statusMeta])
   return (
     <div style={{ flex: 1, minHeight: 0, display: 'flex', gap: 14, padding: '0 24px 16px' }}>
       <div style={{ flex: '1.1 1 0', minWidth: 400, display: 'flex', flexDirection: 'column' }}>
         <Suspense fallback={<div style={{ padding: 24, fontSize: 12, color: 'var(--text-muted)' }}>{t('common:map.loading')}</div>}>
           <CustomersMapView rows={rows} padded={false}
-            statusColor={v => statusMeta(String(v)).color} center={mapCenter} radiusKm={mapRadius}
+            statusColor={statusColor} center={mapCenter} radiusKm={mapRadius}
             onCenterChange={(lat, lng) => setMapCenter({ lat, lng })} onRadiusChange={setMapRadius}
             onPick={id => onSelect({ id } as Customer)} />
         </Suspense>

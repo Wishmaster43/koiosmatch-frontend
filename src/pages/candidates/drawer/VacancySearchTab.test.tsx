@@ -103,10 +103,13 @@ vi.mock('@/components/actionrules', async (importOriginal) => ({
 // line now render for real inside GeoSearchShell (this tab no longer mounts
 // RadiusMapPanel), so the reset test below drives the REAL km input instead of
 // a stub button.
+// Captures every props object the map receives so identity stability can be asserted.
+const mapProps = vi.hoisted(() => ({ calls: [] as Array<{ points: unknown; centerMarker?: unknown }> }))
 vi.mock('@/components/map/RadiusMap', () => ({
-  default: ({ points, radiusKm }: { points: Array<{ id: string | number }>; radiusKm: number }) => (
-    <div data-testid="radius-map" data-radius={radiusKm} data-points={points.length} />
-  ),
+  default: (props: { points: Array<{ id: string | number }>; radiusKm: number; centerMarker?: unknown }) => {
+    mapProps.calls.push({ points: props.points, centerMarker: props.centerMarker })
+    return <div data-testid="radius-map" data-radius={props.radiusKm} data-points={props.points.length} />
+  },
 }))
 
 // Tenant function options — mirrors useFunctions' shape without the real cache/fetch.
@@ -965,5 +968,19 @@ describe('VacancySearchTab · reset filters (Danny 08-08, point 8)', () => {
     await userEvent.click(screen.getByRole('button', { name: 'Filters herstellen' }))
     await waitFor(() => expect(screen.queryByText('Tijdelijk-vacature | Arnhem')).not.toBeInTheDocument())
     expect(screen.getByText('ZZP-vacature | Ede')).toBeInTheDocument()
+  })
+})
+
+// MAP-HOST-MEMO: a re-render with unchanged data hands the imperative map the SAME points and centre marker.
+describe('VacancySearchTab · map prop identity', () => {
+  it('keeps points and centerMarker stable across a re-render', async () => {
+    stubApi({ matches: () => Promise.resolve({ data: { data: rawMatchRows } }) })
+    const { rerender } = render(<VacancySearchTab candidate={candidateWithLocation} />)
+    await waitFor(() => expect(screen.getByTestId('radius-map')).toHaveAttribute('data-points', '2'))
+    const first = mapProps.calls[mapProps.calls.length - 1]
+    rerender(<VacancySearchTab candidate={candidateWithLocation} />)
+    const second = mapProps.calls[mapProps.calls.length - 1]
+    expect(second.points).toBe(first.points)
+    expect(second.centerMarker).toBe(first.centerMarker)
   })
 })

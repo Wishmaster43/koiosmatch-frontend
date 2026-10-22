@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import CalloutBox from '@/components/ui/CalloutBox'
+import { useNumberFormat } from '@/lib/formatters'
 import { useViewportBelow } from '@/hooks/useViewportBelow'
 
 // Layout constant (Danny 15-10, ONIX N-013): the staff app is desktop-only at launch.
@@ -15,6 +16,7 @@ function readDismissed(): boolean {
 // Slim notice shown below the desktop width instead of a broken layout; dismissable per session.
 export default function MinWidthNotice() {
   const { t } = useTranslation('common')
+  const { formatNumber } = useNumberFormat()
   const below = useViewportBelow(DESKTOP_MIN_WIDTH)
   const [dismissed, setDismissed] = useState(readDismissed)
 
@@ -28,7 +30,7 @@ export default function MinWidthNotice() {
   return (
     <div role="status" className="flex-shrink-0 px-3 py-2">
       <CalloutBox variant="warning" live="off" onDismiss={dismiss} dismissLabel={t('minWidth.dismiss')}>
-        {t('minWidth.notice')}
+        {t('minWidth.notice', { width: formatNumber(DESKTOP_MIN_WIDTH) })}
       </CalloutBox>
     </div>
   )

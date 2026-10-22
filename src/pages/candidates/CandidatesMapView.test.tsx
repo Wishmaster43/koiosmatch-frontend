@@ -9,14 +9,22 @@ import { render, screen } from '@testing-library/react'
 import CandidatesMapView from './CandidatesMapView'
 import type { Candidate } from '@/types/candidate'
 
+// Captures the points array each render hands to the panel (identity assertions).
+const capture = vi.hoisted(() => ({ fn: (p: unknown): unknown => p }))
+
 // Leaflet is out of scope — the shared panel is stubbed to expose its points.
 vi.mock('@/components/map/RadiusMapPanel', () => ({
   default: ({ points }: { points: Array<{ id: unknown; label: string }> }) => (
+    capture.fn(points),
     <div data-testid="map-panel">{points.map(p => <span key={String(p.id)}>{p.label}</span>)}</div>
   ),
 }))
-vi.mock('react-i18next', () => ({ useTranslation: () => ({ t: (k: string) => k }) }))
-vi.mock('@/context/LookupsContext', () => ({ useLookups: () => ({ statusMeta: () => ({ color: '#000' }) }) }))
+// One stable t reference, like the real hook, so memo dependencies hold across renders.
+const stableT = (k: string) => k
+vi.mock('react-i18next', () => ({ useTranslation: () => ({ t: stableT }) }))
+// Stable statusMeta reference, like the real context value, so memo dependencies hold.
+const stableStatusMeta = () => ({ color: '#000' })
+vi.mock('@/context/LookupsContext', () => ({ useLookups: () => ({ statusMeta: stableStatusMeta }) }))
 
 const noop = () => {}
 const base = { center: { lat: 52, lng: 5 }, radiusKm: 30, onCenterChange: noop, onRadiusChange: noop, onPick: noop }
@@ -65,5 +73,19 @@ describe('CandidatesMapView · pending geocode banner', () => {
     ] as unknown as Candidate[]
     render(<CandidatesMapView rows={rows} {...base} />)
     expect(screen.queryByText('candidates:map.pendingGeocode')).toBeNull()
+  })
+})
+
+// MAP-HOST-MEMO: same rows keep the SAME points array; a changed rows array rebuilds it.
+describe('CandidatesMapView · points identity', () => {
+  it('passes a stable points array on re-render and a new one when rows change', () => {
+    const seen: unknown[] = []
+    capture.fn = (p: unknown) => seen.push(p)
+    const r1 = [{ id: 'x', name: 'A', lat: 52.09, lng: 5.12, city: 'Utrecht' }] as unknown as Candidate[]
+    const { rerender } = render(<CandidatesMapView rows={r1} {...base} />)
+    rerender(<CandidatesMapView rows={r1} {...base} />)
+    expect(seen[1]).toBe(seen[0])
+    rerender(<CandidatesMapView rows={[...r1]} {...base} />)
+    expect(seen[2]).not.toBe(seen[0])
   })
 })

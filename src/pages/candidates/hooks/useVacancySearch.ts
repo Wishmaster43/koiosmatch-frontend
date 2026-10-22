@@ -10,7 +10,7 @@
  * render reset on an entity switch). The pure seed/filter rules live next door
  * in vacancySearchFilters.ts.
  */
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useMemo } from 'react'
 import type { Dispatch, SetStateAction } from 'react'
 import api, { unwrapList } from '@/lib/api'
 import { toCoord } from '@/lib/coords'
@@ -311,7 +311,10 @@ export function useVacancySearch(candidate: Candidate) {
 
   // The fully-filtered view returned to the tab — client-side only (the API set is
   // already radius/status/function bounded), so no extra network round-trip.
-  const rows = applyClientFilters(rawRows, contractvorm, hoursRange, availableFrom)
+  const rows = useMemo(
+    () => applyClientFilters(rawRows, contractvorm, hoursRange, availableFrom),
+    [rawRows, contractvorm, hoursRange, availableFrom],
+  )
 
   return {
     rows, loading, error, retry: () => setReloadKey(k => k + 1),

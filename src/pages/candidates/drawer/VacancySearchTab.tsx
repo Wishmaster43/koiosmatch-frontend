@@ -6,7 +6,7 @@
  * container, all data via the hook, one small component per tab).
  */
 import type { ReactNode } from 'react'
-import { useState, useEffect, lazy, Suspense } from 'react'
+import { useState, useEffect, useMemo, lazy, Suspense } from 'react'
 import { useTranslation } from 'react-i18next'
 import GeoSearchShell from '@/components/search/GeoSearchShell'
 // audit scalability-3: Leaflet only downloads when this tab actually renders the map —
@@ -117,9 +117,14 @@ function VacancySearchTabInner({ candidate }: { candidate: Candidate }) {
   const { selectedIndex, goPrev, goNext } = useResultPager(rows, selectedId, selectId)
 
   const center = { lat: toCoord(candidate.lat) as number, lng: toCoord(candidate.lng) as number }
-  const points = rows
+  // Memoised so the imperative map does not redraw on unrelated tab re-renders.
+  const points = useMemo(() => rows
     .filter(r => r.lat != null && r.lng != null)
-    .map(r => ({ id: r.id, lat: r.lat as number, lng: r.lng as number, label: r.title, sub: [r.customer, r.city].filter(Boolean).join(' · ') }))
+    .map(r => ({ id: r.id, lat: r.lat as number, lng: r.lng as number, label: r.title, sub: [r.customer, r.city].filter(Boolean).join(' · ') })), [rows])
+  // Stable centre-pin object (label + sub strings only) for the same reason.
+  const centerLabel = candidate.name ?? ''
+  const centerSub = t('vacancySearch.centerHome')
+  const homeMarker = useMemo(() => ({ label: centerLabel, sub: centerSub }), [centerLabel, centerSub])
 
   // GEOSEARCH-1: the trigger row + the situational chips row are now two
   // separate slots on the shared GeoSearchShell (own component — the tab
@@ -155,7 +160,7 @@ function VacancySearchTabInner({ candidate }: { candidate: Candidate }) {
   ) : (
     <Suspense fallback={<div style={{ padding: 24, fontSize: 12, color: 'var(--text-muted)' }}>{t('common:map.loading')}</div>}>
       <RadiusMap points={points} center={center} radiusKm={radiusKm} height="100%"
-      centerMarker={{ label: candidate.name ?? '', sub: t('vacancySearch.centerHome') }}
+      centerMarker={homeMarker}
       // The candidate's home pin stays fixed — re-centring by clicking the map must
       // never move the search origin away from the candidate's own address.
       onCenterChange={() => {}}

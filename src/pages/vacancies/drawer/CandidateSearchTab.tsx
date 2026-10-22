@@ -9,7 +9,7 @@
  * SAME GeoSearchShell (trigger pills, active-filter chips, radius chrome, map,
  * results) instead of two hand-drifted layouts.
  */
-import { useState, useEffect, lazy, Suspense } from 'react'
+import { useState, useEffect, useMemo, lazy, Suspense } from 'react'
 import { useTranslation } from 'react-i18next'
 import { RefreshCw, ChevronRight } from 'lucide-react'
 import GeoSearchShell from '@/components/search/GeoSearchShell'
@@ -108,9 +108,14 @@ export default function CandidateSearchTab({ vacancy }: { vacancy: VacancyDetail
   }
 
   const center = { lat: toCoord(vacancy.lat) as number, lng: toCoord(vacancy.lng) as number }
-  const points = rows
+  // Memoised so the imperative map does not redraw on unrelated tab re-renders.
+  const points = useMemo(() => rows
     .filter(r => r.lat != null && r.lng != null)
-    .map(r => ({ id: r.id, lat: r.lat as number, lng: r.lng as number, label: r.name, sub: [r.functionTitle, r.city].filter(Boolean).join(' · ') }))
+    .map(r => ({ id: r.id, lat: r.lat as number, lng: r.lng as number, label: r.name, sub: [r.functionTitle, r.city].filter(Boolean).join(' · ') })), [rows])
+  // Stable centre-pin object (label + sub strings only) for the same reason.
+  const centerLabel = vacancy.title ?? ''
+  const centerSub = t('candidateSearch.centerVacancy')
+  const vacancyMarker = useMemo(() => ({ label: centerLabel, sub: centerSub }), [centerLabel, centerSub])
 
   // GEOSEARCH-1 (Danny 22-08): each trigger now carries its OWN label INSIDE the
   // pill (FilterTriggerPill), mirroring candidates/drawer/VacancySearchFilters —
@@ -200,7 +205,7 @@ export default function CandidateSearchTab({ vacancy }: { vacancy: VacancyDetail
   ) : (
     <Suspense fallback={<div style={{ padding: 24, fontSize: 12, color: 'var(--text-muted)' }}>{t('common:map.loading')}</div>}>
       <RadiusMap points={points} center={center} radiusKm={radiusKm} height="100%"
-      centerMarker={{ label: vacancy.title ?? '', sub: t('candidateSearch.centerVacancy') }}
+      centerMarker={vacancyMarker}
       // The vacancy pin stays fixed — re-centring by clicking the map must never
       // move the search origin away from the vacancy's own address.
       onCenterChange={() => {}}

@@ -1793,7 +1793,7 @@
     "daysShort": "{{count}}d"
   },
   "minWidth": {
-    "notice": "Koios Match está diseñado para una pantalla de escritorio de al menos 1024 píxeles de ancho. Amplía la ventana para ver la vista completa.",
+    "notice": "Koios Match está diseñado para una pantalla de escritorio de al menos {{width}} píxeles de ancho. Amplía la ventana para ver la vista completa.",
     "dismiss": "Cerrar aviso"
   }
 }

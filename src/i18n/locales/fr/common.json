@@ -1793,7 +1793,7 @@
     "daysShort": "{{count}}j"
   },
   "minWidth": {
-    "notice": "Koios Match est conçu pour un écran de bureau d’au moins 1024 pixels de large. Agrandissez la fenêtre pour un affichage complet.",
+    "notice": "Koios Match est conçu pour un écran de bureau d’au moins {{width}} pixels de large. Agrandissez la fenêtre pour un affichage complet.",
     "dismiss": "Fermer l’avis"
   }
 }

@@ -1793,7 +1793,7 @@
     "daysShort": "{{count}}d"
   },
   "minWidth": {
-    "notice": "Koios Match is built for a desktop screen at least 1024 pixels wide. Make the window wider for the full view.",
+    "notice": "Koios Match is built for a desktop screen at least {{width}} pixels wide. Make the window wider for the full view.",
     "dismiss": "Dismiss notice"
   }
 }

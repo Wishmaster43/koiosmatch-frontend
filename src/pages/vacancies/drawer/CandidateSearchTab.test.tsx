@@ -43,10 +43,13 @@ vi.mock('@/lib/notify', () => ({ notify: vi.fn(), notifyError: vi.fn(), notifySu
 // receives instead. GEOSEARCH-1 (22-08): the radius slider/km input/point-count
 // line now render for real inside GeoSearchShell (this tab no longer mounts
 // RadiusMapPanel).
+// Captures every props object the map receives so identity stability can be asserted.
+const mapProps = vi.hoisted(() => ({ calls: [] as Array<{ points: unknown; centerMarker?: unknown }> }))
 vi.mock('@/components/map/RadiusMap', () => ({
-  default: ({ points, radiusKm }: { points: Array<{ id: string | number }>; radiusKm: number }) => (
-    <div data-testid="radius-map" data-radius={radiusKm} data-points={points.length} />
-  ),
+  default: (props: { points: Array<{ id: string | number }>; radiusKm: number; centerMarker?: unknown }) => {
+    mapProps.calls.push({ points: props.points, centerMarker: props.centerMarker })
+    return <div data-testid="radius-map" data-radius={props.radiusKm} data-points={props.points.length} />
+  },
 }))
 
 // Two tenant function options — mirrors useFunctions' shape without the real cache/fetch.
@@ -624,3 +627,17 @@ describe('CandidateSearchTab · server criteria drive the controls', () => {
   })
 })
 
+
+// MAP-HOST-MEMO: a re-render with unchanged data hands the imperative map the SAME points and centre marker.
+describe('CandidateSearchTab · map prop identity', () => {
+  it('keeps points and centerMarker stable across a re-render', async () => {
+    mockGet.mockResolvedValueOnce({ data: { data: rawRows, total: 2, current_page: 1, last_page: 1, per_page: 100 } })
+    const { rerender } = render(<CandidateSearchTab vacancy={vacancyWithLocation} />)
+    await waitFor(() => expect(screen.getByTestId('radius-map')).toHaveAttribute('data-points', '2'))
+    const first = mapProps.calls[mapProps.calls.length - 1]
+    rerender(<CandidateSearchTab vacancy={vacancyWithLocation} />)
+    const second = mapProps.calls[mapProps.calls.length - 1]
+    expect(second.points).toBe(first.points)
+    expect(second.centerMarker).toBe(first.centerMarker)
+  })
+})

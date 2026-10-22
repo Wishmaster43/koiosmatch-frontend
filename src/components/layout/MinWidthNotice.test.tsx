@@ -3,7 +3,8 @@ import { render, screen, fireEvent } from '@testing-library/react'
 
 const below = vi.hoisted(() => ({ value: true }))
 vi.mock('@/hooks/useViewportBelow', () => ({ useViewportBelow: () => below.value }))
-vi.mock('react-i18next', () => ({ useTranslation: () => ({ t: (k: string) => k }) }))
+vi.mock('react-i18next', () => ({ useTranslation: () => ({ t: (k: string, o?: { width?: string }) => (o?.width ? `${k}|${o.width}` : k) }) }))
+vi.mock('@/lib/formatters', () => ({ useNumberFormat: () => ({ formatNumber: (n: number) => `fmt${n}` }) }))
 
 import MinWidthNotice from './MinWidthNotice'
 
@@ -12,7 +13,7 @@ describe('MinWidthNotice', () => {
 
   it('renders the notice below desktop width', () => {
     render(<MinWidthNotice />)
-    expect(screen.getByText('minWidth.notice')).toBeTruthy()
+    expect(screen.getByText('minWidth.notice|fmt1024')).toBeTruthy()
   })
 
   it('renders nothing at desktop width', () => {
@@ -24,7 +25,7 @@ describe('MinWidthNotice', () => {
   it('dismiss hides the notice and sets the session flag', () => {
     render(<MinWidthNotice />)
     fireEvent.click(screen.getByText('minWidth.dismiss'))
-    expect(screen.queryByText('minWidth.notice')).toBeNull()
+    expect(screen.queryByText('minWidth.notice|fmt1024')).toBeNull()
     expect(window.sessionStorage.getItem('km_min_width_dismissed')).toBe('1')
   })
 

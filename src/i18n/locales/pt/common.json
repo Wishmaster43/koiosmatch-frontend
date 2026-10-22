@@ -1793,7 +1793,7 @@
     "daysShort": "{{count}}d"
   },
   "minWidth": {
-    "notice": "Koios Match foi feito para um ecrã de secretária com pelo menos 1024 píxeis de largura. Alargue a janela para ver tudo.",
+    "notice": "Koios Match foi feito para um ecrã de secretária com pelo menos {{width}} píxeis de largura. Alargue a janela para ver tudo.",
     "dismiss": "Fechar aviso"
   }
 }
