@@ -128,13 +128,20 @@ export function useContactsPanelColumns({ scope, scopeId, locationScope, locatio
       render: p => phoneValue(p.mobile, t('contacts.detail.callPhone'), { label: t('contacts.detail.whatsapp') }) },
     { key: 'lastContact', header: t('contacts.col.lastContact'), nowrap: true, sortable: true, sortValue: p => p.lastContactAt ?? '',
       render: p => {
-        if (!p.lastContactAt) return <span style={{ color: 'var(--text-muted)' }}>—</span>
+        // ONIX S-014: small warning chip when the server flags the contact as overdue (also never-contacted).
+        const alarm = p.noContactDue
+          ? <SoftChip label={t('contacts.noContactDue')} color="var(--color-warning)" title={t('contacts.noContactDueTitle')} />
+          : null
+        if (!p.lastContactAt) return <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}><span style={{ color: 'var(--text-muted)' }}>—</span>{alarm}</span>
         const label = lastContactLabel(p.lastContactType)
         const icon = p.lastContactType ? lastContactIcon(p.lastContactType) : undefined
         return (
-          <span title={label} style={{ display: 'inline-flex', alignItems: 'center', gap: 5, color: 'var(--text)', fontSize: 12 }}>
-            {formatDate(p.lastContactAt)}
-            {icon && <span style={{ display: 'inline-flex', flexShrink: 0, opacity: 0.6 }}><LookupIcon icon={icon} size={12} /></span>}
+          <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}>
+            <span title={label} style={{ display: 'inline-flex', alignItems: 'center', gap: 5, color: 'var(--text)', fontSize: 12 }}>
+              {formatDate(p.lastContactAt)}
+              {icon && <span style={{ display: 'inline-flex', flexShrink: 0, opacity: 0.6 }}><LookupIcon icon={icon} size={12} /></span>}
+            </span>
+            {alarm}
           </span>
         )
       } },

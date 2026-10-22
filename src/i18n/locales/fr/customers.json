@@ -385,6 +385,8 @@
     }
   },
   "contacts": {
+    "noContactDue": "Aucun contact",
+    "noContactDueTitle": "Aucun contact depuis plus longtemps que la fenêtre définie",
     "empty": "Aucun contact pour le moment",
     "add": "Nouveau contact",
     "searchPlaceholder": "Rechercher un contact…",

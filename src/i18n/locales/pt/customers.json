@@ -385,6 +385,8 @@
     }
   },
   "contacts": {
+    "noContactDue": "Sem contacto",
+    "noContactDueTitle": "Sem contacto há mais tempo do que a janela definida",
     "empty": "Ainda sem pessoas de contacto",
     "add": "Nova pessoa de contacto",
     "searchPlaceholder": "Pesquisar pessoa de contacto…",

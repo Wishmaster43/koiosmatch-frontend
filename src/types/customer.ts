@@ -67,6 +67,8 @@ export interface Contact {
   // backend's RecordsLastContact trait. LIVE since CustomerContactResource started
   // exposing it — the columns always existed, only the resource was missing them.
   lastContactAt: string | null
+  // ONIX S-014: server flag, true when the last contact is older than the bureau window (flag only, no FE maths).
+  noContactDue?: boolean
   // The channel slug (a last_contact_types lookup value); label/icon resolve via useLastContactTypes.
   lastContactType: string | null
   customFields: Record<string, unknown>
@@ -384,6 +386,7 @@ export interface ApiContact {
   status?: ApiStatusRef | null; status_id?: Id | null
   // CONTACT-LAATSTE-CONTACT-1: both live on CustomerContactResource (ISO-8601 + slug).
   last_contact_at?: string | null; last_contact_type?: string | null
+  no_contact_due?: boolean
   custom_fields?: Record<string, unknown>
   // CONTACT-TEKST-1: the free-text block, see the Contact interface above for the source cite.
   notes?: string | null

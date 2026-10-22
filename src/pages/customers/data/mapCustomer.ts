@@ -153,6 +153,8 @@ export function mapContact(p: ApiContact = {}): Contact {
     // resource now sends both, so the table's "Laatste contact" column shows real data
     // (it rendered a blanket dash for as long as the resource omitted the columns).
     lastContactAt: p.last_contact_at ?? null,
+    // ONIX S-014: pass the server's no-contact alarm through; absent means not flagged.
+    noContactDue: Boolean(p.no_contact_due),
     lastContactType: p.last_contact_type ?? null,
     customFields: p.custom_fields ?? {},
     // CONTACT-TEKST-1: the free-text block, sanitised HTML rendered via SafeHtml.

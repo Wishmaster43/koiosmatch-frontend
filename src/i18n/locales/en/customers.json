@@ -385,6 +385,8 @@
     }
   },
   "contacts": {
+    "noContactDue": "No contact",
+    "noContactDueTitle": "No contact for longer than the configured window",
     "empty": "No contacts yet",
     "add": "New contact",
     "searchPlaceholder": "Search contact…",

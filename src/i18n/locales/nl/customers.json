@@ -385,6 +385,8 @@
     }
   },
   "contacts": {
+    "noContactDue": "Geen contact",
+    "noContactDueTitle": "Langer dan het ingestelde venster geen contact",
     "empty": "Nog geen contactpersonen",
     "add": "Nieuwe contactpersoon",
     "searchPlaceholder": "Zoek contactpersoon…",

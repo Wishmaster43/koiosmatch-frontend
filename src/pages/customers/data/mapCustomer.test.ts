@@ -275,3 +275,11 @@ describe('mapContact · channel consent and privacy notice (K-008)', () => {
     expect(c.privacyNotice).toEqual({ sentAt: null, due: null })
   })
 })
+
+describe('mapContact · no_contact_due (ONIX S-014)', () => {
+  it('maps the server flag true, false and absent (absent is not flagged)', () => {
+    expect(mapContact({ id: 'c1', no_contact_due: true }).noContactDue).toBe(true)
+    expect(mapContact({ id: 'c1', no_contact_due: false }).noContactDue).toBe(false)
+    expect(mapContact({ id: 'c1' }).noContactDue).toBe(false)
+  })
+})

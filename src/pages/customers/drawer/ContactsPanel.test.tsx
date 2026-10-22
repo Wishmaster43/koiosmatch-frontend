@@ -404,6 +404,16 @@ describe('ContactsPanel · last contact column', () => {
     expect(cells).toContain('—')
   })
 
+  it('shows the no-contact chip only for a flagged row, with its title (ONIX S-014)', () => {
+    render(<Host {...base} scope="customer" contacts={[
+      contact({ lastContactAt: '2026-07-14T09:30:00+02:00', lastContactType: 'phone', noContactDue: true }),
+      contact({ id: 'c2', firstName: 'Piet', lastName: 'Klaas', name: 'Piet Klaas', lastContactAt: null, lastContactType: null, noContactDue: false }),
+    ]} />)
+    const chips = screen.getAllByText(ct('contacts.noContactDue'))
+    expect(chips).toHaveLength(1)
+    expect(chips[0].closest('[title]')).toHaveAttribute('title', ct('contacts.noContactDueTitle'))
+  })
+
   it('keeps the column on every scope — it is the same one surface', () => {
     render(<Host {...base} scope="location" scopeId="loc-1"
       contacts={[contact({ lastContactAt: '2026-07-14T09:30:00+02:00', lastContactType: 'phone' })]} />)

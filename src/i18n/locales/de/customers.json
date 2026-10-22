@@ -385,6 +385,8 @@
     }
   },
   "contacts": {
+    "noContactDue": "Kein Kontakt",
+    "noContactDueTitle": "Länger als im eingestellten Zeitfenster kein Kontakt",
     "empty": "Noch keine Kontakte",
     "add": "Neuer Kontakt",
     "searchPlaceholder": "Kontakt suchen…",
