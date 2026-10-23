@@ -185,3 +185,22 @@ describe('LoginPage · session_revoked and mfa_challenge_used', () => {
     expect(screen.queryByText(nlAuth.mfa.invalid)).toBeNull()
   })
 })
+
+describe('LoginPage · forgot link and handed-over notices', () => {
+  beforeEach(() => sessionStorage.clear())
+
+  it('links to /forgot-password', () => {
+    renderLogin()
+    expect(screen.getByRole('link', { name: nlAuth.login.forgotLink }).getAttribute('href')).toBe('/forgot-password')
+  })
+
+  it.each([
+    ['password_reset', nlAuth.login.passwordResetDone],
+    ['invite_accepted', nlAuth.login.inviteAccepted],
+  ])('shows the %s notice once and clears the key', (kind, text) => {
+    sessionStorage.setItem('km_auth_notice', kind)
+    renderLogin()
+    expect(screen.getByText(text)).toBeTruthy()
+    expect(sessionStorage.getItem('km_auth_notice')).toBeNull()
+  })
+})

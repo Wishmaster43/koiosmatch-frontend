@@ -27,6 +27,8 @@ import { mfaSignals } from '@/lib/mfaGate'
 const MfaEnrollmentGate = lazy(() => import('./pages/auth/MfaEnrollmentGate'))
 // Lazy: TENANT-PICKER-FE-1 — only a super admin without a valid stored bureau ever loads it.
 const TenantPickPage = lazy(() => import('./pages/auth/TenantPickPage'))
+// Lazy: public forgot-password page, only loaded by visitors who ask for a reset link.
+const ForgotPasswordPage = lazy(() => import('./pages/auth/ForgotPasswordPage'))
 // Lazy: NOTITIE-POPOUT-1 F5 — the standalone second-screen notes window, only
 // loaded when a recruiter actually opens one (route-level code splitting, §9).
 const NotesPopoutPage = lazy(() => import('./pages/popout/NotesPopoutPage'))
@@ -101,6 +103,7 @@ export default function App() {
           <ErrorBoundary>
             <Routes>
               <Route path="/login" element={<PublicRoute><LoginPage /></PublicRoute>} />
+              <Route path="/forgot-password" element={<PublicRoute><Suspense fallback={<BootLoader />}><ForgotPasswordPage /></Suspense></PublicRoute>} />
               {/* NOTITIE-POPOUT-1 F5 (Trap B), generalised by F5-uitbreiding to
                   candidate|customer|vacancy: a slim, id-driven second-screen window —
                   auth-guarded like every other route, but rendered OUTSIDE DashboardLayout

@@ -9,7 +9,7 @@
  */
 import { useState, useRef, useEffect } from 'react'
 import type { FormEvent, ChangeEvent } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, Link } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { ShieldCheck, ArrowLeft } from 'lucide-react'
 import { useAuth } from '@/context/AuthContext'
@@ -18,15 +18,16 @@ import ErrorBanner from '@/components/ui/ErrorBanner'
 import Spinner from '@/components/ui/Spinner'
 import Button from '@/components/ui/Button'
 import CalloutBox from '@/components/ui/CalloutBox'
-import { PageTitle, BodyText, FormLabel } from '@/components/ui/typography'
+import { PageTitle, BodyText, Caption, FormLabel } from '@/components/ui/typography'
 import LoginShell from '@/components/auth/LoginShell'
 import { AuthTextField, AuthPasswordField } from '@/components/auth/AuthFields'
+import { useRetryCountdown } from '@/hooks/useRetryCountdown'
 import { retryAfterOf } from '@/lib/retryAfter'
+import { readAuthNotice, clearAuthNotice } from '@/lib/authNotice'
 // DUP-04: one shared axios-error → message extractor, never a re-derived inline dance.
 import { extractApiError } from '@/lib/extractApiError'
 import { isNoOrganisationError, NO_ORGANISATION_FLAG } from '@/lib/orphanAccount'
 import { SESSION_REVOKED_FLAG, isMfaChallengeUsedError } from '@/lib/sessionCodes'
-
 
 // ── Step 1: email + password ──────────────────────────────────────────────────
 function CredentialForm({ onMfaRequired, notice }: { onMfaRequired: (token: string) => void; notice?: string }) {
@@ -37,31 +38,25 @@ function CredentialForm({ onMfaRequired, notice }: { onMfaRequired: (token: stri
   const [password, setPassword] = useState('')
   const [error,    setError]   = useState('')
   // Seconds until the login throttle lifts (null = not throttled). Counted down live.
-  const [retryAfter, setRetryAfter] = useState<number | null>(null)
+  const countdown = useRetryCountdown()
   // Set by api.js when a 401 ended the previous session — show a hint, then clear.
   const [expired] = useState(() => sessionStorage.getItem('km_session_expired') === '1')
   // ONIX C-003: the previous session ended because the account hangs on no organisation.
   const [orphaned] = useState(() => sessionStorage.getItem(NO_ORGANISATION_FLAG) === '1')
   // ONIX C-005: a credential event revoked the previous session (wins over the plain expired hint).
   const [revoked] = useState(() => sessionStorage.getItem(SESSION_REVOKED_FLAG) === '1')
+  // A success notice handed over by the reset / invitation pages, shown once.
+  const [authNotice] = useState(() => readAuthNotice())
+  useEffect(() => { if (authNotice) clearAuthNotice() }, [authNotice])
   useEffect(() => { if (expired) sessionStorage.removeItem('km_session_expired') }, [expired])
   useEffect(() => { if (revoked) sessionStorage.removeItem(SESSION_REVOKED_FLAG) }, [revoked])
   useEffect(() => { if (orphaned) sessionStorage.removeItem(NO_ORGANISATION_FLAG) }, [orphaned])
-
-  // Tick the throttle countdown once per second; at 0 the notice clears and the
-  // submit button re-enables — the promise in the text stays true.
-  useEffect(() => {
-    if (retryAfter === null) return
-    if (retryAfter <= 0) { setRetryAfter(null); return }
-    const timer = setTimeout(() => setRetryAfter(s => (s === null ? null : s - 1)), 1000)
-    return () => clearTimeout(timer)
-  }, [retryAfter])
 
   // Submit credentials: routes to the MFA step when the server asks for it,
   // otherwise navigates straight in; a 429 starts the live throttle countdown.
   const runLogin = async () => {
     setError('')
-    setRetryAfter(null)
+    countdown.clear()
     try {
       const result = await login?.(email, password)
       if (result && 'mfaRequired' in result && result.mfaRequired) {
@@ -73,7 +68,7 @@ function CredentialForm({ onMfaRequired, notice }: { onMfaRequired: (token: stri
       // A throttled 429 gets the live countdown; every other failure keeps the
       // existing message path.
       const secs = retryAfterOf(err)
-      if (secs !== null) setRetryAfter(secs)
+      if (secs !== null) countdown.start(secs)
       else if (isNoOrganisationError(err)) setError(t('login.noOrganisation'))
       else setError(extractApiError(err, t('login.failed')))
     }
@@ -82,7 +77,7 @@ function CredentialForm({ onMfaRequired, notice }: { onMfaRequired: (token: stri
   const { submit, saving: loading } = useGuardedSubmit(runLogin)
   const handleSubmit = (e: FormEvent) => { e.preventDefault(); void submit() }
 
-  const throttled = retryAfter !== null && retryAfter > 0
+  const throttled = countdown.active
 
   return (
     <>
@@ -99,6 +94,11 @@ function CredentialForm({ onMfaRequired, notice }: { onMfaRequired: (token: stri
           <CalloutBox variant="warning">{revoked ? t('login.sessionRevoked') : t('login.sessionExpired')}</CalloutBox>
         </div>
       )}
+      {authNotice && !error && (
+        <div style={{ marginBottom: 16 }}>
+          <CalloutBox variant="success">{authNotice === 'password_reset' ? t('login.passwordResetDone') : t('login.inviteAccepted')}</CalloutBox>
+        </div>
+      )}
       {notice && !error && (
         <div style={{ marginBottom: 16 }}>
           <CalloutBox variant="warning">{notice}</CalloutBox>
@@ -113,6 +113,12 @@ function CredentialForm({ onMfaRequired, notice }: { onMfaRequired: (token: stri
           placeholder={t('login.password')} required
           showLabel={t('login.showPassword')} hideLabel={t('login.hidePassword')} />
 
+        {/* Real link to the reset request page, right-aligned under the password field. */}
+        <div style={{ textAlign: 'right', marginTop: -8 }}>
+          <Link to="/forgot-password">
+            <Caption as="span" style={{ color: 'var(--color-primary-text)' }}>{t('login.forgotLink')}</Caption>
+          </Link>
+        </div>
 
         {error && <ErrorBanner>{error}</ErrorBanner>}
 
@@ -121,7 +127,7 @@ function CredentialForm({ onMfaRequired, notice }: { onMfaRequired: (token: stri
             assertive interruption every tick (§6). */}
         {throttled && (
           <CalloutBox variant="warning" live="polite">
-            {t('login.throttled', { seconds: retryAfter })}
+            {t('login.throttled', { seconds: countdown.seconds })}
           </CalloutBox>
         )}
 
