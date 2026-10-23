@@ -13,7 +13,7 @@
  * instead of `user.selectOptions`/`getByRole('option')`; the eventual REQUEST
  * assertions (api.post body) are unchanged.
  */
-import { describe, it, expect, vi, afterEach } from 'vitest'
+import { describe, it, expect, vi, afterEach, beforeEach } from 'vitest'
 import { render, screen, waitFor, fireEvent } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import NewUserModal from './NewUserModal'
@@ -28,7 +28,9 @@ vi.mock('react-i18next', () => ({
   useTranslation: () => ({
     t: (key: string, opts?: { defaultValue?: string }) => {
       const seeded: Record<string, string> = { 'roles.planner': 'Planner' }
-      return seeded[key] ?? opts?.defaultValue ?? key
+      // Interpolated email rides along so a toast test can assert the address is named.
+      const email = (opts as { email?: string } | undefined)?.email
+      return email ? `${key}:${email}` : (seeded[key] ?? opts?.defaultValue ?? key)
     },
   }),
 }))
@@ -287,5 +289,48 @@ describe('NewUserModal · email_unavailable (ONIX C-007)', () => {
     await waitFor(() => expect(api.post).toHaveBeenCalledWith('/users', expect.objectContaining({ email: 'jan@bedrijf.nl' })))
     expect(await screen.findByText('errors.emailUnavailable')).toBeInTheDocument()
     expect(screen.queryByText('This e-mail address cannot be used.')).not.toBeInTheDocument()
+  })
+})
+
+// T-003: staff invitation — the new user sets their own password via a mailed link.
+describe('NewUserModal · invitation', () => {
+  // Drop queued results/calls a previous test may have left on the shared post mock.
+  beforeEach(() => { vi.mocked(api.post).mockReset() })
+  afterEach(() => vi.clearAllMocks())
+
+  const fill = async (user: ReturnType<typeof userEvent.setup>) => {
+    await user.type(screen.getByLabelText('firstName', { exact: false }), 'Jan')
+    await user.type(screen.getByLabelText('email', { exact: false }), 'jan@bedrijf.nl')
+  }
+
+  it('checked: posts invite:true with NO password, hides the password row and names the address in the toast', async () => {
+    vi.mocked(api.post).mockResolvedValueOnce({ data: { data: { id: 'u1', email: 'jan@bedrijf.nl' } } })
+    const user = userEvent.setup()
+    render(<NewUserModal onClose={noop} onCreated={noop} />)
+    await waitFor(() => expect(screen.getByRole('button', { name: 'role' })).toHaveAccessibleDescription('Planner'))
+    await user.click(screen.getByRole('checkbox', { name: 'invite.label' }))
+    expect(screen.queryByLabelText('password', { exact: false })).toBeNull()
+    await fill(user)
+    await user.click(screen.getByRole('button', { name: 'create' }))
+    await waitFor(() => expect(api.post).toHaveBeenCalled())
+    const [route, body] = vi.mocked(api.post).mock.calls[0] as [string, Record<string, unknown>]
+    expect(route).toBe('/users')
+    expect(body.invite).toBe(true)
+    expect('password' in body).toBe(false)
+    await waitFor(() => expect(notifySuccess).toHaveBeenCalledWith('invite.sent:jan@bedrijf.nl'))
+  })
+
+  it('unchecked (default): posts the password and no invite key', async () => {
+    vi.mocked(api.post).mockResolvedValueOnce({ data: { data: { id: 'u1', email: 'jan@bedrijf.nl' } } })
+    const user = userEvent.setup()
+    render(<NewUserModal onClose={noop} onCreated={noop} />)
+    await waitFor(() => expect(screen.getByRole('button', { name: 'role' })).toHaveAccessibleDescription('Planner'))
+    await fill(user)
+    await user.type(screen.getByLabelText('password', { exact: false }), 'wachtwoord123')
+    await user.click(screen.getByRole('button', { name: 'create' }))
+    await waitFor(() => expect(api.post).toHaveBeenCalled())
+    const body = vi.mocked(api.post).mock.calls[0][1] as Record<string, unknown>
+    expect(body.password).toBe('wachtwoord123')
+    expect('invite' in body).toBe(false)
   })
 })

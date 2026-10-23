@@ -73,6 +73,8 @@ export default function NewUserModal({ onClose, onCreated }: {
   // AGENT-META-SETUP: "create an AI agent?" — default on, asked only for the two
   // roles the backend actually provisions an agent for (AiAgentProvisioner::AGENT_ROLES).
   const [createAgent, setCreateAgent] = useState(true)
+  // T-003: invite mode lets the new user set their own password via a mailed link (default off = admin-set password).
+  const [invite, setInvite] = useState(false)
   // VALIDATIE-LIVE-1-rest: live, on-blur/typing format check for email — own
   // sibling hook, same idiom as AddCandidateModal.
   const { markTouched, fieldMessage, touchInvalidFields, hasFormatError } =
@@ -131,7 +133,10 @@ export default function NewUserModal({ onClose, onCreated }: {
     try {
       // The flag only means anything for a recruiter/manager — omit it for every
       // other role so an unrelated role never implies one (server default is true).
-      const body = isAgentRole ? { ...form, create_agent: createAgent } : form
+      // Invite mode never sends a password (the account starts with an unusable one); otherwise the body is unchanged.
+      const { password, ...withoutPassword } = form
+      const base = invite ? { ...withoutPassword, invite: true } : { ...withoutPassword, password }
+      const body = isAgentRole ? { ...base, create_agent: createAgent } : base
       const res = await api.post<CreateUserResponse>('/users', body)
       const created = unwrap<ManagedUser>(res)
       // Divergence from the role template → replace-set the chosen branches
@@ -143,6 +148,7 @@ export default function NewUserModal({ onClose, onCreated }: {
       // The backend echoes a top-level agent notice (Meta manual-steps still
       // needed) only when it actually provisioned one — surface it once here.
       if (res.data?.agent?.notice) notifySuccess(res.data.agent.notice)
+      if (invite) notifySuccess(t('invite.sent', { email: form.email }))
       onCreated(created)
       onClose()
     } catch (err) {
@@ -183,9 +189,16 @@ export default function NewUserModal({ onClose, onCreated }: {
                     </FieldRow>
                     <FieldNotice text={fieldMessage('email')} />
                   </div>
-                  <FieldRow label={t('password')} required>
-                    <TextField type="password" autoComplete="new-password" value={form.password} onChange={set('password')} placeholder={t('pwPlaceholder')} />
+                  {/* T-003: invitation toggle sits above the password row; checked hides the password. */}
+                  <FieldRow label={t('invite.label')}>
+                    <CheckboxField checked={invite} onChange={setInvite} />
                   </FieldRow>
+                  <Caption as="p" style={{ marginTop: 4 }}>{t('invite.help')}</Caption>
+                  {!invite && (
+                    <FieldRow label={t('password')} required>
+                      <TextField type="password" autoComplete="new-password" value={form.password} onChange={set('password')} placeholder={t('pwPlaceholder')} />
+                    </FieldRow>
+                  )}
                 </div>
               </div>
             </>}

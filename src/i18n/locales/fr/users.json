@@ -145,5 +145,15 @@
   },
   "resetMfa": "Réinitialiser l'AMF",
   "resetMfaConfirm": "Réinitialiser l'AMF pour {{name}}? L'utilisateur devra configurer à nouveau un authentificateur lors de sa prochaine connexion.",
-  "resetMfaDone": "L'AMF pour {{name}} a été réinitialisée."
+  "resetMfaDone": "L'AMF pour {{name}} a été réinitialisée.",
+  "invite": {
+    "label": "Envoyer l’invitation par e-mail",
+    "help": "L’utilisateur choisit lui-même son mot de passe via un lien valable 7 jours.",
+    "sent": "Invitation envoyée à {{email}}",
+    "resend": "Renvoyer l’invitation",
+    "resendTitle": "Envoyer une nouvelle invitation ?",
+    "resendConfirm": "{{email}} recevra un nouveau lien pour définir un mot de passe. Les liens précédents expirent.",
+    "resent": "Invitation renvoyée à {{email}}",
+    "resendFailed": "Échec de l’envoi"
+  }
 }

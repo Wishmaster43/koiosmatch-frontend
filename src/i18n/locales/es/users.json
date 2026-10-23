@@ -145,5 +145,15 @@
   },
   "resetMfa": "Restablecer MFA",
   "resetMfaConfirm": "¿Restablecer MFA para {{name}}? El usuario deberá configurar un autenticador nuevamente en su próximo inicio de sesión.",
-  "resetMfaDone": "Se ha restablecido el MFA para {{name}}."
+  "resetMfaDone": "Se ha restablecido el MFA para {{name}}.",
+  "invite": {
+    "label": "Enviar invitación por correo electrónico",
+    "help": "El usuario elige su propia contraseña mediante un enlace válido durante 7 días.",
+    "sent": "Invitación enviada a {{email}}",
+    "resend": "Reenviar invitación",
+    "resendTitle": "¿Enviar una nueva invitación?",
+    "resendConfirm": "{{email}} recibirá un nuevo enlace para establecer una contraseña. Los enlaces anteriores caducan.",
+    "resent": "Invitación reenviada a {{email}}",
+    "resendFailed": "Error al enviar"
+  }
 }

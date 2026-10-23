@@ -8,28 +8,29 @@
  * Also covers CredentialChangeGuard (CMBE 03-09): a self-edit that touches
  * email/password carries `current_password` and the 403 code maps to copy.
  */
-import { describe, it, expect, vi } from 'vitest'
-import { render, screen, waitFor, fireEvent } from '@testing-library/react'
+import { describe, it, expect, vi, beforeEach } from 'vitest'
+import { render, screen, waitFor, fireEvent, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import EditUserModal from './EditUserModal'
 import api from '@/lib/api'
-import { notifyError } from '@/lib/notify'
+import { notifyError, notifySuccess } from '@/lib/notify'
 import type { ManagedUser } from '@/types/api'
 
 vi.mock('react-i18next', () => ({ useTranslation: () => ({ t: (k: string) => k }) }))
-vi.mock('@/lib/notify', () => ({ notifyError: vi.fn() }))
+vi.mock('@/lib/notify', () => ({ notifyError: vi.fn(), notifySuccess: vi.fn() }))
 vi.mock('@/lib/useLocations', () => ({
   useLocations: () => ([{ value: 'loc-1', label: 'Amsterdam' }, { value: 'loc-2', label: 'Rotterdam' }]),
 }))
 vi.mock('@/lib/api', () => ({
-  default: { get: vi.fn(), put: vi.fn(), patch: vi.fn() },
+  default: { get: vi.fn(), put: vi.fn(), patch: vi.fn(), post: vi.fn() },
   unwrap: (r: { data?: { data?: unknown } }) => r?.data?.data,
   unwrapList: (r: { data?: { data?: unknown[] } }) => ({ rows: r?.data?.data ?? [] }),
 }))
 // The logged-in user id — tests override it per-case to model self vs admin edits.
 let authUserId: string = 'admin-1'
+let canCreate = true
 vi.mock('@/context/AuthContext', () => ({
-  useAuth: () => ({ user: { id: authUserId } }),
+  useAuth: () => ({ user: { id: authUserId }, hasPermission: (p: string) => canCreate && p === 'users.create' }),
 }))
 
 const testUser: ManagedUser = { id: 'u1', firstname: 'Jan', lastname: 'Jansen', email: 'jan@bedrijf.nl' }
@@ -378,5 +379,46 @@ describe('EditUserModal · email_unavailable (ONIX C-007)', () => {
     await waitFor(() => expect(api.put).toHaveBeenCalledWith('/users/u1', expect.objectContaining({ email: 'nieuw@bedrijf.nl' })))
     expect(await screen.findByText('errors.emailUnavailable')).toBeInTheDocument()
     expect(screen.queryByText('This e-mail address cannot be used.')).not.toBeInTheDocument()
+  })
+})
+
+// T-003: re-send the invitation mail.
+describe('EditUserModal · resend invitation', () => {
+  beforeEach(() => {
+    authUserId = 'admin-1'; canCreate = true
+    vi.mocked(api.get).mockResolvedValue({ data: { data: [] } })
+    vi.mocked(api.post).mockReset()
+  })
+
+  it('posts /users/{id}/invite only after the confirm dialog is accepted', async () => {
+    vi.mocked(api.post).mockResolvedValueOnce({ data: { message: 'ok' } })
+    const user = userEvent.setup()
+    render(<EditUserModal user={testUser} onClose={noop} onSaved={noop} />)
+    await user.click(await screen.findByRole('button', { name: 'invite.resend' }))
+    expect(api.post).not.toHaveBeenCalled()
+    await user.click(within(screen.getByRole('dialog', { name: 'invite.resendTitle' })).getByRole('button', { name: 'invite.resend' }))
+    await waitFor(() => expect(api.post).toHaveBeenCalledWith('/users/u1/invite'))
+    await waitFor(() => expect(notifySuccess).toHaveBeenCalledWith('invite.resent'))
+  })
+
+  it('shows the error toast when the resend fails', async () => {
+    vi.mocked(api.post).mockRejectedValueOnce(new Error('boom'))
+    const user = userEvent.setup()
+    render(<EditUserModal user={testUser} onClose={noop} onSaved={noop} />)
+    await user.click(await screen.findByRole('button', { name: 'invite.resend' }))
+    await user.click(within(screen.getByRole('dialog', { name: 'invite.resendTitle' })).getByRole('button', { name: 'invite.resend' }))
+    await waitFor(() => expect(notifyError).toHaveBeenCalled())
+  })
+
+  it('is absent without users.create and for yourself', async () => {
+    canCreate = false
+    const { unmount } = render(<EditUserModal user={testUser} onClose={noop} onSaved={noop} />)
+    await screen.findByDisplayValue('Jan')
+    expect(screen.queryByRole('button', { name: 'invite.resend' })).toBeNull()
+    unmount()
+    canCreate = true; authUserId = 'u1'
+    render(<EditUserModal user={testUser} onClose={noop} onSaved={noop} />)
+    await screen.findByDisplayValue('Jan')
+    expect(screen.queryByRole('button', { name: 'invite.resend' })).toBeNull()
   })
 })

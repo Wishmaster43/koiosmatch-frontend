@@ -25,6 +25,9 @@ import { useUserBranches } from './hooks/useUserBranches'
 import type { ManagedUser } from '@/types/api'
 import { PageTitle, Caption, BodyText } from '@/components/ui/typography'
 import Toggle from '@/components/ui/Toggle'
+import Button from '@/components/ui/Button'
+import ConfirmDialog from '@/components/ui/ConfirmDialog'
+import { notifyError, notifySuccess } from '@/lib/notify'
 // FIELD-LAYOUT canon (Danny 13-08): every field is a label-LEFT row from the
 // shared form kit, grouped into titled cards — mirrors AddCandidateModal's
 // PersonalCard/ContactCard (src/pages/candidates/addmodal/).
@@ -82,6 +85,18 @@ export default function EditUserModal({ user, onClose, onSaved }: {
     forceCurrentPassword ||
     (changePassword && form.password !== '') || form.email.trim() !== (user.email ?? '')
   )
+  // T-003: re-send the invitation mail; independent of the form save, never for yourself.
+  const canInvite = (auth?.hasPermission?.('users.create') ?? false) && !isSelf
+  const [confirmInvite, setConfirmInvite] = useState(false)
+  const resendInvite = async () => {
+    setConfirmInvite(false)
+    try {
+      await api.post(`/users/${user.id}/invite`)
+      notifySuccess(t('invite.resent', { email: user.email ?? '' }))
+    } catch (err) {
+      notifyError(extractApiError(err, t('invite.resendFailed')))
+    }
+  }
   // VALIDATIE-LIVE-1-rest: live, on-blur/typing format check for email — own
   // sibling hook, same idiom as AddCandidateModal.
   const { markTouched, fieldMessage, touchInvalidFields, hasFormatError } =
@@ -198,6 +213,12 @@ export default function EditUserModal({ user, onClose, onSaved }: {
                       <Caption as="p" style={{ marginTop: 5 }}>{t('currentPasswordHint')}</Caption>
                     </div>
                   )}
+                  {/* Resend the invitation mail (users.create, never for yourself); confirmed first, independent of the form save. */}
+                  {canInvite && (
+                    <div>
+                      <Button type="button" variant="secondary" onClick={() => setConfirmInvite(true)}>{t('invite.resend')}</Button>
+                    </div>
+                  )}
                 </div>
               </div>
             </>}
@@ -287,6 +308,10 @@ export default function EditUserModal({ user, onClose, onSaved }: {
             idleLabel={t('common:save')}
           />
         </form>
+        <ConfirmDialog open={confirmInvite} title={t('invite.resendTitle')}
+          message={t('invite.resendConfirm', { email: user.email ?? '' })}
+          confirmLabel={t('invite.resend')} cancelLabel={t('common:cancel')}
+          onConfirm={resendInvite} onCancel={() => setConfirmInvite(false)} />
     </FloatingPanel>
   )
 }

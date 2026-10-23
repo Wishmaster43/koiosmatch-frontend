@@ -145,5 +145,15 @@
   },
   "resetMfa": "MFA zurücksetzen",
   "resetMfaConfirm": "MFA für {{name}} zurücksetzen? Der Benutzer muss sich beim nächsten Login erneut authentifizieren.",
-  "resetMfaDone": "MFA für {{name}} wurde zurückgesetzt."
+  "resetMfaDone": "MFA für {{name}} wurde zurückgesetzt.",
+  "invite": {
+    "label": "Einladung per E-Mail senden",
+    "help": "Die Person wählt ihr Passwort selbst über einen Link, der 7 Tage gültig ist.",
+    "sent": "Einladung an {{email}} gesendet",
+    "resend": "Einladung erneut senden",
+    "resendTitle": "Neue Einladung senden?",
+    "resendConfirm": "{{email}} erhält einen neuen Link zum Festlegen eines Passworts. Frühere Links verfallen.",
+    "resent": "Einladung erneut an {{email}} gesendet",
+    "resendFailed": "Senden fehlgeschlagen"
+  }
 }

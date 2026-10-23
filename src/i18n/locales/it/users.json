@@ -145,5 +145,15 @@
   },
   "resetMfa": "Ripristina MFA",
   "resetMfaConfirm": "Ripristinare l'MFA per {{name}}? L'utente dovrà configurare di nuovo un autenticatore al prossimo accesso.",
-  "resetMfaDone": "L'MFA per {{name}} è stato ripristinato."
+  "resetMfaDone": "L'MFA per {{name}} è stato ripristinato.",
+  "invite": {
+    "label": "Invia l’invito via e-mail",
+    "help": "L’utente sceglie la propria password tramite un link valido per 7 giorni.",
+    "sent": "Invito inviato a {{email}}",
+    "resend": "Invia di nuovo l’invito",
+    "resendTitle": "Inviare un nuovo invito?",
+    "resendConfirm": "{{email}} riceverà un nuovo link per impostare una password. I link precedenti scadono.",
+    "resent": "Invito inviato di nuovo a {{email}}",
+    "resendFailed": "Invio non riuscito"
+  }
 }

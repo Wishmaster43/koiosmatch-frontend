@@ -145,5 +145,15 @@
   },
   "resetMfa": "MFA resetten",
   "resetMfaConfirm": "MFA van {{name}} resetten? De gebruiker moet bij de volgende login opnieuw een authenticator koppelen.",
-  "resetMfaDone": "MFA van {{name}} is gereset."
+  "resetMfaDone": "MFA van {{name}} is gereset.",
+  "invite": {
+    "label": "Uitnodiging per e-mail sturen",
+    "help": "De gebruiker kiest zelf een wachtwoord via een link die 7 dagen geldig is.",
+    "sent": "Uitnodiging verstuurd naar {{email}}",
+    "resend": "Uitnodiging opnieuw versturen",
+    "resendTitle": "Nieuwe uitnodiging sturen?",
+    "resendConfirm": "{{email}} krijgt een nieuwe link om een wachtwoord in te stellen. Eerdere links vervallen.",
+    "resent": "Uitnodiging opnieuw verstuurd naar {{email}}",
+    "resendFailed": "Versturen mislukt"
+  }
 }

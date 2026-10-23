@@ -145,5 +145,15 @@
   },
   "resetMfa": "Reset MFA",
   "resetMfaConfirm": "Reset MFA for {{name}}? They will need to set up an authenticator again at their next login.",
-  "resetMfaDone": "MFA for {{name}} has been reset."
+  "resetMfaDone": "MFA for {{name}} has been reset.",
+  "invite": {
+    "label": "Send invitation by e-mail",
+    "help": "The user chooses their own password via a link that is valid for 7 days.",
+    "sent": "Invitation sent to {{email}}",
+    "resend": "Resend invitation",
+    "resendTitle": "Send a new invitation?",
+    "resendConfirm": "{{email}} will receive a new link to set a password. Earlier links expire.",
+    "resent": "Invitation resent to {{email}}",
+    "resendFailed": "Sending failed"
+  }
 }

@@ -145,5 +145,15 @@
   },
   "resetMfa": "Redefinir MFA",
   "resetMfaConfirm": "Redefinir MFA para {{name}}? O usuário precisará configurar um autenticador novamente no próximo login.",
-  "resetMfaDone": "MFA para {{name}} foi redefinido."
+  "resetMfaDone": "MFA para {{name}} foi redefinido.",
+  "invite": {
+    "label": "Enviar convite por e-mail",
+    "help": "O utilizador escolhe a própria palavra-passe através de uma ligação válida durante 7 dias.",
+    "sent": "Convite enviado para {{email}}",
+    "resend": "Reenviar convite",
+    "resendTitle": "Enviar um novo convite?",
+    "resendConfirm": "{{email}} receberá uma nova ligação para definir uma palavra-passe. As ligações anteriores expiram.",
+    "resent": "Convite reenviado para {{email}}",
+    "resendFailed": "Falha no envio"
+  }
 }
