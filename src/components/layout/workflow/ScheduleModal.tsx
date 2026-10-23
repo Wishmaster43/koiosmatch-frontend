@@ -20,6 +20,7 @@ import FloatingPanel from '@/components/ui/FloatingPanel'
 import type { ScheduleConfig } from '@/types/workflow'
 import { EventCombobox } from './EventCombobox'
 import { WebhookAgentSelect } from './WebhookAgentSelect'
+import { InboundNumberSelect } from './InboundNumberSelect'
 import { ScheduleFields } from './ScheduleFields'
 import { DateRelativeFields } from './DateRelativeFields'
 import { useScheduleForm } from './useScheduleForm'
@@ -100,6 +101,8 @@ export function ScheduleModal({ trigger, scheduleConfig, onSave, onClose }: {
               <label style={sectionLabel}>{t('scheduleModal.agentLabel')}</label>
               <WebhookAgentSelect value={form.agentName} onChange={form.setAgentName} label={t('scheduleModal.agentLabel')} />
               <Caption as="p" style={{ marginTop: 6 }}>{t('scheduleModal.agentHint')}</Caption>
+              <InboundNumberSelect source={form.source} numberId={form.numberId}
+                onSourceChange={form.setSource} onNumberChange={form.setNumberId} />
             </div>
           )}
 

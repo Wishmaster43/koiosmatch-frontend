@@ -244,6 +244,12 @@
     "agentSelect": "Scegli un agente AI…",
     "agentEmpty": "Nessun agente AI ancora. Creane uno prima nelle impostazioni AI.",
     "agentLoading": "Caricamento agenti AI…",
+    "sourceMeta": "Webhook Meta (WABA + Coexistence)",
+    "sourceWaWeb": "WhatsApp Web (numero proprio)",
+    "numberSelect": "Scegli un numero…",
+    "numberLoading": "Caricamento dei numeri…",
+    "noInboundNumbers": "Nessun numero collegato per questa origine; collega prima un numero in Impostazioni → Comunicazione.",
+    "numberHint": "Un solo scenario in ingresso attivo per numero e origine.",
     "shortMonthNote": "Nei mesi più brevi cade l'ultimo giorno del mese."
   },
   "modules": {

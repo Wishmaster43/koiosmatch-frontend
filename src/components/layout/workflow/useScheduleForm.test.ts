@@ -116,8 +116,22 @@ describe('useScheduleForm · invisible contract fields ride along on re-save', (
 
   it('webhook: keeps the `source` lane next to the agent name', () => {
     const onSave = vi.fn()
-    const { result } = renderHook(() => useScheduleForm('Webhook', { agent: 'Michelle', source: 'wa_web' }, onSave))
+    const { result } = renderHook(() => useScheduleForm('Webhook', { agent: 'Michelle', source: 'wa_web', number_id: 'n1' }, onSave))
     act(() => result.current.handleSave())
-    expect(onSave).toHaveBeenCalledWith('Webhook', { agent: 'Michelle', source: 'wa_web' })
+    expect(onSave).toHaveBeenCalledWith('Webhook', { agent: 'Michelle', source: 'wa_web', number_id: 'n1' })
+  })
+})
+
+// INBOUND-TRIGGER-NUMBER: a webhook trigger needs agent AND source AND number_id.
+describe('useScheduleForm · webhook number', () => {
+  it('cannot save without a number, and saves {agent, source, number_id} once chosen', () => {
+    const onSave = vi.fn()
+    const { result } = renderHook(() => useScheduleForm('Webhook', { agent: 'Michelle' }, onSave))
+    expect(result.current.source).toBe('meta')
+    expect(result.current.canSave).toBe(false)
+    act(() => result.current.setNumberId('n-meta'))
+    expect(result.current.canSave).toBe(true)
+    act(() => result.current.handleSave())
+    expect(onSave).toHaveBeenCalledWith('Webhook', { agent: 'Michelle', source: 'meta', number_id: 'n-meta' })
   })
 })

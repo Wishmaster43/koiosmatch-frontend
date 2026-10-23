@@ -244,6 +244,12 @@
     "agentSelect": "Kies een AI-agent…",
     "agentEmpty": "Nog geen AI-agents. Maak er eerst een aan bij AI-instellingen.",
     "agentLoading": "AI-agents ophalen…",
+    "sourceMeta": "Meta-webhook (WABA + Coexistence)",
+    "sourceWaWeb": "WhatsApp Web (eigen nummer)",
+    "numberSelect": "Kies een nummer…",
+    "numberLoading": "Nummers ophalen…",
+    "noInboundNumbers": "Geen gekoppeld nummer voor deze bron; koppel eerst een nummer onder Instellingen → Communicatie.",
+    "numberHint": "Eén actief inbound-scenario per nummer en bron.",
     "shortMonthNote": "Valt in kortere maanden op de laatste dag van de maand."
   },
   "modules": {

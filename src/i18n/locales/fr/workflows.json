@@ -172,6 +172,12 @@
     "agentSelect": "Choisir un agent IA…",
     "agentEmpty": "Pas encore d'agents IA. Créez-en un d'abord dans les paramètres IA.",
     "agentLoading": "Chargement des agents IA…",
+    "sourceMeta": "Webhook Meta (WABA + Coexistence)",
+    "sourceWaWeb": "WhatsApp Web (numéro propre)",
+    "numberSelect": "Choisir un numéro…",
+    "numberLoading": "Chargement des numéros…",
+    "noInboundNumbers": "Aucun numéro lié pour cette source ; liez d'abord un numéro sous Paramètres → Communication.",
+    "numberHint": "Un seul scénario entrant actif par numéro et par source.",
     "shortMonthNote": "Tombe le dernier jour du mois pour les mois plus courts."
   },
   "modules": {

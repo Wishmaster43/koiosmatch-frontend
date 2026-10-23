@@ -15,7 +15,12 @@ vi.mock('@/lib/api', async () => {
   const actual = await vi.importActual<typeof import('@/lib/api')>('@/lib/api')
   return {
     ...actual,
-    default: { get: vi.fn().mockResolvedValue({ data: { data: [{ id: 'a1', name: 'Michelle' }, { id: 'a2', name: 'Kees' }] } }) },
+    default: { get: vi.fn((url: string) => Promise.resolve(url === '/inbound-numbers'
+      ? { data: { data: [
+        { value: 'n-meta', label: 'Meta line', group: 'meta' },
+        { value: 'n-web', label: 'Web device', group: 'wa_web' },
+      ] } }
+      : { data: { data: [{ id: 'a1', name: 'Michelle' }, { id: 'a2', name: 'Kees' }] } })) },
   }
 })
 
@@ -162,8 +167,10 @@ describe('ScheduleModal · webhook (AI-agent) trigger', () => {
     const trigger = await screen.findByRole('button', { name: 'scheduleModal.agentLabel scheduleModal.agentSelect' })
     fireEvent.click(trigger)
     fireEvent.click(screen.getByRole('button', { name: 'Michelle' }))
+    fireEvent.click(await screen.findByRole('button', { name: /fieldLabels.WhatsApp number/ }))
+    fireEvent.click(screen.getByRole('button', { name: 'Meta line' }))
     fireEvent.click(screen.getByText('scheduleModal.save'))
-    expect(onSave).toHaveBeenCalledWith('Webhook', { agent: 'Michelle' })
+    expect(onSave).toHaveBeenCalledWith('Webhook', { agent: 'Michelle', source: 'meta', number_id: 'n-meta' })
   })
 
   it('reopening on an existing Webhook(agent) trigger preselects its stored agent name', async () => {
@@ -209,5 +216,23 @@ describe('scheduleLabel · webhook trigger', () => {
   it('renders the agent-named webhook summary key when an agent is set', () => {
     const t = ((key: string) => key) as never
     expect(scheduleLabel(t, 'nl', 'Webhook', { agent: 'Michelle' })).toBe('scheduleModal.label.webhookAgent')
+  })
+})
+
+// INBOUND-TRIGGER-NUMBER: the webhook trigger binds ONE number row per lane.
+describe('ScheduleModal · webhook number binding', () => {
+  it('lists only the numbers of the chosen source and shows the empty-lane note otherwise', async () => {
+    vi.mocked(api.get).mockImplementation((url: string) => Promise.resolve(url === '/inbound-numbers'
+      ? { data: { data: [{ value: 'n-meta', label: 'Meta line', group: 'meta' }] } }
+      : { data: { data: [{ id: 'a1', name: 'Michelle' }] } }) as never)
+    render(<ScheduleModal trigger="Webhook" scheduleConfig={{ agent: 'Michelle', source: 'wa_web' }} onSave={vi.fn()} onClose={vi.fn()} />)
+    expect(await screen.findByText('scheduleModal.noInboundNumbers')).toBeInTheDocument()
+    expect(screen.queryByText('Meta line')).not.toBeInTheDocument()
+  })
+
+  it('Save stays disabled for a pre-existing scenario without number_id', async () => {
+    render(<ScheduleModal trigger="Webhook" scheduleConfig={{ agent: 'Michelle', source: 'meta' }} onSave={vi.fn()} onClose={vi.fn()} />)
+    await screen.findByRole('button', { name: 'scheduleModal.agentLabel Michelle' })
+    expect(screen.getByText('scheduleModal.save')).toBeDisabled()
   })
 })

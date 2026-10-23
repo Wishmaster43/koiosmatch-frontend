@@ -46,6 +46,10 @@ export function useScheduleForm(
   // Webhook trigger, AI-agent flavor (AI-AGENTS-3): the agent NAME this workflow's
   // own webhook is coupled to (backend matches trigger_config.agent by name).
   const [agentName, setAgentName] = useState(String(scheduleConfig?.agent ?? ''))
+  // Webhook lane (meta | wa_web) and the bound number ROW id (INBOUND-TRIGGER-NUMBER);
+  // a pre-existing scenario without number_id opens empty and must pick one.
+  const [source, setSource] = useState(String(scheduleConfig?.source ?? 'meta'))
+  const [numberId, setNumberId] = useState(String(scheduleConfig?.number_id ?? ''))
   // Date-relative trigger (date_field + a positive "days before" UI value — the
   // stored offset_days is negated on save, see handleSave).
   const [dateField, setDateField] = useState(String(scheduleConfig?.date_field ?? DATE_RELATIVE_FIELDS[0].value))
@@ -77,7 +81,7 @@ export function useScheduleForm(
     (type === 'scheduled' && frequency === 'interval' && (Number.isNaN(+intervalMinutes) || +intervalMinutes < 5 || +intervalMinutes > 10080)) ||
     (type === 'scheduled' && frequency === 'weekly' && weekdays.length === 0) ||
     (type === 'scheduled' && frequency !== 'interval' && times.length === 0) ||
-    (type === 'webhook' && !agentName) ||
+    (type === 'webhook' && (!agentName || !source || !numberId)) ||
     (type === 'date_relative' && (!dateField || Number.isNaN(+offsetDays) || +offsetDays < 0))
   )
 
@@ -98,9 +102,9 @@ export function useScheduleForm(
     }
     // Webhook trigger (AI-agent flavor): the chosen agent's name — the backend couples
     // this workflow to that agent's own inbound webhook, matched on name + the `source`
-    // lane (meta | wa_web). The lane has no picker here; it rides along (WFB-05).
+    // lane (meta | wa_web) and bound to ONE number row id (trigger_config.number_id).
     if (type === 'webhook') {
-      onSave('Webhook', { agent: agentName, ...(scheduleConfig?.source ? { source: scheduleConfig.source } : {}) })
+      onSave('Webhook', { agent: agentName, source, number_id: numberId })
       return
     }
     // Date-relative trigger: the UI's positive "days before" becomes a negative
@@ -122,7 +126,7 @@ export function useScheduleForm(
     : type === 'event' ? 'Event' : type === 'webhook' ? 'Webhook'
     : type === 'date_relative' ? 'DateRelative' : 'Scheduled'
   const previewCfg: ScheduleConfig | null = type === 'event' ? { event: eventKey }
-    : type === 'webhook' ? { agent: agentName }
+    : type === 'webhook' ? { agent: agentName, source, number_id: numberId }
     : type === 'date_relative' ? { date_field: dateField, offset_days: -Math.abs(+offsetDays) }
     : type === 'scheduled'
       ? (frequency === 'interval'
@@ -131,7 +135,7 @@ export function useScheduleForm(
       : null
 
   return {
-    type, setType, frequency, setFrequency, eventKey, setEventKey, agentName, setAgentName,
+    type, setType, frequency, setFrequency, eventKey, setEventKey, agentName, setAgentName, source, setSource, numberId, setNumberId,
     dateField, setDateField, offsetDays, setOffsetDays,
     times, addTime, removeTime, updateTime,
     weekdays, toggleWeekday, monthday, setMonthday, month, setMonth,
