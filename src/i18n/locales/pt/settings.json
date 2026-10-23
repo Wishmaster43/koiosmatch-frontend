@@ -2118,7 +2118,44 @@
     "copyUrl": "Copiar URL",
     "saveError": "Falha ao guardar.",
     "loadError": "Não foi possível carregar as definições do Facebook Leads.",
-    "retry": "Tentar novamente"
+    "retry": "Tentar novamente",
+      "tabs": {
+        "connection": "Ligação",
+        "queue": "Fila"
+      },
+      "queue": {
+        "summary": {
+          "pending": "Pendentes: {{formatted}}",
+          "retrieved": "Recuperados: {{formatted}}",
+          "rejected": "Rejeitados: {{formatted}}",
+          "failed": "Falhados: {{formatted}}"
+        },
+        "oldestPending": "Lead pendente mais antigo: {{date}}",
+        "filterLabel": "Filtrar por estado",
+        "status": {
+          "all": "Todos os estados",
+          "pending": "Pendente",
+          "retrieved": "Recuperado",
+          "rejected": "Rejeitado",
+          "failed": "Falhado"
+        },
+        "col": {
+          "created": "Criado",
+          "form": "Formulário",
+          "status": "Estado",
+          "attempts": "Tentativas",
+          "lastError": "Último erro",
+          "nextAttempt": "Próxima tentativa",
+          "retrieved": "Recuperado em",
+          "candidate": "Candidato"
+        },
+        "view": "Ver",
+        "retry": "Tentar novamente",
+        "empty": "Não há leads com este estado.",
+        "loadError": "Não foi possível carregar a fila.",
+        "alreadyRetrieved": "Este lead já foi recuperado.",
+        "retryFailed": "A nova tentativa falhou."
+      }
   },
   "export": {
     "includeArchived": "Incluir registos arquivados",

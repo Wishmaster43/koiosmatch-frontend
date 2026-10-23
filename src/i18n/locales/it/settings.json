@@ -2118,7 +2118,44 @@
     "copyUrl": "Copia URL",
     "saveError": "Salvataggio non riuscito.",
     "loadError": "Impossibile caricare le impostazioni di Facebook Leads.",
-    "retry": "Riprova"
+    "retry": "Riprova",
+      "tabs": {
+        "connection": "Connessione",
+        "queue": "Coda"
+      },
+      "queue": {
+        "summary": {
+          "pending": "In attesa: {{formatted}}",
+          "retrieved": "Recuperati: {{formatted}}",
+          "rejected": "Rifiutati: {{formatted}}",
+          "failed": "Falliti: {{formatted}}"
+        },
+        "oldestPending": "Lead in attesa più vecchio: {{date}}",
+        "filterLabel": "Filtra per stato",
+        "status": {
+          "all": "Tutti gli stati",
+          "pending": "In attesa",
+          "retrieved": "Recuperato",
+          "rejected": "Rifiutato",
+          "failed": "Fallito"
+        },
+        "col": {
+          "created": "Creato",
+          "form": "Modulo",
+          "status": "Stato",
+          "attempts": "Tentativi",
+          "lastError": "Ultimo errore",
+          "nextAttempt": "Prossimo tentativo",
+          "retrieved": "Recuperato il",
+          "candidate": "Candidato"
+        },
+        "view": "Visualizza",
+        "retry": "Riprova",
+        "empty": "Nessun lead con questo stato.",
+        "loadError": "Impossibile caricare la coda.",
+        "alreadyRetrieved": "Questo lead è già stato recuperato.",
+        "retryFailed": "Il nuovo tentativo non è riuscito."
+      }
   },
   "export": {
     "includeArchived": "Includi i record archiviati",

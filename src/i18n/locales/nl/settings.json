@@ -2118,7 +2118,44 @@
     "copyUrl": "Kopieer URL",
     "saveError": "Opslaan is mislukt.",
     "loadError": "Kon de Facebook Leads-instellingen niet laden.",
-    "retry": "Opnieuw proberen"
+    "retry": "Opnieuw proberen",
+      "tabs": {
+        "connection": "Koppeling",
+        "queue": "Wachtrij"
+      },
+      "queue": {
+        "summary": {
+          "pending": "Wachtend: {{formatted}}",
+          "retrieved": "Opgehaald: {{formatted}}",
+          "rejected": "Afgewezen: {{formatted}}",
+          "failed": "Mislukt: {{formatted}}"
+        },
+        "oldestPending": "Oudste wachtende lead: {{date}}",
+        "filterLabel": "Status filteren",
+        "status": {
+          "all": "Alle statussen",
+          "pending": "Wachtend",
+          "retrieved": "Opgehaald",
+          "rejected": "Afgewezen",
+          "failed": "Mislukt"
+        },
+        "col": {
+          "created": "Aangemaakt",
+          "form": "Formulier",
+          "status": "Status",
+          "attempts": "Pogingen",
+          "lastError": "Laatste fout",
+          "nextAttempt": "Volgende poging",
+          "retrieved": "Opgehaald op",
+          "candidate": "Kandidaat"
+        },
+        "view": "Bekijken",
+        "retry": "Opnieuw proberen",
+        "empty": "Geen leads met deze status.",
+        "loadError": "De wachtrij kon niet worden geladen.",
+        "alreadyRetrieved": "Deze lead is al opgehaald.",
+        "retryFailed": "Opnieuw proberen is mislukt."
+      }
   },
   "export": {
     "includeArchived": "Inclusief gearchiveerde records",

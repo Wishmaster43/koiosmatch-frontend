@@ -20,6 +20,9 @@ import Button from '@/components/ui/Button'
 import CopyIconButton from '@/components/ui/CopyIconButton'
 import { PageTitle, formLabelStyle } from '@/components/ui/typography'
 import { publicApiUrl } from '@/lib/publicApiUrl'
+import SubTabBar from '@/components/drawer/SubTabBar'
+import { getHashParams } from '@/lib/hashQuery'
+import LeadQueuePanel from './facebookLeads/LeadQueuePanel'
 
 // The exact placeholder the backend masks a stored secret with (SettingController::MASK) —
 // matching it lets the FE tell "already set" apart from "empty" without ever seeing the value.
@@ -72,7 +75,7 @@ function SecretField({ id, label, value, onChange, alreadySet, setBadge, placeho
 }
 
 // Loads and saves the tenant's Facebook Leads credentials (verify token, masked app secret/access token, dataset id) through the shared settings endpoints.
-export default function FacebookLeadsSettings() {
+function FacebookConnectionForm() {
   const { t } = useTranslation('settings')
   const activeTenant = useAuth()?.activeTenant ?? null
   const [verifyToken, setVerifyToken] = useState('')
@@ -149,7 +152,6 @@ export default function FacebookLeadsSettings() {
 
   return (
     <div style={{ maxWidth: 560 }}>
-      <PageTitle>{t('facebookLeads.title')}</PageTitle>
       <p style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 2, marginBottom: 20 }}>{t('facebookLeads.subtitle')}</p>
 
       <div style={{ display: 'flex', flexDirection: 'column', gap: 14, marginBottom: 20 }}>
@@ -194,6 +196,22 @@ export default function FacebookLeadsSettings() {
             {t('facebookLeads.copyUrl')}
           </CopyIconButton>
         </div>
+      </div>
+    </div>
+  )
+}
+
+// Screen shell: the credentials form ("connection") and the lead queue, opened on the queue via `?view=queue` (notification deep link).
+export default function FacebookLeadsSettings() {
+  const { t } = useTranslation('settings')
+  const [tab, setTab] = useState<'connection' | 'queue'>(() => (getHashParams(window.location.hash).get('view') === 'queue' ? 'queue' : 'connection'))
+  return (
+    <div>
+      <PageTitle>{t('facebookLeads.title')}</PageTitle>
+      <SubTabBar active={tab} onChange={(id) => setTab(id as 'connection' | 'queue')}
+        tabs={[{ id: 'connection', label: t('facebookLeads.tabs.connection') }, { id: 'queue', label: t('facebookLeads.tabs.queue') }]} />
+      <div style={{ paddingTop: 16 }}>
+        {tab === 'queue' ? <LeadQueuePanel /> : <FacebookConnectionForm />}
       </div>
     </div>
   )

@@ -1857,7 +1857,44 @@
     "copyUrl": "Copiar URL",
     "saveError": "Error al guardar.",
     "loadError": "No se pudieron cargar los ajustes de Facebook Leads.",
-    "retry": "Intentar de nuevo"
+    "retry": "Intentar de nuevo",
+      "tabs": {
+        "connection": "Conexión",
+        "queue": "Cola"
+      },
+      "queue": {
+        "summary": {
+          "pending": "Pendientes: {{formatted}}",
+          "retrieved": "Recuperados: {{formatted}}",
+          "rejected": "Rechazados: {{formatted}}",
+          "failed": "Fallidos: {{formatted}}"
+        },
+        "oldestPending": "Lead pendiente más antiguo: {{date}}",
+        "filterLabel": "Filtrar por estado",
+        "status": {
+          "all": "Todos los estados",
+          "pending": "Pendiente",
+          "retrieved": "Recuperado",
+          "rejected": "Rechazado",
+          "failed": "Fallido"
+        },
+        "col": {
+          "created": "Creado",
+          "form": "Formulario",
+          "status": "Estado",
+          "attempts": "Intentos",
+          "lastError": "Último error",
+          "nextAttempt": "Próximo intento",
+          "retrieved": "Recuperado el",
+          "candidate": "Candidato"
+        },
+        "view": "Ver",
+        "retry": "Reintentar",
+        "empty": "No hay leads con este estado.",
+        "loadError": "No se pudo cargar la cola.",
+        "alreadyRetrieved": "Este lead ya se ha recuperado.",
+        "retryFailed": "El reintento ha fallado."
+      }
   },
   "export": {
     "includeArchived": "Incluir registros archivados",

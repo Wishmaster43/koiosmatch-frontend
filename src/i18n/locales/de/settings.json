@@ -1857,7 +1857,44 @@
     "copyUrl": "URL kopieren",
     "saveError": "Speichern fehlgeschlagen.",
     "loadError": "Die Facebook-Leads-Einstellungen konnten nicht geladen werden.",
-    "retry": "Erneut versuchen"
+    "retry": "Erneut versuchen",
+      "tabs": {
+        "connection": "Verbindung",
+        "queue": "Warteschlange"
+      },
+      "queue": {
+        "summary": {
+          "pending": "Wartend: {{formatted}}",
+          "retrieved": "Abgerufen: {{formatted}}",
+          "rejected": "Abgelehnt: {{formatted}}",
+          "failed": "Fehlgeschlagen: {{formatted}}"
+        },
+        "oldestPending": "Älteste wartende Lead: {{date}}",
+        "filterLabel": "Nach Status filtern",
+        "status": {
+          "all": "Alle Status",
+          "pending": "Wartend",
+          "retrieved": "Abgerufen",
+          "rejected": "Abgelehnt",
+          "failed": "Fehlgeschlagen"
+        },
+        "col": {
+          "created": "Erstellt",
+          "form": "Formular",
+          "status": "Status",
+          "attempts": "Versuche",
+          "lastError": "Letzter Fehler",
+          "nextAttempt": "Nächster Versuch",
+          "retrieved": "Abgerufen am",
+          "candidate": "Kandidat"
+        },
+        "view": "Ansehen",
+        "retry": "Erneut versuchen",
+        "empty": "Keine Leads mit diesem Status.",
+        "loadError": "Die Warteschlange konnte nicht geladen werden.",
+        "alreadyRetrieved": "Diese Lead wurde bereits abgerufen.",
+        "retryFailed": "Der erneute Versuch ist fehlgeschlagen."
+      }
   },
   "export": {
     "includeArchived": "Archivierte Datensätze einschließen",

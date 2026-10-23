@@ -2118,7 +2118,44 @@
     "copyUrl": "Copy URL",
     "saveError": "Saving failed.",
     "loadError": "Could not load the Facebook Leads settings.",
-    "retry": "Try again"
+    "retry": "Try again",
+      "tabs": {
+        "connection": "Connection",
+        "queue": "Queue"
+      },
+      "queue": {
+        "summary": {
+          "pending": "Pending: {{formatted}}",
+          "retrieved": "Retrieved: {{formatted}}",
+          "rejected": "Rejected: {{formatted}}",
+          "failed": "Failed: {{formatted}}"
+        },
+        "oldestPending": "Oldest pending lead: {{date}}",
+        "filterLabel": "Filter by status",
+        "status": {
+          "all": "All statuses",
+          "pending": "Pending",
+          "retrieved": "Retrieved",
+          "rejected": "Rejected",
+          "failed": "Failed"
+        },
+        "col": {
+          "created": "Created",
+          "form": "Form",
+          "status": "Status",
+          "attempts": "Attempts",
+          "lastError": "Last error",
+          "nextAttempt": "Next attempt",
+          "retrieved": "Retrieved on",
+          "candidate": "Candidate"
+        },
+        "view": "View",
+        "retry": "Retry",
+        "empty": "No leads with this status.",
+        "loadError": "The queue could not be loaded.",
+        "alreadyRetrieved": "This lead has already been retrieved.",
+        "retryFailed": "Retrying failed."
+      }
   },
   "export": {
     "includeArchived": "Include archived records",

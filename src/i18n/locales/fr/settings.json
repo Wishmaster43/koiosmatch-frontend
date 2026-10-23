@@ -1857,7 +1857,44 @@
     "copyUrl": "Copier l'URL",
     "saveError": "L'enregistrement a échoué.",
     "loadError": "Impossible de charger les paramètres Facebook Leads.",
-    "retry": "Réessayer"
+    "retry": "Réessayer",
+      "tabs": {
+        "connection": "Connexion",
+        "queue": "File d'attente"
+      },
+      "queue": {
+        "summary": {
+          "pending": "En attente : {{formatted}}",
+          "retrieved": "Récupérés : {{formatted}}",
+          "rejected": "Rejetés : {{formatted}}",
+          "failed": "Échoués : {{formatted}}"
+        },
+        "oldestPending": "Lead en attente la plus ancienne : {{date}}",
+        "filterLabel": "Filtrer par statut",
+        "status": {
+          "all": "Tous les statuts",
+          "pending": "En attente",
+          "retrieved": "Récupéré",
+          "rejected": "Rejeté",
+          "failed": "Échoué"
+        },
+        "col": {
+          "created": "Créé",
+          "form": "Formulaire",
+          "status": "Statut",
+          "attempts": "Tentatives",
+          "lastError": "Dernière erreur",
+          "nextAttempt": "Prochaine tentative",
+          "retrieved": "Récupéré le",
+          "candidate": "Candidat"
+        },
+        "view": "Voir",
+        "retry": "Réessayer",
+        "empty": "Aucun lead avec ce statut.",
+        "loadError": "Impossible de charger la file d'attente.",
+        "alreadyRetrieved": "Ce lead a déjà été récupéré.",
+        "retryFailed": "La nouvelle tentative a échoué."
+      }
   },
   "export": {
     "includeArchived": "Inclure les enregistrements archivés",
