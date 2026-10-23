@@ -11,8 +11,8 @@ import { useTranslation } from 'react-i18next'
 import { ChevronDown, ChevronRight, Download } from 'lucide-react'
 import { useDateFormat } from '@/lib/datetime'
 import type { Id } from '@/types/common'
-import { scanState } from './documentHelpers'
-import type { ScanStatus } from './documentHelpers'
+import { scanState } from '@/lib/scanState'
+import type { ScanStatus } from '@/lib/scanState'
 
 // DOC-VERSIE-1: one superseded file snapshot, created on every /replace — the old
 // file stays on disk and is reachable through its own authenticated download route.

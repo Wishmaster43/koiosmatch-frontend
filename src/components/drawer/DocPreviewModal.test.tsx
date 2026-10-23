@@ -167,3 +167,15 @@ describe('DocPreviewModal', () => {
     expect(container).toBeEmptyDOMElement()
   })
 })
+
+describe('DocPreviewModal · 423 (UPLOADS-SCAN-1)', () => {
+  afterEach(() => vi.unstubAllGlobals())
+
+  it('a 423 answer renders the document-not-available text, not the generic no-preview text', async () => {
+    URL.createObjectURL = vi.fn(() => 'blob:x')
+    vi.stubGlobal('fetch', vi.fn(() => Promise.resolve({ ok: false, status: 423, blob: () => Promise.resolve(new Blob()) })))
+    render(<DocPreviewModal doc={{ name: 'cv.pdf', url: '/x', download_url: null }} onClose={() => {}} />)
+    await waitFor(() => expect(screen.getByText('common:errors.documentNotAvailable')).toBeInTheDocument())
+    expect(screen.queryByText('documents.previewUnavailable')).toBeNull()
+  })
+})

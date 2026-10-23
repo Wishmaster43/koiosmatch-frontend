@@ -19,7 +19,9 @@ export interface CvDocument {
   type?: string
   size?: string | number
   url?: string
-  download_url?: string
+  download_url?: string | null
+  // UPLOADS-SCAN-1: virus-scan state; absent or 'clean' renders exactly as before.
+  scan_status?: 'pending' | 'clean' | 'rejected'
   created_at?: string
   uploaded_at?: string
 }

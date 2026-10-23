@@ -316,3 +316,18 @@ describe('DocumentsTab (vacancy) · upload policy', () => {
     expect(upload.mock.calls[0][2]).toBe('cv.pdf')
   })
 })
+
+describe('DocumentsTab (vacancy) · scan state (UPLOADS-SCAN-1)', () => {
+  it('a pending row shows the state chip and a locked preview; a clean row shows no chip', () => {
+    const docs = [
+      { id: 'p', name: 'p.pdf', type: 'CV', size: '1 KB', download_url: null, scan_status: 'pending' as const },
+      { id: 'c', name: 'c.pdf', type: 'CV', size: '1 KB', download_url: '/dl/c', scan_status: 'clean' as const },
+    ]
+    vi.mocked(useEntityDocuments).mockReturnValue({ docs, loading: false, error: false, upload: vi.fn(), rename: vi.fn(), remove: vi.fn() })
+    render(<DocumentsTab vacancy={vacancy} />)
+    expect(screen.getAllByText(i18n.t('upload.scanPending', { ns: 'common' }))).toHaveLength(1)
+    const previews = screen.getAllByRole('button', { name: i18n.t('documents.preview', { ns: 'candidates' }) })
+    expect(previews[0]).toHaveAttribute('aria-disabled', 'true')
+    expect(previews[1]).not.toHaveAttribute('aria-disabled')
+  })
+})

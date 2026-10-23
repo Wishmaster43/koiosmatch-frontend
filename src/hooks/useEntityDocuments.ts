@@ -30,7 +30,9 @@ import { uploadErrorMessage } from '@/lib/uploadError'
 
 export interface EntityDoc {
   id?: Id; name?: string; file_name?: string; type?: string
-  size?: string | number; url?: string; download_url?: string
+  size?: string | number; url?: string; download_url?: string | null
+  // UPLOADS-SCAN-1: virus-scan state; absent or 'clean' renders exactly as before.
+  scan_status?: 'pending' | 'clean' | 'rejected'
   objectUrl?: string; created_at?: string
   // Uploader/creation metadata (type-only for now — backend emits the name later,
   // ticket DOC-UPLOADER-1; render tolerantly against both shapes in the meantime).

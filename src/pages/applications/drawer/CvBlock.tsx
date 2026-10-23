@@ -8,6 +8,8 @@ import { useDateFormat } from '@/lib/datetime'
 import DocPreviewModal from '@/components/drawer/DocPreviewModal'
 import { Caption } from '@/components/ui/typography'
 import Button from '@/components/ui/Button'
+import SoftChip from '@/components/ui/SoftChip'
+import { scanState } from '@/lib/scanState'
 import { CanonFieldRow } from '@/components/drawer/CanonFieldRow'
 import { useCandidateCvDocument } from '../hooks/useCandidateCvDocument'
 import type { Id } from '@/types/common'
@@ -46,7 +48,10 @@ export default function CvBlock({ candidateId }: { candidateId: Id | null | unde
 
   // Newest CV first (server order) — the one shown/acted on.
   const cv = cvDocuments[0] ?? null
-  const fileUrl = cv?.download_url ?? cv?.url
+  // UPLOADS-SCAN-1: a non-clean CV shows its state and offers no preview/download.
+  const scan = scanState(cv?.scan_status)
+  const scanText = scan ? t(scan === 'pending' ? 'common:upload.scanPending' : 'common:upload.scanRejected') : undefined
+  const fileUrl = scan ? undefined : cv?.download_url ?? cv?.url
   const uploadedAt = cv?.created_at ?? cv?.uploaded_at
 
   return (
@@ -62,6 +67,7 @@ export default function CvBlock({ candidateId }: { candidateId: Id | null | unde
                 title={cv.name}>
                 {cv.name || t('drawer.cv.title')}
               </div>
+              {scan && <SoftChip size={10} color={scan === 'pending' ? 'var(--color-warning)' : 'var(--color-danger)'} label={scanText} title={scanText} />}
               {uploadedAt && (
                 <Caption as="div">
                   {t('drawer.cv.uploadedOn', { date: formatDateTime(uploadedAt) })}
@@ -79,7 +85,7 @@ export default function CvBlock({ candidateId }: { candidateId: Id | null | unde
             ) : (
               <span aria-hidden="true" style={{ ...iconBtnDisabled, opacity: 0.4 }}><Download size={14} /></span>
             )}
-            <Button variant="ghost" iconOnly size="sm" onClick={() => setPreviewOpen(true)} title={t('drawer.cv.view')} aria-label={t('drawer.cv.view')}>
+            <Button variant="ghost" iconOnly size="sm" onClick={scan ? undefined : () => setPreviewOpen(true)} aria-disabled={scan ? true : undefined} style={scan ? { opacity: 0.5, cursor: 'not-allowed' } : undefined} title={scanText ?? t('drawer.cv.view')} aria-label={t('drawer.cv.view')}>
               <Eye size={14} />
             </Button>
           </div>

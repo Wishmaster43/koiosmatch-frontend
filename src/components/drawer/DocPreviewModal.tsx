@@ -24,7 +24,7 @@ const API_ORIGIN = (() => {
 interface PreviewDoc {
   objectUrl?: string
   url?: string
-  download_url?: string
+  download_url?: string | null
   type?: string
   name?: string
   file_name?: string
@@ -74,7 +74,7 @@ export default function DocPreviewModal({ doc, onClose, docTypeScope = 'candidat
   // built from the fetched bytes of a persisted doc. Null while that fetch is in
   // flight or hasn't started (no previewable type, or nothing to fetch at all).
   const [blobUrl, setBlobUrl] = useState<string | null>(null)
-  const [fetchState, setFetchState] = useState<'idle' | 'loading' | 'error'>('idle')
+  const [fetchState, setFetchState] = useState<'idle' | 'loading' | 'error' | 'unavailable'>('idle')
 
   const name = doc?.name ?? doc?.file_name ?? ''
   const previewable = isImage(name) || isPdf(name)
@@ -108,7 +108,8 @@ export default function DocPreviewModal({ doc, onClose, docTypeScope = 'candidat
     const rel = (u?: string) => (u && u.startsWith('/') ? new URL(u, API_ORIGIN).toString() : null)
     const sameOrigin = (u?: string) => (isAbs(u) && new URL(u).origin === window.location.origin ? u : null)
     const cross = (u?: string) => (isAbs(u) ? u : null)
-    const ordered = [rel(doc.url), rel(doc.download_url), sameOrigin(doc.url), sameOrigin(doc.download_url), cross(doc.url), cross(doc.download_url)]
+    const dl = doc.download_url ?? undefined
+    const ordered = [rel(doc.url), rel(dl), sameOrigin(doc.url), sameOrigin(dl), cross(doc.url), cross(dl)]
     return [...new Set(ordered.filter((u): u is string => Boolean(u)))]
   })()
   // Stable primitive key for the effect below — the array itself is rebuilt every render.
@@ -136,10 +137,13 @@ export default function DocPreviewModal({ doc, onClose, docTypeScope = 'candidat
     // Walk the candidates in order; the first one that actually returns bytes wins.
     // A blocked/refused candidate is not an error yet — only running out of them is.
     void (async () => {
+      let blocked = false
       for (const url of previewUrls) {
         try {
           const res = await fetch(url, { credentials: 'include', headers })
           if (cancelled) return
+          // UPLOADS-SCAN-1: 423 = the file is not (yet) available, an honest state of its own.
+          if (res.status === 423) blocked = true
           if (!res.ok) continue
           const blob = await res.blob()
           if (cancelled) return
@@ -150,7 +154,7 @@ export default function DocPreviewModal({ doc, onClose, docTypeScope = 'candidat
         } catch { /* CORS block / network error — fall through to the next candidate */ }
         if (cancelled) return
       }
-      setFetchState('error')
+      setFetchState(blocked ? 'unavailable' : 'error')
     })()
     return () => {
       cancelled = true
@@ -167,7 +171,7 @@ export default function DocPreviewModal({ doc, onClose, docTypeScope = 'candidat
   // The honest escape hatch: a real download, never a silent one from a button
   // labelled preview. Prefers the blob already fetched (works even if the signed
   // download_url has since expired); falls back to the raw authenticated url.
-  const downloadHref = blobUrl ?? doc.download_url ?? doc.url
+  const downloadHref = blobUrl ?? doc.download_url ?? doc.url ?? undefined
 
   return (
     // POPUP-SLEEP (Danny punt 19): the hand-rolled overlay is gone — this is the
@@ -191,6 +195,10 @@ export default function DocPreviewModal({ doc, onClose, docTypeScope = 'candidat
       {!doc.objectUrl && !doc.url ? (
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100%', padding: 40, textAlign: 'center', color: 'var(--text-muted)', fontSize: 13 }}>
           {t('documents.noPreview')}
+        </div>
+      ) : fetchState === 'unavailable' ? (
+        <div role="alert" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: 300, padding: 40, textAlign: 'center', color: 'var(--text-muted)', fontSize: 13 }}>
+          {t('common:errors.documentNotAvailable')}
         </div>
       ) : fetchState === 'loading' ? (
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: 300, color: 'var(--text-muted)', fontSize: 13 }}>

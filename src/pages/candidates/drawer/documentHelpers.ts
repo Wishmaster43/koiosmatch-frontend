@@ -4,11 +4,12 @@
 import { formatByteSize } from '@/pages/candidates/data/byteSize'
 import type { DocVersion } from './DocumentVersionHistory'
 import type { Id } from '@/types/common'
+import { scanState } from '@/lib/scanState'
+import type { ScanStatus } from '@/lib/scanState'
 
 // The candidate document row shape (CandidateDocumentController / DocumentResource),
 // shared by DocumentsSection (state owner) and DocumentRow (its presentational row) —
 // centralised here so neither file needs to import a type from the other.
-export type ScanStatus = 'pending' | 'clean' | 'rejected'
 
 export interface DocItem {
   id?: Id
@@ -20,7 +21,7 @@ export interface DocItem {
   url?: string
   // DOC-EXPIRY-1: the signed, short-lived download URL (DocumentResource) — the
   // preferred download source everywhere in this section (see docUrl below).
-  download_url?: string // null on the wire for a non-clean row; callers use ?? / truthiness, and the shared preview types stay string-only
+  download_url?: string | null // null on the wire for a non-clean row
   // UPLOADS-SCAN-1: virus-scan state; absent or 'clean' renders exactly as before.
   scan_status?: ScanStatus
   // DOC-EXPIRY-1: nullable — only compliance uploads (VOG/BIG/diploma-style) carry one.
@@ -58,8 +59,6 @@ export const isPersisted = (id: Id | undefined): boolean => id != null && !(type
 // DOC-EXPIRY-1 point 2: the SIGNED download_url is preferred everywhere in this
 // section — the legacy authenticated `url` is only a fallback for a row that
 // predates this field (and a locally queued file still uses its blob objectUrl).
-// UPLOADS-SCAN-1: the scan state worth showing, null for clean/absent (a row from before the field).
-export const scanState = (s?: ScanStatus | null): 'pending' | 'rejected' | null => (s === 'pending' || s === 'rejected' ? s : null)
 export const docScanState = (d: DocItem): 'pending' | 'rejected' | null => scanState(d.scan_status)
 // A non-clean row has no usable url: the authenticated `url` fallback answers 423 for it.
 export const docUrl = (d: DocItem): string | undefined => (docScanState(d) ? undefined : d.download_url ?? d.url ?? d.objectUrl)
