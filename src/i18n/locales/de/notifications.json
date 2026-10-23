@@ -124,5 +124,19 @@
       "title": "{{label}} liegt unter dem Ziel",
       "body": "{{label}} lag bei {{value}} bei einem Ziel von {{target}} ({{period}})."
     }
+  },
+  "facebook": {
+    "lead_pending": {
+      "title": "Facebook-Lead wartet auf Abruf",
+      "body": "Facebook-Leads, die seit mehr als 24 Stunden auf den Abruf warten: {{count}}.{{forms}} Prüfe die Facebook-Verbindung."
+    },
+    "lead_failed": {
+      "title": "Facebook-Lead endgültig fehlgeschlagen",
+      "body": "Facebook-Leads, die nicht abgerufen werden konnten und aufgegeben wurden: {{count}}.{{forms}} Versuche es erneut oder prüfe die Facebook-Verbindung."
+    },
+    "leads_retrieval_missing": {
+      "title": "Facebook-App fehlt leads_retrieval",
+      "body": "Der Facebook-App dieser Agentur fehlt die Berechtigung leads_retrieval, daher können verpasste Leads nicht wiederhergestellt werden. Beantrage die Berechtigung in Meta."
+    }
   }
 }

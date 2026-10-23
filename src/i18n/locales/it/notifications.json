@@ -124,5 +124,19 @@
       "title": "{{label}} è sotto l'obiettivo",
       "body": "{{label}} era a {{value}} con un obiettivo di {{target}} ({{period}})."
     }
+  },
+  "facebook": {
+    "lead_pending": {
+      "title": "Lead Facebook in attesa di recupero",
+      "body": "Lead Facebook in attesa di recupero da più di 24 ore: {{count}}.{{forms}} Controlla il collegamento con Facebook."
+    },
+    "lead_failed": {
+      "title": "Lead Facebook definitivamente non riuscito",
+      "body": "Lead Facebook che non è stato possibile recuperare e sono stati abbandonati: {{count}}.{{forms}} Riprova o controlla il collegamento con Facebook."
+    },
+    "leads_retrieval_missing": {
+      "title": "All’app Facebook manca leads_retrieval",
+      "body": "L’app Facebook di questa agenzia non ha il permesso leads_retrieval, quindi i lead persi non possono essere recuperati. Richiedi il permesso in Meta."
+    }
   }
 }

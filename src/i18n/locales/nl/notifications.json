@@ -124,5 +124,19 @@
       "title": "{{label}} ligt onder het doel",
       "body": "{{label}} stond op {{value}} bij een doel van {{target}} ({{period}})."
     }
+  },
+  "facebook": {
+    "lead_pending": {
+      "title": "Facebook-lead wacht op ophalen",
+      "body": "Facebook-leads die al meer dan 24 uur op ophalen wachten: {{count}}.{{forms}} Controleer de Facebook-koppeling."
+    },
+    "lead_failed": {
+      "title": "Facebook-lead definitief mislukt",
+      "body": "Facebook-leads die niet konden worden opgehaald en zijn opgegeven: {{count}}.{{forms}} Probeer ze opnieuw of controleer de Facebook-koppeling."
+    },
+    "leads_retrieval_missing": {
+      "title": "Facebook-app mist leads_retrieval",
+      "body": "De Facebook-app van dit bureau heeft geen leads_retrieval-toestemming, dus gemiste leads kunnen niet worden hersteld. Vraag de toestemming aan in Meta."
+    }
   }
 }

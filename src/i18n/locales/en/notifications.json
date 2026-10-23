@@ -124,5 +124,19 @@
       "title": "{{label}} is below target",
       "body": "{{label}} was {{value}} against a target of {{target}} ({{period}})."
     }
+  },
+  "facebook": {
+    "lead_pending": {
+      "title": "Facebook lead waiting to be retrieved",
+      "body": "Facebook leads that have been waiting to be retrieved for over 24 hours: {{count}}.{{forms}} Check the Facebook connection."
+    },
+    "lead_failed": {
+      "title": "Facebook lead permanently failed",
+      "body": "Facebook leads that could not be retrieved and were given up: {{count}}.{{forms}} Retry them or check the Facebook connection."
+    },
+    "leads_retrieval_missing": {
+      "title": "Facebook app is missing leads_retrieval",
+      "body": "This agency's Facebook app has no leads_retrieval permission, so missed leads cannot be recovered. Request the permission in Meta."
+    }
   }
 }

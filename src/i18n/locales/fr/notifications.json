@@ -124,5 +124,19 @@
       "title": "{{label}} est en dessous de l'objectif",
       "body": "{{label}} était à {{value}} pour un objectif de {{target}} ({{period}})."
     }
+  },
+  "facebook": {
+    "lead_pending": {
+      "title": "Lead Facebook en attente de récupération",
+      "body": "Leads Facebook en attente de récupération depuis plus de 24 heures : {{count}}.{{forms}} Vérifiez la connexion Facebook."
+    },
+    "lead_failed": {
+      "title": "Lead Facebook définitivement en échec",
+      "body": "Leads Facebook qui n’ont pas pu être récupérés et ont été abandonnés : {{count}}.{{forms}} Réessayez ou vérifiez la connexion Facebook."
+    },
+    "leads_retrieval_missing": {
+      "title": "L’application Facebook n’a pas leads_retrieval",
+      "body": "L’application Facebook de cette agence n’a pas l’autorisation leads_retrieval, les leads manqués ne peuvent donc pas être récupérés. Demandez l’autorisation dans Meta."
+    }
   }
 }
