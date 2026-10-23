@@ -4476,6 +4476,7 @@
       "final": "Definitiva"
     },
     "generateResult": "{{generated}} generate, {{alreadyFinal}} già definitive.",
+    "generateResultFailed": "{{generated}} generate, {{alreadyFinal}} già definitive, {{failed}} non riuscite: {{names}}",
     "sendingSince": "Invio email in corso da {{since}}",
     "resolveNotSent": "Segna come non inviata",
     "resolveIntro": "Questa email di fattura si è bloccata. Segnala come non inviata per poterla inviare di nuovo.",

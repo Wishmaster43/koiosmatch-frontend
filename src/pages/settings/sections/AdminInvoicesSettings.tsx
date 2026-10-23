@@ -96,9 +96,19 @@ export default function AdminInvoicesSettings() {
       // the toast reports what really happened instead of a generic "done".
       const res = await api.post('/admin/invoices/generate', { month })
       const body = (res?.data?.data ?? res?.data ?? {}) as GenerateResult
-      notifySuccess(body.generated != null
-        ? t('adminInvoices.generateResult', { generated: body.generated, alreadyFinal: body.already_final ?? 0 })
-        : t('adminInvoices.generateSuccess'))
+      // Partial failure (BE B-007): name the bureaus that failed instead of a plain success.
+      if (typeof body.failed === 'number' && body.failed > 0) {
+        notifyError(t('adminInvoices.generateResultFailed', {
+          generated: body.generated ?? 0,
+          alreadyFinal: body.already_final ?? 0,
+          failed: body.failed,
+          names: (body.failed_tenants ?? []).map(n => String(n)).join(', '),
+        }))
+      } else {
+        notifySuccess(body.generated != null
+          ? t('adminInvoices.generateResult', { generated: body.generated, alreadyFinal: body.already_final ?? 0 })
+          : t('adminInvoices.generateSuccess'))
+      }
       await reload()
     } catch (err) {
       notifyError(extractApiError(err, t('adminInvoices.generateFailed')))

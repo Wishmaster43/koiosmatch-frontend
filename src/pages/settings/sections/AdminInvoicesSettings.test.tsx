@@ -46,6 +46,21 @@ describe('AdminInvoicesSettings', () => {
     await waitFor(() => expect(api.post).toHaveBeenCalledWith('/admin/invoices/generate', expect.objectContaining({ month: expect.any(String) })))
   })
 
+  it('partial failure raises the failed toast naming the bureaus and still reloads', async () => {
+    const events: Array<{ type: string; message: string }> = []
+    const handler = (e: Event) => events.push((e as CustomEvent).detail)
+    window.addEventListener('km:toast', handler)
+    api.get.mockResolvedValue({ data: [] })
+    api.post.mockResolvedValueOnce({ data: { generated: 2, already_final: 1, failed: 1, failed_tenants: ['Bureau X'] } })
+    renderScreen()
+    const btn = await screen.findByRole('button', { name: i18n.t('adminInvoices.generate', { ns: 'settings' }) })
+    await waitFor(() => expect(api.get).toHaveBeenCalledTimes(1))
+    await userEvent.click(btn)
+    await waitFor(() => expect(api.get.mock.calls.length).toBeGreaterThanOrEqual(2))
+    window.removeEventListener('km:toast', handler)
+    expect(events.some(ev => ev.type === 'error' && ev.message.includes('Bureau X') && ev.message.includes('1 mislukt'))).toBe(true)
+  })
+
   it('shows "Finaliseren" for a draft and posts the finalize route', async () => {
     api.get.mockResolvedValueOnce({ data: [
       { id: 'inv-d', tenant_id: 't1', tenant_name: 'Yesway', number: null, period: '2026-08', status: 'draft', total: 100, vat_amount: 21, finalized_at: null, sent_at: null },

@@ -4475,6 +4475,7 @@
       "final": "Definitiva"
     },
     "generateResult": "{{generated}} generadas, {{alreadyFinal}} ya definitivas.",
+    "generateResultFailed": "{{generated}} generadas, {{alreadyFinal}} ya definitivas, {{failed}} fallidas: {{names}}",
     "sendingSince": "Envío de correo en curso desde {{since}}",
     "resolveNotSent": "Marcar como no enviada",
     "resolveIntro": "Este correo de factura se ha quedado atascado. Márcalo como no enviado para poder enviarlo de nuevo.",

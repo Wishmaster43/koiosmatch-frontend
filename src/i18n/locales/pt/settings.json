@@ -4476,6 +4476,7 @@
       "final": "Definitiva"
     },
     "generateResult": "{{generated}} geradas, {{alreadyFinal}} já definitivas.",
+    "generateResultFailed": "{{generated}} geradas, {{alreadyFinal}} já definitivas, {{failed}} falharam: {{names}}",
     "sendingSince": "Envio de email em curso desde {{since}}",
     "resolveNotSent": "Marcar como não enviada",
     "resolveIntro": "Este email de fatura ficou bloqueado. Marque-o como não enviado para poder enviá-lo novamente.",

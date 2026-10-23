@@ -4475,6 +4475,7 @@
       "final": "Definitief"
     },
     "generateResult": "{{generated}} gegenereerd, {{alreadyFinal}} al definitief.",
+    "generateResultFailed": "{{generated}} gegenereerd, {{alreadyFinal}} al definitief, {{failed}} mislukt: {{names}}",
     "sendingSince": "Mail loopt sinds {{since}}",
     "resolveNotSent": "Markeer als niet verzonden",
     "resolveIntro": "Deze factuurmail is blijven hangen. Markeer hem als niet verzonden om opnieuw te kunnen versturen.",

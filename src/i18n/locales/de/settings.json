@@ -4475,6 +4475,7 @@
       "final": "Endgültig"
     },
     "generateResult": "{{generated}} erzeugt, {{alreadyFinal}} bereits endgültig.",
+    "generateResultFailed": "{{generated}} erzeugt, {{alreadyFinal}} bereits endgültig, {{failed}} fehlgeschlagen: {{names}}",
     "sendingSince": "E-Mail-Versand läuft seit {{since}}",
     "resolveNotSent": "Als nicht gesendet markieren",
     "resolveIntro": "Diese Rechnungs-E-Mail ist hängen geblieben. Markieren Sie sie als nicht gesendet, um sie erneut senden zu können.",

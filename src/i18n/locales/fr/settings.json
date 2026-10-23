@@ -4475,6 +4475,7 @@
       "final": "Définitive"
     },
     "generateResult": "{{generated}} générées, {{alreadyFinal}} déjà finalisées.",
+    "generateResultFailed": "{{generated}} générées, {{alreadyFinal}} déjà finalisées, {{failed}} en échec : {{names}}",
     "sendingSince": "Envoi en cours depuis {{since}}",
     "resolveNotSent": "Marquer comme non envoyée",
     "resolveIntro": "Cet e-mail de facture est resté bloqué. Marquez-le comme non envoyé pour pouvoir le renvoyer.",
