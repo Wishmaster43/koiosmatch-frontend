@@ -1,5 +1,5 @@
 /**
- * Single-line settings field that saves one key on blur (shared by the career-site and AI-interview screens).
+ * Single-line settings field that saves one key on blur (settings kit; used by the career-site and AI-interview screens).
  * Draft state is local; a failed save reverts the draft and surfaces the server error.
  */
 import { useState } from 'react'

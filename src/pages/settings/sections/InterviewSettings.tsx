@@ -7,7 +7,7 @@
  */
 import { useTranslation } from 'react-i18next'
 import { useAllSettings } from '@/lib/settings/useAllSettings'
-import BlurSaveField from './careerSite/BlurSaveField'
+import BlurSaveField from '../components/BlurSaveField'
 import { useSettingsForm } from '../lib/useSettingsForm'
 import { SettingsScaffold, SettingCardList, SettingRow, SelectField } from '../components/SettingsKit'
 

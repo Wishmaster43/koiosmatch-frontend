@@ -25,7 +25,7 @@ import { useAllSettings, saveSettingsKeys, invalidateAllSettingsCache } from '@/
 import { notifyError } from '@/lib/notify'
 import { SettingRow, Toggle } from '../components/SettingsKit'
 import PublicUrlsCard from './careerSite/PublicUrlsCard'
-import BlurSaveField from './careerSite/BlurSaveField'
+import BlurSaveField from '../components/BlurSaveField'
 import SubTabBar from '@/components/drawer/SubTabBar'
 import { PageTitle } from '@/components/ui/typography'
 
