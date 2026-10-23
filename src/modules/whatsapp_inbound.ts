@@ -18,7 +18,7 @@ export default {
   // VERTREKMODULE-1: a valid point of origin (also listed in START_MODULE_TYPES).
   isStart:  true,
   schema: [
-    { key: 'source', label: 'Bron', type: 'select', required: true, default: 'meta',
+    { key: 'source', label: 'Source', type: 'select', required: true, default: 'meta',
       options: [
         { value: 'meta',   label: 'Meta webhook (WABA + Coexistence)' },
         { value: 'wa_web', label: 'WhatsApp Web (eigen nummer)' },
