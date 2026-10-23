@@ -5,15 +5,19 @@
  */
 import { useEffect, useState } from 'react'
 import api, { unwrapList } from '@/lib/api'
+import type { TenantProvisioning } from '@/lib/tenantProvisioning'
 
-interface TenantOption { id: string; name: string }
+interface TenantOption extends TenantProvisioning { id: string; name: string }
+
+// Picker option: pending/failed bureaus come back flagged so the UI can show them inert.
+export interface TenantPickOption { value: string; label: string; provisioningStatus?: TenantProvisioning['provisioning_status'] }
 
 // Public shape: mapped {value,label} options + a search setter + an error flag
 // (mirrors usePrincipalSearch in this folder — a failed search must never read
 // as "no tenants"). No loading flag: no consumer renders one, and dead surface
 // is dead code — §11.
 export function useTenantSearch(): {
-  options: Array<{ value: string; label: string }>
+  options: TenantPickOption[]
   onSearch: (q: string) => void
   error: boolean
 } {
@@ -38,5 +42,5 @@ export function useTenantSearch(): {
     return () => ctrl.abort()
   }, [debounced])
 
-  return { options: rows.map((o) => ({ value: String(o.id), label: o.name })), onSearch: setQuery, error }
+  return { options: rows.map((o) => ({ value: String(o.id), label: o.name, provisioningStatus: o.provisioning_status })), onSearch: setQuery, error }
 }

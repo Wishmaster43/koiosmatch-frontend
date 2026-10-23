@@ -1,5 +1,6 @@
-import { describe, it, expect } from 'vitest'
-import { unwrap, unwrapList } from './api'
+import { describe, it, expect, vi } from 'vitest'
+import api, { unwrap, unwrapList } from './api'
+import { TENANT_PICK_FLAG, TENANT_PICK_CODE_KEY, TENANT_REQUIRED_EVENT } from './tenantResolution'
 
 // Helper: fake an axios response (the helpers read `res.data`).
 const res = (data) => ({ data })
@@ -54,5 +55,24 @@ describe('unwrapList', () => {
     expect(r.rows).toEqual([])
     expect(r.total).toBe(0)
     expect(r.lastPage).toBe(1)
+  })
+})
+
+// BE lane F B-002: a 409 tenant_not_ready raises the picker event once, carrying its code.
+describe('response interceptor tenant_not_ready', () => {
+  it('dispatches TENANT_REQUIRED_EVENT once with detail.code tenant_not_ready', async () => {
+    sessionStorage.removeItem(TENANT_PICK_FLAG)
+    const onEvent = vi.fn()
+    window.addEventListener(TENANT_REQUIRED_EVENT, onEvent)
+    const rejected = api.interceptors.response.handlers.find(h => h && h.rejected).rejected
+    const err = () => ({ config: { url: '/vacancies' }, response: { status: 409, data: { code: 'tenant_not_ready' } } })
+    await rejected(err()).catch(() => {})
+    await rejected(err()).catch(() => {})
+    window.removeEventListener(TENANT_REQUIRED_EVENT, onEvent)
+    expect(onEvent).toHaveBeenCalledTimes(1)
+    expect(onEvent.mock.calls[0][0].detail.code).toBe('tenant_not_ready')
+    expect(sessionStorage.getItem(TENANT_PICK_CODE_KEY)).toBe('tenant_not_ready')
+    sessionStorage.removeItem(TENANT_PICK_FLAG)
+    sessionStorage.removeItem(TENANT_PICK_CODE_KEY)
   })
 })

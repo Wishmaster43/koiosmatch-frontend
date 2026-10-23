@@ -17,3 +17,13 @@ describe('tenantResolution', () => {
     expect(isTenantResolutionError(new Error('network'))).toBe(false)
   })
 })
+
+// BE lane F B-002: a bureau still provisioning (or failed) answers 409 tenant_not_ready.
+describe('tenantResolution tenant_not_ready', () => {
+  it('recognises 409 tenant_not_ready and ignores a plain 409', () => {
+    expect(tenantResolutionCode({ response: { status: 409, data: { code: 'tenant_not_ready' } } })).toBe('tenant_not_ready')
+    expect(isTenantResolutionError({ response: { status: 409, data: { code: 'tenant_not_ready' } } })).toBe(true)
+    expect(tenantResolutionCode({ response: { status: 409, data: { code: 'in_use' } } })).toBeNull()
+    expect(tenantResolutionCode({ response: { status: 400, data: { code: 'tenant_not_ready' } } })).toBeNull()
+  })
+})

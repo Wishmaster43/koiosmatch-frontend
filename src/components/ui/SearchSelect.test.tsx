@@ -213,3 +213,21 @@ describe('SearchSelect · clearable on the single-pick field role (DROPDOWN-CLEA
   })
 })
 
+
+// Disabled options stay visible with a badge but cannot be picked (tenant provisioning rows).
+describe('SearchSelect · disabled + badge options', () => {
+  it('renders the badge, keeps a disabled row inert and still picks an enabled row', () => {
+    const onToggle = vi.fn()
+    const options = [{ value: 'a', label: 'A' }, { value: 'b', label: 'B', disabled: true, badge: <span>chip</span> }]
+    render(<SearchSelect triggerLabel="Pick" options={options} onToggle={onToggle} />)
+    fireEvent.click(screen.getByRole('button', { name: /Pick/ }))
+    const disabledRow = screen.getByText('B').closest('button') as HTMLElement
+    expect(disabledRow).toBeDisabled()
+    expect(disabledRow).toHaveAttribute('aria-disabled', 'true')
+    expect(screen.getByText('chip')).toBeInTheDocument()
+    fireEvent.click(disabledRow)
+    expect(onToggle).not.toHaveBeenCalled()
+    fireEvent.click(screen.getByText('A'))
+    expect(onToggle).toHaveBeenCalledWith('a')
+  })
+})

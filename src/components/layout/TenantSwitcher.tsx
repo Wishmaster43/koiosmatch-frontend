@@ -10,6 +10,8 @@ import { useAuth } from '@/context/AuthContext'
 import api, { unwrapList } from '@/lib/api'
 import { ChevronDown, Search } from 'lucide-react'
 import type { Tenant } from '@/types/api'
+import { isTenantBlocked, type TenantProvisioning } from '@/lib/tenantProvisioning'
+import TenantProvisioningChip from '@/components/auth/TenantProvisioningChip'
 // Shared luminance-based contrast helper (BRAND-TEXT-COLOR-1) — reused here because
 // each list row shows a DIFFERENT tenant's own brand colour, never the active
 // tenant's --color-on-accent token (which only reflects the active tenant).
@@ -57,7 +59,7 @@ export default function TenantSwitcher({ expanded }: { expanded?: boolean }) {
   const [open,      setOpen]      = useState(false)
   const [query,     setQuery]     = useState('')
   const [debounced, setDebounced] = useState('')
-  const [results,   setResults]   = useState<Tenant[]>([])
+  const [results,   setResults]   = useState<Array<Tenant & TenantProvisioning>>([])
   const [page,      setPage]      = useState(1)
   const [lastPage,  setLastPage]  = useState(1)
   const [loading,   setLoading]   = useState(false)
@@ -84,7 +86,7 @@ export default function TenantSwitcher({ expanded }: { expanded?: boolean }) {
     setLoadError(false)
     api.get('/tenants', { params: { search: debounced || undefined, per_page: 25, page }, signal: ctrl.signal })
       .then(res => {
-        const { rows, lastPage: lp } = unwrapList<Tenant>(res)
+        const { rows, lastPage: lp } = unwrapList<Tenant & TenantProvisioning>(res)
         setResults(prev => (page === 1 ? rows : [...prev, ...rows]))
         setLastPage(lp)
       })
@@ -114,7 +116,7 @@ export default function TenantSwitcher({ expanded }: { expanded?: boolean }) {
   }
 
   // Switches the active tenant (no-op if already active); closes the picker and clears the search either way.
-  const pick = async (tn: Tenant) => {
+  const pick = async (tn: Tenant & TenantProvisioning) => {
     if (tn.id === tenant?.id) { setOpen(false); return }
     setSwitching(tn.id)
     try { await setActiveTenant?.(tn) } finally { setSwitching(null); setOpen(false); setQuery('') }
@@ -183,7 +185,8 @@ export default function TenantSwitcher({ expanded }: { expanded?: boolean }) {
             {results.map(tn => {
               const isActive = tenant?.id === tn.id
               return (
-                <button key={tn.id} onClick={() => pick(tn)} disabled={switching != null}
+                <button key={tn.id} onClick={() => pick(tn)} disabled={switching != null || isTenantBlocked(tn.provisioning_status)}
+                  aria-disabled={isTenantBlocked(tn.provisioning_status) || undefined}
                   className="flex items-center gap-3 w-full px-2 py-2 rounded-md transition-colors"
                   // eslint-disable-next-line huisstijlLegacy/no-restricted-syntax -- app-chrome control (components/layout = chrome, HUISSTIJL-1): switcher row with its own active state, not an action button; Button's variants deliberately don't cover the rail
                   style={{ background: isActive ? 'var(--hover-bg)' : 'none', border: 'none', cursor: switching != null ? 'wait' : 'pointer' }}
@@ -210,6 +213,8 @@ export default function TenantSwitcher({ expanded }: { expanded?: boolean }) {
                     <div className="text-sm font-medium text-[var(--text)] truncate">{tn.name ?? tn.id}</div>
                     {tenantDomain(tn) && <div className="text-xs text-[var(--text-muted)] truncate">{tenantDomain(tn)}</div>}
                   </div>
+                  {/* Pending/failed bureaus show their provisioning state and cannot be picked. */}
+                  <TenantProvisioningChip status={tn.provisioning_status} />
                   {switching === tn.id
                     ? <span style={{ display: 'flex', color: 'var(--text-muted)' }}><Spinner size={13} label={t('loading')} /></span>
                     // MERKSTIP-TINT-1 (Danny 04-09): the active-tenant marker wears the active tint pair, never the raw brand fill.

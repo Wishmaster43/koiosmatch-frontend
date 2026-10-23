@@ -24,7 +24,7 @@ import { CSRF_COOKIE_URL } from './authMode'
 import { clearDeviceCaches } from './deviceCaches'
 import { isMfaEnrollmentError } from './mfaGate'
 import { isNoOrganisationError, NO_ORGANISATION_FLAG } from './orphanAccount'
-import { isTenantResolutionError, tenantResolutionCode, TENANT_PICK_FLAG, TENANT_REQUIRED_EVENT } from './tenantResolution'
+import { isTenantResolutionError, tenantResolutionCode, TENANT_PICK_FLAG, TENANT_PICK_CODE_KEY, TENANT_REQUIRED_EVENT } from './tenantResolution'
 import { isSessionRevokedError, SESSION_REVOKED_FLAG } from './sessionCodes'
 import { notifyError } from './notify'
 import { requestKey, dedupeInFlight } from './inFlightDedupe'
@@ -228,6 +228,8 @@ api.interceptors.response.use(
     // parallel request that fails the same way stays quiet instead of stacking events.
     if (isTenantResolutionError(error) && !sessionStorage.getItem(TENANT_PICK_FLAG)) {
       sessionStorage.setItem(TENANT_PICK_FLAG, '1')
+      // Remember the code so the picker wall (mounted after this event) can explain why it appeared.
+      sessionStorage.setItem(TENANT_PICK_CODE_KEY, String(tenantResolutionCode(error)))
       window.dispatchEvent(new CustomEvent(TENANT_REQUIRED_EVENT, { detail: { code: tenantResolutionCode(error) } }))
     }
 

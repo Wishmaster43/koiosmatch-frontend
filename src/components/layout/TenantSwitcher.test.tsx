@@ -15,13 +15,14 @@ vi.mock('@/lib/api', async () => {
   return { ...actual, default: { get: vi.fn() } }
 })
 const mockedGet = vi.mocked(api.get)
+const { setActiveTenant } = vi.hoisted(() => ({ setActiveTenant: vi.fn() }))
 
 // Super admin, active tenant "Yesway" — the only role that can open the picker.
 vi.mock('@/context/AuthContext', () => ({
   useAuth: () => ({
     activeTenant: { id: 't1', name: 'Yesway Flex B.V.' },
     user: { id: 'u1' },
-    setActiveTenant: vi.fn(),
+    setActiveTenant,
     isSuperAdmin: () => true,
   }),
 }))
@@ -62,5 +63,29 @@ describe('TenantSwitcher', () => {
     await userEvent.click(screen.getByText('Yesway Flex B.V.'))
     await waitFor(() => expect(screen.getByText('error.loadFailed')).toBeInTheDocument())
     expect(screen.queryByText('noAgencies')).not.toBeInTheDocument()
+  })
+})
+
+// BE lane F B-002: a bureau still provisioning (or failed) is listed but cannot be picked.
+describe('TenantSwitcher provisioning', () => {
+  it('disables pending and failed rows with their chip, keeps ready rows enabled', async () => {
+    mockedGet.mockResolvedValue({ data: { data: [
+      { id: 'a', name: 'Ready Bureau', provisioning_status: null },
+      { id: 'b', name: 'Pending Bureau', provisioning_status: 'pending' },
+      { id: 'c', name: 'Failed Bureau', provisioning_status: 'failed' },
+    ], meta: { total: 3, current_page: 1, last_page: 1 } } })
+    render(<TenantSwitcher expanded />)
+
+    await userEvent.click(screen.getByText('Yesway Flex B.V.'))
+    await waitFor(() => expect(screen.getByText('Pending Bureau')).toBeInTheDocument())
+    expect(screen.getByText('Pending Bureau').closest('button')).toBeDisabled()
+    expect(screen.getByText('Failed Bureau').closest('button')).toBeDisabled()
+    expect(screen.getByText('Ready Bureau').closest('button')).toBeEnabled()
+    expect(screen.getByText('Pending Bureau').closest('button')).toHaveAttribute('aria-disabled', 'true')
+    expect(screen.getByText('Failed Bureau').closest('button')).toHaveAttribute('aria-disabled', 'true')
+    expect(screen.getByText('tenantPick.statusPending')).toBeInTheDocument()
+    expect(screen.getByText('tenantPick.statusFailed')).toBeInTheDocument()
+    await userEvent.click(screen.getByText('Ready Bureau'))
+    expect(setActiveTenant).toHaveBeenCalledWith(expect.objectContaining({ id: 'a' }))
   })
 })
