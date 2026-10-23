@@ -48,6 +48,7 @@ import { ActionRuleBanner } from '@/components/actionrules'
 import { useApplicationModalLookups } from '../hooks/useApplicationModalLookups'
 import { useAddApplicationForm } from '../hooks/useAddApplicationForm'
 import CustomFieldsSection from './CustomFieldsSection'
+import InterviewConsentRow from './InterviewConsentRow'
 import ModalFooter from '@/components/ui/ModalFooter'
 import ModalScrollBody from '@/components/forms/ModalScrollBody'
 import { tintBg, tintBorder } from '@/lib/tint'
@@ -91,7 +92,7 @@ export default function DrawerAddApplicationModal({ candidateId, candidateOwnerI
   const {
     vacancyId, setVacancyId, phaseId, setPhaseId, source, setSource,
     ownerId, setOwnerId, pickedVacancy, ownerDiffersFromCandidate, ownerDiffersFromVacancy,
-    saving, errors, submit, customFieldValues, setCustomField,
+    saving, errors, submit, customFieldValues, setCustomField, interviewConsent, setInterviewConsent,
   } = useAddApplicationForm({
     candidateId, candidateOwnerId, initialVacancyId, suggestedVacancyId, editApplicationId,
     vacancyOptions, stages, defaultStage, userOptions, meId, meIsAssignable,
@@ -180,6 +181,8 @@ export default function DrawerAddApplicationModal({ candidateId, candidateOwnerI
             allowCreate={sourceAllowFreeEntry} menuWidth={pickerMenuWidth} style={fieldFootprint}
             options={sourceOptions} />
         </ApplicationFieldRow>
+        {/* ONIX K-006: consent gate for the AI interview, create only (the edit PATCH never sends it). */}
+        {!editing && <InterviewConsentRow checked={interviewConsent} onChange={setInterviewConsent} />}
         {/* W30: tenant custom fields — only rendered once ≥1 active def exists (§3A(f)).
             Reuses the applications addmodal CustomFieldsSection (ADDAPPLICATION-TWIN-1:
             byte-identical to the old local ApplicationCustomFieldsSection; `hasError`

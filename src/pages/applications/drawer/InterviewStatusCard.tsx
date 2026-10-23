@@ -74,9 +74,11 @@ const MetaDot = () => <span aria-hidden="true" style={{ color: 'var(--text-muted
 // Live interview summary card (see the module doc above): every field renders defensively as optional, and the stop/resume controls gate on the application id, never the interview session id (see the INTERVIEW-STOP-1 note).
 export default function InterviewStatusCard({
   interview, applicationId, interviewWorkflowId, interviewWorkflow, hasInterviewWorkflowField = false,
-  vacancyId, vacancyInterviewWorkflow,
+  vacancyId, vacancyInterviewWorkflow, skipReason,
 }: {
   interview: ApplicationInterview | null; applicationId?: Id
+  // ONIX K-006: why no interview started (`no_interview_consent` | `ai_disclosure_missing`); other values render nothing.
+  skipReason?: string | null
   // INTERVIEW-WORKFLOW-1 (Appendix D/E): this application's own workflow override,
   // presence-gated the same way as the vacancy's own field (VacancyAgentTab).
   interviewWorkflowId?: Id | null
@@ -115,6 +117,10 @@ export default function InterviewStatusCard({
     return (
       <div style={cardStyle}>
         <span style={{ fontSize: 12, color: 'var(--text-muted)', fontStyle: 'italic' }}>{t('interview.status.none')}</span>
+        {/* ONIX K-006: calm plain-text reason, only for the two known skip codes. */}
+        {(skipReason === 'no_interview_consent' || skipReason === 'ai_disclosure_missing') && (
+          <Caption>{t(`interview.skipReason.${skipReason}`)}</Caption>
+        )}
         {workflowOverridePicker}
         {vacancyDefaultBlock}
       </div>

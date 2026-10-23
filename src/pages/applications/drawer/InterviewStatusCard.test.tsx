@@ -642,3 +642,18 @@ describe('InterviewStatusCard · vacancy-default block (INTERVIEW-VISIBILITY-1)'
     expect(screen.getByRole('button', { name: 'interview.status.editInVacancy' })).toBeInTheDocument()
   })
 })
+
+describe('InterviewStatusCard · skip reason (ONIX K-006)', () => {
+  it.each(['no_interview_consent', 'ai_disclosure_missing'])('renders the %s line when no interview started', reason => {
+    render(<InterviewStatusCard interview={null} skipReason={reason} />)
+    expect(screen.getByText(`interview.skipReason.${reason}`)).toBeInTheDocument()
+  })
+
+  it('renders no skip line when the reason is absent or unknown', () => {
+    const { rerender } = render(<InterviewStatusCard interview={null} />)
+    expect(screen.queryByText(/interview\.skipReason/)).not.toBeInTheDocument()
+    rerender(<InterviewStatusCard interview={null} skipReason="something_else" />)
+    expect(screen.queryByText(/interview\.skipReason/)).not.toBeInTheDocument()
+  })
+})
+

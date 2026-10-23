@@ -20,6 +20,10 @@
     "table": "Lijstweergave",
     "board": "Kanban-weergave"
   },
+  "addModal": {
+    "interviewConsent": "Kandidaat geeft toestemming voor het AI-interview",
+    "interviewConsentHelp": "Vereist voordat Koios een AI-interview mag starten; zonder toestemming slaat het interview over."
+  },
   "add": {
     "button": "Nieuwe sollicitatie",
     "title": "Nieuwe sollicitatie",
@@ -262,6 +266,10 @@
     "error": "Kandidaat kon niet worden geladen."
   },
   "interview": {
+    "skipReason": {
+      "no_interview_consent": "Niet gestart: de kandidaat heeft geen toestemming gegeven voor het AI-interview.",
+      "ai_disclosure_missing": "Niet gestart: de interview-intro mist de verplichte AI-vermelding; pas de template aan in Instellingen → Koios AI."
+    },
     "title": "WhatsApp-interview",
     "done": "Klaar",
     "summary": "Samenvatting",

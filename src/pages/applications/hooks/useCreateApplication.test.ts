@@ -31,3 +31,26 @@ describe('useCreateApplication · unmapped 422 banner (ONIX N-005)', () => {
     expect(result.current.errors).toEqual({ 'custom_fields.vog': true })
   })
 })
+
+describe('useCreateApplication · interview consent (ONIX K-006)', () => {
+  const mountWith = (interviewConsent?: boolean) => renderHook(() => useCreateApplication({
+    candidateId: 'cand-1', vacancyId: '', ownerId: '', phaseId: '', source: '', sourceKey: null,
+    customFieldValues: {}, vacancyRequired: false, ownerRequired: false, phaseRequired: false, sourceRequired: false,
+    appRuleBlocked: false, interviewConsent, onCreated: vi.fn(),
+  }))
+
+  it('POSTs /applications with interview_consent: true when ticked', async () => {
+    vi.mocked(api.post).mockResolvedValue({ data: { data: { id: 'a1' } } })
+    const { result } = mountWith(true)
+    await act(async () => { await result.current.create() })
+    expect(vi.mocked(api.post).mock.calls[0][0]).toBe('/applications')
+    expect(vi.mocked(api.post).mock.calls[0][1]).toMatchObject({ candidate_id: 'cand-1', interview_consent: true })
+  })
+
+  it('omits the interview_consent key when unticked', async () => {
+    vi.mocked(api.post).mockResolvedValue({ data: { data: { id: 'a1' } } })
+    const { result } = mountWith(false)
+    await act(async () => { await result.current.create() })
+    expect(vi.mocked(api.post).mock.calls[0][1]).not.toHaveProperty('interview_consent')
+  })
+})

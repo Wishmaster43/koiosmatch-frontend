@@ -32,3 +32,21 @@ describe('useAddApplicationForm · unmapped 422 banner (ONIX N-005)', () => {
     expect(result.current.errors).toEqual({ 'custom_fields.vog': true })
   })
 })
+
+describe('useAddApplicationForm · interview consent (ONIX K-006)', () => {
+  it('POSTs interview_consent: true only after the box is ticked', async () => {
+    vi.mocked(api.post).mockResolvedValue({ data: {} })
+    const { result } = mountHook()
+    act(() => { result.current.setInterviewConsent(true) })
+    await act(async () => { await result.current.submit() })
+    expect(vi.mocked(api.post).mock.calls[0][0]).toBe('/applications')
+    expect(vi.mocked(api.post).mock.calls[0][1]).toMatchObject({ candidate_id: 'cand-1', interview_consent: true })
+  })
+
+  it('omits the interview_consent key by default', async () => {
+    vi.mocked(api.post).mockResolvedValue({ data: {} })
+    const { result } = mountHook()
+    await act(async () => { await result.current.submit() })
+    expect(vi.mocked(api.post).mock.calls[0][1]).not.toHaveProperty('interview_consent')
+  })
+})

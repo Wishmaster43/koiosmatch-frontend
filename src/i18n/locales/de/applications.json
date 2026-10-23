@@ -20,6 +20,10 @@
     "table": "Listenansicht",
     "board": "Board-Ansicht"
   },
+  "addModal": {
+    "interviewConsent": "Der Kandidat willigt in das KI-Interview ein",
+    "interviewConsentHelp": "Erforderlich, bevor Koios ein KI-Interview starten darf; ohne Einwilligung wird das Interview übersprungen."
+  },
   "add": {
     "button": "Neue Bewerbung",
     "title": "Neue Bewerbung",
@@ -262,6 +266,10 @@
     "error": "Kandidat konnte nicht geladen werden."
   },
   "interview": {
+    "skipReason": {
+      "no_interview_consent": "Nicht gestartet: Der Kandidat hat keine Einwilligung für das KI-Interview erteilt.",
+      "ai_disclosure_missing": "Nicht gestartet: Im Interview-Intro fehlt der verpflichtende KI-Hinweis; passen Sie die Vorlage unter Einstellungen → Koios AI an."
+    },
     "title": "WhatsApp-Interview",
     "done": "Erledigt",
     "summary": "Zusammenfassung",

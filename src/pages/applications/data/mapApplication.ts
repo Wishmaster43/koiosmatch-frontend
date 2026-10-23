@@ -338,6 +338,8 @@ export function mapApplicationDetail(raw: ApiApplication = {}, funnelTypes: Look
     // the NORMAL case — only the public careersite apply ever writes it — so it means
     // "no consent recorded", not "consent refused" (see types/application.ts).
     interviewConsentGivenAt: raw.interview_consent_given_at ?? null,
+    // ONIX K-006: tolerant, null until the BE exposes the skip reason on the resource.
+    interviewSkipReason: raw.interview_skip_reason ?? null,
     // S34 (02-09): the Koios reject advice (ApplicationMatchService::ai → advice/
     // advice_reason/auto_reject_eligible) was emitted by the backend but never
     // mapped, so RejectionModal's advice card and its proposal badge could never

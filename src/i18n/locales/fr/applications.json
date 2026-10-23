@@ -20,6 +20,10 @@
     "table": "Vue liste",
     "board": "Vue tableau"
   },
+  "addModal": {
+    "interviewConsent": "Le candidat consent à l'entretien IA",
+    "interviewConsentHelp": "Requis avant que Koios puisse lancer un entretien IA ; sans consentement, l'entretien est ignoré."
+  },
   "add": {
     "button": "Nouvelle candidature",
     "title": "Nouvelle candidature",
@@ -262,6 +266,10 @@
     "error": "Impossible de charger le candidat."
   },
   "interview": {
+    "skipReason": {
+      "no_interview_consent": "Non démarré : le candidat n'a pas donné son consentement pour l'entretien IA.",
+      "ai_disclosure_missing": "Non démarré : l'introduction de l'entretien ne contient pas la mention IA obligatoire ; adaptez le modèle dans Paramètres → Koios AI."
+    },
     "title": "Entretien WhatsApp",
     "done": "Terminé",
     "summary": "Résumé",

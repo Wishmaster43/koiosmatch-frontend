@@ -20,6 +20,10 @@
     "table": "List view",
     "board": "Board view"
   },
+  "addModal": {
+    "interviewConsent": "Candidate consents to the AI interview",
+    "interviewConsentHelp": "Required before Koios may start an AI interview; without consent the interview is skipped."
+  },
   "add": {
     "button": "New application",
     "title": "New application",
@@ -262,6 +266,10 @@
     "error": "Failed to load the candidate."
   },
   "interview": {
+    "skipReason": {
+      "no_interview_consent": "Not started: the candidate has not given consent for the AI interview.",
+      "ai_disclosure_missing": "Not started: the interview intro lacks the mandatory AI disclosure; adjust the template in Settings → Koios AI."
+    },
     "title": "WhatsApp interview",
     "done": "Done",
     "summary": "Summary",

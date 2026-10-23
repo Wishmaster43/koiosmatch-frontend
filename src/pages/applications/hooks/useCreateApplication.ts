@@ -25,7 +25,7 @@ const API_TO_FORM: Record<string, string> = {
 export function useCreateApplication({
   candidateId, vacancyId, ownerId, phaseId, source, sourceKey, customFieldValues,
   vacancyRequired, ownerRequired, phaseRequired, sourceRequired,
-  appRuleBlocked, onCreated,
+  appRuleBlocked, interviewConsent = false, onCreated,
 }: {
   candidateId: string
   vacancyId: string
@@ -39,6 +39,8 @@ export function useCreateApplication({
   phaseRequired: boolean
   sourceRequired: boolean
   appRuleBlocked: boolean
+  // ONIX K-006: sent as `true` only when the recruiter ticked it; never `false`.
+  interviewConsent?: boolean
   onCreated: (app: Application) => void
 }) {
   const { t } = useTranslation('applications')
@@ -82,6 +84,7 @@ export function useCreateApplication({
         ...(phaseId ? { application_stage_id: phaseId } : {}),
         ...(source.trim() ? { source: source.trim(), source_key: sourceKey ?? null } : {}),
         ...(Object.keys(customFieldValues).length ? { custom_fields: customFieldValues } : {}),
+        ...(interviewConsent ? { interview_consent: true } : {}),
       })
       onCreated(mapApplication(unwrap(res), funnelTypes))
     } catch (err) {

@@ -32,6 +32,7 @@ import SearchPickField from './SearchPickField'
 import { useSearchOptions } from './useSearchOptions'
 import type { PickOption, RawPickRow } from './types'
 import CustomFieldsSection from './CustomFieldsSection'
+import InterviewConsentRow from './InterviewConsentRow'
 import { requiredMark } from '@/components/forms/fields'
 // R6: owner-derivation/preflight/stage-seeding effects and the POST submit now
 // live in their own hooks (extracted verbatim, behaviour unchanged).
@@ -241,10 +242,12 @@ export default function PageAddApplicationModal({ onClose, onCreated, lockedVaca
 
   // R6: the POST submit, its client-side required-field preflight and its 422
   // field-error mapping are extracted into their own hook (behaviour unchanged).
+  // ONIX K-006: interview consent, unchecked by default.
+  const [interviewConsent, setInterviewConsent] = useState(false)
   const { create, saving, createError, errors } = useCreateApplication({
     candidateId, vacancyId, ownerId, phaseId, source, sourceKey, customFieldValues,
     vacancyRequired, ownerRequired, phaseRequired, sourceRequired,
-    appRuleBlocked, onCreated,
+    appRuleBlocked, interviewConsent, onCreated,
   })
 
   // Declared once — it renders either on its own row or paired with the phase picker.
@@ -371,6 +374,9 @@ export default function PageAddApplicationModal({ onClose, onCreated, lockedVaca
                 border: `1px solid ${errors.source ? 'var(--color-danger)' : 'var(--border)'}`,
                 background: 'var(--input-bg)', color: 'var(--text)', boxSizing: 'border-box' }} />
           </ApplicationFieldRow>
+
+          {/* ONIX K-006: consent gate for the AI interview. */}
+          <InterviewConsentRow checked={interviewConsent} onChange={setInterviewConsent} />
 
           {/* W30 / §3A(f): the "Extra" section — tenant custom fields for applications,
               rendered only once ≥1 active def exists. */}

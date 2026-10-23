@@ -72,6 +72,8 @@ export function useAddApplicationForm({
   const [phaseId, setPhaseId] = useState(() => defaultStage?.id ?? '')
   // Acquisition source — optional unless the tenant requires it (APP-REQUIRED-FE-1).
   const [source, setSource] = useState('')
+  // ONIX K-006: interview consent, unchecked by default (create only).
+  const [interviewConsent, setInterviewConsent] = useState(false)
   const [saving, setSaving] = useState(false)
   const [errors, setErrors] = useState<Record<string, boolean>>({})
   // EDIT MODE: the record as loaded, so the PATCH below can send only what changed.
@@ -217,6 +219,8 @@ export function useAddApplicationForm({
         // along once the recruiter actually filled something in (an empty {} is
         // indistinguishable from "not asked" server-side, so it's omitted too).
         ...(Object.keys(customFieldValues).length ? { custom_fields: customFieldValues } : {}),
+        // ONIX K-006: consent rides along only when ticked, never as `false`.
+        ...(interviewConsent ? { interview_consent: true } : {}),
       })
       notifySuccess(t('work.applicationCreated'))
       onCreated(); onClose()
@@ -240,5 +244,6 @@ export function useAddApplicationForm({
     editing, vacancyId, setVacancyId, phaseId, setPhaseId, source, setSource,
     ownerId, setOwnerId, pickedVacancy, ownerDiffersFromCandidate, ownerDiffersFromVacancy,
     saving, errors, submit, customFieldValues, setCustomField,
+    interviewConsent, setInterviewConsent,
   }
 }
