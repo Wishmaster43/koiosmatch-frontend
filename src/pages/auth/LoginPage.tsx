@@ -8,10 +8,10 @@
  *   3. User enters 6-digit code → POST /auth/mfa/verify → logged in.
  */
 import { useState, useRef, useEffect } from 'react'
-import type { FormEvent, ChangeEvent, ReactNode } from 'react'
+import type { FormEvent, ChangeEvent } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
-import { Eye, EyeOff, ShieldCheck, ArrowLeft } from 'lucide-react'
+import { ShieldCheck, ArrowLeft } from 'lucide-react'
 import { useAuth } from '@/context/AuthContext'
 import { useGuardedSubmit } from '@/hooks/useGuardedSubmit'
 import ErrorBanner from '@/components/ui/ErrorBanner'
@@ -19,81 +19,14 @@ import Spinner from '@/components/ui/Spinner'
 import Button from '@/components/ui/Button'
 import CalloutBox from '@/components/ui/CalloutBox'
 import { PageTitle, BodyText, FormLabel } from '@/components/ui/typography'
-import { FIELD_FONT_SIZE } from '@/components/forms/fieldMetrics'
+import LoginShell from '@/components/auth/LoginShell'
+import { AuthTextField, AuthPasswordField } from '@/components/auth/AuthFields'
+import { retryAfterOf } from '@/lib/retryAfter'
 // DUP-04: one shared axios-error → message extractor, never a re-derived inline dance.
 import { extractApiError } from '@/lib/extractApiError'
 import { isNoOrganisationError, NO_ORGANISATION_FLAG } from '@/lib/orphanAccount'
 import { SESSION_REVOKED_FLAG, isMfaChallengeUsedError } from '@/lib/sessionCodes'
 
-// Read the login throttle's machine field off a 429 (LOGIN-THROTTLE-1, Danny 13-08):
-// the backend sends retry_after (integer seconds) beside its message; we count that
-// down live instead of parroting the raw — static, Dutch-only — server string (§10).
-const retryAfterOf = (e: unknown): number | null => {
-  const res = (e as { response?: { status?: number; data?: { retry_after?: unknown } } })?.response
-  const secs = res?.status === 429 ? Number(res.data?.retry_after) : NaN
-  return Number.isFinite(secs) && secs > 0 ? Math.ceil(secs) : null
-}
-
-// Typographic wordmark — a crisp placeholder until the final logo asset is delivered
-// (then swap <Wordmark/> for an <img>). Reads well on any background via tokens.
-function Wordmark({ className }: { className?: string }) {
-  return (
-    <span className={className} style={{ fontSize: 21, fontWeight: 700, letterSpacing: '-0.015em', color: 'var(--sidebar-text)', whiteSpace: 'nowrap' }}>
-      <span style={{ color: 'var(--color-primary-text)' }}>Koios</span>Match
-    </span>
-  )
-}
-
-// ── Shared layout wrapper — balanced brand hero left, login card right. ────────
-function LoginShell({ children }: { children: ReactNode }) {
-  const { t } = useTranslation('auth')
-  // Copyright year is dynamic — never a stale hardcoded value.
-  const year = new Date().getFullYear()
-  return (
-    <div className="flex min-h-screen" style={{ background: 'var(--bg)' }}>
-      {/* Left — brand hero: a balanced Koios agent on a calm wash of the three brand colours. */}
-      <div className="relative flex-col items-center hidden w-1/2 p-12 overflow-hidden text-center lg:flex xl:w-[55%]"
-        style={{ background: [
-          'radial-gradient(90% 70% at 14% 6%, color-mix(in srgb, var(--color-primary) 20%, transparent), transparent 56%)',
-          'radial-gradient(85% 75% at 92% 26%, color-mix(in srgb, var(--color-secondary) 17%, transparent), transparent 56%)',
-          'radial-gradient(72% 62% at 82% 100%, color-mix(in srgb, var(--color-accent) 9%, transparent), transparent 55%)',
-          'var(--sidebar-bg)',
-        ].join(', ') }}>
-        <Wordmark className="relative" />
-
-        {/* Brand statement — the single headline, centred above the illustration. */}
-        <p className="relative mt-10 font-semibold leading-snug" style={{ color: 'var(--sidebar-text)', fontSize: 27, maxWidth: 520 }}>
-          {t('brand.sub')}
-        </p>
-
-        {/* Agent — balanced hero: centred with breathing room, capped so it never dominates or crops. */}
-        <div className="relative flex items-center justify-center flex-1 min-h-0 py-6">
-          <img src="/koios-agent.jpg" alt="Koios AI agent"
-            className="object-contain rounded-3xl"
-            style={{ maxHeight: '58%', maxWidth: '80%', filter: 'drop-shadow(0 12px 48px rgba(25,165,202,0.28))' }} />
-        </div>
-
-        <p className="relative text-xs" style={{ color: 'var(--sidebar-muted)' }}>© {year} KoiosMatch</p>
-      </div>
-
-      {/* Right — login card on a soft primary tint. */}
-      <div className="relative flex items-center justify-center flex-1 p-6 sm:p-10"
-        style={{ background: 'linear-gradient(160deg, color-mix(in srgb, var(--color-primary) 7%, var(--bg)) 0%, var(--bg) 55%)' }}>
-        <div className="w-full" style={{ maxWidth: 400 }}>
-          <div className="flex items-center justify-center gap-2 mb-6 lg:hidden">
-            <Wordmark />
-          </div>
-          <div style={{ background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 18,
-            padding: '32px 30px 34px', boxShadow: 'var(--shadow-modal)' }}>
-            {/* Landmark for the login card (WCAG 1.3.1) */}
-            <main>{children}</main>
-          </div>
-          <p className="mt-6 text-xs text-center lg:hidden" style={{ color: 'var(--text-muted)' }}>© {year} KoiosMatch</p>
-        </div>
-      </div>
-    </div>
-  )
-}
 
 // ── Step 1: email + password ──────────────────────────────────────────────────
 function CredentialForm({ onMfaRequired, notice }: { onMfaRequired: (token: string) => void; notice?: string }) {
@@ -102,7 +35,6 @@ function CredentialForm({ onMfaRequired, notice }: { onMfaRequired: (token: stri
   const navigate   = useNavigate()
   const [email,    setEmail]   = useState('')
   const [password, setPassword] = useState('')
-  const [showPw,   setShowPw]  = useState(false)
   const [error,    setError]   = useState('')
   // Seconds until the login throttle lifts (null = not throttled). Counted down live.
   const [retryAfter, setRetryAfter] = useState<number | null>(null)
@@ -174,36 +106,13 @@ function CredentialForm({ onMfaRequired, notice }: { onMfaRequired: (token: stri
       )}
 
       <form onSubmit={handleSubmit} className="flex flex-col gap-4">
-        <div>
-          <FormLabel htmlFor="login-email" style={{ display: 'block', marginBottom: 6 }}>{t('login.email')}</FormLabel>
-          <input id="login-email" type="email" value={email} onChange={e => setEmail(e.target.value)}
-            placeholder={t('login.emailPlaceholder')} required autoFocus
-            className="w-full rounded-lg"
-            style={{ padding: '10px 12px', border: '1px solid var(--border)', outline: 'none', fontSize: FIELD_FONT_SIZE, color: 'var(--text)', background: 'var(--input-bg)' }}
-            onFocus={e => (e.target.style.borderColor = 'var(--color-primary)')}
-            onBlur={e  => (e.target.style.borderColor = 'var(--border)')} />
-        </div>
+        <AuthTextField id="login-email" label={t('login.email')} type="email" value={email} onChange={setEmail}
+          placeholder={t('login.emailPlaceholder')} required autoFocus />
 
-        <div>
-          <FormLabel htmlFor="login-password" style={{ display: 'block', marginBottom: 6 }}>{t('login.password')}</FormLabel>
-          <div className="relative">
-            <input id="login-password" type={showPw ? 'text' : 'password'} value={password}
-              onChange={e => setPassword(e.target.value)}
-              placeholder={t('login.password')} required
-              className="w-full rounded-lg"
-              style={{ padding: '10px 40px 10px 12px', border: '1px solid var(--border)', outline: 'none', fontSize: FIELD_FONT_SIZE, color: 'var(--text)', background: 'var(--input-bg)' }}
-              onFocus={e => (e.target.style.borderColor = 'var(--color-primary)')}
-              onBlur={e  => (e.target.style.borderColor = 'var(--border)')} />
-            {/* eslint-disable-next-line huisstijlLegacy/no-restricted-syntax -- field-internal chrome (BUTTON-GRENS): the eye lives INSIDE the input's box; Button's 28px square would not sit in the field padding */}
-            <button type="button" onClick={() => setShowPw(v => !v)}
-              title={showPw ? t('login.hidePassword') : t('login.showPassword')}
-              aria-label={showPw ? t('login.hidePassword') : t('login.showPassword')}
-              className="absolute -translate-y-1/2 right-3 top-1/2"
-              style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-muted)', padding: 2, display: 'flex' }}>
-              {showPw ? <EyeOff size={16} /> : <Eye size={16} />}
-            </button>
-          </div>
-        </div>
+        <AuthPasswordField id="login-password" label={t('login.password')} value={password} onChange={setPassword}
+          placeholder={t('login.password')} required
+          showLabel={t('login.showPassword')} hideLabel={t('login.hidePassword')} />
+
 
         {error && <ErrorBanner>{error}</ErrorBanner>}
 
