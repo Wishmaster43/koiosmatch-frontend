@@ -120,6 +120,12 @@ export interface ShiftUnconfirmedRow { schedule_id: string; candidate_id: string
 interface WaWebQueueNumberRow { number_id: string; label: string | null; rate_limit: number; in_queue: number; est_drain: number | null }
 export interface WaWebQueueFeed { in_queue: number; sending: number; failed: number; est_drain_hours: number | null; devices: number; numbers: WaWebQueueNumberRow[] }
 
+// KPI-TARGETS-ALERT-1 (BE lane L): one target entry per tenant setting key, hand-written (the spec carries no 2xx schema).
+export interface KpiTarget {
+  value: number | null; target: number | null; comparison: 'gte' | 'lte' | null
+  below_target: boolean | null; metric: string; period_scope: 'month' | 'day' | null
+}
+
 // GET /dashboard (single summary call).
 export interface DashData {
   charts?: { by_funnel?: StatItem[]; timeseries?: Record<string, TimeseriesPoint[] | undefined> }
@@ -140,6 +146,8 @@ export interface DashData {
   // zero; a module-gated key is ABSENT (not a key at all, not `null`) when the
   // tenant lacks the module — that absence is what hides the tile.
   kpis?: Record<string, number | null>
+  // KPI-TARGETS-ALERT-1: value-vs-target per setting key; absent on an older server (tiles then render as today).
+  kpi_targets?: Record<string, KpiTarget>
   // K-173 (714eae01): the viewer-effective ordered KPI row in SERVER keys —
   // presence = visible, position = order (saved via PUT /dashboard/kpis/{role},
   // role-default otherwise). When present this replaces the settings-blob

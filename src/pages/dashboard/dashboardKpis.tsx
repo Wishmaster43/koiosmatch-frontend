@@ -11,12 +11,13 @@ import type { ReactNode } from 'react'
 import { Users, CheckCircle, AlertCircle, AlertTriangle, Target, Euro, Briefcase, CalendarCheck, TrendingUp, MessageSquare, Zap, FileText, CalendarClock, Link2, PhoneOff, Hourglass, CalendarX2, Building2, ShieldAlert, Repeat, Timer, Ban, UserCheck } from 'lucide-react'
 import type { LucideIcon } from 'lucide-react'
 import { translateDrill } from './drillTranslate'
-import type { DashDrillDescriptor } from '@/types/dashboard'
+import type { DashDrillDescriptor, KpiTarget } from '@/types/dashboard'
+import { TILE_TARGET_KEY, PERCENT_TILES, targetLine, formatTargetLine, type TileTargetLine } from './kpiTargets'
 
-export interface DashboardKpi { id: string; label: string; value: ReactNode; sub: string; color: string; bg: string; Icon: LucideIcon; onClick?: () => void }
+export interface DashboardKpi { id: string; label: string; value: ReactNode; sub: string; color: string; bg: string; Icon: LucideIcon; onClick?: () => void; targetLine?: TileTargetLine }
 
 interface BuildArgs {
-  t: (k: string) => string
+  t: (k: string, opts?: Record<string, unknown>) => string
   // Server-computed KPI values (GET /dashboard `kpis`, K-168): null = no
   // right/module for this key (render '—'); 0 = a real zero; a module-gated
   // key absent from the object entirely hides its tile (useDashboardViewModel).
@@ -34,11 +35,28 @@ interface BuildArgs {
   // is only for a cached pre-key envelope (§10).
   opp: { pipeline_value?: number | null; pipeline_hours?: number | null; pipeline_quotes?: number | null } | null
   onNavigate?: (page: string, intent?: Record<string, unknown>) => void
+  // KPI-TARGETS-ALERT-1: GET /dashboard `kpi_targets` + a locale percent formatter; both optional (older server).
+  targets?: Record<string, KpiTarget>
+  pct?: (v: number) => string
 }
 
 // i18n-scan: dashboard — pure builder: `t` is a parameter, so the keysExist
 // scanner needs this pragma to see the ~40 t('kpi.*') literals below.
-export function buildDashboardKpis({ t, kpis, drills = {}, num, eur, opp, onNavigate }: BuildArgs): Record<string, DashboardKpi> {
+export function buildDashboardKpis(args: BuildArgs): Record<string, DashboardKpi> {
+  const tiles = buildTiles(args)
+  // Attach the target line to the five tiles that carry one; the big number stays the flat `kpis` value.
+  if (!args.targets) return tiles
+  const { pct } = args
+  for (const [id, key] of Object.entries(TILE_TARGET_KEY)) {
+    const line = targetLine(args.targets[key])
+    // A percent tile without a locale formatter gets no line: never a hand-built `${n}%`.
+    const isPct = PERCENT_TILES.has(id)
+    if (line && tiles[id] && (!isPct || pct)) tiles[id].targetLine = formatTargetLine(line, isPct, { t: args.t, num: args.num, pct: pct ?? args.num })
+  }
+  return tiles
+}
+
+function buildTiles({ t, kpis, drills = {}, num, eur, opp, onNavigate }: BuildArgs): Record<string, DashboardKpi> {
   // K-173 fase 2 — resolve a tile's onClick: a present drill descriptor navigates
   // via entity+params (the exact filters that reproduce this tile's own number);
   // an explicit `null` descriptor means no drill (undefined onClick, no dead

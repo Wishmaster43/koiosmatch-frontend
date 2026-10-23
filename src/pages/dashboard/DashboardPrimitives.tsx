@@ -11,9 +11,14 @@ import SharedAvatar from '@/components/ui/Avatar'
 import { SectionTitle, Caption } from '@/components/ui/typography'
 import StatusPill from '@/components/ui/StatusPill'
 
+// Ink per target-line tone: text tokens only, the text itself carries the meaning (§6).
+const TARGET_INK = { muted: 'var(--text-muted)', success: 'var(--color-success-text)', warning: 'var(--color-warning-text)' } as const
+
 // A single KPI tile (label/value/sub + icon chip); onClick makes it act as a click-to-filter affordance when the caller passes one.
-export function KpiCard({ label, value, sub, color, bg, Icon, onClick }: {
+export function KpiCard({ label, value, sub, color, bg, Icon, onClick, targetLine }: {
   label?: ReactNode; value?: ReactNode; sub?: ReactNode; color?: string; bg?: string; Icon: LucideIcon; onClick?: () => void
+  // Optional target line (KPI-TARGETS-ALERT-1); the text carries the meaning, the tone only tints it.
+  targetLine?: { text: string; tone: keyof typeof TARGET_INK }
 }) {
   return (
     <div {...interactive(onClick)}
@@ -28,6 +33,7 @@ export function KpiCard({ label, value, sub, color, bg, Icon, onClick }: {
       </div>
       <div style={{ fontSize: 24, fontWeight: 700, color: 'var(--text)', marginBottom: 4 }}>{value}</div>
       <Caption as="div">{sub}</Caption>
+      {targetLine && <Caption as="div" style={{ color: TARGET_INK[targetLine.tone], marginTop: 2 }}>{targetLine.text}</Caption>}
     </div>
   )
 }

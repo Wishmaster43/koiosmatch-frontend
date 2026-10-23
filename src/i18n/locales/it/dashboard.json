@@ -4,6 +4,13 @@
     "loadError": "Impossibile caricare la dashboard."
   },
   "kpi": {
+    "target": {
+      "progress": "{{value}} su {{target}}",
+      "reached": "Obiettivo {{target}} raggiunto",
+      "over": "Sopra il massimo {{target}}",
+      "within": "Massimo {{target}}",
+      "monthOnly": "Obiettivo mensile {{target}}"
+    },
     "candidatesTotal": "Totale candidati",
     "inAts": "Nell'ATS",
     "notContacted6m": "Non contattati >6 mesi",

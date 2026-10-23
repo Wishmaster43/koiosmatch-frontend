@@ -4,6 +4,13 @@
     "loadError": "Couldn't load the dashboard."
   },
   "kpi": {
+    "target": {
+      "progress": "{{value}} of {{target}}",
+      "reached": "Target {{target}} reached",
+      "over": "Above maximum {{target}}",
+      "within": "Maximum {{target}}",
+      "monthOnly": "Monthly target {{target}}"
+    },
     "candidatesTotal": "Total candidates",
     "inAts": "In the ATS",
     "notContacted6m": "Not contacted >6 mo",

@@ -4,6 +4,13 @@
     "loadError": "Impossible de charger le tableau de bord."
   },
   "kpi": {
+    "target": {
+      "progress": "{{value}} sur {{target}}",
+      "reached": "Objectif {{target}} atteint",
+      "over": "Au-dessus du maximum {{target}}",
+      "within": "Maximum {{target}}",
+      "monthOnly": "Objectif mensuel {{target}}"
+    },
     "candidatesTotal": "Total candidats",
     "inAts": "Dans l'ATS",
     "notContacted6m": "Pas contacté >6 mois",

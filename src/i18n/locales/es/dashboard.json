@@ -4,6 +4,13 @@
     "loadError": "No se pudo cargar el panel."
   },
   "kpi": {
+    "target": {
+      "progress": "{{value}} de {{target}}",
+      "reached": "Objetivo {{target}} alcanzado",
+      "over": "Por encima del máximo {{target}}",
+      "within": "Máximo {{target}}",
+      "monthOnly": "Objetivo mensual {{target}}"
+    },
     "candidatesTotal": "Candidatos totales",
     "inAts": "En el ATS",
     "notContacted6m": "Sin contactar >6 meses",

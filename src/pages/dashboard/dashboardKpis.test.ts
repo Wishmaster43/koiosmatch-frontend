@@ -198,3 +198,40 @@ describe('buildDashboardKpis · GETALLEN-1 percent tiles use the house formatter
     expect(num).toHaveBeenCalledWith(63.1)
   })
 })
+
+describe('buildDashboardKpis · KPI-TARGETS-ALERT-1 target lines', () => {
+  const tgt = (o: Record<string, unknown>) => ({ value: 3, target: 10, comparison: 'gte' as const, below_target: true, metric: 'm', period_scope: 'month' as const, ...o })
+  const args = (targets?: Record<string, ReturnType<typeof tgt>>) => ({
+    ...baseArgs({ candidates_new: 3, placements: 2, fill_rate: 40, tasks: 5, calllist_uncalled: 9, candidates_total: 7 }, vi.fn()),
+    t: (k: string, o?: Record<string, unknown>) => (o ? `${k}|${o.value}|${o.target}` : k),
+    pct: (v: number) => `${v}pct`,
+    targets,
+  })
+  it('attaches the right line to the five tiles and none to others', () => {
+    const k = buildDashboardKpis(args({
+      new_candidates_target: tgt({}), placements_target: tgt({ below_target: false }),
+      fill_rate_target: tgt({ value: 40, target: 80 }), open_tasks_target: tgt({ comparison: 'lte' }),
+      uncalled_warning_threshold: tgt({ comparison: 'lte', below_target: false }),
+    }))
+    expect(k.candidatesNew.targetLine?.text).toBe('kpi.target.progress|3|10')
+    expect(k.placements.targetLine?.tone).toBe('success')
+    expect(k.fillRate.targetLine?.text).toBe('kpi.target.progress|40pct|80pct')
+    expect(k.tasks.targetLine?.tone).toBe('warning')
+    expect(k.uncalledCallist.targetLine?.text).toContain('kpi.target.within')
+    expect(k.candidates.targetLine).toBeUndefined()
+  })
+  it('renders the monthOnly line on a non-month period and keeps the big number', () => {
+    const k = buildDashboardKpis(args({ new_candidates_target: tgt({ below_target: null }) }))
+    expect(k.candidatesNew.targetLine?.text).toContain('kpi.target.monthOnly')
+    expect(k.candidatesNew.value).toBe('3')
+  })
+  it('renders exactly today\'s tiles when kpi_targets is absent', () => {
+    const k = buildDashboardKpis(args(undefined))
+    expect(Object.values(k).every(t => t.targetLine === undefined)).toBe(true)
+  })
+  it('skips the fillRate line when no locale percent formatter is passed', () => {
+    const k = buildDashboardKpis({ ...args({ fill_rate_target: tgt({ value: 40, target: 80 }), placements_target: tgt({}) }), pct: undefined })
+    expect(k.fillRate.targetLine).toBeUndefined()
+    expect(k.placements.targetLine).toBeDefined()
+  })
+})

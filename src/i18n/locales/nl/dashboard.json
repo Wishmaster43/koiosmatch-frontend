@@ -4,6 +4,13 @@
     "loadError": "Dashboard laden is mislukt."
   },
   "kpi": {
+    "target": {
+      "progress": "{{value}} van {{target}}",
+      "reached": "Doel {{target}} gehaald",
+      "over": "Boven maximum {{target}}",
+      "within": "Maximum {{target}}",
+      "monthOnly": "Maanddoel {{target}}"
+    },
     "candidatesTotal": "Totaal kandidaten",
     "inAts": "In het ATS",
     "notContacted6m": "Niet benaderd >6 mnd",

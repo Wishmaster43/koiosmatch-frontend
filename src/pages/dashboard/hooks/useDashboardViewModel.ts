@@ -7,6 +7,7 @@
  */
 import { useMemo } from 'react'
 import { useDateFormat } from '@/lib/datetime'
+import { formatPercent } from '@/lib/formatters'
 import { initialsOf } from '@/lib/initials'
 import { useSeedLabel } from '@/lib/useSeedLabel'
 import type { ChartDatum } from '@/components/charts/chartTypes'
@@ -23,7 +24,7 @@ import { humanize, fmtWhen, eur } from '../dashboardFormat'
 import { resolveReportKpiOrder } from '@/pages/reports/shared'
 
 interface UseDashboardViewModelArgs {
-  t: (key: string) => string
+  t: (key: string, opts?: Record<string, unknown>) => string
   formatNumber: (v: number) => string
   stats: DashStats | null
   opp: DashOpp | null
@@ -216,6 +217,7 @@ export function useDashboardViewModel({
     // AUDIT-NAFIX-1: eur() now requires a locale — bind it here instead of
     // letting the builder default to nl-NL on an English tenant.
     t, kpis, drills: dash?.drills, num, eur: (v?: unknown) => eur(v, locale), opp, onNavigate,
+    targets: dash?.kpi_targets, pct: (v: number) => formatPercent(v, locale),
   })
   // MODULE-gated tiles render NOTHING when their server key is ABSENT: K-168
   // only omits a key when the tenant lacks the module behind it (workflows /

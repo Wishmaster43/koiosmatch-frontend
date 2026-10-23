@@ -4,6 +4,13 @@
     "loadError": "Dashboard konnte nicht geladen werden."
   },
   "kpi": {
+    "target": {
+      "progress": "{{value}} von {{target}}",
+      "reached": "Ziel {{target}} erreicht",
+      "over": "Über dem Maximum {{target}}",
+      "within": "Maximum {{target}}",
+      "monthOnly": "Monatsziel {{target}}"
+    },
     "candidatesTotal": "Kandidaten gesamt",
     "inAts": "Im ATS",
     "notContacted6m": "Nicht kontaktiert >6 Mon.",
