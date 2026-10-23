@@ -63,6 +63,8 @@ const ERROR_CODE_KEYS: Record<string, string> = {
   tenant_not_ready: 'errors.tenantNotReady',
   // The interview intro / workflow / Koios toggle lacks the mandatory AI disclosure (422).
   ai_disclosure_missing: 'errors.aiDisclosureMissing',
+  // ONIX C-007: one generic 422 for a taken e-mail (never reveals why or where it is in use).
+  email_unavailable: 'errors.emailUnavailable',
 }
 
 /**

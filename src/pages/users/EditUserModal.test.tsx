@@ -359,3 +359,24 @@ describe('EditUserModal · CredentialChangeGuard (CMBE 03-09)', () => {
     expect(screen.queryByText('currentPasswordRequired')).not.toBeInTheDocument()
   })
 })
+
+describe('EditUserModal · email_unavailable (ONIX C-007)', () => {
+  it('PUTs /users/{id} and shows the translated text, never the English message', async () => {
+    vi.mocked(api.put).mockClear()
+    authUserId = 'admin-1'
+    vi.mocked(api.get).mockResolvedValueOnce({ data: { data: [] } })
+    vi.mocked(api.put).mockRejectedValueOnce({
+      response: { status: 422, data: { code: 'email_unavailable', message: 'This e-mail address cannot be used.', errors: { email: ['This e-mail address cannot be used.'] } } },
+    })
+    const user = userEvent.setup()
+    render(<EditUserModal user={testUser} onClose={noop} onSaved={noop} />)
+    const emailInput = await screen.findByDisplayValue('jan@bedrijf.nl')
+    await user.clear(emailInput)
+    await user.type(emailInput, 'nieuw@bedrijf.nl')
+    fireEvent.focusOut(emailInput)
+    await user.click(screen.getByText('common:save'))
+    await waitFor(() => expect(api.put).toHaveBeenCalledWith('/users/u1', expect.objectContaining({ email: 'nieuw@bedrijf.nl' })))
+    expect(await screen.findByText('errors.emailUnavailable')).toBeInTheDocument()
+    expect(screen.queryByText('This e-mail address cannot be used.')).not.toBeInTheDocument()
+  })
+})

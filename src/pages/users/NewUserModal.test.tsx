@@ -271,3 +271,21 @@ describe('NewUserModal role lock', () => {
     await waitFor(() => expect(screen.getByRole('button', { name: 'role' })).toHaveAccessibleDescription('Planner'))
   })
 })
+
+describe('NewUserModal · email_unavailable (ONIX C-007)', () => {
+  it('POSTs /users and shows the translated text, never the English message', async () => {
+    vi.mocked(api.post).mockRejectedValueOnce({
+      response: { status: 422, data: { code: 'email_unavailable', message: 'This e-mail address cannot be used.', errors: { email: ['This e-mail address cannot be used.'] } } },
+    })
+    const user = userEvent.setup()
+    render(<NewUserModal onClose={noop} onCreated={vi.fn()} />)
+    await user.type(screen.getByLabelText('firstName', { exact: false }), 'Jan')
+    await user.type(screen.getByLabelText('email', { exact: false }), 'jan@bedrijf.nl')
+    await user.type(screen.getByLabelText('password', { exact: false }), 'wachtwoord123')
+    await pickRole(user, 'backoffice')
+    await user.click(screen.getByRole('button', { name: 'create' }))
+    await waitFor(() => expect(api.post).toHaveBeenCalledWith('/users', expect.objectContaining({ email: 'jan@bedrijf.nl' })))
+    expect(await screen.findByText('errors.emailUnavailable')).toBeInTheDocument()
+    expect(screen.queryByText('This e-mail address cannot be used.')).not.toBeInTheDocument()
+  })
+})

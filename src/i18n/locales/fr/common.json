@@ -793,6 +793,7 @@
     "koiosUnavailable": "Koios est momentanément indisponible. Réessayez dans un instant.",
     "helloflexContractTypeUnmapped": "Aucun type de contrat HelloFlex n'est lié à cette forme de contrat. Configurez-le dans Paramètres → HelloFlex.",
     "recipientSuppressed": "Cette adresse est bloquée après un rebond ou une plainte antérieurs ; aucun nouvel envoi n’aura lieu.",
+    "emailUnavailable": "Cette adresse e-mail ne peut pas être utilisée.",
     "documentNotAvailable": "Ce document n'est pas encore disponible : l'analyse antivirus n'est pas terminée ou a rejeté le fichier.",
     "tenantNotReady": "Cette agence est en cours de configuration ou sa configuration a échoué. Réessayez plus tard ou choisissez une autre agence.",
     "aiDisclosureMissing": "L'introduction de l'entretien ne contient pas la mention IA obligatoire ; modifiez le modèle avant de l'activer.",

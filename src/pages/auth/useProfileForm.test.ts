@@ -115,3 +115,15 @@ describe('useProfileForm avatar blob URL lifecycle', () => {
     expect(notifyError).toHaveBeenCalledWith('profile.saveFailed')
   })
 })
+
+describe('useProfileForm save · email_unavailable', () => {
+  it('PUTs /auth/me and shows the translated text, never the English server message', async () => {
+    vi.mocked(api.put).mockRejectedValueOnce({
+      response: { status: 422, data: { code: 'email_unavailable', message: 'This e-mail address cannot be used.', errors: { email: ['x'] } } },
+    })
+    const { result } = renderHook(() => useProfileForm())
+    await act(async () => { await result.current.handleSave() })
+    expect(api.put).toHaveBeenCalledWith('/auth/me', expect.objectContaining({ email: 'jane@x.nl' }))
+    expect(result.current.error).toBe('errors.emailUnavailable')
+  })
+})

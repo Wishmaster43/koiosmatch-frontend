@@ -9,6 +9,7 @@ import { useState, useEffect } from 'react'
 import type { CSSProperties, FormEvent } from 'react'
 import { useTranslation } from 'react-i18next'
 import api, { unwrap } from '@/lib/api'
+import { extractApiError, apiErrorKey } from '@/lib/extractApiError'
 import { useAuth } from '@/context/AuthContext'
 import FloatingPanel from '@/components/ui/FloatingPanel'
 // G34: the house searchable dropdown replaces the native role <select>.
@@ -145,8 +146,9 @@ export default function NewUserModal({ onClose, onCreated }: {
       onCreated(created)
       onClose()
     } catch (err) {
-      const e2 = err as { response?: { data?: { message?: string } } }
-      setError(e2.response?.data?.message ?? t('createFailed'))
+      // Known backend codes (e.g. email_unavailable) are translated; else the server text or fallback.
+      const key = apiErrorKey(err)
+      setError(key ? t(key, { ns: 'common' }) : extractApiError(err, t('createFailed')))
     } finally {
       setSaving(false)
     }

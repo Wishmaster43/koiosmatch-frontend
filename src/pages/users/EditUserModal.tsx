@@ -11,7 +11,7 @@ import type { FormEvent } from 'react'
 import { useTranslation } from 'react-i18next'
 import api, { unwrap } from '@/lib/api'
 // DUP-04: one shared axios-error → message extractor, never a re-derived inline dance.
-import { extractApiError } from '@/lib/extractApiError'
+import { extractApiError, apiErrorKey } from '@/lib/extractApiError'
 import { useAuth } from '@/context/AuthContext'
 import FloatingPanel from '@/components/ui/FloatingPanel'
 import Spinner from '@/components/ui/Spinner'
@@ -127,7 +127,9 @@ export default function EditUserModal({ user, onClose, onSaved }: {
         setError(t('currentPasswordRequired'))
         setForceCurrentPassword(true)
       } else {
-        setError(extractApiError(err, t('saveFailed')))
+        // Known backend codes (e.g. email_unavailable) are translated; the English message is ignored.
+        const key = apiErrorKey(err)
+        setError(key ? t(key, { ns: 'common' }) : extractApiError(err, t('saveFailed')))
       }
     } finally {
       setSaving(false)

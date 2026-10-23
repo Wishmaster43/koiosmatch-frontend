@@ -793,6 +793,7 @@
     "koiosUnavailable": "Koios ist derzeit nicht verfügbar. Bitte versuche es gleich erneut.",
     "helloflexContractTypeUnmapped": "Für diese Vertragsform ist noch kein HelloFlex-Vertragstyp verknüpft. Richte dies unter Einstellungen → HelloFlex ein.",
     "recipientSuppressed": "Diese Adresse ist nach einem früheren Bounce oder einer Beschwerde gesperrt; es wird nicht erneut gesendet.",
+    "emailUnavailable": "Diese E-Mail-Adresse kann nicht verwendet werden.",
     "documentNotAvailable": "Dieses Dokument ist noch nicht verfügbar: Die Virenprüfung ist nicht abgeschlossen oder hat die Datei abgelehnt.",
     "tenantNotReady": "Diese Agentur wird noch eingerichtet oder die Einrichtung ist fehlgeschlagen. Versuchen Sie es später erneut oder wählen Sie eine andere Agentur.",
     "aiDisclosureMissing": "Im Interview-Intro fehlt der verpflichtende KI-Hinweis; passen Sie die Vorlage an, bevor Sie dies aktivieren.",

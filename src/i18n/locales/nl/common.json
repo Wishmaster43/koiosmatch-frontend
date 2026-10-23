@@ -793,6 +793,7 @@
     "koiosUnavailable": "Koios is op dit moment niet beschikbaar. Probeer het zo opnieuw.",
     "helloflexContractTypeUnmapped": "Geen HelloFlex-contracttype gekoppeld voor deze contractvorm. Stel dit in bij Instellingen → HelloFlex.",
     "recipientSuppressed": "Dit adres is geblokkeerd na een eerdere bounce of klacht; er wordt niet opnieuw verzonden.",
+    "emailUnavailable": "Dit e-mailadres kan niet worden gebruikt.",
     "documentNotAvailable": "Dit document is nog niet beschikbaar: de virusscan is niet afgerond of heeft het bestand geweigerd.",
     "tenantNotReady": "Dit bureau wordt nog ingericht of de inrichting is mislukt. Probeer het later opnieuw of kies een ander bureau.",
     "aiDisclosureMissing": "De interview-intro mist de verplichte AI-vermelding; pas de template aan voordat je dit activeert.",

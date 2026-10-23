@@ -128,6 +128,8 @@ describe('OutreachCreate · validation + submit payload (unchanged behaviour)', 
     await user.type(screen.getByPlaceholderText('create.namePlaceholder'), '  Bellijst Noord  ')
     await user.click(screen.getByRole('button', { name: 'create.submit' }))
     await waitFor(() => expect(createCampaign).toHaveBeenCalledWith({ name: 'Bellijst Noord', channel: 'call' }))
+    // MODULE-FACE-BEVRIES: the create body carries no location_id until Danny's go.
+    expect(vi.mocked(createCampaign).mock.calls.at(-1)?.[0]).not.toHaveProperty('location_id')
     expect(onCreated).toHaveBeenCalledWith({ id: 'c-new', name: 'New' })
     expect(onClose).toHaveBeenCalled()
   })

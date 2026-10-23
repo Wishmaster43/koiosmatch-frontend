@@ -65,3 +65,9 @@ describe('apiErrorKey · UPLOADS-SCAN-1 / TENANT-READY codes', () => {
     expect(apiErrorKey({ response: { data: { code: 'ai_disclosure_missing' } } })).toBe('errors.aiDisclosureMissing')
   })
 })
+
+describe('apiErrorKey · email_unavailable (ONIX C-007)', () => {
+  it('maps email_unavailable (422) to its i18n key regardless of the English message', () => {
+    expect(apiErrorKey({ response: { data: { code: 'email_unavailable', message: 'This e-mail address cannot be used.' } } })).toBe('errors.emailUnavailable')
+  })
+})

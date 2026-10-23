@@ -8,6 +8,7 @@ import type { ChangeEvent } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useAuth } from '@/context/AuthContext'
 import api from '@/lib/api'
+import { apiErrorKey } from '@/lib/extractApiError'
 import { notifyError } from '@/lib/notify'
 import type { ProfileFormData } from './profileParts'
 import { uploadErrorMessage } from '@/lib/uploadError'
@@ -88,7 +89,9 @@ export function useProfileForm() {
         setError(t('profile.currentPasswordRequired'))
         setForceCurrentPassword(true)
       } else {
-        setError(t('profile.saveFailed'))
+        // Known backend codes (e.g. email_unavailable) get their own translated text.
+        const key = apiErrorKey(err)
+        setError(key ? t(key, { ns: 'common' }) : t('profile.saveFailed'))
       }
     } finally {
       setSaving(false)
