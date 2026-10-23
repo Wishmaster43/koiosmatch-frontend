@@ -42,6 +42,9 @@ import StatusPill from '@/components/ui/StatusPill'
 // HUISSTIJL-1: shared typography atom — the three plain 11px/muted lines
 // below are exact matches for the house Caption scale.
 import { Caption } from '@/components/ui/typography'
+// DATETIME-IMPORT-LES: the side-effect-free formatter — @/lib/datetime's i18n import initialises i18next in every
+// consumer of the applications barrel (the candidate drawer's apply modal tests broke on it, 23-10).
+import { formatDateTimeStr } from '@/lib/localDate'
 import { useAuth } from '@/context/AuthContext'
 import { translateInterviewStatus } from '@/lib/interviewStatus'
 import { interviewCategoryColor } from '../data/applicationsShared'
@@ -71,14 +74,18 @@ const cardStyle: CSSProperties = {
 // tech since every segment around it already carries its own accessible text.
 const MetaDot = () => <span aria-hidden="true" style={{ color: 'var(--text-muted)', fontSize: 12 }}>·</span>
 
+// Stable skip-reason vocabulary of the contract (INTERVIEW-SKIP-ON-APPLICATION-1).
+const SKIP_CODES = ['rejected_stage', 'placed_stage', 'no_mobile_or_consent', 'action_rule_blocked', 'no_interview_consent', 'wa_web_send_not_supported', 'no_active_connection', 'send_failed', 'ai_disclosure_missing', 'candidate_in_other_interview']
+
 // Live interview summary card (see the module doc above): every field renders defensively as optional, and the stop/resume controls gate on the application id, never the interview session id (see the INTERVIEW-STOP-1 note).
 export default function InterviewStatusCard({
   interview, applicationId, interviewWorkflowId, interviewWorkflow, hasInterviewWorkflowField = false,
-  vacancyId, vacancyInterviewWorkflow, skipReason,
+  vacancyId, vacancyInterviewWorkflow, skipReason, skippedAt,
 }: {
   interview: ApplicationInterview | null; applicationId?: Id
-  // ONIX K-006: why no interview started (`no_interview_consent` | `ai_disclosure_missing`); other values render nothing.
+  // INTERVIEW-SKIP-ON-APPLICATION-1: why the start was skipped (stable code) and when; unknown codes read generically.
   skipReason?: string | null
+  skippedAt?: string | null
   // INTERVIEW-WORKFLOW-1 (Appendix D/E): this application's own workflow override,
   // presence-gated the same way as the vacancy's own field (VacancyAgentTab).
   interviewWorkflowId?: Id | null
@@ -117,9 +124,12 @@ export default function InterviewStatusCard({
     return (
       <div style={cardStyle}>
         <span style={{ fontSize: 12, color: 'var(--text-muted)', fontStyle: 'italic' }}>{t('interview.status.none')}</span>
-        {/* ONIX K-006: calm plain-text reason, only for the two known skip codes. */}
-        {(skipReason === 'no_interview_consent' || skipReason === 'ai_disclosure_missing') && (
-          <Caption>{t(`interview.skipReason.${skipReason}`)}</Caption>
+        {/* Calm plain-text skip reason (+ date); an unknown code reads generically, never raw. */}
+        {skipReason && (
+          <Caption>
+            {t(`interview.skipReason.${SKIP_CODES.includes(skipReason) ? skipReason : 'unknown'}`)}
+            {skippedAt ? ` ${t('interview.skippedAt', { date: formatDateTimeStr(skippedAt) })}` : ''}
+          </Caption>
         )}
         {workflowOverridePicker}
         {vacancyDefaultBlock}

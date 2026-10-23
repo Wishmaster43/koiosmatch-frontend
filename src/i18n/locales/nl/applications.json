@@ -268,8 +268,18 @@
   "interview": {
     "skipReason": {
       "no_interview_consent": "Niet gestart: de kandidaat heeft geen toestemming gegeven voor het AI-interview.",
-      "ai_disclosure_missing": "Niet gestart: de interview-intro mist de verplichte AI-vermelding; pas de template aan in Instellingen → Koios AI."
+      "ai_disclosure_missing": "Niet gestart: de interview-intro mist de verplichte AI-vermelding; pas de template aan in Instellingen → Koios AI.",
+      "rejected_stage": "Niet gestart: de sollicitatie staat in een afgewezen fase.",
+      "placed_stage": "Niet gestart: de kandidaat is al geplaatst.",
+      "no_mobile_or_consent": "Niet gestart: geen mobiel nummer of geen WhatsApp-toestemming.",
+      "action_rule_blocked": "Niet gestart: een actieregel van het bureau blokkeert dit.",
+      "wa_web_send_not_supported": "Niet gestart: dit kanaal kan het interview niet versturen via WhatsApp Web.",
+      "no_active_connection": "Niet gestart: er is geen actieve WhatsApp-koppeling.",
+      "send_failed": "Niet gestart: het eerste bericht kon niet worden verstuurd.",
+      "candidate_in_other_interview": "Niet gestart: de kandidaat zit al in een interview voor een andere sollicitatie.",
+      "unknown": "Niet gestart: het interview is overgeslagen."
     },
+    "skippedAt": "Overgeslagen op {{date}}",
     "title": "WhatsApp-interview",
     "done": "Klaar",
     "summary": "Samenvatting",

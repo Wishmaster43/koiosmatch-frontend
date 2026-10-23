@@ -440,3 +440,11 @@ describe('InterviewsTab — detail-fetch phase gating', () => {
     expect(screen.queryByText('interview.status.none')).not.toBeInTheDocument()
   })
 })
+
+describe('InterviewsTab · skipped start (INTERVIEW-SKIP-ON-APPLICATION-1)', () => {
+  it('passes the skip reason and time to the status card', () => {
+    renderTab(app({ interviewSkipReason: 'send_failed', interviewSkippedAt: '2026-10-21T09:30:00Z' }))
+    expect(screen.getByText(/interview\.skipReason\.send_failed/)).toBeInTheDocument()
+    expect(screen.getByText(/interview\.skipReason\.send_failed.*interview\.skippedAt/)).toBeInTheDocument()
+  })
+})

@@ -37,4 +37,12 @@ describe('mapVacancyDetail · applications[].interview (INTERVIEW-VISIBILITY-1)'
     })
     expect(detail.applications[0].interview?.turn).toBeNull()
   })
+
+  it('maps a skipped block to null (no session, the row shows the dash)', () => {
+    const detail = mapVacancyDetail({
+      id: 'v-1',
+      applications: [{ id: 'app-1', candidate: { id: 'c-1' }, interview: { status: 'skipped' } }],
+    })
+    expect(detail.applications[0].interview).toBeNull()
+  })
 })

@@ -24,6 +24,9 @@ import type { ApplicationInterview } from '@/types/application'
 const mockT = vi.fn((k: string) => k)
 vi.mock('react-i18next', () => ({ useTranslation: () => ({ t: mockT }) }))
 
+// Deterministic date echo: keeps the real i18n singleton out of the unit test.
+vi.mock('@/lib/localDate', async () => ({ ...(await vi.importActual<object>('@/lib/localDate')), formatDateTimeStr: (v: string) => `dt(${v})` }))
+
 const mockUseAuth = vi.fn()
 const mockPost = vi.fn()
 const mockGet = vi.fn()
@@ -649,11 +652,29 @@ describe('InterviewStatusCard · skip reason (ONIX K-006)', () => {
     expect(screen.getByText(`interview.skipReason.${reason}`)).toBeInTheDocument()
   })
 
-  it('renders no skip line when the reason is absent or unknown', () => {
-    const { rerender } = render(<InterviewStatusCard interview={null} />)
-    expect(screen.queryByText(/interview\.skipReason/)).not.toBeInTheDocument()
-    rerender(<InterviewStatusCard interview={null} skipReason="something_else" />)
+  it('renders no skip line when the reason is absent (an unknown code reads generically, see below)', () => {
+    render(<InterviewStatusCard interview={null} />)
     expect(screen.queryByText(/interview\.skipReason/)).not.toBeInTheDocument()
   })
 })
 
+
+describe('InterviewStatusCard · skipped start (INTERVIEW-SKIP-ON-APPLICATION-1)', () => {
+  const CODES = ['rejected_stage', 'placed_stage', 'no_mobile_or_consent', 'action_rule_blocked', 'no_interview_consent', 'wa_web_send_not_supported', 'no_active_connection', 'send_failed', 'ai_disclosure_missing', 'candidate_in_other_interview']
+
+  it.each(CODES)('renders the line for %s', code => {
+    render(<InterviewStatusCard interview={null} skipReason={code} />)
+    expect(screen.getByText(`interview.skipReason.${code}`)).toBeInTheDocument()
+  })
+
+  it('falls back to the generic line for an unknown code, never the raw code', () => {
+    render(<InterviewStatusCard interview={null} skipReason="brand_new_code" />)
+    expect(screen.getByText('interview.skipReason.unknown')).toBeInTheDocument()
+    expect(screen.queryByText(/brand_new_code/)).toBeNull()
+  })
+
+  it('appends the skip date in the house format when given', () => {
+    render(<InterviewStatusCard interview={null} skipReason="send_failed" skippedAt="2026-10-21T09:30:00Z" />)
+    expect(mockT).toHaveBeenCalledWith('interview.skippedAt', { date: 'dt(2026-10-21T09:30:00Z)' })
+  })
+})

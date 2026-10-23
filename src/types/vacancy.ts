@@ -371,7 +371,7 @@ export interface ApiVacancy {
     phase_label?: string; phase_color?: string; source?: string; created_at?: string
     // INTERVIEW-VISIBILITY-1: optional — tolerant of a backend that doesn't
     // attach the interview block to a vacancy's own applicants list yet.
-    interview?: { category?: string; current_status?: string | null; step?: number | null; total?: number; turn?: string | null; waiting_since?: string | null } | null
+    interview?: { status?: string; category?: string; current_status?: string | null; step?: number | null; total?: number; turn?: string | null; waiting_since?: string | null } | null
   }>
   custom_fields?: Array<{ id?: Id; name?: string; label?: string; value?: unknown }>
   documents?: Array<{ id?: Id; name?: string; size?: unknown }>

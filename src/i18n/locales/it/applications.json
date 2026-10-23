@@ -268,8 +268,18 @@
   "interview": {
     "skipReason": {
       "no_interview_consent": "Non avviato: il candidato non ha dato il consenso al colloquio con IA.",
-      "ai_disclosure_missing": "Non avviato: l'introduzione del colloquio non contiene l'indicazione IA obbligatoria; modifica il modello in Impostazioni → Koios AI."
+      "ai_disclosure_missing": "Non avviato: l'introduzione del colloquio non contiene l'indicazione IA obbligatoria; modifica il modello in Impostazioni → Koios AI.",
+      "rejected_stage": "Non avviato: la candidatura è in una fase rifiutata.",
+      "placed_stage": "Non avviato: il candidato è già inserito.",
+      "no_mobile_or_consent": "Non avviato: nessun numero di cellulare o nessun consenso WhatsApp.",
+      "action_rule_blocked": "Non avviato: una regola di azione dell'agenzia lo blocca.",
+      "wa_web_send_not_supported": "Non avviato: questo canale non può inviare il colloquio tramite WhatsApp Web.",
+      "no_active_connection": "Non avviato: non c'è alcuna connessione WhatsApp attiva.",
+      "send_failed": "Non avviato: non è stato possibile inviare il primo messaggio.",
+      "candidate_in_other_interview": "Non avviato: il candidato è già in un colloquio per un'altra candidatura.",
+      "unknown": "Non avviato: il colloquio è stato saltato."
     },
+    "skippedAt": "Saltato il {{date}}",
     "title": "Colloquio WhatsApp",
     "done": "Fatto",
     "summary": "Riepilogo",

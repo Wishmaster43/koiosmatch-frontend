@@ -268,8 +268,18 @@
   "interview": {
     "skipReason": {
       "no_interview_consent": "Not started: the candidate has not given consent for the AI interview.",
-      "ai_disclosure_missing": "Not started: the interview intro lacks the mandatory AI disclosure; adjust the template in Settings → Koios AI."
+      "ai_disclosure_missing": "Not started: the interview intro lacks the mandatory AI disclosure; adjust the template in Settings → Koios AI.",
+      "rejected_stage": "Not started: the application is in a rejected phase.",
+      "placed_stage": "Not started: the candidate is already placed.",
+      "no_mobile_or_consent": "Not started: no mobile number or no WhatsApp consent.",
+      "action_rule_blocked": "Not started: an action rule of the agency blocks this.",
+      "wa_web_send_not_supported": "Not started: this channel cannot send the interview via WhatsApp Web.",
+      "no_active_connection": "Not started: there is no active WhatsApp connection.",
+      "send_failed": "Not started: the first message could not be sent.",
+      "candidate_in_other_interview": "Not started: the candidate is already in an interview for another application.",
+      "unknown": "Not started: the interview was skipped."
     },
+    "skippedAt": "Skipped on {{date}}",
     "title": "WhatsApp interview",
     "done": "Done",
     "summary": "Summary",

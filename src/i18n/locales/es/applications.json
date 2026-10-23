@@ -268,8 +268,18 @@
   "interview": {
     "skipReason": {
       "no_interview_consent": "No iniciada: el candidato no ha dado su consentimiento para la entrevista con IA.",
-      "ai_disclosure_missing": "No iniciada: la introducción de la entrevista no incluye la mención obligatoria de IA; ajusta la plantilla en Ajustes → Koios AI."
+      "ai_disclosure_missing": "No iniciada: la introducción de la entrevista no incluye la mención obligatoria de IA; ajusta la plantilla en Ajustes → Koios AI.",
+      "rejected_stage": "No iniciada: la candidatura está en una fase rechazada.",
+      "placed_stage": "No iniciada: el candidato ya está colocado.",
+      "no_mobile_or_consent": "No iniciada: sin número de móvil o sin consentimiento de WhatsApp.",
+      "action_rule_blocked": "No iniciada: una regla de acción de la agencia lo bloquea.",
+      "wa_web_send_not_supported": "No iniciada: este canal no puede enviar la entrevista por WhatsApp Web.",
+      "no_active_connection": "No iniciada: no hay ninguna conexión de WhatsApp activa.",
+      "send_failed": "No iniciada: no se pudo enviar el primer mensaje.",
+      "candidate_in_other_interview": "No iniciada: el candidato ya está en una entrevista para otra candidatura.",
+      "unknown": "No iniciada: la entrevista se omitió."
     },
+    "skippedAt": "Omitida el {{date}}",
     "title": "Entrevista de WhatsApp",
     "done": "Hecho",
     "summary": "Resumen",

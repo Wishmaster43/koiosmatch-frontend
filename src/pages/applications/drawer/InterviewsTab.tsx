@@ -258,6 +258,7 @@ export default function InterviewsTab({ application: a, detailPhase }: { applica
         interviewWorkflowId={a.interviewWorkflowId} interviewWorkflow={a.interviewWorkflow}
         hasInterviewWorkflowField={a.hasInterviewWorkflowField}
         vacancyId={a.vacancy?.id} vacancyInterviewWorkflow={a.vacancyInterviewWorkflow}
+        skipReason={a.interviewSkipReason} skippedAt={a.interviewSkippedAt}
       />
       {canStartNew && (
         <StartInterviewAction applicationId={a.id} effective={effectiveWorkflow} onStarted={setStartedOverride} />

@@ -268,8 +268,18 @@
   "interview": {
     "skipReason": {
       "no_interview_consent": "Nicht gestartet: Der Kandidat hat keine Einwilligung für das KI-Interview erteilt.",
-      "ai_disclosure_missing": "Nicht gestartet: Im Interview-Intro fehlt der verpflichtende KI-Hinweis; passen Sie die Vorlage unter Einstellungen → Koios AI an."
+      "ai_disclosure_missing": "Nicht gestartet: Im Interview-Intro fehlt der verpflichtende KI-Hinweis; passen Sie die Vorlage unter Einstellungen → Koios AI an.",
+      "rejected_stage": "Nicht gestartet: Die Bewerbung befindet sich in einer abgelehnten Phase.",
+      "placed_stage": "Nicht gestartet: Der Kandidat ist bereits vermittelt.",
+      "no_mobile_or_consent": "Nicht gestartet: Keine Mobilnummer oder keine WhatsApp-Einwilligung.",
+      "action_rule_blocked": "Nicht gestartet: Eine Aktionsregel der Agentur blockiert dies.",
+      "wa_web_send_not_supported": "Nicht gestartet: Dieser Kanal kann das Interview nicht über WhatsApp Web versenden.",
+      "no_active_connection": "Nicht gestartet: Es gibt keine aktive WhatsApp-Verbindung.",
+      "send_failed": "Nicht gestartet: Die erste Nachricht konnte nicht gesendet werden.",
+      "candidate_in_other_interview": "Nicht gestartet: Der Kandidat befindet sich bereits in einem Interview für eine andere Bewerbung.",
+      "unknown": "Nicht gestartet: Das Interview wurde übersprungen."
     },
+    "skippedAt": "Übersprungen am {{date}}",
     "title": "WhatsApp-Interview",
     "done": "Erledigt",
     "summary": "Zusammenfassung",

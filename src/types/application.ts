@@ -288,9 +288,10 @@ export interface ApplicationDetail extends Application {
   // "consent refused" — the drawer renders its AVG evidence row only when non-null
   // rather than asserting an absence it cannot substantiate.
   interviewConsentGivenAt: string | null
-  // ONIX K-006: why no interview started (`no_interview_consent` | `ai_disclosure_missing`);
-  // the BE does not expose it on the application resources yet, so optional and never invented.
+  // INTERVIEW-SKIP-ON-APPLICATION-1: stable skip code from the interview block (status 'skipped'); null when no start was skipped.
   interviewSkipReason?: string | null
+  // INTERVIEW-SKIP-ON-APPLICATION-1: when the start was skipped (ISO-8601), from the same block.
+  interviewSkippedAt?: string | null
   // CONTACT-PERSON-1 (LIVE — nothing awaited): ApplicationDetailResource always sends
   // this key (detail contract only). It is DERIVED, never owned by the application:
   // the resource resolves it through the LINKED VACANCY's contact_id (Vacancy::contact
@@ -465,6 +466,10 @@ export interface ApiApplication {
   // separately in `paused_by_name` (the nested object is tolerated, never sent).
   interview?: {
     id?: Id
+    // INTERVIEW-SKIP-ON-APPLICATION-1: a skipped start carries status 'skipped' + reason + time, no session.
+    status?: string
+    skip_reason?: string | null
+    skipped_at?: string | null
     category?: string
     current_status?: string | null
     statuses?: string[]
@@ -533,7 +538,6 @@ export interface ApiApplication {
   // always sends the key (ISO-8601 or null); the LIST resource never carries it,
   // hence still optional here.
   interview_consent_given_at?: string | null
-  interview_skip_reason?: string | null
   // CONTACT-PERSON-1: the contact exactly as ApplicationDetailResource::contact()
   // builds it — {id, name, email, phone}, with email/phone nullable columns on
   // customer_contacts. Optional here because only the DETAIL contract carries the

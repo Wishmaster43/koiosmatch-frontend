@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { mapApplication, mapApplicationDetail, mapInterview, mapMatchSummary } from './mapApplication'
+import { mapApplication, mapApplicationDetail, mapInterview, mapMatchSummary, readInterviewSkip } from './mapApplication'
 import type { LookupItem } from '@/context/LookupsContext'
 
 // A tenant that renamed the funnel: 'aangenomen' carries is_match — proves the
@@ -665,3 +665,25 @@ describe('mapApplication · hasCv', () => {
   })
 })
 
+
+describe('interview skip block (INTERVIEW-SKIP-ON-APPLICATION-1)', () => {
+  const skipped = { status: 'skipped', skip_reason: 'send_failed', skipped_at: '2026-10-21T09:30:00Z' }
+
+  it('readInterviewSkip reads reason and time from a skipped block only', () => {
+    expect(readInterviewSkip(skipped)).toEqual({ reason: 'send_failed', at: '2026-10-21T09:30:00Z' })
+    expect(readInterviewSkip({ category: 'busy' })).toEqual({ reason: null, at: null })
+    expect(readInterviewSkip(null)).toEqual({ reason: null, at: null })
+  })
+
+  it('mapInterview returns null for a skipped block and still maps a session', () => {
+    expect(mapInterview(skipped)).toBeNull()
+    expect(mapInterview({ category: 'completed' })?.category).toBe('completed')
+  })
+
+  it('mapApplicationDetail carries reason and time and shows no session', () => {
+    const m = mapApplicationDetail({ id: 9, interview: skipped })
+    expect(m.interview).toBeNull()
+    expect(m.interviewSkipReason).toBe('send_failed')
+    expect(m.interviewSkippedAt).toBe('2026-10-21T09:30:00Z')
+  })
+})

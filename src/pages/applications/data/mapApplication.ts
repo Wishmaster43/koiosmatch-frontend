@@ -61,10 +61,18 @@ const mapPausedBy = (raw: NonNullable<ApiApplication['interview']>): Application
   return null
 }
 
+// Skip reason + time off a skipped interview block; any other block yields nulls.
+export function readInterviewSkip(raw?: ApiApplication['interview'] | null): { reason: string | null; at: string | null } {
+  if (!raw || raw.status !== 'skipped') return { reason: null, at: null }
+  return { reason: raw.skip_reason ?? null, at: raw.skipped_at ?? null }
+}
+
 // Raw interview session block → the UI model (see the file doc above for the
 // list-vs-detail field split and the mixed-language `turn` normalisation).
 export function mapInterview(raw?: ApiApplication['interview']): ApplicationInterview | null {
   if (!raw) return null
+  // INTERVIEW-SKIP-ON-APPLICATION-1: a skipped start is not a session.
+  if (raw.status === 'skipped') return null
   const category = (raw.category
     ?? (raw.disqualified_reason ? 'disqualified' : raw.completed_at ? 'completed' : raw.paused_at ? 'paused' : 'busy')) as ApplicationInterview['category']
   return {
@@ -338,8 +346,9 @@ export function mapApplicationDetail(raw: ApiApplication = {}, funnelTypes: Look
     // the NORMAL case — only the public careersite apply ever writes it — so it means
     // "no consent recorded", not "consent refused" (see types/application.ts).
     interviewConsentGivenAt: raw.interview_consent_given_at ?? null,
-    // ONIX K-006: tolerant, null until the BE exposes the skip reason on the resource.
-    interviewSkipReason: raw.interview_skip_reason ?? null,
+    // INTERVIEW-SKIP-ON-APPLICATION-1: reason + time from a skipped interview block (status 'skipped'), else null.
+    interviewSkipReason: readInterviewSkip(raw.interview).reason,
+    interviewSkippedAt: readInterviewSkip(raw.interview).at,
     // S34 (02-09): the Koios reject advice (ApplicationMatchService::ai → advice/
     // advice_reason/auto_reject_eligible) was emitted by the backend but never
     // mapped, so RejectionModal's advice card and its proposal badge could never

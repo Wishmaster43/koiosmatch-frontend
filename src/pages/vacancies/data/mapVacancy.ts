@@ -24,10 +24,12 @@ import type { ApplicationInterview } from '@/types/application'
 // `turn` column mapApplication.ts normalises, this surface has no legacy Dutch
 // spelling to tolerate), so no alias table is needed.
 function mapApplicantInterview(raw?: {
-  category?: string; current_status?: string | null; step?: number | null; total?: number
+  status?: string; category?: string; current_status?: string | null; step?: number | null; total?: number
   turn?: string | null; waiting_since?: string | null
 } | null): ApplicationInterview | null {
   if (!raw) return null
+  // INTERVIEW-SKIP-ON-APPLICATION-1: a skipped start is not a session (row shows the dash).
+  if (raw.status === 'skipped') return null
   const turn = raw.turn === 'candidate' || raw.turn === 'agent' ? raw.turn : null
   return {
     category: (raw.category ?? 'busy') as ApplicationInterview['category'],

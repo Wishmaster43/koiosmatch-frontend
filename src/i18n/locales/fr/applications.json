@@ -268,8 +268,18 @@
   "interview": {
     "skipReason": {
       "no_interview_consent": "Non démarré : le candidat n'a pas donné son consentement pour l'entretien IA.",
-      "ai_disclosure_missing": "Non démarré : l'introduction de l'entretien ne contient pas la mention IA obligatoire ; adaptez le modèle dans Paramètres → Koios AI."
+      "ai_disclosure_missing": "Non démarré : l'introduction de l'entretien ne contient pas la mention IA obligatoire ; adaptez le modèle dans Paramètres → Koios AI.",
+      "rejected_stage": "Non démarré : la candidature est dans une phase refusée.",
+      "placed_stage": "Non démarré : le candidat est déjà placé.",
+      "no_mobile_or_consent": "Non démarré : pas de numéro de mobile ou pas de consentement WhatsApp.",
+      "action_rule_blocked": "Non démarré : une règle d'action de l'agence bloque ce démarrage.",
+      "wa_web_send_not_supported": "Non démarré : ce canal ne peut pas envoyer l'entretien via WhatsApp Web.",
+      "no_active_connection": "Non démarré : aucune connexion WhatsApp active.",
+      "send_failed": "Non démarré : le premier message n'a pas pu être envoyé.",
+      "candidate_in_other_interview": "Non démarré : le candidat participe déjà à un entretien pour une autre candidature.",
+      "unknown": "Non démarré : l'entretien a été ignoré."
     },
+    "skippedAt": "Ignoré le {{date}}",
     "title": "Entretien WhatsApp",
     "done": "Terminé",
     "summary": "Résumé",
