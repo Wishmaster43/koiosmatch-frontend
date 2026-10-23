@@ -4813,10 +4813,9 @@
     "bookingLinkInvalid": "Gebruik een absolute URL die met http:// of https:// begint.",
     "rejectionMode": {
       "label": "Afwijzingsmodus",
-      "description": "Hoe gaat Koios om met kandidaten die door de AI-interview zijn afgekeurd: voorstel doen (recruiter bevestigt) of automatisch afwijzen",
+      "description": "Een door de AI afgekeurd interview wordt als voorstel aan de recruiter voorgelegd; Koios wijst nooit zelf af.",
       "options": {
-        "proposal": "Voorstel, recruiter bevestigt",
-        "automatic": "Automatisch afwijzen"
+        "proposal": "Voorstel, recruiter bevestigt"
       }
     },
     "recruiterPhone": {}

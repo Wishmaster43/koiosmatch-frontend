@@ -1,13 +1,11 @@
 /**
  * InterviewSettings (X-12) — asserts the REAL /settings request (§13: a mutation
  * test must prove the seam): the interview key loads with its tenant default and
- * saves on a single POST. Backend validates interview_rejection_mode against the
- * enum; the recruiter phone lives on the agent and the booking link left this
+ * is read-only (I-005, nothing posted). The recruiter phone lives on the agent and the booking link left this
  * screen on Danny's row 53 (17-09).
  */
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { render, screen, waitFor, fireEvent } from '@testing-library/react'
-import userEvent from '@testing-library/user-event'
 import i18n from '@/i18n'
 import api from '@/lib/api'
 // vi.mocked() gives the mocked-module factory's plain vi.fn()s their real Mock typing at every call site.
@@ -36,64 +34,30 @@ beforeEach(() => {
 })
 
 describe('InterviewSettings — load', () => {
-  it('GETs /settings and renders the tenant default (proposal mode) with the booking-link row', async () => {
+  it('renders the read-only proposal line with the booking-link row', async () => {
     render(<InterviewSettings />)
-    await waitFor(() => expect(mockedApi.get).toHaveBeenCalledWith('/settings'))
     // Proposal mode is the default (shows as the trigger label).
     expect(await screen.findByText(t('interview.rejectionMode.options.proposal'))).toBeInTheDocument()
     // Danny 9a = A: the booking link lives on this screen again.
     expect(screen.getByLabelText(t('interview.bookingLink'))).toBeInTheDocument()
   })
 
-  it('renders the stored rejection mode', async () => {
+  it('renders the read-only proposal line whatever the stored mode, and offers no automatic option', async () => {
     mockedApi.get.mockResolvedValue({ data: { interview_rejection_mode: 'automatic' } })
     render(<InterviewSettings />)
-    expect(await screen.findByText(t('interview.rejectionMode.options.automatic'))).toBeInTheDocument()
+    expect(await screen.findByText(t('interview.rejectionMode.options.proposal'))).toBeInTheDocument()
+    expect(screen.queryByText(/automati/i)).not.toBeInTheDocument()
   })
 })
 
-describe('InterviewSettings — save', () => {
-  // The recruiter phone lives on the AI agent (Danny 09-09, row 20); this screen posts the one tenant key.
-  it('POSTs the interview key to /settings on save, never a booking_link', async () => {
-    const user = userEvent.setup()
+describe('InterviewSettings — read-only mode', () => {
+  // ONIX I-005: no control, no Save button, and never a POST of the mode.
+  it('posts nothing on render and shows no Save button or combobox', async () => {
     render(<InterviewSettings />)
-
-    // Change rejection mode to automatic.
-    const modeButton = await screen.findByText(t('interview.rejectionMode.options.proposal'))
-    await user.click(modeButton)
-    await user.click(screen.getByText(t('interview.rejectionMode.options.automatic')))
-
-    await user.click(screen.getByRole('button', { name: t('common.save') }))
-
-    await waitFor(() => expect(mockedApi.post).toHaveBeenCalledWith('/settings', {
-      interview_rejection_mode: 'automatic',
-    }))
-  })
-})
-
-describe('InterviewSettings — errors', () => {
-  it('still attempts the POST when the backend answers 422 on the rejection mode', async () => {
-    mockedApi.post.mockRejectedValue({
-      response: { status: 422, data: { message: 'Invalid mode.', errors: { interview_rejection_mode: ['The selected mode is invalid.'] } } },
-    })
-    const user = userEvent.setup()
-    render(<InterviewSettings />)
-
-    const modeButton = await screen.findByText(t('interview.rejectionMode.options.proposal'))
-    await user.click(modeButton)
-    await user.click(screen.getByText(t('interview.rejectionMode.options.automatic')))
-    await user.click(screen.getByRole('button', { name: t('common.save') }))
-
-    // The useSettingsForm hook handles error display; we verify the POST was attempted.
-    await waitFor(() => expect(mockedApi.post).toHaveBeenCalled())
-  })
-
-  it('renders the error notice and disables Save when GET /settings fails', async () => {
-    mockedApi.get.mockRejectedValue(new Error('network down'))
-    render(<InterviewSettings />)
-
-    expect(await screen.findByText(t('common.loadError'))).toBeInTheDocument()
-    expect(screen.getByRole('button', { name: t('common.save') })).toBeDisabled()
+    await screen.findByText(t('interview.rejectionMode.options.proposal'))
+    expect(mockedApi.post).not.toHaveBeenCalled()
+    expect(screen.queryByRole('button', { name: t('common.save') })).not.toBeInTheDocument()
+    expect(screen.queryByRole('combobox')).not.toBeInTheDocument()
   })
 })
 

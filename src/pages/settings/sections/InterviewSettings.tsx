@@ -1,45 +1,29 @@
 /**
- * InterviewSettings (X-12) — the tenant-wide AI-interview configuration: the
- * rejection mode (Koios proposes vs. automatic), POSTed through the shared
- * /settings form path with the backend validating it against the enum. The
- * recruiter phone is a per-agent field (Danny 09-09), and the booking link
- * (feeds the AI-interview invitation) saves on its own blur through the shared BlurSaveField.
+ * InterviewSettings (X-12) — the tenant-wide AI-interview configuration. The
+ * rejection mode is a read-only statement (ONIX I-005, Danny 1c = A: the AI never
+ * rejects on its own, the catalogue offers only `proposal`), so nothing is posted
+ * for it. The recruiter phone is a per-agent field (Danny 09-09), and the booking
+ * link (feeds the AI-interview invitation) saves on its own blur through the shared BlurSaveField.
  */
 import { useTranslation } from 'react-i18next'
 import { useAllSettings } from '@/lib/settings/useAllSettings'
 import BlurSaveField from '../components/BlurSaveField'
-import { useSettingsForm } from '../lib/useSettingsForm'
-import { SettingsScaffold, SettingCardList, SettingRow, SelectField } from '../components/SettingsKit'
+import { BodyText } from '@/components/ui/typography'
+import { SettingsScaffold, SettingCardList, SettingRow } from '../components/SettingsKit'
 
-// AI-interview settings editor: the rejection mode.
+// AI-interview settings: read-only rejection mode plus the booking link.
 export default function InterviewSettings() {
   const { t } = useTranslation('settings')
   const stored = useAllSettings()
-  // Tenant default: proposal mode.
-  const form = useSettingsForm({
-    interview_rejection_mode: 'proposal',
-  })
-
-  // Rejection mode options: proposal (Koios proposes, recruiter confirms) or automatic (direct rejection).
-  const rejectionModeOptions = [
-    { value: 'proposal', label: t('interview.rejectionMode.options.proposal') },
-    { value: 'automatic', label: t('interview.rejectionMode.options.automatic') },
-  ]
-
   return (
-    <SettingsScaffold title={t('interview.title')} subtitle={t('interview.subtitle')} maxWidth={640} form={form}>
+    <SettingsScaffold title={t('interview.title')} subtitle={t('interview.subtitle')} maxWidth={640}>
       <SettingCardList>
-        {/* Rejection mode: how DISQUALIFIED AI-interview outcomes are handled. */}
+        {/* Rejection mode: the single behaviour, shown as plain text and never posted. */}
         <SettingRow label={t('interview.rejectionMode.label')} description={t('interview.rejectionMode.description')}>
-          <SelectField
-            value={form.values.interview_rejection_mode}
-            onChange={v => form.set('interview_rejection_mode', v)}
-            options={rejectionModeOptions}
-            ariaLabel={t('interview.rejectionMode.label')}
-          />
+          <BodyText>{t('interview.rejectionMode.options.proposal')}</BodyText>
         </SettingRow>
 
-        {/* Booking link: saves exactly { booking_link } on blur, separate from the form's save. */}
+        {/* Booking link: saves exactly { booking_link } on blur, independent of any form. */}
         <BlurSaveField
           key={`booking:${typeof stored.booking_link === 'string' ? stored.booking_link : ''}`}
           settingKey="booking_link"

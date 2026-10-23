@@ -4813,10 +4813,9 @@
     "bookingLinkInvalid": "Use an absolute URL starting with http:// or https://.",
     "rejectionMode": {
       "label": "Rejection Mode",
-      "description": "How Koios handles candidates disqualified by the AI interview: propose a rejection (recruiter confirms) or reject automatically",
+      "description": "An interview rejected by the AI is put to the recruiter as a proposal; Koios never rejects on its own.",
       "options": {
-        "proposal": "Proposal, recruiter confirms",
-        "automatic": "Reject automatically"
+        "proposal": "Proposal, recruiter confirms"
       }
     },
     "recruiterPhone": {}
