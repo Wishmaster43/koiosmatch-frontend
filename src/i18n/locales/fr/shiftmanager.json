@@ -446,5 +446,12 @@
     "loadError": "Impossible de charger les données Shiftmanager.",
     "retry": "Réessayer",
     "truncated": "Il y a plus de lignes que ce qui peut être chargé ici. Les filtres et les totaux ne portent que sur les lignes chargées."
+  },
+  "erase": {
+    "button": "Effacer les données personnelles",
+    "title": "Effacer les données personnelles",
+    "explanation": "Les données personnelles de cet employé seront effacées de manière irréversible. Cette action est définitive.",
+    "confirm": "Effacer définitivement",
+    "success": "Les données personnelles ont été effacées."
   }
 }

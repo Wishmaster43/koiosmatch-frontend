@@ -29,6 +29,10 @@ import ErrorBanner from '@/components/ui/ErrorBanner'
 import PaginationBar from '@/components/ui/PaginationBar'
 import { filterSmCandidates } from './data/smCandidateFilters'
 import { featureNamesOf, registrationYearOf } from './data/smCandidateFields'
+import Button from '@/components/ui/Button'
+import EraseWithPasswordDialog from '@/components/drawer/EraseWithPasswordDialog'
+import { useAuth } from '@/context/AuthContext'
+import { useSmEmployeeErase } from './hooks/useSmEmployeeErase'
 import { useRightPanel } from '@/context/RightPanelContext'
 import type { ReportCandidate } from '@/types/reports'
 
@@ -38,6 +42,7 @@ import type { ReportCandidate } from '@/types/reports'
 // (per-KPI subset + per-row detail).
 export default function CandidatesDetailPage() {
   const { t } = useTranslation('reports')
+  const { t: tSm } = useTranslation('shiftmanager')
   const { candidates_per_page } = useKpiSettings()
   const { candidates, loading, error, page, pageSize, total, lastPage, setPage, handlePageSizeChange } = useSmCandidatesList()
   // Capped row page (server hard cap 500, `candidates_per_page` tenant setting) —
@@ -66,6 +71,11 @@ export default function CandidatesDetailPage() {
   // Row click opens the rich per-candidate drill-down (Danny 24-07: "ik mis de
   // drill down" — the old reports table opened this drawer; restored blueprint-side).
   const [detail, setDetail] = useState<ReportCandidate | null>(null)
+
+  // H-003: permission-gated erase of the open employee (absent, not disabled, without privacy.erase).
+  const auth = useAuth()
+  const canErase = (auth?.hasPermission ?? (() => false))('privacy.erase')
+  const erase = useSmEmployeeErase(detail?.id, () => setDetail(null), tSm('erase.success'))
 
   // Single-value status toggle — clicking the same status again clears it (mirrors
   // the native candidates page's donut/KPI pick-one behaviour).
@@ -168,7 +178,14 @@ export default function CandidatesDetailPage() {
         <DrillDownDrawer title={drill.title} candidates={drill.candidates} onClose={() => setDrill(null)} />
       )}
       {detail && (
-        <CandidateDetailDrawer candidate={detail} onClose={() => setDetail(null)} />
+        <CandidateDetailDrawer candidate={detail} onClose={() => setDetail(null)}
+          headerActions={canErase && detail.id != null ? (
+            <Button variant="dangerSoft" size="sm" onClick={erase.open}>{tSm('erase.button')}</Button>
+          ) : undefined} />
+      )}
+      {erase.erasing && (
+        <EraseWithPasswordDialog open title={tSm('erase.title')} intro={tSm('erase.explanation')}
+          confirmLabel={tSm('erase.confirm')} onConfirm={erase.confirm} onClose={erase.cancel} />
       )}
     </div>
   )

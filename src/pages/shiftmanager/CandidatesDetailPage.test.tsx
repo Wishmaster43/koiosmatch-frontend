@@ -5,7 +5,7 @@
  * than the mocked row page (3 rows), so a passing assertion on "100" can only
  * happen if SmCandidatesInsightsRow read stats, not this page's row fetch.
  */
-import { render, screen, waitFor } from '@testing-library/react'
+import { render, screen, waitFor, fireEvent } from '@testing-library/react'
 import { describe, it, expect, vi } from 'vitest'
 import { QueryClientProvider, QueryClient } from '@tanstack/react-query'
 import CandidatesDetailPage from './CandidatesDetailPage'
@@ -43,7 +43,11 @@ vi.mock('@/lib/api', async () => {
   }
 })
 
-vi.mock('@/context/AuthContext', () => ({ useAuth: () => ({ refreshUser: vi.fn(), activeTenant: null, user: null }) }))
+// Permission set is mutable so the erase gate (H-003) can be exercised both ways.
+const perms = vi.hoisted(() => ({ erase: false }))
+vi.mock('@/context/AuthContext', () => ({
+  useAuth: () => ({ refreshUser: vi.fn(), activeTenant: null, user: null, hasPermission: (p: string) => p === 'privacy.erase' && perms.erase }),
+}))
 
 function renderPage() {
   const client = new QueryClient({ defaultOptions: { queries: { retry: false } } })
@@ -69,5 +73,35 @@ describe('CandidatesDetailPage · KPI row sources stats, not the row page (SM-ST
     const api = (await import('@/lib/api')).default
     const calls = (api.get as unknown as { mock: { calls: unknown[][] } }).mock.calls
     expect(calls.some(([url]) => url === '/sm_candidates/stats')).toBe(true)
+  })
+})
+
+describe('CandidatesDetailPage · SM employee erase (ONIX H-003)', () => {
+  // Clicks rows until the drawer opens (the first rows may still be loading skeletons).
+  const openFirstRow = async () => {
+    renderPage()
+    await waitFor(() => {
+      Array.from(document.querySelectorAll('tbody tr')).forEach(r => fireEvent.click(r))
+      expect(screen.getByRole('dialog')).toBeInTheDocument()
+    })
+  }
+
+  it('shows no erase action without privacy.erase', async () => {
+    perms.erase = false
+    await openFirstRow()
+    expect(screen.queryByRole('button', { name: /erase|wissen|Persoonsgegevens/i })).toBeNull()
+  })
+
+  it('POSTs /sm_candidates/{id}/erase with the password and keeps the dialog open on a 403', async () => {
+    perms.erase = true
+    const api = (await import('@/lib/api')).default as unknown as { post: ReturnType<typeof vi.fn> }
+    api.post = vi.fn().mockRejectedValue({ response: { status: 403 } })
+    await openFirstRow()
+    fireEvent.click(await screen.findByRole('button', { name: /erase\.button|Erase personal data|Persoonsgegevens wissen/i }))
+    fireEvent.change(document.querySelector('input[type="password"]') as HTMLInputElement, { target: { value: 'pw' } })
+    fireEvent.click(screen.getByRole('button', { name: /erase\.confirm|Erase permanently|Definitief wissen/i }))
+    await waitFor(() => expect(api.post).toHaveBeenCalledWith('/sm_candidates/1/erase', { password: 'pw' }))
+    expect(await screen.findByText(/eraseDialog.wrongPassword|Incorrect password|Wachtwoord onjuist/i)).toBeInTheDocument()
+    expect(document.querySelector('input[type="password"]')).not.toBeNull()
   })
 })

@@ -446,5 +446,12 @@
     "loadError": "No se pudieron cargar los datos de Shiftmanager.",
     "retry": "Reintentar",
     "truncated": "Hay más filas de las que se pueden cargar aquí. Los filtros y los recuentos solo abarcan las filas cargadas."
+  },
+  "erase": {
+    "button": "Borrar datos personales",
+    "title": "Borrar datos personales",
+    "explanation": "Los datos personales de este empleado se borrarán de forma irreversible. Esta acción no se puede deshacer.",
+    "confirm": "Borrar definitivamente",
+    "success": "Los datos personales se han borrado."
   }
 }

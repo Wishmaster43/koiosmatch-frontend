@@ -446,5 +446,12 @@
     "loadError": "Die Shiftmanager-Daten konnten nicht geladen werden.",
     "retry": "Erneut versuchen",
     "truncated": "Es gibt mehr Zeilen, als hier geladen werden können. Filter und Zählungen gelten nur für die geladenen Zeilen."
+  },
+  "erase": {
+    "button": "Personenbezogene Daten löschen",
+    "title": "Personenbezogene Daten löschen",
+    "explanation": "Die personenbezogenen Daten dieses Mitarbeiters werden unwiderruflich gelöscht. Dies kann nicht rückgängig gemacht werden.",
+    "confirm": "Endgültig löschen",
+    "success": "Die personenbezogenen Daten wurden gelöscht."
   }
 }

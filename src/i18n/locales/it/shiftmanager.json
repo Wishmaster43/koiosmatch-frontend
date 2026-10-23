@@ -449,5 +449,12 @@
     "loadError": "Impossibile caricare i dati di Shiftmanager.",
     "retry": "Riprova",
     "truncated": "Ci sono più righe di quante se ne possano caricare qui. Filtri e conteggi riguardano solo le righe caricate."
+  },
+  "erase": {
+    "button": "Cancella i dati personali",
+    "title": "Cancella i dati personali",
+    "explanation": "I dati personali di questo dipendente verranno cancellati in modo irreversibile. L'operazione non può essere annullata.",
+    "confirm": "Cancella definitivamente",
+    "success": "I dati personali sono stati cancellati."
   }
 }

@@ -155,7 +155,8 @@ function TabAlgemeen({ c }: { c: ReportCandidate }) {
 }
 
 /* ── Main component ── */
-export default function CandidateDetailDrawer({ candidate: c, onClose }: { candidate: ReportCandidate | null; onClose: () => void }) {
+// `headerActions` is an optional slot next to close (e.g. a permission-gated danger action).
+export default function CandidateDetailDrawer({ candidate: c, onClose, headerActions }: { candidate: ReportCandidate | null; onClose: () => void; headerActions?: React.ReactNode }) {
   const panelRef = useFocusTrap<HTMLDivElement>(onClose)
   const { t } = useTranslation('reports')
   const [activeTab, setActiveTab] = useState('algemeen')
@@ -196,7 +197,8 @@ export default function CandidateDetailDrawer({ candidate: c, onClose }: { candi
             expand/label, this overlay has no expand mode), then avatar + name +
             status badge + reference, then the tab bar (§3A). */}
         <div className="flex-shrink-0" style={{ padding: '14px 16px 0', borderBottom: '1px solid var(--border)' }}>
-          <div className="flex justify-end" style={{ marginBottom: 8 }}>
+          <div className="flex justify-end items-center" style={{ marginBottom: 8, gap: 8 }}>
+            {headerActions}
             <Button variant="ghost" iconOnly size="sm" onClick={onClose} aria-label={t('common:close')}>
               <X size={15} />
             </Button>

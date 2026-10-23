@@ -446,5 +446,12 @@
     "loadError": "Kon de Shiftmanager-gegevens niet laden.",
     "retry": "Opnieuw proberen",
     "truncated": "Er zijn meer rijen dan hier kunnen worden geladen. Filters en tellingen gelden alleen voor de geladen rijen."
+  },
+  "erase": {
+    "button": "Persoonsgegevens wissen",
+    "title": "Persoonsgegevens wissen",
+    "explanation": "De persoonsgegevens van deze medewerker worden onomkeerbaar gewist. Dit kan niet ongedaan worden gemaakt.",
+    "confirm": "Definitief wissen",
+    "success": "De persoonsgegevens zijn gewist."
   }
 }
