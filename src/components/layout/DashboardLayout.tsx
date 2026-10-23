@@ -3,7 +3,7 @@
  * [Left nav] [Topbar + Content] [Right filter panel (optional)]
  * Owns the active-page + panel state; the page itself comes from renderPage().
  */
-import { useState, useEffect, Suspense } from 'react'
+import { useState, Suspense } from 'react'
 import { useTranslation } from 'react-i18next'
 import type { ComponentType } from 'react'
 import { SlidersHorizontal, PanelLeftClose, PanelLeftOpen } from 'lucide-react'
@@ -16,7 +16,9 @@ import KoiosPanel from './KoiosPanel'
 import ReportFilterSidebar from '../reports/ReportFilterSidebar'
 import { renderPage, PAGE_TITLES } from './appPages'
 import { NavigationProvider } from '@/context/NavigationContext'
-import { ASK_KOIOS_EVENT, type AskKoiosDetail } from '@/lib/koiosBridge'
+import { PageLoader, NoAccessPage } from './LayoutFallbacks'
+import { useAppNavigation } from './useAppNavigation'
+import { useKoiosBridge } from './useKoiosBridge'
 import { DashboardSwitcher } from '@/pages/dashboard/shared'
 import NotificationBell from '@/components/layout/NotificationBell'
 import { useTenantTheme } from '@/hooks/useTenantTheme'
@@ -28,33 +30,9 @@ import { canSwitchViews, switcherTypes } from '@/pages/dashboard/shared'
 import MinWidthNotice from '@/components/layout/MinWidthNotice'
 import type { DashboardType } from '@/pages/dashboard/shared'
 import type { ReportFilterGroup } from '@/types/reports'
-import type { KoiosContextRef } from '@/types/koios'
 
 // Sidebar is still JS (the other Claude owns it); accept its props loosely at this boundary.
 const SidebarTyped = Sidebar as unknown as ComponentType<Record<string, unknown>>
-
-// Fallback while a lazily-loaded page chunk is being fetched.
-function PageLoader() {
-  const { t } = useTranslation('common')
-  return (
-    <div className="flex items-center justify-center h-full">
-      <p className="text-sm text-[var(--text-muted)] animate-pulse">{t('loading')}</p>
-    </div>
-  )
-}
-
-// Shown when a user opens a page they are not allowed to access.
-function NoAccessPage() {
-  const { t } = useTranslation('common')
-  return (
-    <div className="flex items-center justify-center h-full">
-      <div className="text-center">
-        <p className="text-sm font-medium" style={{ color: 'var(--text)' }}>{t('noAccess')}</p>
-        <p className="mt-1 text-xs text-[var(--text-muted)]">{t('noAccessDesc')}</p>
-      </div>
-    </div>
-  )
-}
 
 // The app shell: sidebar + active page + Koios/right panels, driving real browser
 // history so back/forward navigates between pages instead of doing nothing.
@@ -63,81 +41,14 @@ export default function DashboardLayout() {
   const [expanded,       setExpanded]       = useState(true)
   const auth0                               = useAuth()
   const pkg0                                = auth0?.activeTenant?.package ?? auth0?.user?.tenant?.package
-  // Boot from the URL hash when it names a known page (deep-link/refresh survive);
-  // Settings rewrites the hash to its own sections, so unknown hashes fall back.
-  // Split on '/' (legacy sub-path) AND '?' (NAV-BACK-1's `?open=<id>` drawer param)
-  // so a deep-linked drawer URL still resolves to its page, not the fallback.
-  const [activePage,     setActivePage]     = useState(() => {
-    const fromHash = window.location.hash.replace(/^#/, '').split(/[/?]/)[0]
-    return (fromHash && PAGE_TITLES[fromHash]) ? fromHash : (PACKAGE_DEFAULT_PAGE[pkg0 ?? ''] ?? 'dashboard')
+  const { activePage, navIntent, jumpOrigin, goTo } = useAppNavigation({
+    defaultPage: PACKAGE_DEFAULT_PAGE[pkg0 ?? ''] ?? 'dashboard',
   })
   // Translated page title: feeds the top-bar <h1> and the document title.
   const pageTitle = t(activePage, { ns: 'pageTitles', keySeparator: false, defaultValue: PAGE_TITLES[activePage] || activePage })
   useDocumentTitle(pageTitle)
-  // Navigation intent: a filter the target page should apply when navigated to
-  // (e.g. a dashboard KPI/chart click). Plain navigation (sidebar) clears it.
-  const [navIntent,      setNavIntent]      = useState<unknown>(null)
-  // Every page switch becomes a real history entry, so the browser's back/forward
-  // work (Danny 2026-07-05: "terug in de browser doet niks").
-  // A jump WITH an intent (KPI/doorklik) remembers where it came from → back-chip;
-  // plain navigation (sidebar) clears it.
-  const [jumpOrigin, setJumpOrigin] = useState<string | null>(null)
-  // Navigates to a page: pushes a real history entry (so browser back/forward work)
-  // and remembers where a KPI/doorklik jump came from for the back-chip.
-  const goTo = (page: string, intent: unknown = null) => {
-    setJumpOrigin(intent != null && page !== activePage ? activePage : null)
-    setNavIntent(intent); setActivePage(page)
-    window.history.pushState({ kmPage: page }, '', `#${page}`)
-    // Synthetic popstate: pushState is silent, and hash-derived listeners
-    // (Koios ambient chip) must see a page switch drop the open record.
-    window.dispatchEvent(new PopStateEvent('popstate', { state: { kmPage: page, kmSynthetic: true } }))
-  }
-  // Back/forward: restore the page from our history state (hash as reload fallback).
-  // Same '/'+'?' split as above — a NAV-BACK-1 drawer entry's `kmPage` is already
-  // the bare page (see useDrawerUrl), but the hash fallback still carries `?open=`.
-  // MATCH-APPROVAL-2: notification events (synthetic popstate with kmIntentData)
-  // communicate a custom intent to the target page.
-  useEffect(() => {
-    // User pressed browser back/forward: resolve the target page from the pushed
-    // history state, falling back to the hash for a hard reload.
-    const onPop = (e: PopStateEvent) => {
-      const state = e.state as { kmSynthetic?: boolean; kmPage?: string; kmIntentData?: unknown } | null
-      // MATCH-APPROVAL-2: notification navigation carries kmIntentData in synthetic events.
-      // Apply it as navIntent so the target page receives it via the intent prop.
-      if (state?.kmSynthetic && state?.kmIntentData != null) {
-        setNavIntent(state.kmIntentData)
-        // Same guard as the fall-through path: only a known page id becomes the active page.
-        const intentPage = state.kmPage ?? window.location.hash.replace(/^#/, '').split(/[/?]/)[0]
-        if (intentPage && PAGE_TITLES[intentPage]) setActivePage(intentPage)
-        return
-      }
-      // Synthetic announcements (kmSynthetic) are for hash-derived listeners
-      // only — they are not user navigation, so never reset intent on them.
-      if (state?.kmSynthetic) return
-      const page = state?.kmPage ?? window.location.hash.replace(/^#/, '').split(/[/?]/)[0]
-      if (page && PAGE_TITLES[page]) { setNavIntent(null); setActivePage(page) }
-    }
-    window.addEventListener('popstate', onPop)
-    return () => window.removeEventListener('popstate', onPop)
-  }, [])
   const [rightPanelOpen, setRightPanelOpen] = useState(false)
-  const [koiosOpen,      setKoiosOpen]      = useState(false)
-  // KOIOS-ADVIES-DOORKLIK-1: a question composed elsewhere (an advice row) asks
-  // the singleton panel to open pre-filled via the shared window event — see
-  // src/lib/koiosBridge.ts. Consumed once by KoiosPanel, then cleared here.
-  const [koiosQuestion,  setKoiosQuestion]  = useState<string | null>(null)
-  const [koiosContextRef, setKoiosContextRef] = useState<KoiosContextRef | undefined>(undefined)
-  useEffect(() => {
-    const onAsk = (e: Event) => {
-      const detail = (e as CustomEvent<AskKoiosDetail>).detail
-      if (!detail?.text) return
-      setKoiosQuestion(detail.text)
-      setKoiosContextRef(detail.ref)
-      setKoiosOpen(true)
-    }
-    window.addEventListener(ASK_KOIOS_EVENT, onAsk)
-    return () => window.removeEventListener(ASK_KOIOS_EVENT, onAsk)
-  }, [])
+  const { koiosOpen, setKoiosOpen, koiosQuestion, setKoiosQuestion, koiosContextRef } = useKoiosBridge()
   const auth                                = auth0
   const { logout, user, activeTenant }      = auth ?? {}
   // Dashboard view (B-27) — super-admin + management may switch/preview any role's
