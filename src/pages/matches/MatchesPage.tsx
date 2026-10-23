@@ -9,13 +9,11 @@ import { useState, useEffect, useMemo, useRef } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Plus, Archive, Trash2, ClipboardCheck } from 'lucide-react'
 import ViewModeToggle from '@/components/ui/ViewModeToggle'
-import { matchesLifecycleView } from '@/lib/lifecycleFilter'
 import { tableBoardViewOptions } from '@/components/ui/listViewOptions'
 import { useAuth } from '@/context/AuthContext'
 import { useRightPanel } from '@/context/RightPanelContext'
 import { usePublishSelection } from '@/context/SelectionContext'
 import { useMatchStatuses } from '@/lib/useMatchStatuses'
-import { useContractTypes } from '@/lib/useContractTypes'
 import { useSeedLabel } from '@/lib/useSeedLabel'
 import { useMatchApprovalMode } from './hooks/useMatchApprovalMode'
 import { isReferenceQuery } from '@/lib/referenceNumber'
@@ -38,7 +36,7 @@ import QuickViewToggle from '@/components/ui/QuickViewToggle'
 import { useMatchesDeepLink } from './hooks/useMatchesDeepLink'
 import { useMatches, MATCHES_MAX_PER_PAGE } from './hooks/useMatches'
 import { useMatchesStats } from './hooks/useMatchesStats'
-import type { MatchDateRange } from './data/matchFilterGroups'
+import { useMatchesListFilters } from './hooks/useMatchesListFilters'
 import { useMatchesBulkActions } from './hooks/useMatchesBulkActions'
 import { useMatchMutations } from './hooks/useMatchMutations'
 import { useMatchesInsights } from './hooks/useMatchesInsights'
@@ -106,25 +104,16 @@ export default function MatchesPage({ intent }: { intent?: unknown } = {}) {
   // offering a size (300/400/500) disconnected from what this page's own data ever
   // actually holds.
   const { pageSize, setPageSize, options: pageSizeOptions } = useListPageSize('matches', MATCHES_MAX_PER_PAGE)
-  const [stageFilter, setStageFilter] = usePageMemory<string[]>('matches.stage', [])
-  // KPI attention toggle (Gem. score → only scored matches).
-  const [kpiScored, setKpiScored] = usePageMemory('matches.scored', false)
-  const [ownerFilter, setOwnerFilter] = usePageMemory<string[]>('matches.owner', [])
-  const [clientFilter, setClientFilter] = usePageMemory<string[]>('matches.client', [])
-  // VESTIGING: branch (bureau) filter — narrows to matches run from that branch.
-  const [branchFilter, setBranchFilter] = usePageMemory<string[]>('matches.branch', [])
-  // MATCH-SOORT-1 panel filter (wave 1c): narrows by the match's contract form.
-  const [contractFormFilter, setContractFormFilter] = usePageMemory<string[]>('matches.contractForm', [])
-  // MATCH-AXIS-FIX: distinct contract TYPE axis (matches.contract_type / the
-  // ContractType lookup the ops-dashboard donut counts on) — a separate
-  // dimension from the contract FORM above (§ CandidateType lookup). Stores
-  // lookup VALUES.
-  const [contractTypeFilter, setContractTypeFilter] = usePageMemory<string[]>('matches.contractType', [])
-  const { options: contractTypeLookupOptions } = useContractTypes()
-  // Unscored complements kpiScored: both live in the right panel's one "score state" group.
-  const [kpiUnscored, setKpiUnscored] = usePageMemory('matches.unscored', false)
-  // Match-date window (a single removable range, not multi-value).
-  const [dateRange, setDateRange] = usePageMemory<MatchDateRange | null>('matches.dateRange', null)
+  const {
+    stageFilter, setStageFilter, ownerFilter, setOwnerFilter, clientFilter, setClientFilter,
+    branchFilter, setBranchFilter, contractFormFilter, setContractFormFilter,
+    contractTypeFilter, setContractTypeFilter, contractTypeLookupOptions,
+    kpiScored, setKpiScored, kpiUnscored, setKpiUnscored, dateRange, setDateRange,
+    filteredAll, filterSignature,
+  } = useMatchesListFilters({
+    rows, query, refQuery, showArchived, showTrash, pendingApprovalOnly,
+    setPendingApprovalOnly, approvalReviewVisible, intent,
+  })
   // Start of the current month, captured once (purity — feeds the "Nieuw" KPI).
   const [monthStart] = useState(() => { const d = new Date(); d.setDate(1); d.setHours(0, 0, 0, 0); return d.getTime() })
   // Bulk selection (checkboxes); accumulates across pages, clears on filter change.
@@ -152,50 +141,8 @@ export default function MatchesPage({ intent }: { intent?: unknown } = {}) {
     registerFilters, unregisterFilters,
   })
 
-  // Reset to the first page and clear the selection whenever a filter changes
-  // (kept out of the memo — setting state during render can loop).
-  useEffect(() => { setPage(1); setSelectedIds(new Set()) },
-    [stageFilter, ownerFilter, clientFilter, branchFilter, contractFormFilter, contractTypeFilter, kpiScored, kpiUnscored, pendingApprovalOnly, dateRange, query, showArchived, showTrash])
-
-  // Filter the visible rows by donut selection. A reference-number query already
-  // narrowed `rows` server-side (exact `?ref=` lookup) — skip the free-text
-  // re-filter so the single matched row isn't accidentally filtered back out.
-  const filteredAll = useMemo(() => {
-    const q = refQuery ? '' : query.trim().toLowerCase()
-    return rows.filter(r => {
-      // Three lifecycle views (TRASH-OVERAL-2, mirrors candidates): trash =
-      // pending_erase only, archived = archived only, default = active only.
-      if (!matchesLifecycleView(r, showTrash, showArchived)) return false
-      if (stageFilter.length && !stageFilter.includes(r.status)) return false
-      if (kpiScored && typeof r.score !== 'number') return false
-      if (kpiUnscored && typeof r.score === 'number') return false
-      // MATCH-APPROVAL-QUEUE-1: client-side over the loaded rows, same mechanism
-      // as kpiScored/kpiUnscored above (approval_status already rides on every row).
-      // Gated like its toggle/KPI (approvalReviewVisible): with approval 'uit'
-      // a page-memory-remembered toggle must never keep filtering invisibly.
-      if (approvalReviewVisible && pendingApprovalOnly && r.approval_status !== 'pending') return false
-      if (ownerFilter.length && !ownerFilter.includes(r.owner)) return false
-      if (clientFilter.length && !clientFilter.includes(r.client)) return false
-      if (branchFilter.length && !branchFilter.includes(r.branchName ?? '')) return false
-      if (contractFormFilter.length && !contractFormFilter.includes(r.contractForm?.value ?? '')) return false
-      // Contract-type predicate tolerates BOTH the lookup value and its label:
-      // the drawer's contract-type select writes the LABEL (OverviewTab.tsx
-      // useContractTypes().types), while the dashboard feed counts on the
-      // VALUE — see OPEN_QUESTIONS for the CMBE ask to unify this server-side.
-      if (contractTypeFilter.length) {
-        const selectedLabels = contractTypeLookupOptions
-          .filter(o => contractTypeFilter.includes(o.value))
-          .map(o => o.label)
-        const rowType = r.contractType ?? ''
-        if (!contractTypeFilter.includes(rowType) && !selectedLabels.includes(rowType)) return false
-      }
-      if (dateRange?.from && (!r.date || new Date(r.date).getTime() < new Date(dateRange.from).getTime())) return false
-      if (dateRange?.to && (!r.date || new Date(r.date).getTime() > new Date(dateRange.to).getTime())) return false
-      if (q && ![r.candidate, r.vacancy, r.client].some(v => String(v ?? '').toLowerCase().includes(q))) return false
-      return true
-    })
-  }, [rows, stageFilter, ownerFilter, clientFilter, branchFilter, contractFormFilter, contractTypeFilter, contractTypeLookupOptions,
-      kpiScored, kpiUnscored, pendingApprovalOnly, approvalReviewVisible, dateRange, query, refQuery, showArchived, showTrash])
+  // Reset to the first page and clear the selection whenever a filter changes.
+  useEffect(() => { setPage(1); setSelectedIds(new Set()) }, [filterSignature])
 
   // Board rows never include archived matches: dragging one to a new status would
   // PATCH /matches/{id}, which 404s once soft-deleted (MatchController::update has
@@ -209,26 +156,6 @@ export default function MatchesPage({ intent }: { intent?: unknown } = {}) {
   const [addOpen, setAddOpen] = useState(false)
   // Read-only drill-down: the clicked row opens the MatchDrawer beside the table.
   const [selected, setSelected] = useState<MatchRow | null>(null)
-  // Seed filters from a navigation intent (e.g. the ops dashboard donut's slice click,
-  // or MATCH-APPROVAL-2 notification navigation) — mirrors CandidatesPage's intent effect.
-  useEffect(() => {
-    const i = intent as { contract_form?: unknown; contract_type?: unknown; pendingApprovalOnly?: unknown } | undefined
-    const contractForm = i?.contract_form
-    if (contractForm != null) setContractFormFilter([String(contractForm)])
-    // MATCH-AXIS-FIX: same seeding for the distinct contract-TYPE intent (e.g
-    // the ops-dashboard MatchesByContractTypeDonut's slice click).
-    const contractType = i?.contract_type
-    if (contractType != null) setContractTypeFilter([String(contractType)])
-    // MATCH-APPROVAL-2: a match.approval_pending notification lands with intent
-    // { pendingApprovalOnly: true }. Activate the pending-approval quick view,
-    // honesty-gated: absent entirely once the tenant's approval_mode is 'off'.
-    if (i?.pendingApprovalOnly === true && approvalReviewVisible) {
-      setPendingApprovalOnly(true)
-    }
-    // setContractFormFilter/setContractTypeFilter/setPendingApprovalOnly are
-    // usePageMemory setters (stable identity) — listed to satisfy exhaustive-deps,
-    // not because this effect should re-run on them.
-  }, [intent, setContractFormFilter, setContractTypeFilter, setPendingApprovalOnly, approvalReviewVisible])
 
   // Deep-link/intent open + URL mirror live in their own hook (§3 split).
   useMatchesDeepLink({ intent, rows, loading, selected, setSelected, t })
