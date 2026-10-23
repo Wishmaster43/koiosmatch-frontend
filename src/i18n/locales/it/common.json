@@ -52,7 +52,9 @@
     "storageUnavailable": "L'archiviazione non è temporaneamente disponibile. Riprova.",
     "typeNotAllowed": "Questo tipo di file non è consentito. Consentiti: {{allowed}}.",
     "tooLargeMax": "Questo file è troppo grande. Massimo {{max}} MB.",
-    "rejectedByScanner": "Questo file è stato rifiutato dall'antivirus."
+    "rejectedByScanner": "Questo file è stato rifiutato dall'antivirus.",
+    "scanPending": "Scansione antivirus in corso",
+    "scanRejected": "Rifiutato dall'antivirus"
   },
   "eraseDialog": {
     "password": "Password",
@@ -791,6 +793,8 @@
     "koiosUnavailable": "Koios non è disponibile in questo momento. Riprova a breve.",
     "helloflexContractTypeUnmapped": "Nessun tipo di contratto HelloFlex collegato per questo tipo di contratto. Configuralo in Impostazioni → HelloFlex.",
     "recipientSuppressed": "Questo indirizzo è bloccato dopo un precedente bounce o reclamo; non verrà inviato di nuovo.",
+    "documentNotAvailable": "Questo documento non è ancora disponibile: la scansione antivirus non è terminata o ha rifiutato il file.",
+    "tenantNotReady": "Questa agenzia è ancora in fase di configurazione o la configurazione è fallita. Riprova più tardi o scegli un'altra agenzia.",
     "fieldRequired": "{{field}} è obbligatorio."
   },
   "timeline": {

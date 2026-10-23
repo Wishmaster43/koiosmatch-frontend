@@ -11,6 +11,8 @@ import { useTranslation } from 'react-i18next'
 import { ChevronDown, ChevronRight, Download } from 'lucide-react'
 import { useDateFormat } from '@/lib/datetime'
 import type { Id } from '@/types/common'
+import { scanState } from './documentHelpers'
+import type { ScanStatus } from './documentHelpers'
 
 // DOC-VERSIE-1: one superseded file snapshot, created on every /replace — the old
 // file stays on disk and is reachable through its own authenticated download route.
@@ -19,7 +21,8 @@ export interface DocVersion {
   file_size?: string | number
   replaced_by_name?: string | null
   created_at?: string
-  download_url?: string
+  download_url?: string // null on the wire for a non-clean version
+  scan_status?: ScanStatus
 }
 
 // Collapsible superseded-versions list under a document row; renders nothing when there are no prior versions (see file header).
@@ -43,7 +46,9 @@ export default function DocumentVersionHistory({ versions }: { versions: DocVers
               <span>{v.created_at ? formatDateTime(v.created_at) : '—'}</span>
               {v.replaced_by_name && <span>· {v.replaced_by_name}</span>}
               {v.file_size != null && <span>· {v.file_size}</span>}
-              {v.download_url && (
+              {/* UPLOADS-SCAN-1: a non-clean version shows its state instead of a download link. */}
+              {scanState(v.scan_status) && <span>· {t(scanState(v.scan_status) === 'pending' ? 'common:upload.scanPending' : 'common:upload.scanRejected')}</span>}
+              {!scanState(v.scan_status) && v.download_url && (
                 <a href={v.download_url} download rel="noopener noreferrer" aria-label={t('documents.downloadVersion')}
                   style={{ display: 'flex', color: 'var(--color-primary-text)' }}>
                   <Download size={10} />

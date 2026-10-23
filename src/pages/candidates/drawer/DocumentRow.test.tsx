@@ -108,3 +108,31 @@ describe('DocumentRow · DOC-LIST-LINK-1 change-link control', () => {
     expect(screen.queryByTitle('documents.linkedTo')).not.toBeInTheDocument()
   })
 })
+
+describe('DocumentRow · UPLOADS-SCAN-1 scan state', () => {
+  it('pending: shows the chip and disables preview and download', async () => {
+    const onPreview = vi.fn()
+    render(<DocumentRow {...defaultProps} onPreview={onPreview} d={{ ...baseDoc, scan_status: 'pending' }} />)
+    expect(screen.getAllByText('common:upload.scanPending').length).toBeGreaterThan(0)
+    expect(screen.getByLabelText('documents.preview')).toHaveAttribute('aria-disabled', 'true')
+    expect(screen.getByLabelText('documents.download')).toHaveAttribute('aria-disabled', 'true')
+    expect(screen.getByLabelText('documents.download')).not.toHaveAttribute('href')
+    await userEvent.click(screen.getByLabelText('documents.preview'))
+    expect(onPreview).not.toHaveBeenCalled()
+  })
+  it('rejected: shows the rejected chip and does not fire preview', async () => {
+    const onPreview = vi.fn()
+    render(<DocumentRow {...defaultProps} onPreview={onPreview} d={{ ...baseDoc, scan_status: 'rejected' }} />)
+    expect(screen.getAllByText('common:upload.scanRejected').length).toBeGreaterThan(0)
+    await userEvent.click(screen.getByLabelText('documents.preview'))
+    expect(onPreview).not.toHaveBeenCalled()
+    expect(screen.getByLabelText('documents.download')).toHaveAttribute('aria-disabled', 'true')
+  })
+  it('clean: no chip, preview and download stay live', () => {
+    render(<DocumentRow {...defaultProps} d={{ ...baseDoc, scan_status: 'clean' }} />)
+    expect(screen.queryByText('common:upload.scanPending')).not.toBeInTheDocument()
+    expect(screen.queryByText('common:upload.scanRejected')).not.toBeInTheDocument()
+    expect(screen.getByLabelText('documents.preview')).not.toHaveAttribute('aria-disabled')
+    expect(screen.getByLabelText('documents.download')).toHaveAttribute('href', '/x')
+  })
+})

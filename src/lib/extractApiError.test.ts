@@ -3,7 +3,7 @@
  * → caller fallback; never throws on malformed/absent error shapes.
  */
 import { describe, it, expect } from 'vitest'
-import { extractApiError } from './extractApiError'
+import { extractApiError, apiErrorKey } from './extractApiError'
 
 describe('extractApiError', () => {
   it('prefers the first validation error over the generic message', () => {
@@ -51,5 +51,14 @@ describe('extractApiError · raw Laravel "required" template is never shown verb
   it('recognises the template with a multi-word attribute (underscore → space)', () => {
     const err = { response: { data: { errors: { last_name: ['The last name field is required.'] } } } }
     expect(extractApiError(err, 'fallback', { last_name: 'Achternaam is verplicht.' })).toBe('Achternaam is verplicht.')
+  })
+})
+
+describe('apiErrorKey · UPLOADS-SCAN-1 / TENANT-READY codes', () => {
+  it('maps document_not_available (423) to its i18n key', () => {
+    expect(apiErrorKey({ response: { data: { code: 'document_not_available' } } })).toBe('errors.documentNotAvailable')
+  })
+  it('maps tenant_not_ready (409) to its i18n key', () => {
+    expect(apiErrorKey({ response: { data: { code: 'tenant_not_ready' } } })).toBe('errors.tenantNotReady')
   })
 })

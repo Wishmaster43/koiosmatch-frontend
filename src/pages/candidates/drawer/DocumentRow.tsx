@@ -5,7 +5,7 @@ import { useDateFormat } from '@/lib/datetime'
 import SoftChip from '@/components/ui/SoftChip'
 import DocumentVersionHistory from './DocumentVersionHistory'
 import DocumentLinkPicker from './DocumentLinkPicker'
-import { splitExt, isPersisted, computeDocExpiry, docUrl, DOC_GRID_COLUMNS } from './documentHelpers'
+import { splitExt, isPersisted, computeDocExpiry, docUrl, docScanState, DOC_GRID_COLUMNS } from './documentHelpers'
 import type { DocItem, DocumentLinkSources } from './documentHelpers'
 import { Caption } from '@/components/ui/typography'
 import type { Id } from '@/types/common'
@@ -100,6 +100,9 @@ export default function DocumentRow({
     ?? (typeof d.created_by === 'object' ? d.created_by?.name : d.created_by) ?? ''
   const when = d.uploaded_at ?? d.created_at
   const expiry = computeDocExpiry(d.expires_at)
+  // UPLOADS-SCAN-1: pending/rejected rows show a state chip and lock preview/download.
+  const scan = docScanState(d)
+  const scanText = scan ? t(scan === 'pending' ? 'common:upload.scanPending' : 'common:upload.scanRejected') : undefined
   // Escape layer: cancels inline rename (one-stage).
   useEscapeLayer(renaming, onRenameCancel)
   // DOC-LIST-LINK-1: the linked kind's own icon + its grouped "<Group> · <label>" tooltip.
@@ -127,11 +130,12 @@ export default function DocumentRow({
               </div>
             : <span style={{ fontSize: 12, fontWeight: 500, color: 'var(--text)', display: 'block', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{displayName}</span>
           }
-          {(by || when || expiry || linked || linking) && (
+          {(by || when || expiry || scan || linked || linking) && (
             <div style={{ display: 'flex', alignItems: 'center', gap: 6, flexWrap: 'wrap' }}>
               {(by || when) && <span style={{ fontSize: 10, color: 'var(--text-muted)' }}>
                 {by}{by && when ? ' · ' : ''}{when ? formatDateTime(when) : ''}
               </span>}
+              {scan && <SoftChip size={10} color={scan === 'pending' ? 'var(--color-warning)' : 'var(--color-danger)'} label={scanText} title={scanText} />}
               {expiry && (
                 <SoftChip size={10}
                   color={expiry.kind === 'expired' ? 'var(--color-danger)' : 'var(--color-warning)'}
@@ -181,13 +185,16 @@ export default function DocumentRow({
             <button aria-label={t('documents.replace')} title={t('documents.replace')} onClick={onReplace}
               style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-muted)', padding: '2px 3px', display: 'flex' }}><RefreshCw size={12} /></button>
           )}
-          <button aria-label={t('documents.preview')} onClick={onPreview} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-muted)', padding: '2px 3px', display: 'flex' }}><Eye size={12} /></button>
+          <button aria-label={t('documents.preview')} onClick={scan ? undefined : onPreview} aria-disabled={scan ? true : undefined} title={scanText} style={{ background: 'none', border: 'none', cursor: scan ? 'not-allowed' : 'pointer', opacity: scan ? 0.5 : undefined, color: 'var(--text-muted)', padding: '2px 3px', display: 'flex' }}><Eye size={12} /></button>
           {/* PDF-VACATURES-26: a real per-row download (read action, no permission
               gate — mirrors the preview button above), next to the bulk "download
               selected" action in the toolbar. Renders only once the row actually
               carries a url; a downloadable=false row (still-uploading optimistic
               row) shows no dead link. */}
-          {downloadable && <a href={docUrl(d)} download={displayName} aria-label={t('documents.download')} title={t('documents.download')}
+          {/* UPLOADS-SCAN-1: a non-clean row keeps a visibly disabled download, never a dead link. */}
+          {scan && <span role="link" aria-disabled="true" aria-label={t('documents.download')} title={scanText}
+            style={{ color: 'var(--text-muted)', opacity: 0.5, padding: '2px 3px', display: 'flex', cursor: 'not-allowed' }}><Download size={12} /></span>}
+          {downloadable && !scan && <a href={docUrl(d)} download={displayName} aria-label={t('documents.download')} title={t('documents.download')}
             style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-muted)', padding: '2px 3px', display: 'flex' }}><Download size={12} /></a>}
           {canManage && <button aria-label={t('common:remove')} onClick={onDeleteRequest} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-muted)', padding: '2px 3px', display: 'flex' }}><X size={12} /></button>}
         </div>

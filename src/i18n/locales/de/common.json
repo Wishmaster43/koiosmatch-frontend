@@ -52,7 +52,9 @@
     "storageUnavailable": "Der Speicher ist vorübergehend nicht verfügbar. Bitte versuchen Sie es erneut.",
     "typeNotAllowed": "Dieser Dateityp ist nicht erlaubt. Erlaubt: {{allowed}}.",
     "tooLargeMax": "Diese Datei ist zu groß. Maximal {{max}} MB.",
-    "rejectedByScanner": "Diese Datei wurde vom Virenscanner abgelehnt."
+    "rejectedByScanner": "Diese Datei wurde vom Virenscanner abgelehnt.",
+    "scanPending": "Virenprüfung läuft",
+    "scanRejected": "Vom Virenscanner abgelehnt"
   },
   "eraseDialog": {
     "password": "Passwort",
@@ -791,6 +793,8 @@
     "koiosUnavailable": "Koios ist derzeit nicht verfügbar. Bitte versuche es gleich erneut.",
     "helloflexContractTypeUnmapped": "Für diese Vertragsform ist noch kein HelloFlex-Vertragstyp verknüpft. Richte dies unter Einstellungen → HelloFlex ein.",
     "recipientSuppressed": "Diese Adresse ist nach einem früheren Bounce oder einer Beschwerde gesperrt; es wird nicht erneut gesendet.",
+    "documentNotAvailable": "Dieses Dokument ist noch nicht verfügbar: Die Virenprüfung ist nicht abgeschlossen oder hat die Datei abgelehnt.",
+    "tenantNotReady": "Diese Agentur wird noch eingerichtet oder die Einrichtung ist fehlgeschlagen. Versuchen Sie es später erneut oder wählen Sie eine andere Agentur.",
     "fieldRequired": "{{field}} ist erforderlich."
   },
   "timeline": {

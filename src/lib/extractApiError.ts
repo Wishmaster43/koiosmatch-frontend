@@ -57,6 +57,10 @@ const ERROR_CODE_KEYS: Record<string, string> = {
   helloflex_contract_type_unmapped: 'errors.helloflexContractTypeUnmapped',
   // The proposal send is refused up front (422) for a suppressed recipient address.
   recipient_suppressed: 'errors.recipientSuppressed',
+  // UPLOADS-SCAN-1 (423): the file is not clean yet, or was rejected by the scanner.
+  document_not_available: 'errors.documentNotAvailable',
+  // TENANT-READY (409): the named bureau is still provisioning or failed.
+  tenant_not_ready: 'errors.tenantNotReady',
 }
 
 /**

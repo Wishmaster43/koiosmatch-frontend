@@ -52,7 +52,9 @@
     "storageUnavailable": "Opslag is tijdelijk niet beschikbaar. Probeer het opnieuw.",
     "typeNotAllowed": "Dit bestandstype is niet toegestaan. Toegestaan: {{allowed}}.",
     "tooLargeMax": "Dit bestand is te groot. Maximaal {{max}} MB.",
-    "rejectedByScanner": "Dit bestand is geweigerd door de virusscanner."
+    "rejectedByScanner": "Dit bestand is geweigerd door de virusscanner.",
+    "scanPending": "Virusscan loopt",
+    "scanRejected": "Geweigerd door de virusscanner"
   },
   "eraseDialog": {
     "password": "Wachtwoord",
@@ -791,6 +793,8 @@
     "koiosUnavailable": "Koios is op dit moment niet beschikbaar. Probeer het zo opnieuw.",
     "helloflexContractTypeUnmapped": "Geen HelloFlex-contracttype gekoppeld voor deze contractvorm. Stel dit in bij Instellingen → HelloFlex.",
     "recipientSuppressed": "Dit adres is geblokkeerd na een eerdere bounce of klacht; er wordt niet opnieuw verzonden.",
+    "documentNotAvailable": "Dit document is nog niet beschikbaar: de virusscan is niet afgerond of heeft het bestand geweigerd.",
+    "tenantNotReady": "Dit bureau wordt nog ingericht of de inrichting is mislukt. Probeer het later opnieuw of kies een ander bureau.",
     "fieldRequired": "{{field}} is verplicht."
   },
   "timeline": {
