@@ -149,6 +149,9 @@ export function noteMetaSentence(meta: NoteMeta | null | undefined, ctx: NoteMet
       return cvNotAttachedSentence(meta, ctx)
     case 'consent_refused_by_reply':
       return consentRefusedSentence(meta, ctx)
+    // UNSUBSCRIBE-1 (K-007): the person used the signed unsubscribe link in a mail (relationship mail stops).
+    case 'consent_refused_by_link':
+      return ctx.t('notes.meta.consentRefusedByLink')
     default:
       return null
   }

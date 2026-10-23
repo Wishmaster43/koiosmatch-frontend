@@ -1526,6 +1526,7 @@
       "markedForDeletion": "Deletion scheduled",
       "eraseAt": " · Will be deleted on {{date}}",
       "consentRefusedByReply": "Candidate refused all contact by message ({{channels}})",
+      "consentRefusedByLink": "Candidate unsubscribed from relationship mail via the unsubscribe link",
       "channelWhatsapp": "WhatsApp",
       "channelEmail": "email"
     }

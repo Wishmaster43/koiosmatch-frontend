@@ -1526,6 +1526,7 @@
       "markedForDeletion": "Exclusão agendada",
       "eraseAt": " · Será excluído em {{date}}",
       "consentRefusedByReply": "O candidato recusou todo o contacto por mensagem ({{channels}})",
+      "consentRefusedByLink": "O candidato cancelou a subscrição dos e-mails de relação através da ligação de cancelamento",
       "channelWhatsapp": "WhatsApp",
       "channelEmail": "e-mail"
     }

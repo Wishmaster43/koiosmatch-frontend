@@ -64,6 +64,12 @@ describe('noteMetaSentence', () => {
     )
   })
 
+  // UNSUBSCRIBE-1: the unsubscribe-link refusal renders its own sentence.
+  it('renders consent_refused_by_link as the unsubscribe sentence', () => {
+    const meta = { kind: 'consent_refused_by_link' } as NoteMeta
+    expect(noteMetaSentence(meta, ctx)).toBe('notes.meta.consentRefusedByLink|{}')
+  })
+
   it('renders consent_refused_by_reply without channels as an empty list, not a crash', () => {
     expect(noteMetaSentence({ kind: 'consent_refused_by_reply' } as NoteMeta, ctx)).toBe('notes.meta.consentRefusedByReply|{"channels":""}')
   })

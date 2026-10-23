@@ -1526,6 +1526,7 @@
       "markedForDeletion": "Löschung geplant",
       "eraseAt": " · Wird gelöscht am {{date}}",
       "consentRefusedByReply": "Kandidat hat per Nachricht jeden Kontakt abgelehnt ({{channels}})",
+      "consentRefusedByLink": "Kandidat hat sich über den Abmeldelink von Beziehungs-E-Mails abgemeldet",
       "channelWhatsapp": "WhatsApp",
       "channelEmail": "E-Mail"
     }

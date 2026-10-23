@@ -1526,6 +1526,7 @@
       "markedForDeletion": "Eliminazione pianificata",
       "eraseAt": " · Verrà eliminato il {{date}}",
       "consentRefusedByReply": "Il candidato ha rifiutato ogni contatto tramite messaggio ({{channels}})",
+      "consentRefusedByLink": "Il candidato ha annullato l’iscrizione alle e-mail relazionali tramite il link di disiscrizione",
       "channelWhatsapp": "WhatsApp",
       "channelEmail": "e-mail"
     }
