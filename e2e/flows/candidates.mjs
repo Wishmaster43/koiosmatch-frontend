@@ -85,16 +85,25 @@ export async function archiveAndFindBack({ page, errors }) {
     const rowName = (await nameSpan.count())
       ? (await nameSpan.getAttribute('title') ?? '').trim()
       : (await row.locator('td').nth(1).innerText()).split('\n').map(s => s.trim()).filter(Boolean).pop() ?? ''
-    await row.click(); await sleep(1200)
+    // Wait for the real signal, not the clock (23-10: two false reds on a cold/loaded dev server).
+    await row.click()
     const trash = page.locator('button[title*="rchiveren"], button[aria-label*="rchiveren"]').first()
+    await trash.waitFor({ state: 'visible', timeout: 10000 }).catch(() => {})
     expect(await trash.count(), 'archiveer-knop niet gevonden in de drawer')
-    await trash.click(); await sleep(1500)
+    await trash.click()
     // Archiving asks for confirmation in OUR OWN dialog now, not the browser's
     // window.confirm this flow was written against (caught 30-07: the suite hung
     // clicking "Gearchiveerd" because the confirm backdrop covered it). The native
     // dialog handler above stays as a safety net for any confirm still left.
     const confirm = page.locator('[role="dialog"], [role="alertdialog"]').locator('button:has-text("Bevestigen")').first()
-    if (await confirm.count()) { await confirm.click(); await sleep(1500) }
+    await confirm.waitFor({ state: 'visible', timeout: 5000 }).catch(() => {})
+    if (await confirm.count()) {
+      // Start the response wait before the click so a fast DELETE is not missed.
+      const archived = page.waitForResponse(r => /\/candidates\/[^/?]+$/.test(r.url()) && r.request().method() === 'DELETE', { timeout: 15000 }).catch(() => null)
+      await confirm.click()
+      await archived
+      await sleep(400)
+    }
     // Guard modal = this candidate has live business → close and try the next row.
     const guard = page.locator('text=/live sollicitatie|actieve match|lopende/i').first()
     if (await guard.count()) { await page.keyboard.press('Escape'); await sleep(300); await page.keyboard.press('Escape'); await sleep(400); continue }
@@ -103,18 +112,21 @@ export async function archiveAndFindBack({ page, errors }) {
   page.off('dialog', acceptDialog)
   expect(Boolean(name), 'geen archiveerbare kandidaat gevonden in de eerste 10 rijen (guard blokkeerde alles)')
   // Open the archived quick-view and look for the name.
+  const archivedList = page.waitForResponse(r => r.url().includes('/candidates') && r.url().includes('include_archived=1') && r.request().method() === 'GET', { timeout: 15000 }).catch(() => null)
   await page.locator('button:has-text("Gearchiveerd")').first().click()
-  await sleep(1500)
+  await archivedList
+  await page.locator(`table tbody tr:has-text("${name}")`).first().waitFor({ timeout: 10000 }).catch(() => {})
   const found = await page.locator(`table tbody tr:has-text("${name}")`).count()
   expect(found > 0, `gearchiveerde kandidaat "${name}" NIET terug te vinden in de Gearchiveerd-view (ARCH-1)`)
   // The archived row must OPEN (drawer on row data + banner); restore puts the
   // candidate back exactly as we found it.
   await page.locator(`table tbody tr:has-text("${name}")`).first().click()
-  await sleep(1000)
   const restoreBtn = page.locator('button[title="Herstellen"]')
+  await restoreBtn.first().waitFor({ state: 'visible', timeout: 10000 }).catch(() => {})
   expect(await restoreBtn.count(), 'gearchiveerde kandidaat opent NIET (drawer/banner ontbreekt)')
+  const restored = page.waitForResponse(r => r.url().includes('/restore') && r.request().method() === 'POST', { timeout: 15000 }).catch(() => null)
   await restoreBtn.first().click()
-  await sleep(1200)
+  await restored
   await page.keyboard.press('Escape'); await sleep(300)
   // Leave the archived view clean for the next flow.
   await page.locator('button:has-text("Gearchiveerd")').first().click()
