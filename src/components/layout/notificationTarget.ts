@@ -74,6 +74,8 @@ export const CUSTOM_TYPE_TARGETS: Record<string, (meta: Record<string, unknown>)
     if (scope === 'platform') return { page: 'settings', id: 'admin_limits', hash: '#settings/superadmin/admin_limits' }
     return null
   },
+  // WA-REPAIR: a device needs re-linking; open the WhatsApp Web devices tab (meta carries device_ids only).
+  'whatsapp_web.repair_required': () => ({ page: 'settings', id: 'whatsapp_web', hash: '#settings/communication/whatsapp_web' }),
   // LIMITS-FE-F7 (limits:check 'blocked' level, ConnectorGate): a real refusal/
   // queue today — two distinct types, each pointing at ITS OWN limits screen
   // (never `scope`-branched like the warning above: the tenant-facing type

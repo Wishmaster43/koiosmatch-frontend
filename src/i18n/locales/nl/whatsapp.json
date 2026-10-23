@@ -199,5 +199,12 @@
     "pauseConfirm": "Jij neemt dit gesprek over. De AI-agent stuurt geen berichten meer tot je hem hervat.",
     "pauseConfirmAction": "Pauzeren",
     "agentControlFailed": "Kon de AI-agent niet aanpassen."
+  },
+  "embeddedSignup": {
+    "pending": "Nummer geregistreerd, wacht op activatie door Meta.",
+    "pendingReasons": {
+      "subscribed_apps": "Meta moet nog de webhook-koppeling van het nummer activeren.",
+      "phone_numbers": "Meta moet nog het telefoonnummer synchroniseren."
+    }
   }
 }

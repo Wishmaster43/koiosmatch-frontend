@@ -61,6 +61,8 @@ const ERROR_CODE_KEYS: Record<string, string> = {
   document_not_available: 'errors.documentNotAvailable',
   // TENANT-READY (409): the named bureau is still provisioning or failed.
   tenant_not_ready: 'errors.tenantNotReady',
+  // The interview intro / workflow / Koios toggle lacks the mandatory AI disclosure (422).
+  ai_disclosure_missing: 'errors.aiDisclosureMissing',
 }
 
 /**

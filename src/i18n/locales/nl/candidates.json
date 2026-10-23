@@ -1524,7 +1524,10 @@
       "cvNotAttached": "CV van type {{type}} niet toegevoegd: dit documenttype vereist een vervaldatum zonder standaard. Upload het CV handmatig met een vervaldatum.",
       "cvNotAttachedNoType": "CV niet toegevoegd: het documenttype vereist een vervaldatum zonder standaard. Upload het CV handmatig met een vervaldatum.",
       "markedForDeletion": "Verwijdering gepland",
-      "eraseAt": " · Wordt gewist op {{date}}"
+      "eraseAt": " · Wordt gewist op {{date}}",
+      "consentRefusedByReply": "Kandidaat heeft per bericht alle contact geweigerd ({{channels}})",
+      "channelWhatsapp": "WhatsApp",
+      "channelEmail": "e-mail"
     }
   },
   "backofficeLinks": {

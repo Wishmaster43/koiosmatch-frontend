@@ -74,6 +74,48 @@ describe('EmbeddedSignupCard', () => {
     expect(await screen.findByText(/whatsapp\.embedded\.linked/)).toBeInTheDocument()
   })
 
+  it('a pending exchange never shows the linked state', async () => {
+    const user = userEvent.setup()
+    vi.mocked(api.get).mockResolvedValue(READY)
+    let loginCb: ((r: { authResponse?: { code?: string } }) => void) | null = null
+    vi.mocked(loadFacebookSdk).mockResolvedValue({
+      init: vi.fn(),
+      login: (cb: (r: { authResponse?: { code?: string } }) => void) => { loginCb = cb },
+    })
+    vi.mocked(api.post).mockResolvedValue({ data: { data: { id: 'conn-1', waba_id: 'WABA-1', provider: 'embedded', status: 'pending', pending_reason: 'phone_numbers' } } })
+
+    render(<EmbeddedSignupCard canManage />)
+    await user.click(await screen.findByRole('button', { name: /whatsapp\.embedded\.start/ }))
+    await waitFor(() => expect(loginCb).not.toBeNull())
+    postSessionInfo()
+    act(() => { loginCb?.({ authResponse: { code: 'c0de' } }) })
+
+    expect(await screen.findByText(/whatsapp:embeddedSignup\.pendingReasons\.phone_numbers/)).toBeInTheDocument()
+    expect(screen.queryByText(/(^|\s)phone_numbers(\s|$)/)).toBeNull()
+    expect(screen.queryByText(/whatsapp\.embedded\.linked/)).toBeNull()
+  })
+
+  it('an unknown pending reason shows only the generic pending sentence', async () => {
+    const user = userEvent.setup()
+    vi.mocked(api.get).mockResolvedValue(READY)
+    let loginCb: ((r: { authResponse?: { code?: string } }) => void) | null = null
+    vi.mocked(loadFacebookSdk).mockResolvedValue({
+      init: vi.fn(),
+      login: (cb: (r: { authResponse?: { code?: string } }) => void) => { loginCb = cb },
+    })
+    vi.mocked(api.post).mockResolvedValue({ data: { data: { id: 'conn-1', waba_id: 'WABA-1', provider: 'embedded', status: 'pending', pending_reason: 'mystery_step' } } })
+
+    render(<EmbeddedSignupCard canManage />)
+    await user.click(await screen.findByRole('button', { name: /whatsapp\.embedded\.start/ }))
+    await waitFor(() => expect(loginCb).not.toBeNull())
+    postSessionInfo()
+    act(() => { loginCb?.({ authResponse: { code: 'c0de' } }) })
+
+    expect(await screen.findByText(/whatsapp:embeddedSignup\.pending/)).toBeInTheDocument()
+    expect(screen.queryByText(/pendingReasons/)).toBeNull()
+    expect(screen.queryByText(/mystery_step/)).toBeNull()
+  })
+
   it('ignores session-info from a non-facebook origin (calm popup-closed return, no exchange)', async () => {
     const user = userEvent.setup()
     vi.mocked(api.get).mockResolvedValue(READY)

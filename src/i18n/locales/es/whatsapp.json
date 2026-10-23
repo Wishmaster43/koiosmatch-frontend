@@ -199,5 +199,12 @@
     "pauseConfirm": "Tú asumes esta conversación. El agente de IA no envía más mensajes hasta que lo reanudes.",
     "pauseConfirmAction": "Pausar",
     "agentControlFailed": "No se pudo cambiar el agente de IA."
+  },
+  "embeddedSignup": {
+    "pending": "Número registrado, a la espera de la activación por Meta.",
+    "pendingReasons": {
+      "subscribed_apps": "Meta aún debe activar la suscripción de webhook de este número.",
+      "phone_numbers": "Meta aún debe sincronizar el número de teléfono."
+    }
   }
 }

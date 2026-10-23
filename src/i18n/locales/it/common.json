@@ -795,6 +795,7 @@
     "recipientSuppressed": "Questo indirizzo è bloccato dopo un precedente bounce o reclamo; non verrà inviato di nuovo.",
     "documentNotAvailable": "Questo documento non è ancora disponibile: la scansione antivirus non è terminata o ha rifiutato il file.",
     "tenantNotReady": "Questa agenzia è ancora in fase di configurazione o la configurazione è fallita. Riprova più tardi o scegli un'altra agenzia.",
+    "aiDisclosureMissing": "Nell'introduzione del colloquio manca l'informativa obbligatoria sull'IA; modifica il modello prima di attivarlo.",
     "fieldRequired": "{{field}} è obbligatorio."
   },
   "timeline": {

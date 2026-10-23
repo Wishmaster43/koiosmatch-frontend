@@ -57,6 +57,17 @@ describe('noteMetaSentence', () => {
     expect(sentence).toBe('notes.meta.statusChange|{"from":"LABEL(available)","to":"LABEL(placed)"}')
   })
 
+  it('names the refused channels for consent_refused_by_reply', () => {
+    const meta = { kind: 'consent_refused_by_reply', channels: ['whatsapp', 'email'] } as NoteMeta
+    expect(noteMetaSentence(meta, ctx)).toBe(
+      'notes.meta.consentRefusedByReply|{"channels":"notes.meta.channelWhatsapp|{}, notes.meta.channelEmail|{}"}',
+    )
+  })
+
+  it('renders consent_refused_by_reply without channels as an empty list, not a crash', () => {
+    expect(noteMetaSentence({ kind: 'consent_refused_by_reply' } as NoteMeta, ctx)).toBe('notes.meta.consentRefusedByReply|{"channels":""}')
+  })
+
   it('returns null for an unknown kind', () => {
     const meta = { kind: 'something_else', from_value: 'lead', to_value: 'candidate' } as NoteMeta
     expect(noteMetaSentence(meta, ctx)).toBeNull()

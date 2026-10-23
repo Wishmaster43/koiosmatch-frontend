@@ -199,5 +199,12 @@
     "pauseConfirm": "Du übernimmst dieses Gespräch. Der KI-Agent sendet keine Nachrichten mehr, bis du ihn fortsetzt.",
     "pauseConfirmAction": "Pausieren",
     "agentControlFailed": "Der KI-Agent konnte nicht geändert werden."
+  },
+  "embeddedSignup": {
+    "pending": "Nummer registriert, wartet auf die Aktivierung durch Meta.",
+    "pendingReasons": {
+      "subscribed_apps": "Meta muss das Webhook-Abonnement für diese Nummer noch aktivieren.",
+      "phone_numbers": "Meta muss die Telefonnummer noch synchronisieren."
+    }
   }
 }

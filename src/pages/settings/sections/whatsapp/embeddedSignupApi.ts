@@ -21,6 +21,10 @@ export interface EmbeddedSignupExchangeResult {
   waba_id: string
   provider: string
   phone_registration_skipped?: boolean
+  // ONIX I-002/lane B: 'pending' until Meta activates the number; absent on an older BE.
+  status?: 'active' | 'pending'
+  // BE vocabulary (EmbeddedSignupOnboarding::STEPS): the Meta step still open.
+  pending_reason?: 'subscribed_apps' | 'phone_numbers' | null
   [k: string]: unknown
 }
 

@@ -32,6 +32,8 @@ export interface NoteMeta {
   blacklist_reason_value?: string | null
   effective_from?: string | null
   erase_at?: string | null
+  // consent_refused_by_reply: the channels a STOP reply refused.
+  channels?: string[] | null
 }
 
 // What the sentence builder needs from its caller: the candidates-namespace t(), a
@@ -119,6 +121,14 @@ function markedForDeletionSentence(meta: NoteMeta, ctx: NoteMetaContext): string
   return sentence
 }
 
+// Builds the consent_refused_by_reply sentence: a STOP reply refused all contact; names the
+// channels from meta (unknown channel ids render as sent, never dropped).
+const CHANNEL_KEYS: Record<string, string> = { whatsapp: 'notes.meta.channelWhatsapp', email: 'notes.meta.channelEmail' }
+function consentRefusedSentence(meta: NoteMeta, ctx: NoteMetaContext): string {
+  const channels = (meta.channels ?? []).map(c => (Object.hasOwn(CHANNEL_KEYS, c) ? ctx.t(CHANNEL_KEYS[c]) : c)).join(', ')
+  return ctx.t('notes.meta.consentRefusedByReply', { channels })
+}
+
 // Renders one note's meta as a translated sentence, or null when the kind is unknown,
 // unset or meta itself is missing — the caller then falls back to the stored `body`
 // (a plain user-written note has no meta and always falls through here).
@@ -137,6 +147,8 @@ export function noteMetaSentence(meta: NoteMeta | null | undefined, ctx: NoteMet
       return markedForDeletionSentence(meta, ctx)
     case 'cv_not_attached':
       return cvNotAttachedSentence(meta, ctx)
+    case 'consent_refused_by_reply':
+      return consentRefusedSentence(meta, ctx)
     default:
       return null
   }

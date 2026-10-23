@@ -795,6 +795,7 @@
     "recipientSuppressed": "Esta dirección está bloqueada tras un rebote o queja anterior; no se volverá a enviar.",
     "documentNotAvailable": "Este documento aún no está disponible: el análisis antivirus no ha terminado o ha rechazado el archivo.",
     "tenantNotReady": "Esta agencia aún se está configurando o su configuración ha fallado. Inténtalo más tarde o elige otra agencia.",
+    "aiDisclosureMissing": "Falta la mención obligatoria de IA en la introducción de la entrevista; modifica la plantilla antes de activarlo.",
     "fieldRequired": "{{field}} es obligatorio."
   },
   "timeline": {

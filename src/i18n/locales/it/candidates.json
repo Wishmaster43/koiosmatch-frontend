@@ -1524,7 +1524,10 @@
       "cvNotAttached": "CV di tipo {{type}} non allegato: questo tipo di documento richiede una data di scadenza senza valore predefinito. Carica il CV manualmente con una data di scadenza.",
       "cvNotAttachedNoType": "CV non allegato: il tipo di documento richiede una data di scadenza senza valore predefinito. Carica il CV manualmente con una data di scadenza.",
       "markedForDeletion": "Eliminazione pianificata",
-      "eraseAt": " · Verrà eliminato il {{date}}"
+      "eraseAt": " · Verrà eliminato il {{date}}",
+      "consentRefusedByReply": "Il candidato ha rifiutato ogni contatto tramite messaggio ({{channels}})",
+      "channelWhatsapp": "WhatsApp",
+      "channelEmail": "e-mail"
     }
   },
   "backofficeLinks": {

@@ -199,5 +199,12 @@
     "pauseConfirm": "Vous reprenez cette conversation. L'agent IA n'envoie plus de messages tant que vous ne le relancez pas.",
     "pauseConfirmAction": "Mettre en pause",
     "agentControlFailed": "Impossible de modifier l'agent IA."
+  },
+  "embeddedSignup": {
+    "pending": "Numéro enregistré, en attente d'activation par Meta.",
+    "pendingReasons": {
+      "subscribed_apps": "Meta doit encore activer l’abonnement webhook de ce numéro.",
+      "phone_numbers": "Meta doit encore synchroniser le numéro de téléphone."
+    }
   }
 }

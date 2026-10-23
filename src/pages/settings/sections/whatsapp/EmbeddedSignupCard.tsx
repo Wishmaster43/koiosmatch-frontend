@@ -20,11 +20,14 @@ import CalloutBox from '@/components/ui/CalloutBox'
 import { SectionTitle, BodyText, Caption } from '@/components/ui/typography'
 import { useEmbeddedSignup } from './useEmbeddedSignup'
 
+// Whitelist of known Meta steps; an unknown code never renders raw.
+const PENDING_REASONS = { subscribed_apps: true, phone_numbers: true } as const
+
 const card = { border: '1px solid var(--border)', borderRadius: 10, padding: 16, marginBottom: 14, background: 'var(--surface)' } as const
 
 // See the file's top doc above for the three honest states (not-ready/ready/linked) this card renders.
 export default function EmbeddedSignupCard({ onLinked, canManage }: { onLinked?: () => void; canManage: boolean }) {
-  const { t } = useTranslation('settings')
+  const { t } = useTranslation(['settings', 'whatsapp'])
   const es = useEmbeddedSignup(onLinked)
 
   // Config fetch failed outright — the manual token path below still works,
@@ -81,6 +84,14 @@ export default function EmbeddedSignupCard({ onLinked, canManage }: { onLinked?:
             {es.phase === 'exchanging' ? t('whatsapp.embedded.exchanging') : t('whatsapp.embedded.start')}
           </Button>
         </>
+      )}
+
+      {/* Meta has not activated the number yet: never the linked state. */}
+      {es.phase === 'pending' && (
+        <CalloutBox variant="warning">
+          {t('whatsapp:embeddedSignup.pending')}
+          {es.pendingReason && Object.hasOwn(PENDING_REASONS, es.pendingReason) && <> {t(`whatsapp:embeddedSignup.pendingReasons.${es.pendingReason}`)}</>}
+        </CalloutBox>
       )}
 
       {es.phase === 'linked' && (

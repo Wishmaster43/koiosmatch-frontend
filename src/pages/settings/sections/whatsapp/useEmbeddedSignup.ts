@@ -17,13 +17,15 @@ import { FEATURE_TYPE, loadFacebookSdk } from './facebookSdk'
 import type { FacebookSdk } from './facebookSdk'
 import type { EmbeddedSignupConfig, HistorySyncResult } from './embeddedSignupApi'
 
-export type SignupPhase = 'config-loading' | 'not-ready' | 'config-error' | 'idle' | 'authorizing' | 'exchanging' | 'linked' | 'error'
+export type SignupPhase = 'config-loading' | 'not-ready' | 'config-error' | 'idle' | 'authorizing' | 'exchanging' | 'linked' | 'pending' | 'error'
 
 export interface UseEmbeddedSignupResult {
   phase: SignupPhase
   config: EmbeddedSignupConfig | null
   errorKey: 'popupClosed' | 'exchangeFailed' | 'sdkFailed' | null
   linked: { connectionId: string; wabaId: string; phoneNumberId: string | null } | null
+  // Why Meta has not activated the number yet (phase 'pending' only).
+  pendingReason: 'subscribed_apps' | 'phone_numbers' | null
   start: () => Promise<void>
   // History sync for the freshly linked number — null result until requested.
   syncState: 'idle' | 'busy' | 'done' | 'failed'
@@ -38,6 +40,7 @@ export function useEmbeddedSignup(onLinked?: () => void): UseEmbeddedSignupResul
   const [config, setConfig] = useState<EmbeddedSignupConfig | null>(null)
   const [errorKey, setErrorKey] = useState<UseEmbeddedSignupResult['errorKey']>(null)
   const [linked, setLinked] = useState<UseEmbeddedSignupResult['linked']>(null)
+  const [pendingReason, setPendingReason] = useState<'subscribed_apps' | 'phone_numbers' | null>(null)
   const [syncState, setSyncState] = useState<UseEmbeddedSignupResult['syncState']>('idle')
   const [syncResult, setSyncResult] = useState<HistorySyncResult | null>(null)
   // The session-info message arrives DURING the popup, before FB.login's own
@@ -76,6 +79,7 @@ export function useEmbeddedSignup(onLinked?: () => void): UseEmbeddedSignupResul
   const start = useCallback(async () => {
     if (!config?.ready || !config.app_id || !config.config_id) return
     setErrorKey(null)
+    setPendingReason(null)
     sessionRef.current = { wabaId: null, phoneNumberId: null }
     let sdk: FacebookSdk
     try {
@@ -97,7 +101,8 @@ export function useEmbeddedSignup(onLinked?: () => void): UseEmbeddedSignupResul
       exchangeEmbeddedSignup({ code, waba_id: wabaId, phone_number_id: phoneNumberId ?? undefined })
         .then(res => {
           setLinked({ connectionId: res.id, wabaId: res.waba_id, phoneNumberId })
-          setPhase('linked')
+          // Linked only on an explicit active (or a BE without the field); pending stays honest.
+          if (res.status === 'pending') { setPendingReason(res.pending_reason ?? null); setPhase('pending') } else setPhase('linked')
           onLinked?.()
         })
         .catch(() => { setErrorKey('exchangeFailed'); setPhase('error') })
@@ -121,5 +126,5 @@ export function useEmbeddedSignup(onLinked?: () => void): UseEmbeddedSignupResul
     }
   }, [linked])
 
-  return { phase, config, errorKey, linked, start, syncState, syncResult, startHistorySync }
+  return { phase, config, errorKey, linked, pendingReason, start, syncState, syncResult, startHistorySync }
 }

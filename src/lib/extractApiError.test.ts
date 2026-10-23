@@ -61,4 +61,7 @@ describe('apiErrorKey · UPLOADS-SCAN-1 / TENANT-READY codes', () => {
   it('maps tenant_not_ready (409) to its i18n key', () => {
     expect(apiErrorKey({ response: { data: { code: 'tenant_not_ready' } } })).toBe('errors.tenantNotReady')
   })
+  it('maps ai_disclosure_missing (422) to its i18n key', () => {
+    expect(apiErrorKey({ response: { data: { code: 'ai_disclosure_missing' } } })).toBe('errors.aiDisclosureMissing')
+  })
 })
