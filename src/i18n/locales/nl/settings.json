@@ -4424,7 +4424,8 @@
         "financial": "Financiële gegevens, verborgen voor gebruikers zonder rechten; een verplicht IBAN zou collega's zonder die rechten blokkeren.",
         "relation": "Nog niet beschikbaar om verplicht te stellen. Dit veld wordt in een latere fase toegevoegd.",
         "webhookStamped": "Wordt automatisch ingevuld door een extern systeem. Er is geen invoerveld om te verplichten.",
-        "customFields": "Eigen velden hebben hun eigen verplichtingsinstelling op de velddefinitie zelf."
+        "customFields": "Eigen velden hebben hun eigen verplichtingsinstelling op de velddefinitie zelf.",
+        "setAfterCreation": "Wordt pas na het aanmaken ingevuld. Verplicht stellen zou elke nieuwe sollicitatie blokkeren."
       }
     }
   },

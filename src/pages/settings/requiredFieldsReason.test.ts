@@ -12,6 +12,11 @@ describe('reasonI18nKey', () => {
     expect(reasonI18nKey('relation — a write-only pivot-sync field the guard cannot read back, so requiring it would be a permanent 422')).toBe('settings.fieldInventory.reason.relation')
   })
 
+  // APP-REQUIRED-CREATE-ONLY-1 (BE 205e5741f): the five update-only application fields.
+  it('maps the update-only application reason to setAfterCreation', () => {
+    expect(reasonI18nKey('set after creation — the required-field check runs when an application is created and the create form does not accept this field, so requiring it would block every new application')).toBe('settings.fieldInventory.reason.setAfterCreation')
+  })
+
   it('returns null for an unknown reason so the caller falls back to the raw text', () => {
     expect(reasonI18nKey('something new')).toBeNull()
   })

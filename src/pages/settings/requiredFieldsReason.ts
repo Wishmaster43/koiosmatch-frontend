@@ -19,6 +19,9 @@ const REASON_CATEGORY_BY_TEXT: Record<string, string> = {
   // OtherEntityFieldInventory::NOT_READABLE_REASON — a write-only pivot-sync mutator
   // the guard can never read back (customer/customer_contact/customer_location).
   'relation — a write-only pivot-sync field the guard cannot read back, so requiring it would be a permanent 422': 'relation',
+  // OtherEntityFieldInventory::UPDATE_ONLY_REASON (BE APP-REQUIRED-CREATE-ONLY-1, 205e5741f) — five application
+  // fields set after creation (interview flow/workflow, match criteria/score, rejection reason).
+  'set after creation — the required-field check runs when an application is created and the create form does not accept this field, so requiring it would block every new application': 'setAfterCreation',
 }
 
 // The translated i18n key for a raw inventory reason, or null when the text is not one

@@ -4424,7 +4424,8 @@
         "financial": "Financial data, hidden from users without permission; a required IBAN would block colleagues who cannot see it.",
         "relation": "Not available to require yet. This field is added in a later phase.",
         "webhookStamped": "Filled in automatically by an external system. There is no input to require.",
-        "customFields": "Custom fields carry their own required setting on the field definition itself."
+        "customFields": "Custom fields carry their own required setting on the field definition itself.",
+        "setAfterCreation": "Filled in after creation. Requiring it would block every new application."
       }
     }
   },

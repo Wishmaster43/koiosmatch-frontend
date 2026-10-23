@@ -4424,7 +4424,8 @@
         "financial": "Finanzdaten, für Nutzer ohne Berechtigung ausgeblendet; eine Pflicht-IBAN würde Kollegen ohne diese Berechtigung blockieren.",
         "relation": "Noch nicht verpflichtend wählbar. Dieses Feld wird in einer späteren Phase ergänzt.",
         "webhookStamped": "Wird automatisch von einem externen System befüllt. Es gibt kein Eingabefeld, das verpflichtend gemacht werden kann.",
-        "customFields": "Eigene Felder haben ihre eigene Pflichteinstellung direkt an der Felddefinition."
+        "customFields": "Eigene Felder haben ihre eigene Pflichteinstellung direkt an der Felddefinition.",
+        "setAfterCreation": "Wird erst nach dem Anlegen ausgefüllt. Eine Pflichtangabe würde jede neue Bewerbung blockieren."
       }
     }
   },

@@ -4424,7 +4424,8 @@
         "financial": "Datos financieros, ocultos para usuarios sin permiso; un IBAN obligatorio bloquearía a los compañeros que no pueden verlo.",
         "relation": "Todavía no se puede marcar como obligatorio. Este campo se añadirá en una fase posterior.",
         "webhookStamped": "Se rellena automáticamente mediante un sistema externo. No existe un campo de entrada que hacer obligatorio.",
-        "customFields": "Los campos personalizados tienen su propio ajuste de obligatoriedad en la propia definición del campo."
+        "customFields": "Los campos personalizados tienen su propio ajuste de obligatoriedad en la propia definición del campo.",
+        "setAfterCreation": "Se completa después de la creación. Hacerlo obligatorio bloquearía cada nueva solicitud."
       }
     }
   },

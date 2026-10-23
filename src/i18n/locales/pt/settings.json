@@ -4425,7 +4425,8 @@
         "financial": "Dados financeiros, ocultos para utilizadores sem permissão; um IBAN obrigatório bloquearia colegas que não conseguem vê-lo.",
         "relation": "Ainda não disponível para tornar obrigatório. Este campo será adicionado numa fase posterior.",
         "webhookStamped": "Preenchido automaticamente por um sistema externo. Não existe um campo de introdução para tornar obrigatório.",
-        "customFields": "Os campos personalizados têm a sua própria definição de obrigatoriedade na própria definição do campo."
+        "customFields": "Os campos personalizados têm a sua própria definição de obrigatoriedade na própria definição do campo.",
+        "setAfterCreation": "Preenchido apenas após a criação. Torná-lo obrigatório bloquearia cada nova candidatura."
       }
     }
   },

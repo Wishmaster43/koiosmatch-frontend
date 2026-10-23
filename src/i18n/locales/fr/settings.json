@@ -4424,7 +4424,8 @@
         "financial": "Données financières, masquées aux utilisateurs sans autorisation ; un IBAN obligatoire bloquerait les collègues qui ne peuvent pas le voir.",
         "relation": "Pas encore disponible à rendre obligatoire. Ce champ sera ajouté à une phase ultérieure.",
         "webhookStamped": "Rempli automatiquement par un système externe. Il n'existe aucun champ de saisie à rendre obligatoire.",
-        "customFields": "Les champs personnalisés ont leur propre réglage d'obligation sur la définition du champ."
+        "customFields": "Les champs personnalisés ont leur propre réglage d'obligation sur la définition du champ.",
+        "setAfterCreation": "Renseigné seulement après la création. Le rendre obligatoire bloquerait chaque nouvelle candidature."
       }
     }
   },
