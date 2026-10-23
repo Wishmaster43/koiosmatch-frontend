@@ -118,5 +118,11 @@
       "title": "Limite raggiunto: {{label}}",
       "body": "{{label}} ha raggiunto il limite configurato per un tenant. Approva un aumento tramite la schermata di amministrazione."
     }
+  },
+  "kpi": {
+    "below_target": {
+      "title": "{{label}} è sotto l'obiettivo",
+      "body": "{{label}} era a {{value}} con un obiettivo di {{target}} ({{period}})."
+    }
   }
 }

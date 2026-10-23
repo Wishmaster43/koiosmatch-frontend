@@ -74,6 +74,8 @@ export const CUSTOM_TYPE_TARGETS: Record<string, (meta: Record<string, unknown>)
     if (scope === 'platform') return { page: 'settings', id: 'admin_limits', hash: '#settings/superadmin/admin_limits' }
     return null
   },
+  // KPI-TARGET-NOTIFY (BE lane L): a below-target KPI bell opens the dashboard where the KPI lives (no entity id, so a plain page hash).
+  'kpi.below_target': () => ({ page: 'dashboard', id: '', hash: '#dashboard' }),
   // WA-REPAIR: a device needs re-linking; open the WhatsApp Web devices tab (meta carries device_ids only).
   'whatsapp_web.repair_required': () => ({ page: 'settings', id: 'whatsapp_web', hash: '#settings/communication/whatsapp_web' }),
   // LIMITS-FE-F7 (limits:check 'blocked' level, ConnectorGate): a real refusal/

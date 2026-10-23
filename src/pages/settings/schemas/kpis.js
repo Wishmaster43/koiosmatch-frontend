@@ -23,7 +23,8 @@ const noContactAlert = [
 export const kpisLeads = {
   ...base, titleI18n: 'nav.kpis_leads',
   fields: [
-    { key: 'new_candidates_target', type: 'number', default: 15, min: 0 },
+    // M2: a stored 0 means "not set" for every kpi target, so min is 1; clearing sends empty.
+    { key: 'new_candidates_target', type: 'number', default: 15, min: 1 },
   ],
 }
 
@@ -84,7 +85,7 @@ export const kpisContacts = {
 export const kpisTasks = {
   ...base, titleI18n: 'nav.kpis_tasks',
   fields: [
-    { key: 'open_tasks_target', type: 'number', default: 20, min: 0 },
+    { key: 'open_tasks_target', type: 'number', default: 20, min: 1 },
   ],
 }
 
@@ -92,8 +93,8 @@ export const kpisTasks = {
 export const kpisCalllists = {
   ...base, titleI18n: 'nav.kpis_calllists',
   fields: [
-    { key: 'daily_calls_target', type: 'number', default: 20, min: 0 },
-    { key: 'uncalled_warning_threshold', type: 'number', default: 25, min: 0 },
+    { key: 'daily_calls_target', type: 'number', default: 20, min: 1 },
+    { key: 'uncalled_warning_threshold', type: 'number', default: 25, min: 1 },
   ],
 }
 
@@ -101,8 +102,8 @@ export const kpisCalllists = {
 export const kpisMatches = {
   ...base, titleI18n: 'nav.kpis_matches',
   fields: [
-    { key: 'placements_target', type: 'number', default: 10, min: 0 },
-    { key: 'fill_rate_target', type: 'number', default: 85, min: 0, max: 100 },
+    { key: 'placements_target', type: 'number', default: 10, min: 1 },
+    { key: 'fill_rate_target', type: 'number', default: 85, min: 1, max: 100 },
   ],
 }
 

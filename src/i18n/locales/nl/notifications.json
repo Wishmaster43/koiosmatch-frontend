@@ -118,5 +118,11 @@
       "title": "Limiet bereikt: {{label}}",
       "body": "{{label}} heeft de ingestelde limiet bereikt voor een tenant. Keur een verhoging goed via het beheerscherm."
     }
+  },
+  "kpi": {
+    "below_target": {
+      "title": "{{label}} ligt onder het doel",
+      "body": "{{label}} stond op {{value}} bij een doel van {{target}} ({{period}})."
+    }
   }
 }

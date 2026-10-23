@@ -118,5 +118,11 @@
       "title": "Limit erreicht: {{label}}",
       "body": "{{label}} hat das eingestellte Limit für einen Mandanten erreicht. Genehmigen Sie eine Erhöhung über den Admin-Bildschirm."
     }
+  },
+  "kpi": {
+    "below_target": {
+      "title": "{{label}} liegt unter dem Ziel",
+      "body": "{{label}} lag bei {{value}} bei einem Ziel von {{target}} ({{period}})."
+    }
   }
 }

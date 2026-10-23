@@ -118,5 +118,11 @@
       "title": "Limit reached: {{label}}",
       "body": "{{label}} has reached its configured limit for a tenant. Approve an increase via the admin screen."
     }
+  },
+  "kpi": {
+    "below_target": {
+      "title": "{{label}} is below target",
+      "body": "{{label}} was {{value}} against a target of {{target}} ({{period}})."
+    }
   }
 }
