@@ -5,32 +5,21 @@
  */
 import { useState } from 'react'
 import type { FormEvent } from 'react'
-import { Link } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { useGuardedSubmit } from '@/hooks/useGuardedSubmit'
-import api, { primeCsrf } from '@/lib/api'
-import { useRetryCountdown } from '@/hooks/useRetryCountdown'
+import api from '@/lib/api'
+import { useAuthRequest } from '@/hooks/useAuthRequest'
 import { retryAfterOf } from '@/lib/retryAfter'
 import ErrorBanner from '@/components/ui/ErrorBanner'
 import Spinner from '@/components/ui/Spinner'
 import Button from '@/components/ui/Button'
 import CalloutBox from '@/components/ui/CalloutBox'
-import { PageTitle, BodyText, Caption } from '@/components/ui/typography'
+import { PageTitle, BodyText } from '@/components/ui/typography'
+import { BackLink } from '@/components/auth/AuthLink'
 import LoginShell from '@/components/auth/LoginShell'
 import { AuthTextField } from '@/components/auth/AuthFields'
 
 type Failure = 'invalid' | 'generic' | null
-
-// Link back to the sign-in page, shared by the form and the sent state.
-function BackLink({ label }: { label: string }) {
-  return (
-    <div style={{ marginTop: 24 }}>
-      <Link to="/login">
-        <Caption as="span" style={{ color: 'var(--color-primary-text)' }}>{label}</Caption>
-      </Link>
-    </div>
-  )
-}
 
 export default function ForgotPasswordPage() {
   const { t } = useTranslation('auth')
@@ -38,13 +27,12 @@ export default function ForgotPasswordPage() {
   const [sent, setSent] = useState(false)
   const [failure, setFailure] = useState<Failure>(null)
   // Seconds until the request throttle lifts, counted down live.
-  const countdown = useRetryCountdown()
+  const { countdown, begin } = useAuthRequest()
 
   // Request the link: prime the CSRF cookie first (page may be opened cold), then POST.
   const run = async () => {
     setFailure(null)
-    countdown.clear()
-    try { await primeCsrf() } catch { /* a failed prime never blocks the attempt */ }
+    await begin()
     try {
       await api.post('/auth/password/forgot', { email })
       setSent(true)

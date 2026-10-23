@@ -45,6 +45,7 @@ const MD_ALLOWLIST = {
     'src/pages/auth/LoginPage.tsx': 2,
     // AUTH-PAGES (lane J, 23-10): the public auth pages share the login card, so their one primary action keeps the login's md.
     'src/pages/auth/ForgotPasswordPage.tsx': 1,
+    'src/pages/auth/SetPasswordForm.tsx': 1,
   'src/pages/users/UsersPage.tsx': 1,
   // Doc mention, not a render: buttonMetrics' own docblock NAMES size="md" while
   // defining BTN_H (the simple text count cannot tell prose from JSX).
