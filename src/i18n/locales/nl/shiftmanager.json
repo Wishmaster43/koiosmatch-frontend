@@ -452,6 +452,7 @@
     "title": "Persoonsgegevens wissen",
     "explanation": "De persoonsgegevens van deze medewerker worden onomkeerbaar gewist. Dit kan niet ongedaan worden gemaakt.",
     "confirm": "Definitief wissen",
-    "success": "De persoonsgegevens zijn gewist."
+    "success": "De persoonsgegevens zijn gewist.",
+    "erasedNotice": "De persoonsgegevens van deze medewerker zijn gewist op {{date}}. Een nieuwe synchronisatie met Shiftmanager zet ze niet terug."
   }
 }

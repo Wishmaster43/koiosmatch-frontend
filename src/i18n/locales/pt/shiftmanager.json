@@ -455,6 +455,7 @@
     "title": "Apagar dados pessoais",
     "explanation": "Os dados pessoais deste colaborador serão apagados de forma irreversível. Esta ação não pode ser anulada.",
     "confirm": "Apagar definitivamente",
-    "success": "Os dados pessoais foram apagados."
+    "success": "Os dados pessoais foram apagados.",
+    "erasedNotice": "Os dados pessoais deste colaborador foram apagados em {{date}}. Uma nova sincronização com o Shiftmanager não os repõe."
   }
 }

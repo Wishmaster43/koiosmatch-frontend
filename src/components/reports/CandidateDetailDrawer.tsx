@@ -155,8 +155,11 @@ function TabAlgemeen({ c }: { c: ReportCandidate }) {
 }
 
 /* ── Main component ── */
-// `headerActions` is an optional slot next to close (e.g. a permission-gated danger action).
-export default function CandidateDetailDrawer({ candidate: c, onClose, headerActions }: { candidate: ReportCandidate | null; onClose: () => void; headerActions?: React.ReactNode }) {
+// `headerActions` is an optional slot next to close (e.g. a permission-gated danger action);
+// `notice` is an optional calm banner above the tab content (e.g. an erased record's notice).
+export default function CandidateDetailDrawer({ candidate: c, onClose, headerActions, notice }: {
+  candidate: ReportCandidate | null; onClose: () => void; headerActions?: React.ReactNode; notice?: React.ReactNode
+}) {
   const panelRef = useFocusTrap<HTMLDivElement>(onClose)
   const { t } = useTranslation('reports')
   const [activeTab, setActiveTab] = useState('algemeen')
@@ -219,6 +222,9 @@ export default function CandidateDetailDrawer({ candidate: c, onClose, headerAct
 
           <DrawerTabs tabs={tabItems} active={activeTab} onChange={setActiveTab} />
         </div>
+
+        {/* The record-level notice, shown on every tab. */}
+        {notice && <div className="flex-shrink-0" style={{ padding: '12px 16px 0' }}>{notice}</div>}
 
         {/* Tab content */}
         {activeTab === 'algemeen' && <TabAlgemeen c={c} />}

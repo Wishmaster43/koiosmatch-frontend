@@ -28,9 +28,11 @@ import ClearFiltersButton from '@/components/ui/ClearFiltersButton'
 import ErrorBanner from '@/components/ui/ErrorBanner'
 import PaginationBar from '@/components/ui/PaginationBar'
 import { filterSmCandidates } from './data/smCandidateFilters'
-import { featureNamesOf, registrationYearOf } from './data/smCandidateFields'
+import { featureNamesOf, registrationYearOf, erasedAtOf } from './data/smCandidateFields'
 import Button from '@/components/ui/Button'
 import EraseWithPasswordDialog from '@/components/drawer/EraseWithPasswordDialog'
+import CalloutBox from '@/components/ui/CalloutBox'
+import { formatDateOnly } from '@/lib/localDate'
 import { useAuth } from '@/context/AuthContext'
 import { useSmEmployeeErase } from './hooks/useSmEmployeeErase'
 import { useRightPanel } from '@/context/RightPanelContext'
@@ -76,6 +78,8 @@ export default function CandidatesDetailPage() {
   const auth = useAuth()
   const canErase = (auth?.hasPermission ?? (() => false))('privacy.erase')
   const erase = useSmEmployeeErase(detail?.id, () => setDetail(null), tSm('erase.success'))
+  // An erased employee says when it happened and offers no second erase (a no-op button, §3).
+  const erasedAt = detail ? erasedAtOf(detail) : null
 
   // Single-value status toggle — clicking the same status again clears it (mirrors
   // the native candidates page's donut/KPI pick-one behaviour).
@@ -179,7 +183,10 @@ export default function CandidatesDetailPage() {
       )}
       {detail && (
         <CandidateDetailDrawer candidate={detail} onClose={() => setDetail(null)}
-          headerActions={canErase && detail.id != null ? (
+          notice={erasedAt ? (
+            <CalloutBox variant="info">{tSm('erase.erasedNotice', { date: formatDateOnly(erasedAt) })}</CalloutBox>
+          ) : undefined}
+          headerActions={canErase && detail.id != null && !erasedAt ? (
             <Button variant="dangerSoft" size="sm" onClick={erase.open}>{tSm('erase.button')}</Button>
           ) : undefined} />
       )}

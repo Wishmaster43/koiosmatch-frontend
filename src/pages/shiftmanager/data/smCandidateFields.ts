@@ -31,3 +31,10 @@ export const registrationYearOf = (c: ReportCandidate): number | null => {
   const y = c.registration_date ? new Date(c.registration_date).getFullYear() : NaN
   return Number.isFinite(y) ? y : null
 }
+
+// When this employee's personal data was erased (ONIX H-003, decision 10g: SmCandidateResource `erased_at`),
+// or null for a live record. Anything but a non-empty string reads as "not erased".
+export const erasedAtOf = (c: ReportCandidate): string | null => {
+  const v = c.erased_at ?? c.erasedAt
+  return typeof v === 'string' && v ? v : null
+}

@@ -452,6 +452,7 @@
     "title": "Effacer les données personnelles",
     "explanation": "Les données personnelles de cet employé seront effacées de manière irréversible. Cette action est définitive.",
     "confirm": "Effacer définitivement",
-    "success": "Les données personnelles ont été effacées."
+    "success": "Les données personnelles ont été effacées.",
+    "erasedNotice": "Les données personnelles de cet employé ont été effacées le {{date}}. Une nouvelle synchronisation avec Shiftmanager ne les rétablit pas."
   }
 }

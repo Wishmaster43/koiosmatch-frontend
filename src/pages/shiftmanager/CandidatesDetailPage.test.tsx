@@ -6,7 +6,7 @@
  * happen if SmCandidatesInsightsRow read stats, not this page's row fetch.
  */
 import { render, screen, waitFor, fireEvent } from '@testing-library/react'
-import { describe, it, expect, vi } from 'vitest'
+import { describe, it, expect, vi, afterEach } from 'vitest'
 import { QueryClientProvider, QueryClient } from '@tanstack/react-query'
 import CandidatesDetailPage from './CandidatesDetailPage'
 import { RightPanelProvider } from '@/context/RightPanelContext'
@@ -103,5 +103,35 @@ describe('CandidatesDetailPage · SM employee erase (ONIX H-003)', () => {
     await waitFor(() => expect(api.post).toHaveBeenCalledWith('/sm_candidates/1/erase', { password: 'pw' }))
     expect(await screen.findByText(/eraseDialog.wrongPassword|Incorrect password|Wachtwoord onjuist/i)).toBeInTheDocument()
     expect(document.querySelector('input[type="password"]')).not.toBeNull()
+  })
+})
+
+// An erased employee (ONIX H-003, decision 10g): the drawer says when, and the no-op erase action is gone (§3).
+describe('CandidatesDetailPage · an erased SM employee', () => {
+  // Clicks rows until the drawer opens (the first rows may still be loading skeletons).
+  const openAnyRow = async () => {
+    renderPage()
+    await waitFor(() => {
+      Array.from(document.querySelectorAll('tbody tr')).forEach(r => fireEvent.click(r))
+      expect(screen.getByRole('dialog')).toBeInTheDocument()
+    })
+  }
+  const ERASE_BUTTON = /erase\.button|Erase personal data|Persoonsgegevens wissen/i
+  const NOTICE = /erase\.erasedNotice|erased on 23-10-2026|gewist op 23-10-2026/i
+  afterEach(() => { rows.forEach(r => { delete (r as Record<string, unknown>).erased_at }) })
+
+  it('shows the erased notice and no erase action, even with privacy.erase', async () => {
+    perms.erase = true
+    rows.forEach(r => { (r as Record<string, unknown>).erased_at = '2026-10-23T10:00:00Z' })
+    await openAnyRow()
+    expect(await screen.findByText(NOTICE)).toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: ERASE_BUTTON })).toBeNull()
+  })
+
+  it('keeps the erase action and shows no notice on a live employee', async () => {
+    perms.erase = true
+    await openAnyRow()
+    expect(await screen.findByRole('button', { name: ERASE_BUTTON })).toBeInTheDocument()
+    expect(screen.queryByText(NOTICE)).toBeNull()
   })
 })
