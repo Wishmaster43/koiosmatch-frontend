@@ -9,7 +9,7 @@
  */
 import { useState, useRef, useEffect } from 'react'
 import type { FormEvent, ChangeEvent } from 'react'
-import { useNavigate, Link } from 'react-router-dom'
+import { useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { ShieldCheck, ArrowLeft } from 'lucide-react'
 import { useAuth } from '@/context/AuthContext'
@@ -18,8 +18,9 @@ import ErrorBanner from '@/components/ui/ErrorBanner'
 import Spinner from '@/components/ui/Spinner'
 import Button from '@/components/ui/Button'
 import CalloutBox from '@/components/ui/CalloutBox'
-import { PageTitle, BodyText, Caption, FormLabel } from '@/components/ui/typography'
+import { PageTitle, BodyText, FormLabel } from '@/components/ui/typography'
 import LoginShell from '@/components/auth/LoginShell'
+import { AuthLink } from '@/components/auth/AuthLink'
 import { AuthTextField, AuthPasswordField } from '@/components/auth/AuthFields'
 import { useRetryCountdown } from '@/hooks/useRetryCountdown'
 import { retryAfterOf } from '@/lib/retryAfter'
@@ -115,9 +116,7 @@ function CredentialForm({ onMfaRequired, notice }: { onMfaRequired: (token: stri
 
         {/* Real link to the reset request page, right-aligned under the password field. */}
         <div style={{ textAlign: 'right', marginTop: -8 }}>
-          <Link to="/forgot-password">
-            <Caption as="span" style={{ color: 'var(--color-primary-text)' }}>{t('login.forgotLink')}</Caption>
-          </Link>
+          <AuthLink to="/forgot-password" label={t('login.forgotLink')} />
         </div>
 
         {error && <ErrorBanner>{error}</ErrorBanner>}
