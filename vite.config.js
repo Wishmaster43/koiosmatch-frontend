@@ -70,6 +70,9 @@ export default defineConfig(({ mode }) => {
       // Pin the relative API base the dev .env ships, so a checkout without that gitignored
       // file (CI, a fresh worktree) runs the suite exactly as every local gate does.
       env: { VITE_API_URL: '/api' },
+      // The landing gates already give each test 15s (land.sh --testTimeout=15000); CI and manual runs get the
+      // same budget, so a test that is merely slow on a loaded runner is not a red build (GitHub 24-10: 5027ms).
+      testTimeout: 15000,
       // Agent worktrees under .claude/ carry their own stale copies of every suite;
       // they must never run against this checkout's src (09-09: 67 phantom failures).
       exclude: [...configDefaults.exclude, '.claude/**'],
