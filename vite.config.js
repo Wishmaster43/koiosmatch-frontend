@@ -67,6 +67,9 @@ export default defineConfig(({ mode }) => {
       globals: true,
       setupFiles: './src/test/setup.js',
       css: false,
+      // Pin the relative API base the dev .env ships, so a checkout without that gitignored
+      // file (CI, a fresh worktree) runs the suite exactly as every local gate does.
+      env: { VITE_API_URL: '/api' },
       // Agent worktrees under .claude/ carry their own stale copies of every suite;
       // they must never run against this checkout's src (09-09: 67 phantom failures).
       exclude: [...configDefaults.exclude, '.claude/**'],

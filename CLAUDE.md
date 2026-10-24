@@ -1472,8 +1472,9 @@ verifier and manager from now on.
   gates run. Committed content == gated content, by construction.
 - **GATE-TREES-1 — three worktrees, three owners.** `land-wt` and `head-wt` belong to land.sh (it resets
   head-wt for its eslint-vs-HEAD comparison and wiped a manager's full-vitest run mid-flight); a manager's own
-  gate run uses `gate-wt` only. Every gate tree carries the gitignored `.env` (DocPreviewModal.test reads
-  VITE_API_URL from it; without it the tree is red for a reason that is not the bucket's).
+  gate run uses `gate-wt` only. The vitest config pins `VITE_API_URL` (CI-ENV-PIN-FE-1, 24-10), so a tree
+  without the gitignored `.env` measures the same as one with it, exactly as CI does; before that pin,
+  DocPreviewModal.test was red in every tree without `.env`, GitHub CI included.
 - **FULL-SUITE-FOR-SHARED-MODULES-1.** A bucket that changes `src/lib/api.ts`, a shared fetch/mapper helper,
   the auth context or the dependency lock runs the FULL vitest in gate-wt before landing; the landing's
   two-hop importer list misses consumers that reach the helper through a provider (2c6383b0) or a mock of
@@ -1498,4 +1499,14 @@ verifier and manager from now on.
 - **VISIBLE-FIX-IS-REPORTED-1.** A WCAG contrast fix on a known screen (`--color-info-text` on the candidates
   KPI figure, the ActionRuleCell opacity) is a visible change: it lands because §6 is a hard requirement, and
   the same status message names it to Danny as a colour change he may veto — never silently.
+- **CI-VERDICT-READ-1 (24-10).** The landing gates run in a tree that always had the gitignored `.env`, the
+  Amsterdam timezone and an installed `node_modules`; GitHub CI is the only check on a truly clean checkout
+  (fresh `npm ci`, no `.env`, UTC, the runner's Node), and nobody read its verdict. Measured 24-10: no FE run on
+  during-onix had been green since at least 08-10 (three DocPreviewModal tests read `VITE_API_URL` from `.env`),
+  and since 21-10 every run died at `npm ci` with EBADENGINE, because DEPS-AUDIT-FE-1 raised the `engines` floor
+  to 22.23.4 under `engine-strict` while `ci.yml` kept a bare `node-version: 22` (the runner's cached 22.23.3).
+  Rules: a change to `engines`, `.npmrc` or the Node floor updates the CI `node-version` in the same bucket; a
+  test reads configuration only from the committed test config, never from a gitignored file; land-hand.sh
+  prints the last completed CI verdict on every LANDED line, and a red verdict is investigated the same day like
+  a red smoke flow.
 
