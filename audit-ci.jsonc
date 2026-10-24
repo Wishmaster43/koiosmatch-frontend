@@ -23,11 +23,10 @@
     // tinypool --omit=dev` is empty: dev-only test runner, not in the bundle.
     // Revalidate again 2026-11-01.
     "GHSA-5gmw-xhrv-c9v3", // tinypool worker-options prototype pollution (dev-only)
-    "GHSA-85c8-ppgw-ccpr", // tinypool run() options prototype pollution (dev-only)
-    // braces 3.0.3 sits under tailwindcss 3 (fast-glob>micromatch and chokidar),
-    // build-time class scanning only; fix = tailwindcss 4 (MAJOR, planned
-    // separately). `npm ls braces --omit=dev` is empty: not in the production
-    // bundle path. Revalidate again 2026-11-01.
-    "GHSA-vfj7-8cjw-p6xm"  // braces (build-time only, tailwindcss 3 chain)
+    "GHSA-85c8-ppgw-ccpr"  // tinypool run() options prototype pollution (dev-only)
+    // DEPS-AUDIT-FE-2 (24-10-2026): the braces entry GHSA-vfj7-8cjw-p6xm was dropped because
+    // audit-ci no longer reports it on this lock ("consider not allowlisting"); should it come
+    // back, this gate fails loudly instead of hiding it. The same bucket fixed the new
+    // dompurify, zod and undici advisories with patch updates, not allowlist entries.
   ]
 }
