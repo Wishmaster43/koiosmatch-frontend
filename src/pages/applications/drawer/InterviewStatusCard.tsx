@@ -45,6 +45,7 @@ import { Caption } from '@/components/ui/typography'
 // DATETIME-IMPORT-LES: the side-effect-free formatter — @/lib/datetime's i18n import initialises i18next in every
 // consumer of the applications barrel (the candidate drawer's apply modal tests broke on it, 23-10).
 import { formatDateTimeStr } from '@/lib/localDate'
+import { isInterviewSkipCode } from './interviewSkipReasons'
 import { useAuth } from '@/context/AuthContext'
 import { translateInterviewStatus } from '@/lib/interviewStatus'
 import { interviewCategoryColor } from '../data/applicationsShared'
@@ -73,9 +74,6 @@ const cardStyle: CSSProperties = {
 // Decorative separator between the meta line's segments — hidden from assistive
 // tech since every segment around it already carries its own accessible text.
 const MetaDot = () => <span aria-hidden="true" style={{ color: 'var(--text-muted)', fontSize: 12 }}>·</span>
-
-// Stable skip-reason vocabulary of the contract (INTERVIEW-SKIP-ON-APPLICATION-1).
-const SKIP_CODES = ['rejected_stage', 'placed_stage', 'no_mobile_or_consent', 'action_rule_blocked', 'no_interview_consent', 'wa_web_send_not_supported', 'no_active_connection', 'send_failed', 'ai_disclosure_missing', 'candidate_in_other_interview']
 
 // Live interview summary card (see the module doc above): every field renders defensively as optional, and the stop/resume controls gate on the application id, never the interview session id (see the INTERVIEW-STOP-1 note).
 export default function InterviewStatusCard({
@@ -127,7 +125,7 @@ export default function InterviewStatusCard({
         {/* Calm plain-text skip reason (+ date); an unknown code reads generically, never raw. */}
         {skipReason && (
           <Caption>
-            {t(`interview.skipReason.${SKIP_CODES.includes(skipReason) ? skipReason : 'unknown'}`)}
+            {t(`interview.skipReason.${isInterviewSkipCode(skipReason) ? skipReason : 'unknown'}`)}
             {skippedAt ? ` ${t('interview.skippedAt', { date: formatDateTimeStr(skippedAt) })}` : ''}
           </Caption>
         )}

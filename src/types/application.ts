@@ -280,13 +280,14 @@ export interface ApplicationDetail extends Application {
   coverLetter: string | null
   // INTERVIEW-CONSENT-PERSIST-1 (LIVE — nothing awaited): ApplicationDetailResource
   // always sends this, as an ISO-8601 timestamp or null. It is a WHEN, not a boolean:
-  // never treat presence as a checkbox without formatting the date. Only the PUBLIC
-  // careersite apply writes it (CareerApplicationHandler); coupling an existing
-  // candidate inside Koios and the external partner-site channel never do, and even
-  // on the careersite the vacancy's `application_settings.interview_consent` can be
-  // `hidden` or simply left unticked. So null means "no consent recorded" and NEVER
-  // "consent refused" — the drawer renders its AVG evidence row only when non-null
-  // rather than asserting an absence it cannot substantiate.
+  // never treat presence as a checkbox without formatting the date. Since ONIX K-006
+  // (decision 1b = A) four paths write it: the PUBLIC careersite apply, the staff apply
+  // modals and the manual interview start (both send `interview_consent: true` only when
+  // the row was ticked), and the partner API's `interview_consent` field. The vacancy's
+  // `application_settings.interview_consent` can be `hidden` or the row left unticked,
+  // so null means "no consent recorded" and NEVER "consent refused" — the drawer renders
+  // its AVG evidence row only when non-null rather than asserting an absence it cannot
+  // substantiate.
   interviewConsentGivenAt: string | null
   // INTERVIEW-SKIP-ON-APPLICATION-1: stable skip code from the interview block (status 'skipped'); null when no start was skipped.
   interviewSkipReason?: string | null

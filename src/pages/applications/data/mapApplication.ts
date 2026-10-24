@@ -343,8 +343,9 @@ export function mapApplicationDetail(raw: ApiApplication = {}, funnelTypes: Look
     // CMBE emits `cover_letter` on the detail resource (honest-gated in the tab).
     coverLetter: raw.cover_letter ?? null,
     // INTERVIEW-CONSENT-PERSIST-1: null-safe read of the consent timestamp. Null is
-    // the NORMAL case — only the public careersite apply ever writes it — so it means
-    // "no consent recorded", not "consent refused" (see types/application.ts).
+    // the NORMAL case until a path records the consent (careersite, staff apply modals,
+    // the manual start, the partner API; see types/application.ts), so it means
+    // "no consent recorded", not "consent refused".
     interviewConsentGivenAt: raw.interview_consent_given_at ?? null,
     // INTERVIEW-SKIP-ON-APPLICATION-1: reason + time from a skipped interview block (status 'skipped'), else null.
     interviewSkipReason: readInterviewSkip(raw.interview).reason,

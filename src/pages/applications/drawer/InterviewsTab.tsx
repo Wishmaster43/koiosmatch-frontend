@@ -21,6 +21,8 @@ import { tintBg, tintBorder } from '@/lib/tint'
 import { Caption } from '@/components/ui/typography'
 import { useInterviewOptions } from '@/hooks/useInterviewOptions'
 import InterviewStatusCard from './InterviewStatusCard'
+import InterviewConsentRow from '../addmodal/InterviewConsentRow'
+import { isInterviewSkipCode } from './interviewSkipReasons'
 import { mapInterview } from '../data/mapApplication'
 import { resolveEffectiveInterviewWorkflow, type EffectiveInterviewWorkflow } from '../data/interviewWorkflowEffective'
 import type { ApplicationDetail, ApplicationInterview, ApiApplication } from '@/types/application'
@@ -86,7 +88,7 @@ function TranscriptBubble({ msg }: { msg: TranscriptMsg }) {
  * "Start interview moet wel kunnen maar dan start dus onderwater de
  * workflow"): the manual agent picker is GONE — the card is ONE line (the
  * effective workflow's caption) plus a single "Start interview" button, which
- * POSTs with NO body; the backend derives the agent from the effective
+ * POSTs with no body unless consent is ticked; the backend derives the agent from the effective
  * workflow (this application's own override, else the vacancy default) and
  * refuses with `no_interview_workflow` when nothing is linked. So the button
  * is only ENABLED when an effective workflow resolved at all (regardless of
@@ -98,13 +100,20 @@ function TranscriptBubble({ msg }: { msg: TranscriptMsg }) {
  * message), 422 = a guard skip with one of the known reasons (own message
  * each, unknown reasons fall back to the generic notice). The 404 honest-gate
  * stays as a safety net (§3) though it should no longer be hit in practice.
+ * START-CONSENT-FE-1 (ONIX K-006, decision 1b = A: every start path records the
+ * interview consent BEFORE the start): while the application has no recorded
+ * consent the card carries the same unchecked consent row as the apply modals,
+ * and a ticked row sends `interview_consent: true`. The server decides whether
+ * the vacancy needs it (hidden = no), so the button never blocks on the row.
  */
-function StartInterviewAction({ applicationId, effective, onStarted }: {
+function StartInterviewAction({ applicationId, effective, consentGivenAt, onStarted }: {
   applicationId: Id | undefined
   // The resolved workflow in effect, or null when none — computed once by the
   // parent (InterviewsTab) so this card and the status card's own caption
   // always agree on the same resolution.
   effective: EffectiveInterviewWorkflow | null
+  // When the application's interview consent was recorded (null = not yet, so the card asks for it).
+  consentGivenAt: string | null | undefined
   onStarted: (iv: ApplicationInterview) => void
 }) {
   const { t } = useTranslation('applications')
@@ -112,6 +121,8 @@ function StartInterviewAction({ applicationId, effective, onStarted }: {
   const canManage = auth?.hasPermission?.('applications.update') ?? false
   const [busy, setBusy] = useState(false)
   const [unavailable, setUnavailable] = useState(false)
+  // Unchecked by default: the system never assumes consent (K-006).
+  const [consent, setConsent] = useState(false)
 
   if (!canManage) return null
 
@@ -124,10 +135,11 @@ function StartInterviewAction({ applicationId, effective, onStarted }: {
     if (busy || applicationId == null || !effective) return
     setBusy(true)
     try {
-      // INTERVIEW-FLAG-1: no body — the server derives the agent from the
-      // effective workflow, so the client no longer chooses or sends one.
+      // INTERVIEW-FLAG-1: the server derives the agent from the effective workflow, so the
+      // only body is the staff consent of START-CONSENT-FE-1, sent when the row was ticked.
       // Starting an interview session is irreversible-feeling: one Idempotency-Key per click.
-      const res = await api.post(`/applications/${applicationId}/interview`, undefined, withIdempotencyKey())
+      const body = consent ? { interview_consent: true } : undefined
+      const res = await api.post(`/applications/${applicationId}/interview`, body, withIdempotencyKey())
       const raw = unwrap<NonNullable<ApiApplication['interview']>>(res)
       const iv = mapInterview(raw)
       if (iv) onStarted(iv)
@@ -148,6 +160,9 @@ function StartInterviewAction({ applicationId, effective, onStarted }: {
         notifyError(t('interview.start.alreadyRunning'))
       } else if (status === 422 && isStartInterviewReason(reason)) {
         notifyError(t(`interview.start.reasons.${reason}`))
+      } else if (status === 422 && isInterviewSkipCode(reason)) {
+        // The consent, AI-disclosure and action-rule gates read the status card's own skip sentence.
+        notifyError(t(`interview.skipReason.${reason}`))
       } else {
         notifyError(extractApiError(err, t('common:actionFailed')))
       }
@@ -159,6 +174,10 @@ function StartInterviewAction({ applicationId, effective, onStarted }: {
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 8, padding: '10px 12px',
       background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 10 }}>
+      {/* START-CONSENT-FE-1: asked only while no consent is recorded AND Start can run (§3: no tick that goes nowhere). */}
+      {!consentGivenAt && effective && !unavailable && (
+        <InterviewConsentRow checked={consent} onChange={setConsent} style={{ marginBottom: 0 }} />
+      )}
       <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
         {/* The effective workflow's caption — the agent name only when the
             resolution actually carries one (a workflow without an embedded
@@ -261,7 +280,8 @@ export default function InterviewsTab({ application: a, detailPhase }: { applica
         skipReason={a.interviewSkipReason} skippedAt={a.interviewSkippedAt}
       />
       {canStartNew && (
-        <StartInterviewAction applicationId={a.id} effective={effectiveWorkflow} onStarted={setStartedOverride} />
+        <StartInterviewAction applicationId={a.id} effective={effectiveWorkflow}
+          consentGivenAt={a.interviewConsentGivenAt} onStarted={setStartedOverride} />
       )}
 
       {/* ONE "nothing yet" message, never two (Danny 22-08, screenshot): while no

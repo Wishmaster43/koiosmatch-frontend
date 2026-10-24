@@ -3,8 +3,8 @@
  * card is now ONE caption + ONE button, rendered only when this application has
  * no session yet, the user can manage applications, and the application isn't
  * in a terminal bucket (rejected/matched). No agent picker any more — the
- * button POSTs with NO body and is enabled only when an effective workflow
- * resolved. Asserts the real POST request (§13, empty body), the confirmed
+ * button POSTs with no body (unless the START-CONSENT-FE-1 consent row is ticked) and is
+ * enabled only when an effective workflow resolved. Asserts the real POST request (§13), the confirmed
  * 200/201/409/422 contract (incl. the new no_interview_workflow/workflow_
  * inactive/budget_exceeded/workflow_failed/already_running reasons), the 404
  * safety-net gate, and every hide condition.
@@ -320,6 +320,58 @@ describe('InterviewsTab · start-interview action (Flow B)', () => {
     expect(screen.getByText('interview.status.borrowedFromSibling')).toBeInTheDocument()
     expect(screen.queryByRole('button', { name: 'interview.start.label' })).toBeNull()
   })
+})
+
+// START-CONSENT-FE-1 (ONIX K-006, decision 1b = A): the manual start records the staff consent
+// BEFORE the start. These assert the REQUEST body (§13), not only that something rendered.
+describe('InterviewsTab · interview consent on the manual start (START-CONSENT-FE-1)', () => {
+  it('asks for the consent while none is recorded, unchecked by default', async () => {
+    renderTab(app({ interviewWorkflow: OWN_WF, interviewConsentGivenAt: null }))
+    const box = await screen.findByRole('checkbox', { name: 'addModal.interviewConsent' })
+    expect(box).not.toBeChecked()
+  })
+
+  it('hides the consent row once the application carries a recorded consent', async () => {
+    renderTab(app({ interviewWorkflow: OWN_WF, interviewConsentGivenAt: '2026-10-23T10:00:00Z' }))
+    await waitFor(() => screen.getByRole('button', { name: 'interview.start.label' }))
+    expect(screen.queryByRole('checkbox', { name: 'addModal.interviewConsent' })).toBeNull()
+  })
+
+  it('shows no consent row while Start cannot run (no workflow in effect)', async () => {
+    renderTab(app({ interviewConsentGivenAt: null }))
+    await waitFor(() => screen.getByRole('button', { name: 'interview.start.label' }))
+    expect(screen.getByRole('button', { name: 'interview.start.label' })).toBeDisabled()
+    expect(screen.queryByRole('checkbox', { name: 'addModal.interviewConsent' })).toBeNull()
+  })
+
+  it('sends interview_consent: true when the row is ticked before Start', async () => {
+    mockPost.mockResolvedValueOnce({ status: 201, data: { data: { category: 'busy', id: 'iv-9' } } })
+    renderTab(app({ interviewWorkflow: OWN_WF, interviewConsentGivenAt: null }))
+    const user = userEvent.setup()
+    await user.click(await screen.findByRole('checkbox', { name: 'addModal.interviewConsent' }))
+    await clickStart()
+
+    expect(mockPost).toHaveBeenCalledWith('/applications/app-1/interview', { interview_consent: true }, expect.objectContaining({
+      headers: expect.objectContaining({ 'Idempotency-Key': expect.any(String) }),
+    }))
+  })
+
+  it('sends no body when the row stays unticked (the server decides whether the vacancy needs consent)', async () => {
+    mockPost.mockResolvedValueOnce({ status: 201, data: { data: { category: 'busy', id: 'iv-9' } } })
+    renderTab(app({ interviewWorkflow: OWN_WF, interviewConsentGivenAt: null }))
+    await clickStart()
+
+    expect(mockPost).toHaveBeenCalledWith('/applications/app-1/interview', undefined, expect.anything())
+  })
+
+  it.each(['no_interview_consent', 'ai_disclosure_missing', 'action_rule_blocked'])(
+    'reads the status card skip sentence for a 422 %s (the K-006/I-001 gates)', async reason => {
+      mockPost.mockRejectedValueOnce({ response: { status: 422, data: { reason } } })
+      renderTab(app({ interviewWorkflow: OWN_WF }))
+      await clickStart()
+
+      await waitFor(() => expect(mockNotifyError).toHaveBeenCalledWith(`interview.skipReason.${reason}`))
+    })
 })
 
 // W7 (CMBE: the tab read fields the backend never sends — iv.created_at/time/summary,
