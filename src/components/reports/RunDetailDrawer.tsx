@@ -112,7 +112,7 @@ export default function RunDetailDrawer({ run, onClose, zIndex }: {
       <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 4 }}>
         {/* F7: the badge's own title/sr-only text carries the block reason on a
             blocked run — read from the capped step, not the still-empty error_message. */}
-        <StatusBadge status={shown.status} reason={blockedReason(shown)} />
+        <StatusBadge status={shown.status} reason={blockedReason(shown, t)} />
         {/* RUN-CONTROL-1: this Make-style inspector stays read-only otherwise —
             the stop button is the one exception for a still-live run. */}
         {CANCELLABLE.has(String(shown.status)) && shown.id != null && (
@@ -216,9 +216,9 @@ export default function RunDetailDrawer({ run, onClose, zIndex }: {
           comes from blockedReason() (the capped step) — run.error_message stays
           empty for a blocked run today (BE gap, RunPresenter only reads 'failed'
           log rows; hash-back open with CMBE). */}
-      {shown.status === 'blocked' && blockedReason(shown) ? (
+      {shown.status === 'blocked' && blockedReason(shown, t) ? (
         <CalloutBox variant="warning" title={t('runs.drawer.blockedReason')}>
-          {blockedReason(shown)}
+          {blockedReason(shown, t)}
         </CalloutBox>
       ) : shown.error_message && (
         <DrawerErrorBlock label={t('runs.drawer.error')} message={shown.error_message} />

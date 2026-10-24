@@ -161,7 +161,7 @@ export default function RunsTable() {
       // blocked run — read from the capped step, not the still-empty error_message.
       // RUN-REASON-I18N-1: falls back to the translated run-level reason (e.g. a
       // `skipped` run) when there is no connector-cap reason — never the raw code.
-      render: r => <StatusBadge status={r.status} reason={blockedReason(r) ?? runReasonLabel(r.reason, t)} />,
+      render: r => <StatusBadge status={r.status} reason={blockedReason(r, t) ?? runReasonLabel(r.reason, t)} />,
     },
     {
       key: 'candidates_count', header: t('runs.cols.candidates'), sortable: true,

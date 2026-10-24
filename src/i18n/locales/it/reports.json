@@ -435,6 +435,28 @@
       "vacancy_coupling": "Collegato sulla posizione vacante",
       "bureau_default": "Predefinito dell'agenzia"
     },
+    "stepReasons": {
+      "no_recipients": "Nessun destinatario, non è stato inviato nulla.",
+      "consent_missing": "Nessun consenso tra i destinatari, non è stato inviato nulla.",
+      "action_rule_blocked": "Bloccato dalle regole di azione, non è stato creato nulla.",
+      "nothing_created": "Non è stato creato nulla di nuovo, il record esiste già.",
+      "sm_opt_out": "Disiscrizione da Shiftmanager tra i destinatari, non è stato inviato nulla.",
+      "no_phone": "Nessun numero di telefono tra i destinatari, non è stato inviato nulla.",
+      "no_email": "Nessun indirizzo e-mail tra i destinatari, non è stato inviato nulla.",
+      "unsubscribed": "Tutti i destinatari si sono disiscritti da queste e-mail, non è stato inviato nulla.",
+      "retention_link_unsupported": "Il link per il consenso alla conservazione non è disponibile per i referenti dei clienti, non è stato inviato nulla.",
+      "no_device": "Nessun dispositivo selezionato, non è stato inviato nulla.",
+      "device_not_connected": "Il dispositivo selezionato non è connesso, non è stato inviato nulla.",
+      "no_template": "Nessun modello configurato, non è stato inviato nulla.",
+      "cap_reached": "Limite di invio raggiunto, non è stato inviato nulla.",
+      "two_way_off": "La sincronizzazione bidirezionale è disattivata, non è stato inviato nulla.",
+      "applications_all_blocked": "Ogni candidatura di destinazione è stata rifiutata da una regola di azione, non è stato modificato nulla.",
+      "applications_nothing_updated": "Nessuna candidatura è stata modificata.",
+      "applications_nothing_created": "Nessuna candidatura è stata creata.",
+      "no_effect": "Nessuno dei destinatari è stato raggiunto, non è stato inviato nulla.",
+      "calllist_archived_twin": "Esiste già una lista di chiamate archiviata con questo nome, non è stato aggiunto nulla.",
+      "calllist_nothing_new": "Tutti i candidati richiesti sono già nella lista, non è stato aggiunto nulla."
+    },
     "reasonLabel": "Motivo",
     "openHistory": "Visualizza nella cronologia",
     "dryRun": {

@@ -89,3 +89,26 @@ describe('RunStepList · RUN-MESSAGES-1', () => {
     expect(screen.getAllByText(/runs\.drawer\.messages\.title/)).toHaveLength(1)
   })
 })
+
+// STEP-REASON-RENDER: a known step reason code replaces the server sentence and error.
+describe('RunStepList · step reason', () => {
+  const sentence = 'Er is niets nieuws aangemaakt — het record bestaat al.'
+
+  it('renders the translated reason, never the message or error sentence', () => {
+    render(<RunStepList steps={[{ label: 'S', status: 'skipped', reason: 'nothing_created', message: sentence, error: sentence }]} />)
+    expect(screen.getByText('runs.stepReasons.nothing_created')).toBeInTheDocument()
+    expect(screen.queryByText(sentence)).toBeNull()
+  })
+
+  it('keeps the server message for an unknown reason code', () => {
+    render(<RunStepList steps={[{ label: 'S', status: 'skipped', reason: 'some_future_reason', message: 'server sentence' }]} />)
+    expect(screen.getByText('server sentence')).toBeInTheDocument()
+  })
+
+  it('still renders the error of a failed step without a reason', () => {
+    render(<RunStepList steps={[{ label: 'S', status: 'failed', error: 'boom' }]} />)
+    expect(screen.getByText('boom')).toBeInTheDocument()
+    // Danger ink is asserted on the raw style attribute because jsdom handles var() unreliably
+    expect(screen.getByText('boom').getAttribute('style')).toContain('--color-danger-text')
+  })
+})

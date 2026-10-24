@@ -8,7 +8,7 @@
 import { describe, it, expect, vi, afterEach } from 'vitest'
 import { render, screen, within, act, waitFor, fireEvent } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
-import '@/i18n'
+import i18n from '@/i18n'
 import RunsTable, { getWorkflowIdFromHash } from './RunsTable'
 import { useReportList } from './useReportList'
 import type { RunRow } from '@/types/reports'
@@ -208,6 +208,21 @@ describe('RunsTable — LIMITS-FE-F7 blocked status', () => {
     render(<RunsTable />)
     expect(screen.getByText('Geblokkeerd').closest('span'))
       .toHaveAttribute('title', 'Limiet bereikt (sm, modus block) — stap overgeslagen, niets gesynchroniseerd.')
+  })
+})
+
+describe('RunsTable — blocked badge translates the capped step reason code', () => {
+  it('shows the translated step reason as the badge title', () => {
+    vi.mocked(useReportList).mockReturnValueOnce({
+      rows: [{
+        id: 'r5', workflow_name: 'Limietflow', status: 'blocked',
+        step_results: [{ status: 'skipped', reason: 'cap_reached', message: 'Server sentence' }],
+      }],
+      loading: false, error: false,
+    })
+    render(<RunsTable />)
+    expect(screen.getByText('Geblokkeerd').closest('span'))
+      .toHaveAttribute('title', i18n.t('reports:runs.stepReasons.cap_reached'))
   })
 })
 

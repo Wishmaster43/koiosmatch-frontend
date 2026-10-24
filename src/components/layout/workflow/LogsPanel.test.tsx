@@ -85,3 +85,21 @@ describe('LogsPanel — run-step inspector button', () => {
     expect(screen.queryByText('inspector.open')).toBeNull()
   })
 })
+
+// STEP-REASON-RENDER: a known step reason replaces the raw error text on the expanded card.
+describe('LogsPanel — step reason', () => {
+  beforeEach(() => { vi.mocked(api.get).mockReset(); vi.mocked(api.get).mockResolvedValue({ data: [] }) })
+  const runWith = (step: Record<string, unknown>) =>
+    ({ id: 'r2', status: 'success', dry_run: false, started_at: '2026-08-23T10:00:00Z', duration_ms: 900, steps: [step] }) as unknown as RunRow
+
+  it('renders the translated reason instead of the error text', async () => {
+    render(<LogsPanel liveRun={runWith({ label: 'Mail', status: 'skipped', reason: 'unsubscribed', error: 'Alle ontvangers hebben zich uitgeschreven' })} onClose={() => {}} />)
+    expect(await screen.findByText('runs.stepReasons.unsubscribed')).toBeInTheDocument()
+    expect(screen.queryByText('Alle ontvangers hebben zich uitgeschreven')).toBeNull()
+  })
+
+  it('keeps the error text for an unknown reason', async () => {
+    render(<LogsPanel liveRun={runWith({ label: 'Mail', status: 'failed', reason: 'future_code', error: 'kapot' })} onClose={() => {}} />)
+    expect(await screen.findByText('kapot')).toBeInTheDocument()
+  })
+})

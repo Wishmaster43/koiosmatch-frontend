@@ -1,8 +1,11 @@
 /**
  * blockedReason — the human sentence behind a run halted by a connector limit (F7).
  * A pure helper in its own module so runFormat.tsx keeps exporting components only.
+ * The capped step's stable `reason` code reads translated when the caller passes its `t`.
  */
+import type { TFunction } from 'i18next'
 import type { RunRow } from '@/types/reports'
+import { stepReasonLabel } from './stepReason'
 
 // F7 fix: RunPresenter.errorMessage (BE) only pulls from a log row with
 // status==='failed' — a connector-capped step settles as 'skipped', so
@@ -16,12 +19,16 @@ import type { RunRow } from '@/types/reports'
 // the older precedent (WF-DRYRUN-1, archive/WORKLIST-DONE.md:23) put a skipped
 // step's sentence in `error`, so the read stays tolerant across
 // `message`/`error`/`error_message` for runs persisted before that hash.
-export function blockedReason(run: RunRow): string | null {
+export function blockedReason(run: RunRow, t?: TFunction): string | null {
   if (run.status !== 'blocked') return null
   const steps = (run.step_results?.length ? run.step_results : run.steps) ?? []
   const capped = [...steps].reverse().find(
-    (s) => s.status === 'skipped' && (s.message || s.error || s.error_message)
+    (s) => s.status === 'skipped' && (
+      (t && stepReasonLabel(s.reason, t)) || s.message || s.error || s.error_message
+    )
   )
+  // Translated known reason code first (only when the caller supplied `t`).
+  const translated = t && capped ? stepReasonLabel(capped.reason, t) : null
   // `||`, not `??`: a step serialised with message '' and a real `error` must fall through to the sentence.
-  return capped?.message || capped?.error || capped?.error_message || run.error_message || null
+  return translated || capped?.message || capped?.error || capped?.error_message || run.error_message || null
 }

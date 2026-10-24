@@ -435,6 +435,28 @@
       "vacancy_coupling": "An der Vakanz gekoppelt",
       "bureau_default": "Standard des Büros"
     },
+    "stepReasons": {
+      "no_recipients": "Keine Empfänger, es wurde nichts gesendet.",
+      "consent_missing": "Keine Einwilligung bei den Empfängern, es wurde nichts gesendet.",
+      "action_rule_blocked": "Durch die Aktionsregeln blockiert, es wurde nichts erstellt.",
+      "nothing_created": "Es wurde nichts Neues erstellt, der Datensatz existiert bereits.",
+      "sm_opt_out": "Shiftmanager-Abmeldung bei den Empfängern, es wurde nichts gesendet.",
+      "no_phone": "Keine Telefonnummer bei den Empfängern, es wurde nichts gesendet.",
+      "no_email": "Keine E-Mail-Adresse bei den Empfängern, es wurde nichts gesendet.",
+      "unsubscribed": "Alle Empfänger haben sich von diesen E-Mails abgemeldet, es wurde nichts gesendet.",
+      "retention_link_unsupported": "Der Link für die Aufbewahrungszustimmung ist für Kundenkontakte nicht verfügbar, es wurde nichts gesendet.",
+      "no_device": "Kein Gerät ausgewählt, es wurde nichts gesendet.",
+      "device_not_connected": "Das ausgewählte Gerät ist nicht verbunden, es wurde nichts gesendet.",
+      "no_template": "Keine Vorlage konfiguriert, es wurde nichts gesendet.",
+      "cap_reached": "Sendelimit erreicht, es wurde nichts gesendet.",
+      "two_way_off": "Die Zwei-Wege-Synchronisierung ist ausgeschaltet, es wurde nichts gesendet.",
+      "applications_all_blocked": "Jede Zielbewerbung wurde durch eine Aktionsregel abgelehnt, es wurde nichts geändert.",
+      "applications_nothing_updated": "Es wurde keine Bewerbung geändert.",
+      "applications_nothing_created": "Es wurde keine Bewerbung erstellt.",
+      "no_effect": "Keiner der Empfänger wurde erreicht, es wurde nichts gesendet.",
+      "calllist_archived_twin": "Eine archivierte Anrufliste mit diesem Namen existiert bereits, es wurde nichts hinzugefügt.",
+      "calllist_nothing_new": "Alle angefragten Kandidaten stehen bereits auf der Liste, es wurde nichts hinzugefügt."
+    },
     "reasonLabel": "Grund",
     "openHistory": "In Verlauf anzeigen",
     "dryRun": {

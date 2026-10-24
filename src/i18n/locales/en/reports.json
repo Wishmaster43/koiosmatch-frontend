@@ -435,6 +435,28 @@
       "vacancy_coupling": "Linked on the vacancy",
       "bureau_default": "Bureau default"
     },
+    "stepReasons": {
+      "no_recipients": "No recipients, nothing was sent.",
+      "consent_missing": "No consent among the recipients, nothing was sent.",
+      "action_rule_blocked": "Blocked by the action rules, nothing was created.",
+      "nothing_created": "Nothing new was created, the record already exists.",
+      "sm_opt_out": "Shiftmanager opt-out among the recipients, nothing was sent.",
+      "no_phone": "No phone number among the recipients, nothing was sent.",
+      "no_email": "No email address among the recipients, nothing was sent.",
+      "unsubscribed": "Every recipient unsubscribed from these emails, nothing was sent.",
+      "retention_link_unsupported": "The retention consent link is not available for customer contacts, nothing was sent.",
+      "no_device": "No device selected, nothing was sent.",
+      "device_not_connected": "The selected device is not connected, nothing was sent.",
+      "no_template": "No template configured, nothing was sent.",
+      "cap_reached": "Send limit reached, nothing was sent.",
+      "two_way_off": "Two-way synchronisation is switched off, nothing was sent.",
+      "applications_all_blocked": "Every target application was refused by an action rule, nothing was changed.",
+      "applications_nothing_updated": "No application was changed.",
+      "applications_nothing_created": "No application was created.",
+      "no_effect": "None of the recipients was reached, nothing was sent.",
+      "calllist_archived_twin": "An archived call list with this name already exists, nothing was added.",
+      "calllist_nothing_new": "Every requested candidate is already on the list, nothing was added."
+    },
     "reasonLabel": "Reason",
     "openHistory": "View in history",
     "dryRun": {

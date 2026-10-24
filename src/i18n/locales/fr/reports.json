@@ -435,6 +435,28 @@
       "vacancy_coupling": "Lié au poste",
       "bureau_default": "Valeur par défaut du bureau"
     },
+    "stepReasons": {
+      "no_recipients": "Aucun destinataire, rien n'a été envoyé.",
+      "consent_missing": "Aucun consentement parmi les destinataires, rien n'a été envoyé.",
+      "action_rule_blocked": "Bloqué par les règles d'action, rien n'a été créé.",
+      "nothing_created": "Rien de nouveau n'a été créé, l'enregistrement existe déjà.",
+      "sm_opt_out": "Désinscription Shiftmanager parmi les destinataires, rien n'a été envoyé.",
+      "no_phone": "Aucun numéro de téléphone parmi les destinataires, rien n'a été envoyé.",
+      "no_email": "Aucune adresse e-mail parmi les destinataires, rien n'a été envoyé.",
+      "unsubscribed": "Tous les destinataires se sont désinscrits de ces e-mails, rien n'a été envoyé.",
+      "retention_link_unsupported": "Le lien de consentement à la conservation n'est pas disponible pour les contacts clients, rien n'a été envoyé.",
+      "no_device": "Aucun appareil sélectionné, rien n'a été envoyé.",
+      "device_not_connected": "L'appareil sélectionné n'est pas connecté, rien n'a été envoyé.",
+      "no_template": "Aucun modèle configuré, rien n'a été envoyé.",
+      "cap_reached": "Limite d'envoi atteinte, rien n'a été envoyé.",
+      "two_way_off": "La synchronisation bidirectionnelle est désactivée, rien n'a été envoyé.",
+      "applications_all_blocked": "Chaque candidature cible a été refusée par une règle d'action, rien n'a été modifié.",
+      "applications_nothing_updated": "Aucune candidature n'a été modifiée.",
+      "applications_nothing_created": "Aucune candidature n'a été créée.",
+      "no_effect": "Aucun des destinataires n'a été atteint, rien n'a été envoyé.",
+      "calllist_archived_twin": "Une liste d'appels archivée portant ce nom existe déjà, rien n'a été ajouté.",
+      "calllist_nothing_new": "Tous les candidats demandés figurent déjà sur la liste, rien n'a été ajouté."
+    },
     "reasonLabel": "Motif",
     "openHistory": "Voir dans l'historique",
     "dryRun": {

@@ -435,6 +435,28 @@
       "vacancy_coupling": "Vinculado en la vacante",
       "bureau_default": "Valor predeterminado de la agencia"
     },
+    "stepReasons": {
+      "no_recipients": "Sin destinatarios, no se ha enviado nada.",
+      "consent_missing": "Ningún destinatario ha dado su consentimiento, no se ha enviado nada.",
+      "action_rule_blocked": "Bloqueado por las reglas de acción, no se ha creado nada.",
+      "nothing_created": "No se ha creado nada nuevo, el registro ya existe.",
+      "sm_opt_out": "Baja en Shiftmanager entre los destinatarios, no se ha enviado nada.",
+      "no_phone": "Ningún número de teléfono entre los destinatarios, no se ha enviado nada.",
+      "no_email": "Ninguna dirección de correo electrónico entre los destinatarios, no se ha enviado nada.",
+      "unsubscribed": "Todos los destinatarios se han dado de baja de estos correos, no se ha enviado nada.",
+      "retention_link_unsupported": "El enlace de consentimiento de retención no está disponible para los contactos de clientes, no se ha enviado nada.",
+      "no_device": "No se ha seleccionado ningún dispositivo, no se ha enviado nada.",
+      "device_not_connected": "El dispositivo seleccionado no está conectado, no se ha enviado nada.",
+      "no_template": "No hay ninguna plantilla configurada, no se ha enviado nada.",
+      "cap_reached": "Se ha alcanzado el límite de envío, no se ha enviado nada.",
+      "two_way_off": "La sincronización bidireccional está desactivada, no se ha enviado nada.",
+      "applications_all_blocked": "Una regla de acción ha rechazado todas las candidaturas de destino, no se ha cambiado nada.",
+      "applications_nothing_updated": "No se ha modificado ninguna candidatura.",
+      "applications_nothing_created": "No se ha creado ninguna candidatura.",
+      "no_effect": "No se ha llegado a ninguno de los destinatarios, no se ha enviado nada.",
+      "calllist_archived_twin": "Ya existe una lista de llamadas archivada con este nombre, no se ha añadido nada.",
+      "calllist_nothing_new": "Todos los candidatos solicitados ya están en la lista, no se ha añadido nada."
+    },
     "reasonLabel": "Motivo",
     "openHistory": "Ver en el historial",
     "dryRun": {

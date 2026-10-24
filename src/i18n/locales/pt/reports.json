@@ -435,6 +435,28 @@
       "vacancy_coupling": "Vinculado na vaga",
       "bureau_default": "Padrão do escritório"
     },
+    "stepReasons": {
+      "no_recipients": "Sem destinatários, nada foi enviado.",
+      "consent_missing": "Sem consentimento dos destinatários, nada foi enviado.",
+      "action_rule_blocked": "Bloqueado pelas regras de ação, nada foi criado.",
+      "nothing_created": "Nada de novo foi criado, o registo já existe.",
+      "sm_opt_out": "Cancelamento no Shiftmanager entre os destinatários, nada foi enviado.",
+      "no_phone": "Sem número de telefone nos destinatários, nada foi enviado.",
+      "no_email": "Sem endereço de e-mail nos destinatários, nada foi enviado.",
+      "unsubscribed": "Todos os destinatários cancelaram a subscrição destes e-mails, nada foi enviado.",
+      "retention_link_unsupported": "A ligação de consentimento de retenção não está disponível para pessoas de contacto de clientes, nada foi enviado.",
+      "no_device": "Nenhum dispositivo selecionado, nada foi enviado.",
+      "device_not_connected": "O dispositivo selecionado não está ligado, nada foi enviado.",
+      "no_template": "Nenhum modelo configurado, nada foi enviado.",
+      "cap_reached": "Limite de envio atingido, nada foi enviado.",
+      "two_way_off": "A sincronização bidirecional está desligada, nada foi enviado.",
+      "applications_all_blocked": "Todas as candidaturas de destino foram recusadas por uma regra de ação, nada foi alterado.",
+      "applications_nothing_updated": "Nenhuma candidatura foi alterada.",
+      "applications_nothing_created": "Nenhuma candidatura foi criada.",
+      "no_effect": "Nenhum dos destinatários foi alcançado, nada foi enviado.",
+      "calllist_archived_twin": "Já existe uma lista de chamadas arquivada com este nome, nada foi adicionado.",
+      "calllist_nothing_new": "Todos os candidatos pedidos já estão na lista, nada foi adicionado."
+    },
     "reasonLabel": "Motivo",
     "openHistory": "Ver no histórico",
     "dryRun": {

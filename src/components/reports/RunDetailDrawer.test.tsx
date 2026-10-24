@@ -167,6 +167,24 @@ describe('RunDetailDrawer — blocked run (F7)', () => {
   })
 })
 
+describe('RunDetailDrawer — blocked reason code', () => {
+  it('shows the translated capped-step reason in the warning callout', () => {
+    render(
+      <I18nextProvider i18n={i18n}>
+        <RunDetailDrawer
+          run={{ ...baseRun, status: 'blocked', step_results: [{ status: 'skipped', reason: 'cap_reached', message: 'Server sentence' }] } as RunRow}
+          onClose={() => {}}
+        />
+      </I18nextProvider>,
+    )
+    // The warning callout (role=alert) itself carries the translated reason, and the server sentence is gone
+    // everywhere (the step list reads the same code).
+    const label = i18n.t('reports:runs.stepReasons.cap_reached')
+    expect(screen.getAllByRole('alert').some(a => (a.textContent ?? '').includes(label))).toBe(true)
+    expect(screen.queryByText('Server sentence')).toBeNull()
+  })
+})
+
 // RUN-SKIPPED-REASON-FE-1 (N-006, additive): a run-level `reason` renders as a
 // muted line under the status when present, and is absent when it is not.
 describe('RunDetailDrawer — RUN-SKIPPED-REASON-FE-1 run-level reason', () => {

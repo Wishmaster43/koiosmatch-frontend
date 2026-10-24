@@ -435,6 +435,28 @@
       "vacancy_coupling": "Gekoppeld op de vacature",
       "bureau_default": "Standaard van het bureau"
     },
+    "stepReasons": {
+      "no_recipients": "Geen ontvangers, er is niets verstuurd.",
+      "consent_missing": "Geen toestemming bij de ontvangers, er is niets verstuurd.",
+      "action_rule_blocked": "Geblokkeerd door de actieregels, er is niets aangemaakt.",
+      "nothing_created": "Er is niets nieuws aangemaakt, het record bestaat al.",
+      "sm_opt_out": "Afmelding in Shiftmanager bij de ontvangers, er is niets verstuurd.",
+      "no_phone": "Geen telefoonnummer bij de ontvangers, er is niets verstuurd.",
+      "no_email": "Geen e-mailadres bij de ontvangers, er is niets verstuurd.",
+      "unsubscribed": "Alle ontvangers hebben zich afgemeld voor deze e-mails, er is niets verstuurd.",
+      "retention_link_unsupported": "De link voor bewaartoestemming bestaat niet voor contactpersonen van klanten, er is niets verstuurd.",
+      "no_device": "Geen apparaat gekozen, er is niets verstuurd.",
+      "device_not_connected": "Het gekozen apparaat is niet verbonden, er is niets verstuurd.",
+      "no_template": "Geen template ingesteld, er is niets verstuurd.",
+      "cap_reached": "Verzendlimiet bereikt, er is niets verstuurd.",
+      "two_way_off": "Tweerichtingssynchronisatie staat uit, er is niets verstuurd.",
+      "applications_all_blocked": "Elke doelsollicitatie is door een actieregel geweigerd, er is niets gewijzigd.",
+      "applications_nothing_updated": "Er is geen sollicitatie gewijzigd.",
+      "applications_nothing_created": "Er is geen sollicitatie aangemaakt.",
+      "no_effect": "Geen van de ontvangers is bereikt, er is niets verstuurd.",
+      "calllist_archived_twin": "Er bestaat al een gearchiveerde bellijst met deze naam, er is niets toegevoegd.",
+      "calllist_nothing_new": "Elke gevraagde kandidaat staat al op de lijst, er is niets toegevoegd."
+    },
     "reasonLabel": "Reden",
     "openHistory": "Bekijk in geschiedenis",
     "dryRun": {

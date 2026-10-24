@@ -8,6 +8,7 @@ import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { ChevronRight, ChevronDown, Zap, Clock } from 'lucide-react'
 import { formatDuration, StepStatusBadge } from './runFormat'
+import { stepReasonLabel } from './stepReason'
 // House numeric shape (DATUM-1): digits only, so no locale is needed here.
 import { hhmm } from '@/lib/localDate'
 // HIST-DETAIL-1 (Danny 24-07 "je kan niet zien welke kandidaten"): the history
@@ -112,6 +113,9 @@ function StepCard({ step, index, catalog }: { step: RunStep; index: number; cata
   const [open, setOpen] = useState(false)
   const hasIO = step.input != null || step.output != null
   const title = step.label ?? step.type ?? t('runs.drawer.step', { n: index + 1 })
+  // A known step reason code reads as a translated sentence and replaces the server message and error text.
+  const reasonText = stepReasonLabel(step.reason, t)
+  const showError = !reasonText && (step.error ?? step.error_message) != null
 
   return (
     <div style={{ background: 'var(--hover-bg)', borderRadius: 8, overflow: 'hidden' }}>
@@ -146,8 +150,8 @@ function StepCard({ step, index, catalog }: { step: RunStep; index: number; cata
       </div>
 
       {/* Message (always visible when present) */}
-      {step.message && (
-        <Caption as="div" style={{ padding: '0 12px 10px 33px' }}>{step.message}</Caption>
+      {(reasonText ?? step.message) && (
+        <Caption as="div" style={{ padding: '0 12px 10px 33px' }}>{reasonText ?? step.message}</Caption>
       )}
 
       {/* HIST-DETAIL-1: the one-line outcome (e.g. "466 synced") always visible. */}
@@ -156,12 +160,12 @@ function StepCard({ step, index, catalog }: { step: RunStep; index: number; cata
       )}
 
       {/* WF-R3 live meta: retry count, error and when the next attempt fires. */}
-      {(Number(step.attempts ?? 0) > 1 || step.error || step.error_message || step.next_attempt_at) && (
+      {(Number(step.attempts ?? 0) > 1 || showError || step.next_attempt_at) && (
         <div style={{ fontSize: 11, padding: '0 12px 10px 33px', display: 'flex', flexDirection: 'column', gap: 2 }}>
           {Number(step.attempts ?? 0) > 1 && (
             <span style={{ color: 'var(--text-muted)' }}>{t('runs.drawer.attempts', { count: Number(step.attempts) })}</span>
           )}
-          {(step.error ?? step.error_message) != null && (
+          {showError && (
             <span style={{ color: 'var(--color-danger-text)' }}>{String(step.error ?? step.error_message)}</span>
           )}
           {step.next_attempt_at != null && (

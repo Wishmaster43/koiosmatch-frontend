@@ -12,6 +12,7 @@ import api, { unwrapList } from '@/lib/api'
 import { useNumberFormat } from '@/lib/formatters'
 import { resolveWorkflowBaseURL } from '@/lib/workflowApi'
 import { StatusBadge, StepStatusBadge, DryRunBanner, formatDT, formatDuration } from '@/components/reports/runFormat'
+import { stepReasonLabel } from '@/components/reports/stepReason'
 import { CANCELLABLE, StopRunButton } from './runControl'
 import { useModuleCatalog } from './useModuleCatalog'
 import StepOutputSlice from './StepOutputSlice'
@@ -221,9 +222,12 @@ export default function LogsPanel({ workflowId, liveRun, onClose, onOpenHistory 
                         {time && (
                           <Mono as="div" style={{ fontSize: 11, fontWeight: 600, color: 'var(--text)', marginTop: 4 }}>{time}</Mono>
                         )}
-                        {step.error != null && (
-                          <div style={{ fontSize: 11, color: 'var(--color-danger-text)', marginTop: 4 }}>{String(step.error)}</div>
-                        )}
+                        {/* A known step reason reads as a translated sentence in place of the raw error text. */}
+                        {stepReasonLabel(step.reason, t)
+                          ? <Caption as="div" style={{ marginTop: 4 }}>{stepReasonLabel(step.reason, t)}</Caption>
+                          : step.error != null && (
+                            <div style={{ fontSize: 11, color: 'var(--color-danger-text)', marginTop: 4 }}>{String(step.error)}</div>
+                          )}
                         {/* One-line outcome, e.g. "460 gesynct · 2 overgeslagen". */}
                         {typeof step.summary === 'string' && step.summary && (
                           <div style={{ fontSize: 11, fontWeight: 600, color: 'var(--color-success-text)', marginTop: 4 }}>{step.summary}</div>
