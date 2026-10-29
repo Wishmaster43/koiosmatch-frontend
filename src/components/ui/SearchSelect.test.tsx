@@ -231,3 +231,26 @@ describe('SearchSelect · disabled + badge options', () => {
     expect(onToggle).toHaveBeenCalledWith('a')
   })
 })
+
+// #112: the clear X anchors to the trigger, so the default single-pick face wraps tightly.
+describe('SearchSelect · root width follows the single-pick trigger', () => {
+  it('uses an inline-block root for the default closeOnToggle face and keeps the clear button inside it', () => {
+    const { container } = render(
+      <div style={{ width: 600 }}>
+        <SearchSelect triggerLabel="NL" options={['NL']} selected={['NL']} closeOnToggle onToggle={() => {}} />
+      </div>,
+    )
+    const root = container.querySelector('button')!.parentElement as HTMLElement
+    expect(root.style.display).toBe('inline-block')
+    expect(root.querySelectorAll('button').length).toBe(2)
+  })
+
+  it('keeps a block root when the caller supplies renderTrigger', () => {
+    const { container } = render(
+      <SearchSelect triggerLabel="x" options={['A']} closeOnToggle onToggle={() => {}}
+        renderTrigger={(toggle) => <button type="button" onClick={toggle}>own</button>} />,
+    )
+    const root = container.querySelector('button')!.parentElement as HTMLElement
+    expect(root.style.display).toBe('')
+  })
+})

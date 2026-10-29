@@ -155,7 +155,9 @@ export default function SearchSelect({
     - (showSelectAll && shown.length > 0 ? SELECT_ALL_ROW_HEIGHT : 0)
 
   return (
-    <div ref={ref} style={{ position: 'relative' }}>
+    // #112: the default single-pick face shrinks the root to its trigger so the clear X anchors
+    // to the trigger edge, not a full-width parent; renderTrigger callers keep their block root.
+    <div ref={ref} style={{ position: 'relative', ...(closeOnToggle && !renderTrigger ? { display: 'inline-block', maxWidth: '100%' } : {}) }}>
       {renderTrigger
         ? (disabled
           // Caller owns this markup; only wrap it when disabled, so every existing

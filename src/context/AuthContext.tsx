@@ -23,9 +23,11 @@ import { createContext, useContext, useState, useEffect, useCallback, useMemo, u
 import { clearDeviceCaches } from '@/lib/deviceCaches'
 import { setBureauTimezone } from '@/lib/bureauTime'
 import type { ReactNode } from 'react'
-import api, { primeCsrf, unwrapList } from '../lib/api'
+import api, { primeCsrf } from '../lib/api'
 import { setUploadPolicy } from '@/lib/uploadPolicy'
-import { TENANT_PICK_FLAG, TENANT_REQUIRED_EVENT } from '@/lib/tenantResolution'
+import { TENANT_REQUIRED_EVENT, clearTenantPickSignal, resolveStoredTenant } from '@/lib/tenantResolution'
+import type { TenantResolution } from '@/lib/tenantResolution'
+import { loadTenantResolution } from './auth/tenantPin'
 import { queryClient } from '../lib/queryClient'
 import { unsubscribe as unsubscribePush } from '../lib/pushSubscription'
 import { resolveDashboardType } from '../pages/dashboard/templates'
@@ -57,7 +59,7 @@ export interface AuthContextValue {
   logout: () => Promise<void>
   refreshUser: () => Promise<AuthUser>
   verifyMfa: (mfaToken: string, code: string) => Promise<AuthUser>
-  setupMfa: () => Promise<unknown>
+  setupMfa: (currentPassword?: string) => Promise<unknown>
   confirmMfa: (code: string) => Promise<unknown>
   disableMfa: (code: string) => Promise<unknown>
   hasRole: (role: string) => boolean
@@ -146,13 +148,28 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setActiveTenantState(tenant)
     // A pick lifts the picker wall and re-arms the once-per-boot refusal signal (api.ts).
     setNeedsTenantPick(false)
-    sessionStorage.removeItem(TENANT_PICK_FLAG)
+    clearTenantPickSignal()
     queryClient.clear()
     // React Query is cleared above, but module-level caches (lookups, custom-fields, all-settings,
     // KPI) + context state survive a soft switch and would LEAK the previous tenant's data into the
     // newly selected bureau. Special-category health data (AVG) — isolation must be absolute, so we
     // hard-reload to re-bootstrap the whole app for the new tenant (X-Tenant already points at it).
     window.location.reload()
+  }, [])
+
+  // Applies a stored-bureau resolution: pin it, keep the stored id, or raise the picker (never a guess).
+  const applyTenantResolution = useCallback((r: TenantResolution) => {
+    if (r.kind === 'pinned') {
+      localStorage.setItem('active_tenant', r.tenant.id)
+      setActiveTenantState(r.tenant)
+      setNeedsTenantPick(false)
+    } else if (r.kind === 'pick') {
+      localStorage.removeItem('active_tenant')
+      setActiveTenantState(null)
+      setNeedsTenantPick(true)
+    } else if (r.kind === 'keepStored') {
+      setActiveTenantState(prev => prev ?? ({ id: r.id } as Tenant))
+    }
   }, [])
 
   // TENANT-TAB-1 (Danny 23-07 "elke kandidaat 404t op demo"): localStorage is
@@ -187,33 +204,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       // AWAITED by the restore path (TENANT-HEADER-1): rendering before the
       // active tenant is known let early fetches go out without X-Tenant, and
       // the backend then falls back to the FIRST tenant (demo-data-in-yesway).
-      await api.get('/tenants')
-        .then(res => {
+      await loadTenantResolution(savedTenant)
+        .then(({ list, resolution }) => {
           setTenantsError(false)
-          const list = unwrapList<Tenant>(res).rows
-          if (Array.isArray(list) && list.length) {
-            setTenants(list)
-            // Only a stored id that the list still carries is pinned; a stale id (deleted
-            // bureau) or no id at all raises the picker instead of a first-row guess.
-            const active = list.find((t: Tenant) => t.id === savedTenant) ?? null
-            if (active) {
-              setActiveTenantState(active)
-              localStorage.setItem('active_tenant', active.id)
-              setNeedsTenantPick(false)
-            } else {
-              localStorage.removeItem('active_tenant')
-              setActiveTenantState(null)
-              setNeedsTenantPick(true)
-            }
-          }
+          if (list.length) setTenants(list)
+          applyTenantResolution(resolution)
         })
         .catch(() => {
           setTenantsError(true)
-          // The list is unknown: keep a stored id as the working bureau (a stale one is
-          // refused 404 tenant_not_found and lands on the picker through the api event);
-          // without any stored id there is nothing to work in, so the picker shows.
-          if (savedTenant) setActiveTenantState(prev => prev ?? ({ id: savedTenant } as Tenant))
-          else setNeedsTenantPick(true)
+          applyTenantResolution(resolveStoredTenant(null, savedTenant))
         })
     } else {
       const tenant = u?.tenant
@@ -223,7 +222,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         localStorage.setItem('active_tenant', tenant.id)
       }
     }
-  }, [])
+  }, [applyTenantResolution])
 
   // ── Session expiry (401) ─────────────────────────────────────────────────────
   // api.js fires 'km:auth-expired' after a 401 (and has already cleared
@@ -266,7 +265,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   useEffect(() => { userRef.current = user }, [user])
   useEffect(() => {
     const onTenantRequired = () => {
-      if (!userIsSuperAdmin(userRef.current)) return
+      // A non-super-admin never keeps a stale pick signal, so a dropped event cannot use it up.
+      if (!userIsSuperAdmin(userRef.current)) { clearTenantPickSignal(); return }
       localStorage.removeItem('active_tenant')
       setActiveTenantState(null)
       setNeedsTenantPick(true)
@@ -312,29 +312,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
     const savedTenant = localStorage.getItem('active_tenant')
     try {
-      const r    = await api.get('/tenants')
-      const list = unwrapList<Tenant>(r).rows
-      if (Array.isArray(list) && list.length > 0) {
-        setTenants(list)
-        const saved = list.find((t: Tenant) => t.id === savedTenant) ?? null
-        if (saved) {
-          localStorage.setItem('active_tenant', saved.id)
-          setActiveTenantState(saved)
-          setNeedsTenantPick(false)
-        } else {
-          // A stale or missing id is dropped, never replaced by a guess (ONIX B-003 / B-005).
-          localStorage.removeItem('active_tenant')
-          setActiveTenantState(null)
-          setNeedsTenantPick(true)
-        }
-      }
+      const { list, resolution } = await loadTenantResolution(savedTenant)
+      if (list.length) setTenants(list)
+      applyTenantResolution(resolution)
     } catch {
-      // No list: keep a stored id as the working bureau (a stale one lands on the picker
-      // through the api event), otherwise the picker shows with its own error state.
-      if (savedTenant) setActiveTenantState(prev => prev ?? ({ id: savedTenant } as Tenant))
-      else setNeedsTenantPick(true)
+      applyTenantResolution(resolveStoredTenant(null, savedTenant))
     }
-  }, [])
+  }, [applyTenantResolution])
 
   // ── Login ────────────────────────────────────────────────────────────────────
   /**
@@ -384,7 +368,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   // ── MFA management (called from Security settings tab) ───────────────────────
   /** Start MFA setup. Returns { secret, otpauth_url } — render otpauth_url as QR. */
-  const setupMfa = useCallback(() => api.post('/auth/mfa/setup').then(r => r.data), [])
+  // The password rides along only when the API asked for it (403 current_password_required).
+  const setupMfa = useCallback((currentPassword?: string) => api.post('/auth/mfa/setup', currentPassword ? { current_password: currentPassword } : {}).then(r => r.data), [])
   /** Confirm MFA with the first TOTP code. Returns { recovery_codes: [...] }. */
   const confirmMfa = useCallback((code: string) => api.post('/auth/mfa/confirm', { code }).then(r => r.data), [])
   /** Disable MFA. Requires the current TOTP code for confirmation. */
@@ -409,6 +394,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     clearDeviceCaches()
     // Allow the MFA-gate signal to fire again in a fresh session (see api.ts).
     sessionStorage.removeItem('km_mfa_gate')
+    // Re-arm the once-per-boot tenant refusal signal too.
+    clearTenantPickSignal()
     // AUDIT 03-09 (frontend-security-quality-1/-15, CRITICAL): the next user in this
     // tab must never be served the previous user's (possibly another tenant's) data.
     // Mirror setActiveTenant: drop the per-tenant app cache, clear React Query, and

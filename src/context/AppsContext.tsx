@@ -329,7 +329,7 @@ export const AVAILABLE_APPS: AppDef[] = [
   {
     id:          'kvk',
     Mark:        KvkMark,
-    label:       'KvK / Handelsregister',
+    label:       'KvK / Company register',
     icon:        '🏛️',
     group:       'verificatie',
     color:       '#0C4A6E',
@@ -341,7 +341,7 @@ export const AVAILABLE_APPS: AppDef[] = [
   {
     id:          'vat',
     Mark:        VatMark,
-    label:       'BTW-validatie (VIES)',
+    label:       'VAT validation (VIES)',
     icon:        '🇪🇺',
     group:       'verificatie',
     color:       '#1E3A8A',

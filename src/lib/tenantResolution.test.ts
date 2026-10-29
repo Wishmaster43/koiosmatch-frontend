@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { isTenantResolutionError, tenantResolutionCode } from './tenantResolution'
+import { isTenantResolutionError, tenantResolutionCode, resolveStoredTenant, clearTenantPickSignal } from './tenantResolution'
 
 // ONIX B-003 (BE c5bf84fb): only the two coded refusals count as "pick a bureau".
 describe('tenantResolution', () => {
@@ -25,5 +25,30 @@ describe('tenantResolution tenant_not_ready', () => {
     expect(isTenantResolutionError({ response: { status: 409, data: { code: 'tenant_not_ready' } } })).toBe(true)
     expect(tenantResolutionCode({ response: { status: 409, data: { code: 'in_use' } } })).toBeNull()
     expect(tenantResolutionCode({ response: { status: 400, data: { code: 'tenant_not_ready' } } })).toBeNull()
+  })
+})
+
+// B-003 / B-002 pure rule: pin, pick, keep the stored id, or change nothing.
+describe('resolveStoredTenant + clearTenantPickSignal', () => {
+  const t1 = { id: 't1', name: 'One' } as never
+  it('pins a listed ready id, picks for stale/missing/blocked, keeps on a failed list, no-ops on empty', () => {
+    expect(resolveStoredTenant([t1], 't1')).toEqual({ kind: 'pinned', tenant: t1 })
+    expect(resolveStoredTenant([t1], 'gone')).toEqual({ kind: 'pick' })
+    expect(resolveStoredTenant([t1], null)).toEqual({ kind: 'pick' })
+    expect(resolveStoredTenant(null, 't1')).toEqual({ kind: 'keepStored', id: 't1' })
+    expect(resolveStoredTenant(null, null)).toEqual({ kind: 'pick' })
+    expect(resolveStoredTenant([], 't1')).toEqual({ kind: 'none' })
+    for (const provisioning_status of ['pending', 'failed']) {
+      expect(resolveStoredTenant([{ id: 't1', provisioning_status } as never], 't1')).toEqual({ kind: 'pick' })
+    }
+    expect(resolveStoredTenant([{ id: 't1', provisioning_status: 'ready' } as never], 't1').kind).toBe('pinned')
+  })
+
+  it('clearTenantPickSignal drops both session keys', () => {
+    sessionStorage.setItem('km_tenant_pick', '1')
+    sessionStorage.setItem('km_tenant_pick_code', 'tenant_required')
+    clearTenantPickSignal()
+    expect(sessionStorage.getItem('km_tenant_pick')).toBeNull()
+    expect(sessionStorage.getItem('km_tenant_pick_code')).toBeNull()
   })
 })

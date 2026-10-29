@@ -91,4 +91,17 @@ describe('SmSyncButton', () => {
     fireEvent.click(button)
     expect(mockSync).not.toHaveBeenCalled()
   })
+
+  // #109: the feedback chip rides the Caption atom with the -text ink twins, no own font size.
+  it.each([
+    [{ kind: 'queued' }, /Synchronisatie gestart/i, 'var(--color-info-text)'],
+    [{ kind: 'throttled', retryAfter: 42 }, /42/, 'var(--color-warning-text)'],
+    [{ kind: 'error', detail: 'boom' }, /boom/, 'var(--color-danger-text)'],
+  ])('renders %j feedback in the Caption atom with its ink twin', (result, text, ink) => {
+    mockUseSmSync.mockReturnValue({ syncing: false, awaitingSnapshot: false, result, sync: mockSync })
+    render(<SmSyncButton />)
+    const el = screen.getByText(text as RegExp)
+    expect(el.style.fontSize).toBe('11px')
+    expect(el.style.color).toBe(ink)
+  })
 })

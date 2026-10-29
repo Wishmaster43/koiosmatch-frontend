@@ -6,6 +6,10 @@
  * every bureau route and the bell. Both mean: pick a bureau, then resend with X-Tenant.
  */
 
+import type { Tenant } from '@/types/api'
+import { isTenantBlocked } from '@/lib/tenantProvisioning'
+import type { TenantProvisioning } from '@/lib/tenantProvisioning'
+
 // The error codes the API returns when the bureau could not be resolved.
 export const TENANT_REQUIRED_CODE  = 'tenant_required'
 export const TENANT_NOT_FOUND_CODE = 'tenant_not_found'
@@ -36,4 +40,34 @@ export function tenantResolutionCode(error: unknown): typeof TENANT_REQUIRED_COD
 /** True when a request failed because no valid bureau was named for a super admin. */
 export function isTenantResolutionError(error: unknown): boolean {
   return tenantResolutionCode(error) !== null
+}
+
+// A bureau row as GET /tenants serves it, with the optional provisioning fields.
+export type StoredTenantRow = Tenant & TenantProvisioning
+
+// The outcome of matching the stored bureau id against the bureau list.
+export type TenantResolution =
+  | { kind: 'pinned'; tenant: StoredTenantRow }
+  | { kind: 'pick' }
+  | { kind: 'keepStored'; id: string }
+  | { kind: 'none' }
+
+/**
+ * Pure rule (never a first-row guess): a stored id the list carries and that is ready is
+ * pinned; a stale, missing or not-ready (pending/failed) id raises the picker; a failed list
+ * keeps a stored id as the working bureau; an empty list changes nothing.
+ */
+export function resolveStoredTenant(list: StoredTenantRow[] | null, savedId: string | null): TenantResolution {
+  if (list === null) return savedId ? { kind: 'keepStored', id: savedId } : { kind: 'pick' }
+  if (list.length === 0) return { kind: 'none' }
+  const found = list.find(t => t.id === savedId) ?? null
+  return found && !isTenantBlocked(found.provisioning_status) ? { kind: 'pinned', tenant: found } : { kind: 'pick' }
+}
+
+/** Re-arms the once-per-boot refusal signal (api.ts) by dropping its flag and code. */
+export function clearTenantPickSignal(): void {
+  try {
+    sessionStorage.removeItem(TENANT_PICK_FLAG)
+    sessionStorage.removeItem(TENANT_PICK_CODE_KEY)
+  } catch { /* storage unavailable: nothing to clear */ }
 }

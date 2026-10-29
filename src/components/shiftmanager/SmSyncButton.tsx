@@ -12,6 +12,7 @@ import { RefreshCw, Check, AlertTriangle, Clock } from 'lucide-react'
 import { useAuth } from '@/context/AuthContext'
 import SelectMenu from '@/components/ui/SelectMenu'
 import Button from '@/components/ui/Button'
+import { Caption } from '@/components/ui/typography'
 import { useSmConnections } from './useSmConnections'
 import { useSmSync } from './useSmSync'
 
@@ -43,6 +44,7 @@ export default function SmSyncButton() {
     : noConnection ? t('charts.sync.noConnection')
     : undefined
 
+  // Caption carries the 11px identity; only layout and the -text ink twin are set per result kind.
   return (
     <div style={{ display: 'inline-flex', alignItems: 'center', gap: 8 }}>
       {picking ? (
@@ -63,16 +65,16 @@ export default function SmSyncButton() {
         </Button>
       )}
       {result && !syncing && (
-        <span style={{
-          display: 'inline-flex', alignItems: 'center', gap: 4, fontSize: 11,
-          color: result.kind === 'queued' ? 'var(--color-info)'
-            : result.kind === 'throttled' ? 'var(--color-warning)' : 'var(--color-danger)',
+        <Caption style={{
+          display: 'inline-flex', alignItems: 'center', gap: 4,
+          color: result.kind === 'queued' ? 'var(--color-info-text)'
+            : result.kind === 'throttled' ? 'var(--color-warning-text)' : 'var(--color-danger-text)',
         }}>
           {result.kind === 'queued' ? <Check size={11} /> : result.kind === 'throttled' ? <Clock size={11} /> : <AlertTriangle size={11} />}
           {result.kind === 'queued' ? t('charts.sync.started')
             : result.kind === 'throttled' ? t('charts.sync.tooManyRequests', { secs: result.retryAfter })
             : (result.detail ?? t('charts.sync.failed'))}
-        </span>
+        </Caption>
       )}
     </div>
   )

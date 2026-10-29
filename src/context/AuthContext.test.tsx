@@ -338,3 +338,115 @@ describe('AuthContext · upload policy from /auth/me', () => {
     expect(getUploadPolicy().cv_parse.extensions).toEqual(UPLOAD_POLICY_SEED.cv_parse.extensions)
   })
 })
+
+// B-003 beyond page one: a stored bureau missing from the first page is looked up by exact id.
+describe('AuthContext · stored bureau beyond the first /tenants page', () => {
+  const page1 = Array.from({ length: 25 }, (_, i) => ({ id: `p${i}`, name: `P${i}` }))
+  const mockTenants = (searchRows: unknown[]) => vi.mocked(api.get).mockImplementation((url: string, cfg?: { params?: unknown }) => {
+    if (url === '/tenants' && (cfg?.params as { search?: string } | undefined)?.search) return Promise.resolve({ data: { data: searchRows } })
+    if (url === '/tenants') return Promise.resolve({ data: { data: page1, meta: { total: 26, last_page: 2 } } })
+    return Promise.resolve({ data: { user: null } })
+  })
+
+  it('login pins t26 found by exact-id search, keeps localStorage, no picker', async () => {
+    mockTenants([{ id: 't26', name: 'T26' }])
+    localStorage.setItem('active_tenant', 't26')
+    const { result } = renderHook(() => useAuth(), { wrapper })
+    await waitFor(() => expect(result.current?.loading).toBe(false))
+    vi.mocked(api.post).mockResolvedValueOnce({ data: { user: { id: 'sa', is_super_admin: true, roles: [] } } })
+    await result.current?.login('a@b.nl', 'pw')
+    await waitFor(() => expect(result.current?.activeTenant?.id).toBe('t26'))
+    expect(result.current?.needsTenantPick).toBe(false)
+    expect(localStorage.getItem('active_tenant')).toBe('t26')
+    expect(vi.mocked(api.get)).toHaveBeenCalledWith('/tenants', { params: { search: 't26', per_page: 100 } })
+  })
+
+  it('an empty search result removes the id and raises the picker', async () => {
+    mockTenants([])
+    localStorage.setItem('active_tenant', 't26')
+    const { result } = renderHook(() => useAuth(), { wrapper })
+    await waitFor(() => expect(result.current?.loading).toBe(false))
+    vi.mocked(api.post).mockResolvedValueOnce({ data: { user: { id: 'sa', is_super_admin: true, roles: [] } } })
+    await result.current?.login('a@b.nl', 'pw')
+    await waitFor(() => expect(result.current?.needsTenantPick).toBe(true))
+    expect(localStorage.getItem('active_tenant')).toBeNull()
+  })
+
+  it('a pending stored bureau raises the picker instead of pinning', async () => {
+    vi.mocked(api.get).mockResolvedValue({ data: [{ id: 't1', name: 'One', provisioning_status: 'pending' }] })
+    localStorage.setItem('active_tenant', 't1')
+    const { result } = renderHook(() => useAuth(), { wrapper })
+    await waitFor(() => expect(result.current?.loading).toBe(false))
+    vi.mocked(api.post).mockResolvedValueOnce({ data: { user: { id: 'sa', is_super_admin: true, roles: [] } } })
+    await result.current?.login('a@b.nl', 'pw')
+    await waitFor(() => expect(result.current?.needsTenantPick).toBe(true))
+    expect(result.current?.activeTenant).toBeNull()
+  })
+
+  it('setupMfa posts the password only when given', async () => {
+    vi.mocked(api.get).mockResolvedValue({ data: { user: null } })
+    const { result } = renderHook(() => useAuth(), { wrapper })
+    await waitFor(() => expect(result.current?.loading).toBe(false))
+    await result.current?.setupMfa()
+    expect(vi.mocked(api.post)).toHaveBeenLastCalledWith('/auth/mfa/setup', {})
+    await result.current?.setupMfa('pw')
+    expect(vi.mocked(api.post)).toHaveBeenLastCalledWith('/auth/mfa/setup', { current_password: 'pw' })
+  })
+
+  // Boot path (#31): /auth/me returns a super admin and the stored t26 is found by exact-id search.
+  const mockBoot = (searchRows: unknown[]) => vi.mocked(api.get).mockImplementation((url: string, cfg?: { params?: unknown }) => {
+    if (url === '/auth/me') return Promise.resolve({ data: { user: { id: 'sa', is_super_admin: true, roles: [] } } })
+    if (url === '/tenants' && (cfg?.params as { search?: string } | undefined)?.search) return Promise.resolve({ data: { data: searchRows } })
+    if (url === '/tenants') return Promise.resolve({ data: { data: page1, meta: { total: 26, last_page: 2 } } })
+    return Promise.resolve({ data: {} })
+  })
+
+  it('boot pins t26 beyond page one via the exact-id search', async () => {
+    localStorage.setItem('km_session', '1')
+    localStorage.setItem('active_tenant', 't26')
+    mockBoot([{ id: 't26', name: 'T26' }])
+    const { result } = renderHook(() => useAuth(), { wrapper })
+    await waitFor(() => expect(result.current?.activeTenant?.id).toBe('t26'))
+    expect(result.current?.needsTenantPick).toBe(false)
+    expect(localStorage.getItem('active_tenant')).toBe('t26')
+    expect(vi.mocked(api.get)).toHaveBeenCalledWith('/tenants', { params: { search: 't26', per_page: 100 } })
+  })
+
+  it('restore and login reach the same outcome for a stale stored id', async () => {
+    // Restore (boot): the stale id is dropped and the picker is raised.
+    localStorage.setItem('km_session', '1')
+    localStorage.setItem('active_tenant', 'gone')
+    vi.mocked(api.get).mockImplementation((url: string) => Promise.resolve(
+      url === '/auth/me' ? { data: { user: { id: 'sa', is_super_admin: true, roles: [] } } } : { data: [{ id: 't1', name: 'One' }] }))
+    const boot = renderHook(() => useAuth(), { wrapper })
+    await waitFor(() => expect(boot.result.current?.needsTenantPick).toBe(true))
+    expect(localStorage.getItem('active_tenant')).toBeNull()
+    boot.unmount()
+    // Login: the same stale id gives the same outcome.
+    localStorage.clear()
+    localStorage.setItem('active_tenant', 'gone')
+    vi.mocked(api.get).mockResolvedValue({ data: [{ id: 't1', name: 'One' }] })
+    const login = renderHook(() => useAuth(), { wrapper })
+    await waitFor(() => expect(login.result.current?.loading).toBe(false))
+    vi.mocked(api.post).mockResolvedValueOnce({ data: { user: { id: 'sa', is_super_admin: true, roles: [] } } })
+    await login.result.current?.login('a@b.nl', 'pw')
+    await waitFor(() => expect(login.result.current?.needsTenantPick).toBe(true))
+    expect(localStorage.getItem('active_tenant')).toBeNull()
+  })
+
+  it('logout re-arms the tenant pick signal', async () => {
+    const reload = vi.fn()
+    const original = window.location
+    Object.defineProperty(window, 'location', { configurable: true, value: { ...original, reload } })
+    sessionStorage.setItem('km_tenant_pick', '1')
+    sessionStorage.setItem('km_tenant_pick_code', 'tenant_required')
+    vi.mocked(api.get).mockResolvedValue({ data: { user: null } })
+    const { result } = renderHook(() => useAuth(), { wrapper })
+    await waitFor(() => expect(result.current).not.toBeNull())
+    await result.current!.logout()
+    expect(vi.mocked(api.post)).toHaveBeenCalledWith('/auth/logout')
+    expect(sessionStorage.getItem('km_tenant_pick')).toBeNull()
+    expect(sessionStorage.getItem('km_tenant_pick_code')).toBeNull()
+    Object.defineProperty(window, 'location', { configurable: true, value: original })
+  })
+})

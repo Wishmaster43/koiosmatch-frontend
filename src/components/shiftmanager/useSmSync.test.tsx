@@ -35,6 +35,7 @@ describe('useSmSync · backoff poll', () => {
 
     const { result } = renderHook(() => useSmSync(), { wrapper: makeWrapper(client) })
     await act(async () => { await result.current.sync('c1') })
+    expect(mockedPost).toHaveBeenCalledWith('/sm_reports/sync', { connection_id: 'c1', scope: undefined })
     // The immediate post-queue invalidation.
     expect(invalidateSpy).toHaveBeenCalledTimes(1)
 
@@ -124,5 +125,33 @@ describe('useSmSync · backoff poll', () => {
     await act(async () => { await result.current.sync('c1') })
     expect(result.current.result).toEqual({ kind: 'throttled', retryAfter: 30 })
     expect(invalidateSpy).not.toHaveBeenCalled()
+  })
+
+  // #111: the request body carries the chosen scope.
+  it('posts the explicit scope in the body', async () => {
+    const client = new QueryClient({ defaultOptions: { queries: { retry: false } } })
+    mockedPost.mockResolvedValue({ data: {} })
+    const { result } = renderHook(() => useSmSync(), { wrapper: makeWrapper(client) })
+    await act(async () => { await result.current.sync('c1', 'candidates' as never) })
+    expect(mockedPost).toHaveBeenCalledWith('/sm_reports/sync', { connection_id: 'c1', scope: 'candidates' })
+  })
+
+  it('surfaces the 422 field error without polling', async () => {
+    const client = new QueryClient({ defaultOptions: { queries: { retry: false } } })
+    const invalidateSpy = vi.spyOn(client, 'invalidateQueries')
+    mockedPost.mockRejectedValue({ response: { status: 422, data: { errors: { connection_id: ['inactive'] }, message: 'x' } } })
+    const { result } = renderHook(() => useSmSync(), { wrapper: makeWrapper(client) })
+    await act(async () => { await result.current.sync('c1') })
+    expect(result.current.result).toEqual({ kind: 'error', detail: 'inactive' })
+    expect(result.current.awaitingSnapshot).toBe(false)
+    expect(invalidateSpy).not.toHaveBeenCalled()
+  })
+
+  it('falls back to the server message on a 500', async () => {
+    const client = new QueryClient({ defaultOptions: { queries: { retry: false } } })
+    mockedPost.mockRejectedValue({ response: { status: 500, data: { message: 'server broke' } } })
+    const { result } = renderHook(() => useSmSync(), { wrapper: makeWrapper(client) })
+    await act(async () => { await result.current.sync('c1') })
+    expect(result.current.result).toEqual({ kind: 'error', detail: 'server broke' })
   })
 })
