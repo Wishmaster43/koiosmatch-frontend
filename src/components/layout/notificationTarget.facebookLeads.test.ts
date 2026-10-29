@@ -10,7 +10,7 @@ const row = (type: string): AppNotification =>
   ({ id: 1, type, meta: { count: 2, forms: ' Formulieren: 123, 456.' } } as unknown as AppNotification)
 
 describe('resolveNotificationTarget: facebook lead types', () => {
-  it.each(['facebook.lead_pending', 'facebook.lead_failed'])('%s opens the queue tab', (type) => {
+  it.each(['facebook.lead_pending', 'facebook.lead_failed', 'facebook.lead_rejected'])('%s opens the queue tab', (type) => {
     expect(resolveNotificationTarget(row(type))).toEqual({
       page: 'settings', id: 'facebook_leads', hash: '#settings/integrations/facebook_leads?view=queue',
     })

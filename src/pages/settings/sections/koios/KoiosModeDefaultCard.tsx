@@ -10,7 +10,7 @@
  * Gated on `settings.update`; a user without it sees the current values but a
  * disabled control with an honest reason (§0 no fake affordances).
  */
-import { saveSettingsKeys } from '@/lib/settings/useAllSettings'
+import { saveSettingsKeys, getBoolSetting } from '@/lib/settings/useAllSettings'
 import { extractApiError } from '@/lib/extractApiError'
 import { notifyError } from '@/lib/notify'
 import SegmentedControl from '@/components/ui/SegmentedControl'
@@ -23,18 +23,13 @@ import { useTranslation } from 'react-i18next'
 const MODE_KEY = 'koios.mode_default'
 const AUTO_MESSAGES_KEY = 'koios.auto_messages_default'
 
-// Reads the tenant boolean default the same way the backend stores it ('1'/'0'), unlike getBoolSetting's 'true' convention used elsewhere.
-function readAutoMessagesDefault(raw: unknown): boolean {
-  return raw === '1' || raw === true || raw === 'true'
-}
-
 // Bureau-wide Koios Wizard/Auto default card — first (status/models) settings tab, per the slice spec.
 export default function KoiosModeDefaultCard() {
   const { t } = useTranslation('koios')
   const { canEdit, values, saving, setSaving, error, setError } = useKoiosDefaultCard()
 
   const mode = values[MODE_KEY] === 'auto' ? 'auto' : 'wizard'
-  const autoMessages = readAutoMessagesDefault(values[AUTO_MESSAGES_KEY])
+  const autoMessages = getBoolSetting(values, AUTO_MESSAGES_KEY, false)
 
   // Persists one key through the shared writer (booleans travel as the backend's own
   // '1'/'0' convention so the wire equals the read-back); the writer reverts on failure.

@@ -147,6 +147,10 @@
       "title": "Lead Facebook definitivamente non riuscito",
       "body": "Lead Facebook che non è stato possibile recuperare e sono stati abbandonati: {{count}}.{{forms}} Riprova o controlla il collegamento con Facebook."
     },
+    "lead_rejected": {
+      "title": "Lead Facebook rifiutato da Meta",
+      "body": "Lead Facebook che secondo Meta non possono essere recuperati: {{count}}.{{forms}} Controlla i lead nella coda Facebook o riprova."
+    },
     "leads_retrieval_missing": {
       "title": "All’app Facebook manca leads_retrieval",
       "body": "L’app Facebook di questa agenzia non ha il permesso leads_retrieval, quindi i lead persi non possono essere recuperati. Richiedi il permesso in Meta."

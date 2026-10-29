@@ -147,6 +147,10 @@
       "title": "Facebook-Lead endgültig fehlgeschlagen",
       "body": "Facebook-Leads, die nicht abgerufen werden konnten und aufgegeben wurden: {{count}}.{{forms}} Versuchen Sie es erneut oder prüfen Sie die Facebook-Verbindung."
     },
+    "lead_rejected": {
+      "title": "Facebook-Lead von Meta abgelehnt",
+      "body": "Facebook-Leads, die laut Meta nicht abgerufen werden können: {{count}}.{{forms}} Prüfen Sie die Leads in der Facebook-Warteschlange oder versuchen Sie es erneut."
+    },
     "leads_retrieval_missing": {
       "title": "Facebook-App fehlt leads_retrieval",
       "body": "Der Facebook-App dieser Agentur fehlt die Berechtigung leads_retrieval, daher können verpasste Leads nicht wiederhergestellt werden. Beantragen Sie die Berechtigung in Meta."

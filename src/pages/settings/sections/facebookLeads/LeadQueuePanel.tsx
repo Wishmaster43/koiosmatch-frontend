@@ -45,6 +45,8 @@ export default function LeadQueuePanel() {
     { key: 'last_error_code', header: t('facebookLeads.queue.col.lastError'), render: (r) => (r.last_error_code ? <Mono>{r.last_error_code}</Mono> : dash) },
     { key: 'next_retry_at', header: t('facebookLeads.queue.col.nextAttempt'), nowrap: true, render: (r) => date(r.next_retry_at) },
     { key: 'retrieved_at', header: t('facebookLeads.queue.col.retrieved'), nowrap: true, render: (r) => date(r.retrieved_at) },
+    // CONTRACT-FOLLOW-1: on a rejected receipt escalated_at means "rejection announced at"; other statuses show a dash.
+    { key: 'escalated_at', header: t('facebookLeads.queue.col.rejectionAnnounced'), nowrap: true, render: (r) => (r.status === 'rejected' ? date(r.escalated_at) : dash) },
     { key: 'candidate_id', header: t('facebookLeads.queue.col.candidate'), render: (r) => (r.candidate_id != null
       ? <EntityLink page="candidates" id={r.candidate_id}>{t('facebookLeads.queue.view')}</EntityLink> : dash) },
     { key: 'actions', header: '', render: (r) => (canRetry && RETRYABLE.includes(r.status)

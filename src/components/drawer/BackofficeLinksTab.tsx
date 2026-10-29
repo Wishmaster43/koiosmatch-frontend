@@ -164,7 +164,11 @@ export default function BackofficeLinksTab({ entity, id, helloflexLink, shiftman
       // KOPPELINGEN-REFRESH-1: same self-refetch after a manual resync.
       await refetchLinks()
     } catch (err) {
-      notifyError(extractApiError(err, t('backofficeLinks.shiftmanager.syncFailed')))
+      // CONTRACT-SMALL-1: the stable sm_* codes get a translated sentence, never the server prose.
+      const code = (err as { response?: { data?: { code?: string } } })?.response?.data?.code
+      const codeKey = code === 'sm_not_found' ? 'backofficeLinks.shiftmanager.syncNotFound'
+        : code === 'sm_unexpected_response' ? 'backofficeLinks.shiftmanager.syncUnexpected' : null
+      notifyError(codeKey ? t(codeKey) : extractApiError(err, t('backofficeLinks.shiftmanager.syncFailed')))
     } finally {
       setSyncing(false)
     }

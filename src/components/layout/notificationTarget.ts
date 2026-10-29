@@ -81,6 +81,7 @@ export const CUSTOM_TYPE_TARGETS: Record<string, (meta: Record<string, unknown>)
   // FB-LEAD-NOTIFY (BE lane K): pending/failed lead bells open the Facebook leads queue tab; a missing leads_retrieval permission opens the connection tab.
   'facebook.lead_pending': () => ({ page: 'settings', id: 'facebook_leads', hash: '#settings/integrations/facebook_leads?view=queue' }),
   'facebook.lead_failed': () => ({ page: 'settings', id: 'facebook_leads', hash: '#settings/integrations/facebook_leads?view=queue' }),
+  'facebook.lead_rejected': () => ({ page: 'settings', id: 'facebook_leads', hash: '#settings/integrations/facebook_leads?view=queue' }),
   'facebook.leads_retrieval_missing': () => ({ page: 'settings', id: 'facebook_leads', hash: '#settings/integrations/facebook_leads' }),
   // WA-REPAIR: a device needs re-linking; open the WhatsApp Web devices tab (meta carries device_ids only).
   'whatsapp_web.repair_required': () => ({ page: 'settings', id: 'whatsapp_web', hash: '#settings/communication/whatsapp_web' }),

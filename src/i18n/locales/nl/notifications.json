@@ -147,6 +147,10 @@
       "title": "Facebook-lead definitief mislukt",
       "body": "Facebook-leads die niet konden worden opgehaald en zijn opgegeven: {{count}}.{{forms}} Probeer ze opnieuw of controleer de Facebook-koppeling."
     },
+    "lead_rejected": {
+      "title": "Facebook-lead door Meta geweigerd",
+      "body": "Facebook-leads die volgens Meta niet kunnen worden opgehaald: {{count}}.{{forms}} Bekijk de leads in de Facebook-wachtrij of probeer ze opnieuw."
+    },
     "leads_retrieval_missing": {
       "title": "Facebook-app mist leads_retrieval",
       "body": "De Facebook-app van dit bureau heeft geen leads_retrieval-toestemming, dus gemiste leads kunnen niet worden hersteld. Vraag de toestemming aan in Meta."

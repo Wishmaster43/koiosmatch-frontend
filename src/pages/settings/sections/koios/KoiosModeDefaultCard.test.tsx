@@ -102,4 +102,15 @@ describe('KoiosModeDefaultCard — gated on settings.update', () => {
     expect(screen.getByRole('switch')).toBeDisabled()
     expect(screen.getByText(st('modeDefault.noPermission'))).toBeInTheDocument()
   })
+
+  // SETTINGS-BOOL-1: the server now publishes a JSON boolean; it reads the same as '1'.
+  it('reads a JSON boolean true as checked and a JSON false as unchecked', () => {
+    mockSettings.mockReturnValue({ 'koios.mode_default': 'auto', 'koios.auto_messages_default': true })
+    const { unmount } = render(<KoiosModeDefaultCard />)
+    expect(screen.getByRole('switch')).toHaveAttribute('aria-checked', 'true')
+    unmount()
+    mockSettings.mockReturnValue({ 'koios.mode_default': 'auto', 'koios.auto_messages_default': false })
+    render(<KoiosModeDefaultCard />)
+    expect(screen.getByRole('switch')).toHaveAttribute('aria-checked', 'false')
+  })
 })

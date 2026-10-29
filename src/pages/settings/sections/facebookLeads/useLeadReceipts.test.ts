@@ -57,6 +57,23 @@ describe('useLeadReceipts', () => {
     expect(result.current.rows[0].status).toBe('pending')
   })
 
+  // CONTRACT-FOLLOW-1: a fetch job for the lead is in flight -> 409 lead_in_flight has its own sentence.
+  it('shows the in-flight sentence for 409 lead_in_flight', async () => {
+    mockGets()
+    mocked.post.mockRejectedValue({ response: { status: 409, data: { code: 'lead_in_flight', message: 'raw' } } })
+    const { result } = renderHook(() => useLeadReceipts('pending'))
+    await waitFor(() => expect(result.current.rows).toHaveLength(2))
+    await act(async () => { await result.current.retry(1) })
+    expect(mocked.post).toHaveBeenCalledWith('/facebook-leads/receipts/1/retry')
+    expect(result.current.retryError).toBe(i18n.t('facebookLeads.queue.retryInFlight', { ns: 'settings' }))
+  })
+
+  it('never sends a blank status param for the all filter', async () => {
+    mockGets()
+    renderHook(() => useLeadReceipts(''))
+    await waitFor(() => expect(mocked.get).toHaveBeenCalledWith('/facebook-leads/receipts', { params: { per_page: 25, page: 1 } }))
+  })
+
   it('shows the generic retry failure text for other errors', async () => {
     mockGets()
     mocked.post.mockRejectedValue(new Error('boom'))

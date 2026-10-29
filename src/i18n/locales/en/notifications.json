@@ -147,6 +147,10 @@
       "title": "Facebook lead permanently failed",
       "body": "Facebook leads that could not be retrieved and were given up: {{count}}.{{forms}} Retry them or check the Facebook connection."
     },
+    "lead_rejected": {
+      "title": "Facebook lead rejected by Meta",
+      "body": "Facebook leads that Meta says cannot be retrieved: {{count}}.{{forms}} Check the leads in the Facebook queue or retry them."
+    },
     "leads_retrieval_missing": {
       "title": "Facebook app is missing leads_retrieval",
       "body": "This agency's Facebook app has no leads_retrieval permission, so missed leads cannot be recovered. Request the permission in Meta."

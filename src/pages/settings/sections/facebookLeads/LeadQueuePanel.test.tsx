@@ -37,6 +37,19 @@ describe('LeadQueuePanel', () => {
     expect(screen.getByText((text) => text.startsWith(prefix))).toBeTruthy()
   })
 
+  // CONTRACT-FOLLOW-1: escalated_at is "rejection announced at" and only shows on rejected rows.
+  it('labels the escalated_at column as rejection announced and fills it only for rejected rows', async () => {
+    mocked.get.mockImplementation((url: string) => Promise.resolve(url.endsWith('/summary')
+      ? { data: { data: { pending: 0, retrieved: 0, rejected: 1, failed: 1, oldest_pending_at: null } } }
+      : { data: { data: [{ ...row(4, 'rejected'), escalated_at: '2026-10-21T09:30:00Z' }, { ...row(3, 'failed'), escalated_at: '2026-10-21T09:30:00Z' }], meta: { total: 2, last_page: 1 } } }) as never)
+    render(<LeadQueuePanel />)
+    await waitFor(() => expect(screen.getByText('form-4')).toBeTruthy())
+    expect(screen.getByText(t('facebookLeads.queue.col.rejectionAnnounced'))).toBeTruthy()
+    const rejectedCells = within(screen.getByText('form-4').closest('tr') as HTMLElement).getAllByRole('cell').map((c) => c.textContent)
+    const failedCells = within(screen.getByText('form-3').closest('tr') as HTMLElement).getAllByRole('cell').map((c) => c.textContent)
+    expect(rejectedCells.filter((c) => c && c !== '—').length).toBeGreaterThan(failedCells.filter((c) => c && c !== '—').length)
+  })
+
   it('hides retry without settings.update', async () => {
     mockUseAuth.mockReturnValue({ activeTenant: { id: 't' }, hasPermission: () => false })
     render(<LeadQueuePanel />)

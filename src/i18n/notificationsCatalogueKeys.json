@@ -30,6 +30,8 @@
  "facebook.lead_pending.body",
  "facebook.lead_failed.title",
  "facebook.lead_failed.body",
+ "facebook.lead_rejected.title",
+ "facebook.lead_rejected.body",
  "facebook.forms_suffix",
  "facebook.leads_retrieval_missing.title",
  "facebook.leads_retrieval_missing.body",

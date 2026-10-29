@@ -147,6 +147,10 @@
       "title": "Lead de Facebook fallido definitivamente",
       "body": "Leads de Facebook que no se pudieron recuperar y se descartaron: {{count}}.{{forms}} Vuelva a intentarlo o revise la conexión de Facebook."
     },
+    "lead_rejected": {
+      "title": "Lead de Facebook rechazado por Meta",
+      "body": "Leads de Facebook que Meta indica que no se pueden recuperar: {{count}}.{{forms}} Revisa los leads en la cola de Facebook o vuelve a intentarlo."
+    },
     "leads_retrieval_missing": {
       "title": "A la app de Facebook le falta leads_retrieval",
       "body": "La app de Facebook de esta agencia no tiene el permiso leads_retrieval, así que los leads perdidos no se pueden recuperar. Solicite el permiso en Meta."

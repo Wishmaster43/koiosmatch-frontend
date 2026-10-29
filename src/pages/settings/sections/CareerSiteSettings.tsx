@@ -21,7 +21,7 @@
  */
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { useAllSettings, saveSettingsKeys, invalidateAllSettingsCache } from '@/lib/settings/useAllSettings'
+import { useAllSettings, getBoolSetting, saveSettingsKeys, invalidateAllSettingsCache } from '@/lib/settings/useAllSettings'
 import { notifyError } from '@/lib/notify'
 import { SettingRow, Toggle } from '../components/SettingsKit'
 import PublicUrlsCard from './careerSite/PublicUrlsCard'
@@ -40,8 +40,7 @@ export default function CareerSiteSettings() {
   const { t } = useTranslation('settings')
   const values = useAllSettings()
   // Booleans round-trip through the settings store as strings — coerce every truthy form.
-  const raw = values.career_site_active
-  const active = raw === true || raw === 1 || raw === '1' || raw === 'true'
+  const active = getBoolSetting(values, 'career_site_active', false)
 
   // SUB-TABS: one tab per existing titled block (mirrors VacancyCandidateTabSettings).
   const [activeTab, setActiveTab] = useState<CareerSiteTab>('settings')

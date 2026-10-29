@@ -240,3 +240,22 @@ describe('buildDashboardKpis · KPI-TARGETS-ALERT-1 target lines', () => {
     expect(k.placements.targetLine).toBeDefined()
   })
 })
+
+// CONTRACT-FOLLOW-1 (6): never_contacted_alert off -> kpis.never_contacted null: no value, no attention caption.
+describe('buildDashboardKpis · never_contacted null', () => {
+  it('renders a dash without the attention caption when the alert is off', () => {
+    const off = buildDashboardKpis(baseArgs({ never_contacted: null }, vi.fn()))
+    expect(off.never.value).toBe('—')
+    expect(off.never.sub).toBe('')
+    expect(off.never.onClick).toBeUndefined()
+  })
+  it('keeps a real zero and the caption when the alert is on', () => {
+    const on = buildDashboardKpis(baseArgs({ never_contacted: 0 }, vi.fn()))
+    expect(on.never.value).toBe('0')
+    expect(on.never.sub).toBe('kpi.attentionNeeded')
+  })
+  it('uncalled tile value is kpis.calllist_uncalled (equals the threshold target value)', () => {
+    const k = buildDashboardKpis({ ...baseArgs({ calllist_uncalled: 9 }, vi.fn()), targets: { uncalled_warning_threshold: { value: 9, target: 25, comparison: 'lte', below_target: false, metric: 'm', period_scope: 'month' } } })
+    expect(k.uncalledCallist.value).toBe('9')
+  })
+})

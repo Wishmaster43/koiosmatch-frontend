@@ -152,6 +152,19 @@ describe('BackofficeLinksTab · Shiftmanager "Nu synchroniseren" (entity-prefixe
     await waitFor(() => expect(mockNotifySuccess).toHaveBeenCalledWith('backofficeLinks.shiftmanager.syncSuccess'))
   })
 
+  // CONTRACT-SMALL-1: sm_not_found (404) and sm_unexpected_response (422) map to their own sentences.
+  it.each([
+    [404, 'sm_not_found', 'backofficeLinks.shiftmanager.syncNotFound'],
+    [422, 'sm_unexpected_response', 'backofficeLinks.shiftmanager.syncUnexpected'],
+  ])('maps %s %s to its translated sentence', async (status, code, key) => {
+    mockPost.mockRejectedValue({ response: { status, data: { code, message: 'raw server text' } } })
+    const user = userEvent.setup()
+    render(<BackofficeLinksTab entity="candidates" id="1" helloflexLink={null} shiftmanagerLink={link({ status: 'linked', externalId: '428' })} canLink />)
+    await user.click(screen.getByRole('button', { name: /backofficeLinks.shiftmanager.syncNow/ }))
+    expect(mockPost).toHaveBeenCalledWith('/sm_candidates/sync/428', undefined, expect.anything())
+    await waitFor(() => expect(mockNotifyError).toHaveBeenCalledWith(key))
+  })
+
   // Only /sm_candidates/sync/{externalId} exists in the API today. Offering the button
   // for the other entities would ship a control that 404s on every click, so it is not
   // rendered at all — this asserts that boundary, not just that a handler fired.

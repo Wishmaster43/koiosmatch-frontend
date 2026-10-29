@@ -2,7 +2,7 @@
  * KPI target fields (BE lane L, M2): a stored 0 means "not set", so every target
  * field has min 1 (clearing sends empty); defaults and the fill-rate max stay.
  */
-import { describe, it, expect } from 'vitest'
+import { describe, it, expect, vi } from 'vitest'
 import * as schemas from './kpis'
 
 const TARGETS = {
@@ -36,5 +36,19 @@ describe('kpi target schema fields', () => {
   })
   it('keeps max 100 on fill rate', () => {
     expect(fields.find((x) => x.key === 'fill_rate_target')?.max).toBe(100)
+  })
+})
+
+// CONTRACT-FOLLOW-1 (6): clearing a target posts '' (never "null" or 0), which removes the row server-side.
+const postMock = vi.hoisted(() => vi.fn(() => Promise.resolve({ data: {} })))
+vi.mock('@/lib/api', async () => {
+  const actual = await vi.importActual<typeof import('@/lib/api')>('@/lib/api')
+  return { ...actual, default: { ...(actual.default as object), post: postMock } }
+})
+describe('kpi target removal wire', () => {
+  it('POST /settings carries an empty string for a cleared target', async () => {
+    const { saveSettingsKeys } = await import('@/lib/settings/useAllSettings')
+    await saveSettingsKeys({ new_candidates_target: null })
+    expect(postMock).toHaveBeenCalledWith('/settings', { new_candidates_target: '' })
   })
 })

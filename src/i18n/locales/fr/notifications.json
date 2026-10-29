@@ -147,6 +147,10 @@
       "title": "Lead Facebook définitivement en échec",
       "body": "Leads Facebook qui n’ont pas pu être récupérés et ont été abandonnés : {{count}}.{{forms}} Réessayez ou vérifiez la connexion Facebook."
     },
+    "lead_rejected": {
+      "title": "Lead Facebook rejeté par Meta",
+      "body": "Leads Facebook que Meta ne peut pas récupérer : {{count}}.{{forms}} Consultez les leads dans la file Facebook ou réessayez-les."
+    },
     "leads_retrieval_missing": {
       "title": "L’application Facebook n’a pas leads_retrieval",
       "body": "L’application Facebook de cette agence n’a pas l’autorisation leads_retrieval, les leads manqués ne peuvent donc pas être récupérés. Demandez l’autorisation dans Meta."

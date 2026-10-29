@@ -95,7 +95,9 @@ export function useLeadReceipts(initialStatus: ReceiptStatus | '' = 'pending') {
       // Only the contract code is mapped; every other failure (404, 403, 5xx, network) shows the translated fallback, never a raw server message.
       setRetryError(code === 'lead_already_retrieved'
         ? t('facebookLeads.queue.alreadyRetrieved')
-        : t('facebookLeads.queue.retryFailed'))
+        : code === 'lead_in_flight'
+          ? t('facebookLeads.queue.retryInFlight')
+          : t('facebookLeads.queue.retryFailed'))
     } finally {
       setRetryingId(null)
     }
