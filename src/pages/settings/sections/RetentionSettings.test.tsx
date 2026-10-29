@@ -138,6 +138,33 @@ describe('RetentionSettings — save', () => {
   })
 })
 
+// S-005: the day-window ceilings follow the chosen unit and warning/escalation never go below 1.
+describe('RetentionSettings — per-unit window bounds', () => {
+  it('clamps the warning amount to the months ceiling and posts the clamped amount with its unit', async () => {
+    const user = userEvent.setup()
+    render(<RetentionSettings />)
+    await screen.findByDisplayValue('12')
+    await user.click(screen.getByRole('button', { name: t('settings.retention.retention_warning_days_unit.label') }))
+    // "maanden" also labels the other fields' units; the open menu option is the last match.
+    await user.click((await screen.findAllByText(t('settings.options.window_unit.months'))).at(-1) as HTMLElement)
+    await user.click(screen.getByRole('button', { name: t('common.save') }))
+    await waitFor(() => expect(api.post).toHaveBeenCalledWith('/settings', expect.objectContaining({
+      retention_warning_days: '12', retention_warning_days_unit: 'months',
+    })))
+  })
+
+  it('cannot submit 0 for the warning window (floors to 1)', async () => {
+    const user = userEvent.setup()
+    render(<RetentionSettings />)
+    const warning = (await screen.findAllByDisplayValue('30'))[0]
+    await user.clear(warning)
+    await user.type(warning, '0')
+    await user.tab()
+    await user.click(screen.getByRole('button', { name: t('common.save') }))
+    await waitFor(() => expect(api.post).toHaveBeenCalledWith('/settings', expect.objectContaining({ retention_warning_days: '1' })))
+  })
+})
+
 // Audit finding A: a failed GET /settings must never render as "policy = defaults"
 // (AVG-sensitive retention windows) — the shared SettingsScaffold shows an error
 // notice and blocks Save until a reload succeeds.

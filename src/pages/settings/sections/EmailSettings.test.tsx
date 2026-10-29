@@ -54,6 +54,8 @@ function withLocationSpy() {
 
 // The settings context this suite renders (a pre-existing Dutch settings slug, named once).
 const CONTEXT = 'klanten'
+// Server status message fixture for the needs_reconnect case, shared by the mock and the assertion.
+const MAILBOX_MESSAGE = 'Token revoked by the provider'
 
 function renderPanel(context = 'klanten') {
   return render(<I18nextProvider i18n={i18n}><EmailSettings context={context} /></I18nextProvider>)
@@ -291,9 +293,9 @@ describe('EmailSettings · OAuth callback landing reads the hash, not location.s
 describe('EmailSettings · mailbox health statuses', () => {
   it('needs_reconnect shows the server message in a warning, never the green connected box', async () => {
     loadSettings.mockResolvedValue({ [`email_${CONTEXT}_provider`]: 'gmail' })
-    mockedGet.mockResolvedValue({ data: { data: { connected: false, status: 'needs_reconnect', provider: 'gmail', address: 'x@y.nl', status_message: 'Token ingetrokken door de aanbieder' } } })
+    mockedGet.mockResolvedValue({ data: { data: { connected: false, status: 'needs_reconnect', provider: 'gmail', address: 'x@y.nl', status_message: MAILBOX_MESSAGE } } })
     renderPanel(CONTEXT)
-    expect(await screen.findByText('Token ingetrokken door de aanbieder')).toBeInTheDocument()
+    expect(await screen.findByText(MAILBOX_MESSAGE)).toBeInTheDocument()
     expect(screen.queryByText(st('email.oauthConnectedTitle'))).not.toBeInTheDocument()
     expect(screen.getByRole('button', { name: st('email.oauthConnect') })).toBeInTheDocument()
   })

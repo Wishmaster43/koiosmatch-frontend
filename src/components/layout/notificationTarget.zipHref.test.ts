@@ -4,7 +4,7 @@
  * {page,id} record model. Pins: only http(s) passes, unknown types stay null.
  */
 import { describe, it, expect, vi } from 'vitest'
-// Pin a distinct API origin so the API-origin branch is really exercised (the .env uses a relative /api).
+// Pin a distinct API origin so the API-origin branch is really exercised (the vitest config pins a relative /api, CI-ENV-PIN-FE-1).
 vi.mock('@/lib/authMode', () => ({
   isApiOrigin: (u: string) => new URL(u).origin === 'https://api.example.test',
 }))

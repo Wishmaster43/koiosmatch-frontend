@@ -79,6 +79,16 @@ const renderKAS = () => {
   return { ...utils, rerenderKAS }
 }
 
+describe('KoiosAdviceSettings — subtitle', () => {
+  // The subtitle goes through the Caption atom rendered as a paragraph.
+  it('renders the subtitle as a <p> with the translated text', () => {
+    mockSettings.mockReturnValue({})
+    renderKAS()
+    const sub = screen.getByText(st('koiosAdvice.subtitle'))
+    expect(sub.tagName).toBe('P')
+  })
+})
+
 describe('KoiosAdviceSettings — seeded defaults', () => {
   it('shows the 14-day vacancy default, 30-day match default and 14-day application-stage default when nothing is configured', () => {
     mockSettings.mockReturnValue({})

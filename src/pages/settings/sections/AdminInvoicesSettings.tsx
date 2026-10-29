@@ -40,6 +40,16 @@ const th = thBase as CSSProperties
 const td = tdBase as CSSProperties
 const numCell = numCellBase as CSSProperties
 
+// At most this many failed bureau names are spelled out in the partial-failure toast.
+const MAX_FAILED_NAMES = 5
+
+// Joins the first failed bureau names and appends a translated "+K more" suffix.
+function failedNames(tenants: unknown[], t: (key: string, opts?: Record<string, unknown>) => string): string {
+  const names = tenants.map(n => String(n))
+  const head = names.slice(0, MAX_FAILED_NAMES).join(', ')
+  const rest = names.length - MAX_FAILED_NAMES
+  return rest > 0 ? `${head} ${t('adminInvoices.generateMoreNames', { rest })}` : head
+}
 
 // Stream a blob response to disk via a temporary object URL (never a bare <a
 // href> navigation) — the download URL itself is never logged, only the id (§8).
@@ -102,7 +112,8 @@ export default function AdminInvoicesSettings() {
           generated: body.generated ?? 0,
           alreadyFinal: body.already_final ?? 0,
           failed: body.failed,
-          names: (body.failed_tenants ?? []).map(n => String(n)).join(', '),
+          // Cap the named bureaus so many failures never build an unbounded toast line.
+          names: failedNames(body.failed_tenants ?? [], t),
         }))
       } else {
         notifySuccess(body.generated != null

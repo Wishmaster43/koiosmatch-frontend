@@ -9,6 +9,7 @@ import { tintBorder } from '@/lib/tint'
 import { useTranslation } from 'react-i18next'
 import { useAuth } from '@/context/AuthContext'
 import Spinner from '@/components/ui/Spinner'
+import { SectionTitle } from '@/components/ui/typography'
 import { SettingRow, Toggle } from '../components/SettingsKit'
 import { loadSettings, saveSettings } from '../lib/settingsApi'
 import { runAliveGuarded } from '@/lib/aliveGuard'
@@ -49,9 +50,7 @@ export default function MfaEnforcementSetting() {
 
   return (
     <div style={{ marginTop: 24 }}>
-      <h3 style={{ fontSize: 13, fontWeight: 700, color: 'var(--text)', marginBottom: 10 }}>
-        {t('security.enforceSection')}
-      </h3>
+      <SectionTitle style={{ marginBottom: 10 }}>{t('security.enforceSection')}</SectionTitle>
       <SettingRow label={t('security.enforceTitle')} description={t('security.enforceDesc')}>
         {loading || saving
           ? <span style={{ color: 'var(--text-muted)' }}><Spinner size={15} /></span>

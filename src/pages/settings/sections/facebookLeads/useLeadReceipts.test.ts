@@ -63,7 +63,32 @@ describe('useLeadReceipts', () => {
     const { result } = renderHook(() => useLeadReceipts('pending'))
     await waitFor(() => expect(result.current.rows).toHaveLength(2))
     await act(async () => { await result.current.retry(1) })
-    expect(result.current.retryError).toBeTruthy()
-    expect(result.current.retryError).not.toBe(i18n.t('facebookLeads.queue.alreadyRetrieved', { ns: 'settings' }))
+    expect(result.current.retryError).toBe(i18n.t('facebookLeads.queue.retryFailed', { ns: 'settings' }))
+    expect(result.current.rows[0].status).toBe('pending')
+    expect(mocked.post).toHaveBeenCalledWith('/facebook-leads/receipts/1/retry')
+  })
+
+  // A raw Laravel message (404/500) must never reach the user: only the translated fallback shows.
+  it.each([
+    [404, 'No query results for model [App\\Models\\FacebookLeadReceipt] x'],
+    [500, 'Server Error'],
+  ])('maps a %i response to the translated retry failure, not the server message', async (status, message) => {
+    mockGets()
+    mocked.post.mockRejectedValue({ response: { status, data: { message } } })
+    const { result } = renderHook(() => useLeadReceipts('pending'))
+    await waitFor(() => expect(result.current.rows).toHaveLength(2))
+    await act(async () => { await result.current.retry(1) })
+    expect(result.current.retryError).toBe(i18n.t('facebookLeads.queue.retryFailed', { ns: 'settings' }))
+  })
+
+  it('reports a failed summary request without touching the receipts', async () => {
+    mocked.get.mockImplementation((url: string) => (url.endsWith('/summary')
+      ? Promise.reject(new Error('x'))
+      : Promise.resolve({ data: { data: [row(1)], meta: { total: 1, last_page: 1 } } })) as never)
+    const { result } = renderHook(() => useLeadReceipts('pending'))
+    await waitFor(() => expect(result.current.summaryError).toBe(true))
+    expect(result.current.summary).toBeNull()
+    expect(result.current.error).toBe(false)
+    expect(result.current.rows).toHaveLength(1)
   })
 })

@@ -38,4 +38,16 @@ describe('AuditDrawer · K004-AUDIT-SCRUB-1', () => {
     expect(screen.getByText('Oude naam')).toBeInTheDocument()
     expect(screen.getByText('Nieuwe naam')).toBeInTheDocument()
   })
+
+  // Both notices go through the shared Caption atom (11px) instead of a hand-sized span.
+  it('renders the scrubbed and the access notice through the Caption atom', () => {
+    const base = { id: 3, log_name: 'candidates', description: 'x', created_at: '2026-10-01T10:00:00Z', causer_name: 'Danny Polak' }
+    const scrubbed: AuditEntry = { ...base, event: 'updated', properties: { scrubbed: true, reason: 'avg_erasure_request' } }
+    const { unmount } = render(<AuditDrawer entry={scrubbed} onClose={() => {}} />)
+    expect(screen.getByText(st('audit.scrubbedNotice'))).toHaveStyle({ fontSize: '11px' })
+    unmount()
+    const access: AuditEntry = { ...base, event: 'viewed' }
+    render(<AuditDrawer entry={access} onClose={() => {}} />)
+    expect(screen.getByText(st('audit.accessNotice'))).toHaveStyle({ fontSize: '11px' })
+  })
 })

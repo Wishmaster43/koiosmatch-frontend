@@ -2,7 +2,7 @@
  * AuditDrawer — drill-down for one audit entry: before/after diff per changed field.
  * Uses shared DiffRow for consistent styling across audit and other detail views.
  */
-import { Fragment } from 'react'
+import { Fragment, type ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
 import { X, Eye, ShieldOff } from 'lucide-react'
 import { useFocusTrap } from '@/hooks/useFocusTrap'
@@ -25,6 +25,16 @@ const asArray = (v: unknown): unknown[] => Array.isArray(v) ? v : []
 const asRecord = (v: unknown): Record<string, unknown> | undefined =>
   v && typeof v === 'object' && !Array.isArray(v) ? v as Record<string, unknown> : undefined
 
+// Neutral notice row (icon + caption) shared by the scrubbed and the access branches.
+function AuditNotice({ icon, text }: { icon: ReactNode; text: string }) {
+  return (
+    <div style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '10px 14px', borderRadius: 8, background: 'var(--hover-bg)' }}>
+      <span style={{ display: 'inline-flex', color: 'var(--text-muted)', flexShrink: 0 }}>{icon}</span>
+      <Caption>{text}</Caption>
+    </div>
+  )
+}
+
 // Drill-down for one audit log entry: dispatches to a per-log-type rendering
 // (access/http/auth/sync/roles/settings) or the generic before/after diff fallback.
 export function AuditDrawer({ entry, onClose }: AuditDrawerProps) {
@@ -46,10 +56,7 @@ export function AuditDrawer({ entry, onClose }: AuditDrawerProps) {
     if (isScrubbedActivity(p)) {
       return (
         <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '10px 14px', borderRadius: 8, background: 'var(--hover-bg)' }}>
-            <ShieldOff size={14} style={{ color: 'var(--text-muted)', flexShrink: 0 }} />
-            <span style={{ fontSize: 12.5, color: 'var(--text-muted)' }}>{t('audit.scrubbedNotice')}</span>
-          </div>
+          <AuditNotice icon={<ShieldOff size={14} />} text={t('audit.scrubbedNotice')} />
           <DetailRow label={t('audit.colEntity')} value={entry.subject_type ? [entityLabel(entry.subject_type, t), entry.subject_label].filter(Boolean).join(' · ') : '—'} />
         </div>
       )
@@ -59,10 +66,7 @@ export function AuditDrawer({ entry, onClose }: AuditDrawerProps) {
     if (isAccessEvent(entry)) {
       return (
         <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '10px 14px', borderRadius: 8, background: 'var(--hover-bg)' }}>
-            <Eye size={14} style={{ color: 'var(--text-muted)', flexShrink: 0 }} />
-            <span style={{ fontSize: 12.5, color: 'var(--text-muted)' }}>{t('audit.accessNotice')}</span>
-          </div>
+          <AuditNotice icon={<Eye size={14} />} text={t('audit.accessNotice')} />
           <DetailRow label={t('audit.colEntity')} value={entry.subject_type ? [entityLabel(entry.subject_type, t), entry.subject_label].filter(Boolean).join(' · ') : '—'} />
           <DetailRow label={t('audit.auth.ip')} value={(p.ip as string) ?? '—'} />
         </div>

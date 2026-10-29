@@ -27,7 +27,7 @@
 import { useMemo, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import SubTabBar from '@/components/drawer/SubTabBar'
-import { PageTitle } from '@/components/ui/typography'
+import { PageTitle, Caption } from '@/components/ui/typography'
 import NumberSettingField from '../components/NumberSettingField'
 import SettingsLoadBanner from '../components/SettingsLoadBanner'
 import CatalogSection from './CatalogSection'
@@ -80,7 +80,7 @@ export default function KoiosAdviceSettings() {
       <SettingsLoadBanner />
       <div style={{ marginBottom: 16 }}>
         <PageTitle>{t('koiosAdvice.title')}</PageTitle>
-        <p style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 2 }}>{t('koiosAdvice.subtitle')}</p>
+        <Caption as="p" style={{ marginTop: 2 }}>{t('koiosAdvice.subtitle')}</Caption>
       </div>
       <div style={{ marginBottom: 20 }}>
         <SubTabBar active={subTab} onChange={(id) => setSubTab(id as AdviceSubTab)} tabs={[

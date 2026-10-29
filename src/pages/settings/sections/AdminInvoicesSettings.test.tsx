@@ -50,15 +50,40 @@ describe('AdminInvoicesSettings', () => {
     const events: Array<{ type: string; message: string }> = []
     const handler = (e: Event) => events.push((e as CustomEvent).detail)
     window.addEventListener('km:toast', handler)
-    api.get.mockResolvedValue({ data: [] })
-    api.post.mockResolvedValueOnce({ data: { generated: 2, already_final: 1, failed: 1, failed_tenants: ['Bureau X'] } })
-    renderScreen()
-    const btn = await screen.findByRole('button', { name: i18n.t('adminInvoices.generate', { ns: 'settings' }) })
-    await waitFor(() => expect(api.get).toHaveBeenCalledTimes(1))
-    await userEvent.click(btn)
-    await waitFor(() => expect(api.get.mock.calls.length).toBeGreaterThanOrEqual(2))
-    window.removeEventListener('km:toast', handler)
-    expect(events.some(ev => ev.type === 'error' && ev.message.includes('Bureau X') && ev.message.includes('1 mislukt'))).toBe(true)
+    try {
+      api.get.mockResolvedValue({ data: [] })
+      api.post.mockResolvedValueOnce({ data: { generated: 2, already_final: 1, failed: 1, failed_tenants: ['Bureau X'] } })
+      renderScreen()
+      const btn = await screen.findByRole('button', { name: i18n.t('adminInvoices.generate', { ns: 'settings' }) })
+      await waitFor(() => expect(api.get).toHaveBeenCalledTimes(1))
+      await userEvent.click(btn)
+      await waitFor(() => expect(api.get.mock.calls.length).toBeGreaterThanOrEqual(2))
+      const expected = i18n.t('adminInvoices.generateResultFailed', { ns: 'settings', generated: 2, alreadyFinal: 1, failed: 1, names: 'Bureau X' })
+      expect(events.some(ev => ev.type === 'error' && ev.message === expected)).toBe(true)
+    } finally {
+      window.removeEventListener('km:toast', handler)
+    }
+  })
+
+  it('caps the failed bureau names at five and appends the translated remainder', async () => {
+    const events: Array<{ type: string; message: string }> = []
+    const handler = (e: Event) => events.push((e as CustomEvent).detail)
+    window.addEventListener('km:toast', handler)
+    try {
+      const names = Array.from({ length: 8 }, (_, i) => `Bureau ${i + 1}`)
+      api.get.mockResolvedValue({ data: [] })
+      api.post.mockResolvedValueOnce({ data: { generated: 0, already_final: 0, failed: 8, failed_tenants: names } })
+      renderScreen()
+      const btn = await screen.findByRole('button', { name: i18n.t('adminInvoices.generate', { ns: 'settings' }) })
+      await waitFor(() => expect(api.get).toHaveBeenCalledTimes(1))
+      await userEvent.click(btn)
+      const listed = `${names.slice(0, 5).join(', ')} ${i18n.t('adminInvoices.generateMoreNames', { ns: 'settings', rest: 3 })}`
+      const expected = i18n.t('adminInvoices.generateResultFailed', { ns: 'settings', generated: 0, alreadyFinal: 0, failed: 8, names: listed })
+      await waitFor(() => expect(events.some(ev => ev.message === expected)).toBe(true))
+      expect(expected).not.toContain('Bureau 6')
+    } finally {
+      window.removeEventListener('km:toast', handler)
+    }
   })
 
   it('shows "Finaliseren" for a draft and posts the finalize route', async () => {
@@ -90,11 +115,17 @@ describe('AdminInvoicesSettings', () => {
   // `km:toast` event (no notify mock in this file) so the request AND the
   // surfaced reason are both proven, never only that finalize resolved.
   describe('CLAIM-1 mail-claim reasons on finalize', () => {
+    // Every listener is also removed in afterEach, so a failing assertion never leaks it.
+    const stops: Array<() => void> = []
+    afterEach(() => { stops.splice(0).forEach(fn => fn()) })
+
     function captureToasts() {
       const events: Array<{ type: string; message: string }> = []
       const handler = (e: Event) => events.push((e as CustomEvent).detail)
       window.addEventListener('km:toast', handler)
-      return { events, stop: () => window.removeEventListener('km:toast', handler) }
+      const stop = () => window.removeEventListener('km:toast', handler)
+      stops.push(stop)
+      return { events, stop }
     }
 
     it('shows only the success toast when mailed: true', async () => {

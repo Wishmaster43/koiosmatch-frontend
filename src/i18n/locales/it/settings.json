@@ -2130,6 +2130,7 @@
           "failed": "Falliti: {{formatted}}"
         },
         "oldestPending": "Lead in attesa più vecchio: {{date}}",
+        "summaryLoadError": "Impossibile caricare il riepilogo.",
         "filterLabel": "Filtra per stato",
         "status": {
           "all": "Tutti gli stati",
@@ -4514,6 +4515,7 @@
     },
     "generateResult": "{{generated}} generate, {{alreadyFinal}} già definitive.",
     "generateResultFailed": "{{generated}} generate, {{alreadyFinal}} già definitive, {{failed}} non riuscite: {{names}}",
+    "generateMoreNames": "+{{rest}} altre",
     "sendingSince": "Invio email in corso da {{since}}",
     "resolveNotSent": "Segna come non inviata",
     "resolveIntro": "Questa email di fattura si è bloccata. Segnala come non inviata per poterla inviare di nuovo.",

@@ -2130,6 +2130,7 @@
           "failed": "Falhados: {{formatted}}"
         },
         "oldestPending": "Lead pendente mais antigo: {{date}}",
+        "summaryLoadError": "Não foi possível carregar o resumo.",
         "filterLabel": "Filtrar por estado",
         "status": {
           "all": "Todos os estados",
@@ -4514,6 +4515,7 @@
     },
     "generateResult": "{{generated}} geradas, {{alreadyFinal}} já definitivas.",
     "generateResultFailed": "{{generated}} geradas, {{alreadyFinal}} já definitivas, {{failed}} falharam: {{names}}",
+    "generateMoreNames": "+{{rest}} mais",
     "sendingSince": "Envio de email em curso desde {{since}}",
     "resolveNotSent": "Marcar como não enviada",
     "resolveIntro": "Este email de fatura ficou bloqueado. Marque-o como não enviado para poder enviá-lo novamente.",

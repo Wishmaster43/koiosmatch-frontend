@@ -56,6 +56,9 @@ export default function LeadQueuePanel() {
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+      {q.summaryError && (
+        <ErrorBanner onRetry={q.reload} retryLabel={t('facebookLeads.retry')}>{t('facebookLeads.queue.summaryLoadError')}</ErrorBanner>
+      )}
       {q.summary && (
         <div>
           <BodyText style={{ margin: 0 }}>

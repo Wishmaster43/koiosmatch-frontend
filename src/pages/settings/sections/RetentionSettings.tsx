@@ -19,7 +19,7 @@
 import { useTranslation } from 'react-i18next'
 import { useSettingsForm } from '../lib/useSettingsForm'
 import { SettingsScaffold, SettingCardList, SettingRow, NumberField, SelectField } from '../components/SettingsKit'
-import { WINDOW_UNIT_OPTIONS } from '../components/windowUnitOptions'
+import { WINDOW_UNIT_OPTIONS, WINDOW_UNIT_MAX_AMOUNT } from '../components/windowUnitOptions'
 import CatalogSection from './CatalogSection'
 
 // O23 UNIT-NAAST-BEDRAG-1: window-unit options translated for the SelectField shape.
@@ -27,6 +27,10 @@ function useWindowUnitOptions() {
   const { t } = useTranslation('settings')
   return WINDOW_UNIT_OPTIONS.map(o => ({ value: o.value, label: t(o.label) }))
 }
+
+// Per-unit amount bounds of a day-window field (grace keeps its 7-day floor for day-like units).
+const windowMax = (unit: string) => WINDOW_UNIT_MAX_AMOUNT[unit] ?? 365
+const graceMin = (unit: string) => (unit === 'days' || unit === 'workdays' ? 7 : 1)
 
 // Tenant-wide AVG retention windows editor (see the module doc above): the only screen that edits the policy the backend derives retention_expires_at from.
 export default function RetentionSettings() {
@@ -57,6 +61,11 @@ export default function RetentionSettings() {
     deletion_grace_days_unit: 'days',
   })
   const unitOptions = useWindowUnitOptions()
+  // Switching a unit also clamps the amount into the new unit's ceiling, so no stale oversize value is saved.
+  const setUnit = (key: 'retention_warning_days' | 'retention_escalation_days' | 'deletion_grace_days', unit: string) => {
+    form.set(`${key}_unit`, unit)
+    if (Number(form.values[key]) > windowMax(unit)) form.set(key, windowMax(unit))
+  }
 
   return (
     <>
@@ -90,11 +99,11 @@ export default function RetentionSettings() {
           <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
             <NumberField value={form.values.retention_warning_days}
               onChange={v => form.set('retention_warning_days', v)}
-              min={0} max={365} />
+              min={1} max={windowMax(form.values.retention_warning_days_unit)} />
             {/* DROPDOWN-CLEAR-1: this unit pairs with a required amount and must
                 never persist empty. */}
             <SelectField value={form.values.retention_warning_days_unit}
-              onChange={v => form.set('retention_warning_days_unit', v)}
+              onChange={v => setUnit('retention_warning_days', v)}
               options={unitOptions} ariaLabel={t('settings.retention.retention_warning_days_unit.label')}
               clearable={false} />
           </div>
@@ -104,11 +113,11 @@ export default function RetentionSettings() {
           <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
             <NumberField value={form.values.retention_escalation_days}
               onChange={v => form.set('retention_escalation_days', v)}
-              min={0} max={365} />
+              min={1} max={windowMax(form.values.retention_escalation_days_unit)} />
             {/* DROPDOWN-CLEAR-1: this unit pairs with a required amount and must
                 never persist empty. */}
             <SelectField value={form.values.retention_escalation_days_unit}
-              onChange={v => form.set('retention_escalation_days_unit', v)}
+              onChange={v => setUnit('retention_escalation_days', v)}
               options={unitOptions} ariaLabel={t('settings.retention.retention_escalation_days_unit.label')}
               clearable={false} />
           </div>
@@ -118,11 +127,11 @@ export default function RetentionSettings() {
           <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
             <NumberField value={form.values.deletion_grace_days}
               onChange={v => form.set('deletion_grace_days', v)}
-              min={7} max={365} />
+              min={graceMin(form.values.deletion_grace_days_unit)} max={windowMax(form.values.deletion_grace_days_unit)} />
             {/* DROPDOWN-CLEAR-1: this unit pairs with a required amount and must
                 never persist empty. */}
             <SelectField value={form.values.deletion_grace_days_unit}
-              onChange={v => form.set('deletion_grace_days_unit', v)}
+              onChange={v => setUnit('deletion_grace_days', v)}
               options={unitOptions} ariaLabel={t('settings.retention.deletion_grace_days_unit.label')}
               clearable={false} />
           </div>

@@ -21,7 +21,7 @@ import CopyIconButton from '@/components/ui/CopyIconButton'
 import { PageTitle, formLabelStyle } from '@/components/ui/typography'
 import { publicApiUrl } from '@/lib/publicApiUrl'
 import SubTabBar from '@/components/drawer/SubTabBar'
-import { getHashParams } from '@/lib/hashQuery'
+import { useHashViewParam } from '@/hooks/useHashViewParam'
 import LeadQueuePanel from './facebookLeads/LeadQueuePanel'
 
 // The exact placeholder the backend masks a stored secret with (SettingController::MASK) —
@@ -204,7 +204,10 @@ function FacebookConnectionForm() {
 // Screen shell: the credentials form ("connection") and the lead queue, opened on the queue via `?view=queue` (notification deep link).
 export default function FacebookLeadsSettings() {
   const { t } = useTranslation('settings')
-  const [tab, setTab] = useState<'connection' | 'queue'>(() => (getHashParams(window.location.hash).get('view') === 'queue' ? 'queue' : 'connection'))
+  // A same-page deep link (bell click while this section is open) only changes the hash: follow it.
+  const viewParam = useHashViewParam('view')
+  const [tab, setTab] = useState<'connection' | 'queue'>(viewParam === 'queue' ? 'queue' : 'connection')
+  useEffect(() => { if (viewParam === 'queue') setTab('queue') }, [viewParam])
   return (
     <div>
       <PageTitle>{t('facebookLeads.title')}</PageTitle>

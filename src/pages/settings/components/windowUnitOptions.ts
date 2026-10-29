@@ -15,6 +15,10 @@ export const WINDOW_UNIT_OPTIONS: Array<{ value: string; label: string }> = [
   { value: 'months', label: 'settings.options.window_unit.months' },
 ]
 
+// Largest amount the UI accepts per unit, so a unit switch can never widen a window past
+// roughly a year (BE WindowUnit::MAX_AMOUNT is looser; the UI stays on the stricter side).
+export const WINDOW_UNIT_MAX_AMOUNT: Record<string, number> = { days: 365, workdays: 260, weeks: 52, months: 12 }
+
 // Builds the ready `<amountKey>_unit` select field for a schema, so it can sit right
 // after its amount field: `unitOf` marks it as a companion (SchemaSection renders it
 // inline instead of as its own row) rather than a plain catalogue field. `defaultUnit`

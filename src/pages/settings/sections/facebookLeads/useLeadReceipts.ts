@@ -6,7 +6,6 @@
 import { useCallback, useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import api, { unwrapList } from '@/lib/api'
-import { extractApiError } from '@/lib/extractApiError'
 
 export type ReceiptStatus = 'pending' | 'retrieved' | 'rejected' | 'failed'
 
@@ -68,11 +67,14 @@ export function useLeadReceipts(initialStatus: ReceiptStatus | '' = 'pending') {
 
   // Counts summary, loaded on mount and after every retry.
   const [summaryKey, setSummaryKey] = useState(0)
+  // A failed summary request is reported, never rendered as an empty counts block.
+  const [summaryError, setSummaryError] = useState(false)
   useEffect(() => {
     let alive = true
+    setSummaryError(false)
     api.get('/facebook-leads/receipts/summary').then((res) => {
       if (alive) setSummary((res.data?.data ?? null) as LeadSummary | null)
-    }).catch(() => { if (alive) setSummary(null) })
+    }).catch(() => { if (alive) { setSummary(null); setSummaryError(true) } })
     return () => { alive = false }
   }, [summaryKey, reloadKey])
 
@@ -90,9 +92,10 @@ export function useLeadReceipts(initialStatus: ReceiptStatus | '' = 'pending') {
       setSummaryKey((k) => k + 1)
     } catch (err) {
       const code = (err as { response?: { data?: { code?: string } } })?.response?.data?.code
+      // Only the contract code is mapped; every other failure (404, 403, 5xx, network) shows the translated fallback, never a raw server message.
       setRetryError(code === 'lead_already_retrieved'
         ? t('facebookLeads.queue.alreadyRetrieved')
-        : extractApiError(err, t('facebookLeads.queue.retryFailed')))
+        : t('facebookLeads.queue.retryFailed'))
     } finally {
       setRetryingId(null)
     }
@@ -100,5 +103,5 @@ export function useLeadReceipts(initialStatus: ReceiptStatus | '' = 'pending') {
 
   const reload = useCallback(() => setReloadKey((k) => k + 1), [])
 
-  return { status, setStatus, page, setPage, rows, total, lastPage, perPage: PER_PAGE, summary, loading, error, retry, retryError, retryingId, reload }
+  return { status, setStatus, page, setPage, rows, total, lastPage, perPage: PER_PAGE, summary, summaryError, loading, error, retry, retryError, retryingId, reload }
 }

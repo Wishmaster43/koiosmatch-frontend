@@ -1,6 +1,6 @@
 /** LeadQueuePanel + the screen's queue deep link — render checks per status, candidate link and permission gating. */
 import { describe, it, expect, afterEach, beforeEach, vi } from 'vitest'
-import { render, screen, waitFor, fireEvent } from '@testing-library/react'
+import { render, screen, waitFor, fireEvent, within, act } from '@testing-library/react'
 import i18n from '@/i18n'
 import api from '@/lib/api'
 import LeadQueuePanel from './LeadQueuePanel'
@@ -32,7 +32,9 @@ describe('LeadQueuePanel', () => {
     for (const s of ['failed', 'retrieved', 'rejected']) expect(screen.getAllByText(t(`facebookLeads.queue.status.${s}`)).length).toBeGreaterThan(0)
     expect(screen.getAllByText(t('facebookLeads.queue.view'))).toHaveLength(1)
     expect(screen.getAllByRole('button', { name: t('facebookLeads.queue.retry') })).toHaveLength(3)
-    expect(screen.getByText(/Oldest pending lead|Oudste wachtende lead/)).toBeTruthy()
+    // The caption text is the translated key up to its date placeholder.
+    const prefix = i18n.t('facebookLeads.queue.oldestPending', { ns: 'settings', date: '@@' }).split('@@')[0]
+    expect(screen.getByText((text) => text.startsWith(prefix))).toBeTruthy()
   })
 
   it('hides retry without settings.update', async () => {
@@ -53,6 +55,24 @@ describe('LeadQueuePanel', () => {
     await waitFor(() => expect(mocked.get).toHaveBeenLastCalledWith('/facebook-leads/receipts', { params: { per_page: 25, page: 1 } }))
   })
 
+  it('clicking retry on a failed row posts the retry route for that receipt', async () => {
+    mocked.post.mockResolvedValue({ data: { data: row(3, 'retrieved') } })
+    render(<LeadQueuePanel />)
+    await waitFor(() => expect(screen.getByText('form-3')).toBeTruthy())
+    const failedRow = screen.getByText('form-3').closest('tr') as HTMLElement
+    fireEvent.click(within(failedRow).getByRole('button', { name: t('facebookLeads.queue.retry') }))
+    await waitFor(() => expect(mocked.post).toHaveBeenCalledWith('/facebook-leads/receipts/3/retry'))
+  })
+
+  it('shows a summary error banner while the receipts table still renders', async () => {
+    mocked.get.mockImplementation((url: string) => (url.endsWith('/summary')
+      ? Promise.reject(new Error('x'))
+      : Promise.resolve({ data: { data: [row(1, 'pending')], meta: { total: 1, last_page: 1 } } })) as never)
+    render(<LeadQueuePanel />)
+    await waitFor(() => expect(screen.getByText(t('facebookLeads.queue.summaryLoadError'))).toBeTruthy())
+    expect(screen.getByText('form-1')).toBeTruthy()
+  })
+
   it('shows an error banner when loading fails', async () => {
     mocked.get.mockRejectedValue(new Error('x'))
     render(<LeadQueuePanel />)
@@ -64,6 +84,19 @@ describe('FacebookLeadsSettings queue deep link', () => {
   it('opens on the queue tab with ?view=queue', async () => {
     window.location.hash = '#settings/integrations/facebook_leads?view=queue'
     render(<FacebookLeadsSettings />)
+    await waitFor(() => expect(screen.getByText('form-1')).toBeTruthy())
+    window.location.hash = ''
+  })
+
+  // A same-page deep link only fires hashchange: the open Connection tab must follow it.
+  it('switches to the queue when the hash gains ?view=queue while mounted', async () => {
+    window.location.hash = '#settings/integrations/facebook_leads'
+    render(<FacebookLeadsSettings />)
+    expect(screen.queryByText('form-1')).toBeNull()
+    act(() => {
+      window.location.hash = '#settings/integrations/facebook_leads?view=queue'
+      window.dispatchEvent(new HashChangeEvent('hashchange'))
+    })
     await waitFor(() => expect(screen.getByText('form-1')).toBeTruthy())
     window.location.hash = ''
   })

@@ -17,8 +17,8 @@ import CareerSiteSettings from './CareerSiteSettings'
 import { publicApiBase } from '@/lib/publicApiUrl'
 
 const t = (key: string, opts?: Record<string, unknown>) => i18n.t(key, { ns: 'settings', ...opts })
-// Same VITE_API_URL-derived base PublicUrlsCard resolves (.env sets the relative
-// dev-proxy path '/api', not the absolute prod fallback) — computed, not hardcoded.
+// Same VITE_API_URL-derived base PublicUrlsCard resolves (the vitest config pins the relative
+// '/api' via test.env, CI-ENV-PIN-FE-1, not the absolute prod fallback) — computed, not hardcoded.
 // The card composes ABSOLUTE URLs via publicApiBase (regression 31-08: the
 // cookie setup's relative /api base leaked into copy targets) — pin the same.
 const API_BASE = publicApiBase()

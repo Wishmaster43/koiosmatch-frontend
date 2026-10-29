@@ -1870,6 +1870,7 @@
           "failed": "Fallidos: {{formatted}}"
         },
         "oldestPending": "Lead pendiente más antiguo: {{date}}",
+        "summaryLoadError": "No se pudo cargar el resumen.",
         "filterLabel": "Filtrar por estado",
         "status": {
           "all": "Todos los estados",
@@ -4513,6 +4514,7 @@
     },
     "generateResult": "{{generated}} generadas, {{alreadyFinal}} ya definitivas.",
     "generateResultFailed": "{{generated}} generadas, {{alreadyFinal}} ya definitivas, {{failed}} fallidas: {{names}}",
+    "generateMoreNames": "+{{rest}} más",
     "sendingSince": "Envío de correo en curso desde {{since}}",
     "resolveNotSent": "Marcar como no enviada",
     "resolveIntro": "Este correo de factura se ha quedado atascado. Márcalo como no enviado para poder enviarlo de nuevo.",

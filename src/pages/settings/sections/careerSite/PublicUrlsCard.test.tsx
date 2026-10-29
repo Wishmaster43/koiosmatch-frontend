@@ -11,8 +11,8 @@ import PublicUrlsCard from './PublicUrlsCard'
 import { publicApiBase } from '@/lib/publicApiUrl'
 
 const t = (key: string, opts?: Record<string, unknown>) => i18n.t(key, { ns: 'settings', ...opts })
-// Same VITE_API_URL-derived base the component itself resolves (.env sets it to
-// the relative dev-proxy path '/api', not the absolute prod fallback) — computed
+// Same VITE_API_URL-derived base the component itself resolves (the vitest config
+// pins it to the relative '/api' via test.env, CI-ENV-PIN-FE-1, not the absolute prod fallback) — computed
 // here instead of hardcoded so the assertion holds under either configuration.
 // The card composes ABSOLUTE URLs via publicApiBase (regression 31-08: the
 // cookie setup's relative /api base leaked into copy targets) — pin the same.
