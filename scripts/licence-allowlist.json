@@ -1,0 +1,6 @@
+[
+  { "name": "png-js", "licence": "none", "reason": "Q-008 decision pending (accept or replace): lock entry has no licence field", "expires": "2026-11-29" },
+  { "name": "@fontsource/inter", "licence": "OFL-1.1", "reason": "SIL Open Font License permits bundling and redistributing the font files unmodified", "expires": "2027-10-29" },
+  { "name": "@fontsource/jetbrains-mono", "licence": "OFL-1.1", "reason": "SIL Open Font License permits bundling and redistributing the font files unmodified", "expires": "2027-10-29" },
+  { "name": "caniuse-lite", "licence": "CC-BY-4.0", "reason": "Dev-only browser-support data, never shipped in the bundle; attribution licence", "expires": "2027-10-29" }
+]

@@ -24,6 +24,7 @@
     "huisstijl:ceiling": "node scripts/huisstijl-ceiling.mjs",
     "security:audit": "audit-ci --config audit-ci.jsonc",
     "dry:ceiling": "node scripts/dry-ceiling.mjs",
+    "licence:check": "node scripts/licence-inventory.mjs",
     "english:ceiling": "node scripts/english-code-count.mjs"
   },
   "dependencies": {

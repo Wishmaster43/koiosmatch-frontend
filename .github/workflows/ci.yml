@@ -41,6 +41,8 @@ jobs:
         run: npx vitest run src/components/ui/typography.houseStyle.test.js src/components/ui/buttonSize.houseStyle.test.js src/i18n/emdash.houseStyle.test.js
       - name: dependency audit (HIGH/CRITICAL unless allowlisted with a reason)
         run: npm run --silent security:audit
+      - name: licence allow-list (lockfile families)
+        run: npm run --silent licence:check
 
   tests:
     name: vitest (full suite)
