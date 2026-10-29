@@ -1,4 +1,8 @@
 {
+  "validation": {
+    "outOfRange": "Enter a value between {{min}} and {{max}}.",
+    "invalid": "This value is not valid."
+  },
   "shell": {
     "title": "Settings",
     "empty": "No settings available for your role.",

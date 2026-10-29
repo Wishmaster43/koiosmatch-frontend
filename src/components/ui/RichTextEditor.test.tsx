@@ -82,3 +82,15 @@ describe('RichTextEditor · source mode sanitises on the way out (ONIX M-002)', 
     await waitFor(() => expect(onChange).toHaveBeenLastCalledWith('<p>ok</p>'))
   })
 })
+
+// #18 (§6): id / aria-labelledby / aria-required land on the editable root, not the wrapper.
+describe('RichTextEditor · a11y attributes on the editable root', () => {
+  it('forwards id, aria-labelledby and aria-required to the contenteditable element', async () => {
+    render(<RichTextEditor value="<p>x</p>" onChange={vi.fn()} id="rte-1" aria-labelledby="rte-1-label" aria-required />)
+    await screen.findByText('x')
+    const root = document.querySelector('[contenteditable="true"]') as HTMLElement
+    expect(root).toHaveAttribute('id', 'rte-1')
+    expect(root).toHaveAttribute('aria-labelledby', 'rte-1-label')
+    expect(root).toHaveAttribute('aria-required', 'true')
+  })
+})

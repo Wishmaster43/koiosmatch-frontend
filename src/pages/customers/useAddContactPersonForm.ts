@@ -22,7 +22,7 @@ import { formatUnmappedErrors } from '@/lib/formatUnmappedErrors'
 import { duplicateContactError } from '@/lib/duplicateContactError'
 import { useSubEntityDuplicateGuard } from './addmodal/useSubEntityDuplicateGuard'
 // ONIX N-005: the entity's REQUIRED tenant custom fields.
-import { requiredCustomFieldKeys, isRequiredCustomField, isCustomFieldFilled, requiredCustomFieldErrors } from '@/components/forms/requiredCustomFields'
+import { requiredCustomFieldKeys, isRequiredCustomField, isCustomFieldFilled, requiredCustomFieldErrors, seedBooleanDefaults } from '@/components/forms/requiredCustomFields'
 import { useCustomFields } from '@/lib/useCustomFields'
 import type { ContactPayload } from './hooks/useCustomerContacts'
 import type { Contact, Department } from '@/types/customer'
@@ -119,7 +119,9 @@ export function useAddContactPersonForm({
   // ONIX N-005: this entity's REQUIRED tenant custom fields.
   const { fields: customFieldDefs } = useCustomFields('customer_contact')
   const requiredCustomDefs = customFieldDefs.filter(isRequiredCustomField)
-  const customFieldsValid = requiredCustomDefs.every(def => isCustomFieldFilled(form.customFields[def.key]))
+  // An untouched required checkbox is an answer (false): validate and send the seeded values.
+  const seededCustomFields = seedBooleanDefaults(requiredCustomDefs, form.customFields)
+  const customFieldsValid = requiredCustomDefs.every(def => isCustomFieldFilled(seededCustomFields[def.key]))
 
   const set = <K extends keyof ContactPayload>(k: K, v: ContactPayload[K]) => {
     setForm(f => ({ ...f, [k]: v }))
@@ -176,13 +178,14 @@ export function useAddContactPersonForm({
       return
     }
     // ONIX N-005: block on an empty required custom field, same as the identity checks above.
-    const customFieldErrors = requiredCustomFieldErrors(requiredCustomDefs, form.customFields)
+    const customFieldErrors = requiredCustomFieldErrors(requiredCustomDefs, seededCustomFields)
     if (customFieldErrors) { setErrors(e => ({ ...e, ...customFieldErrors })); return }
     // The pickers here are single-value on purpose — a new contact gets its FIRST
     // coupling; more are added in the drill-down. The arrays are derived from them so the
     // pivots are right from the first write instead of only after the next edit.
     const payload = {
       ...form,
+      customFields: seededCustomFields,
       firstName: form.firstName.trim(), middleName: form.middleName.trim(), lastName: form.lastName.trim(),
       locationIds: form.locationId ? [form.locationId] : [],
       departmentIds: form.departmentId ? [form.departmentId] : [],

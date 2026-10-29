@@ -50,7 +50,7 @@ import ProfileTextCard from './addmodal/ProfileTextCard'
 import BranchesCard from './addmodal/BranchesCard'
 // ONIX N-005: the entity's REQUIRED tenant custom fields (renders nothing when none exist).
 import RequiredCustomFieldsCard from '@/components/forms/RequiredCustomFieldsCard'
-import { requiredCustomFieldKeys, isRequiredCustomField, isCustomFieldFilled } from '@/components/forms/requiredCustomFields'
+import { requiredCustomFieldKeys, isRequiredCustomField, isCustomFieldFilled, seedBooleanDefaults } from '@/components/forms/requiredCustomFields'
 import { useCustomFields } from '@/lib/useCustomFields'
 import CvUploadCard from './addmodal/CvUploadCard'
 import PasteCvCard from './addmodal/PasteCvCard'
@@ -155,6 +155,8 @@ export default function AddCandidateModal({ onClose, onCreated, onImported }: Ad
   const { fields: customFieldDefs } = useCustomFields('candidate')
   const requiredCustomDefs = customFieldDefs.filter(isRequiredCustomField)
   const [customFields, setCustomFields] = useState<Record<string, unknown>>({})
+  // An untouched required checkbox is an answer (false): validate and send the seeded values.
+  const seededCustomFields = seedBooleanDefaults(requiredCustomDefs, customFields)
   const setCustomField = (key: string, v: unknown) => {
     setCustomFields(cf => ({ ...cf, [key]: v }))
     const bagKey = `custom_fields.${key}`
@@ -252,7 +254,7 @@ export default function AddCandidateModal({ onClose, onCreated, onImported }: Ad
     form, status, branchIds, requiredForm, touchInvalidFields, createCandidate, onCreated, onClose, t,
     // ONIX N-005: the custom-field values ride along in the body, and the dotted
     // bag keys a field here already renders are excluded from the generic banner.
-    customFields, renderedKeys: requiredCustomFieldKeys(requiredCustomDefs),
+    customFields: seededCustomFields, renderedKeys: requiredCustomFieldKeys(requiredCustomDefs),
   })
 
   const selectedStatus = phases.find(s => s.value === status)
@@ -260,7 +262,7 @@ export default function AddCandidateModal({ onClose, onCreated, onImported }: Ad
   // result) — never let the manual form fire a SECOND create while the import is
   // mid-decision or has just written its own records (mirrors AddVacancyModal).
   // ONIX N-005: an empty required custom field blocks submit, same as a required form field.
-  const customFieldsValid = requiredCustomDefs.every(def => isCustomFieldFilled(customFields[def.key]))
+  const customFieldsValid = requiredCustomDefs.every(def => isCustomFieldFilled(seededCustomFields[def.key]))
   const canSubmit       = !!status && requiredForm.every(k => String(form[k] ?? '').trim()) && !hasFormatError
     && customFieldsValid && importWizard.step === 'upload'
   const statusLabel     = selectedStatus?.label ?? ''

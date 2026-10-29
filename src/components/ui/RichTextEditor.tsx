@@ -67,14 +67,25 @@ interface RichTextEditorProps {
   // KOIOS-GENERATE-1 (Danny 09-08): forwarded straight to RichTextAssistBar's own
   // `generate` prop — omit on any field the backend cannot generate for (§3).
   assistGenerate?: { entity: GenerateEntity; id: string }
+  // a11y (§6): forwarded to the editable root so a FieldRow label names the editor and announces it as required.
+  id?: string
+  'aria-labelledby'?: string
+  'aria-required'?: boolean
 }
 
-export default function RichTextEditor({ value, onChange, expanded, onToggleExpand, labels = {}, fill = false, minHeight = 120, resizable = false, language, onLanguageChange, showLanguage = true, toolbarExtra, assist = true, assistModes, assistGenerate }: RichTextEditorProps) {
+export default function RichTextEditor({ value, onChange, expanded, onToggleExpand, labels = {}, fill = false, minHeight = 120, resizable = false, language, onLanguageChange, showLanguage = true, toolbarExtra, assist = true, assistModes, assistGenerate, id, 'aria-labelledby': ariaLabelledBy, 'aria-required': ariaRequired }: RichTextEditorProps) {
   // Merge caller overrides over the i18n'd defaults (common:editor.*).
   const { t, i18n } = useTranslation('common')
   // Effective spellcheck language: caller-controlled wins, else local choice, else app language.
   const [innerLang, setInnerLang] = useState<string | null>(null)
   const lang = language ?? innerLang ?? (i18n.language || 'nl').slice(0, 2)
+  // Editable-root attributes: spellcheck language plus the forwarded a11y wiring.
+  const rootAttributes = useMemo(() => ({
+    spellcheck: 'true', lang,
+    ...(id ? { id } : {}),
+    ...(ariaLabelledBy ? { 'aria-labelledby': ariaLabelledBy } : {}),
+    ...(ariaRequired ? { 'aria-required': 'true' } : {}),
+  }), [lang, id, ariaLabelledBy, ariaRequired])
   // User picked a spellcheck language from the menu; also lets a controlling
   // caller (language prop owner) hear about the choice.
   const pickLang = (l: string) => {
@@ -99,7 +110,7 @@ export default function RichTextEditor({ value, onChange, expanded, onToggleExpa
     content: value || '',
     // TAAL-SPELL-1: native browser spellcheck in the CHOSEN language — local and
     // free; never a third-party spell cloud (§9: notes hold health-adjacent text).
-    editorProps: { attributes: { spellcheck: 'true', lang } },
+    editorProps: { attributes: rootAttributes },
     onUpdate: ({ editor }) => onChange(editor.getHTML()),
   })
 
@@ -123,9 +134,9 @@ export default function RichTextEditor({ value, onChange, expanded, onToggleExpa
   // Language switch re-applies the content attributes (TipTap has no reactive prop).
   useEffect(() => {
     if (editor && !editor.isDestroyed) {
-      editor.setOptions({ editorProps: { attributes: { spellcheck: 'true', lang } } })
+      editor.setOptions({ editorProps: { attributes: rootAttributes } })
     }
-  }, [lang, editor])
+  }, [rootAttributes, editor])
 
   if (!editor) return null
 

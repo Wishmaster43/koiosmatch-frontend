@@ -7,7 +7,7 @@ import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { downloadImportTemplate } from './importApi'
 import { notifyError } from '@/lib/notify'
-import { useUploadPolicy } from '@/lib/uploadPolicy'
+import { useUploadPolicy, uploadRefusalText } from '@/lib/uploadPolicy'
 import Button from '@/components/ui/Button'
 import Spinner from '@/components/ui/Spinner'
 import { FileDropZoneUI } from '@/pages/import/shared'
@@ -31,7 +31,7 @@ interface UploadStepProps {
 export default function UploadStep({
   entity, file, onSelectFile, onRunPreview, previewStatus, previewError, canView, canImport,
 }: UploadStepProps) {
-  const { t } = useTranslation('settings')
+  const { t, i18n } = useTranslation('settings')
   const { accept: importAccept, check: importCheck } = useUploadPolicy('import')
   const [typeError, setTypeError] = useState<string | null>(null)
   const [downloadPending, setDownloadPending] = useState(false)
@@ -44,14 +44,15 @@ export default function UploadStep({
   const acceptFile = (candidate: File) => {
     const lower = candidate.name.toLowerCase()
     const isValidZip = lower.endsWith('.zip')
-    const isValidSpreadsheet = importCheck(candidate).ok
+    const policyResult = importCheck(candidate)
 
     if (isZip && !isValidZip) {
       setTypeError(t('import.wrongFileType'))
       return
     }
-    if (!isZip && !isValidSpreadsheet) {
-      setTypeError(t('import.wrongFileType'))
+    if (!isZip && !policyResult.ok) {
+      // Name the refusal (allowed extensions or max size) in the active language.
+      setTypeError(uploadRefusalText(policyResult, t, i18n.language))
       return
     }
     if (isZip && candidate.size > ZIP_MAX_MB * 1024 * 1024) {

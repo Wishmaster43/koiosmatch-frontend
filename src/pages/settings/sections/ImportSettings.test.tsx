@@ -243,7 +243,8 @@ describe('ImportSettings — the wizard never claims success it did not earn', (
     const file = new File(['binary'], 'customers.pdf', { type: 'application/pdf' })
     await user.upload(screen.getByLabelText(t('import.selectCsv')), file)
 
-    expect(await screen.findByText(t('import.wrongFileType'))).toBeInTheDocument()
+    // #81: the refusal names the allowed extensions through the shared upload policy text.
+    expect(await screen.findByText(i18n.t('common:upload.typeNotAllowed', { allowed: 'csv, txt, xlsx' }))).toBeInTheDocument()
     expect(screen.queryByText(t('import.fileSelected', { name: 'customers.pdf' }))).not.toBeInTheDocument()
     expect(api.post).not.toHaveBeenCalled()
   })

@@ -60,7 +60,7 @@ import ContactOnSiteCard from './addmodal/ContactOnSiteCard'
 import LocationDescriptionCard from './addmodal/LocationDescriptionCard'
 // ONIX N-005: the entity's REQUIRED tenant custom fields (renders nothing when none exist).
 import RequiredCustomFieldsCard from '@/components/forms/RequiredCustomFieldsCard'
-import { requiredCustomFieldKeys, isRequiredCustomField, isCustomFieldFilled, requiredCustomFieldErrors, makeCustomFieldChangeHandler } from '@/components/forms/requiredCustomFields'
+import { requiredCustomFieldKeys, isRequiredCustomField, isCustomFieldFilled, requiredCustomFieldErrors, makeCustomFieldChangeHandler, seedBooleanDefaults } from '@/components/forms/requiredCustomFields'
 import { useCustomFields } from '@/lib/useCustomFields'
 import { setLocationPrimaryContact, quickContactPayload } from './hooks/useCustomerContacts'
 import type { LocationPayload } from './hooks/useCustomerLocations'
@@ -196,7 +196,9 @@ export default function AddLocationModal({
   // ONIX N-005: this entity's REQUIRED tenant custom fields.
   const { fields: customFieldDefs } = useCustomFields('customer_location')
   const requiredCustomDefs = customFieldDefs.filter(isRequiredCustomField)
-  const customFieldsValid = requiredCustomDefs.every(def => isCustomFieldFilled(form.customFields[def.key]))
+  // An untouched required checkbox is an answer (false): validate and send the seeded values.
+  const seededCustomFields = seedBooleanDefaults(requiredCustomDefs, form.customFields)
+  const customFieldsValid = requiredCustomDefs.every(def => isCustomFieldFilled(seededCustomFields[def.key]))
   // KVK/BTW-PER-LAND-1 (Danny 08-08, points 10 + 11): the KvK/BTW format follows the
   // country picked in THIS form (live — switching country re-checks both), and only a
   // tenant on 'block' mode is actually stopped from submitting.
@@ -237,9 +239,9 @@ export default function AddLocationModal({
     // mismatch stops the submit — a warning is shown but never refuses the save.
     if (hasIdentifierError) return
     // ONIX N-005: block on an empty required custom field, same as the name check above.
-    const customFieldErrors = requiredCustomFieldErrors(requiredCustomDefs, form.customFields)
+    const customFieldErrors = requiredCustomFieldErrors(requiredCustomDefs, seededCustomFields)
     if (customFieldErrors) { setErrors(customFieldErrors); return }
-    const payload = { ...form, name: form.name.trim() }
+    const payload = { ...form, customFields: seededCustomFields, name: form.name.trim() }
     // Edit path: update() keeps its existing toast-based error handling — unchanged,
     // closes immediately. The contact picker above only renders on CREATE (see the
     // render below), so there is no coupling to attempt here.

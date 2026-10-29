@@ -78,7 +78,7 @@ const MetaDot = () => <span aria-hidden="true" style={{ color: 'var(--text-muted
 // Live interview summary card (see the module doc above): every field renders defensively as optional, and the stop/resume controls gate on the application id, never the interview session id (see the INTERVIEW-STOP-1 note).
 export default function InterviewStatusCard({
   interview, applicationId, interviewWorkflowId, interviewWorkflow, hasInterviewWorkflowField = false,
-  vacancyId, vacancyInterviewWorkflow, skipReason, skippedAt,
+  vacancyId, vacancyInterviewWorkflow, skipReason, skippedAt, onWorkflowSaved,
 }: {
   interview: ApplicationInterview | null; applicationId?: Id
   // INTERVIEW-SKIP-ON-APPLICATION-1: why the start was skipped (stable code) and when; unknown codes read generically.
@@ -93,6 +93,8 @@ export default function InterviewStatusCard({
   // the fetched list never shows the raw id in the trigger.
   interviewWorkflow?: InterviewWorkflowRef | null
   hasInterviewWorkflowField?: boolean
+  // Forwarded to the override hook: the host learns the saved workflow id (null = cleared) right away.
+  onWorkflowSaved?: (id: Id | null) => void
   // INTERVIEW-VISIBILITY-1: the vacancy's own default workflow + its id, for the
   // "Standaard van vacature" caption and its "edit in vacancy" deep link.
   vacancyId?: Id | null
@@ -109,7 +111,7 @@ export default function InterviewStatusCard({
   // Workflow override picker + vacancy-default caption, own state + own PATCH — extracted hook.
   const { workflowOverridePicker, vacancyDefaultBlock } = useInterviewOverrides({
     applicationId, interviewWorkflowId, interviewWorkflow, hasInterviewWorkflowField, canManage,
-    vacancyId, vacancyInterviewWorkflow,
+    vacancyId, vacancyInterviewWorkflow, onWorkflowSaved,
   })
 
   // Stop/resume state machine — extracted hook.

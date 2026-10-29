@@ -1,4 +1,8 @@
 {
+  "validation": {
+    "outOfRange": "Introduzca un valor entre {{min}} y {{max}}.",
+    "invalid": "Este valor no es válido."
+  },
   "shell": {
     "title": "Configuración",
     "empty": "No hay configuración disponible para tu rol.",

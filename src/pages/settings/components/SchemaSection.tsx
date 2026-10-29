@@ -21,6 +21,8 @@ import { useAuth } from '@/context/AuthContext'
 import { useSettingsForm } from '../lib/useSettingsForm'
 import { SlidersHorizontal } from 'lucide-react'
 import { SectionTitle } from '@/components/ui/typography'
+import FieldNotice from '@/components/ui/FieldNotice'
+import { useNumberFormat } from '@/lib/formatters'
 import { lucideByName } from '@/lib/lucideByName'
 import {
   SettingsScaffold, SettingCardList, SettingRow,
@@ -156,6 +158,7 @@ interface SchemaSectionProps { schema: Schema; embedded?: boolean }
 export default function SchemaSection({ schema, embedded = false }: SchemaSectionProps) {
   const { t } = useTranslation('settings')
   const auth = useAuth()
+  const { formatNumber } = useNumberFormat()
   const canEdit = auth?.hasPermission('settings.update') ?? false
   // Build the field-key → default-value map once per schema, seeding useSettingsForm.
   const defaults = useMemo(
@@ -200,6 +203,14 @@ export default function SchemaSection({ schema, embedded = false }: SchemaSectio
       disabled={!canEdit} hideUnit={hideUnit} />
   )
 
+  // Per-field 422 text: the min/max range when the schema bounds the field, else a generic sentence.
+  const fieldErrorText = (field: SchemaField): string | null => {
+    if (!(form.fieldErrors as Record<string, string> | undefined)?.[field.key]) return null
+    return field.min != null && field.max != null
+      ? t('validation.outOfRange', { min: formatNumber(field.min), max: formatNumber(field.max) })
+      : t('validation.invalid')
+  }
+
   // One row per field; the label/help keys come from the field (catalogue rows) or the folder convention.
   // O23 UNIT-NAAST-BEDRAG-1: a companion unit field (`unitOf` pointing back at this
   // one) never gets its own row — it renders inline right of the amount instead.
@@ -219,12 +230,15 @@ export default function SchemaSection({ schema, embedded = false }: SchemaSectio
       <SettingRow key={field.key}
         label={label}
         description={opt(field.helpKey ?? `${base}.help`)}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-          <FieldControl field={field} value={form.values[field.key]}
-            onChange={v => form.set(field.key, v)} t={t} base={base} label={label}
-            disabled={!canEdit} hideUnit={!field.windowKeys && !!unitField} />
-          {amountField && renderCompanion(amountField, !!unitField)}
-          {unitField && renderCompanion(unitField)}
+        <div>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+            <FieldControl field={field} value={form.values[field.key]}
+              onChange={v => form.set(field.key, v)} t={t} base={base} label={label}
+              disabled={!canEdit} hideUnit={!field.windowKeys && !!unitField} />
+            {amountField && renderCompanion(amountField, !!unitField)}
+            {unitField && renderCompanion(unitField)}
+          </div>
+          <FieldNotice text={fieldErrorText(field)} />
         </div>
       </SettingRow>
     )

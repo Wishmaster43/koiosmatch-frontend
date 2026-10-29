@@ -1,4 +1,8 @@
 {
+  "validation": {
+    "outOfRange": "Saisissez une valeur comprise entre {{min}} et {{max}}.",
+    "invalid": "Cette valeur n’est pas valide."
+  },
   "shell": {
     "title": "Paramètres",
     "empty": "Aucun paramètre disponible pour votre rôle.",

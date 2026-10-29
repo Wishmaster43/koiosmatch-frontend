@@ -1,4 +1,8 @@
 {
+  "validation": {
+    "outOfRange": "Voer een waarde tussen {{min}} en {{max}} in.",
+    "invalid": "Deze waarde is ongeldig."
+  },
   "shell": {
     "title": "Instellingen",
     "empty": "Geen instellingen beschikbaar voor jouw rol.",

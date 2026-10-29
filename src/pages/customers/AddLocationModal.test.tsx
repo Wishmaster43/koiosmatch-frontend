@@ -64,6 +64,9 @@ const { authState, settingsState } = vi.hoisted(() => ({
   settingsState: { settings: {} as Record<string, unknown> },
 }))
 vi.mock('@/context/AuthContext', () => ({ useAuth: () => ({ hasPermission: authState.hasPermission }) }))
+// B1: per-test required custom field defs for the host under test (empty by default).
+const { customFieldsState } = vi.hoisted(() => ({ customFieldsState: { fields: [] as unknown[] } }))
+vi.mock('@/lib/useCustomFields', () => ({ useCustomFields: () => ({ fields: customFieldsState.fields, allFields: customFieldsState.fields, loading: false, error: false, invalidate: vi.fn(), refetch: vi.fn() }) }))
 // Keep the REAL getJsonSetting (the component parses the required-fields config
 // through it); only the settings blob itself is test-controlled.
 vi.mock('@/lib/settings/useAllSettings', async importOriginal => {
@@ -689,5 +692,22 @@ describe('AddLocationModal · one create per click (ONIX N-007)', () => {
     resolve(undefined)
     await waitFor(() => expect(onClose).toHaveBeenCalledTimes(1))
     expect(onCreate).toHaveBeenCalledTimes(1)
+  })
+})
+
+// B1 (#79): an untouched REQUIRED boolean custom field is an answer (false) — it must not block, and the payload carries it.
+describe('AddLocationModal · required boolean custom field', () => {
+  it('submits customFields { gdpr: false } when the checkbox is left untouched', async () => {
+    customFieldsState.fields = [{ key: 'gdpr', label: 'GDPR', type: 'boolean', sort_order: 0, active: true, has_data: false, visible_in_ui: true, required_always: true, required_for: [] }]
+    const onCreate = vi.fn()
+    const user = userEvent.setup()
+    render(<AddLocationModal onClose={() => {}} onCreate={onCreate} statuses={statuses} />)
+    await user.type(screen.getByLabelText(ct('subModal.locationName'), { exact: false }), 'Hoofdkantoor')
+    const createBtn = screen.getByRole('button', { name: ct('subModal.create') })
+    expect(createBtn).not.toBeDisabled()
+    await user.click(createBtn)
+    await waitFor(() => expect(onCreate).toHaveBeenCalledTimes(1))
+    expect(onCreate.mock.calls[0][0].customFields).toEqual({ gdpr: false })
+    customFieldsState.fields = []
   })
 })

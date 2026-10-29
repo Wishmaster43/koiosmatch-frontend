@@ -41,7 +41,9 @@ vi.mock('@/lib/notify', () => ({ notifyError: vi.fn(), notifySuccess: vi.fn() })
 // directly — mocked here (as every other create-modal test does, see
 // AddApplicationModal.test.tsx) so it never reaches the above @/lib/api stub,
 // which does not implement getActiveTenantId. No required def by default.
-vi.mock('@/lib/useCustomFields', () => ({ useCustomFields: () => ({ fields: [], allFields: [], loading: false, error: false, invalidate: vi.fn(), refetch: vi.fn() }) }))
+// B1: per-test required custom field defs for the host under test (empty by default).
+const { customFieldsState } = vi.hoisted(() => ({ customFieldsState: { fields: [] as unknown[] } }))
+vi.mock('@/lib/useCustomFields', () => ({ useCustomFields: () => ({ fields: customFieldsState.fields, allFields: customFieldsState.fields, loading: false, error: false, invalidate: vi.fn(), refetch: vi.fn() }) }))
 
 // Tenant lookups/auth/users/locations are network-backed hooks — mocked directly
 // so the test isolates this modal's own wiring.
@@ -85,6 +87,7 @@ beforeEach(() => {
   state.settings = {}
   state.permissions = ['candidates.update']
   createCandidate.mockReset()
+  customFieldsState.fields = []
   createCandidate.mockResolvedValue({ id: 'cand-new' })
   getMock.mockReset()
   // Default probe answer: nobody found (so the create-body tests stay unaffected).
@@ -629,5 +632,21 @@ describe('AddCandidateModal · Excel/CSV import in the header (CAND-IMPORT-FE-1)
 
     expect(screen.getByRole('button', { name: 'modal.create' })).toBeDisabled()
     expect(createCandidate).not.toHaveBeenCalled()
+  })
+})
+
+// B1 (#79): an untouched REQUIRED boolean custom field is an answer (false) — it must not block, and must ride in the POST body.
+describe('AddCandidateModal · required boolean custom field', () => {
+  it('creates with custom_fields { gdpr: false } when the checkbox is left untouched', async () => {
+    customFieldsState.fields = [{ key: 'gdpr', label: 'GDPR', type: 'boolean', sort_order: 0, active: true, has_data: false, visible_in_ui: true, required_always: true, required_for: [] }]
+    const user = userEvent.setup()
+    render(<AddCandidateModal onClose={noop} onCreated={noop} />)
+    await user.type(screen.getByPlaceholderText('common:placeholders.firstName'), 'Jan')
+    await user.type(screen.getByPlaceholderText('common:placeholders.lastName'), 'Jansen')
+    const createBtn = screen.getByRole('button', { name: 'modal.create' })
+    expect(createBtn).not.toBeDisabled()
+    await user.click(createBtn)
+    await waitFor(() => expect(createCandidate).toHaveBeenCalledTimes(1))
+    expect(createCandidate.mock.calls[0][0].custom_fields).toEqual({ gdpr: false })
   })
 })

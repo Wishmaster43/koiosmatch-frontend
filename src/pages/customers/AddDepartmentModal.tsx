@@ -43,7 +43,7 @@ import { useSubEntitySave } from './hooks/useSubEntitySave'
 import SubEntityDuplicateNotice from './addmodal/SubEntityDuplicateNotice'
 // ONIX N-005: the entity's REQUIRED tenant custom fields (renders nothing when none exist).
 import RequiredCustomFieldsCard from '@/components/forms/RequiredCustomFieldsCard'
-import { requiredCustomFieldKeys, isRequiredCustomField, isCustomFieldFilled, requiredCustomFieldErrors, makeCustomFieldChangeHandler } from '@/components/forms/requiredCustomFields'
+import { requiredCustomFieldKeys, isRequiredCustomField, isCustomFieldFilled, requiredCustomFieldErrors, makeCustomFieldChangeHandler, seedBooleanDefaults } from '@/components/forms/requiredCustomFields'
 import { useCustomFields } from '@/lib/useCustomFields'
 import { useSubEntityDuplicateGuard } from './addmodal/useSubEntityDuplicateGuard'
 import type { DepartmentPayload } from './hooks/useCustomerDepartments'
@@ -107,7 +107,9 @@ export default function AddDepartmentModal({ onClose, onCreate, onImported, loca
   // ONIX N-005: this entity's REQUIRED tenant custom fields.
   const { fields: customFieldDefs } = useCustomFields('customer_department')
   const requiredCustomDefs = customFieldDefs.filter(isRequiredCustomField)
-  const customFieldsValid = requiredCustomDefs.every(def => isCustomFieldFilled(form.customFields[def.key]))
+  // An untouched required checkbox is an answer (false): validate and send the seeded values.
+  const seededCustomFields = seedBooleanDefaults(requiredCustomDefs, form.customFields)
+  const customFieldsValid = requiredCustomDefs.every(def => isCustomFieldFilled(seededCustomFields[def.key]))
 
   const set = <K extends keyof DepartmentPayload>(k: K, v: DepartmentPayload[K]) => {
     setForm(f => ({ ...f, [k]: v }))
@@ -132,9 +134,9 @@ export default function AddDepartmentModal({ onClose, onCreate, onImported, loca
       return
     }
     // ONIX N-005: block on an empty required custom field, same as the name/location check above.
-    const customFieldErrors = requiredCustomFieldErrors(requiredCustomDefs, form.customFields)
+    const customFieldErrors = requiredCustomFieldErrors(requiredCustomDefs, seededCustomFields)
     if (customFieldErrors) { setErrors(customFieldErrors); return }
-    const payload = { ...form, name: form.name.trim() }
+    const payload = { ...form, name: form.name.trim(), customFields: seededCustomFields }
     // Edit path: update() keeps its existing toast-based error handling — unchanged,
     // closes immediately.
     if (isEdit) { onCreate?.(payload); onClose(); return }

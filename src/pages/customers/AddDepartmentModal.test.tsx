@@ -425,3 +425,20 @@ describe('AddDepartmentModal · required custom fields (ONIX N-005)', () => {
     expect(await screen.findByText('Only digits')).toBeInTheDocument()
   })
 })
+
+// B1 (#79): an untouched REQUIRED boolean custom field is an answer (false) — it must not block, and the payload carries it.
+describe('AddDepartmentModal · required boolean custom field', () => {
+  it('submits customFields { gdpr: false } when the checkbox is left untouched', async () => {
+    customFieldsState.fields = [{ key: 'gdpr', label: 'GDPR', type: 'boolean', sort_order: 0, active: true, has_data: false, visible_in_ui: true, required_always: true, required_for: [] }]
+    const onCreate = vi.fn()
+    const user = userEvent.setup()
+    render(<AddDepartmentModal onClose={() => {}} onCreate={onCreate} locations={locations} statuses={statuses} />)
+    await user.type(screen.getByLabelText(ct('subModal.departmentName'), { exact: false }), 'Thuiszorg')
+    const createBtn = screen.getByRole('button', { name: ct('subModal.create') })
+    expect(createBtn).not.toBeDisabled()
+    await user.click(createBtn)
+    await waitFor(() => expect(onCreate).toHaveBeenCalledTimes(1))
+    expect(onCreate.mock.calls[0][0].customFields).toEqual({ gdpr: false })
+    customFieldsState.fields = []
+  })
+})

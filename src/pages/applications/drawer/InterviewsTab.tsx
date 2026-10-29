@@ -3,7 +3,7 @@
  * REAL InterviewSession (APP-INTERVIEW-HISTORY-1), with its outcome chip and the
  * full transcript. Empty state when there are none.
  */
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { MessageCircle, FileText } from 'lucide-react'
 import StatusPill from '@/components/ui/StatusPill'
@@ -244,12 +244,16 @@ export default function InterviewsTab({ application: a, detailPhase }: { applica
   // `linkedWorkflow` in useInterviewOverrides — falling back to a.interviewWorkflow
   // for whichever contract version is actually live.
   const { workflowById: ownWorkflowById } = useInterviewOptions(a.hasInterviewWorkflowField)
-  const listedOwnWorkflow = a.interviewWorkflowId != null ? ownWorkflowById.get(String(a.interviewWorkflowId)) : undefined
+  // The workflow just saved in the status card (undefined = none saved this open): Start reads it at once, no drawer reopen.
+  const [savedWorkflowId, setSavedWorkflowId] = useState<Id | null | undefined>(undefined)
+  useEffect(() => { setSavedWorkflowId(undefined) }, [a.interviewWorkflowId])
+  const ownWorkflowId = savedWorkflowId !== undefined ? savedWorkflowId : a.interviewWorkflowId
+  const listedOwnWorkflow = ownWorkflowId != null ? ownWorkflowById.get(String(ownWorkflowId)) : undefined
   // Normalise the tenant-list Workflow shape into the same InterviewWorkflowRef
   // shape as a.interviewWorkflow, mirroring useInterviewOverrides' own build.
   const ownWorkflow = listedOwnWorkflow
     ? { id: listedOwnWorkflow.id ?? '', name: listedOwnWorkflow.name ?? '', agent: listedOwnWorkflow.agent ?? null }
-    : a.interviewWorkflow
+    : savedWorkflowId !== undefined ? null : a.interviewWorkflow
   const effectiveWorkflow = resolveEffectiveInterviewWorkflow(ownWorkflow, a.vacancyInterviewWorkflow)
 
   // The list row carries no interviews[] (detail-only) and a deep-link opens on a
@@ -282,6 +286,7 @@ export default function InterviewsTab({ application: a, detailPhase }: { applica
         hasInterviewWorkflowField={a.hasInterviewWorkflowField}
         vacancyId={a.vacancy?.id} vacancyInterviewWorkflow={a.vacancyInterviewWorkflow}
         skipReason={a.interviewSkipReason} skippedAt={a.interviewSkippedAt}
+        onWorkflowSaved={setSavedWorkflowId}
       />
       {canStartNew && (
         <StartInterviewAction applicationId={a.id} effective={effectiveWorkflow}

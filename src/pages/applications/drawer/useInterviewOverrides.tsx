@@ -21,7 +21,7 @@ import type { Id } from '@/types/common'
 // Same own-echo idiom as the session-actions hook: a fresh prop (parent
 // refetch) always wins over our own local echo of a just-saved value.
 export function useInterviewOverrides({
-  applicationId, interviewWorkflowId, interviewWorkflow, hasInterviewWorkflowField, canManage, vacancyId, vacancyInterviewWorkflow,
+  applicationId, interviewWorkflowId, interviewWorkflow, hasInterviewWorkflowField, canManage, vacancyId, vacancyInterviewWorkflow, onWorkflowSaved,
 }: {
   applicationId?: Id; interviewWorkflowId?: Id | null
   interviewWorkflow?: InterviewWorkflowRef | null; hasInterviewWorkflowField: boolean; canManage: boolean
@@ -31,6 +31,8 @@ export function useInterviewOverrides({
   // is a distinct, presence-gated case (§3): the backend simply doesn't report
   // the key yet, vs. `null` meaning it reported "the vacancy has none".
   vacancyId?: Id | null; vacancyInterviewWorkflow?: InterviewWorkflowRef | null | undefined
+  // Called with the saved id (null = cleared) once the PATCH landed, so the host can update without a drawer reopen.
+  onWorkflowSaved?: (id: Id | null) => void
 }) {
   const { t } = useTranslation('applications')
   const { openEntity } = useNavigation()
@@ -53,6 +55,7 @@ export function useInterviewOverrides({
     try {
       await api.patch(`/applications/${applicationId}`, { interview_workflow_id: nextId })
       setWorkflowOverride(nextId)
+      onWorkflowSaved?.(nextId)
       notifySuccess(t('interview.status.workflowOverrideSaved'))
     } catch (err) {
       notifyError(extractApiError(err, t('common:actionFailed')))

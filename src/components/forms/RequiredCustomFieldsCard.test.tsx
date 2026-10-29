@@ -4,7 +4,7 @@
  * flag + server message attached by the dotted bag key.
  */
 import { describe, it, expect, vi, afterEach } from 'vitest'
-import { render, screen, fireEvent } from '@testing-library/react'
+import { render, screen, fireEvent, waitFor } from '@testing-library/react'
 import '@/i18n'
 import RequiredCustomFieldsCard from './RequiredCustomFieldsCard'
 import { useCustomFields } from '@/lib/useCustomFields'
@@ -81,5 +81,25 @@ describe('RequiredCustomFieldsCard', () => {
     const input = screen.getByRole('textbox', { name: 'VOG' })
     fireEvent.change(input, { target: { value: 'yes' } })
     expect(onChange).toHaveBeenCalledWith('vog', 'yes')
+  })
+})
+
+// #18 (§6): a required rich-text field is named by its row label and announced as required.
+describe('RequiredCustomFieldsCard · rich-text field a11y', () => {
+  it('associates the label with the editable root and marks it required', async () => {
+    mockedUseCustomFields.mockReturnValue({
+      fields: [{ key: 'story', label: 'Story', type: 'textarea', sort_order: 0, active: true, has_data: false, visible_in_ui: true, required_always: true, required_for: [] }],
+      allFields: [], loading: false, error: false, invalidate: vi.fn(), refetch: vi.fn(),
+    })
+    render(<RequiredCustomFieldsCard entityType="candidate" values={{}} onChange={vi.fn()} />)
+    const root = await waitFor(() => {
+      const el = document.querySelector('[contenteditable="true"]') as HTMLElement
+      expect(el).not.toBeNull()
+      return el
+    })
+    expect(root).toHaveAttribute('aria-required', 'true')
+    const labelId = root.getAttribute('aria-labelledby') as string
+    expect(document.getElementById(labelId)).toHaveTextContent('Story')
+    expect(root.id).toBeTruthy()
   })
 })

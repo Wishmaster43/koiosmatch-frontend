@@ -274,3 +274,38 @@ describe('SchemaSection · multiline text', () => {
     expect(box.tagName).toBe('TEXTAREA')
   })
 })
+
+// #182/#378: a cleared number falls back to its default on save, and a 422 lands under the field.
+describe('SchemaSection · save outcomes', () => {
+  const schema: Schema = {
+    i18nKey: 'catalog.sections.company',
+    fields: [{ key: 'cap_test_only', type: 'number', default: 10, min: 1, max: 50, labelKey: 'catalog.sections.company.fields.cap_test_only.label' }],
+  }
+  const clickSave = async () => {
+    const btn = await waitFor(() => {
+      const b = screen.getByRole('button', { name: i18n.t('common.save', { ns: 'settings' }) })
+      expect(b).not.toBeDisabled()
+      return b
+    })
+    fireEvent.click(btn)
+  }
+
+  it('shows the default again after clearing the input and saving', async () => {
+    vi.mocked(api.post).mockResolvedValueOnce({ data: {} })
+    render(<SchemaSection schema={schema} />)
+    const input = await screen.findByRole('textbox')
+    fireEvent.change(input, { target: { value: '' } })
+    await clickSave()
+    await waitFor(() => expect(api.post).toHaveBeenCalled())
+    await waitFor(() => expect(screen.getByRole('textbox')).toHaveValue('10'))
+  })
+
+  it('renders the range sentence under the field after a 422 on that key', async () => {
+    vi.mocked(api.post).mockRejectedValueOnce({ response: { status: 422, data: { errors: { cap_test_only: ['The cap must be at most 50.'] } } } })
+    render(<SchemaSection schema={schema} />)
+    const input = await screen.findByRole('textbox')
+    fireEvent.change(input, { target: { value: '99' } })
+    await clickSave()
+    expect(await screen.findByText(i18n.t('validation.outOfRange', { ns: 'settings', min: '1', max: '50' }))).toBeInTheDocument()
+  })
+})

@@ -43,11 +43,12 @@ vi.mock('@/hooks/useInterviewOptions', () => ({
 // Keep the real unwrap (importActual) — only the default client (get/post) is stubbed.
 vi.mock('@/lib/api', async () => {
   const actual = await vi.importActual<typeof import('@/lib/api')>('@/lib/api')
-  return { ...actual, default: { get: vi.fn(), post: vi.fn() } }
+  return { ...actual, default: { get: vi.fn(), post: vi.fn(), patch: vi.fn() } }
 })
 
 const mockGet = api.get as unknown as ReturnType<typeof vi.fn>
 const mockPost = api.post as unknown as ReturnType<typeof vi.fn>
+const mockPatch = api.patch as unknown as ReturnType<typeof vi.fn>
 
 const AGENT = { id: 'a1', name: 'Kelly' }
 const defaultOptionsResult = () => ({
@@ -545,5 +546,24 @@ describe('InterviewsTab · skipped start (INTERVIEW-SKIP-ON-APPLICATION-1)', () 
 describe('InterviewsTab · single i18n source', () => {
   it('carries no defaultValue literal', () => {
     expect(tabSource).not.toMatch(/defaultValue\s*:/)
+  })
+})
+
+// #47: picking a workflow in the status card enables Start at once, without reopening the drawer.
+describe('InterviewsTab · workflow saved in the card', () => {
+  it('enables Start right after the PATCH resolves and sends the chosen workflow id', async () => {
+    const user = userEvent.setup()
+    mockPatch.mockResolvedValue({ data: {} })
+    mockUseInterviewOptions.mockReturnValue({
+      ...defaultOptionsResult(),
+      workflowOptions: [{ value: 'wf-new', label: 'New workflow' }],
+      workflowById: new Map([['wf-new', { id: 'wf-new', name: 'New workflow', agent: { id: 'a1', name: 'Kelly' } }]]),
+    })
+    renderTab(app({ hasInterviewWorkflowField: true } as Partial<ApplicationDetail>))
+    await waitFor(() => expect(screen.getByRole('button', { name: 'interview.start.label' })).toBeDisabled())
+    await user.click(screen.getAllByRole('button').find(b => b.getAttribute('aria-haspopup') === 'listbox') as HTMLElement)
+    await user.click(await screen.findByText('New workflow'))
+    await waitFor(() => expect(mockPatch).toHaveBeenCalledWith('/applications/app-1', { interview_workflow_id: 'wf-new' }))
+    await waitFor(() => expect(screen.getByRole('button', { name: 'interview.start.label' })).not.toBeDisabled())
   })
 })
