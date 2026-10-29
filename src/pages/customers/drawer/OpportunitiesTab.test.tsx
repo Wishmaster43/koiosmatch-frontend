@@ -156,7 +156,7 @@ describe('OpportunitiesTab · stage colour toggle (customer_opportunity_table_co
     mockOpportunities(oneRow)
     render(<OpportunitiesTab customerId="cust-1" customerName="Acme" />)
     // eslint-disable-next-line no-restricted-syntax -- DATA: asserts the fixture's own stage colour, not a UI choice
-    await waitFor(() => expect(screen.getByText('Lead')).toHaveStyle({ color: chipInk('#94a3b8') }))
+    await waitFor(() => expect(screen.getByText('Lead')).toHaveInlineStyle({ color: chipInk('#94a3b8') }))
   })
 
   it('renders the stage chip as plain text once the tenant setting is off', async () => {
@@ -166,7 +166,7 @@ describe('OpportunitiesTab · stage colour toggle (customer_opportunity_table_co
         : Promise.resolve({ data: {} }))
     mockOpportunities(oneRow)
     render(<OpportunitiesTab customerId="cust-1" customerName="Acme" />)
-    await waitFor(() => expect(screen.getByText('Lead')).toHaveStyle({ color: 'var(--text)' }))
+    await waitFor(() => expect(screen.getByText('Lead')).toHaveInlineStyle({ color: 'var(--text)' }))
   })
 })
 

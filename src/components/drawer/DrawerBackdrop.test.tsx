@@ -18,6 +18,6 @@ describe('DrawerBackdrop', () => {
   it('uses the given zIndex over the default drawer rung', () => {
     const { container } = render(<DrawerBackdrop onClick={vi.fn()} zIndex="var(--z-overlay)" />)
     const backdrop = container.firstChild as HTMLElement
-    expect(backdrop).toHaveStyle({ zIndex: 'var(--z-overlay)' })
+    expect(backdrop).toHaveInlineStyle({ zIndex: 'var(--z-overlay)' })
   })
 })

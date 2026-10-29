@@ -84,7 +84,7 @@ describe('DocumentsTab (vacancy) · document type', () => {
     // The pending card's own chip picker shows a soft-tint selection for the
     // lookup's first type before the user changes anything.
     const contractChip = screen.getByRole('button', { name: 'Contract' })
-    expect(contractChip).toHaveStyle({ fontWeight: '600' })
+    expect(contractChip).toHaveInlineStyle({ fontWeight: '600' })
 
     await clickConfirm()
     expect(upload).toHaveBeenCalledWith(file, 'Contract', 'contract.pdf', 'blob:contract.pdf')

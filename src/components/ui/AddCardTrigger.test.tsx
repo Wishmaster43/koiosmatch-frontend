@@ -24,6 +24,6 @@ describe('AddCardTrigger', () => {
     render(<AddCardTrigger onClick={vi.fn()} label="Add Item" />)
 
     const button = screen.getByRole('button', { name: /Add Item/i })
-    expect(button).toHaveStyle({ width: '100%' })
+    expect(button).toHaveInlineStyle({ width: '100%' })
   })
 })

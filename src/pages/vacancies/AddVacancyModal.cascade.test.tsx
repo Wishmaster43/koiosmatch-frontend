@@ -445,6 +445,8 @@ describe('AddVacancyModal · Voorwaarden — salaris + uren (punt 16)', () => {
   it('carries salary min/max/period and hours min/max', async () => {
     const user = userEvent.setup()
     render(<AddVacancyModal onClose={noop} users={users} customers={customers} />)
+    // Salary and hours live on the requirements pane, hidden until its tab is open.
+    await openTab(user, 'requirements')
     const salaryInputs = screen.getAllByPlaceholderText('common:placeholders.min')
     await user.type(salaryInputs[0], '2500')
     await user.type(screen.getByPlaceholderText('modal.fields.salaryPeriodPlaceholder'), 'per maand')

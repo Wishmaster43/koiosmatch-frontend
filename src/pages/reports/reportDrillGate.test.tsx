@@ -49,7 +49,7 @@ describe('reportDrillGate — wired into a click affordance', () => {
     const handler = vi.fn()
     render(<FakeKpiCard onClick={gateDrillClick('vacancies', handler)} />)
     const kpi = screen.getByTestId('kpi')
-    expect(kpi).toHaveStyle({ cursor: 'pointer' })
+    expect(kpi).toHaveInlineStyle({ cursor: 'pointer' })
     kpi.click()
     expect(handler).toHaveBeenCalledTimes(1)
   })
@@ -59,7 +59,7 @@ describe('reportDrillGate — wired into a click affordance', () => {
     ;(REPORT_DRILL_AVAILABLE as Record<DrillableReport, boolean>).whatsapp = false
     render(<FakeKpiCard onClick={gateDrillClick('whatsapp', handler)} />)
     const kpi = screen.getByTestId('kpi')
-    expect(kpi).toHaveStyle({ cursor: 'default' })
+    expect(kpi).toHaveInlineStyle({ cursor: 'default' })
     kpi.click()
     expect(handler).not.toHaveBeenCalled()
   })

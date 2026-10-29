@@ -157,7 +157,7 @@ describe('DepartmentDetail · title-row status badge (JOB-STATUS-1)', () => {
   it('colours the badge with the lookup\'s own colour, not a fixed brand colour', () => {
     render(<DepartmentDetail department={activeDepartment()} onSave={vi.fn()} {...baseProps} />)
     // Ink is chipInk(colour), not the raw lookup colour (AA contrast, r3.5).
-    expect(screen.getByText('Actief')).toHaveStyle({ color: chipInk(statuses[0].color as string) })
+    expect(screen.getByText('Actief')).toHaveInlineStyle({ color: chipInk(statuses[0].color as string) })
   })
 
   it('renders no badge (but still an edit affordance) when the department carries no status yet', () => {

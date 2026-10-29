@@ -181,7 +181,7 @@ describe('CertificationsTab · compact display (C-13a/b)', () => {
     const item = { id: 'c1', name: 'VCA Basis', license: 'LIC-12345' }
     render(<CertificationsTab items={[item]} />)
     const el = screen.getByText(/LIC-12345/)
-    expect(el).toHaveStyle({ fontFamily: 'JetBrains Mono, monospace' })
+    expect(el).toHaveInlineStyle({ fontFamily: 'JetBrains Mono, monospace' })
   })
 
   it('hides the licence line entirely when there is none', () => {

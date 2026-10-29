@@ -45,7 +45,7 @@ describe('EditUserModal · profile save', () => {
   it('opens at the wide-form footprint, not the old cramped 420px column, with the full name readable', async () => {
     vi.mocked(api.get).mockResolvedValueOnce({ data: { data: [] } })
     render(<EditUserModal user={testUser} onClose={noop} onSaved={noop} />)
-    expect(screen.getByRole('dialog')).toHaveStyle({ maxWidth: '1320px' })
+    expect(screen.getByRole('dialog')).toHaveInlineStyle({ maxWidth: '1320px' })
     expect(await screen.findByDisplayValue('Jan')).toBeInTheDocument()
     expect(screen.getByDisplayValue('Jansen')).toBeInTheDocument()
   })

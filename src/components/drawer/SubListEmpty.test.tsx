@@ -15,6 +15,6 @@ describe('SubListEmpty', () => {
   it('applies the shared muted 12px empty-state style', () => {
     render(<SubListEmpty text="Empty" />)
     const el = screen.getByText('Empty')
-    expect(el).toHaveStyle({ fontSize: '12px', color: 'var(--text-muted)' })
+    expect(el).toHaveInlineStyle({ fontSize: '12px', color: 'var(--text-muted)' })
   })
 })

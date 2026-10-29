@@ -24,7 +24,7 @@ describe('CandidateDetailDrawer — restyled header', () => {
 
     // SoftChip tints via color-mix — never a solid fill (§4).
     const pill = screen.getByText('Actief')
-    expect(pill.closest('span')).toHaveStyle({ background: 'color-mix(in srgb, var(--color-success) 10%, transparent)' })
+    expect(pill.closest('span')).toHaveInlineStyle({ background: 'color-mix(in srgb, var(--color-success) 10%, transparent)' })
 
     // ReferenceNumberChip — the id in JetBrains Mono with a click-to-copy affordance.
     expect(screen.getByText('42')).toBeInTheDocument()

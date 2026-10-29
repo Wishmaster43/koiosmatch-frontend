@@ -24,7 +24,7 @@ describe('ChangelogPopover', () => {
     await user.click(screen.getByRole('button', { name: 'Wijzigingen' }))
     const dialog = screen.getByRole('dialog', { name: 'Wijzigingen' })
     expect(dialog).toBeInTheDocument()
-    expect(dialog).toHaveStyle({ width: '900px' })
+    expect(dialog).toHaveInlineStyle({ width: '900px' })
     expect(screen.getByText('changelog-content')).toBeInTheDocument()
   })
 

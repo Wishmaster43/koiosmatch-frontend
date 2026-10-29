@@ -61,7 +61,7 @@ describe('StatisticsTab · empty other-list (total 1)', () => {
     renderTab(deal, [deal])
     const note = screen.getByText(i18n.t('opportunities:drawer.statistics.onlyOpportunity'))
     expect(note).toBeInTheDocument()
-    expect(note).toHaveStyle({ fontStyle: 'italic' })
+    expect(note).toHaveInlineStyle({ fontStyle: 'italic' })
   })
 })
 

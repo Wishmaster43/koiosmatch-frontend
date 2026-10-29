@@ -52,7 +52,7 @@ describe('ListToolbarCore', () => {
   it('gives the search box its 300px frame and remounts it on a search-epoch bump', () => {
     const { rerender } = render(<ListToolbarCore {...baseProps()} searchEpoch={0} />)
     // The one page-toolbar md button (34px beside the 34px search chrome, §4).
-    expect(screen.getByText('+ Add').closest('button')).toHaveStyle({ height: '34px' })
+    expect(screen.getByText('+ Add').closest('button')).toHaveInlineStyle({ height: '34px' })
     const input = screen.getByPlaceholderText('Search…') as HTMLInputElement
     expect(input.closest('[style*="300px"]')).not.toBeNull()
     fireEvent.change(input, { target: { value: 'abc' } })

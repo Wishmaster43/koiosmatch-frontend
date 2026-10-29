@@ -282,7 +282,7 @@ describe('InterviewStatusCard · one-line meta composition (I1, 08-08)', () => {
     expect(turnChip.parentElement).toBe(row)
     expect(stepText.parentElement).toBe(row)
     // The row itself is a wrapping flex line — a group wrap, not per-item stacking.
-    expect(row).toHaveStyle({ display: 'flex', flexWrap: 'wrap' })
+    expect(row).toHaveInlineStyle({ display: 'flex', flexWrap: 'wrap' })
   })
 
   // Elapsed time is deliberately NOT part of the meta row (it was crowding the
@@ -325,7 +325,7 @@ describe('InterviewStatusCard · step name leads, count is a muted suffix (DD-FE
     // the ORDER between them — name first, count after, never the reverse.
     expect(name.compareDocumentPosition(count) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy()
     // The count is visually demoted (smaller + muted) relative to the name.
-    expect(count).toHaveStyle({ fontSize: '11px', color: 'var(--text-muted)' })
+    expect(count).toHaveInlineStyle({ fontSize: '11px', color: 'var(--text-muted)' })
   })
 
   it('still shows the step count on its own when the flow has no current-step name', () => {

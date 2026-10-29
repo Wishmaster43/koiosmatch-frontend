@@ -15,13 +15,13 @@ describe('CreateErrorAlert', () => {
     const { container } = render(<CreateErrorAlert message="Error" />)
     const alert = container.querySelector('[role="alert"]')
 
-    expect(alert).toHaveStyle({ margin: '0 22px 8px' })
+    expect(alert).toHaveInlineStyle({ margin: '0 22px 8px' })
   })
 
   it('applies a custom inset', () => {
     const { container } = render(<CreateErrorAlert message="Error" inset={24} />)
     const alert = container.querySelector('[role="alert"]')
 
-    expect(alert).toHaveStyle({ margin: '0 24px 8px' })
+    expect(alert).toHaveInlineStyle({ margin: '0 24px 8px' })
   })
 })

@@ -134,7 +134,7 @@ describe('VacancyDrawer · initialTab deep-link (VACANCY-MATCH-COUNT-1, Danny 23
     // The tab's content shows immediately — no click needed to switch there.
     expect(screen.getByText('candidate-search-tab-content')).toBeInTheDocument()
     const activeBtn = screen.getByRole('tab', { name: 'Kandidaten zoeken' })
-    expect(activeBtn).toHaveStyle({ fontWeight: 600 })
+    expect(activeBtn).toHaveInlineStyle({ fontWeight: 600 })
   })
 
   it('falls back to the default tab when the requested tab is gated away, never a blank pane', () => {
@@ -146,7 +146,7 @@ describe('VacancyDrawer · initialTab deep-link (VACANCY-MATCH-COUNT-1, Danny 23
     expect(screen.queryByRole('button', { name: 'Kandidaten zoeken' })).not.toBeInTheDocument()
     expect(screen.queryByText('candidate-search-tab-content')).not.toBeInTheDocument()
     const detailsBtn = screen.getByRole('tab', { name: 'Details' })
-    expect(detailsBtn).toHaveStyle({ fontWeight: 600 })
+    expect(detailsBtn).toHaveInlineStyle({ fontWeight: 600 })
   })
 })
 

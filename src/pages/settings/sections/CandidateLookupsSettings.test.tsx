@@ -397,7 +397,7 @@ describe('CandidateLookupsSettings — colour + reorder revert on failure', () =
     await waitFor(() => expect(notifyError).toHaveBeenCalledWith(st('statusList.saveFailed')))
     // Reverted: the trigger tints the ORIGINAL colour again, not the rejected pick.
     expect(screen.getByRole('button', { name: st('statusList.valueMark', { label: 'ZZP' }) }))
-      .toHaveStyle({ background: tintBg(ZZP_COLOR, true) })
+      .toHaveInlineStyle({ background: tintBg(ZZP_COLOR, true) })
   })
 
   it('reverts the order and notifies when the reorder PUT fails', async () => {

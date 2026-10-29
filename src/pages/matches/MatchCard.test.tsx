@@ -140,12 +140,12 @@ describe('MatchCard · header affordances', () => {
 describe('MatchCard · flatRow (Danny 09-08)', () => {
   it('defaults to the tinted --bg header (every OTHER caller stays unchanged)', () => {
     render(<MatchCard {...base} />)
-    expect(screen.getByTestId('match-card-header')).toHaveStyle({ background: 'var(--bg)' })
+    expect(screen.getByTestId('match-card-header')).toHaveInlineStyle({ background: 'var(--bg)' })
   })
 
   it('renders the plain surface background when flatRow is set', () => {
     render(<MatchCard {...base} flatRow />)
-    expect(screen.getByTestId('match-card-header')).toHaveStyle({ background: 'var(--surface)' })
+    expect(screen.getByTestId('match-card-header')).toHaveInlineStyle({ background: 'var(--surface)' })
   })
 })
 
@@ -182,10 +182,10 @@ describe('MatchCard · flatRow column split (Danny 09-08 second look)', () => {
     // column is deliberately SHRINKABLE now (the vacancy title must keep room),
     // so it is asserted on its minWidth floor instead of a fixed width — pinning
     // a number there would undo exactly what makes the title readable.
-    expect(screen.getByTestId('match-col-status')).toHaveStyle({ width: `${Number(MATCH_COL_STATUS.width)}px` })
-    expect(screen.getByTestId('match-col-score')).toHaveStyle({ width: `${Number(MATCH_COL_SCORE.width)}px` })
-    expect(screen.getByTestId('match-col-actions')).toHaveStyle({ width: `${Number(MATCH_COL_ACTIONS.width)}px` })
-    expect(screen.getByTestId('match-col-client')).toHaveStyle({ minWidth: `${Number(MATCH_COL_OTHER_PARTY.minWidth)}px` })
+    expect(screen.getByTestId('match-col-status')).toHaveInlineStyle({ width: `${Number(MATCH_COL_STATUS.width)}px` })
+    expect(screen.getByTestId('match-col-score')).toHaveInlineStyle({ width: `${Number(MATCH_COL_SCORE.width)}px` })
+    expect(screen.getByTestId('match-col-actions')).toHaveInlineStyle({ width: `${Number(MATCH_COL_ACTIONS.width)}px` })
+    expect(screen.getByTestId('match-col-client')).toHaveInlineStyle({ minWidth: `${Number(MATCH_COL_OTHER_PARTY.minWidth)}px` })
   })
 
   it('keeps the merged title and renders no separate Status/Score columns when collapsible without flatRow (no current caller, kept for compatibility)', () => {

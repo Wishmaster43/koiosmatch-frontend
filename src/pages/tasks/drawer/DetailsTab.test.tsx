@@ -478,12 +478,12 @@ describe('tasks DetailsTab — assignee avatar follows the table colour toggle',
   it('toggle ON (default): the assignee avatar carries their own colour', () => {
     render(<DetailsTab task={withAssignee} onUpdate={vi.fn()} />)
     // eslint-disable-next-line no-restricted-syntax -- asserting the fixture colour, not a UI colour choice
-    expect(screen.getByText('AN')).toHaveStyle({ background: '#ff0000' })
+    expect(screen.getByText('AN')).toHaveInlineStyle({ background: '#ff0000' })
   })
 
   it('toggle OFF: the assignee avatar renders the explicit neutral', () => {
     displaySettingsRecord.current = { task_table_color_assignee: false }
     render(<DetailsTab task={withAssignee} onUpdate={vi.fn()} />)
-    expect(screen.getByText('AN')).toHaveStyle({ background: NEUTRAL_AVATAR })
+    expect(screen.getByText('AN')).toHaveInlineStyle({ background: NEUTRAL_AVATAR })
   })
 })

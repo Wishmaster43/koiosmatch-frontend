@@ -36,7 +36,7 @@ describe('OpportunityDescriptionBlock · read mode', () => {
     // Real nl translation for opportunities:richText.empty.
     const placeholder = screen.getByText('Nog niets vastgelegd')
     expect(placeholder).toBeInTheDocument()
-    expect(placeholder).toHaveStyle({ fontStyle: 'italic' })
+    expect(placeholder).toHaveInlineStyle({ fontStyle: 'italic' })
   })
 
   it('does not show the RichTextEditor while in read mode', () => {

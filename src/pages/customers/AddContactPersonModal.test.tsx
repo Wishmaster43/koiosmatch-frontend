@@ -22,7 +22,8 @@
  * own — same shared wizard/card, same parent-mismatch safety net, entity="contacts"),
  * and the status picker hiding by default (STATUS-HIDDEN-1).
  */
-import { describe, it, expect, vi, beforeEach } from 'vitest'
+import { describe, it, expect, vi, beforeEach, type Mock } from 'vitest'
+import type { ContactPayload } from './hooks/useCustomerContacts'
 import { render, screen, waitFor, fireEvent } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import i18n from '@/i18n'
@@ -130,7 +131,7 @@ describe('AddContactPersonModal · card structure follows HET-RECEPT (label-left
 
 describe('AddContactPersonModal', () => {
   it('blocks submit while first/last name are empty and shows the required message', async () => {
-    const onCreate = vi.fn()
+    const onCreate = vi.fn<(v: ContactPayload) => unknown>()
     const user = userEvent.setup()
     render(<AddContactPersonModal onClose={() => {}} onCreate={onCreate} locations={locations} statuses={statuses} />)
 
@@ -144,7 +145,7 @@ describe('AddContactPersonModal', () => {
   })
 
   it('the location picker is searchable — typing narrows the option list, then picking updates the trigger', async () => {
-    const onCreate = vi.fn()
+    const onCreate = vi.fn<(v: ContactPayload) => unknown>()
     const user = userEvent.setup()
     render(<AddContactPersonModal onClose={() => {}} onCreate={onCreate} locations={locations} statuses={statuses} />)
 
@@ -185,7 +186,7 @@ describe('AddContactPersonModal', () => {
   })
 
   it('the department picker follows the selected location (C-42/point-9 cascade)', async () => {
-    const onCreate = vi.fn()
+    const onCreate = vi.fn<(v: ContactPayload) => unknown>()
     const user = userEvent.setup()
     render(<AddContactPersonModal onClose={() => {}} onCreate={onCreate} locations={locations} departments={departments} statuses={statuses} />)
 
@@ -208,7 +209,7 @@ describe('AddContactPersonModal', () => {
   })
 
   it('changing the location resets a department that no longer belongs to it', async () => {
-    const onCreate = vi.fn()
+    const onCreate = vi.fn<(v: ContactPayload) => unknown>()
     const user = userEvent.setup()
     render(<AddContactPersonModal onClose={() => {}} onCreate={onCreate} locations={locations} departments={departments} statuses={statuses} />)
 
@@ -270,7 +271,7 @@ describe('AddContactPersonModal', () => {
   })
 
   it('locking the location (adding "at this location") hides only the location picker — department still renders and cascades', async () => {
-    const onCreate = vi.fn()
+    const onCreate = vi.fn<(v: ContactPayload) => unknown>()
     const user = userEvent.setup()
     render(<AddContactPersonModal onClose={() => {}} onCreate={onCreate} locations={locations} departments={departments} statuses={statuses} lockLocationId="loc-1" />)
 
@@ -283,7 +284,7 @@ describe('AddContactPersonModal', () => {
   })
 
   it('toggling "primair" ON while another contact is already primary asks first — confirming turns it on', async () => {
-    const onCreate = vi.fn()
+    const onCreate = vi.fn<(v: ContactPayload) => unknown>()
     const user = userEvent.setup()
     const existing = [contact({ id: 'c-primary', name: 'Anna Bakker', isPrimary: true })]
     render(<AddContactPersonModal onClose={() => {}} onCreate={onCreate} locations={locations} statuses={statuses} existing={existing} />)
@@ -301,7 +302,7 @@ describe('AddContactPersonModal', () => {
   })
 
   it('cancelling the primary-replace confirmation leaves the toggle off and changes nothing else', async () => {
-    const onCreate = vi.fn()
+    const onCreate = vi.fn<(v: ContactPayload) => unknown>()
     const user = userEvent.setup()
     const existing = [contact({ id: 'c-primary', name: 'Anna Bakker', isPrimary: true })]
     render(<AddContactPersonModal onClose={() => {}} onCreate={onCreate} locations={locations} statuses={statuses} existing={existing} />)
@@ -314,7 +315,7 @@ describe('AddContactPersonModal', () => {
   })
 
   it('editing the contact that is ALREADY primary never prompts on save', async () => {
-    const onCreate = vi.fn()
+    const onCreate = vi.fn<(v: ContactPayload) => unknown>()
     const user = userEvent.setup()
     // Same id as `initial` — must be excluded from the "someone else is primary" check.
     const initial = contact({ id: 'c-self', name: 'Jan Jansen', firstName: 'Jan', middleName: '', lastName: 'Jansen', isPrimary: true })
@@ -331,7 +332,7 @@ describe('AddContactPersonModal', () => {
   })
 
   it('typing an email that another contact already has shows the duplicate message and blocks submit', async () => {
-    const onCreate = vi.fn()
+    const onCreate = vi.fn<(v: ContactPayload) => unknown>()
     const user = userEvent.setup()
     const existing = [contact({ id: 'c-other', name: 'Anna Bakker', email: 'anna@klant.nl' })]
     render(<AddContactPersonModal onClose={() => {}} onCreate={onCreate} locations={locations} statuses={statuses} existing={existing} />)
@@ -349,7 +350,7 @@ describe('AddContactPersonModal', () => {
   })
 
   it('a phone duplicate is detected on digits only, ignoring punctuation/spacing differences', async () => {
-    const onCreate = vi.fn()
+    const onCreate = vi.fn<(v: ContactPayload) => unknown>()
     const user = userEvent.setup()
     // Same digits as the typed value below, just formatted with a dash/spaces —
     // the digit-only compare must still catch it (a plain string compare would not).
@@ -386,7 +387,7 @@ describe('AddContactPersonModal', () => {
 // error and blocks submit instead of only bouncing back as a 422.
 describe('AddContactPersonModal · live e-mail format validation (VALIDATIE-LIVE-1-rest)', () => {
   it('shows an inline error under e-mail once blurred with a malformed value, and disables Create', async () => {
-    const onCreate = vi.fn()
+    const onCreate = vi.fn<(v: ContactPayload) => unknown>()
     const user = userEvent.setup()
     render(<AddContactPersonModal onClose={() => {}} onCreate={onCreate} locations={locations} statuses={statuses} />)
 
@@ -449,7 +450,7 @@ describe('AddContactPersonModal · status picker hidden by default (STATUS-HIDDE
 describe('AddContactPersonModal · tussenvoegsel', () => {
   it('sends the tussenvoegsel with the create payload', async () => {
     const user = userEvent.setup()
-    const onCreate = vi.fn()
+    const onCreate = vi.fn<(v: ContactPayload) => unknown>()
     render(<AddContactPersonModal onCreate={onCreate} onClose={vi.fn()} />)
 
     await user.type(screen.getByLabelText(ct('subModal.firstName'), { exact: false }), 'Jan')
@@ -464,7 +465,7 @@ describe('AddContactPersonModal · tussenvoegsel', () => {
 
   it('keeps an existing tussenvoegsel when a contact is edited', async () => {
     const user = userEvent.setup()
-    const onCreate = vi.fn()
+    const onCreate = vi.fn<(v: ContactPayload) => unknown>()
     const existing = { id: 'c9', firstName: 'Jan', middleName: 'van der', lastName: 'Berg', name: 'Jan van der Berg' } as never
     render(<AddContactPersonModal initial={existing} onCreate={onCreate} onClose={vi.fn()} />)
 
@@ -614,7 +615,7 @@ describe('AddContactPersonModal · locatie/afdeling koppeling is clearable', () 
 describe('AddContactPersonModal · LinkedIn (CONTACT-LINKEDIN-1)', () => {
   it('sends the typed LinkedIn value with the create payload', async () => {
     const user = userEvent.setup()
-    const onCreate = vi.fn()
+    const onCreate = vi.fn<(v: ContactPayload) => unknown>()
     render(<AddContactPersonModal onCreate={onCreate} onClose={vi.fn()} />)
 
     await user.type(screen.getByLabelText(ct('subModal.firstName'), { exact: false }), 'Jan')
@@ -627,7 +628,7 @@ describe('AddContactPersonModal · LinkedIn (CONTACT-LINKEDIN-1)', () => {
 
   it('leaves LinkedIn empty when it is not filled in — the field is optional', async () => {
     const user = userEvent.setup()
-    const onCreate = vi.fn()
+    const onCreate = vi.fn<(v: ContactPayload) => unknown>()
     render(<AddContactPersonModal onCreate={onCreate} onClose={vi.fn()} />)
 
     await user.type(screen.getByLabelText(ct('subModal.firstName'), { exact: false }), 'Jan')
@@ -824,7 +825,7 @@ describe('AddContactPersonModal · duplicate-contact 422 (N-001)', () => {
     if (withId) errors.duplicate_contact_id = ['c-other']
     return vi.fn().mockRejectedValue({ response: { status: 422, data: { errors } } })
   }
-  const submitDup = async (onCreate: ReturnType<typeof vi.fn>, existing: Contact[]) => {
+  const submitDup = async (onCreate: Mock<(v: ContactPayload) => unknown>, existing: Contact[]) => {
     const user = userEvent.setup()
     render(<AddContactPersonModal onClose={() => {}} onCreate={onCreate} locations={locations} statuses={statuses} existing={existing} />)
     await user.type(screen.getByLabelText(ct('subModal.firstName'), { exact: false }), 'Jan')
@@ -860,7 +861,7 @@ describe('formKeyForApiField', () => {
 describe('AddContactPersonModal · required boolean custom field', () => {
   it('submits customFields { gdpr: false } when the checkbox is left untouched', async () => {
     customFieldsState.fields = [{ key: 'gdpr', label: 'GDPR', type: 'boolean', sort_order: 0, active: true, has_data: false, visible_in_ui: true, required_always: true, required_for: [] }]
-    const onCreate = vi.fn()
+    const onCreate = vi.fn<(v: ContactPayload) => unknown>()
     const user = userEvent.setup()
     render(<AddContactPersonModal onClose={() => {}} onCreate={onCreate} locations={locations} statuses={statuses} />)
     await user.type(screen.getByLabelText(ct('subModal.firstName'), { exact: false }), 'Jan')

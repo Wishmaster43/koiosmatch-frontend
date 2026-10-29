@@ -80,7 +80,7 @@ describe('KoiosModeDefaultCard — saves', () => {
     const err = await screen.findByText('Ongeldige waarde.')
     expect(err.tagName).toBe('SPAN')
     expect(err).not.toHaveAttribute('role')
-    expect(err).toHaveStyle({ fontSize: '11px' })
+    expect(err).toHaveInlineStyle({ fontSize: '11px' })
   })
 })
 

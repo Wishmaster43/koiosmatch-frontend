@@ -21,7 +21,7 @@ describe('DocTypeChipRow', () => {
   // the row itself carries no notion of "active" beyond calling it per option.
   it('renders the caller-resolved active chip with bold weight', () => {
     render(<DocTypeChipRow options={options} isActive={v => v === 'diploma'} onPick={vi.fn()} />)
-    expect(screen.getByText('CV')).toHaveStyle({ fontWeight: 400 })
-    expect(screen.getByText('Diploma')).toHaveStyle({ fontWeight: 600 })
+    expect(screen.getByText('CV')).toHaveInlineStyle({ fontWeight: 400 })
+    expect(screen.getByText('Diploma')).toHaveInlineStyle({ fontWeight: 600 })
   })
 })

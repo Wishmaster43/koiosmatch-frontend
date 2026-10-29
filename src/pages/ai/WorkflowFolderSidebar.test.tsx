@@ -40,9 +40,9 @@ describe('WorkflowFolderSidebar — folder delete is keyboard-reachable', () => 
   it('reveals the delete button on keyboard focus (not just mouse hover)', () => {
     render(<WorkflowFolderSidebar {...baseProps} />)
     const deleteBtn = screen.getByRole('button', { name: 'Verwijderen' })
-    expect(deleteBtn).toHaveStyle({ opacity: '0' })
+    expect(deleteBtn).toHaveInlineStyle({ opacity: '0' })
     fireEvent.focus(deleteBtn)
-    expect(deleteBtn).toHaveStyle({ opacity: '1' })
+    expect(deleteBtn).toHaveInlineStyle({ opacity: '1' })
   })
 
   it('never renders a delete button when the user cannot manage folders', () => {

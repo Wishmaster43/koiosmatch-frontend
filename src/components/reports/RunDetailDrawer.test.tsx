@@ -213,7 +213,7 @@ describe('RunDetailDrawer — RUN-SKIPPED-REASON-FE-1 run-level reason', () => {
       </I18nextProvider>,
     )
     const line = screen.getByText('Reden: Workflow gestopt door limiet')
-    expect(line).toHaveStyle({ color: 'var(--color-danger-text)' })
+    expect(line).toHaveInlineStyle({ color: 'var(--color-danger-text)' })
   })
 })
 

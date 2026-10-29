@@ -81,7 +81,7 @@ describe('StatisticsTab · empty other-list (total 1)', () => {
     renderTab(match, [match])
     const note = screen.getByText(i18n.t('matches:drawer.statistics.onlyMatch'))
     expect(note).toBeInTheDocument()
-    expect(note).toHaveStyle({ fontStyle: 'italic' })
+    expect(note).toHaveInlineStyle({ fontStyle: 'italic' })
   })
 })
 

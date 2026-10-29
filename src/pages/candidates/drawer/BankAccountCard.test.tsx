@@ -106,7 +106,7 @@ describe('BankAccountCard · private (salary) account', () => {
     expect(screen.getByText('preferences.groupBankAccount')).toBeInTheDocument()
     const shown = screen.getByText('NL91 ABNA 0417 1643 00')
     expect(shown).toBeInTheDocument()
-    expect(shown).toHaveStyle({ fontFamily: monoStyle.fontFamily })
+    expect(shown).toHaveInlineStyle({ fontFamily: monoStyle.fontFamily })
     expect(screen.getByText('Jan Jansen')).toBeInTheDocument()
     expect(screen.getByTitle('edit')).toBeInTheDocument()
   })

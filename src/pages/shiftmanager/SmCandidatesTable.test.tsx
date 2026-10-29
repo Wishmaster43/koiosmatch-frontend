@@ -34,7 +34,7 @@ describe('SmCandidatesTable · columns', () => {
 
     const chip = screen.getByText('Actief')
     // SoftChip tints via color-mix — never a solid background (§4).
-    expect(chip.closest('span')).toHaveStyle({ background: tintBg('var(--color-success)') })
+    expect(chip.closest('span')).toHaveInlineStyle({ background: tintBg('var(--color-success)') })
   })
 })
 

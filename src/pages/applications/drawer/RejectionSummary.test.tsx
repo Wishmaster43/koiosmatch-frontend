@@ -216,7 +216,7 @@ describe('RejectionSummary · delivery status', () => {
     render(<RejectionSummary application={withDelivery(status)} />)
     const el = screen.getByTestId('rejection-delivery')
     expect(el).toHaveTextContent(key)
-    expect(el).toHaveStyle({ color: ink })
+    expect(el).toHaveInlineStyle({ color: ink })
   })
 
   it('adds nothing for sent, null or absent fields', () => {

@@ -33,8 +33,7 @@ describe('QuickViewToggle', () => {
     // accent-yellow toggles (3.75:1, herhaal-slotaudit 20-08).
     // eslint-disable-next-line no-restricted-syntax -- DATA: asserting the exact chipInk output for that test colour
     expect(btn.style.color).toBe('color-mix(in srgb, #ffdd00 45%, var(--text))')
-    // eslint-disable-next-line huisstijlLegacy/no-restricted-syntax -- DATA: asserting tintBg's exact output string, not hand-rolling the recipe
-    expect(btn.style.background).toBe('color-mix(in srgb, rgb(255, 221, 0) 16%, transparent)')
+    expect(btn.style.background).toBe('color-mix(in srgb, rgb(255, 221, 0) 16%, transparent 84%)')
     expect(btn.style.border).toContain('color-mix(in srgb, rgb(255, 221, 0)')
   })
 

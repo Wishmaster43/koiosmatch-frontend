@@ -59,7 +59,7 @@ describe('TenantUsageKpiRow', () => {
     // Pin the SEAM (mutation-proven weak before): the over line is the overBudget
     // KEY itself in the danger ink — deleting the branch must fail this test.
     const over = screen.getByText(/billing\.usage\.plan\.overBudget/)
-    expect(over).toHaveStyle({ color: 'var(--color-danger-text)' })
+    expect(over).toHaveInlineStyle({ color: 'var(--color-danger-text)' })
     expect(document.body.textContent).not.toMatch(/withinBudget/)
   })
 

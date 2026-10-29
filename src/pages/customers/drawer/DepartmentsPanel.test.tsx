@@ -166,7 +166,7 @@ describe('DepartmentsPanel · colour on/off flags per column (CHIPKLEUR-INSTELBA
     render(<DepartmentsPanel {...base} openId={null} onOpenChange={vi.fn()} scope="customer" departments={[department()]} />)
 
     await waitFor(() => {
-      expect(screen.getByText('Vestiging Noord')).toHaveStyle({ color: chipInk('var(--color-secondary)') })
+      expect(screen.getByText('Vestiging Noord')).toHaveInlineStyle({ color: chipInk('var(--color-secondary)') })
       // Scoped to the columnheader role: the toolbar's StatusFilterSelect trigger
       // now ALSO renders the literal word "Status" (HUISSTIJL-1 batch G), so an
       // unscoped getByText('Status') matches both and throws.
@@ -183,7 +183,7 @@ describe('DepartmentsPanel · colour on/off flags per column (CHIPKLEUR-INSTELBA
     render(<DepartmentsPanel {...base} openId={null} onOpenChange={vi.fn()} scope="customer" departments={[department()]} />)
 
     await waitFor(() => {
-      expect(screen.getByText('Vestiging Noord')).toHaveStyle({ color: 'var(--text)' })
+      expect(screen.getByText('Vestiging Noord')).toHaveInlineStyle({ color: 'var(--text)' })
     })
   })
 
@@ -198,7 +198,7 @@ describe('DepartmentsPanel · colour on/off flags per column (CHIPKLEUR-INSTELBA
       departments={[department({ statusLabel: 'Actief', statusColor: '#16A34A' })]} />)
 
     await waitFor(() => {
-      expect(screen.getByText('Actief')).toHaveStyle({ color: 'var(--text)' })
+      expect(screen.getByText('Actief')).toHaveInlineStyle({ color: 'var(--text)' })
     })
   })
 })

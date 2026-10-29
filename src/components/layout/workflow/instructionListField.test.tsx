@@ -168,7 +168,7 @@ describe('InstructionListField · limits (INTERVIEW-WORKFLOW-1 Appendix C: 50 ro
     const long = [{ id: 'a', text: 'x'.repeat(2001) }]
     render(<InstructionListField value={long} onChange={vi.fn()} fieldKey="instructions" />)
     const counter = screen.getByText('fields.instructionCharCount')
-    expect(counter).toHaveStyle({ color: 'var(--color-danger-text)' })
+    expect(counter).toHaveInlineStyle({ color: 'var(--color-danger-text)' })
   })
 
   it('renders the total-characters caption', () => {

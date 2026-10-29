@@ -52,7 +52,7 @@ describe('NoteFields · channel picker shows the selection (CHANNEL-PICKER-CONTR
     for (const ch of channels) {
       const btn = chip(ch.label)
       expect(btn).toHaveAttribute('aria-pressed', 'false')
-      expect(btn).toHaveStyle({ background: 'var(--surface)', color: 'var(--text-muted)' })
+      expect(btn).toHaveInlineStyle({ background: 'var(--surface)', color: 'var(--text-muted)' })
       expect(btn.style.border).toBe('1px solid var(--border)')
       expect(btn.style.background).not.toContain(EMAIL_COLOR)
     }
@@ -67,7 +67,7 @@ describe('NoteFields · channel picker shows the selection (CHANNEL-PICKER-CONTR
     const selected = chip('WhatsApp')
     expect(selected).toHaveAttribute('aria-pressed', 'true')
     // jsdom normalizes a hex colour to rgb() — toHaveStyle normalizes both sides.
-    expect(selected).toHaveStyle({ color: chipInk(WHATSAPP_COLOR) })
+    expect(selected).toHaveInlineStyle({ color: chipInk(WHATSAPP_COLOR) })
     // jsdom rewrites the hex inside color-mix() to rgb() — assert on the parts
     // that carry the meaning: the channel colour, the 16%/50% tint, color-mix.
     expect(selected.style.background).toContain('color-mix(in srgb, rgb(22, 163, 74)')
@@ -80,7 +80,7 @@ describe('NoteFields · channel picker shows the selection (CHANNEL-PICKER-CONTR
 
     const other = chip('Email')
     expect(other).toHaveAttribute('aria-pressed', 'false')
-    expect(other).toHaveStyle({ background: 'var(--surface)', color: 'var(--text-muted)' })
+    expect(other).toHaveInlineStyle({ background: 'var(--surface)', color: 'var(--text-muted)' })
   })
 
   it('keeps an icon on every chip, so the channel is recognisable without colour (§6)', () => {
@@ -94,6 +94,6 @@ describe('NoteFields · channel picker shows the selection (CHANNEL-PICKER-CONTR
     await user.click(chip('Email'))
     await user.click(chip('Email'))
     expect(chip('Email')).toHaveAttribute('aria-pressed', 'false')
-    expect(chip('Email')).toHaveStyle({ background: 'var(--surface)' })
+    expect(chip('Email')).toHaveInlineStyle({ background: 'var(--surface)' })
   })
 })

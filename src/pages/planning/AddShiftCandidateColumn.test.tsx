@@ -17,6 +17,6 @@ describe('AddShiftCandidateColumn · group label uses the shared typography atom
         candidate={null} setCandidate={vi.fn()} />,
     )
     const heading = screen.getByText('common:nav.candidates')
-    expect(heading).toHaveStyle({ fontSize: '11px', fontWeight: 600, textTransform: 'uppercase', color: 'var(--text-muted)' })
+    expect(heading).toHaveInlineStyle({ fontSize: '11px', fontWeight: 600, textTransform: 'uppercase', color: 'var(--text-muted)' })
   })
 })

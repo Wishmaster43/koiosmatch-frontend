@@ -19,7 +19,7 @@ describe('ReportGridItem', () => {
   it('spans both columns when span=2', () => {
     render(<ReportGridItem span={2}><div>wide</div></ReportGridItem>)
     const item = screen.getByText('wide').parentElement as HTMLElement
-    expect(item).toHaveStyle({ gridColumn: '1 / -1' })
+    expect(item).toHaveInlineStyle({ gridColumn: '1 / -1' })
   })
 
   it('takes a single column by default', () => {

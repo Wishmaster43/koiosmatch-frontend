@@ -482,7 +482,7 @@ describe('ZzpTab · LANE-I2-1 freelance identifier hints', () => {
       vat_number_hint: { status: 'unverifiable', country_code: null, example: null },
     })} />)
     const hint = screen.getByText('zzp.hintUnverifiable')
-    expect(hint).toHaveStyle({ color: 'var(--text-muted)', fontStyle: 'italic', fontSize: '11px' })
+    expect(hint).toHaveInlineStyle({ color: 'var(--text-muted)', fontStyle: 'italic', fontSize: '11px' })
   })
 
   it('never blocks saving despite an "invalid" hint', async () => {

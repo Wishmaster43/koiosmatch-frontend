@@ -29,7 +29,7 @@ describe('PendingUploadRows', () => {
     )
     expect(screen.getByText('row one')).toBeInTheDocument()
     expect(screen.getByText('row two')).toBeInTheDocument()
-    expect(container.firstChild).toHaveStyle({ display: 'flex', flexDirection: 'column' })
+    expect(container.firstChild).toHaveInlineStyle({ display: 'flex', flexDirection: 'column' })
   })
 })
 

@@ -12,7 +12,7 @@ describe('SearchResultRowFrame', () => {
       </SearchResultRowFrame>
     )
     const frame = container.querySelector('[role="button"]')
-    expect(frame).toHaveStyle('background: var(--color-primary-bg)')
+    expect(frame).toHaveInlineStyle('background: var(--color-primary-bg)')
   })
 
   it('renders with transparent background when isSelected is false', () => {
@@ -22,7 +22,7 @@ describe('SearchResultRowFrame', () => {
       </SearchResultRowFrame>
     )
     const frame = container.querySelector('[role="button"]')
-    expect(frame).toHaveStyle('background: transparent')
+    expect(frame).toHaveInlineStyle('background: transparent')
   })
 
   it('calls onSelect when clicked', async () => {

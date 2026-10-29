@@ -38,10 +38,10 @@ describe('InsightsRow · donut clear button colour', () => {
       />
     )
     const clearBtn = screen.getByRole('button')
-    expect(clearBtn).toHaveStyle({ background: 'var(--button-fill)', color: 'var(--button-ink)' })
+    expect(clearBtn).toHaveInlineStyle({ background: 'var(--button-fill)', color: 'var(--button-ink)' })
     fireEvent.mouseEnter(clearBtn)
-    expect(clearBtn).toHaveStyle({ background: 'var(--button-fill)', color: 'var(--button-ink)' })
+    expect(clearBtn).toHaveInlineStyle({ background: 'var(--button-fill)', color: 'var(--button-ink)' })
     fireEvent.mouseLeave(clearBtn)
-    expect(clearBtn).toHaveStyle({ background: 'var(--button-fill)', color: 'var(--button-ink)' })
+    expect(clearBtn).toHaveInlineStyle({ background: 'var(--button-fill)', color: 'var(--button-ink)' })
   })
 })

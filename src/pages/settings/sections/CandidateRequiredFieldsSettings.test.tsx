@@ -197,7 +197,7 @@ describe('built-in fields — saving keeps the phase-keyed shape', () => {
     // Asserting the shared Toggle's actual rendered token value (Toggle.tsx), not authoring UI.
     expect(screen.getByRole('switch', { name: `${ct('candidates:modal.fields.mobile')} — Kandidaat` }))
       // eslint-disable-next-line huisstijlLegacy/no-restricted-syntax -- test assertion on the real component style, not new UI
-      .toHaveStyle({ background: 'var(--color-primary)' })
+      .toHaveInlineStyle({ background: 'var(--color-primary)' })
   })
 
   it('a legacy postal_code entry shows as the working postcode toggle and saves folded', async () => {
@@ -207,7 +207,7 @@ describe('built-in fields — saving keeps the phase-keyed shape', () => {
 
     const postcodeToggle = screen.getByRole('switch', { name: `${ct('candidates:modal.fields.postalCode')} — Lead` })
     // eslint-disable-next-line huisstijlLegacy/no-restricted-syntax -- test assertion on the real component style, not new UI
-    expect(postcodeToggle).toHaveStyle({ background: 'var(--color-primary)' })
+    expect(postcodeToggle).toHaveInlineStyle({ background: 'var(--color-primary)' })
 
     // Toggling any other field rewrites the map onto guard-readable keys.
     await user.click(screen.getByRole('switch', { name: `${ct('candidates:modal.fields.city')} — Lead` }))

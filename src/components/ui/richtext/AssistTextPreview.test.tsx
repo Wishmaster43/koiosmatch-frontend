@@ -53,9 +53,9 @@ describe('AssistTextPreview', () => {
     await user.click(compareOption)
     // Removed word carries its hidden label + strikethrough styling.
     const removed = screen.getByText('notesAssist.diffRemoved')
-    expect(removed.parentElement).toHaveStyle({ textDecoration: 'line-through' })
+    expect(removed.parentElement).toHaveInlineStyle({ textDecoration: 'line-through' })
     // Added word carries its hidden label + underline styling.
     const added = screen.getByText('notesAssist.diffAdded')
-    expect(added.parentElement).toHaveStyle({ textDecoration: 'underline' })
+    expect(added.parentElement).toHaveInlineStyle({ textDecoration: 'underline' })
   })
 })

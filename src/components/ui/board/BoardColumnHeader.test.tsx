@@ -18,7 +18,7 @@ describe('BoardColumnHeader', () => {
     )
     const dot = container.querySelector('span[style*="border-radius: 50%"]')
     expect(dot).toBeInTheDocument()
-    expect(dot).toHaveStyle('background: rgb(79, 127, 255)')
+    expect(dot).toHaveInlineStyle('background: rgb(79, 127, 255)')
   })
 
   it('does not render a dot when showDot is false', () => {

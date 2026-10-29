@@ -51,7 +51,7 @@ describe('EscalationList · reason colour/label (LOOKUP-GAP-1c)', () => {
       hours_waiting: 2,
     }]
     render(<EscalationList escalations={escalations} />)
-    expect(screen.getByText('Klant boos')).toHaveStyle({ color: chipInk('var(--color-info)') })
+    expect(screen.getByText('Klant boos')).toHaveInlineStyle({ color: chipInk('var(--color-info)') })
     expect(screen.queryByText('reasons.no_reply')).not.toBeInTheDocument()
   })
 
@@ -63,7 +63,7 @@ describe('EscalationList · reason colour/label (LOOKUP-GAP-1c)', () => {
     const badge = screen.getByText('Klacht')
     expect(badge).toBeInTheDocument()
     // eslint-disable-next-line no-restricted-syntax -- DATA: asserting the exact colour-mix output for the fixture colour above
-    expect(badge).toHaveStyle({ color: chipInk('#00aaff'), background: tintBg('#00aaff') })
+    expect(badge).toHaveInlineStyle({ color: chipInk('#00aaff'), background: tintBg('#00aaff') })
   })
 
   it('a lookup match wins even when the value ALSO happens to collide with a derived diagnostic key', () => {
@@ -74,7 +74,7 @@ describe('EscalationList · reason colour/label (LOOKUP-GAP-1c)', () => {
     const escalations: WaEscalation[] = [{ candidate_id: 'c1', candidate, reason: 'no_reply', hours_waiting: 5 }]
     render(<EscalationList escalations={escalations} />)
     // eslint-disable-next-line no-restricted-syntax -- DATA: asserting against the fixture colour above
-    expect(screen.getByText('Geen actie ondernomen')).toHaveStyle({ color: chipInk('#556677') })
+    expect(screen.getByText('Geen actie ondernomen')).toHaveInlineStyle({ color: chipInk('#556677') })
     expect(screen.queryByText('reasons.no_reply')).not.toBeInTheDocument()
   })
 
@@ -86,16 +86,16 @@ describe('EscalationList · reason colour/label (LOOKUP-GAP-1c)', () => {
       { candidate_id: 'c3', candidate, reason: 'negative_response', hours_waiting: 4 },
     ]
     render(<EscalationList escalations={escalations} />)
-    expect(screen.getByText('reasons.failed_delivery')).toHaveStyle({ color: chipInk('var(--color-danger)') })
-    expect(screen.getByText('reasons.no_reply')).toHaveStyle({ color: chipInk('var(--color-warning)') })
-    expect(screen.getByText('reasons.negative_response')).toHaveStyle({ color: chipInk('var(--color-violet)') })
+    expect(screen.getByText('reasons.failed_delivery')).toHaveInlineStyle({ color: chipInk('var(--color-danger)') })
+    expect(screen.getByText('reasons.no_reply')).toHaveInlineStyle({ color: chipInk('var(--color-warning)') })
+    expect(screen.getByText('reasons.negative_response')).toHaveInlineStyle({ color: chipInk('var(--color-violet)') })
   })
 
   it('an entirely unknown reason (no lookup match, not a derived key) falls to the neutral muted colour', () => {
     mockMetaOf.mockReturnValue(undefined)
     const escalations: WaEscalation[] = [{ candidate_id: 'c1', candidate, reason: 'mystery', hours_waiting: 2 }]
     render(<EscalationList escalations={escalations} />)
-    expect(screen.getByText('reasons.mystery')).toHaveStyle({ color: chipInk('var(--text-muted)') })
+    expect(screen.getByText('reasons.mystery')).toHaveInlineStyle({ color: chipInk('var(--text-muted)') })
   })
 })
 

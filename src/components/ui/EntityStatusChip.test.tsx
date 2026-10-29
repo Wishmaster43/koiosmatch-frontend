@@ -62,7 +62,7 @@ describe('EntityStatusChip', () => {
       />
     )
     const text = screen.getByText('Beschikbaar')
-    expect(text).toHaveStyle({ fontSize: '12.5px' })
+    expect(text).toHaveInlineStyle({ fontSize: '12.5px' })
   })
 
   test('renders fallback label when status slug not provided and fallbackLabel is given', () => {

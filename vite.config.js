@@ -89,6 +89,9 @@ export default defineConfig(({ mode }) => {
       globals: true,
       setupFiles: './src/test/setup.js',
       css: false,
+      // vitest 5 clears every mock before each test by default; the suites were written against the vitest 2
+      // behaviour (call history survives between tests unless a file clears it itself), so keep that contract.
+      clearMocks: false,
       // Pin the relative API base the dev .env ships, so a checkout without that gitignored
       // file (CI, a fresh worktree) runs the suite exactly as every local gate does.
       env: { VITE_API_URL: '/api' },

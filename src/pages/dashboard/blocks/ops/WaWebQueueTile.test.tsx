@@ -35,10 +35,10 @@ describe('WaWebQueueTile', () => {
 
   it('colors the failed figure with the danger token only when it is a real non-zero count', () => {
     const { rerender } = render(<WaWebQueueTile feed={feed} />)
-    expect(screen.getByText('2')).toHaveStyle({ color: 'var(--color-danger-text)' })
+    expect(screen.getByText('2')).toHaveInlineStyle({ color: 'var(--color-danger-text)' })
 
     rerender(<WaWebQueueTile feed={{ ...feed, failed: 0 }} />)
-    expect(screen.getByText('0')).toHaveStyle({ color: 'var(--text)' })
+    expect(screen.getByText('0')).toHaveInlineStyle({ color: 'var(--text)' })
   })
 
   it('shows the est-drain caption only when est_drain_hours is not null', () => {

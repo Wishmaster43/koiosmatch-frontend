@@ -11,7 +11,7 @@ describe('dashboard KpiCard target line', () => {
     ['muted', 'var(--text-muted)'],
   ] as const)('renders the line with the %s tone token', (tone, token) => {
     render(<KpiCard label="L" value="3" Icon={Users} targetLine={{ text: 'Target 10 reached', tone }} />)
-    expect(screen.getByText('Target 10 reached')).toHaveStyle({ color: token })
+    expect(screen.getByText('Target 10 reached')).toHaveInlineStyle({ color: token })
   })
   // The same card with and without a target line differs by exactly that line.
   it('renders nothing extra when absent', () => {

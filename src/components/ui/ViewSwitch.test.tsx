@@ -39,8 +39,8 @@ describe('ViewSwitch', () => {
     const mapNode = screen.getByTestId('map-counter')
     expect(tableNode).toBeInTheDocument()
     expect(mapNode).toBeInTheDocument()
-    expect(tableNode.parentElement).toHaveStyle({ display: 'none' })
-    expect(mapNode.parentElement).toHaveStyle({ display: 'contents' })
+    expect(tableNode.parentElement).toHaveInlineStyle({ display: 'none' })
+    expect(mapNode.parentElement).toHaveInlineStyle({ display: 'contents' })
   })
 
   it('preserves a view\'s internal state across a toggle away and back (no remount)', async () => {

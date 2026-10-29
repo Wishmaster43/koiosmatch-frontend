@@ -21,6 +21,6 @@ describe('AiGeneratedLabel', () => {
   it('scales the icon with the one size prop', () => {
     render(<AiGeneratedLabel size={14} />)
     const img = screen.getByRole('img')
-    expect(img).toHaveStyle({ width: '17px', height: '17px' })
+    expect(img).toHaveInlineStyle({ width: '17px', height: '17px' })
   })
 })

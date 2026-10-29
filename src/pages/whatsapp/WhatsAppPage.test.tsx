@@ -227,7 +227,7 @@ describe('WhatsAppPage · nine-card KPI band (WA-KPI9-1)', () => {
     render(<WhatsAppPage />)
     const card = screen.getByText(LABELS.queuedToday).parentElement as HTMLElement
     expect(card).not.toHaveAttribute('role', 'button')
-    expect(card).toHaveStyle({ cursor: 'default' })
+    expect(card).toHaveInlineStyle({ cursor: 'default' })
     // Clicking it is a no-op: the overview tab (activity chart) is still showing, not Messages.
     await user.click(screen.getByText(LABELS.queuedToday))
     expect(screen.getByTestId('activity-chart')).toBeInTheDocument()

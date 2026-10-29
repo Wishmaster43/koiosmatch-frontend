@@ -13,7 +13,8 @@
  * contract), the establishment picker actually filtering by typing, and the
  * name validation still blocking an incomplete submit.
  */
-import { describe, it, expect, vi, beforeEach } from 'vitest'
+import { describe, it, expect, vi, beforeEach, type Mock } from 'vitest'
+import type { CustomerForm } from './AddCustomerModal'
 import { render, screen, waitFor, fireEvent, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import i18n from '@/i18n'
@@ -636,7 +637,7 @@ describe('AddCustomerModal · duplicate probe (CUST-DUP-FE-1)', () => {
 // banner and throw the `existing` payload away. It must now render a translated
 // panel with real actions built from that payload — mirrors AddCandidateModal 1:1.
 describe('AddCustomerModal · duplicate 409 panel (CUST-DUP-FE-1)', () => {
-  const mountWithNav = (onCreate: ReturnType<typeof vi.fn>, onClose = vi.fn()) => {
+  const mountWithNav = (onCreate: Mock<(form: CustomerForm) => unknown>, onClose = vi.fn()) => {
     const goTo = vi.fn()
     render(
       <NavigationProvider goTo={goTo}>

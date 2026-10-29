@@ -109,7 +109,7 @@ describe('EmailTab · four states', () => {
     await waitFor(() => {
       const note = screen.getByText(i18n.t('opportunities:email.empty'))
       expect(note).toBeInTheDocument()
-      expect(note).toHaveStyle({ fontStyle: 'italic' })
+      expect(note).toHaveInlineStyle({ fontStyle: 'italic' })
     })
   })
 

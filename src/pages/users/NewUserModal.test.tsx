@@ -90,7 +90,7 @@ describe('NewUserModal', () => {
   // untruncated labelled inputs inside their own titled card.
   it('opens at the wide-form footprint, not the old cramped 420px column', () => {
     render(<NewUserModal onClose={noop} onCreated={noop} />)
-    expect(screen.getByRole('dialog')).toHaveStyle({ maxWidth: '1320px' })
+    expect(screen.getByRole('dialog')).toHaveInlineStyle({ maxWidth: '1320px' })
     expect(screen.getByLabelText('firstName', { exact: false })).toBeInTheDocument()
     expect(screen.getByLabelText('lastName', { exact: false })).toBeInTheDocument()
   })

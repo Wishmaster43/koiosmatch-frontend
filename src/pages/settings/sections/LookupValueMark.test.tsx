@@ -32,7 +32,7 @@ describe('LookupValueMark — icon-tinted face', () => {
     expect(trigger.querySelector('svg')).toBeInTheDocument()
     // The icon's ink is chipInk(ROW_COLOR) — var(--color-primary)'s own AA-safe
     // text twin, never the raw colour (herhaal-slotaudit 20-08, mirrors SoftChip).
-    expect(trigger).toHaveStyle({ color: 'var(--color-primary-text)' })
+    expect(trigger).toHaveInlineStyle({ color: 'var(--color-primary-text)' })
   })
 
   it('opens the popover on trigger click and closes it on an outside mousedown', async () => {
@@ -103,7 +103,7 @@ describe('LookupValueMark — colour-only face (no icon vocabulary)', () => {
 
     const trigger = screen.getByRole('button', { name: st('statusList.colorMark', { label: 'Starter' }) })
     expect(trigger).toBeInTheDocument()
-    expect(trigger).toHaveStyle({ background: OTHER_ROW_COLOR })
+    expect(trigger).toHaveInlineStyle({ background: OTHER_ROW_COLOR })
     expect(trigger.querySelector('svg')).not.toBeInTheDocument()
   })
 
@@ -113,6 +113,6 @@ describe('LookupValueMark — colour-only face (no icon vocabulary)', () => {
 
     const trigger = screen.getByRole('button', { name: st('statusList.colorMark', { label: 'Onbekend' }) })
     // FALLBACK_SWATCH (#6B7280) — jsdom normalises the inline hex to rgb().
-    expect(trigger).toHaveStyle({ background: 'rgb(107, 114, 128)' })
+    expect(trigger).toHaveInlineStyle({ background: 'rgb(107, 114, 128)' })
   })
 })

@@ -193,7 +193,7 @@ describe('ApplicationsTable · interview column', () => {
     render(<ApplicationsTable rows={[rowWithInterview]} />)
     const progress = screen.getByText('2/12')
     const line = progress.parentElement as HTMLElement
-    expect(line).toHaveStyle({ display: 'inline-flex', whiteSpace: 'nowrap' })
+    expect(line).toHaveInlineStyle({ display: 'inline-flex', whiteSpace: 'nowrap' })
     // The chip is that same line's sibling — never a stacked column wrapper.
     expect(line.children.length).toBe(2)
     expect(line.style.flexDirection).not.toBe('column')
@@ -255,7 +255,7 @@ describe('ApplicationsTable · days-in-phase column (PDF-SOLLICITATIES point 8)'
     const flagged = { ...baseRow, id: 42, currentStageEnteredAt: '2026-08-01T00:00:00Z', tooLongInStage: true } as unknown as Application
     render(<ApplicationsTable rows={[flagged]} />)
     const count = screen.getByText('13')
-    expect(count).toHaveStyle({ color: 'var(--color-warning-text)' })
+    expect(count).toHaveInlineStyle({ color: 'var(--color-warning-text)' })
   })
 
   it('sorts by days in the current phase (who is stuck longest)', () => {

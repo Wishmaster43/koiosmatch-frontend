@@ -395,8 +395,8 @@ const dataWithKpis: MatchesReportData = { ...data, kpis: matchKpis }
 // in the assertion argument, not in a style literal: this test paints nothing.
 function expectInk(el: HTMLElement, token: string, opts?: { absent?: boolean }) {
   const m = expect(el)
-  if (opts?.absent) m.not.toHaveStyle({ color: token })
-  else m.toHaveStyle({ color: token })
+  if (opts?.absent) m.not.toHaveInlineStyle({ color: token })
+  else m.toHaveInlineStyle({ color: token })
 }
 
 describe('MatchesReport (nine-card server-suite KPI strip, KPI-MATCHES-1)', () => {

@@ -148,7 +148,7 @@ describe('VacancyChannelSettings', () => {
     // LOOKUP-ONE-ELEMENT-1: the colour now lives on the LookupValueMark trigger —
     // the row's own label is plain text, never the old ColorBadge pill (99px radius).
     const label = await screen.findByText('Indeed')
-    expect(label).not.toHaveStyle({ borderRadius: '99px' })
+    expect(label).not.toHaveInlineStyle({ borderRadius: '99px' })
     expect(screen.getByRole('button', { name: st('statusList.valueMark', { label: 'Indeed' }) })).toBeInTheDocument()
   })
 

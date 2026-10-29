@@ -280,7 +280,7 @@ describe('MatchesTab · column header bar (Danny 09-08)', () => {
 
   it('renders the collapsed summary row with the FLAT surface background (matches ApplicationRow)', () => {
     render(<MatchesTab c={candidate([{ id: 'm1', vacancyTitle: 'Verpleegkundige', client: 'Yesway' }])} />)
-    expect(screen.getByTestId('match-card-header')).toHaveStyle({ background: 'var(--surface)' })
+    expect(screen.getByTestId('match-card-header')).toHaveInlineStyle({ background: 'var(--surface)' })
   })
 })
 
@@ -328,11 +328,11 @@ describe('MatchesTab · every visible column has a header (Danny 09-08 second lo
       ['match-col-actions-header', 'match-col-actions', `${Number(MATCH_COL_ACTIONS.width)}px`],
     ]
     for (const [headerId, cellId, width] of fixed) {
-      expect(screen.getByTestId(headerId)).toHaveStyle({ width })
-      expect(screen.getByTestId(cellId)).toHaveStyle({ width })
+      expect(screen.getByTestId(headerId)).toHaveInlineStyle({ width })
+      expect(screen.getByTestId(cellId)).toHaveInlineStyle({ width })
     }
     const clientFloor = { minWidth: `${Number(MATCH_COL_OTHER_PARTY.minWidth)}px` }
-    expect(screen.getByTestId('match-col-client-header')).toHaveStyle(clientFloor)
-    expect(screen.getByTestId('match-col-client')).toHaveStyle(clientFloor)
+    expect(screen.getByTestId('match-col-client-header')).toHaveInlineStyle(clientFloor)
+    expect(screen.getByTestId('match-col-client')).toHaveInlineStyle(clientFloor)
   })
 })

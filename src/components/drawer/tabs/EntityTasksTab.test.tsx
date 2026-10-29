@@ -263,7 +263,7 @@ describe('EntityTasksTab · live status lookup over stale payload', () => {
     // Lowercase (jsdom lowercases hex inside color-mix() on serialization, see the
     // colour-toggle describe block above for the same note).
     // eslint-disable-next-line no-restricted-syntax -- test fixture colour, mirrors statusesRef's own seed
-    expect(screen.getByText('Te doen')).toHaveStyle({ color: chipInk('#d98a8a') })
+    expect(screen.getByText('Te doen')).toHaveInlineStyle({ color: chipInk('#d98a8a') })
   })
 
   it('falls back to the payload label/colour when the status key is unknown to the live lookup', () => {
@@ -276,7 +276,7 @@ describe('EntityTasksTab · live status lookup over stale payload', () => {
     // No live lookup entry for 'ghost' — the payload's own label/colour must still show.
     expect(screen.getByText('Spookstatus')).toBeInTheDocument()
     // eslint-disable-next-line no-restricted-syntax -- test fixture colour, mirrors the fixture above (already lowercase)
-    expect(screen.getByText('Spookstatus')).toHaveStyle({ color: chipInk('#123456') })
+    expect(screen.getByText('Spookstatus')).toHaveInlineStyle({ color: chipInk('#123456') })
   })
 })
 
@@ -336,21 +336,21 @@ describe('EntityTasksTab · task status colour toggle (customer_task_table_color
     mockTasks({ items: [task({ status_label: 'In behandeling', status_color: STATUS_COLOR })] })
     render(<EntityTasksTab linkType="customer" id="cust-1" labels={labels} />)
     // Ink is chipInk(statusColor), not the raw lookup colour (AA contrast, r3.5).
-    expect(screen.getByText('In behandeling')).toHaveStyle({ color: chipInk(STATUS_COLOR) })
+    expect(screen.getByText('In behandeling')).toHaveInlineStyle({ color: chipInk(STATUS_COLOR) })
   })
 
   it('renders the status chip as plain text once the tenant setting is off (customer embedding)', () => {
     settingsRef.current = { customer_task_table_color_status: 'false' }
     mockTasks({ items: [task({ status_label: 'In behandeling', status_color: STATUS_COLOR })] })
     render(<EntityTasksTab linkType="customer" id="cust-1" labels={labels} />)
-    expect(screen.getByText('In behandeling')).toHaveStyle({ color: 'var(--text)' })
+    expect(screen.getByText('In behandeling')).toHaveInlineStyle({ color: 'var(--text)' })
   })
 
   it('keeps the status chip coloured for a non-customer embedding regardless of the setting', () => {
     settingsRef.current = { customer_task_table_color_status: 'false' }
     mockTasks({ items: [task({ status_label: 'In behandeling', status_color: STATUS_COLOR })] })
     render(<EntityTasksTab linkType="contact" id="c-1" labels={labels} />)
-    expect(screen.getByText('In behandeling')).toHaveStyle({ color: chipInk(STATUS_COLOR) })
+    expect(screen.getByText('In behandeling')).toHaveInlineStyle({ color: chipInk(STATUS_COLOR) })
   })
 })
 

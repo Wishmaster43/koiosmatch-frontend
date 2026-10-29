@@ -111,7 +111,7 @@ describe('AddOpportunityModal · house wide frame (Danny 27-07)', () => {
   it('renders on the shared WIDE_MODAL frame with the two titled cards', () => {
     render(<AddOpportunityModal onClose={noop} />)
     // POPUP-SLEEP-1: FloatingPanel owns the footprint — WIDE_MODAL width, panel's 92vh cap.
-    expect(screen.getByRole('dialog')).toHaveStyle({ maxWidth: '1320px', maxHeight: '92vh' })
+    expect(screen.getByRole('dialog')).toHaveInlineStyle({ maxWidth: '1320px', maxHeight: '92vh' })
     expect(screen.getByText('modal.groups.general')).toBeInTheDocument()
     expect(screen.getByText('modal.groups.dealStage')).toBeInTheDocument()
   })
@@ -119,7 +119,7 @@ describe('AddOpportunityModal · house wide frame (Danny 27-07)', () => {
   it('K1: shares MatchModal\'s exact width prop (94vw), not the old near-equivalent calc()', () => {
     render(<AddOpportunityModal onClose={noop} />)
     // Mirrors MatchModal.test.tsx's own footprint assertion style (dialog inline style).
-    expect(screen.getByRole('dialog')).toHaveStyle({ width: '94vw' })
+    expect(screen.getByRole('dialog')).toHaveInlineStyle({ width: '94vw' })
   })
 
   it('has no bare <select> element left — every dropdown is the searchable CreatableSelect', () => {

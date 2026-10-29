@@ -27,6 +27,8 @@ export function makeDefaultStatuses() {
 
 // Fill the required title and submit — the shared last step of most tests.
 export async function fillTitleAndSubmit(user: ReturnType<typeof userEvent.setup>) {
+  // jsdom 30 no longer lets user-event type into a display:none pane (like a real browser), so return to General first.
+  await user.click(screen.getByRole('tab', { name: 'modal.tabs.general' }))
   await user.type(screen.getByPlaceholderText('modal.titlePlaceholder'), 'Verpleegkundige')
   await user.click(screen.getByRole('button', { name: 'modal.create' }))
 }

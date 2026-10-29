@@ -170,7 +170,7 @@ describe('AddApplicationModal', () => {
   it('renders the widened 720px panel (not the old 440px width)', () => {
     render(<AddApplicationModal onClose={vi.fn()} onCreated={vi.fn()} />)
     const panel = screen.getByRole('dialog')
-    expect(panel).toHaveStyle({ width: '720px' })
+    expect(panel).toHaveInlineStyle({ width: '720px' })
   })
 
   it('renders candidate/vacancy/owner/phase as searchable pickers, never a bare <select>', () => {

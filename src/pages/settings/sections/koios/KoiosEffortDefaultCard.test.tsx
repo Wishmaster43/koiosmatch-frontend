@@ -75,7 +75,7 @@ describe('KoiosEffortDefaultCard — saves', () => {
     // The extracted error message should be shown inline.
     await waitFor(() => expect(screen.getByRole('status')).toBeInTheDocument())
     // This card's own error shape (rule B, DRY round 10): a 12px status div.
-    expect(screen.getByRole('status')).toHaveStyle({ fontSize: '12px' })
+    expect(screen.getByRole('status')).toHaveInlineStyle({ fontSize: '12px' })
   })
 })
 

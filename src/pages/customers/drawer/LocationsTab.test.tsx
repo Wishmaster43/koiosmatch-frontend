@@ -61,7 +61,7 @@ describe('LocationsTab · status colour on/off flag (CHIPKLEUR-INSTELBAAR-1)', (
   it('keeps the status chip coloured when no flag is saved (today\'s behaviour)', async () => {
     render(<LocationsTab {...base} />)
     // eslint-disable-next-line no-restricted-syntax -- DATA: fixture colour mirrors the tenant lookup colour set on `location()` above
-    await waitFor(() => expect(screen.getByText('Actief')).toHaveStyle({ color: chipInk('#22c55e') }))
+    await waitFor(() => expect(screen.getByText('Actief')).toHaveInlineStyle({ color: chipInk('#22c55e') }))
   })
 
   it('renders the status chip as plain text once the flag is turned off', async () => {
@@ -72,7 +72,7 @@ describe('LocationsTab · status colour on/off flag (CHIPKLEUR-INSTELBAAR-1)', (
 
     render(<LocationsTab {...base} />)
     // The label survives — only the colour is dropped.
-    await waitFor(() => expect(screen.getByText('Actief')).toHaveStyle({ color: 'var(--text)' }))
+    await waitFor(() => expect(screen.getByText('Actief')).toHaveInlineStyle({ color: 'var(--text)' }))
   })
 })
 

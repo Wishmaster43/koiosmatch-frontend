@@ -13,6 +13,15 @@ import { render, screen, waitFor, act } from '@testing-library/react'
 import '@/i18n'
 import MatchesPage from './MatchesPage'
 
+// The rendered tree fires lookup requests this test never awaits; the real client would reject them with a
+// network error AFTER the last test and log "API Error" during worker teardown, which vitest 5 counts as an
+// unhandled error. The stub rejects the same way (error state stays identical) without the client's logging.
+vi.mock('@/lib/api', async () => {
+  const actual = await vi.importActual('@/lib/api')
+  const offline = () => Promise.reject(new Error('network disabled in this test'))
+  return { ...actual, default: { get: vi.fn(offline), post: vi.fn(offline), put: vi.fn(offline), patch: vi.fn(offline), delete: vi.fn(offline), request: vi.fn(offline) } }
+})
+
 // Captures every registerFilters call so the test can inspect the REAL group
 // config MatchesPage builds, and drive a pick through the same onToggle a
 // right-panel row would call.

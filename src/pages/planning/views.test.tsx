@@ -41,7 +41,7 @@ describe('DayView · add affordances gated on planning.create (D8)', () => {
     vi.mocked(useAuth).mockReturnValue({ hasPermission: () => true } as unknown as ReturnType<typeof useAuth>)
     render(<DayView current={today} shifts={[]} today={today} locale="nl-NL" onDayClick={vi.fn()} />)
     const heading = screen.getByRole('heading', { level: 2 })
-    expect(heading).toHaveStyle({ fontSize: '15px', fontWeight: 600 })
+    expect(heading).toHaveInlineStyle({ fontSize: '15px', fontWeight: 600 })
   })
 })
 

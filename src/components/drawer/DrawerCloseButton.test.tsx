@@ -24,6 +24,6 @@ describe('DrawerCloseButton', () => {
     )
 
     const button = screen.getByLabelText('Close')
-    expect(button).toHaveStyle({ marginLeft: '10px', flexShrink: 0 })
+    expect(button).toHaveInlineStyle({ marginLeft: '10px', flexShrink: 0 })
   })
 })

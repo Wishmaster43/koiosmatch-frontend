@@ -33,7 +33,7 @@ describe('SettingsTabs · overflow handling', () => {
       const tablist = screen.getByRole('tablist')
       expect(tablist.style.overflowX).toBe('auto')
       // Every tab keeps its full text width — never wraps or shrinks below it.
-      screen.getAllByRole('tab').forEach((tab) => expect(tab).toHaveStyle({ whiteSpace: 'nowrap' }))
+      screen.getAllByRole('tab').forEach((tab) => expect(tab).toHaveInlineStyle({ whiteSpace: 'nowrap' }))
       // The active tab was asked to scroll itself into view (mount included).
       expect(scrollIntoViewSpy).toHaveBeenCalledWith({ block: 'nearest', inline: 'nearest' })
     } finally {

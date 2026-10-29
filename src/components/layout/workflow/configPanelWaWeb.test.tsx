@@ -12,6 +12,21 @@ import i18n from '@/i18n'
 import ConfigPanel from './ConfigPanel'
 import type { FlowNode } from '@/types/workflow'
 
+// The rendered tree fires lookup requests this test never awaits; the real client would reject them with a
+// network error AFTER the last test and log "API Error" during worker teardown, which vitest 5 counts as an
+// unhandled error. The stub rejects the same way (error state stays identical) without the client's logging.
+vi.mock('@/lib/api', async () => {
+  const actual = await vi.importActual('@/lib/api')
+  const offline = () => Promise.reject(new Error('network disabled in this test'))
+  return { ...actual, default: { get: vi.fn(offline), post: vi.fn(offline), put: vi.fn(offline), patch: vi.fn(offline), delete: vi.fn(offline), request: vi.fn(offline) } }
+})
+// useLookupOptions reaches the client through a dynamic import() that the module mock above does not
+// intercept, so its three WhatsApp lookups still hit the real client after the last test; this test is about the
+// static channel select, so the lookup fields render honestly empty and idle.
+vi.mock('./fieldControls/useLookupOptions', () => ({
+  useLookupOptions: () => ({ opts: [], error: false, loading: false, retry: vi.fn() }),
+}))
+
 // The channel field renders through CreatableSelect (searchable dropdown); no
 // network options needed since 'channel' is a static select, not a lookup.
 // Its own field block is located via its visible label ("Kanaal", fieldLabel's

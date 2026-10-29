@@ -33,7 +33,7 @@ describe('OutreachCreate · shared wide-form frame', () => {
     // FloatingPanel (POPUP-SLEEP-1) owns the panel chrome now — asserting its
     // draggable header composition (data-drag-handle), not FloatingPanel's own
     // internal maxHeight implementation detail.
-    expect(dialog).toHaveStyle({ maxWidth: '1320px' })
+    expect(dialog).toHaveInlineStyle({ maxWidth: '1320px' })
     expect(dialog.querySelector('[data-drag-handle]')).toBeTruthy()
     expect(dialog).toHaveAttribute('aria-label', 'create.title')
   })

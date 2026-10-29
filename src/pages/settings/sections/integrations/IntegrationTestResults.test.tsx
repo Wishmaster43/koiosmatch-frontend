@@ -62,7 +62,7 @@ describe('IntegrationTestResults', () => {
       />,
     )
     const title = screen.getByText(t('integrations.connection.tokenApiTitle'))
-    expect(title).toHaveStyle({ fontWeight: String(sectionTitleStyle.fontWeight) })
+    expect(title).toHaveInlineStyle({ fontWeight: String(sectionTitleStyle.fontWeight) })
     expect(title.tagName).toBe('DIV')
     expect(screen.getByText(t('integrations.connection.companyApiTitle'))).toBeInTheDocument()
     expect(screen.getByText(new RegExp(t('integrations.reason.auth_failed')))).toBeInTheDocument()

@@ -76,7 +76,7 @@ describe('ApplicationStatusStrip', () => {
     // The label sits BEFORE the value in the DOM (label-left), and the two
     // are siblings inside the same row, not stacked label-above-value blocks.
     expect(label.compareDocumentPosition(value) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy()
-    expect(label).toHaveStyle({ width: '120px' })
+    expect(label).toHaveInlineStyle({ width: '120px' })
   })
 
   // Fallback rung 3: no stage_durations/currentStageEnteredAt but a created
@@ -151,7 +151,7 @@ describe('ApplicationStatusStrip', () => {
     const count = screen.getByText(/interview\.stepOf/)
     expect(name.compareDocumentPosition(count) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy()
     expect(count.tagName).toBe('SPAN')
-    expect(count).toHaveStyle({ fontSize: captionStyle.fontSize, color: captionStyle.color })
+    expect(count).toHaveInlineStyle({ fontSize: captionStyle.fontSize, color: captionStyle.color })
   })
 
   // S2/S3: the appointment/interview rows become clickable tab-switches, but

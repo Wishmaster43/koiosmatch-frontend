@@ -17,7 +17,7 @@ describe('CvBlock · scan state', () => {
     render(<CvBlock candidateId="c1" />)
     expect(screen.getByText('common:upload.scanPending')).toBeInTheDocument()
     expect(screen.getByRole('button', { name: 'drawer.cv.view' })).toHaveAttribute('aria-disabled', 'true')
-    expect(screen.getByRole('button', { name: 'drawer.cv.view' })).toHaveStyle({ opacity: '0.5', cursor: 'not-allowed' })
+    expect(screen.getByRole('button', { name: 'drawer.cv.view' })).toHaveInlineStyle({ opacity: '0.5', cursor: 'not-allowed' })
     fireEvent.click(screen.getByRole('button', { name: 'drawer.cv.view' }))
     expect(screen.queryByTestId('preview-modal')).toBeNull()
     expect(screen.queryByRole('link', { name: 'drawer.cv.download' })).toBeNull()

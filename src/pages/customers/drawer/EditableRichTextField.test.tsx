@@ -31,7 +31,7 @@ describe('EditableRichTextField · read mode', () => {
     render(<EditableRichTextField label="Beschrijving" value="" onSave={() => {}} />)
     const placeholder = screen.getByText('customers:richText.empty')
     expect(placeholder).toBeInTheDocument()
-    expect(placeholder).toHaveStyle({ fontStyle: 'italic' })
+    expect(placeholder).toHaveInlineStyle({ fontStyle: 'italic' })
   })
 
   it('does not show the RichTextEditor while in read mode', () => {

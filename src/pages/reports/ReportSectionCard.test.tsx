@@ -12,7 +12,7 @@ describe('ReportSectionCard', () => {
     // The card style (surface/radius/border) is applied on the direct parent —
     // every report page gets this shape from one place, never a re-typed literal.
     const cardEl = content.parentElement as HTMLElement
-    expect(cardEl).toHaveStyle({ background: reportCardStyle.background, borderRadius: '12px' })
+    expect(cardEl).toHaveInlineStyle({ background: reportCardStyle.background, borderRadius: '12px' })
   })
 })
 
@@ -20,7 +20,7 @@ describe('ReportSectionCardBody', () => {
   it('lays out its sections with the shared padding:20 / gap:24 rhythm', () => {
     render(<ReportSectionCardBody><div>a</div><div>b</div></ReportSectionCardBody>)
     const wrapper = screen.getByText('a').parentElement as HTMLElement
-    expect(wrapper).toHaveStyle({ padding: '20px', display: 'flex', gap: '24px' })
+    expect(wrapper).toHaveInlineStyle({ padding: '20px', display: 'flex', gap: '24px' })
   })
 })
 

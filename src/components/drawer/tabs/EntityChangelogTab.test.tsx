@@ -75,7 +75,7 @@ describe('EntityChangelogTab · CHANGELOG-3 uuid guard', () => {
     const chip = await screen.findByText('Vestiging')
     // SoftChip's own tinted background — proves it went through the shared
     // chip component rather than a hand-rolled <span style={{fontWeight:600}}>.
-    expect(chip.closest('span')).toHaveStyle({ borderRadius: '99px' })
+    expect(chip.closest('span')).toHaveInlineStyle({ borderRadius: '99px' })
   })
 
   // K-ACTLOG-SUBJECT-NAME-1: subject_id (already on the wire, LogsEntityActivity)

@@ -8,14 +8,14 @@ describe('CanonFieldRow', () => {
   it('centers the label by default (single-line value)', () => {
     render(<CanonFieldRow label="Status">value</CanonFieldRow>)
     const label = screen.getByText('Status')
-    expect(label.parentElement).toHaveStyle({ alignItems: 'center' })
+    expect(label.parentElement).toHaveInlineStyle({ alignItems: 'center' })
   })
 
   it('top-aligns the label with a marginTop when align="flex-start" (wrapping value)', () => {
     render(<CanonFieldRow label="Notes" align="flex-start">a long wrapping value</CanonFieldRow>)
     const label = screen.getByText('Notes')
-    expect(label.parentElement).toHaveStyle({ alignItems: 'flex-start' })
-    expect(label).toHaveStyle({ marginTop: '2px' })
+    expect(label.parentElement).toHaveInlineStyle({ alignItems: 'flex-start' })
+    expect(label).toHaveInlineStyle({ marginTop: '2px' })
   })
 
   it('merges a caller labelStyle onto the canon label style, never replacing it', () => {
@@ -24,8 +24,8 @@ describe('CanonFieldRow', () => {
     )
     const label = screen.getByText('Type')
     // Canon label identity (fontSize/width from CANON_LABEL_STYLE) survives...
-    expect(label).toHaveStyle({ fontSize: '11px', width: '120px' })
+    expect(label).toHaveInlineStyle({ fontSize: '11px', width: '120px' })
     // ...alongside the caller's own extra style.
-    expect(label).toHaveStyle({ display: 'flex', gap: '4px' })
+    expect(label).toHaveInlineStyle({ display: 'flex', gap: '4px' })
   })
 })

@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest'
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 import { renderHook, act } from '@testing-library/react'
 import { getOpenIdFromHash, setOpenIdInHash, getTabFromHash, setTabInHash, resolveWriteMode, useDrawerUrl } from './useDrawerUrl'
 
@@ -73,6 +73,11 @@ describe('resolveWriteMode', () => {
 describe('useDrawerUrl', () => {
   beforeEach(() => {
     window.history.replaceState(null, '', '#candidates')
+  })
+
+  // vitest 5: re-spying returns the SAME spy with its old calls, so restore after every test.
+  afterEach(() => {
+    vi.restoreAllMocks()
   })
 
   it('pushes a history entry with ?open=<id> when a drawer opens', () => {
@@ -186,6 +191,11 @@ describe('useDrawerUrl', () => {
 describe('useDrawerUrl · sub-tab (F5)', () => {
   beforeEach(() => {
     window.history.replaceState(null, '', '#candidates')
+  })
+
+  // vitest 5: re-spying returns the SAME spy with its old calls, so restore after every test.
+  afterEach(() => {
+    vi.restoreAllMocks()
   })
 
   it('reads the tab out of the URL alongside the id on a deep link', () => {

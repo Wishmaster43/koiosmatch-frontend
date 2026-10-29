@@ -10,12 +10,12 @@ describe('PlanningContactPill', () => {
   it('renders the success tint and label when active', () => {
     render(<PlanningContactPill active label="Ja" />)
     const pill = screen.getByText('Ja').closest('span')
-    expect(pill).toHaveStyle({ background: 'var(--color-success-bg)' })
+    expect(pill).toHaveInlineStyle({ background: 'var(--color-success-bg)' })
   })
 
   it('renders the muted tint and label when inactive', () => {
     render(<PlanningContactPill active={false} label="Nee" />)
     const pill = screen.getByText('Nee').closest('span')
-    expect(pill).toHaveStyle({ background: 'var(--hover-bg)' })
+    expect(pill).toHaveInlineStyle({ background: 'var(--hover-bg)' })
   })
 })

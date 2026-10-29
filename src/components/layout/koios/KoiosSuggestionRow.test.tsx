@@ -95,7 +95,7 @@ describe('KoiosSuggestionRow · short reason (KOIOS-SUGGEST-COMPACT-1)', () => {
     expect(screen.getByTitle(suggestion.body)).toBeInTheDocument()
     // The task type's OWN colour drives the icon slot (Danny 24-09) — never the kind default.
     const iconSlot = container.querySelectorAll('span')[0]
-    expect(iconSlot).toHaveStyle({ color: fixtureColor })
+    expect(iconSlot).toHaveInlineStyle({ color: fixtureColor })
   })
 
   it('falls back to the short kind label when `params` is absent (BE half not landed yet)', () => {

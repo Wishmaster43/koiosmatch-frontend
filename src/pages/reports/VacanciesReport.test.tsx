@@ -384,8 +384,8 @@ describe('VacanciesReport (RAPPORTEN-SUITE-1 portie 4, additive on C-34)', () =>
   // in the assertion argument, not in a style literal (mirrors MatchesReport.test.tsx).
   function expectInk(el: HTMLElement, token: string, opts?: { absent?: boolean }) {
     const m = expect(el)
-    if (opts?.absent) m.not.toHaveStyle({ color: token })
-    else m.toHaveStyle({ color: token })
+    if (opts?.absent) m.not.toHaveInlineStyle({ color: token })
+    else m.toHaveInlineStyle({ color: token })
   }
 
   describe('VacanciesReport (nine-card server-suite KPI strip, KPI-VAC-1)', () => {

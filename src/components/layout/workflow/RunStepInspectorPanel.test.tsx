@@ -168,7 +168,7 @@ describe('RunStepInspectorPanel attempt log', () => {
     vi.mocked(api.get).mockResolvedValue({ data: withAttemptRow({ status: 'failed', error: 'Boom', output: {} }) } as never)
     render(<RunStepInspectorPanel runId="run-1" stepId="step-1" moduleLabel="X" onClose={() => {}} />, { wrapper })
     const err = await screen.findByText('Boom')
-    expect(err).toHaveStyle({ color: 'var(--color-danger-text)' })
+    expect(err).toHaveInlineStyle({ color: 'var(--color-danger-text)' })
   })
 })
 

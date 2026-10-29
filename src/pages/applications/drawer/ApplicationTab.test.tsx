@@ -298,7 +298,7 @@ describe('ApplicationTab', () => {
     it('preserves line breaks for a PLAIN-TEXT motivation (white-space: pre-wrap)', () => {
       renderTab(<ApplicationTab application={app({ coverLetter: 'Beste,\n\nGraag solliciteer ik.\nMet groet, Anna' })} />)
       const body = screen.getByText(/Graag solliciteer ik/)
-      expect(body).toHaveStyle({ whiteSpace: 'pre-wrap' })
+      expect(body).toHaveInlineStyle({ whiteSpace: 'pre-wrap' })
     })
 
     // The inverse guard: real HTML must NOT get pre-wrap, or the newlines between
@@ -306,7 +306,7 @@ describe('ApplicationTab', () => {
     it('does NOT apply pre-wrap to an HTML motivation', () => {
       renderTab(<ApplicationTab application={app({ coverLetter: '<p>Regel een</p>\n<p>Regel twee</p>' })} />)
       const body = screen.getByText('Regel een').parentElement as HTMLElement
-      expect(body).not.toHaveStyle({ whiteSpace: 'pre-wrap' })
+      expect(body).not.toHaveInlineStyle({ whiteSpace: 'pre-wrap' })
     })
   })
 

@@ -127,7 +127,7 @@ describe('OutreachDepthSections', () => {
     const title = screen.getByText(i18n.t('outreach.depth.channelFunnel.title', { ns: 'analytics' }))
     const gridItem = title.closest('[style*="grid-column"]')
     expect(gridItem).toBeTruthy()
-    expect(gridItem).toHaveStyle({ gridColumn: '1 / -1' })
+    expect(gridItem).toHaveInlineStyle({ gridColumn: '1 / -1' })
     expect(screen.queryByText(i18n.t('outreach.depth.heatmap.title', { ns: 'analytics' }))).not.toBeInTheDocument()
   })
 

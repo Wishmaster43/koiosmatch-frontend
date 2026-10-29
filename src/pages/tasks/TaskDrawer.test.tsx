@@ -350,7 +350,7 @@ describe('TaskDrawer · header badge reads the LIVE lookup, not a baked snapshot
     mount(stale)
     // The live lookup ('todo' → 'Te doen'/'#888888', 'call' → 'Belafspraak') wins.
     // eslint-disable-next-line no-restricted-syntax -- asserting chipInk() output for the test fixture colour, not a UI colour choice
-    expect(titleRowScope().getByText('Te doen')).toHaveStyle({ color: chipInk('#888888') })
+    expect(titleRowScope().getByText('Te doen')).toHaveInlineStyle({ color: chipInk('#888888') })
     expect(subtitleScope().getByText('Belafspraak')).toBeInTheDocument()
     expect(screen.queryByText('Oude naam')).not.toBeInTheDocument()
     expect(screen.queryByText('Oud type')).not.toBeInTheDocument()
@@ -359,13 +359,13 @@ describe('TaskDrawer · header badge reads the LIVE lookup, not a baked snapshot
   it('updates the badge colour once the tenant lookup colour changes (live reactivity)', () => {
     const { rerender } = mount(task(false))
     // eslint-disable-next-line no-restricted-syntax -- asserting chipInk() output for the test fixture colour, not a UI colour choice
-    expect(titleRowScope().getByText('Te doen')).toHaveStyle({ color: chipInk('#888888') })
+    expect(titleRowScope().getByText('Te doen')).toHaveInlineStyle({ color: chipInk('#888888') })
 
     // eslint-disable-next-line no-restricted-syntax -- test fixture lookup colour (DATA, not UI styling)
     statusesRef.current[0].color = '#123456'
     rerender(<TaskDrawer task={task(false)} onClose={noop} onUpdate={noop} onAddLink={noop} onRemoveLink={noop} />)
     // eslint-disable-next-line no-restricted-syntax -- asserting chipInk() output for the test fixture colour, not a UI colour choice
-    expect(titleRowScope().getByText('Te doen')).toHaveStyle({ color: chipInk('#123456') })
+    expect(titleRowScope().getByText('Te doen')).toHaveInlineStyle({ color: chipInk('#123456') })
     // eslint-disable-next-line no-restricted-syntax -- restore the fixture colour for tests running after this one
     statusesRef.current[0].color = '#888888'
   })
@@ -391,9 +391,9 @@ describe('TaskDrawer · header follows the table colour toggle (TASK-DISPLAY-DRI
     statusesRef.current[0].color = '#123456'
     mount(task(false))
     // eslint-disable-next-line no-restricted-syntax -- asserting tint() output for the fixture colour, not a UI colour choice
-    expect(screen.getByText('BK')).toHaveStyle({ background: tint('#123456', 12) })
+    expect(screen.getByText('BK')).toHaveInlineStyle({ background: tint('#123456', 12) })
     // eslint-disable-next-line no-restricted-syntax -- asserting chipInk() output for the fixture colour, not a UI colour choice
-    expect(titleRowScope().getByText('Te doen')).toHaveStyle({ color: chipInk('#123456') })
+    expect(titleRowScope().getByText('Te doen')).toHaveInlineStyle({ color: chipInk('#123456') })
   })
 
   it('toggle OFF: avatar renders the explicit neutral and the badge its own grey', () => {
@@ -401,10 +401,10 @@ describe('TaskDrawer · header follows the table colour toggle (TASK-DISPLAY-DRI
     statusesRef.current[0].color = '#123456'
     displaySettingsRecord.current = { task_table_color_status: false }
     mount(task(false))
-    expect(screen.getByText('BK')).toHaveStyle({ background: tint(NEUTRAL_AVATAR, 12) })
+    expect(screen.getByText('BK')).toHaveInlineStyle({ background: tint(NEUTRAL_AVATAR, 12) })
     const badge = titleRowScope().getByText('Te doen')
     // The DOM lowercases hex colours, so assert against the lowercased token.
-    expect(badge).toHaveStyle({ color: chipInk(NEUTRAL_AVATAR.toLowerCase()), background: tintBg(NEUTRAL_AVATAR) })
+    expect(badge).toHaveInlineStyle({ color: chipInk(NEUTRAL_AVATAR.toLowerCase()), background: tintBg(NEUTRAL_AVATAR) })
   })
 })
 

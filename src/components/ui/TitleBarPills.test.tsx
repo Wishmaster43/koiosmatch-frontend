@@ -13,7 +13,7 @@ describe('TitleBarPills', () => {
     expect(active).toHaveAttribute('aria-pressed', 'true')
     expect(inactive).toHaveAttribute('aria-pressed', 'false')
     // fontWeight lives on the inner label span, not the button element itself.
-    expect(active.querySelector('span')).toHaveStyle({ fontWeight: 600 })
+    expect(active.querySelector('span')).toHaveInlineStyle({ fontWeight: 600 })
   })
 
   it('draws a colour dot only when the option carries a colour', () => {

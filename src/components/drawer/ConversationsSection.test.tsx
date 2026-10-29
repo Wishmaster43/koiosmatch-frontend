@@ -145,8 +145,8 @@ describe('ConversationsSection', () => {
     // (mirrors the shared Avatar/owner colour picker — never a second hash function).
     const ravi = screen.getAllByText('Ravi')[0]
     const kelly = screen.getByText('Kelly')
-    expect(ravi).toHaveStyle({ color: avatarColor('Ravi') })
-    expect(kelly).toHaveStyle({ color: avatarColor('Kelly') })
+    expect(ravi).toHaveInlineStyle({ color: avatarColor('Ravi') })
+    expect(kelly).toHaveInlineStyle({ color: avatarColor('Kelly') })
   })
 
   it('refetches when the caller-passed params VALUE changes, even with a fresh object literal', async () => {

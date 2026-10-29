@@ -27,6 +27,7 @@ describe('WidgetListBlock', () => {
   it('is not clickable when a row has no onClick', () => {
     render(<WidgetListBlock title="Expiring matches" rows={[{ key: 1, primary: 'Team A', meta: '12' }]} />)
     const row = screen.getByText('Team A').closest('div[style]')?.parentElement as HTMLElement
-    expect(row).toHaveStyle({ cursor: 'default' })
+    // No pointer affordance is set inline: the row reads as plain text (jsdom has no computed default cursor to assert).
+    expect(row).not.toHaveInlineStyle({ cursor: 'pointer' })
   })
 })

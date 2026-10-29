@@ -1,11 +1,11 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest'
+import { describe, it, expect, vi, beforeEach, type Mock } from 'vitest'
 import { renderHook, act } from '@testing-library/react'
 
-let mockSettings: ReturnType<typeof vi.fn>
-let mockLoaded: ReturnType<typeof vi.fn>
-let mockSaveSettingsKeys: ReturnType<typeof vi.fn>
-let mockInvalidateCache: ReturnType<typeof vi.fn>
-let mockNotifyError: ReturnType<typeof vi.fn>
+let mockSettings: Mock<() => Record<string, unknown>>
+let mockLoaded: Mock<() => boolean>
+let mockSaveSettingsKeys: Mock<(config: Record<string, unknown>) => Promise<void>>
+let mockInvalidateCache: Mock<() => void>
+let mockNotifyError: Mock<(msg: string) => void>
 
 vi.mock('@/lib/settings/useAllSettings', () => ({
   useAllSettings: () => mockSettings(),

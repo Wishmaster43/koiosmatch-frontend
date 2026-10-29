@@ -298,7 +298,7 @@ describe('NoteComposer · channel picker shows the selection (CHANNEL-PICKER-CON
     for (const ch of channels) {
       const btn = chip(ch.label)
       expect(btn).toHaveAttribute('aria-pressed', 'false')
-      expect(btn).toHaveStyle({ background: 'var(--surface)', color: 'var(--text-muted)' })
+      expect(btn).toHaveInlineStyle({ background: 'var(--surface)', color: 'var(--text-muted)' })
       expect(btn.style.border).toBe('1px solid var(--border)')
       // The channel colour must NOT leak onto an unselected chip.
       expect(btn.style.background).not.toContain(EMAIL_COLOR)
@@ -314,7 +314,7 @@ describe('NoteComposer · channel picker shows the selection (CHANNEL-PICKER-CON
     const selected = chip('Email')
     expect(selected).toHaveAttribute('aria-pressed', 'true')
     // jsdom normalizes a hex colour to rgb() — toHaveStyle normalizes both sides.
-    expect(selected).toHaveStyle({ color: chipInk(EMAIL_COLOR) })
+    expect(selected).toHaveInlineStyle({ color: chipInk(EMAIL_COLOR) })
     // jsdom rewrites the hex inside color-mix() to rgb() — assert on the parts
     // that carry the meaning: the channel colour, the 16%/50% tint, color-mix.
     expect(selected.style.background).toContain('color-mix(in srgb, rgb(37, 99, 235)')
@@ -327,7 +327,7 @@ describe('NoteComposer · channel picker shows the selection (CHANNEL-PICKER-CON
 
     const other = chip('WhatsApp')
     expect(other).toHaveAttribute('aria-pressed', 'false')
-    expect(other).toHaveStyle({ background: 'var(--surface)', color: 'var(--text-muted)' })
+    expect(other).toHaveInlineStyle({ background: 'var(--surface)', color: 'var(--text-muted)' })
     expect(other.style.fontWeight).toBe('500')
   })
 
@@ -338,7 +338,7 @@ describe('NoteComposer · channel picker shows the selection (CHANNEL-PICKER-CON
     await user.click(chip('Email'))
     const btn = chip('Email')
     expect(btn).toHaveAttribute('aria-pressed', 'false')
-    expect(btn).toHaveStyle({ background: 'var(--surface)' })
+    expect(btn).toHaveInlineStyle({ background: 'var(--surface)' })
   })
 })
 
