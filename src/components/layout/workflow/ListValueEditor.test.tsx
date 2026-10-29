@@ -66,3 +66,18 @@ describe('ListValueEditor · opt-in overrides', () => {
     expect(screen.getByText('extra')).toBeInTheDocument()
   })
 })
+
+describe('ListValueEditor · add input', () => {
+  it('has no inline outline suppression and commits on comma and blur', () => {
+    const onCommit = vi.fn()
+    render(<ListValueEditor items={['a']} onCommit={onCommit} ariaLabel="value" />)
+    const input = screen.getByLabelText('value') as HTMLInputElement
+    expect(input.style.outline).toBe('')
+    fireEvent.change(input, { target: { value: 'b' } })
+    fireEvent.keyDown(input, { key: ',' })
+    expect(onCommit).toHaveBeenLastCalledWith(['a', 'b'])
+    fireEvent.change(input, { target: { value: 'c' } })
+    fireEvent.blur(input)
+    expect(onCommit).toHaveBeenLastCalledWith(['a', 'c'])
+  })
+})

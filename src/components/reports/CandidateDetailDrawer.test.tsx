@@ -7,7 +7,7 @@
  */
 import { describe, it, expect, vi } from 'vitest'
 import { render, screen, fireEvent } from '@testing-library/react'
-import '@/i18n'
+import i18n from '@/i18n'
 import CandidateDetailDrawer from './CandidateDetailDrawer'
 import type { ReportCandidate } from '@/types/reports'
 
@@ -45,5 +45,16 @@ describe('CandidateDetailDrawer — restyled header', () => {
   it('renders nothing when there is no candidate (loading/closed state)', () => {
     const { container } = render(<CandidateDetailDrawer candidate={null} onClose={() => {}} />)
     expect(container).toBeEmptyDOMElement()
+  })
+})
+
+describe('CandidateDetailDrawer — tab wiring', () => {
+  it('opens on General, switches to Conversation and back', () => {
+    render(<CandidateDetailDrawer candidate={candidate} onClose={() => {}} />)
+    expect(screen.getByText('anna@example.com')).toBeInTheDocument()
+    fireEvent.click(screen.getByRole('tab', { name: i18n.t('candidateDrawer.tabs.conversation', { ns: 'reports' }) }))
+    expect(screen.queryByText('anna@example.com')).toBeNull()
+    fireEvent.click(screen.getByRole('tab', { name: i18n.t('candidateDrawer.tabs.general', { ns: 'reports' }) }))
+    expect(screen.getByText('anna@example.com')).toBeInTheDocument()
   })
 })

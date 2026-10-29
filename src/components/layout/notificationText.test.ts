@@ -56,6 +56,22 @@ describe('notificationText', () => {
     expect(body).toBe('')
   })
 
+  // Regression: a kpi.below_target row renders the FE catalogue sentence with its params filled, not the server literal.
+  it('translates kpi.below_target title and body with their params', () => {
+    const n = {
+      id: 5, seen: false, title: 'SERVER TITLE', body: 'SERVER BODY',
+      title_key: 'notifications.kpi.below_target.title',
+      body_key: 'notifications.kpi.below_target.body',
+      params: { label: 'Nieuwe kandidaten', value: '12', target: '15', period: '2026-09' },
+    } as unknown as AppNotification
+    const { title, body } = notificationText(n, i18n.t.bind(i18n))
+    expect(title).not.toBe('SERVER TITLE')
+    expect(body).not.toBe('SERVER BODY')
+    expect(title).toContain('Nieuwe kandidaten')
+    expect(body).toBe('Nieuwe kandidaten stond op 12 bij een doel van 15 (september 2026).')
+    expect(body).not.toMatch(/\{\{/)
+  })
+
   it('renders the server text verbatim for a free-typed row (no title_key/body_key)', () => {
     const n = {
       id: 3, seen: false, title: 'Free typed title', body: 'Free typed body',
@@ -64,5 +80,30 @@ describe('notificationText', () => {
     const { title, body } = notificationText(n, i18n.t.bind(i18n))
     expect(title).toBe('Free typed title')
     expect(body).toBe('Free typed body')
+  })
+})
+
+describe('notificationText · kpi.below_target period', () => {
+  const row = (period: string) => ({
+    id: 9, seen: false, title: 'S', body: 'SERVER BODY',
+    title_key: 'notifications.kpi.below_target.title', body_key: 'notifications.kpi.below_target.body',
+    params: { label: 'Gesprekken', value: '3', target: '5', period },
+  }) as unknown as AppNotification
+
+  it('renders a daily period as DD-MM-YYYY, never ISO', () => {
+    const { body } = notificationText(row('2026-10-22'), i18n.t.bind(i18n))
+    expect(body).toContain('(22-10-2026)')
+    expect(body).not.toContain('2026-10-22')
+  })
+
+  it('renders a monthly period as a localized month and year', () => {
+    const { body } = notificationText(row('2026-09'), i18n.t.bind(i18n))
+    expect(body).not.toContain('(2026-09)')
+    expect(body).toMatch(/september 2026/i)
+  })
+
+  it('passes a non-date param through unchanged', () => {
+    const { body } = notificationText(row('2026-09'), i18n.t.bind(i18n))
+    expect(body).toContain('Gesprekken')
   })
 })

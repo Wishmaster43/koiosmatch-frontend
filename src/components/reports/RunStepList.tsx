@@ -8,14 +8,14 @@ import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { ChevronRight, ChevronDown, Zap, Clock } from 'lucide-react'
 import { formatDuration, StepStatusBadge } from './runFormat'
-import { stepReasonLabel } from './stepReason'
+import { stepReasonLabel, stepBlockedCodes } from './stepReason'
 // House numeric shape (DATUM-1): digits only, so no locale is needed here.
 import { hhmm } from '@/lib/localDate'
 // HIST-DETAIL-1 (Danny 24-07 "je kan niet zien welke kandidaten"): the history
 // drawer reuses the Logs panel's Make-style output table — one implementation.
 import StepOutputSlice from '@/components/layout/workflow/StepOutputSlice'
 import { useModuleCatalog } from '@/components/layout/workflow/useModuleCatalog'
-import { Caption, BodyText } from '@/components/ui/typography'
+import { Caption, BodyText, Mono } from '@/components/ui/typography'
 import SoftChip from '@/components/ui/SoftChip'
 import Button from '@/components/ui/Button'
 import { useNavigation } from '@/context/NavigationContext'
@@ -115,6 +115,7 @@ function StepCard({ step, index, catalog }: { step: RunStep; index: number; cata
   const title = step.label ?? step.type ?? t('runs.drawer.step', { n: index + 1 })
   // A known step reason code reads as a translated sentence and replaces the server message and error text.
   const reasonText = stepReasonLabel(step.reason, t)
+  const blockedCodes = stepBlockedCodes(step)
   const showError = !reasonText && (step.error ?? step.error_message) != null
 
   return (
@@ -152,6 +153,10 @@ function StepCard({ step, index, catalog }: { step: RunStep; index: number; cata
       {/* Message (always visible when present) */}
       {(reasonText ?? step.message) && (
         <Caption as="div" style={{ padding: '0 12px 10px 33px' }}>{reasonText ?? step.message}</Caption>
+      )}
+      {/* The refusal popup codes stay visible under the translated reason. */}
+      {reasonText && blockedCodes.length > 0 && (
+        <Mono as="div" style={{ fontSize: 11, padding: '0 12px 10px 33px' }}>{blockedCodes.join(', ')}</Mono>
       )}
 
       {/* HIST-DETAIL-1: the one-line outcome (e.g. "466 synced") always visible. */}

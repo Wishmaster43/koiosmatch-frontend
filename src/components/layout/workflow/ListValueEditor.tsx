@@ -7,12 +7,16 @@
  * all opt-in, so a caller that passes none of them gets exactly the old inline
  * chip editor.
  */
-import type { ReactNode } from 'react'
+import type { CSSProperties, ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
 import { X } from 'lucide-react'
 import Button from '@/components/ui/Button'
 import SoftChip from '@/components/ui/SoftChip'
 import { Caption } from '@/components/ui/typography'
+import { fieldInputStyle } from '@/components/forms/fieldMetrics'
+
+// Canon field face; the outline is left to the global :focus-visible ring (index.css).
+const ADD_INPUT_STYLE: CSSProperties = { ...fieldInputStyle, width: 'auto', flex: 1, minWidth: 80, outline: undefined }
 
 export interface ListValueEditorProps {
   items: string[]
@@ -72,7 +76,7 @@ export default function ListValueEditor({ items, onCommit, ariaLabel, renderAdd,
               }
             }}
             onBlur={e => { addItem(e.target.value); e.target.value = '' }}
-            style={{ flex: 1, minWidth: 80, padding: '4px 6px', fontSize: 12, border: '1px solid var(--border)', borderRadius: 6, outline: 'none' }} />
+            style={ADD_INPUT_STYLE} />
         )}
         {children}
         </div>

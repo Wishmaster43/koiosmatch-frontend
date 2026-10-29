@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest'
 import type { TFunction } from 'i18next'
-import { stepReasonLabel, STEP_REASON_CODES } from './stepReason'
+import { stepReasonLabel, stepBlockedCodes, STEP_REASON_CODES } from './stepReason'
 import nl from '@/i18n/locales/nl/reports.json'
 import en from '@/i18n/locales/en/reports.json'
 import de from '@/i18n/locales/de/reports.json'
@@ -37,5 +37,15 @@ describe('stepReasonLabel', () => {
         expect(labels[code], `${lc}.${code}`).not.toContain('—')
       }
     }
+  })
+})
+
+describe('stepBlockedCodes', () => {
+  it('reads the refusal codes off the trailing suffix', () => {
+    expect(stepBlockedCodes({ reason: 'action_rule_blocked', message: 'Blocked' })).toEqual([])
+    expect(stepBlockedCodes({ reason: 'applications_all_blocked', message: 'x (P3)' })).toEqual(['P3'])
+    expect(stepBlockedCodes({ reason: 'action_rule_blocked', message: 'x (P3, P5)' })).toEqual(['P3', 'P5'])
+    expect(stepBlockedCodes({ reason: 'action_rule_blocked', message: 'plain', error: 'y (P2)' })).toEqual(['P2'])
+    expect(stepBlockedCodes({ reason: 'no_phone', message: 'x (P3)' })).toEqual([])
   })
 })

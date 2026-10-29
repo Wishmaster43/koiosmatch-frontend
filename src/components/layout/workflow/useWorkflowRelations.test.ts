@@ -9,11 +9,13 @@ import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { renderHook, waitFor, act } from '@testing-library/react'
 import { useWorkflowRelations } from './useWorkflowRelations'
 import api from '@/lib/api'
+import { notifyError } from '@/lib/notify'
 
 vi.mock('@/lib/api', async importOriginal => {
   const actual = await importOriginal<typeof import('@/lib/api')>()
   return { ...actual, default: { get: vi.fn(), put: vi.fn() } }
 })
+vi.mock('@/lib/notify', () => ({ notifyError: vi.fn() }))
 const mockedGet = vi.mocked(api.get)
 const mockedPut = vi.mocked(api.put)
 
@@ -101,5 +103,24 @@ describe('useWorkflowRelations', () => {
     await act(async () => { await result.current.toggleStatus(result.current.parents[0]) })
 
     expect(result.current.parents[0].status).toBe('active')
+  })
+
+  // I-002: a refused activation rolls back in tree + flat lists and tells the user why.
+  it.each([
+    ['inbound_scenario_clash', 'common:actionFailed'],
+    ['ai_disclosure_missing', 'errors.aiDisclosureMissing'],
+  ])('a 422 %s refusal PUTs, rolls back everywhere and notifies', async (code, expected) => {
+    const node = { id: 'p1', name: 'Ouderflow', status: 'inactive' }
+    mockedGet.mockResolvedValue({ data: { parents: [node], children: [], tree: { id: 'wf-1', name: 'Root', status: 'active', children: [node] } } })
+    mockedPut.mockRejectedValue({ response: { status: 422, data: { code } } })
+    const { result } = renderHook(() => useWorkflowRelations('wf-1'))
+    await waitFor(() => expect(result.current.loading).toBe(false))
+
+    await act(async () => { await result.current.toggleStatus(result.current.parents[0]) })
+
+    expect(mockedPut).toHaveBeenCalledWith('/workflows/p1', { status: 'active', active: true })
+    expect(result.current.parents[0].status).toBe('inactive')
+    expect(result.current.tree?.children?.[0].status).toBe('inactive')
+    expect(notifyError).toHaveBeenCalledWith(expected)
   })
 })

@@ -61,10 +61,10 @@ function ComingSoon({ icon: Icon, title, desc }: { icon: LucideIcon; title: stri
   )
 }
 
-// The "Algemeen" tab body: contact / timeline / stats / features / global-role
+// The General tab body: contact / timeline / stats / features / global-role
 // cards — SectionCard everywhere (11px uppercase muted title + bordered block),
 // tolerant field readers so this matches the Shiftmanager table 1:1 (§11 DRY).
-function TabAlgemeen({ c }: { c: ReportCandidate }) {
+function TabGeneral({ c }: { c: ReportCandidate }) {
   const { t } = useTranslation('reports')
   const { formatDate, formatDateTime } = useDateFormat()
   const { formatCurrency } = useNumberFormat()
@@ -158,11 +158,11 @@ function TabAlgemeen({ c }: { c: ReportCandidate }) {
 // `headerActions` is an optional slot next to close (e.g. a permission-gated danger action);
 // `notice` is an optional calm banner above the tab content (e.g. an erased record's notice).
 export default function CandidateDetailDrawer({ candidate: c, onClose, headerActions, notice }: {
-  candidate: ReportCandidate | null; onClose: () => void; headerActions?: React.ReactNode; notice?: React.ReactNode
+  candidate: ReportCandidate | null; onClose: () => void; headerActions?: ReactNode; notice?: ReactNode
 }) {
   const panelRef = useFocusTrap<HTMLDivElement>(onClose)
   const { t } = useTranslation('reports')
-  const [activeTab, setActiveTab] = useState('algemeen')
+  const [activeTab, setActiveTab] = useState('general')
   if (!c) return null
 
   // Display name, status colour/label (shared SM palette, never ad-hoc hex — §4) and
@@ -174,15 +174,15 @@ export default function CandidateDetailDrawer({ candidate: c, onClose, headerAct
 
   // Sub-tab config: DrawerTabs (the shared underline bar) renders icon + label per tab.
   const tabItems = [
-    { id: 'algemeen', tKey: 'general', icon: undefined },
-    { id: 'conversatie', tKey: 'conversation', icon: MessageSquare },
-    { id: 'history', tKey: 'history', icon: History },
+    { id: 'general', icon: undefined },
+    { id: 'conversation', icon: MessageSquare },
+    { id: 'history', icon: History },
   ].map(tab => ({
     id: tab.id,
     label: (
       <span style={{ display: 'inline-flex', alignItems: 'center', gap: 5 }}>
         {tab.icon && <tab.icon size={13} />}
-        {t(`candidateDrawer.tabs.${tab.tKey}`)}
+        {t(`candidateDrawer.tabs.${tab.id}`)}
       </span>
     ),
   }))
@@ -227,8 +227,8 @@ export default function CandidateDetailDrawer({ candidate: c, onClose, headerAct
         {notice && <div className="flex-shrink-0" style={{ padding: '12px 16px 0' }}>{notice}</div>}
 
         {/* Tab content */}
-        {activeTab === 'algemeen' && <TabAlgemeen c={c} />}
-        {activeTab === 'conversatie' && (
+        {activeTab === 'general' && <TabGeneral c={c} />}
+        {activeTab === 'conversation' && (
           <ComingSoon icon={MessageSquare} title={t('candidateDrawer.conversationComing')}
             desc={t('candidateDrawer.conversationDesc', { name: c.firstname ?? t('candidateDrawer.candidateFallback') })} />
         )}

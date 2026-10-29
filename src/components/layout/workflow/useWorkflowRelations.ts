@@ -14,7 +14,10 @@
  * the server-built tree drives the whole branch, no more per-node lazy fetch.
  */
 import { useEffect, useState, useCallback } from 'react'
+import { useTranslation } from 'react-i18next'
 import api, { unwrap } from '@/lib/api'
+import { apiErrorMessage } from '@/lib/extractApiError'
+import { notifyError } from '@/lib/notify'
 import type { WorkflowRelation } from '@/types/workflow'
 
 // Recursively patches the matching node's status inside a server-built tree
@@ -29,6 +32,7 @@ function patchTreeStatus(node: WorkflowRelation | null, id: string | number, sta
 // Loads a workflow's parent/child relations and exposes the active-toggle mutation
 // described in the module doc comment above (never touches the related workflow's own steps).
 export function useWorkflowRelations(workflowId?: string | number) {
+  const { t } = useTranslation()
   const [parents,  setParents]  = useState<WorkflowRelation[]>([])
   const [children, setChildren] = useState<WorkflowRelation[]>([])
   const [calls,    setCalls]    = useState<WorkflowRelation[]>([])
@@ -82,10 +86,12 @@ export function useWorkflowRelations(workflowId?: string | number) {
     apply(nextStatus)
     try {
       await api.put(`/workflows/${row.id}`, { status: nextStatus, active: nextStatus === 'active' })
-    } catch {
+    } catch (err: unknown) {
+      // Roll back, then say why (a coded 422 refusal renders its translated copy).
       apply(prevStatus)
+      notifyError(apiErrorMessage(err, t, t('common:actionFailed')))
     }
-  }, [])
+  }, [t])
 
   return { parents, children, calls, calledBy, tree, loading, error, retry, toggleStatus }
 }

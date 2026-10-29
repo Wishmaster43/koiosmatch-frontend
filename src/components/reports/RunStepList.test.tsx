@@ -112,3 +112,11 @@ describe('RunStepList · step reason', () => {
     expect(screen.getByText('boom').getAttribute('style')).toContain('--color-danger-text')
   })
 })
+
+describe('RunStepList · refusal codes', () => {
+  it('keeps the popup codes next to the translated reason', () => {
+    render(<RunStepList steps={[{ label: 'Create', status: 'skipped', reason: 'action_rule_blocked', message: 'Blocked by rules (P3, P5)' }]} />)
+    expect(screen.getByText('runs.stepReasons.action_rule_blocked')).toBeInTheDocument()
+    expect(screen.getByText('P3, P5')).toBeInTheDocument()
+  })
+})
