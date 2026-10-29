@@ -42,6 +42,14 @@ const getallenPlugin = {
   },
 }
 
+// N-ENTRY-1 / N-003 (ONIX-RECHECK-1 #64): the entry-graph rules get their own alias for the
+// same reason (one rule key carries one severity + one selector array per file set).
+const entryGraphPlugin = {
+  rules: {
+    'no-restricted-syntax': builtinRules.get('no-restricted-syntax'),
+  },
+}
+
 // HUISSTIJL slotaudit — a local "plugin" that re-exposes the built-in
 // no-restricted-syntax rule under alias names. ESLint flat config MERGES config
 // objects per rule KEY: when two objects both set the plain `no-restricted-syntax`
@@ -173,6 +181,25 @@ export default defineConfig([
       }, {
         selector: "NewExpression[callee.object.name='Intl'][callee.property.name='NumberFormat']",
         message: 'GETALLEN-1: render numbers through src/lib/formatters (useNumberFormat) — never toFixed/toLocaleString/Intl.NumberFormat in a component.',
+      }],
+    },
+  },
+  // N-003 regression guard (ONIX-RECHECK-1 #64): lucide-react is imported per icon, or lazily
+  // through lib/lazyLucide. A whole-library import (`* as`, the `icons` map, or a dynamic import of
+  // the package root) drags every icon into the chunk that renders it — the exact N-003 bug.
+  {
+    files: ['src/**/*.{ts,tsx,js,jsx}'],
+    plugins: { entrygraph: entryGraphPlugin },
+    rules: {
+      'entrygraph/no-restricted-syntax': ['error', {
+        selector: "ImportDeclaration[source.value='lucide-react'] > ImportNamespaceSpecifier",
+        message: 'N-003: import lucide icons by name (import { X } from "lucide-react") or through lib/lazyLucide — never the whole library.',
+      }, {
+        selector: "ImportDeclaration[source.value='lucide-react'] > ImportSpecifier[imported.name='icons']",
+        message: 'N-003: the lucide `icons` map is the whole library; resolve a slug through lib/lazyLucide instead.',
+      }, {
+        selector: "ImportExpression[source.value='lucide-react']",
+        message: 'N-003: a dynamic import of the lucide-react root loads every icon; import one icon module through lib/lazyLucide.',
       }],
     },
   },

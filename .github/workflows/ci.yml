@@ -15,7 +15,7 @@ concurrency:
 
 jobs:
   gates:
-    name: typecheck · lint + huisstijl/dry/english ceilings · i18n parity · typography ratchet · dependency audit
+    name: typecheck · lint + house-style/dry/english ceilings · i18n parity · typography ratchet · dependency audit
     runs-on: ubuntu-latest
     timeout-minutes: 20
     steps:
@@ -29,7 +29,7 @@ jobs:
       - run: npm ci
       - name: typecheck
         run: npm run --silent typecheck
-      - name: eslint errors + huisstijl ceiling (shrink-only)
+      - name: eslint errors + house-style ceiling (shrink-only)
         run: node scripts/huisstijl-ceiling.mjs
       - name: dry (jscpd clone) ceiling (shrink-only)
         run: npm run --silent dry:ceiling

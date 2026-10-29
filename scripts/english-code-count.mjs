@@ -6,12 +6,13 @@
 // ratchet: `--write` freezes the totals in scripts/english-code-ceiling.json, a plain run
 // fails when either total grows. `--list` prints every hit (file:line token).
 import { readFileSync, writeFileSync, readdirSync, statSync, existsSync } from 'node:fs'
-import { join, relative } from 'node:path'
+import { join, relative, basename, extname } from 'node:path'
+import { stripComments } from './lib/stripComments.mjs'
 
 const ROOT = process.cwd()
 const SCAN = ['src', 'e2e', 'scripts']
 const EXT = /\.(ts|tsx|js|jsx|mjs|cjs)$/
-const SKIP = [/\/i18n\/locales\//, /api-generated\.ts$/, /node_modules/, /\/dist\//, /english-code-count\.mjs$/]
+const SKIP = [/\/i18n\/locales\//, /api-generated\.ts$/, /node_modules/, /\/dist\//, /english-code-count\.mjs$/, /scripts\/lib\/stripComments/]
 // Text catalogues (seeded demo copy, lookup seed labels) and the word-list tooling are
 // values, not code: their string hits are reported apart and never ratcheted.
 const TEXT_VALUES = [/\/demoSeedTexts\//, /lookupSeedCatalogue/, /comment-audit\.mjs$/, /dutchCopies\.houseStyle/, /placeholdersGeneric\.houseStyle/]
@@ -44,15 +45,20 @@ function walk(dir) {
 }
 for (const d of SCAN) if (existsSync(join(ROOT, d))) walk(join(ROOT, d))
 
-// Strip comments (line + block) so quoted Dutch in comments never counts.
-const stripComments = (src) => src.replace(/\/\*[\s\S]*?\*\//g, m => m.replace(/[^\n]/g, ' ')).replace(/(^|[^:'"`])\/\/[^\n]*/g, (m, pre) => pre + ' '.repeat(m.length - pre.length))
+// Comments are blanked by the string-aware scanner in scripts/lib/stripComments.mjs (quoted Dutch in
+// comments never counts; a `/*` inside a glob string no longer opens a comment, #231).
 // Identifier tokens: split camelCase / snake_case / kebab into lowercase words.
 const tokensOf = (ident) => ident.replace(/([a-z0-9])([A-Z])/g, '$1 $2').toLowerCase().split(/[^a-z]+/).filter(Boolean)
 
-const hits = { identifiers: [], strings: [] }
+const hits = { identifiers: [], strings: [], filenames: [] }
 const ignored = []
 for (const file of files) {
   const rel = relative(ROOT, file)
+  // FILES-EN-1 covers file and folder names too (#67): every path segment is tokenised like an identifier.
+  for (const seg of [...rel.split('/').slice(0, -1), basename(rel, extname(rel))]) {
+    const dutch = tokensOf(seg).filter(t => DUTCH.has(t))
+    if (dutch.length) hits.filenames.push({ file: rel, line: 0, token: dutch[0], text: seg })
+  }
   const raw = readFileSync(file, 'utf8')
   // A file whose head carries `english-code-ignore:` is a deliberate Dutch→English alias map
   // for a contract transition (KOIOS-EN-1); it is listed apart and never ratcheted.
@@ -78,25 +84,36 @@ for (const file of files) {
 // Four buckets: identifiers (all code incl. tests: an identifier is code wherever it lives),
 // strings in source, strings in tests/probes (fixtures follow the renames), strings in text catalogues.
 const kindOf = (h) => TEXT_VALUES.some(r => r.test(h.file)) ? 'strings_catalogue' : isTest(h.file) ? 'strings_tests' : 'strings_src'
-const totals = { identifiers: hits.identifiers.length, strings_src: 0, strings_tests: 0, strings_catalogue: 0, files: files.length }
+const totals = { identifiers: hits.identifiers.length, strings_src: 0, strings_tests: 0, strings_catalogue: 0, filenames: hits.filenames.length, files: files.length }
 for (const h of hits.strings) totals[kindOf(h)]++
 const CEIL = join(ROOT, 'scripts', 'english-code-ceiling.json')
 const args = new Set(process.argv.slice(2))
 if (args.has('--list')) {
   for (const h of hits.identifiers) console.log(`identifiers\t${h.file}:${h.line}\t${h.token}\t${h.text}`)
+  for (const h of hits.filenames) console.log(`filenames\t${h.file}\t${h.token}\t${h.text}`)
   for (const h of hits.strings) console.log(`${kindOf(h)}\t${h.file}:${h.line}\t${h.token}\t${h.text}`)
 }
 const perFile = {}
 for (const k of ['identifiers', 'strings']) for (const h of hits[k]) perFile[h.file] = (perFile[h.file] || 0) + 1
 const top = Object.entries(perFile).sort((a, b) => b[1] - a[1]).slice(0, 15)
 if (ignored.length) console.log(`legacy alias files skipped (english-code-ignore): ${ignored.join(', ')}`)
-console.log(`english-code: ${totals.identifiers} Dutch identifier tokens; Dutch string literals: ${totals.strings_src} in source, ${totals.strings_tests} in tests/probes, ${totals.strings_catalogue} in text catalogues (${totals.files} files)`)
+console.log(`english-code: ${totals.identifiers} Dutch identifier tokens; ${totals.filenames} Dutch file/folder-name tokens; Dutch string literals: ${totals.strings_src} in source, ${totals.strings_tests} in tests/probes, ${totals.strings_catalogue} in text catalogues (${totals.files} files)`)
 if (args.has('--top')) for (const [f, n] of top) console.log(`  ${String(n).padStart(4)}  ${f}`)
-if (args.has('--write')) { writeFileSync(CEIL, JSON.stringify(totals, null, 2) + '\n'); console.log(`ceiling written: ${CEIL}`); process.exit(0) }
+// The ratchet covers identifiers, source strings and file names; tests and catalogues are informational.
+const grewAgainst = (frozen) => totals.identifiers > frozen.identifiers || totals.strings_src > frozen.strings_src || totals.filenames > (frozen.filenames ?? Infinity)
+if (args.has('--write')) {
+  // Shrink-only write (#232): a higher count is refused unless --force, and a forced raise is logged so
+  // the commit that carries it has to say why (a changed measurement, never silent drift).
+  const frozen = existsSync(CEIL) ? JSON.parse(readFileSync(CEIL, 'utf8')) : null
+  if (frozen && grewAgainst(frozen) && !args.has('--force')) {
+    console.error(`✗ refusing to raise the english-code ceiling (frozen ${frozen.identifiers} identifiers / ${frozen.strings_src} source strings / ${frozen.filenames ?? 'n/a'} file names) — fix the drift, or --force with a written reason`)
+    process.exit(1)
+  }
+  if (frozen && grewAgainst(frozen)) console.log('! english-code ceiling raised with --force; the commit message carries the reason')
+  writeFileSync(CEIL, JSON.stringify(totals, null, 2) + '\n'); console.log(`ceiling written: ${CEIL}`); process.exit(0)
+}
 if (existsSync(CEIL)) {
   const frozen = JSON.parse(readFileSync(CEIL, 'utf8'))
-  // The ratchet covers identifiers and source strings; tests and catalogues are informational.
-  const grew = totals.identifiers > frozen.identifiers || totals.strings_src > frozen.strings_src
-  if (grew) { console.error(`✗ english-code ceiling exceeded (frozen ${frozen.identifiers} identifiers / ${frozen.strings_src} source strings) — new Dutch identifiers or strings landed`); process.exit(1) }
-  console.log(`✓ english-code ceiling ok (frozen ${frozen.identifiers} identifiers / ${frozen.strings_src} source strings)`)
+  if (grewAgainst(frozen)) { console.error(`✗ english-code ceiling exceeded (frozen ${frozen.identifiers} identifiers / ${frozen.strings_src} source strings / ${frozen.filenames ?? 'n/a'} file names) — new Dutch identifiers, strings or file names landed`); process.exit(1) }
+  console.log(`✓ english-code ceiling ok (frozen ${frozen.identifiers} identifiers / ${frozen.strings_src} source strings / ${frozen.filenames ?? 'n/a'} file names)`)
 }

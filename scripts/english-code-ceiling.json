@@ -1,7 +1,8 @@
 {
-  "identifiers": 555,
+  "identifiers": 551,
   "strings_src": 277,
-  "strings_tests": 2957,
-  "strings_catalogue": 767,
-  "files": 3867
+  "strings_tests": 3109,
+  "strings_catalogue": 820,
+  "filenames": 0,
+  "files": 4160
 }

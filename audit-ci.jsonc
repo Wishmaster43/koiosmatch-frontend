@@ -1,8 +1,12 @@
 {
   // Dependency-audit gate (heraudit SEC-1/2/3, 20-08): `npm run security:audit`
   // fails on any HIGH/CRITICAL advisory not explicitly allowlisted here. Every
-  // allowlist entry carries its reason and a revalidation date — "we didn't
-  // know" is impossible by construction (the huisstijl-ceiling pattern).
+  // Revalidated 29-10-2026 (ONIX-RECHECK-1 GATES-2): `npm ls vitest tinypool launch-editor vite
+  // --omit=dev` is empty, so the whole allowlisted chain is still dev-only; next check 2026-11-29
+  // (or earlier, when MAJORS-FE-1 lands vitest 5 and these entries go). Every
+  // allowlist entry carries its reason and a machine-readable `expires YYYY-MM-DD`: the test
+  // src/lib/auditAllowlistExpiry.houseStyle.test.js fails the suite once that date has passed, so
+  // a revalidation is a deliberate act (re-check dev-only, move the date) and never forgotten.
   "high": true,
   "allowlist": [
     // vitest 2 → 4 is a MAJOR test-infra migration (784 test files), planned
@@ -10,20 +14,20 @@
     // server/esbuild): never in the production bundle path. Revalidated 03-09-2026
     // (audit frontend-security-quality-4): still dev-only, migration not started;
     // revalidate again 2026-11-01 (revalidated 09-10-2026 with AUDIT-GATE-1: still dev-only).
-    "GHSA-5xrq-8626-4rwp", // vitest (critical, dev-only test runner)
-    "GHSA-fx2h-pf6j-xcff", // vite server.fs.deny bypass on Windows paths (dev-only, macOS/CI)
+    "GHSA-5xrq-8626-4rwp", // expires 2026-11-29 · vitest (critical, dev-only test runner)
+    "GHSA-fx2h-pf6j-xcff", // expires 2026-11-29 · vite server.fs.deny bypass on Windows paths (dev-only, macOS/CI)
     // DEPS-AUDIT-FE-1 (21-10-2026): launch-editor `fs.existsSync()` bypass, published after
     // AUDIT-GATE-1; same dev-only vite dev-server chain, Windows-only vector (macOS/CI here);
     // `npm ls launch-editor --omit=dev` is empty. Fix = vite 7 through the vitest 5 MAJOR
     // (planned lane). Revalidate 2026-11-01. The three entries audit-ci reported as no longer
     // vulnerable on this lock (GHSA-4w7w-66w2-5vf9, GHSA-67mh-4wv8-2f99, GHSA-v6wh-96g9-6wx3) were dropped.
-    "GHSA-587h-7wmj-h5pm", // launch-editor existence-check bypass on Windows (dev-only)
+    "GHSA-587h-7wmj-h5pm", // expires 2026-11-29 · launch-editor existence-check bypass on Windows (dev-only)
     // Revalidated 09-10-2026 (AUDIT-GATE-1): the vitest 2 chain also carries two
     // tinypool advisories (fix = vitest 5, MAJOR, planned separately). `npm ls
     // tinypool --omit=dev` is empty: dev-only test runner, not in the bundle.
     // Revalidate again 2026-11-01.
-    "GHSA-5gmw-xhrv-c9v3", // tinypool worker-options prototype pollution (dev-only)
-    "GHSA-85c8-ppgw-ccpr"  // tinypool run() options prototype pollution (dev-only)
+    "GHSA-5gmw-xhrv-c9v3", // expires 2026-11-29 · tinypool worker-options prototype pollution (dev-only)
+    "GHSA-85c8-ppgw-ccpr" // expires 2026-11-29 · tinypool run() options prototype pollution (dev-only)
     // DEPS-AUDIT-FE-2 (24-10-2026): the braces entry GHSA-vfj7-8cjw-p6xm was dropped because
     // audit-ci no longer reports it on this lock ("consider not allowlisting"); should it come
     // back, this gate fails loudly instead of hiding it. The same bucket fixed the new

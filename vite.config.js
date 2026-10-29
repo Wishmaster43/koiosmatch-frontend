@@ -63,6 +63,27 @@ export default defineConfig(({ mode }) => {
     // Use the automatic JSX runtime everywhere (incl. test files), so test JSX
     // doesn't need an explicit `import React`.
     esbuild: { jsx: 'automatic' },
+    build: {
+      rolldownOptions: {
+        output: {
+          // ONIX-RECHECK-1 #74: recharts and its redux/d3 dependencies form one `charts` chunk that
+          // only the chart components import, instead of riding inside the EntityDrawer chunk that
+          // index.html preloads on first paint (measured 28-10: 88 kB gzip of chart library on login).
+          advancedChunks: {
+            // Match the listed modules only: with the recursive default the group swallowed react-dom
+            // (a recharts dependency) and the entry then preloaded the whole chunk again (measured 29-10).
+            includeDependenciesRecursively: false,
+            groups: [{
+              name: 'charts',
+              // Only recharts and its exclusive helpers: a shared library (d3-*, immer, fast-equals) in this group
+              // would make the entry depend on the whole chunk again (measured 29-10: the charts chunk stayed in
+              // index.html's modulepreload until the group was narrowed).
+              test: /node_modules[\\/](recharts|victory-vendor|react-smooth|recharts-scale|decimal\.js-light)[\\/]/,
+            }],
+          },
+        },
+      },
+    },
     test: {
       environment: 'jsdom',
       globals: true,

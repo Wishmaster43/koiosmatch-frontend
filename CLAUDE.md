@@ -1424,9 +1424,11 @@ verifier and manager from now on.
 - **LANE-PROTOCOL-1 (parallel lanes in one working copy):** never `git add/commit/push/stash/
   checkout/restore`; never restore a file from HEAD (a bigger diff means a sibling is in that
   file — leave their lines; on 13-09 one restore wiped four sibling lanes out of seven locale
-  files); locale JSON only under the `mkdir` lock with surgical edits (candidates.json carries
-  duplicate keys and shiftmanager.json is not round-trip identical, so `json.dump` of a whole
-  file loses data); one vitest at a time, waiting on `pgrep -f "vites[t] run"` (the bracket
+  files); locale JSON only under the `mkdir` lock with surgical edits (a whole-file `json.dump`
+  re-serialises every key: shiftmanager.json is not round-trip identical, and a sibling lane's
+  unlanded keys in the same file get rewritten or dropped; the old "candidates.json carries
+  duplicate keys" premise was stale, measured 29-10, and noDuplicateKeys.houseStyle guards it);
+  one vitest at a time, waiting on `pgrep -f "vites[t] run"` (the bracket
   keeps the waiting shell from matching itself — three lanes deadlocked for 20 minutes on the
   plain pattern) and running ONLY the lane's own test files; new shared units checked against
   `git status` first so two lanes do not create the same helper twice.
@@ -1510,3 +1512,70 @@ verifier and manager from now on.
   prints the last completed CI verdict on every LANDED line, and a red verdict is investigated the same day like
   a red smoke flow.
 
+
+## 18. Lessons from ONIX-RECHECK-1 (28/29-10-2026: Fable 5.1 re-read every ONIX landing of the Opus era, 89 readers → 467 raw findings → 335 confirmed one by one; the fix wave landed as 25 lanes + 2 gate buckets)
+
+Each rule below was paid for with a confirmed finding or a measured breakage during the fix wave. They bind
+every lane, verifier and manager from now on.
+
+- **SWEEP-SCOPE-1 — a sweep's inventory is the WHOLE estate the rule names, never the sites one grep found.**
+  75 of the 335 findings were "the fix landed on one caller/endpoint/file and the siblings kept the bug": the
+  FILES-EN-1 sweep checked identifiers but not string-literal ids (`id:`/`key:`/option values), the
+  defaultValue sweep cleaned 89 inventoried sites and never re-grepped the touched files, the max-size sentence
+  took the locale at two of fifteen callers. Rule: the brief states the inventory command (`grep -rn … src e2e`)
+  and its measured count; the lane reports the count it found; the verifier re-runs the grep on the final tree and
+  a leftover is a mustFix. A per-file "closing grep" (`defaultValue:`, `<select`, `toFixed(`, raw `fontSize`) is
+  part of touching a file.
+- **KEY-ECHO-TEST-1 — a test that asserts translated copy reads the key through the real i18n instance
+  (`i18n.t('ns:key')`) or mocks `t` as a key echo; a Dutch literal or regex in a test is a finding.** 35
+  findings were tests pinned to Dutch sentences that broke on every copy change and said nothing about the
+  key. A `defaultValue` in production code is a finding (the key exists ×7 or it does not ship):
+  `src/i18n/noDutchDefaultValue.houseStyle.test.js` ratchets the remaining sites.
+- **INTERPOLATION-CALLERS-1 — a locale value that carries `{{var}}` is called with that variable, and
+  `src/i18n/interpolationCallers.houseStyle.test.ts` proves it on every production t() call.** The locale-parity
+  guard compares locales with each other, never with the caller: setPassword.minHint gained `{{min}}` ×7 while
+  its caller stayed bare and the live tip rendered "Minimaal {{min}} tekens". A key whose VALUE gains a variable
+  and its consumer land in ONE bucket (PLACEHOLDER-LANDED-FIRST-1: the locale hunk rode along with another lane).
+- **REQUEST-ASSERT-1 (§13, sharpened) — a mutation or fetch test asserts method, route and body/params on the
+  adapter; "callback fired" or "text appeared" proves nothing about the seam.** 57 findings. A test title is a
+  contract: every clause in an `it()` title has an assertion behind it (the verifier reads title against body).
+- **BUCKET-COHERENCE-1 — a bucket lands with everything its tests and types need.** Measured 29-10 four times:
+  a key-echo test landed without the component that stopped echoing (KoiosFeedback), notificationText.ts without
+  the new notificationParams module it imports, api.ts with a 5-argument requestKey while inFlightDedupe.ts kept
+  the old signature, a new ratchet pinned at a count measured in the shared working copy. Rule: before a landing,
+  the bucket's test files' import closure and the bucket's changed signatures are checked against the bucket
+  list; a dependency on a sibling's unlanded file means "land the sibling first" (chain order), never a wider
+  bucket. The landing tree, not the shared working copy, is where a pin is measured.
+- **CEILING-MOVE-2 — moved debt is re-baselined surgically.** Splitting a file moves its eslint-disables with
+  it and the house-style snapshot treats the new file as drift (ceiling 0): lower the old entry, add the new one,
+  total unchanged, in the same bucket; never a whole-snapshot `--write` from a shared working copy (it would bake
+  every sibling's half-finished state into the baseline).
+- **GATE-HONESTY-2 — a gate line in a report quotes the run AFTER the last edit, with the command and the
+  count.** Lane 15 reported "tsc 0" from a run before its final edit; the manager's run showed an error in the
+  lane's own file. A lane that cannot re-run a gate says so instead of repeating the old number.
+- **LOCALE-SHARE-1 — a shared locale file lands with the first bucket that carries it, with every lane's keys
+  inside.** Additive keys are harmless; a REMOVED key or a value that gained a variable is not (its consumer may
+  land hours later). Attribute a "key missing" red in a full-suite gate to the key's owner before believing it,
+  and land that owner next.
+- **ATOM-SCALE-1 (§4, sharpened) — the typography lint only knows the atom identities (15px, 11/muted, 13/600);
+  a 12px or 12.5px caption, a 21px heading, a `fontWeight: 700` on a section title sail past it.** 55 house-style
+  findings. Rule: any `fontSize`/`fontWeight` literal outside `components/ui/typography.tsx` is a finding on
+  sight, and a verifier greps the touched files for them; the atoms take layout through `style`, never identity.
+- **A11Y-CLICKABLE-1 (§6, sharpened) — a clickable non-button (a table cell, a row, a chip) is a `Button` or
+  carries role=button + tabIndex + Enter/Space handlers + a translated name; an icon-only control has
+  `aria-label`; an input with help or error text points at it with `aria-describedby`.** 56 findings.
+- **STRING-ID-EN-1 (FILES-EN-1, sharpened) — a string literal that acts as a persisted or wire identifier
+  (filter group `key`, option `value`, tab `id`, action slug, e2e selector) is English; the english-code counter
+  now also counts file and folder names, and an e2e flow carries English assertion messages.** 59 findings.
+- **DOCS-CLAIM-1 — a worklist row or commit message states only what the diff proves; a count ("12
+  popouts", "all seven locales") is re-measured on the final tree before it is written; "landed" names the
+  hash.** 33 findings were rows that described a fix the code never did or a scope the diff never had.
+- **SIZE-TRIGGER-1 (§3, sharpened) — a file past ~400 lines splits in the SAME delivery that pushed it over;
+  the landing prints the line count of every bucket file above 350 so the trend is visible before the cap.**
+- **SHARED-HELPER-ADOPTION-1 (§11, sharpened) — a shared helper (uploadRefusalText, extractApiError,
+  apiErrorMessage, stepReasonLabel) ships with every existing copy site migrated, and a brief for a shape change
+  names the consumers whose tests assert the old shape (SHAPE-CHANGE-TOEQUAL-1).**
+- **FROZEN-SCREEN-REFACTOR-1 — a size or hooks-order refactor on a frozen screen is allowed only when the brief
+  names it, is render-identical by construction (JSX moved verbatim, props unchanged), and the verifier states
+  per file what a user sees before and after; a behaviour change there (an accept filter, a hidden block) is
+  named to Danny in the same status message (VISIBLE-FIX-IS-REPORTED-1).**
