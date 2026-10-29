@@ -1460,7 +1460,7 @@
   },
   "couplingErrors": {
     "title": "Erreurs de couplage",
-    "subtitle": "Enregistrements dont la dernière tentative de synchronisation avec un système de back-office lié a échoué.",
+    "subtitle": "Enregistrements dont la dernière synchronisation avec un système lié a échoué, et demandes d'effacement qu'un système destinataire n'a pas encore confirmées.",
     "loading": "Chargement des erreurs de couplage…",
     "error": "Impossible de charger les erreurs de couplage.",
     "empty": "Aucune erreur de couplage. Chaque liaison a été synchronisée avec succès.",

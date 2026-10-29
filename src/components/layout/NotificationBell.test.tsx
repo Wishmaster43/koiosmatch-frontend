@@ -11,6 +11,7 @@ import * as useNotificationsModule from '@/hooks/useNotifications'
 import * as notificationTargetModule from './notificationTarget'
 import type { AppNotification } from '@/hooks/useNotifications'
 import api from '@/lib/api'
+import i18n from '@/i18n'
 
 // NOTIF-I18N-1: the restore-candidate action stages/confirms through the real
 // koios actions endpoints — mocked (API-CREDITS-1: nothing live).
@@ -215,7 +216,7 @@ describe('NotificationBell row click-through', () => {
     fireEvent.click(screen.getByRole('button', { name: /notificat/i }))
     expect(screen.getByText(/Bekijk de aangemaakte vervolgtaak\./)).toBeInTheDocument()
     // Danny 30-09: the next-action sentence REPLACES the bare status, never doubles it.
-    expect(screen.queryByText(/Mislukt\./)).not.toBeInTheDocument()
+    expect(screen.queryByText(i18n.t('notifications.actionStatus.failed'))).not.toBeInTheDocument()
   })
 
   // K-192: an unknown next_action key must never render the raw key.
@@ -231,7 +232,7 @@ describe('NotificationBell row click-through', () => {
     fireEvent.click(screen.getByRole('button', { name: /notificat/i }))
     expect(screen.queryByText(/some_unknown_key/)).not.toBeInTheDocument()
     // With no known follow-up, the status sentence still shows on its own.
-    expect(screen.getByText(/Mislukt\./)).toBeInTheDocument()
+    expect(screen.getByText(i18n.t('notifications.actionStatus.failed'))).toBeInTheDocument()
   })
 
   it('renders no action-status line for a plain row', () => {
@@ -424,7 +425,7 @@ describe('NotificationBell · NOTIF-I18N-1 (bell speaks the user\'s language, na
     } as unknown as ReturnType<typeof useNotificationsModule.useNotifications>)
     render(<NotificationBell />)
     fireEvent.click(screen.getByRole('button', { name: /notificat/i }))
-    const restoreButton = screen.getByRole('button', { name: /restore|terugzetten/i })
+    const restoreButton = screen.getByRole('button', { name: i18n.t('koios.assistant.actions.restore_candidate') })
     fireEvent.click(restoreButton)
     await waitFor(() => expect(mockPost).toHaveBeenCalledWith('/ai/koios/actions/stage', { tool: 'restore_candidate', input: { candidate_id: 'c-1' } }))
     await waitFor(() => expect(mockPost).toHaveBeenCalledWith('/ai/koios/actions/pa-1/confirm', undefined, expect.objectContaining({ headers: expect.objectContaining({ 'Idempotency-Key': expect.any(String) }) })))
@@ -446,7 +447,7 @@ describe('NotificationBell · NOTIF-I18N-1 (bell speaks the user\'s language, na
     } as unknown as ReturnType<typeof useNotificationsModule.useNotifications>)
     render(<NotificationBell />)
     fireEvent.click(screen.getByRole('button', { name: /notificat/i }))
-    fireEvent.keyDown(screen.getByRole('button', { name: /restore|terugzetten/i }), { key: 'Enter' })
+    fireEvent.keyDown(screen.getByRole('button', { name: i18n.t('koios.assistant.actions.restore_candidate') }), { key: 'Enter' })
     expect(navigateSpy).not.toHaveBeenCalled()
     expect(window.location.hash).toBe('')
     // The row itself still navigates on its own Enter.
@@ -463,7 +464,7 @@ describe('NotificationBell · NOTIF-I18N-1 (bell speaks the user\'s language, na
     } as unknown as ReturnType<typeof useNotificationsModule.useNotifications>)
     render(<NotificationBell />)
     fireEvent.click(screen.getByRole('button', { name: /notificat/i }))
-    fireEvent.click(screen.getByRole('button', { name: /remove|verwijderen/i }))
+    fireEvent.click(screen.getByRole('button', { name: i18n.t('notifications.remove') }))
     expect(removeNotification).toHaveBeenCalledWith('n-1')
   })
 
@@ -474,6 +475,6 @@ describe('NotificationBell · NOTIF-I18N-1 (bell speaks the user\'s language, na
     } as unknown as ReturnType<typeof useNotificationsModule.useNotifications>)
     render(<NotificationBell />)
     fireEvent.click(screen.getByRole('button', { name: /notificat/i }))
-    expect(screen.queryByRole('button', { name: /remove|verwijderen/i })).not.toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: i18n.t('notifications.remove') })).not.toBeInTheDocument()
   })
 })

@@ -1460,7 +1460,7 @@
   },
   "couplingErrors": {
     "title": "Erros de associação",
-    "subtitle": "Registos cuja última tentativa de sincronização com um sistema de backoffice associado falhou.",
+    "subtitle": "Registos cuja última sincronização com um sistema associado falhou e pedidos de eliminação que um sistema recetor ainda não confirmou.",
     "loading": "A carregar erros de associação…",
     "error": "Não foi possível carregar os erros de associação.",
     "empty": "Sem erros de associação. Todas as associações foram sincronizadas com sucesso.",

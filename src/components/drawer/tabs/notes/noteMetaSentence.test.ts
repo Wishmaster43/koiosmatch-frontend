@@ -74,6 +74,15 @@ describe('noteMetaSentence', () => {
     expect(noteMetaSentence({ kind: 'consent_refused_by_reply' } as NoteMeta, ctx)).toBe('notes.meta.consentRefusedByReply|{"channels":""}')
   })
 
+  it('names the channel for consent_granted_by_reply, passing an unknown slug through', () => {
+    expect(noteMetaSentence({ kind: 'consent_granted_by_reply', channel: 'whatsapp' } as NoteMeta, ctx)).toBe(
+      'notes.meta.consentGrantedByReply|{"channel":"notes.meta.channelWhatsapp|{}"}',
+    )
+    expect(noteMetaSentence({ kind: 'consent_granted_by_reply', channel: 'sms' } as NoteMeta, ctx)).toBe(
+      'notes.meta.consentGrantedByReply|{"channel":"sms"}',
+    )
+  })
+
   it('returns null for an unknown kind', () => {
     const meta = { kind: 'something_else', from_value: 'lead', to_value: 'candidate' } as NoteMeta
     expect(noteMetaSentence(meta, ctx)).toBeNull()

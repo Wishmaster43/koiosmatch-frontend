@@ -22,10 +22,9 @@
  * NOTIF-I18N-1 (Danny 29-09, bell review as Kelly, EN): each row now renders in
  * the VIEWING USER's language, names the record it is about, offers the same
  * executable actions a Koios suggestion row does, and can be removed — see
- * `./NotificationRow`. The per-row trash button and the header "mark all read"
- * button render only once the backend payload is the new shape (feature
- * detection on `record`/`title_key`/`actions`), so an older backend never shows
- * a dead affordance.
+ * `./NotificationRow`. The per-row trash button renders only once the backend
+ * payload is the new shape (feature detection on `record`/`title_key`/`actions`),
+ * so an older backend never shows a dead affordance.
  */
 import { useState, useRef } from 'react'
 import { useTranslation } from 'react-i18next'
@@ -116,7 +115,6 @@ export default function NotificationBell() {
           boxShadow: 'var(--shadow-float)',
         }}>
           <div style={{
-            display: 'flex', alignItems: 'center', justifyContent: 'space-between',
             padding: '12px 16px', borderBottom: '1px solid var(--border)',
           }}>
             <SectionTitle>{t('notifications.title')}</SectionTitle>

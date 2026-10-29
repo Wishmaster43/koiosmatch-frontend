@@ -15,6 +15,7 @@ import { drilldownRender } from './flows/drilldown-render.mjs'
 import { naadContract } from './flows/naad-contract.mjs'
 import { workflowEditorGraph } from './flows/workflow-editor.mjs'
 import { reportDeeplinkDrill } from './flows/report-deeplink.mjs'
+import { minWidth } from './flows/min-width.mjs'
 
 const FLOWS = [
   ['pages-render', pagesRender],
@@ -29,6 +30,7 @@ const FLOWS = [
   ['naad-contract', naadContract],
   ['workflow-editor', workflowEditorGraph],
   ['report-deeplink', reportDeeplinkDrill],
+  ['min-width', minWidth],
   ['archive-and-find-back', archiveAndFindBack], // last: it mutates the list
 ]
 

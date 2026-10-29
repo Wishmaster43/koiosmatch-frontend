@@ -95,7 +95,7 @@ export default function NotificationRow({ n, isLast, fmt, showRemove, onRemove, 
     >
       <div style={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column', gap: 2 }}>
         <BodyText style={{ fontWeight: n.seen ? 400 : 600 }}>{title || '—'}</BodyText>
-        {body && <div style={{ fontSize: 12, color: 'var(--text-muted)' }}>{body}</div>}
+        {body && <Caption style={{ display: 'block' }}>{body}</Caption>}
         {/* NOTIF-I18N-1: the record this notification is about — a deep-link chip
             under the title, never repeated inside the title itself. */}
         {/* record.label is null when the record is unresolved (cross-tenant/deleted)

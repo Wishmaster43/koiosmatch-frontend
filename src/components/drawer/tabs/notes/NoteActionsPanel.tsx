@@ -183,12 +183,12 @@ function ActionItemCard({ item, index, onEdit, onConfirm, candidateId, formatNum
             // datetime string in due_date 422'd the whole batch (Opus round).
             item.type === 'appointment' ? (
               <input type="datetime-local" value={dateField ? dateField.slice(0, 16) : ''}
-                aria-label={t('notesAssist.panel.editDate', { defaultValue: 'Datum' })}
+                aria-label={t('notesAssist.panel.editDate')}
                 onChange={e => onEdit(index, { start: e.target.value })}
                 style={{ marginTop: 4, width: '100%', boxSizing: 'border-box', padding: '4px 6px', fontSize: 11.5, borderRadius: 6, border: '1px solid var(--border)', background: 'var(--surface)', color: 'var(--text)' }} />
             ) : (
               <input type="date" value={dateField ? dateField.slice(0, 10) : ''}
-                aria-label={t('notesAssist.panel.editDate', { defaultValue: 'Datum' })}
+                aria-label={t('notesAssist.panel.editDate')}
                 onChange={e => onEdit(index, { due_date: e.target.value })}
                 style={{ marginTop: 4, width: '100%', boxSizing: 'border-box', padding: '4px 6px', fontSize: 11.5, borderRadius: 6, border: '1px solid var(--border)', background: 'var(--surface)', color: 'var(--text)' }} />
             )
@@ -240,7 +240,7 @@ function ActionItemCard({ item, index, onEdit, onConfirm, candidateId, formatNum
             {item.confirmErrorKind === 'sessionExpired'
               ? t('notesAssist.execute.confirmSessionExpired')
               : item.confirmErrorKind === 'notApplied'
-                ? t('notesAssist.execute.confirmNotApplied', { defaultValue: 'De server nam de bevestiging niet aan, probeer het nogmaals' })
+                ? t('notesAssist.execute.confirmNotApplied')
                 : t('notesAssist.execute.confirmFailed')}
           </Caption></span>
         )}
@@ -256,10 +256,9 @@ function ActionItemCard({ item, index, onEdit, onConfirm, candidateId, formatNum
             <AlertTriangle size={12} />
             {item.budget?.used != null && item.budget?.allowance != null && t('notesAssist.panel.budgetLine', {
               used: formatNumber(item.budget.used), allowance: formatNumber(item.budget.allowance), unit: item.budget.unit ?? '',
-              defaultValue: '{{used}}/{{allowance}} {{unit}}',
             })}
             {item.budget?.upgrade_hint?.next_tier_label && (
-              <> · {t('notesAssist.panel.upgradeHint', { tier: item.budget.upgrade_hint.next_tier_label, defaultValue: 'Upgrade naar {{tier}}' })}</>
+              <> · {t('notesAssist.panel.upgradeHint', { tier: item.budget.upgrade_hint.next_tier_label })}</>
             )}
           </span>
         )}
@@ -373,10 +372,10 @@ export default function NoteActionsPanel({ items, onItemsChange, noteId, candida
   return (
     <div style={{ width: 300, flexShrink: 0, borderLeft: '1px solid var(--border)', padding: 12, display: 'flex', flexDirection: 'column', gap: 8, overflow: 'auto' }}>
       <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-        <GroupLabel>{t('notesAssist.panel.title', { defaultValue: 'Actiepunten' })}</GroupLabel>
+        <GroupLabel>{t('notesAssist.panel.title')}</GroupLabel>
         <div style={{ flex: 1 }} />
         <Button variant="primary" size="sm" onClick={runBatch} disabled={!hasProposed || exec.status === 'loading'}>
-          {exec.status === 'loading' ? <Spinner size={12} /> : <Play size={12} />} {t('notesAssist.panel.run', { defaultValue: 'Uitvoeren' })}
+          {exec.status === 'loading' ? <Spinner size={12} /> : <Play size={12} />} {t('notesAssist.panel.run')}
         </Button>
       </div>
       {exec.status === 'error' && (

@@ -5,7 +5,7 @@
  * for a super admin, since the component had no prior test coverage at all.
  */
 import { describe, it, expect, vi } from 'vitest'
-import { render, screen, waitFor } from '@testing-library/react'
+import { render, screen, waitFor, fireEvent } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import api from '@/lib/api'
 import TenantSwitcher from './TenantSwitcher'
@@ -87,5 +87,23 @@ describe('TenantSwitcher provisioning', () => {
     expect(screen.getByText('tenantPick.statusFailed')).toBeInTheDocument()
     await userEvent.click(screen.getByText('Ready Bureau'))
     expect(setActiveTenant).toHaveBeenCalledWith(expect.objectContaining({ id: 'a' }))
+  })
+})
+
+// B-002 follow-up: a blocked row looks unavailable (default cursor, dimmed, no hover tint).
+describe('TenantSwitcher blocked row styling', () => {
+  it('uses the default cursor, 0.7 opacity and no hover background', async () => {
+    mockedGet.mockResolvedValue({ data: { data: [
+      { id: 'b', name: 'Pending Bureau', provisioning_status: 'pending' },
+    ], meta: { total: 1, current_page: 1, last_page: 1 } } })
+    render(<TenantSwitcher expanded />)
+
+    await userEvent.click(screen.getByText('Yesway Flex B.V.'))
+    await waitFor(() => expect(screen.getByText('Pending Bureau')).toBeInTheDocument())
+    const row = screen.getByText('Pending Bureau').closest('button') as HTMLButtonElement
+    expect(row.style.cursor).toBe('default')
+    expect(row.style.opacity).toBe('0.7')
+    fireEvent.mouseEnter(row)
+    expect(row.style.background).not.toContain('hover-bg')
   })
 })

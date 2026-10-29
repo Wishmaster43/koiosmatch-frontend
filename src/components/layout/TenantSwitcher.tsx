@@ -184,13 +184,15 @@ export default function TenantSwitcher({ expanded }: { expanded?: boolean }) {
           <div onScroll={onScroll} style={{ maxHeight: 300, overflowY: 'auto', padding: 4 }}>
             {results.map(tn => {
               const isActive = tenant?.id === tn.id
+              // A blocked row reads as unavailable (default cursor, dimmed, no hover tint), like SearchSelect.
+              const blocked = isTenantBlocked(tn.provisioning_status)
               return (
-                <button key={tn.id} onClick={() => pick(tn)} disabled={switching != null || isTenantBlocked(tn.provisioning_status)}
-                  aria-disabled={isTenantBlocked(tn.provisioning_status) || undefined}
+                <button key={tn.id} onClick={() => pick(tn)} disabled={switching != null || blocked}
+                  aria-disabled={blocked || undefined}
                   className="flex items-center gap-3 w-full px-2 py-2 rounded-md transition-colors"
                   // eslint-disable-next-line huisstijlLegacy/no-restricted-syntax -- app-chrome control (components/layout = chrome, HUISSTIJL-1): switcher row with its own active state, not an action button; Button's variants deliberately don't cover the rail
-                  style={{ background: isActive ? 'var(--hover-bg)' : 'none', border: 'none', cursor: switching != null ? 'wait' : 'pointer' }}
-                  onMouseEnter={e => !isActive && (e.currentTarget.style.background = 'var(--hover-bg)')}
+                  style={{ background: isActive ? 'var(--hover-bg)' : 'none', border: 'none', cursor: switching != null ? 'wait' : blocked ? 'default' : 'pointer', opacity: blocked ? 0.7 : 1 }}
+                  onMouseEnter={e => !isActive && !blocked && (e.currentTarget.style.background = 'var(--hover-bg)')}
                   onMouseLeave={e => !isActive && (e.currentTarget.style.background = 'none')}
                 >
                   {/* Each tenant's OWN brand colour (list payload carries primary_color) —

@@ -1460,7 +1460,7 @@
   },
   "couplingErrors": {
     "title": "Errores de vinculación",
-    "subtitle": "Registros cuyo último intento de sincronización con un sistema de backoffice vinculado ha fallado.",
+    "subtitle": "Registros cuya última sincronización con un sistema vinculado ha fallado, y solicitudes de eliminación que un sistema receptor aún no ha confirmado.",
     "loading": "Cargando errores de vinculación…",
     "error": "No se pudieron cargar los errores de vinculación.",
     "empty": "Sin errores de vinculación. Todas las vinculaciones se sincronizaron correctamente.",

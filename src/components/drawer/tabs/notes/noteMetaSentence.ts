@@ -34,6 +34,8 @@ export interface NoteMeta {
   erase_at?: string | null
   // consent_refused_by_reply: the channels a STOP reply refused.
   channels?: string[] | null
+  // consent_granted_by_reply: the channel the consenting reply came in on.
+  channel?: string | null
 }
 
 // What the sentence builder needs from its caller: the candidates-namespace t(), a
@@ -152,6 +154,11 @@ export function noteMetaSentence(meta: NoteMeta | null | undefined, ctx: NoteMet
     // UNSUBSCRIBE-1 (K-007): the person used the signed unsubscribe link in a mail (relationship mail stops).
     case 'consent_refused_by_link':
       return ctx.t('notes.meta.consentRefusedByLink')
+    // The consent twin: the candidate granted contact by replying on one channel (raw slug passes through).
+    case 'consent_granted_by_reply':
+      return ctx.t('notes.meta.consentGrantedByReply', {
+        channel: meta.channel && Object.hasOwn(CHANNEL_KEYS, meta.channel) ? ctx.t(CHANNEL_KEYS[meta.channel]) : (meta.channel ?? ''),
+      })
     default:
       return null
   }

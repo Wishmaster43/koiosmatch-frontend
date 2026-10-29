@@ -32,10 +32,9 @@ interface NavItemData {
 
 // Resolve a nav item's label from i18n by id (dots → underscores to stay flat,
 // since i18next treats a dot as nesting and e.g. nav.shiftmanager is already a
-// string). The registry's hardcoded Dutch label is kept only as the defaultValue
-// fallback, so a future id without a key degrades to readable text, not a raw key.
-const navLabel = (t: TFunction, id: string, fallback?: string) =>
-  t(`nav.${id.replace(/\./g, '_')}`, { defaultValue: fallback })
+// string). common.nav.* is the only label source; a missing key degrades to the raw
+// key, which the navKeys locale-parity test catches.
+const navLabel = (t: TFunction, id: string) => t(`nav.${id.replace(/\./g, '_')}`)
 
 // Filters a nav-item list down to pages this user's role can access (children too),
 // resolving each item's (and child's) label from i18n by id — shared by the core
@@ -44,9 +43,9 @@ function resolveVisibleNavItems(items: NavItemData[], auth: AuthContextValue | n
   return items
     .filter(item => canAccessPage(item.id, auth))
     .map(item => {
-      if (!item.children) return { ...item, label: navLabel(t, item.id, item.label) }
-      return { ...item, label: navLabel(t, item.id, item.label),
-        children: item.children.filter(child => canAccessPage(child.id, auth)).map(c => ({ ...c, label: navLabel(t, c.id, c.label) })) }
+      if (!item.children) return { ...item, label: navLabel(t, item.id) }
+      return { ...item, label: navLabel(t, item.id),
+        children: item.children.filter(child => canAccessPage(child.id, auth)).map(c => ({ ...c, label: navLabel(t, c.id) })) }
     })
 }
 
@@ -75,23 +74,23 @@ function canUseKoios(auth: AuthContextValue | null): boolean {
 // accessible_pages below. Planning, AI & Workflows and WhatsApp live here too
 // (moved up out of "Modules"); they stay gated per page via accessible_pages.
 const NAV_ITEMS: NavItemData[] = [
-  { id: 'dashboard',      label: 'Dashboard',      icon: LayoutDashboard },
+  { id: 'dashboard', icon: LayoutDashboard },
   { id: 'candidates',     icon: Users },
   { id: 'applications',   icon: FileText },
   { id: 'vacancies',      icon: Briefcase },
-  { id: 'matches',        label: 'Matches',        icon: Handshake },
+  { id: 'matches', icon: Handshake },
   { id: 'opportunities',  icon: Target },
   { id: 'tasks',          icon: ListChecks },
   { id: 'outreach',       icon: PhoneCall },
   { id: 'customers',      icon: Building2 },
-  { id: 'planning',       label: 'Planning',       icon: CalendarDays },
-  { id: 'aiagents',       label: 'AI & Workflows', icon: Brain },
-  { id: 'whatsapp',       label: 'WhatsApp',       icon: MessageCircle },
+  { id: 'planning', icon: CalendarDays },
+  { id: 'aiagents', icon: Brain },
+  { id: 'whatsapp', icon: MessageCircle },
   // Reports hub — LAST standard item, right above the MODULES group (Danny 2026-07-05).
   // Gated on the "Rapporten Koios Match" add-on (access.ts). Children map to
   // ReportsPage tabs; labels resolve via common.nav.* (navLabel).
   {
-    id: 'reports', label: 'Rapporten', icon: PieChart,
+    id: 'reports', icon: PieChart,
     // One child per report sub-page, in REPORT_IDS order (reports/reportIds.ts is
     // the single source for that order; labels resolve via navLabel → common.nav.*).
     children: REPORT_IDS.map(id => ({ id: `reports.${id}` })),
@@ -102,7 +101,7 @@ const NAV_ITEMS: NavItemData[] = [
 // accessible_pages (super admin enables them per tenant via the Modules settings tab).
 const MODULE_NAV_ITEMS: NavItemData[] = [
   {
-    id: 'shiftmanager', label: 'Shiftmanager', icon: BarChart3,
+    id: 'shiftmanager', icon: BarChart3,
     children: [
       // Reports (analytics)
       { id: 'shiftmanager.dashboard' },
@@ -117,16 +116,16 @@ const MODULE_NAV_ITEMS: NavItemData[] = [
       { id: 'shiftmanager.departments-table' },
       { id: 'shiftmanager.candidates-table' },
       { id: 'shiftmanager.contacts-table' },
-      { id: 'shiftmanager.orders-table',      label: 'Diensten' },
+      { id: 'shiftmanager.orders-table' },
       // Communication / AI (standalone, module-gated)
-      { id: 'shiftmanager.runs-table',        label: 'Uitvoeringen' },
-      { id: 'shiftmanager.details',           label: 'WhatsApp' },
+      { id: 'shiftmanager.runs-table' },
+      { id: 'shiftmanager.details' },
     ],
   },
   {
-    id: 'helloflex', label: 'HelloFlex', icon: TrendingUp,
+    id: 'helloflex', icon: TrendingUp,
     children: [
-      { id: 'helloflex.dashboard', label: 'Dashboard-HF' },
+      { id: 'helloflex.dashboard' },
     ],
   },
 ]

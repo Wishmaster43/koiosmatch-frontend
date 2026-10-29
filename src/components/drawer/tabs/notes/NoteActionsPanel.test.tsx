@@ -43,7 +43,7 @@ describe('NoteActionsPanel · batch Uitvoeren', () => {
     vi.mocked(executeRichTextActions).mockResolvedValue([{ title: 'Bel terug', type: 'task', status: 'pending', reason: 'Wacht op jouw bevestiging.' }])
     const items = [baseItem(), baseItem({ title: 'Al gedaan', status: 'executed', created: { type: 'task', id: 'run-1' } })]
     render(<NoteActionsPanel items={items} onItemsChange={vi.fn()} />)
-    await user.click(screen.getByRole('button', { name: 'Uitvoeren' }))
+    await user.click(screen.getByRole('button', { name: 'notesAssist.panel.run' }))
     expect(executeRichTextActions).toHaveBeenCalledWith(
       [expect.objectContaining({ title: 'Bel terug', confirmed: undefined })],
       {},
@@ -54,7 +54,7 @@ describe('NoteActionsPanel · batch Uitvoeren', () => {
     const user = userEvent.setup()
     vi.mocked(executeRichTextActions).mockResolvedValue([{ title: 'Bel terug', type: 'task', status: 'pending', reason: 'Wacht op jouw bevestiging.' }])
     render(<Controlled initial={[baseItem()]} />)
-    await user.click(screen.getByRole('button', { name: 'Uitvoeren' }))
+    await user.click(screen.getByRole('button', { name: 'notesAssist.panel.run' }))
     expect(await screen.findByText('notesAssist.panel.confirm')).toBeInTheDocument()
     expect(await screen.findByText('Wacht op jouw bevestiging.')).toBeInTheDocument()
   })
@@ -67,7 +67,7 @@ describe('NoteActionsPanel · per-item Bevestigen', () => {
       .mockResolvedValueOnce([{ title: 'Bel terug', type: 'task', status: 'pending', reason: 'Wacht op jouw bevestiging.' }])
       .mockResolvedValueOnce([{ title: 'Bel terug', type: 'task', status: 'executed', run_id: 'run-9' }])
     render(<Controlled initial={[baseItem()]} noteId="note-1" />)
-    await user.click(screen.getByRole('button', { name: 'Uitvoeren' }))
+    await user.click(screen.getByRole('button', { name: 'notesAssist.panel.run' }))
     await screen.findByText('notesAssist.panel.confirm')
     await user.click(screen.getByRole('button', { name: 'notesAssist.panel.confirm' }))
     expect(executeRichTextActions).toHaveBeenLastCalledWith(
@@ -85,7 +85,7 @@ describe('NoteActionsPanel · inline edit reaches the request verbatim', () => {
     await user.click(screen.getByRole('button', { name: 'notesAssist.panel.edit' }))
     const titleInput = screen.getByLabelText('notesAssist.panel.editTitle')
     fireEvent.change(titleInput, { target: { value: 'Terugbellen om 14u' } })
-    await user.click(screen.getByRole('button', { name: 'Uitvoeren' }))
+    await user.click(screen.getByRole('button', { name: 'notesAssist.panel.run' }))
     expect(executeRichTextActions).toHaveBeenCalledWith(
       [expect.objectContaining({ title: 'Terugbellen om 14u' })],
       {},
@@ -147,7 +147,7 @@ describe('NoteActionsPanel · candidate on the call and an honest confirm outcom
       .mockResolvedValueOnce([{ title: 'Bel terug', type: 'task', status: 'pending' }])
       .mockResolvedValueOnce([{ title: 'Bel terug', type: 'task', status: 'executed', run_id: 'run-3' }])
     render(<Controlled initial={[baseItem()]} candidateId="cand-7" />)
-    await user.click(screen.getByRole('button', { name: 'Uitvoeren' }))
+    await user.click(screen.getByRole('button', { name: 'notesAssist.panel.run' }))
     expect(executeRichTextActions).toHaveBeenCalledWith(expect.anything(), { candidate_id: 'cand-7' })
     await user.click(await screen.findByRole('button', { name: 'notesAssist.panel.confirm' }))
     expect(executeRichTextActions).toHaveBeenLastCalledWith(
@@ -160,9 +160,9 @@ describe('NoteActionsPanel · candidate on the call and an honest confirm outcom
       .mockResolvedValueOnce([{ title: 'Bel terug', type: 'task', status: 'pending' }])
       .mockResolvedValueOnce([{ title: 'Bel terug', type: 'task', status: 'pending' }])
     render(<Controlled initial={[baseItem()]} candidateId="cand-7" />)
-    await user.click(screen.getByRole('button', { name: 'Uitvoeren' }))
+    await user.click(screen.getByRole('button', { name: 'notesAssist.panel.run' }))
     await user.click(await screen.findByRole('button', { name: 'notesAssist.panel.confirm' }))
-    expect(await screen.findByRole('alert')).toHaveTextContent('De server nam de bevestiging niet aan, probeer het nogmaals')
+    expect(await screen.findByRole('alert')).toHaveTextContent('notesAssist.execute.confirmNotApplied')
     expect(screen.getByRole('button', { name: 'notesAssist.panel.confirm' })).not.toBeDisabled()
   })
 
@@ -172,7 +172,7 @@ describe('NoteActionsPanel · candidate on the call and an honest confirm outcom
       .mockResolvedValueOnce([{ title: 'Bel terug', type: 'task', status: 'pending' }])
       .mockRejectedValueOnce({ response: { status: 401 } })
     render(<Controlled initial={[baseItem()]} candidateId="cand-7" />)
-    await user.click(screen.getByRole('button', { name: 'Uitvoeren' }))
+    await user.click(screen.getByRole('button', { name: 'notesAssist.panel.run' }))
     await user.click(await screen.findByRole('button', { name: 'notesAssist.panel.confirm' }))
     expect(await screen.findByRole('alert')).toHaveTextContent('notesAssist.execute.confirmSessionExpired')
   })
@@ -186,7 +186,7 @@ describe('NoteActionsPanel · executing/declined mapping (CLAIM-1)', () => {
     const user = userEvent.setup()
     vi.mocked(executeRichTextActions).mockResolvedValue([{ title: 'Bel terug', type: 'task', status: 'executing' }])
     render(<Controlled initial={[baseItem()]} />)
-    await user.click(screen.getByRole('button', { name: 'Uitvoeren' }))
+    await user.click(screen.getByRole('button', { name: 'notesAssist.panel.run' }))
     expect(await screen.findByText('notesAssist.panel.statusExecuting')).toBeInTheDocument()
     expect(screen.queryByRole('button', { name: 'notesAssist.panel.confirm' })).not.toBeInTheDocument()
   })
@@ -197,7 +197,7 @@ describe('NoteActionsPanel · executing/declined mapping (CLAIM-1)', () => {
       { title: 'Bel terug', type: 'task', status: 'declined', code: 'proposal_in_flight', reason: 'Wordt al verstuurd.' },
     ])
     render(<Controlled initial={[baseItem()]} />)
-    await user.click(screen.getByRole('button', { name: 'Uitvoeren' }))
+    await user.click(screen.getByRole('button', { name: 'notesAssist.panel.run' }))
     expect(await screen.findByText('notesAssist.panel.statusDeclined')).toBeInTheDocument()
     expect(screen.getByText('notesAssist.execute.declined.proposal_in_flight')).toBeInTheDocument()
     expect(screen.getByRole('button', { name: 'notesAssist.execute.forceSend' })).toBeInTheDocument()
@@ -209,7 +209,7 @@ describe('NoteActionsPanel · executing/declined mapping (CLAIM-1)', () => {
       .mockResolvedValueOnce([{ title: 'Bel terug', type: 'task', status: 'declined', code: 'proposal_recently_sent' }])
       .mockResolvedValueOnce([{ title: 'Bel terug', type: 'task', status: 'executed', run_id: 'run-9' }])
     render(<Controlled initial={[baseItem()]} noteId="note-1" />)
-    await user.click(screen.getByRole('button', { name: 'Uitvoeren' }))
+    await user.click(screen.getByRole('button', { name: 'notesAssist.panel.run' }))
     await user.click(await screen.findByRole('button', { name: 'notesAssist.execute.forceSend' }))
     expect(executeRichTextActions).toHaveBeenLastCalledWith(
       [expect.objectContaining({ title: 'Bel terug', confirmed: true, force: true })],
@@ -225,7 +225,7 @@ describe('NoteActionsPanel · executing/declined mapping (CLAIM-1)', () => {
       { title: 'Bel terug', type: 'task', status: 'declined', code: 'duplicate_customer', ref: { type: 'customer', id: 'cust-1' } },
     ])
     render(<Controlled initial={[baseItem()]} />)
-    await user.click(screen.getByRole('button', { name: 'Uitvoeren' }))
+    await user.click(screen.getByRole('button', { name: 'notesAssist.panel.run' }))
     expect(await screen.findByText('notesAssist.execute.declined.duplicate')).toBeInTheDocument()
     expect(screen.getByText('notesAssist.execute.openExisting')).toBeInTheDocument()
     expect(screen.queryByRole('button', { name: 'notesAssist.execute.forceSend' })).not.toBeInTheDocument()

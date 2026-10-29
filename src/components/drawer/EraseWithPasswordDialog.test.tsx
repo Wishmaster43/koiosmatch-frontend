@@ -56,13 +56,18 @@ describe('EraseWithPasswordDialog', () => {
 
   it('shows the server message on a generic failure, and clears it on retry', async () => {
     const user = userEvent.setup()
-    const onConfirm = vi.fn().mockRejectedValue({ response: { data: { message: 'Netwerkfout' } } })
+    const onConfirm = vi.fn().mockRejectedValueOnce({ response: { data: { message: 'Netwerkfout' } } }).mockResolvedValueOnce(undefined)
     render(<EraseWithPasswordDialog open title="t" intro="i" confirmLabel="Confirm" onConfirm={onConfirm} onClose={vi.fn()} />)
 
     await user.type(screen.getByLabelText(cm('eraseDialog.password'), { exact: false }), 'x')
     await user.click(screen.getByRole('button', { name: 'Confirm' }))
 
     expect(await screen.findByRole('alert')).toHaveTextContent('Netwerkfout')
+
+    // Retry: the error clears and the second call goes through.
+    await user.click(screen.getByRole('button', { name: 'Confirm' }))
+    await waitFor(() => expect(screen.queryByRole('alert')).toBeNull())
+    expect(onConfirm).toHaveBeenCalledTimes(2)
   })
 
   it('disables confirm and shows a busy submit label while awaiting onConfirm', async () => {

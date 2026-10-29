@@ -1460,7 +1460,7 @@
   },
   "couplingErrors": {
     "title": "Kopplungsfehler",
-    "subtitle": "Datensätze, deren letzter Synchronisierungsversuch mit einem verknüpften Backoffice-System fehlgeschlagen ist.",
+    "subtitle": "Datensätze, deren letzte Synchronisierung mit einem verknüpften System fehlgeschlagen ist, und Löschanfragen, die ein empfangendes System noch nicht bestätigt hat.",
     "loading": "Kopplungsfehler werden geladen…",
     "error": "Die Kopplungsfehler konnten nicht geladen werden.",
     "empty": "Keine Kopplungsfehler. Jede Verknüpfung wurde erfolgreich synchronisiert.",

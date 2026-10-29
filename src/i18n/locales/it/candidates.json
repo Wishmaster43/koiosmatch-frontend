@@ -1460,7 +1460,7 @@
   },
   "couplingErrors": {
     "title": "Errori di collegamento",
-    "subtitle": "Record il cui ultimo tentativo di sincronizzazione con un sistema di backoffice collegato non è riuscito.",
+    "subtitle": "Record la cui ultima sincronizzazione con un sistema collegato non è riuscita e richieste di cancellazione che un sistema ricevente non ha ancora confermato.",
     "loading": "Caricamento errori di collegamento…",
     "error": "Non è stato possibile caricare gli errori di collegamento.",
     "empty": "Nessun errore di collegamento. Ogni collegamento è stato sincronizzato correttamente.",
