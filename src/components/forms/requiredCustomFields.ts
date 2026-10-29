@@ -24,6 +24,15 @@ export function isCustomFieldFilled(value: unknown): boolean {
   return typeof value === 'boolean' || (value !== undefined && value !== null && String(value).trim() !== '')
 }
 
+// A visible-but-untouched checkbox IS an answer (unchecked): returns the values with
+// `false` filled in for every boolean def still undefined, so the value the user sees
+// is the value that validates AND is sent in the POST payload.
+export function seedBooleanDefaults(defs: CustomFieldDef[], values: Record<string, unknown>): Record<string, unknown> {
+  const seeded = { ...values }
+  defs.forEach(def => { if (def.type === 'boolean' && seeded[def.key] === undefined) seeded[def.key] = false })
+  return seeded
+}
+
 // The dotted-key error flags for every required def that is currently empty
 // (e.g. { 'custom_fields.vog': true }), or null when all of them are filled —
 // the one shared pre-check every create modal's submit guard runs before

@@ -4,6 +4,7 @@
 import { useState } from 'react'
 import { Search } from 'lucide-react'
 import DatePicker from 'react-datepicker'
+import 'react-datepicker/dist/react-datepicker.css'
 import SelectAllRow from '@/components/ui/SelectAllRow'
 import Slider from '@/components/ui/Slider'
 import Toggle from '@/components/ui/Toggle'

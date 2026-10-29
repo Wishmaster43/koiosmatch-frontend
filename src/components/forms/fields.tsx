@@ -5,20 +5,21 @@
  * the candidate drawer tabs and the generic form helpers all share. Previously
  * each file declared its own `iStyle` / `inputStyle` / `dpInputStyle` copy.
  */
-import { useId, cloneElement, isValidElement } from 'react'
+import { useId, cloneElement, isValidElement, lazy, Suspense } from 'react'
 import type { CSSProperties, ReactNode, ReactElement, KeyboardEvent } from 'react'
-import DatePicker from 'react-datepicker'
-import 'react-datepicker/dist/react-datepicker.css'
 import { fieldInputStyle } from './fieldMetrics'
 import { CANON_LABEL_STYLE } from '@/components/drawer/fieldRowCanon'
 import { groupLabelStyle } from '@/components/ui/typography'
-import { toLocalIsoDate } from '@/lib/localDate'
+import { toLocalIsoDate, formatDateOnly } from '@/lib/localDate'
 import CreatableSelect from '@/components/ui/CreatableSelect'
 import DrawerAddButton from '@/components/drawer/DrawerAddButton'
 
 /* eslint-disable react-refresh/only-export-components -- the shared form KIT
    exports field styles/helpers beside its components by design (§ field layout,
    one sweep source); HMR-nicety only — precedent: usageCardStyles.jsx. */
+// The picker chunk loads on first DateField render, never in the entry bundle.
+const DatePicker = lazy(() => import('./LazyDatePicker'))
+
 export interface SelectOption { value: string; label?: ReactNode }
 
 // Canon field style (G33/fieldMetrics) — this was its own one-off (padding
@@ -186,29 +187,33 @@ export function SelectField({ id, value, onChange, options = [], placeholder, st
 export function DateField({ id, value, onChange, placeholder, style, ...req }: {
   id?: string; value?: string | number | Date | null; onChange: (v: string) => void; placeholder?: string; style?: CSSProperties
 } & RequiredProps) {
+  const fieldStyle = { ...inputStyle, ...style }
   return (
-    <DatePicker
-      id={id}
-      selected={parseDate(value)}
-      // Local calendar day, never `.toISOString()` — see toLocalIsoDate's doc for the
-      // measured UTC-shift bug this fixes (this is the SHARED DateField every form uses).
-      onChange={(d: Date | null) => onChange(d ? toLocalIsoDate(d) : '')}
-      dateFormat="dd-MM-yyyy"
-      showMonthDropdown showYearDropdown dropdownMode="select"
-      placeholderText={placeholder}
-      portalId="datepicker-portal"
-      popperPlacement="bottom-start"
-      customInput={<input style={{ ...inputStyle, ...style }} {...requiredAttrs(req)} />}
-    />
+    // Fallback is the same styled input (read-only) so the field looks identical while the chunk loads.
+    <Suspense fallback={<div style={{ display: 'inline-block' }}><input id={id} readOnly value={parseDate(value) ? formatDateOnly(value) : ''} placeholder={placeholder} style={fieldStyle} {...requiredAttrs(req)} /></div>}>
+      <DatePicker
+        id={id}
+        selected={parseDate(value)}
+        // Local calendar day, never `.toISOString()` — see toLocalIsoDate's doc for the
+        // measured UTC-shift bug this fixes (this is the SHARED DateField every form uses).
+        onChange={(d: Date | null) => onChange(d ? toLocalIsoDate(d) : '')}
+        dateFormat="dd-MM-yyyy"
+        showMonthDropdown showYearDropdown dropdownMode="select"
+        placeholderText={placeholder}
+        portalId="datepicker-portal"
+        popperPlacement="bottom-start"
+        customInput={<input style={fieldStyle} {...requiredAttrs(req)} />}
+      />
+    </Suspense>
   )
 }
 
 // Checkbox input on the shared accent colour; disabled also flips the cursor to default.
-export function CheckboxField({ id, checked, onChange, disabled, ...req }: {
-  id?: string; checked?: boolean; onChange: (v: boolean) => void; disabled?: boolean
+export function CheckboxField({ id, checked, onChange, disabled, describedBy, ...req }: {
+  id?: string; checked?: boolean; onChange: (v: boolean) => void; disabled?: boolean; describedBy?: string
 } & RequiredProps) {
   return (
-    <input id={id} type="checkbox" checked={!!checked} disabled={disabled} {...requiredAttrs(req)}
+    <input id={id} aria-describedby={describedBy} type="checkbox" checked={!!checked} disabled={disabled} {...requiredAttrs(req)}
       onChange={e => onChange(e.target.checked)}
       style={{ width: 14, height: 14, accentColor: 'var(--color-primary)', cursor: disabled ? 'default' : 'pointer' }} />
   )

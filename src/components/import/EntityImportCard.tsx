@@ -44,7 +44,7 @@ import Spinner from '@/components/ui/Spinner'
 // client or a second result renderer.
 import { PreviewStep, ResultStep, downloadImportTemplate } from '@/pages/settings/shared'
 import type { useImportWizard } from '@/pages/settings/shared'
-import { useUploadPolicy } from '@/lib/uploadPolicy'
+import { useUploadPolicy, uploadRefusalText } from '@/lib/uploadPolicy'
 import Button from '@/components/ui/Button'
 import { tintBg, tintBorder } from '@/lib/tint'
 import { Caption } from '@/components/ui/typography'
@@ -74,7 +74,7 @@ interface EntityImportCardProps {
 // The compact "create from a file" card at the top of a create modal: pick →
 // mandatory dry-run preview → real import, reusing the Settings wizard's own steps.
 export default function EntityImportCard({ wizard, canView, canImport, entity, intro, wholeTree = false, introExtra, previewBanner, onConfirmImport }: EntityImportCardProps) {
-  const { t } = useTranslation('settings')
+  const { t, i18n } = useTranslation('settings')
   // File-picker filter from the shared upload policy (import surface).
   const { accept: importAccept, check: importCheck } = useUploadPolicy('import')
   const { step, file, preview, run } = wizard
@@ -85,8 +85,9 @@ export default function EntityImportCard({ wizard, canView, canImport, entity, i
 
   // UPLOAD-POLICY-1: reject anything the shared import policy refuses, with an honest, actionable message.
   const acceptFile = (candidate: File) => {
-    if (!importCheck(candidate).ok) {
-      setTypeError(t('import.wrongFileType'))
+    const result = importCheck(candidate)
+    if (!result.ok) {
+      setTypeError(uploadRefusalText(result, t, i18n.language))
       return
     }
     setTypeError(null)

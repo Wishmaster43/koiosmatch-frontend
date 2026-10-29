@@ -13,7 +13,7 @@ vi.mock('./koiosApi', () => ({ confirmPendingAction: vi.fn(), cancelPendingActio
 vi.mock('@/context/NavigationContext', () => ({ useNavigation: vi.fn() }))
 // useKoiosToolCapabilities fetches GET /ai/koios/capabilities directly via the axios client.
 vi.mock('@/lib/api', () => ({ default: { get: vi.fn() }, unwrap: (r: { data: unknown }) => r.data }))
-vi.mock('react-i18next', () => ({ useTranslation: () => ({ t: (k: string, opts?: { defaultValue?: string; count?: number }) => opts?.defaultValue ?? (opts?.count != null ? `${k}|${opts.count}` : k) }) }))
+vi.mock('react-i18next', () => ({ useTranslation: () => ({ t: (k: string, opts?: { defaultValue?: string; count?: number }) => (k === 'koios.pendingAction.reasons.send_failed' ? 'Sending failed.' : null) ?? opts?.defaultValue ?? (opts?.count != null ? `${k}|${opts.count}` : k) }) }))
 vi.mock('@/lib/formatters', () => ({ useNumberFormat: () => ({ formatNumber: (n: number) => String(n) }) }))
 const mockConfirm = confirmPendingAction as unknown as ReturnType<typeof vi.fn>
 const mockCancel = cancelPendingAction as unknown as ReturnType<typeof vi.fn>
@@ -137,6 +137,30 @@ describe('KoiosPendingActionCard', () => {
     expect(screen.getByText('Je AI-staffel is vol.')).toBeInTheDocument()
     expect(screen.getByText(/koios\.pendingAction\.upgradeHint/)).toBeInTheDocument()
     expect(screen.queryByText('koios.pendingAction.expired')).not.toBeInTheDocument()
+  })
+
+  // Any non-duplicate decline translates its stable reason slug, never the BE's English prose.
+  it('translates a declined response by its reason slug instead of the raw server message', async () => {
+    mockConfirm.mockRejectedValue({
+      response: { status: 422, data: { status: 'declined', message: 'Candidate not found.', data: { ok: false, reason: 'send_failed' } } },
+    })
+    const user = userEvent.setup()
+    renderCard(action())
+    await user.click(screen.getByText('koios.pendingAction.confirm'))
+    await waitFor(() => expect(screen.getByTestId('koios-pending-action')).toHaveAttribute('data-status', 'refused'))
+    expect(screen.getByText('Sending failed.')).toBeInTheDocument()
+    expect(screen.queryByText('Candidate not found.')).not.toBeInTheDocument()
+  })
+
+  it('falls back to the server message when the decline slug is unknown', async () => {
+    mockConfirm.mockRejectedValue({
+      response: { status: 422, data: { status: 'declined', message: 'Candidate not found.', data: { reason: 'brand_new_slug' } } },
+    })
+    const user = userEvent.setup()
+    renderCard(action())
+    await user.click(screen.getByText('koios.pendingAction.confirm'))
+    await waitFor(() => expect(screen.getByTestId('koios-pending-action')).toHaveAttribute('data-status', 'refused'))
+    expect(screen.getByText('Candidate not found.')).toBeInTheDocument()
   })
 
   it('renders a generic error state on an unrelated failure', async () => {

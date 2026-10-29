@@ -79,7 +79,13 @@ export default function DashboardLayout() {
     <SelectionProvider>
     <div className="flex h-screen overflow-hidden">
       {/* Skip link: first focusable element (WCAG 2.4.1) */}
-      <a href="#main-content" className="skip-link">{t('nav.skipToContent')}</a>
+      <a
+        href="#main-content"
+        className="skip-link"
+        // Focus <main> directly: a hash jump would overwrite the app's hash routing (#page?open=…).
+        onClick={e => { e.preventDefault(); document.getElementById('main-content')?.focus() }}
+      >{t('nav.skipToContent')}
+      </a>
 
       {/* ── Left navigation ── */}
       <SidebarTyped

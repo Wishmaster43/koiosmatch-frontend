@@ -2,7 +2,7 @@
  * requiredCustomFields — pure-helper tests (ONIX N-005, SHARED-UNIT-TEST-1).
  */
 import { describe, it, expect } from 'vitest'
-import { isRequiredCustomField, requiredCustomFieldKeys, isCustomFieldFilled, requiredCustomFieldErrors, makeCustomFieldChangeHandler } from './requiredCustomFields'
+import { isRequiredCustomField, requiredCustomFieldKeys, isCustomFieldFilled, requiredCustomFieldErrors, makeCustomFieldChangeHandler, seedBooleanDefaults } from './requiredCustomFields'
 import type { CustomFieldDef } from '@/lib/useCustomFields'
 
 const def = (overrides: Partial<CustomFieldDef>): CustomFieldDef => ({
@@ -77,5 +77,21 @@ describe('makeCustomFieldChangeHandler (POLISH)', () => {
 
     expect(values).toEqual({ vog: '123' })
     expect(errors).toEqual({ 'custom_fields.vog': false })
+  })
+})
+
+describe('seedBooleanDefaults', () => {
+  const bool = def({ key: 'driver', type: 'boolean', required_always: true })
+  it('fills false for an untouched boolean so it validates as filled', () => {
+    const seeded = seedBooleanDefaults([bool], {})
+    expect(seeded).toEqual({ driver: false })
+    expect(requiredCustomFieldErrors([bool], seeded)).toBeNull()
+  })
+  it('leaves text defs and existing values untouched (no mutation)', () => {
+    const values = { driver: true, vog: '' }
+    expect(seedBooleanDefaults([bool, def({ key: 'vog' })], values)).toEqual({ driver: true, vog: '' })
+    const empty = {}
+    seedBooleanDefaults([bool], empty)
+    expect(empty).toEqual({})
   })
 })

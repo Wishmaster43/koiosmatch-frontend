@@ -679,7 +679,7 @@ describe('AddContactPersonModal · import card (Danny 02-08: "+ nieuwe contactpe
     const dropZone = screen.getByText(ct('subModal.import.intro', { entity: st('import.entities.contacts.label') })).parentElement as HTMLElement
     fireEvent.drop(dropZone, { dataTransfer: { files: [xlsxFile] } })
 
-    expect(screen.queryByText(st('import.wrongFileType'))).not.toBeInTheDocument()
+    expect(screen.queryByText(st('common:upload.typeNotAllowed', { allowed: 'csv, txt, xlsx' }))).not.toBeInTheDocument()
     expect(screen.getByText(st('import.fileSelected', { name: 'contacten.xlsx' }))).toBeInTheDocument()
   })
 
@@ -691,7 +691,8 @@ describe('AddContactPersonModal · import card (Danny 02-08: "+ nieuwe contactpe
     const dropZone = screen.getByText(ct('subModal.import.intro', { entity: st('import.entities.contacts.label') })).parentElement as HTMLElement
     fireEvent.drop(dropZone, { dataTransfer: { files: [pdfFile] } })
 
-    expect(screen.getByText(st('import.wrongFileType'))).toBeInTheDocument()
+    // The refusal speaks the shared upload policy (a type refusal lists the allowed extensions).
+    expect(screen.getByText(st('common:upload.typeNotAllowed', { allowed: 'csv, txt, xlsx' }))).toBeInTheDocument()
     expect(dryRunImport).not.toHaveBeenCalled()
   })
 

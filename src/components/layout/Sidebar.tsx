@@ -12,7 +12,7 @@ import type { TFunction } from 'i18next'
 import { useAuth } from '@/context/AuthContext'
 import type { AuthContextValue } from '@/context/AuthContext'
 import { canAccessPage, hasKoiosAiModule } from '@/lib/access'
-import { REPORT_IDS } from '@/pages/reports/shared'
+import { REPORT_IDS } from '@/lib/reportIds'
 import TenantSwitcher from './TenantSwitcher'
 import {
   LayoutDashboard, Users, Building2,

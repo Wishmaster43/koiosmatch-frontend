@@ -114,6 +114,14 @@ export default function KoiosPendingActionCard({ action }: { action: KoiosPendin
     return () => clearInterval(id)
   }, [status, action.expires_at])
 
+  // Maps a stable reason slug to its translated sentence; falls back to the server text.
+  const translateReason = (reasonSlug?: string, errorText?: string) => {
+    if (!reasonSlug) return errorText ?? null
+    const slugKey = `koios.pendingAction.reasons.${reasonSlug}`
+    const translated = t(slugKey)
+    return translated === slugKey ? (errorText ?? reasonSlug) : translated
+  }
+
   // Confirms the action; a destructive one requires an extra click (the "confirming"
   // step above) before it actually submits to the server.
   const confirm = () => {
@@ -139,12 +147,6 @@ export default function KoiosPendingActionCard({ action }: { action: KoiosPendin
         const reason = pick<string>(data, 'reason', 'reden')
         const error = pick<string>(data, 'error', 'fout')
         const remembered = pick<string[]>(data, 'remembered', 'onthouden')
-        const translateReason = (reasonSlug?: string, errorText?: string) => {
-          if (!reasonSlug) return errorText ?? null
-          const slugKey = `koios.pendingAction.reasons.${reasonSlug}`
-          const translated = t(slugKey)
-          return translated === slugKey ? (errorText ?? reasonSlug) : translated
-        }
         const hasOkKey = data != null && ('ok' in data || 'gelukt' in data)
         if (ok === false || (!hasOkKey && (reason || error))) {
           setRefusedReason(translateReason(reason, error))
@@ -173,7 +175,8 @@ export default function KoiosPendingActionCard({ action }: { action: KoiosPendin
         // present only for a caller holding its view permission).
         const body = e?.response?.data as {
           status?: string; message?: string
-          data?: { budget?: ActionBudget; code?: string; ref?: { type: string; id: Id; archived?: boolean } }
+          // reason/error twins are read through pick() (KOIOS-EN-1 contract keys), so the type names only the English members.
+          data?: Record<string, unknown> & { budget?: ActionBudget; code?: string; ref?: { type: string; id: Id; archived?: boolean } }
         } | undefined
         if (body?.status === 'declined') {
           // §5: a duplicate-twin decline's `message` is the BE's English
@@ -184,7 +187,8 @@ export default function KoiosPendingActionCard({ action }: { action: KoiosPendin
               ? 'notesAssist.execute.declined.duplicate_archived'
               : 'notesAssist.execute.declined.duplicate'))
           } else {
-            setRefusedReason(body.message ?? null)
+            // Any other decline: translate the stable reason slug, fall back to the server message.
+            setRefusedReason(translateReason(pick<string>(body.data, 'reason', 'reden'), body.message))
           }
           setBudget(body.data?.budget ?? null)
           setExistingRef(body.data?.ref ?? null)

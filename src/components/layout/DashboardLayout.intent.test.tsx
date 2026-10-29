@@ -9,7 +9,7 @@
  * is stubbed so this test stays about the popstate wiring, not the shell's UI.
  */
 import { describe, it, expect, vi } from 'vitest'
-import { render, screen, act } from '@testing-library/react'
+import { render, screen, act, fireEvent } from '@testing-library/react'
 import DashboardLayout from './DashboardLayout'
 import i18n from '@/i18n'
 
@@ -92,5 +92,19 @@ describe('DashboardLayout · a11y shell (N-014)', () => {
     const firstFocusable = container.querySelector('a, button, input, [tabindex="0"]')
     expect(firstFocusable?.getAttribute('href')).toBe('#main-content')
     expect(document.title).toBe(`${h1.textContent} · KoiosMatch`)
+  })
+})
+
+describe('DashboardLayout · skip link keeps the hash route (N-014)', () => {
+  it('focuses <main> without overwriting the location hash', () => {
+    window.location.hash = '#settings/company/general'
+    const historyBefore = window.history.length
+    const { container } = render(<DashboardLayout />)
+    const link = container.querySelector('.skip-link') as HTMLElement
+    fireEvent.click(link)
+    expect(window.location.hash).toBe('#settings/company/general')
+    expect(window.history.length).toBe(historyBefore)
+    expect(document.activeElement).toBe(document.getElementById('main-content'))
+    window.location.hash = ''
   })
 })

@@ -5,7 +5,7 @@
  * SENT value is the picked local day, not a UTC-shifted one, matters most here.
  */
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
-import { render, screen } from '@testing-library/react'
+import { render, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import 'react-datepicker/dist/react-datepicker.css'
 import { DateField, SelectField } from './fields'
@@ -36,6 +36,9 @@ describe('DateField · sends the LOCAL calendar day, never a UTC-shifted one', (
     const user = userEvent.setup()
     const onChange = vi.fn()
     render(<DateField value={null} onChange={onChange} />)
+    // The picker chunk is lazy: wait for the real picker (it is the only input that opens a calendar).
+    // 5 s: the first lazy import under full-suite load measured 1.7 s (29-10), past waitFor's 1 s default.
+    await waitFor(() => expect(document.querySelector('.react-datepicker__input-container')).toBeTruthy(), { timeout: 5000 })
     await user.click(screen.getByRole('textbox'))
     // The calendar renders into the shared datepicker-portal (outside the RTL
     // container), so query the document like a real user would see it.
@@ -65,3 +68,14 @@ describe('SelectField · clear affordance (DROPDOWN-CLEAR-1)', () => {
   })
 })
 
+
+// N-ENTRY-1: the picker chunk is lazy, the field shows the same input meanwhile.
+describe('DateField · lazy picker chunk', () => {
+  it('shows the DD-MM-YYYY value in the fallback input, then the picker with the same value', async () => {
+    render(<DateField value="2026-03-09" onChange={() => {}} />)
+    expect((screen.getByRole('textbox') as HTMLInputElement).value).toBe('09-03-2026')
+    // 5 s: the first lazy import under full-suite load measured 1.7 s (29-10), past waitFor's 1 s default.
+    await waitFor(() => expect(document.querySelector('.react-datepicker__input-container')).toBeTruthy(), { timeout: 5000 })
+    expect((screen.getByRole('textbox') as HTMLInputElement).value).toBe('09-03-2026')
+  })
+})

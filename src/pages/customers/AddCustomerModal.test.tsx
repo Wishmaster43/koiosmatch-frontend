@@ -484,7 +484,7 @@ describe('AddCustomerModal · import card (Danny 02-08: replaces the italic impo
     const dropZone = screen.getByText(ct('modal.import.intro')).parentElement as HTMLElement
     fireEvent.drop(dropZone, { dataTransfer: { files: [xlsxFile] } })
 
-    expect(screen.queryByText(st('import.wrongFileType'))).not.toBeInTheDocument()
+    expect(screen.queryByText(st('common:upload.typeNotAllowed', { allowed: 'csv, txt, xlsx' }))).not.toBeInTheDocument()
     expect(screen.getByText(st('import.fileSelected', { name: 'acme.xlsx' }))).toBeInTheDocument()
   })
 
@@ -496,7 +496,8 @@ describe('AddCustomerModal · import card (Danny 02-08: replaces the italic impo
     const dropZone = screen.getByText(ct('modal.import.intro')).parentElement as HTMLElement
     fireEvent.drop(dropZone, { dataTransfer: { files: [pdfFile] } })
 
-    expect(screen.getByText(st('import.wrongFileType'))).toBeInTheDocument()
+    // The refusal now speaks the shared upload policy (type refusal lists the allowed extensions).
+    expect(screen.getByText(st('common:upload.typeNotAllowed', { allowed: 'csv, txt, xlsx' }))).toBeInTheDocument()
     expect(dryRunImport).not.toHaveBeenCalled()
   })
 
