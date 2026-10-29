@@ -24,6 +24,12 @@ export type KpiDefinitionPatch  = Partial<WriteBody>
 export type KpiOrderBody        = NonNullable<operations['putKpiDefinitionsOrder']['requestBody']>['content']['application/json']
 export type KpiDefinitionsQuery = NonNullable<operations['getKpiDefinitions']['parameters']['query']>
 
+// Server column caps (J-014 style): a longer value is refused client-side before the 422.
+export const KPI_METRIC_KEY_MAX = 64
+export const KPI_DIMENSION_MAX = 64
+export const KPI_DIMENSION_VALUE_MAX = 120
+export const KPI_LABEL_MAX = 255
+
 // Hand-written — GET /kpi-metrics has no generated 2xx schema. One entry per
 // entity; `dimensions[0]` is always 'all' (the "no breakdown" choice).
 export interface KpiMetric {

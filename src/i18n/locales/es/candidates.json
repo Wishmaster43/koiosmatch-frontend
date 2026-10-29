@@ -864,6 +864,7 @@
     "viesInvalid": "No válido según VIES",
     "viesUnknown": "VIES no está disponible. No se realizó la comprobación.",
     "viesFailed": "La comprobación del IVA ha fallado. Inténtalo de nuevo más tarde.",
+    "vatMissing": "No hay ningún número de IVA registrado. Introdúcelo primero.",
     "businessEmailInvalid": "Introduce una dirección de correo electrónico válida.",
     "businessEmailDuplicateTitle": "Esta dirección de correo ya está en uso",
     "businessEmailDuplicateBody": "{{name}} ya utiliza esta dirección de correo. ¿Guardar de todos modos?",

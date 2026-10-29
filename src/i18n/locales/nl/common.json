@@ -796,6 +796,8 @@
     "helloflexContractTypeUnmapped": "Geen HelloFlex-contracttype gekoppeld voor deze contractvorm. Stel dit in bij Instellingen → HelloFlex.",
     "recipientSuppressed": "Dit adres is geblokkeerd na een eerdere bounce of klacht; er wordt niet opnieuw verzonden.",
     "emailUnavailable": "Dit e-mailadres kan niet worden gebruikt.",
+    "inboundScenarioClash": "Er is al een actief scenario voor dit nummer en deze lane: {{clash_name}}.",
+    "inboundScenarioNumberMissing": "Dit scenario noemt geen nummer van dit bureau op zijn lane en kan niet actief worden.",
     "documentNotAvailable": "Dit document is nog niet beschikbaar: de virusscan is niet afgerond of heeft het bestand geweigerd.",
     "tenantNotReady": "Dit bureau wordt nog ingericht of de inrichting is mislukt. Probeer het later opnieuw of kies een ander bureau.",
     "aiDisclosureMissing": "De interview-intro mist de verplichte AI-vermelding; pas de template aan voordat je dit activeert.",

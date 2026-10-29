@@ -864,6 +864,7 @@
     "viesInvalid": "Invalide selon VIES",
     "viesUnknown": "VIES est injoignable. La vérification n'a pas été effectuée.",
     "viesFailed": "La vérification de la TVA a échoué. Réessayez plus tard.",
+    "vatMissing": "Aucun numéro de TVA n'est enregistré. Saisis-le d'abord.",
     "businessEmailInvalid": "Saisissez une adresse e-mail valide.",
     "businessEmailDuplicateTitle": "Cette adresse e-mail est déjà utilisée",
     "businessEmailDuplicateBody": "{{name}} utilise déjà cette adresse e-mail. Enregistrer quand même ?",

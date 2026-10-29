@@ -86,8 +86,17 @@ describe('ProfileEmailConnect · mailbox health', () => {
     expect(api.post).toHaveBeenCalledWith('/profile/email/connect', { provider: 'gmail' })
   })
 
-  it('tenant_policy renders the info box and no button', async () => {
-    vi.mocked(api.get).mockResolvedValueOnce({ data: { status: 'tenant_policy' } })
+  it('tenant_policy renders the info box with a connect-again button that POSTs the connect route', async () => {
+    vi.mocked(api.get).mockResolvedValueOnce({ data: { status: 'tenant_policy', provider: 'office' } })
+    vi.mocked(api.post).mockResolvedValueOnce({ data: {} })
+    render(<ProfileEmailConnect />)
+    expect(await screen.findByText('profile.email.tenantPolicy')).toBeInTheDocument()
+    await userEvent.setup().click(screen.getByRole('button', { name: 'profile.email.connectWith:Office 365' }))
+    expect(api.post).toHaveBeenCalledWith('/profile/email/connect', { provider: 'office' })
+  })
+
+  it('tenant_policy on an SMTP mailbox offers no OAuth button', async () => {
+    vi.mocked(api.get).mockResolvedValueOnce({ data: { status: 'tenant_policy', provider: 'smtp' } })
     render(<ProfileEmailConnect />)
     expect(await screen.findByText('profile.email.tenantPolicy')).toBeInTheDocument()
     expect(screen.queryByRole('button')).not.toBeInTheDocument()

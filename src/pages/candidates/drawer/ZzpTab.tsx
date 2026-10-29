@@ -317,9 +317,11 @@ export function ZzpTab({ c, onSave }: { c: Candidate; onSave?: (v: Record<string
       if (mountedRef.current && candidateIdRef.current === forId && d?.verdict) setVies({ verdict: d.verdict, at: d.vat_verified_at ?? null })
     } catch (err) {
       if (mountedRef.current && candidateIdRef.current === forId) {
-        // A 422 carries the BE's Dutch "no VAT number" sentence: show the translated text instead.
-        const is422 = (err as { response?: { status?: number } })?.response?.status === 422
-        notifyError(is422 ? t('zzp.viesFailed') : extractApiError(err, t('zzp.viesFailed')))
+        // Prefer the stable code (vat_number_missing); a 422 without a code keeps the generic VIES sentence; never the BE's Dutch prose.
+        const res = (err as { response?: { status?: number; data?: { code?: string } } })?.response
+        const is422 = res?.status === 422
+        const vatMissing = res?.data?.code === 'vat_number_missing'
+        notifyError(vatMissing ? t('zzp.vatMissing') : is422 ? t('zzp.viesFailed') : extractApiError(err, t('zzp.viesFailed')))
       }
     } finally {
       // Always release the button while mounted: a candidate switch mid-flight must never leave it stuck (Opus lens r2).

@@ -5,7 +5,7 @@
  * server `message` → the caller's fallback (an i18n'd string — never leak a
  * raw axios/network string to the UI).
  */
-interface ServerErrorBody { message?: string; code?: string; errors?: Record<string, string[]> }
+interface ServerErrorBody { message?: string; code?: string; errors?: Record<string, string[]>; clash_name?: string; params?: { clash_name?: string }; meta?: { clash_name?: string } }
 
 // KAND-ACHTERGROND-VERPLICHT-1 (2026-08-17): Laravel's OWN default "required"
 // validation copy (vendor lang/en/validation.php: 'The :attribute field is
@@ -65,6 +65,10 @@ const ERROR_CODE_KEYS: Record<string, string> = {
   ai_disclosure_missing: 'errors.aiDisclosureMissing',
   // ONIX C-007: one generic 422 for a taken e-mail (never reveals why or where it is in use).
   email_unavailable: 'errors.emailUnavailable',
+  // Activating an inbound WhatsApp scenario: the (number, lane) is taken by another scenario (422, names the holder).
+  inbound_scenario_clash: 'errors.inboundScenarioClash',
+  // Activating an inbound scenario that names none of the bureau's numbers on its lane (422).
+  inbound_scenario_number_missing: 'errors.inboundScenarioNumberMissing',
 }
 
 /**
@@ -85,9 +89,15 @@ export function apiErrorKey(err: unknown): string | null {
  */
 export function apiErrorMessage(
   err: unknown,
-  t: (key: string, options?: { ns: string }) => string,
+  t: (key: string, options?: { ns: string; clash_name?: string }) => string,
   fallback: string,
 ): string {
   const key = apiErrorKey(err)
+  if (key === ERROR_CODE_KEYS.inbound_scenario_clash) {
+    // The clash sentence names the holder; without a name the generic chain is more honest than a blank.
+    const body = (err as { response?: { data?: ServerErrorBody } })?.response?.data
+    const name = body?.clash_name ?? body?.params?.clash_name ?? body?.meta?.clash_name
+    return name ? t(key, { ns: 'common', clash_name: name }) : extractApiError(err, fallback)
+  }
   return key ? t(key, { ns: 'common' }) : extractApiError(err, fallback)
 }

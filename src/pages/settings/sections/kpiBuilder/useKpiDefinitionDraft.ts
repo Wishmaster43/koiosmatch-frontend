@@ -8,6 +8,7 @@
  */
 import { useMemo, useState } from 'react'
 import type { KpiDefinition, KpiComparison, KpiSurface, KpiUnit, KpiEntityRegistry } from './kpiDefinitionsApi'
+import { KPI_METRIC_KEY_MAX, KPI_DIMENSION_MAX, KPI_DIMENSION_VALUE_MAX, KPI_LABEL_MAX } from './kpiDefinitionsApi'
 
 export interface KpiDefinitionDraft {
   metric_key: string
@@ -47,6 +48,17 @@ function surfacesEqual(a: KpiSurface[], b: KpiSurface[]): boolean {
   return a.every(s => setB.has(s))
 }
 
+// Per-field character caps; a longer value is cut before it can reach the server's 422.
+const FIELD_MAX: Partial<Record<keyof KpiDefinitionDraft, number>> = {
+  metric_key: KPI_METRIC_KEY_MAX, dimension: KPI_DIMENSION_MAX, dimension_value: KPI_DIMENSION_VALUE_MAX, label: KPI_LABEL_MAX,
+}
+
+// Cuts a string value to its field cap; other values pass through untouched.
+function clampField<K extends keyof KpiDefinitionDraft>(key: K, value: KpiDefinitionDraft[K]): KpiDefinitionDraft[K] {
+  const max = FIELD_MAX[key]
+  return max !== undefined && typeof value === 'string' && value.length > max ? (value.slice(0, max) as KpiDefinitionDraft[K]) : value
+}
+
 export function useKpiDefinitionDraft(registry: KpiEntityRegistry | undefined, editing: KpiDefinition | null) {
   const [draft, setDraft] = useState<KpiDefinitionDraft>(() => (editing ? draftFromDefinition(editing) : emptyDraft()))
 
@@ -56,7 +68,8 @@ export function useKpiDefinitionDraft(registry: KpiEntityRegistry | undefined, e
   // metric's own default_unit (the tenant can still override it afterwards —
   // that override sticks until the metric is changed again, since only a
   // metric change touches `unit` here).
-  const setField = <K extends keyof KpiDefinitionDraft>(key: K, value: KpiDefinitionDraft[K]) => {
+  const setField = <K extends keyof KpiDefinitionDraft>(key: K, rawValue: KpiDefinitionDraft[K]) => {
+    const value = clampField(key, rawValue)
     setDraft(prev => {
       if (key === 'metric_key' && value !== prev.metric_key) {
         const next = registry?.metrics.find(m => m.key === value)

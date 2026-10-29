@@ -136,9 +136,19 @@ export default function ProfileEmailConnect() {
         </CalloutBox>
       )}
 
-      {/* The organisation forbids an own mailbox: informational, no connect action. */}
+      {/* Microsoft refused the sign-in (authenticated SMTP off for the organisation): explain and let an OAuth user try again once the admin changed it. */}
       {status === 'tenant_policy' && (
-        <CalloutBox variant="info">{t('profile.email.tenantPolicy')}</CalloutBox>
+        <CalloutBox variant="info">
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12, flexWrap: 'wrap' }}>
+            <span>{t('profile.email.tenantPolicy')}</span>
+            {!isSmtp && (
+              <Button variant="secondary" size="sm" onClick={() => connectOauth(info.provider ?? 'office')} disabled={busy}>
+                {busy ? <Spinner size={12} /> : <Mail size={14} />}
+                {t('profile.email.connectWith', { provider: PROVIDERS.find(p => p.id === info.provider)?.label ?? PROVIDERS[0].label })}
+              </Button>
+            )}
+          </div>
+        </CalloutBox>
       )}
 
       {status === 'connected' && (

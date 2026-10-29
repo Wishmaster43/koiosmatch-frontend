@@ -796,6 +796,8 @@
     "helloflexContractTypeUnmapped": "Não existe nenhum tipo de contrato HelloFlex associado a este tipo de contrato. Configure isto em Definições → HelloFlex.",
     "recipientSuppressed": "Este endereço está bloqueado após um bounce ou queixa anterior; não será enviado novamente.",
     "emailUnavailable": "Este endereço de e-mail não pode ser utilizado.",
+    "inboundScenarioClash": "Já existe outro cenário ativo para este número e esta lane: {{clash_name}}.",
+    "inboundScenarioNumberMissing": "Este cenário não indica nenhum número desta agência na sua lane e não pode ser ativado.",
     "documentNotAvailable": "Este documento ainda não está disponível: a análise antivírus não terminou ou rejeitou o ficheiro.",
     "tenantNotReady": "Esta agência ainda está a ser configurada ou a configuração falhou. Tente novamente mais tarde ou escolha outra agência.",
     "aiDisclosureMissing": "A introdução da entrevista não tem a menção obrigatória de IA; ajuste o modelo antes de ativar.",

@@ -76,6 +76,8 @@ export const CUSTOM_TYPE_TARGETS: Record<string, (meta: Record<string, unknown>)
   },
   // KPI-TARGET-NOTIFY (BE lane L): a below-target KPI bell opens the dashboard where the KPI lives (no entity id, so a plain page hash).
   'kpi.below_target': () => ({ page: 'dashboard', id: '', hash: '#dashboard' }),
+  // An above-maximum KPI bell (target is a ceiling) opens the same dashboard.
+  'kpi.above_maximum': () => ({ page: 'dashboard', id: '', hash: '#dashboard' }),
   // FB-LEAD-NOTIFY (BE lane K): pending/failed lead bells open the Facebook leads queue tab; a missing leads_retrieval permission opens the connection tab.
   'facebook.lead_pending': () => ({ page: 'settings', id: 'facebook_leads', hash: '#settings/integrations/facebook_leads?view=queue' }),
   'facebook.lead_failed': () => ({ page: 'settings', id: 'facebook_leads', hash: '#settings/integrations/facebook_leads?view=queue' }),

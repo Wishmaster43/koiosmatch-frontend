@@ -796,6 +796,8 @@
     "helloflexContractTypeUnmapped": "No HelloFlex contract type is linked for this contract form yet. Set it up in Settings → HelloFlex.",
     "recipientSuppressed": "This address is blocked after an earlier bounce or complaint; it will not be sent to again.",
     "emailUnavailable": "This e-mail address cannot be used.",
+    "inboundScenarioClash": "Another active scenario already answers this number and lane: {{clash_name}}.",
+    "inboundScenarioNumberMissing": "This scenario names no number of this bureau on its lane and cannot go active.",
     "documentNotAvailable": "This document is not available yet: the virus scan has not finished or has rejected the file.",
     "tenantNotReady": "This agency is still being set up, or its setup failed. Try again later or choose another agency.",
     "aiDisclosureMissing": "The interview intro is missing the mandatory AI disclosure; adjust the template before you activate this.",

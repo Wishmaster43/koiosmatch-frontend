@@ -124,6 +124,10 @@
       "title": "{{label}} está abaixo da meta",
       "body": "{{label}} estava em {{value}} para uma meta de {{target}} ({{period}})."
     },
+    "above_maximum": {
+      "title": "{{label}} está acima do máximo",
+      "body": "{{label}} estava em {{value}} para um máximo de {{target}} ({{period}})."
+    },
     "labels": {
       "new_candidates_target": "Novos candidatos",
       "open_tasks_target": "Tarefas abertas",

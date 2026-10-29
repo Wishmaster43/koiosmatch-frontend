@@ -86,13 +86,14 @@ export function useSmSync() {
       await queryClient.invalidateQueries({ queryKey: ['dashboard', 'sync-sources'] })
       pollUntilLandedRef.current(generationRef.current, before, 0)
     } catch (err) {
-      const e = err as { response?: { status?: number; data?: { retry_after?: number } } }
+      const e = err as { response?: { status?: number; data?: { retry_after?: number; code?: string } } }
       const status = e.response?.status
       if (status === 429) {
         setResult({ kind: 'throttled', retryAfter: e.response?.data?.retry_after ?? 60 })
       } else {
-        // Never render server prose: 422 (unknown/inactive connection) maps to a translated reason.
-        setResult({ kind: 'error', reason: status === 422 ? 'unknownConnection' : 'failed' })
+        // Never render server prose: the code sm_connection_unavailable (or, without a code, a bare 422) maps to a translated reason.
+        const code = e.response?.data?.code
+        setResult({ kind: 'error', reason: code === 'sm_connection_unavailable' || (!code && status === 422) ? 'unknownConnection' : 'failed' })
       }
     } finally {
       setSyncing(false)

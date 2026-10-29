@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest'
 import { act, renderHook } from '@testing-library/react'
 import { useKpiDefinitionDraft } from './useKpiDefinitionDraft'
 import type { KpiDefinition, KpiEntityRegistry } from './kpiDefinitionsApi'
+import { KPI_METRIC_KEY_MAX, KPI_DIMENSION_MAX, KPI_DIMENSION_VALUE_MAX, KPI_LABEL_MAX } from './kpiDefinitionsApi'
 
 const registry: KpiEntityRegistry = {
   metrics: [
@@ -58,5 +59,17 @@ describe('useKpiDefinitionDraft', () => {
     act(() => result.current.setField('metric_key', 'new_in_period'))
     act(() => result.current.setField('label', '   '))
     expect(result.current.createBody().label).toBeNull()
+  })
+
+  // Each capped field refuses characters past its server cap (client-side, before the 422).
+  it.each([
+    ['metric_key', KPI_METRIC_KEY_MAX],
+    ['dimension', KPI_DIMENSION_MAX],
+    ['dimension_value', KPI_DIMENSION_VALUE_MAX],
+    ['label', KPI_LABEL_MAX],
+  ] as const)('%s is cut to %i characters', (field, max) => {
+    const { result } = renderHook(() => useKpiDefinitionDraft(registry, null))
+    act(() => result.current.setField(field, 'x'.repeat(max + 20)))
+    expect(result.current.draft[field]).toHaveLength(max)
   })
 })

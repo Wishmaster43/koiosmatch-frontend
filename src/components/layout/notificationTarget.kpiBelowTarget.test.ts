@@ -14,4 +14,9 @@ describe('resolveNotificationTarget: kpi.below_target', () => {
     expect(resolveNotificationTarget(row({ kpi: 'placements_target', metric: 'placements', period: '2026-09', value: 3, target: 10 })))
       .toEqual({ page: 'dashboard', id: '', hash: '#dashboard' })
   })
+
+  it('deep-links a kpi.above_maximum row to the dashboard too', () => {
+    const n = { id: 2, type: 'kpi.above_maximum', meta: { kpi: 'open_tasks_target' } } as unknown as AppNotification
+    expect(resolveNotificationTarget(n)).toEqual({ page: 'dashboard', id: '', hash: '#dashboard' })
+  })
 })

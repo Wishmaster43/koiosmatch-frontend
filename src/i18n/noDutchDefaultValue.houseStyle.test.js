@@ -12,7 +12,7 @@ import { readFileSync, readdirSync, statSync } from 'node:fs'
 // Dutch stopwords that never occur in an English fallback literal.
 const DUTCH = /\b(de|het|een|naar|nog|niet|door|aan)\b/i
 // Pinned ceiling: lower it whenever a batch of sites is cleaned up, never raise it.
-const CEILING = 15
+const CEILING = 14
 
 // Collects every non-test .ts/.tsx source file under src.
 const sources = dir => readdirSync(dir).flatMap(name => {

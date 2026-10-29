@@ -16,6 +16,13 @@ type Params = Record<string, unknown>
 // KPI settings where AT MOST the target is good: the verdict rounds up, the rest round down (mirrors the BE).
 const MAXIMUM_KPIS = new Set(['open_tasks_target', 'uncalled_warning_threshold'])
 
+// A below_target KPI row whose KPI wants AT MOST the target reads as "above maximum"; the BE type (kpi.above_maximum) wins when it sends it.
+export function kpiAwareKey(key: string | null | undefined, meta: unknown): string | null | undefined {
+  if (!key || !key.includes('kpi.below_target')) return key
+  const kpi = meta && typeof meta === 'object' ? (meta as Params).kpi : null
+  return typeof kpi === 'string' && MAXIMUM_KPIS.has(kpi) ? key.replace('kpi.below_target', 'kpi.above_maximum') : key
+}
+
 // The Intl locale tag of the active UI language (nl-NL fallback, like useLocale).
 function activeLocale(): string {
   return (LOCALE_BY_LANG as Record<string, string>)[i18n?.language ?? ''] ?? 'nl-NL'
@@ -71,7 +78,7 @@ export function localizeNotificationParams(n: AppNotification, t: T): Params | u
   const locale = activeLocale()
   const key = `${n.title_key ?? ''} ${n.body_key ?? ''}`
   const meta = (n.meta && typeof n.meta === 'object' ? n.meta : {}) as Params
-  if (key.includes('.kpi.below_target')) params = localizeKpi(params, meta, t, locale)
+  if (key.includes('.kpi.below_target') || key.includes('.kpi.above_maximum')) params = localizeKpi(params, meta, t, locale)
   if (key.includes('.facebook.')) params = localizeForms(params, t)
   if ('period' in params) params = { ...params, period: localizePeriod(params.period, locale) }
   return params

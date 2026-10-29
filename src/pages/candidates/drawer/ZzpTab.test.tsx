@@ -569,6 +569,14 @@ describe('ZzpTab · VIES check', () => {
     expect(apiPostMock.mock.calls[0][0]).toBe('/candidates/cand-1/freelance/verify-vat')
   })
 
+  it('maps the vat_number_missing code to zzp.vatMissing on the verify-vat POST', async () => {
+    apiPostMock.mockRejectedValue({ response: { status: 422, data: { code: 'vat_number_missing', message: 'Geen BTW-nummer geregistreerd.' } } })
+    render(<ZzpTab c={candidate()} />)
+    await userEvent.setup().click(screen.getByRole('button', { name: 'zzp.viesCheck' }))
+    await vi.waitFor(() => expect(notifyErrorMock).toHaveBeenCalledWith('zzp.vatMissing'))
+    expect(apiPostMock.mock.calls[0][0]).toBe('/candidates/cand-1/freelance/verify-vat')
+  })
+
   it('drops the local verdict when the drawer switches to another candidate', async () => {
     apiPostMock.mockResolvedValue({ data: { data: { verdict: 'valid', vat_verified_at: null } } })
     const { rerender } = render(<ZzpTab c={candidate()} />)

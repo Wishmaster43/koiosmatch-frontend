@@ -887,6 +887,7 @@
     "viesInvalid": "Non valida secondo VIES",
     "viesUnknown": "VIES non è raggiungibile. La verifica non è stata eseguita.",
     "viesFailed": "La verifica dell'IVA non è riuscita. Riprova più tardi.",
+    "vatMissing": "Nessuna partita IVA registrata. Inseriscila prima.",
     "businessEmailInvalid": "Inserisci un indirizzo e-mail valido.",
     "businessEmailDuplicateTitle": "Questo indirizzo e-mail è già in uso",
     "businessEmailDuplicateBody": "{{name}} utilizza già questo indirizzo e-mail. Salvare comunque?",

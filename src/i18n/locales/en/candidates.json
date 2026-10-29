@@ -887,6 +887,7 @@
     "viesInvalid": "Invalid according to VIES",
     "viesUnknown": "VIES is unreachable. The check was not performed.",
     "viesFailed": "The VAT check failed. Please try again later.",
+    "vatMissing": "No VAT number is registered. Enter it first.",
     "businessEmailInvalid": "Enter a valid e-mail address.",
     "businessEmailDuplicateTitle": "This e-mail address is already in use",
     "businessEmailDuplicateBody": "{{name}} already uses this e-mail address. Save anyway?",

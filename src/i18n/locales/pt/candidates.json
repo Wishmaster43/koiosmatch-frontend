@@ -887,6 +887,7 @@
     "viesInvalid": "Inválido segundo o VIES",
     "viesUnknown": "O VIES não está acessível. A verificação não foi realizada.",
     "viesFailed": "A verificação do IVA falhou. Tenta novamente mais tarde.",
+    "vatMissing": "Não há número de IVA registado. Introduz primeiro.",
     "businessEmailInvalid": "Introduza um endereço de e-mail válido.",
     "businessEmailDuplicateTitle": "Este endereço de e-mail já está em uso",
     "businessEmailDuplicateBody": "{{name}} já utiliza este endereço de e-mail. Guardar mesmo assim?",

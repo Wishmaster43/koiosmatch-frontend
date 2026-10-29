@@ -269,10 +269,7 @@ export default function BackgroundTab({ c, onLocalMerge, onJump }: { c: Candidat
     { id: 'experience',     label: t('candidates:sections.experience') },
     { id: 'education',      label: t('candidates:sections.education') },
     { id: 'languages',      label: t('candidates:sections.languages') },
-    // KAND-REFERENTIES-1: the defaultValue keeps the tab labelled before the
-    // manager applies the reported key to the locale files (see AddableSection's
-    // identical t(key, { defaultValue }) convention for 'edit'/'remove').
-    { id: 'references',     label: t('candidates:sections.references', { defaultValue: 'Referenties' }) },
+    { id: 'references',     label: t('candidates:sections.references') },
     { id: 'skills',         label: t('candidates:sections.skills') },
   ].sort((a, b) => a.label.localeCompare(b.label, i18n.language))
   const [subTab, setSubTab] = useState('experience')

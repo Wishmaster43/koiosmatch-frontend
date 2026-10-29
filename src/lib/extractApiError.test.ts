@@ -92,3 +92,27 @@ describe('apiErrorMessage', () => {
     expect(apiErrorMessage(new Error('Network Error'), t, 'fallback')).toBe('fallback')
   })
 })
+
+// C2: the inbound-scenario 422 codes render translated copy; the clash names its holder; unknown codes keep the fallback.
+describe('inbound scenario codes', () => {
+  const t = (key: string, o?: { ns: string; clash_name?: string }) => `${key}|${o?.clash_name ?? ''}`
+  const err = (data: Record<string, unknown>) => ({ response: { data } })
+
+  it('maps both codes to errors.* keys', () => {
+    expect(apiErrorKey(err({ code: 'inbound_scenario_clash' }))).toBe('errors.inboundScenarioClash')
+    expect(apiErrorKey(err({ code: 'inbound_scenario_number_missing' }))).toBe('errors.inboundScenarioNumberMissing')
+  })
+
+  it('interpolates the holder name into the clash sentence', () => {
+    expect(apiErrorMessage(err({ code: 'inbound_scenario_clash', clash_name: 'Intake' }), t, 'fb')).toBe('errors.inboundScenarioClash|Intake')
+  })
+
+  it('falls back to the server text when a clash arrives without a name', () => {
+    expect(apiErrorMessage(err({ code: 'inbound_scenario_clash', message: 'Server' }), t, 'fb')).toBe('Server')
+  })
+
+  it('renders the number-missing sentence and ignores an unknown code', () => {
+    expect(apiErrorMessage(err({ code: 'inbound_scenario_number_missing' }), t, 'fb')).toBe('errors.inboundScenarioNumberMissing|')
+    expect(apiErrorMessage(err({ code: 'nope' }), t, 'fb')).toBe('fb')
+  })
+})

@@ -124,6 +124,10 @@
       "title": "{{label}} is below target",
       "body": "{{label}} was {{value}} against a target of {{target}} ({{period}})."
     },
+    "above_maximum": {
+      "title": "{{label}} is above the maximum",
+      "body": "{{label}} was {{value}} against a maximum of {{target}} ({{period}})."
+    },
     "labels": {
       "new_candidates_target": "New candidates",
       "open_tasks_target": "Open tasks",

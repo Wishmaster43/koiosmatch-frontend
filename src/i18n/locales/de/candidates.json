@@ -864,6 +864,7 @@
     "viesInvalid": "Laut VIES ungültig",
     "viesUnknown": "VIES ist nicht erreichbar. Die Prüfung wurde nicht durchgeführt.",
     "viesFailed": "Die USt-Prüfung ist fehlgeschlagen. Bitte versuche es später erneut.",
+    "vatMissing": "Es ist keine USt-IdNr. hinterlegt. Trage sie zuerst ein.",
     "businessEmailInvalid": "Geben Sie eine gültige E-Mail-Adresse ein.",
     "businessEmailDuplicateTitle": "Diese E-Mail-Adresse wird bereits verwendet",
     "businessEmailDuplicateBody": "{{name}} verwendet diese E-Mail-Adresse bereits. Trotzdem speichern?",

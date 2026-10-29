@@ -12,7 +12,7 @@
  */
 import i18n from '@/i18n'
 import type { AppNotification } from '@/hooks/useNotifications'
-import { localizeNotificationParams } from './notificationParams'
+import { kpiAwareKey, localizeNotificationParams } from './notificationParams'
 
 export type TFunction = (key: string, opts?: Record<string, unknown>) => string
 
@@ -40,7 +40,7 @@ function resolveHalf(key: string | null | undefined, serverText: string | undefi
 export function notificationText(n: AppNotification, t: TFunction): { title: string; body: string } {
   const params = localizeNotificationParams(n, t)
   return {
-    title: resolveHalf(n.title_key, n.title, params, t),
-    body: resolveHalf(n.body_key, n.body, params, t),
+    title: resolveHalf(kpiAwareKey(n.title_key, n.meta), n.title, params, t),
+    body: resolveHalf(kpiAwareKey(n.body_key, n.meta), n.body, params, t),
   }
 }

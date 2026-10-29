@@ -147,6 +147,23 @@ describe('useSmSync · backoff poll', () => {
     expect(invalidateSpy).not.toHaveBeenCalled()
   })
 
+  // CONTRACT-SMALL-1: the coded 422 maps on the code; a different code is a generic failure.
+  it('maps the sm_connection_unavailable code to unknownConnection', async () => {
+    const client = new QueryClient({ defaultOptions: { queries: { retry: false } } })
+    mockedPost.mockRejectedValue({ response: { status: 422, data: { code: 'sm_connection_unavailable', message: 'x', errors: { connection_id: ['x'] } } } })
+    const { result } = renderHook(() => useSmSync(), { wrapper: makeWrapper(client) })
+    await act(async () => { await result.current.sync('c1') })
+    expect(result.current.result).toEqual({ kind: 'error', reason: 'unknownConnection' })
+  })
+
+  it('maps an unrelated code on a 422 to the generic failed reason', async () => {
+    const client = new QueryClient({ defaultOptions: { queries: { retry: false } } })
+    mockedPost.mockRejectedValue({ response: { status: 422, data: { code: 'something_else', message: 'x' } } })
+    const { result } = renderHook(() => useSmSync(), { wrapper: makeWrapper(client) })
+    await act(async () => { await result.current.sync('c1') })
+    expect(result.current.result).toEqual({ kind: 'error', reason: 'failed' })
+  })
+
   it('maps a 500 to the generic failed reason, never the server message', async () => {
     const client = new QueryClient({ defaultOptions: { queries: { retry: false } } })
     mockedPost.mockRejectedValue({ response: { status: 500, data: { message: 'server broke' } } })

@@ -68,3 +68,25 @@ describe('facebook forms suffix', () => {
     expect(title).toBe('Facebook lead linked to an archived candidate')
   })
 })
+
+// KPI-MAX: a ceiling KPI reads "above maximum" even while the BE still sends below_target; a floor KPI keeps below_target.
+describe('kpi.above_maximum', () => {
+  it('rewrites a below_target row of a maximum KPI to the above-maximum sentence (en)', async () => {
+    await i18n.changeLanguage('en')
+    const { title, body } = text(row('kpi.below_target', { label: 'x', period: '2026-10-22' }, { kpi: 'open_tasks_target', value: 25.2, target: 20, period: '2026-10-22' }))
+    expect(title).toBe('Open tasks is above the maximum')
+    expect(body).toContain('maximum of 20')
+  })
+
+  it('renders a BE-sent kpi.above_maximum row the same way', async () => {
+    await i18n.changeLanguage('en')
+    const { title } = text(row('kpi.above_maximum', { label: 'x', period: '2026-10-22' }, { kpi: 'uncalled_warning_threshold', value: 9, target: 5, period: '2026-10-22' }))
+    expect(title).toBe('Contacts still to call is above the maximum')
+  })
+
+  it('keeps below_target for an at-least KPI', async () => {
+    await i18n.changeLanguage('en')
+    const { title } = text(row('kpi.below_target', { label: 'x', period: '2026-10-22' }, { kpi: 'new_candidates_target', value: 3, target: 10, period: '2026-10-22' }))
+    expect(title).toBe('New candidates is below target')
+  })
+})

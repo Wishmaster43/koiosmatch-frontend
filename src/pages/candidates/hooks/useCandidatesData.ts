@@ -103,7 +103,7 @@ export function useCandidatesData({ filterParams, page, pageSize, t, setActionMs
         return { candidates: (rows as ApiCandidate[]).map(c => mapCandidate(c, locale)), total, lastPage, rangeFrom: from, rangeTo: to }
       } catch (err) {
         if ((err as { response?: { status?: number } })?.response?.status === 422) {
-          setActionMsg({ type: 'error', text: t('page.filterUnsupported', { defaultValue: 'Dit filter wordt (nog) niet door de server ondersteund.' }) })
+          setActionMsg({ type: 'error', text: t('page.filterUnsupported') })
           return { candidates: [], total: 0, lastPage: 1 }
         }
         throw err
