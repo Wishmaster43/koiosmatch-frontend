@@ -4,11 +4,11 @@
  * This file owns the PAGE: brand colours in, candidate normalised into slices,
  * and the header / sidebar / main / footer layout assembled from the section
  * components in ./cv. Styles, input types, labels and the individual sections
- * live in ./cv so this stays the layout only; the types and groupCvSections are
- * re-exported here because this module is the CV's public entry point.
+ * live in ./cv so this stays the layout only; groupCvSections lives pdf-free in
+ * ./cv/cvSections (the types are re-exported here for existing importers).
  */
 import { Document, Page, View, Text, Image } from '@react-pdf/renderer'
-import { resolveCvSectionPlacement, CV_DEFAULT_SECTIONS } from '@/lib/useCvSettings'
+import { groupCvSections } from './cv/cvSections'
 import { makeStyles, paletteFor } from './cv/cvStyles'
 import { fmtDate, makeCvLabeller, resolveCvName } from './cv/cvLabels'
 import { SideSection, MainSection } from './cv/CvSectionShells'
@@ -30,28 +30,6 @@ interface CvDocumentProps {
   // function, summary, experience, education, skills and languages stay untouched —
   // the customer sees who they get but reaches them only through the agency.
   redactContact?: boolean
-}
-
-/**
- * Groups a tenant's configured sections into the two CV regions (sidebar/main),
- * preserving stored order and resolving placement the same way for every id —
- * this is the ONE function both the generated PDF (below) and the settings
- * screen's live preview call, so they can never disagree on layout (CvTemplateSettings
- * imports it from here rather than re-deriving its own copy).
- */
-// eslint-disable-next-line react-refresh/only-export-components -- pre-existing: CvTemplateSettings deliberately imports this pure layout helper from the PDF module itself (see the docblock above) so the two can never disagree; splitting it into a new file is a structural change outside this lane's scope
-export function groupCvSections(
-  sections: Array<{ id: string; enabled?: boolean; placement?: string }>,
-): { sidebar: string[]; main: string[] } {
-  // No configuration at all (very old callers) => show every default section,
-  // matching the pre-placement "show everything" fallback.
-  const base = sections.length > 0 ? sections : CV_DEFAULT_SECTIONS
-  const isEnabled = (id: string) => sections.length === 0 || (sections.find(s => s.id === id)?.enabled !== false)
-  const ordered = base.map(s => ({ id: s.id, placement: resolveCvSectionPlacement(s) }))
-  return {
-    sidebar: ordered.filter(s => s.placement === 'sidebar' && isEnabled(s.id)).map(s => s.id),
-    main:    ordered.filter(s => s.placement === 'main'    && isEnabled(s.id)).map(s => s.id),
-  }
 }
 
 // `locale` (DATUM-1/LANE-B): the drawer passes the active language's locale

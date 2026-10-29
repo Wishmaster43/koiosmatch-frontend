@@ -178,3 +178,69 @@ describe('IbanDocumentSlot', () => {
     expect(notifyError).toHaveBeenCalledTimes(1)
   })
 })
+
+// GAPS-A2: the linked document downloads through docUrl (signed url first, never a pending/rejected file).
+describe('IbanDocumentSlot · download url and scan state (GAPS-A2)', () => {
+  it('downloads the signed download_url, not the raw url', async () => {
+    const user = userEvent.setup()
+    const { downloadFilesSequentially } = await import('@/lib/downloadFiles')
+    vi.mocked(downloadFilesSequentially).mockClear()
+    render(<IbanDocumentSlot candidateId="c1" documents={[{ id: 'd1', name: 'a.pdf', url: '/raw', download_url: '/signed' }]} linkedDocumentId="d1" onLink={vi.fn()} />)
+    await user.click(screen.getByRole('button', { name: 'documents.download' }))
+    expect(downloadFilesSequentially).toHaveBeenCalledWith([{ url: '/signed', name: 'a.pdf' }])
+  })
+
+  it.each([['pending', 'common:upload.scanPending'], ['rejected', 'common:upload.scanRejected']])('disables the download for a %s scan with the translated name', async (status, label) => {
+    const { downloadFilesSequentially } = await import('@/lib/downloadFiles')
+    vi.mocked(downloadFilesSequentially).mockClear()
+    render(<IbanDocumentSlot candidateId="c1" documents={[{ id: 'd1', name: 'a.pdf', url: '/raw', download_url: null, scan_status: status }]} linkedDocumentId="d1" onLink={vi.fn()} />)
+    const btn = screen.getByRole('button', { name: label })
+    expect(btn).toBeDisabled()
+    expect(downloadFilesSequentially).not.toHaveBeenCalled()
+  })
+})
+
+// GAPS-A3: the expiry date is cleared on a type change and after a successful upload.
+describe('IbanDocumentSlot · expiry hygiene (GAPS-A3)', () => {
+  beforeEach(() => {
+    vi.mocked(api.post).mockReset()
+    mockUseDocumentTypes.mockReset()
+    mockUseDocumentTypes.mockReturnValue({ types: [{ value: 'ID-bewijs', label: 'ID-bewijs' }, { value: 'Overig', label: 'Overig' }] })
+  })
+
+  it('does not send a stale expires_at after the first upload succeeded', async () => {
+    const user = userEvent.setup()
+    mockUseDocumentTypes.mockReturnValue({ types: [{ value: 'VOG', label: 'VOG', requiresExpiry: true, defaultValidityMonths: null }] })
+    vi.mocked(api.post).mockResolvedValue({ data: { data: { id: 'd9', name: 'vog.pdf' } } })
+    render(<IbanDocumentSlot candidateId="c1" documents={docs} linkedDocumentId={null} onLink={vi.fn()} />)
+    await user.click(screen.getByRole('button', { name: /bankDoc\.link/ }))
+    await waitFor(() => expect(document.querySelector('.react-datepicker__input-container')).toBeTruthy(), { timeout: 5000 })
+    await user.type(screen.getByRole('textbox'), '01/31/2027')
+    await user.upload(screen.getByLabelText('bankDoc.uploadNew', { selector: 'input' }) as HTMLInputElement, new File(['x'], 'vog.pdf', { type: 'application/pdf' }))
+    await waitFor(() => expect(api.post).toHaveBeenCalledTimes(1))
+    expect((vi.mocked(api.post).mock.calls[0][1] as FormData).get('expires_at')).toBe('2027-01-31')
+    // Reopen the picker (still unlinked in this host) and upload again without a date.
+    await user.click(await screen.findByRole('button', { name: /bankDoc\.link/ }))
+    await user.upload(screen.getByLabelText('bankDoc.uploadNew', { selector: 'input' }) as HTMLInputElement, new File(['x'], 'vog2.pdf', { type: 'application/pdf' }))
+    await waitFor(() => expect(api.post).toHaveBeenCalledTimes(2))
+    expect((vi.mocked(api.post).mock.calls[1][1] as FormData).get('expires_at')).toBeNull()
+  })
+
+  it('sends no expires_at after switching from an expiry type to one without', async () => {
+    const user = userEvent.setup()
+    mockUseDocumentTypes.mockReturnValue({ types: [{ value: 'VOG', label: 'VOG', requiresExpiry: true, defaultValidityMonths: null }, { value: 'Overig', label: 'Overig' }] })
+    vi.mocked(api.post).mockResolvedValue({ data: { data: { id: 'd9', name: 'x.pdf' } } })
+    render(<IbanDocumentSlot candidateId="c1" documents={docs} linkedDocumentId={null} onLink={vi.fn()} />)
+    await user.click(screen.getByRole('button', { name: /bankDoc\.link/ }))
+    await waitFor(() => expect(document.querySelector('.react-datepicker__input-container')).toBeTruthy(), { timeout: 5000 })
+    await user.type(screen.getByRole('textbox'), '01/31/2027')
+    // Switch the upload type to one without an expiry requirement.
+    await user.click(screen.getByRole('button', { name: 'VOG' }))
+    await user.click(await screen.findByRole('button', { name: 'Overig' }))
+    await user.upload(screen.getByLabelText('bankDoc.uploadNew', { selector: 'input' }) as HTMLInputElement, new File(['x'], 'x.pdf', { type: 'application/pdf' }))
+    await waitFor(() => expect(api.post).toHaveBeenCalled())
+    const fd = vi.mocked(api.post).mock.calls[0][1] as FormData
+    expect(fd.get('type')).toBe('Overig')
+    expect(fd.get('expires_at')).toBeNull()
+  })
+})

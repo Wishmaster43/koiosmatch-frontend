@@ -31,7 +31,8 @@ import {
 // DOC-ENTRY-LINK-1: `linkTo` is an OPTIONAL "education:<id>" / "certification:<id>"
 // pick from the "Koppelen aan" ("Link to") grouped select — '' means no link.
 // N008-DOC-EXPIRY-FE-1: `expiresAt` is an OPTIONAL Y-m-d date (from the DateField
-// below) — '' means not set; harmless to keep across a type switch (the server
+// below) — '' means not set. A type switch clears it (useUploadQueueItems), because a
+// stale date for a type that no longer asks for one must never be sent (the server
 // side: "a sent expires_at always wins").
 export interface PendingItem { file: File; objectUrl: string; name: string; size: string; type: string; linkTo: string; expiresAt?: string }
 

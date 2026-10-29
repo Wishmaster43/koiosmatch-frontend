@@ -9,7 +9,7 @@
  * criteria depend on.
  */
 import { describe, it, expect } from 'vitest'
-import { groupCvSections } from './CandidateCvTemplate'
+import { groupCvSections } from './cv/cvSections'
 import { resolveCvName, makeCvLabeller } from './cv/cvLabels'
 
 describe('groupCvSections', () => {

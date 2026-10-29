@@ -39,12 +39,16 @@ interface UseUploadQueueItemsResult<T extends UploadQueueItemBase> {
 export function useUploadQueueItems<T extends UploadQueueItemBase>(initial: T[] = []): UseUploadQueueItemsResult<T> {
   const [pending, setPending] = useState<T[]>(initial)
 
+  // A type switch clears the picked expiry ('' = not set): the date field may vanish with the new type, so a hidden stale date must never be uploaded.
+  const withType = (it: T, type: string): T =>
+    (it.type !== type && it.expiresAt ? { ...it, type, expiresAt: '' } : { ...it, type })
+
   // Set one item's doc type (its own select) without touching the others.
   const setItemType = (idx: number, type: string) =>
-    setPending(items => items.map((it, i) => (i === idx ? { ...it, type } : it)))
+    setPending(items => items.map((it, i) => (i === idx ? withType(it, type) : it)))
 
   // Give every queued item the same doc type (the "alle bestanden" chip row).
-  const setAllTypes = (type: string) => setPending(items => items.map(it => ({ ...it, type })))
+  const setAllTypes = (type: string) => setPending(items => items.map(it => withType(it, type)))
 
   // DOC-ENTRY-LINK-1: set one item's "Koppelen aan" pick without touching the others.
   const setItemLink = (idx: number, linkTo: string) =>

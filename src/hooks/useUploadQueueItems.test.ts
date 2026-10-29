@@ -69,3 +69,26 @@ describe('useUploadQueueItems', () => {
     expect(result.current.pending).toEqual([{ objectUrl: 'blob:b', type: 'CV', name: 'b.pdf' }])
   })
 })
+
+// GAPS-A3: a type switch clears a picked expiry (hidden stale dates are never uploaded).
+describe('useUploadQueueItems · expiry on type change', () => {
+  it('setItemType clears expiresAt only when the type really changes', () => {
+    const { result } = renderHook(() => useUploadQueueItems<TestItem>([
+      { objectUrl: 'blob:a', type: 'VOG', name: 'a.pdf', expiresAt: '2027-01-31' },
+      { objectUrl: 'blob:b', type: 'VOG', name: 'b.pdf', expiresAt: '2027-02-01' },
+    ]))
+    act(() => result.current.setItemType(0, 'ID'))
+    expect(result.current.pending[0].expiresAt).toBe('')
+    expect(result.current.pending[1].expiresAt).toBe('2027-02-01')
+    act(() => result.current.setItemType(1, 'VOG'))
+    expect(result.current.pending[1].expiresAt).toBe('2027-02-01')
+  })
+
+  it('setAllTypes clears every expiry whose type changed', () => {
+    const { result } = renderHook(() => useUploadQueueItems<TestItem>([
+      { objectUrl: 'blob:a', type: 'VOG', name: 'a.pdf', expiresAt: '2027-01-31' },
+    ]))
+    act(() => result.current.setAllTypes('ID'))
+    expect(result.current.pending[0]).toMatchObject({ type: 'ID', expiresAt: '' })
+  })
+})

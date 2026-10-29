@@ -9,8 +9,6 @@
 import { useState, useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Download, RotateCcw } from 'lucide-react'
-import { pdf } from '@react-pdf/renderer'
-import { CvDocument } from '@/pages/candidates/shared'
 import { useCvSettings } from '@/lib/useCvSettings'
 import { useLocale } from '@/lib/datetime'
 import { loadSettings } from '../lib/settingsApi'
@@ -67,7 +65,9 @@ export default function CvTemplateSettings() {
     try {
       // Summary is user-facing prose (DEMO-TAAL) — resolved through i18n, never the fixture's own text.
       const previewCandidate = { ...PREVIEW_CANDIDATE, summary: tCv('cv.preview.summary') }
-      const blob = await pdf(<CvDocument c={previewCandidate} settings={settingsWithBrand} locale={locale} t={tCv} />).toBlob()
+      // The PDF engine is loaded on demand so the settings chunk stays free of @react-pdf.
+      const { renderCvBlob } = await import('@/pages/candidates/cv/renderCvBlob')
+      const blob = await renderCvBlob({ c: previewCandidate as never, settings: settingsWithBrand as never, locale, t: tCv })
       const url = URL.createObjectURL(blob)
       const a = document.createElement('a')
       a.href = url; a.download = 'CV-preview.pdf'

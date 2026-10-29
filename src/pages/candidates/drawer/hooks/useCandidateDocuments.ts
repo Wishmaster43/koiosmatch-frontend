@@ -73,13 +73,7 @@ export function useCandidateDocuments(c: Candidate, onRefresh?: () => void) {
   const [docs, setDocs] = useState<LinkedDocItem[]>(c.documents ?? [])
   // DRY round 11, DOCS: setItemType/setItemLink/removePending (with the blob-URL
   // revoke) are shared with the customer drawer's useDocumentUploadQueue.
-  const { pending, setPending, setItemLink, setItemExpiry, removePending } = useUploadQueueItems<PendingItem>()
-
-  // A type switch drops the picked expiry: the date field may vanish with the new type, so a hidden stale date must never be uploaded.
-  const setItemType = (idx: number, type: string) =>
-    setPending(items => items.map((it, i) => (i === idx ? { ...it, type, expiresAt: it.type !== type ? '' : it.expiresAt } : it)))
-  const setAllTypes = (type: string) =>
-    setPending(items => items.map(it => ({ ...it, type, expiresAt: it.type !== type ? '' : it.expiresAt })))
+  const { pending, setPending, setItemType, setAllTypes, setItemLink, setItemExpiry, removePending } = useUploadQueueItems<PendingItem>()
 
   // DOC-ENTRY-LINK-1 / DOC-LANG-SKILL-LINK-1: PATCH the chosen education/
   // certification/language/skill with the freshly uploaded document's id,

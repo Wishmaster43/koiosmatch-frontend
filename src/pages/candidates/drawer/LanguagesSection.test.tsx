@@ -35,6 +35,8 @@ vi.mock('@/lib/api', async () => {
   return { ...actual, default: { patch, post, delete: del, get: vi.fn(() => Promise.resolve({ data: { data: [] } })) }, getActiveTenantId: () => 'demo' }
 })
 vi.mock('@/lib/notify', () => ({ notifyError }))
+// documentHelpers (docUrl) pulls @/lib/formatters and with it the real i18n init; keep it uninitialised so t() keeps returning keys.
+vi.mock('@/i18n', () => ({ LOCALE_BY_LANG: { nl: 'nl-NL', en: 'en-GB' } }))
 vi.mock('@/lib/downloadFiles', () => ({ downloadFilesSequentially: downloadFiles }))
 
 const doc = { id: 'd1', name: 'taalcertificaat.pdf', url: '/api/candidates/c1/documents/d1/download' }
@@ -246,5 +248,26 @@ describe('LanguagesSection · TAAL-DOC-LINK-1 document link', () => {
     render(<LanguagesSection c={{ id: 'c1', languages: candidate.languages, documents: [] } as unknown as Candidate} onSaved={vi.fn()} />)
     await user.click(screen.getByTitle('common:edit'))
     expect(screen.queryByRole('button', { name: /addFields\.linkedDocument/ })).toBeNull()
+  })
+})
+
+// GAPS-A2: the chip download goes through docUrl (signed url first) and is disabled for an unscanned file.
+describe('LanguagesSection · linked document download (GAPS-A2)', () => {
+  const withDoc = (d: Record<string, unknown>) => ({
+    id: 'c1',
+    languages: [{ id: 'l1', language: 'Nederlands', spoken: 'Vloeiend', written: 'Vloeiend', document_id: 'd1' }],
+    documents: [{ id: 'd1', name: 'cert.pdf', ...d }],
+  }) as unknown as Candidate
+
+  it('downloads the signed download_url first', async () => {
+    const user = userEvent.setup()
+    render(<LanguagesSection c={withDoc({ url: '/raw', download_url: '/signed' })} onSaved={vi.fn()} />)
+    await user.click(screen.getByRole('button', { name: 'documents.download' }))
+    expect(downloadFiles).toHaveBeenCalledWith([{ url: '/signed', name: 'cert.pdf' }])
+  })
+
+  it.each([['pending', 'common:upload.scanPending'], ['rejected', 'common:upload.scanRejected']])('disables the download for a %s scan and names it', (status, label) => {
+    render(<LanguagesSection c={withDoc({ url: '/raw', download_url: null, scan_status: status })} onSaved={vi.fn()} />)
+    expect(screen.getByRole('button', { name: label })).toBeDisabled()
   })
 })

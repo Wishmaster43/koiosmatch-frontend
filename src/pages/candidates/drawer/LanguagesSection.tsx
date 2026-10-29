@@ -15,6 +15,8 @@ import DocPreviewModal from '@/components/drawer/DocPreviewModal'
 import { useLanguageLookups } from '@/lib/useLanguageLookups'
 import { useGuardedSubmit } from '@/hooks/useGuardedSubmit'
 import DrawerAddButton from './DrawerAddButton'
+import { docScanState, docUrl } from './documentHelpers'
+import type { DocItem } from './documentHelpers'
 import Button from '@/components/ui/Button'
 // DOC-1-EIGENAAR-1: the ONE shared "which document is still free" rule (§11).
 import { documentLinkOptions } from './documentLinkRules'
@@ -46,7 +48,7 @@ interface ApiLanguage {
 // modal and download helper read the same two url shapes. DOC-1-EIGENAAR-1: the five
 // reverse-FK ids ride along too, so the picker can drop already-claimed documents.
 interface LinkedDocument {
-  id?: Id; name?: string; file_name?: string; url?: string; download_url?: string; type?: string
+  id?: Id; name?: string; file_name?: string; url?: string; download_url?: string | null; type?: string; scan_status?: DocItem['scan_status']
   education_id?: Id | null; certification_id?: Id | null; language_id?: Id | null; skill_id?: Id | null; reference_id?: Id | null
 }
 
@@ -201,13 +203,26 @@ export default function LanguagesSection({ c, onSaved }: { c: Candidate; onSaved
   // ONIX N-007: guards the diskette against a second click while the batch
   // (per-row POST/PATCH/DELETE above) is still in flight.
   const { submit: guardedSave, saving } = useGuardedSubmit(save)
-  // Download a linked document through the one shared helper (same mechanics as the
-  // Documenten list row) — the in-app stream url first, the signed url as fallback.
-  const downloadDoc = (doc: LinkedDocument) => downloadFilesSequentially([{ url: doc.url ?? doc.download_url, name: doc.name ?? doc.file_name ?? '' }])
+  // Download a linked document through the one shared helper; docUrl puts the signed download_url first
+  // and yields nothing for a pending/rejected scan (F-001), so such a file is never offered live.
+  const downloadDoc = (doc: LinkedDocument) => {
+    const url = docUrl(doc as DocItem)
+    if (url) downloadFilesSequentially([{ url, name: doc.name ?? doc.file_name ?? '' }])
+  }
 
+  // Translated scan-state name for a pending/rejected document (the disabled download's label).
+  const scanLabel = (doc: LinkedDocument) => {
+    const scan = docScanState(doc as DocItem)
+    return scan ? t(scan === 'pending' ? 'common:upload.scanPending' : 'common:upload.scanRejected') : undefined
+  }
   // Subtle, borderless icon button for the chip's preview/download actions — the
   // same muted treatment SectionTabs' own document links use.
   const chipIconBtn: CSSProperties = { background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-muted)', padding: 0, display: 'flex' }
+  // The chip's download glyph dims and shows a not-allowed cursor while the file is unscanned/rejected.
+  const downloadIconStyle = (doc: LinkedDocument): CSSProperties => {
+    const ok = Boolean(docUrl(doc as DocItem))
+    return { ...chipIconBtn, cursor: ok ? 'pointer' : 'not-allowed', opacity: ok ? 1 : 0.5 }
+  }
   // CreatableSelect's own style prop only reaches its inner trigger button, not the
   // outer wrapping div — each picker below is wrapped in its own flex:1 container
   // so the three stay evenly sized in the row (mirrors the old selectStyle's flex).
@@ -334,8 +349,9 @@ export default function LanguagesSection({ c, onSaved }: { c: Candidate; onSaved
                       <button type="button" onClick={() => setPreviewDoc(doc)} style={chipIconBtn}
                         aria-label={t('documents.preview')} title={doc.name ?? doc.file_name ?? t('documents.preview')}><Eye size={11} /></button>
                       {/* eslint-disable-next-line huisstijlLegacy/no-restricted-syntax -- inline chip-scoped glyph sized to the 11px language pill, not a standalone Button */}
-                      <button type="button" onClick={() => downloadDoc(doc)} style={chipIconBtn}
-                        aria-label={t('documents.download')} title={t('documents.download')}><Download size={11} /></button>
+                      <button type="button" onClick={() => downloadDoc(doc)} style={downloadIconStyle(doc)}
+                        disabled={!docUrl(doc as DocItem)}
+                        aria-label={scanLabel(doc) ?? t('documents.download')} title={scanLabel(doc) ?? t('documents.download')}><Download size={11} /></button>
                     </>
                   )}
                 </span>

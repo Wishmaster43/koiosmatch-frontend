@@ -115,8 +115,9 @@ export default function CommunicationTab({ c, onSave, onEditStatusEvent, initial
   // so the deep-link action is consumed right away; a later remount must not open a stale one.
   // (A missing mobile is NOT consumed here: the Koios path opens a stub { id } first.)
   useEffect(() => {
-    if (showStartModal && !canStartConversation) { setShowStartModal(false); onInitialActionConsumed?.() }
-  }, [showStartModal, canStartConversation, onInitialActionConsumed])
+    // Only once auth has finished loading: while permissions are unknown a legitimate deep link must survive.
+    if (showStartModal && auth && !auth.loading && !canStartConversation) { setShowStartModal(false); onInitialActionConsumed?.() }
+  }, [showStartModal, canStartConversation, auth, onInitialActionConsumed])
   // AVG-RET-2-TAAL-1: the agency default backs a candidate without an own preferred language.
   const settingsValues = useAllSettings()
 

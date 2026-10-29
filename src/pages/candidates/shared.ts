@@ -6,9 +6,10 @@
  * extend this list deliberately, never bypass it with a deep import.
  */
 export { default as AddCandidateModal } from './AddCandidateModal'
-export { CvDocument, groupCvSections } from './CandidateCvTemplate'
-export type { CvCandidate, CvSettings, TranslateFn } from './CandidateCvTemplate'
-export { paletteFor } from './cv/cvStyles'
+// CvDocument is deliberately NOT exported: it pulls the @react-pdf engine; load it via cv/renderCvBlob.
+export { groupCvSections } from './cv/cvSections'
+export type { CvCandidate, CvSettings, TranslateFn } from './cv/cvTypes'
+export { paletteFor } from './cv/cvPalette'
 export { buildCandidatePatch } from './data/candidatesShared'
 export { mapCandidate } from './data/mapCandidate'
 export { default as CandidateAddApplicationModal } from './drawer/AddApplicationModal'

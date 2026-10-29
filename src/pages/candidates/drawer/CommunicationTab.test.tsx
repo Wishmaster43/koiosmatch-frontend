@@ -595,3 +595,17 @@ describe('CommunicationTab · privacy notice hint in the thread composer (K-008)
     expect(screen.queryByText('conversations.privacyNoticeIncluded')).toBeNull()
   })
 })
+
+// GAPS-A4: a deep-link action survives the permission load; it is consumed only once loading is done and the permission is missing.
+describe('CommunicationTab · start action vs auth loading (GAPS-A4)', () => {
+  it('does not consume the action while auth.loading, then consumes it once loaded without permission', () => {
+    mockUseAuth.mockReturnValue({ loading: true, hasPermission: () => false })
+    const onConsumed = vi.fn()
+    const el = () => <CommunicationTab c={candidate({}, { mobile: '+31612345678' })} initialSubTab="conversations" initialAction="start" onInitialActionConsumed={onConsumed} />
+    const { rerender } = render(el())
+    expect(onConsumed).not.toHaveBeenCalled()
+    mockUseAuth.mockReturnValue({ loading: false, hasPermission: () => false })
+    rerender(el())
+    expect(onConsumed).toHaveBeenCalled()
+  })
+})

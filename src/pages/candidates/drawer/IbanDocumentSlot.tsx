@@ -29,6 +29,8 @@ import { DateField } from '@/components/forms/fields'
 import DocPreviewModal from '@/components/drawer/DocPreviewModal'
 import { uploadErrorMessage } from '@/lib/uploadError'
 import { useUploadPickFilter } from '@/lib/useUploadPickFilter'
+import { docScanState, docUrl } from './documentHelpers'
+import type { DocItem } from './documentHelpers'
 
 type Loose = Record<string, unknown>
 type AnyProps = Record<string, unknown>
@@ -78,7 +80,11 @@ export default function IbanDocumentSlot({ candidateId, documents = [], linkedDo
   const linkedDoc = linkedDocumentId != null ? allDocs.find(d => String(d.id) === String(linkedDocumentId)) : undefined
   const docName = (d: Loose) => String(d.name ?? d.file_name ?? d.type ?? d.id)
 
-  const download = () => linkedDoc && downloadFilesSequentially([{ url: (linkedDoc.url as string) ?? (linkedDoc.download_url as string), name: docName(linkedDoc) }])
+  // docUrl: signed download_url first, nothing for a pending/rejected scan (F-001) so it is never offered live.
+  const dlUrl = linkedDoc ? docUrl(linkedDoc as unknown as DocItem) : undefined
+  const scan = linkedDoc ? docScanState(linkedDoc as unknown as DocItem) : null
+  const scanText = scan ? t(scan === 'pending' ? 'common:upload.scanPending' : 'common:upload.scanRejected') : undefined
+  const download = () => { if (linkedDoc && dlUrl) downloadFilesSequentially([{ url: dlUrl, name: docName(linkedDoc) }]) }
 
   // Inline upload through the ONE existing multipart route, then link the
   // fresh id — the type defaults to the first lookup value until picked.
@@ -91,12 +97,14 @@ export default function IbanDocumentSlot({ candidateId, documents = [], linkedDo
     // N008-DOC-EXPIRY-FE-1: only sent when picked — an omitted expires_at lets
     // the backend auto-compute it from the type's default validity, or answer
     // its own 422 when the type requires one with no default.
-    if (expiresAt) fd.append('expires_at', expiresAt)
+    if (expiresAt && activeTypeOpt?.requiresExpiry) fd.append('expires_at', expiresAt)
     api.post(`/candidates/${candidateId}/documents`, fd, { headers: { 'Content-Type': 'multipart/form-data' } })
       .then(res => {
         const doc = ((res.data as Loose)?.data ?? res.data) as Loose
         if (doc?.id != null) {
           setLocalDocs(prev => [doc, ...prev])
+          // A finished upload must not leak its date into the next one.
+          setExpiresAt('')
           onLink(String(doc.id))
           setPicking(false)
         } else {
@@ -116,7 +124,7 @@ export default function IbanDocumentSlot({ candidateId, documents = [], linkedDo
           <>
             <Mono style={{ fontSize: 12, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', minWidth: 0 }}>{docName(linkedDoc)}</Mono>
             <Button variant="ghost" iconOnly size="sm" aria-label={t('documents.preview')} title={t('documents.preview')} onClick={() => setPreviewDoc(linkedDoc)}><Eye size={13} /></Button>
-            <Button variant="ghost" iconOnly size="sm" aria-label={t('documents.download')} title={t('documents.download')} onClick={download}><Download size={13} /></Button>
+            <Button variant="ghost" iconOnly size="sm" aria-label={scanText ?? t('documents.download')} title={scanText ?? t('documents.download')} onClick={download} disabled={!dlUrl}><Download size={13} /></Button>
             <Button variant="ghost" iconOnly size="sm" aria-label={t('bankDoc.change')} title={t('bankDoc.change')} onClick={() => setPicking(v => !v)}><Edit2 size={13} /></Button>
           </>
         ) : (
@@ -142,7 +150,7 @@ export default function IbanDocumentSlot({ candidateId, documents = [], linkedDo
             <SearchSelect triggerLabel={uploadType || defaultType} selectAll={false}
               options={types.map((tp: { value: string; label: string }) => ({ value: String(tp.value), label: tp.label }))}
               selected={[uploadType || defaultType]}
-              onToggle={(v: string) => setUploadType(v)} />
+              onToggle={(v: string) => { setUploadType(v); setExpiresAt('') }} />
             <Button variant="secondary" size="sm" onClick={() => fileRef.current?.click()} disabled={uploading}>
               {uploading ? <Spinner size={13} /> : <Upload size={13} />} {t('bankDoc.uploadNew')}
             </Button>
