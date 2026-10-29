@@ -4,3 +4,6 @@ import type { CSSProperties } from 'react'
 // and single-pane screens such as Memory. Lives outside shared.tsx so that file keeps exporting
 // components only (react-refresh).
 export const editorPaneStyle: CSSProperties = { border: '1px solid var(--border)', borderRadius: 10, padding: 14, overflowY: 'auto', background: 'var(--surface)' }
+
+// Max height of an AI-management editor pane (SideList and single-pane screens share one value).
+export const PANE_MAX_HEIGHT = 'min(70vh, 720px)'

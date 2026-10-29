@@ -4,7 +4,7 @@
  * SideList, ListRow). Extracted from AIManagementTabs so each tab can live on its own.
  */
 import { useState, useId, cloneElement, isValidElement } from 'react'
-import { editorPaneStyle } from './paneStyle'
+import { editorPaneStyle, PANE_MAX_HEIGHT } from './paneStyle'
 import type { CSSProperties, ReactNode, ReactElement } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Check, ChevronDown, Clock, Copy, Plus, Save, Trash2 } from 'lucide-react'
@@ -199,7 +199,7 @@ export function SideList<T extends { id?: string | number }>({ title, items, sel
   return (
     // AI-SETTINGS-FACE-1 (Danny 29-09: "witte blok is te lang/hoog"): the panes are bounded to the
     // viewport instead of stretching to the page, so the page background stays visible below them.
-    <div style={{ display: 'grid', gridTemplateColumns: '180px 1fr', gap: 12, height: 'min(70vh, 720px)', minHeight: 320 }}>
+    <div style={{ display: 'grid', gridTemplateColumns: '180px 1fr', gap: 12, height: PANE_MAX_HEIGHT, minHeight: 320 }}>
       {/* List */}
       <div style={{ border: '1px solid var(--border)', borderRadius: 10, overflow: 'hidden', display: 'flex', flexDirection: 'column', background: 'var(--surface)' }}>
         <div style={{ padding: '9px 11px', borderBottom: '1px solid var(--border)', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>

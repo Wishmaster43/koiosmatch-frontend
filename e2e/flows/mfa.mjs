@@ -46,10 +46,10 @@ const post = async (path, body, token) => {
 export async function mfaLifecycle() {
   // 1. ENROLL via the API (setup → real TOTP → confirm → recovery codes).
   const login1 = await post('/auth/login', MFA_USER)
-  expect(login1.data.token, `pre-login faalde: ${JSON.stringify(login1.data).slice(0, 120)}`)
+  expect(login1.data.token, `pre-login failed: ${JSON.stringify(login1.data).slice(0, 120)}`)
   const token = login1.data.token
   const setup = await post('/auth/mfa/setup', {}, token)
-  expect(setup.data.secret, `mfa/setup gaf geen secret (${setup.status})`)
+  expect(setup.data.secret, `mfa/setup returned no secret (${setup.status})`)
   const confirm = await post('/auth/mfa/confirm', { code: totp(setup.data.secret) }, token)
   expect(Array.isArray(confirm.data.recovery_codes) && confirm.data.recovery_codes.length === 8,
     `mfa/confirm gaf geen 8 recovery-codes (${confirm.status})`)
@@ -72,13 +72,13 @@ export async function mfaLifecycle() {
     await page.click('button[type="submit"]')
     await sleep(1200)
     const codeInput = page.locator('#mfa-code')
-    expect(await codeInput.count(), 'MFA-codestap verscheen NIET na login')
+    expect(await codeInput.count(), 'MFA code step did NOT appear after login')
     await codeInput.fill(totp(setup.data.secret))
     await page.click('button[type="submit"]')
     await sleep(2000)
     const loggedIn = await page.locator('text=Uitloggen').count()
-    expect(loggedIn > 0, 'na code-verificatie NIET ingelogd (geen dashboard)')
-    expect(errors.length === 0, `login gaf fouten: ${errors.join(' | ')}`)
+    expect(loggedIn > 0, 'NOT logged in after code verification (no dashboard)')
+    expect(errors.length === 0, `login produced errors: ${errors.join(' | ')}`)
     await browser.close()
   } finally {
     // 3. DISABLE — leave the seeded account clean whatever happened above. The server's
@@ -89,10 +89,10 @@ export async function mfaLifecycle() {
     await nextWindow()
     const login2 = await post('/auth/login', MFA_USER)
     const relogin = login2.data.token ? login2 : await post('/auth/mfa/verify', { mfa_token: login2.data.mfa_token, code: totp(setup.data.secret) })
-    expect(relogin.data.token, `herlogin voor disable faalde (${relogin.status}): ${JSON.stringify(relogin.data).slice(0, 120)}`)
+    expect(relogin.data.token, `relogin before disable failed (${relogin.status}): ${JSON.stringify(relogin.data).slice(0, 120)}`)
     const t2 = relogin.data.token
     await nextWindow()
     const off = await post('/auth/mfa/disable', { code: totp(setup.data.secret) }, t2)
-    expect(off.status >= 200 && off.status < 300, `mfa/disable faalde (${off.status}): ${JSON.stringify(off.data).slice(0, 120)}`)
+    expect(off.status >= 200 && off.status < 300, `mfa/disable failed (${off.status}): ${JSON.stringify(off.data).slice(0, 120)}`)
   }
 }

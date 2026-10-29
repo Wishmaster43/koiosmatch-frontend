@@ -472,7 +472,7 @@ describe('ConversationsSection · Koios AI conversation assist (G27)', () => {
     vi.mocked(assistConversation).mockResolvedValue({ kind: 'text', text: 'Kandidaat kan morgen starten.' })
     const user = userEvent.setup()
     render(<ConversationsSection threadsUrl="/conversations" threadsParams={{ candidate_id: 'cand-1' }} />)
-    await user.click(await screen.findByRole('button', { name: 'Samenvatten' }))
+    await user.click(await screen.findByRole('button', { name: 'conversations.assist.summarize' }))
     expect(assistConversation).toHaveBeenCalledWith(expect.objectContaining({ id: 'conv-1', mode: 'summarize' }), expect.anything())
   })
 
@@ -483,17 +483,17 @@ describe('ConversationsSection · Koios AI conversation assist (G27)', () => {
       return Promise.reject(new Error(`unexpected GET ${url}`))
     })
     render(<ConversationsSection threadsUrl="/conversations" threadsParams={{ candidate_id: 'cand-1' }} />)
-    expect(await screen.findByRole('button', { name: 'Samenvatten' })).toBeDisabled()
-    expect(screen.getByRole('button', { name: 'Actiepunten' })).toBeDisabled()
+    expect(await screen.findByRole('button', { name: 'conversations.assist.summarize' })).toBeDisabled()
+    expect(screen.getByRole('button', { name: 'conversations.assist.actions' })).toBeDisabled()
   })
 
   it('Overnemen writes the assist result straight into the composer draft input', async () => {
     vi.mocked(assistConversation).mockResolvedValue({ kind: 'text', text: 'Kandidaat kan morgen starten.' })
     const user = userEvent.setup()
     render(<ConversationsSection threadsUrl="/conversations" threadsParams={{ candidate_id: 'cand-1' }} />)
-    await user.click(await screen.findByRole('button', { name: 'Samenvatten' }))
+    await user.click(await screen.findByRole('button', { name: 'conversations.assist.summarize' }))
     await screen.findByText('Kandidaat kan morgen starten.')
-    await user.click(screen.getByRole('button', { name: 'Overnemen' }))
+    await user.click(screen.getByRole('button', { name: 'conversations.assist.apply' }))
     const input = screen.getByPlaceholderText('conversations.composerPlaceholder')
     expect(input).toHaveValue('Kandidaat kan morgen starten.')
   })
@@ -504,9 +504,9 @@ describe('ConversationsSection · Koios AI conversation assist (G27)', () => {
     render(<ConversationsSection threadsUrl="/conversations" threadsParams={{ candidate_id: 'cand-1' }} />)
     const input = await screen.findByPlaceholderText('conversations.composerPlaceholder')
     await user.type(input, 'Mijn eigen concept')
-    await user.click(screen.getByRole('button', { name: 'Samenvatten' }))
+    await user.click(screen.getByRole('button', { name: 'conversations.assist.summarize' }))
     await screen.findByText('Kandidaat kan morgen starten.')
-    await user.click(screen.getByRole('button', { name: 'Verwerpen' }))
+    await user.click(screen.getByRole('button', { name: 'conversations.assist.discard' }))
     expect(input).toHaveValue('Mijn eigen concept')
   })
 })
@@ -707,8 +707,8 @@ describe('ConversationsSection · message fetch failure + retry (§8 D8)', () =>
 // ONIX R-001: step the fake clock in small slices until the condition holds, so a timer
 // scheduled late (loaded machine) is still reached. RTL's waitFor runs on the FAKE clock
 // here, so this is a plain bounded loop (virtual 5 min max), never a longer wall wait.
-async function advanceUntil(cond: () => boolean) {
-  for (let i = 0; i < 60 && !cond(); i += 1) {
+async function advanceUntil(cond: () => boolean, maxMs = 300_000) {
+  for (let i = 0; i < Math.ceil(maxMs / 5_000) && !cond(); i += 1) {
     await act(async () => { await vi.advanceTimersByTimeAsync(5_000) })
   }
   expect(cond()).toBe(true)
@@ -812,7 +812,10 @@ describe('ConversationsSection · WA-THREAD-UX-1', () => {
       // cadence (shouldAdvanceTime moves the fake clock with real time too, so an exact
       // 60_000 can land a few ms short under CPU load) and wait for the refetch instead of
       // asserting synchronously — measured flake in two landings on 02-10.
-      await advanceUntil(() => getCount > callsBeforeTimer)
+      // Cadence bracket: no early refetch at +50 s, and the refetch lands by ~+70 s (a 4-minute poll fails).
+      await act(async () => { await vi.advanceTimersByTimeAsync(50_000) })
+      expect(getCount).toBe(callsBeforeTimer)
+      await advanceUntil(() => getCount > callsBeforeTimer, 20_000)
     } finally {
       vi.useRealTimers()
     }
@@ -853,13 +856,17 @@ describe('ConversationsSection · WA-THREAD-UX-1', () => {
 
       // First backoff step (60s): the refetch resolves without the queued row.
       // Advance PAST the cadence and await the refetch (same shape as FLAKE-WA-TIMER-1).
-      await advanceUntil(() => getCount > callsBeforeTimer)
+      await act(async () => { await vi.advanceTimersByTimeAsync(50_000) })
+      expect(getCount).toBe(callsBeforeTimer)
+      await advanceUntil(() => getCount > callsBeforeTimer, 20_000)
       // The pending bubble is still on screen — a bare replace would have dropped it.
       expect(screen.getByText('Wachtrij-bericht')).toBeInTheDocument()
 
       // Second backoff step (still 60s, attempt index 1): polling continues.
       const callsBeforeSecondTimer = getCount
-      await advanceUntil(() => getCount > callsBeforeSecondTimer)
+      await act(async () => { await vi.advanceTimersByTimeAsync(50_000) })
+      expect(getCount).toBe(callsBeforeSecondTimer)
+      await advanceUntil(() => getCount > callsBeforeSecondTimer, 20_000)
       expect(screen.getByText('Wachtrij-bericht')).toBeInTheDocument()
     } finally {
       vi.useRealTimers()

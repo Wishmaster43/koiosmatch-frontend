@@ -11,7 +11,7 @@ import { useTranslation } from 'react-i18next'
 import { useSettingsForm } from '../lib/useSettingsForm'
 import { SettingsScaffold } from '../components/SettingsKit'
 import RichTextEditor from '@/components/ui/RichTextEditor'
-import { editorPaneStyle } from '@/components/ai/management/paneStyle'
+import { editorPaneStyle, PANE_MAX_HEIGHT } from '@/components/ai/management/paneStyle'
 
 export default function MemorySettings() {
   const { t } = useTranslation('settings')
@@ -22,7 +22,7 @@ export default function MemorySettings() {
       {/* AI-SETTINGS-FACE-1 (Danny 29-09: "even groot maken als blokken hierboven en zelfde stijl"):
           the note sits in the same bordered editor pane, at the same width and bounded height,
           as the FAQ and Knowledge screens next to it. */}
-      <div style={{ ...editorPaneStyle, maxHeight: 'min(70vh, 720px)' }}>
+      <div style={{ ...editorPaneStyle, maxHeight: PANE_MAX_HEIGHT }}>
         {/* House rule (CLAUDE.md 14/7): free text = rich-text editor, never a bare textarea. */}
         {/* MEMORY-RESIZE-1: roomier default + a drag handle to grow it further. */}
         <RichTextEditor value={form.values.memory_notes}

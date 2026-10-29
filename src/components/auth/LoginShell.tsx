@@ -38,9 +38,11 @@ export default function LoginShell({ children }: { children: ReactNode }) {
 
         {/* Agent — balanced hero: centred with breathing room, capped so it never dominates or crops. */}
         <div className="relative flex items-center justify-center flex-1 min-h-0 py-6">
-          <img src="/koios-agent.jpg" alt="Koios AI agent"
+          {/* Decorative: the translated headline above carries the meaning (WCAG 1.1.1). */}
+          <img src="/koios-agent.jpg" alt="" aria-hidden="true"
             className="object-contain rounded-3xl"
-            style={{ maxHeight: '58%', maxWidth: '80%', filter: 'drop-shadow(0 12px 48px rgba(25,165,202,0.28))' }} />
+            style={{ maxHeight: '58%', maxWidth: '80%',
+              filter: `drop-shadow(0 12px 48px ${tint('var(--color-primary)', 28)})` }} />
         </div>
 
         <p className="relative text-xs" style={{ color: 'var(--sidebar-muted)' }}>© {year} KoiosMatch</p>
@@ -48,7 +50,7 @@ export default function LoginShell({ children }: { children: ReactNode }) {
 
       {/* Right — login card on a soft primary tint. */}
       <div className="relative flex items-center justify-center flex-1 p-6 sm:p-10"
-        style={{ background: 'linear-gradient(160deg, color-mix(in srgb, var(--color-primary) 7%, var(--bg)) 0%, var(--bg) 55%)' }}>
+        style={{ background: 'var(--auth-backdrop)' }}>
         <div className="w-full" style={{ maxWidth: 400 }}>
           <div className="flex items-center justify-center gap-2 mb-6 lg:hidden">
             <Wordmark />

@@ -178,4 +178,27 @@ describe('DocPreviewModal · 423 (UPLOADS-SCAN-1)', () => {
     await waitFor(() => expect(screen.getByText('common:errors.documentNotAvailable')).toBeInTheDocument())
     expect(screen.queryByText('documents.previewUnavailable')).toBeNull()
   })
+
+  const BOTH_URLS = { name: 'cv.png', url: '/x', download_url: 'http://koiosmatch-api.test/signed' }
+
+  it('a 423 on the first candidate followed by a 200 still renders the document', async () => {
+    URL.createObjectURL = vi.fn(() => 'blob:fetched-object-url')
+    const fetchMock = vi.fn()
+      .mockResolvedValueOnce({ ok: false, status: 423, blob: () => Promise.resolve(new Blob()) })
+      .mockResolvedValueOnce({ ok: true, blob: () => Promise.resolve(new Blob(['x'])) })
+    vi.stubGlobal('fetch', fetchMock)
+    render(<DocPreviewModal doc={BOTH_URLS} onClose={() => {}} />)
+    await waitFor(() => expect(screen.getByAltText('cv.png')).toHaveAttribute('src', 'blob:fetched-object-url'))
+    expect(screen.queryByText('common:errors.documentNotAvailable')).toBeNull()
+  })
+
+  it('a 423 on the first candidate followed by a thrown fetch stays "unavailable" (blocked is sticky)', async () => {
+    URL.createObjectURL = vi.fn(() => 'blob:x')
+    const fetchMock = vi.fn()
+      .mockResolvedValueOnce({ ok: false, status: 423, blob: () => Promise.resolve(new Blob()) })
+      .mockRejectedValueOnce(new TypeError('Failed to fetch'))
+    vi.stubGlobal('fetch', fetchMock)
+    render(<DocPreviewModal doc={BOTH_URLS} onClose={() => {}} />)
+    await waitFor(() => expect(screen.getByText('common:errors.documentNotAvailable')).toBeInTheDocument())
+  })
 })

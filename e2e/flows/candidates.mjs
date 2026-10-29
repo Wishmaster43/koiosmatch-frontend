@@ -97,11 +97,15 @@ export async function archiveAndFindBack({ page, errors }) {
     // dialog handler above stays as a safety net for any confirm still left.
     const confirm = page.locator('[role="dialog"], [role="alertdialog"]').locator('button:has-text("Bevestigen")').first()
     await confirm.waitFor({ state: 'visible', timeout: 5000 }).catch(() => {})
+    // The confirm dialog must appear unless the guard modal (live business) legitimately replaces it.
+    const guardShown = await page.locator('text=/live sollicitatie|actieve match|lopende/i').first().count()
+    expect(guardShown > 0 || (await confirm.count()) > 0, 'archive confirm dialog did not appear')
     if (await confirm.count()) {
       // Start the response wait before the click so a fast DELETE is not missed.
       const archived = page.waitForResponse(r => /\/candidates\/[^/?]+$/.test(r.url()) && r.request().method() === 'DELETE', { timeout: 15000 }).catch(() => null)
       await confirm.click()
-      await archived
+      const archivedRes = await archived
+      expect(archivedRes !== null, 'archive DELETE never fired after confirm click')
       await sleep(400)
     }
     // Guard modal = this candidate has live business → close and try the next row.

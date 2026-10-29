@@ -20,7 +20,7 @@ interface AuthWallShellProps {
 export default function AuthWallShell({ icon, title, description, signOutLabel, onSignOut, children }: AuthWallShellProps) {
   return (
     <div className="flex items-center justify-center min-h-screen p-6"
-      style={{ background: 'linear-gradient(160deg, color-mix(in srgb, var(--color-primary) 7%, var(--bg)) 0%, var(--bg) 55%)' }}>
+      style={{ background: 'var(--auth-backdrop)' }}>
       <main className="w-full" style={{ maxWidth: 520 }}>
         <div style={{ background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 18,
                       padding: '32px 30px 34px', boxShadow: 'var(--shadow-modal)' }}>

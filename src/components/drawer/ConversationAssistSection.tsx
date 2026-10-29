@@ -1,7 +1,7 @@
 /**
  * ConversationAssistSection — the Koios AI assist affordance inside an open
  * WhatsApp thread's session composer (G27 / K2-CONV-ASSIST-1). Mirrors
- * NoteAssistSection's original knop→preview→Overnemen/Verwerpen idiom (never
+ * NoteAssistSection's original knop→preview→apply/discard idiom (never
  * auto-applies) — but runs over the THREAD's own stored messages (no client
  * text sent) and its apply target is the composer's plain-text DRAFT, not a
  * rich-text body, so `onApply` simply replaces the draft string and `discard`
@@ -35,9 +35,6 @@ interface ConversationAssistSectionProps {
   onApply: (draftText: string) => void
   language?: string
 }
-
-// Dutch fallback copy (DEFAULT-VALUE-1) — mode button label.
-const MODE_LABEL_NL: Record<ConversationAssistMode, string> = { summarize: 'Samenvatten', actions: 'Actiepunten' }
 
 // One row per mode — icon + i18n key share the mode name, mirrors NoteAssistSection's MODES array.
 const MODES: { mode: ConversationAssistMode; icon: typeof AlignLeft }[] = [
@@ -74,7 +71,7 @@ export default function ConversationAssistSection({ conversationId, hasMessages,
           <Button key={m} variant="soft" size="sm" onClick={() => run(m, conversationId)} disabled={loading || !hasMessages}
             title={hasMessages ? undefined : t('conversations.assist.needsMessages')}>
             {loading && mode === m ? <Spinner size={12} /> : <Icon size={12} />}
-            {t(`conversations.assist.${m}`, { defaultValue: MODE_LABEL_NL[m] })}
+            {t(`conversations.assist.${m}`)}
           </Button>
         ))}
       </div>
@@ -120,14 +117,14 @@ export default function ConversationAssistSection({ conversationId, hasMessages,
             </ul>
           ) : (
             // Actions with zero items — nothing to run, calm empty notice.
-            <div style={{ fontSize: 12, color: 'var(--text-muted)', fontStyle: 'italic' }}>{t('conversations.assist.noItems', { defaultValue: 'Geen actiepunten gevonden' })}</div>
+            <div style={{ fontSize: 12, color: 'var(--text-muted)', fontStyle: 'italic' }}>{t('conversations.assist.noItems')}</div>
           )}
           <div style={{ display: 'flex', gap: 8 }}>
             {/* No apply target when actions came back empty — nothing to apply. */}
             {(result.kind === 'text' || result.items.length > 0) && (
-              <Button variant="primary" size="sm" onClick={handleApply}><Check size={13} /> {t('conversations.assist.apply', { defaultValue: 'Overnemen' })}</Button>
+              <Button variant="primary" size="sm" onClick={handleApply}><Check size={13} /> {t('conversations.assist.apply')}</Button>
             )}
-            <AssistDiscardButton onDiscard={discard} label={t('conversations.assist.discard', { defaultValue: 'Verwerpen' })} />
+            <AssistDiscardButton onDiscard={discard} label={t('conversations.assist.discard')} />
           </div>
         </div>
       )}

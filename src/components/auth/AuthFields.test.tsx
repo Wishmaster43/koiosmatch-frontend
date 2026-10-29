@@ -12,6 +12,18 @@ describe('AuthTextField', () => {
 })
 
 describe('AuthPasswordField', () => {
+  it('reports typing and forwards placeholder, required and autocomplete', () => {
+    const onChange = vi.fn()
+    render(<AuthPasswordField id="p" label="Password" value="" onChange={onChange} showLabel="Show" hideLabel="Hide"
+      placeholder="ph" required autoComplete="new-password" />)
+    const input = screen.getByLabelText('Password')
+    fireEvent.change(input, { target: { value: 'secret' } })
+    expect(onChange).toHaveBeenCalledWith('secret')
+    expect(input).toHaveAttribute('placeholder', 'ph')
+    expect(input).toBeRequired()
+    expect(input).toHaveAttribute('autocomplete', 'new-password')
+  })
+
   it('toggles the input type and the eye label', () => {
     render(<AuthPasswordField id="p" label="Password" value="x" onChange={() => {}} showLabel="Show" hideLabel="Hide" />)
     const input = screen.getByLabelText('Password')
