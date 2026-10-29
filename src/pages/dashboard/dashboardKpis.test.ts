@@ -225,6 +225,11 @@ describe('buildDashboardKpis · KPI-TARGETS-ALERT-1 target lines', () => {
     expect(k.candidatesNew.targetLine?.text).toContain('kpi.target.monthOnly')
     expect(k.candidatesNew.value).toBe('3')
   })
+  it('carries the kpi_targets value (not the flat kpis number) and uses the ceiling kind on a non-month period', () => {
+    const k = buildDashboardKpis(args({ open_tasks_target: tgt({ value: 23, target: 30, comparison: 'lte', below_target: null }), new_candidates_target: tgt({ value: 22, below_target: false }) }))
+    expect(k.tasks.targetLine).toEqual({ text: 'kpi.target.monthOnlyMax|23|30', tone: 'muted' })
+    expect(k.candidatesNew.targetLine?.text).toBe('kpi.target.reached|22|10')
+  })
   it('renders exactly today\'s tiles when kpi_targets is absent', () => {
     const k = buildDashboardKpis(args(undefined))
     expect(Object.values(k).every(t => t.targetLine === undefined)).toBe(true)

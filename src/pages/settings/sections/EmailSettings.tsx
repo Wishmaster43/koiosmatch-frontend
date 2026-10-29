@@ -237,9 +237,9 @@ export default function EmailSettings({ context = 'klanten' }: EmailSettingsProp
   // N007-POINT3-FIX-1: any provider/context setting change re-enables the test
   // button immediately — the user is now testing a DIFFERENT configuration.
   // `context` is in the deps too (verifier fix): the registry can reuse this
-  // component's instance across the klanten/kandidaten/planning sub-tabs
+  // component's instance across the customers/candidates/planning sub-tabs
   // (groups.communication.tsx), and without it a test sent on one context left
-  // "Test verstuurd" disabled on another that was never actually tested.
+  // the `email.testSentButton` state disabled on another that was never actually tested.
   useEffect(() => {
     setTestSent(false)
     if (testSentTimerRef.current) { clearTimeout(testSentTimerRef.current); testSentTimerRef.current = null }
@@ -257,6 +257,12 @@ export default function EmailSettings({ context = 'klanten' }: EmailSettingsProp
     { id: 'office', label: 'Office 365',            desc: t('email.officeDesc') },
     { id: 'manual', label: t('email.manualLabel'),  desc: t('email.manualDesc') },
   ]
+
+  // T-009/T-006: translate the sentence from the reason code; the server text is only the fallback for an unknown code.
+  const reasonSuffix = oauthReasonKey(connStatus?.status_reason ?? null)
+  const statusSentence = reasonSuffix
+    ? t(`email.oauthReason${reasonSuffix}`)
+    : connStatus?.status_message || t(connStatus?.status === 'tenant_policy' ? 'email.tenantPolicy' : 'email.needsReconnect')
 
   return (
     // SETTINGS-INCON-B1b: house-wide container (matches the widest settings screen,
@@ -346,13 +352,11 @@ export default function EmailSettings({ context = 'klanten' }: EmailSettingsProp
                     </Button>
                   </div>
                 </CalloutBox>
-              ) : connStatus?.status === 'tenant_policy' ? (
-                <CalloutBox variant="info">{t('email.tenantPolicy')}</CalloutBox>
-              ) : connStatus?.status === 'needs_reconnect' ? (
+              ) : connStatus?.status === 'tenant_policy' || connStatus?.status === 'needs_reconnect' ? (
                 <CalloutBox variant="warning" title={t('email.oauthWarningTitle')}>
                   <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12, flexWrap: 'wrap' }}>
                     <div>
-                      {connStatus.status_message || t('email.needsReconnect')}
+                      {statusSentence}
                       {connStatus.status_at && <Caption as="div">{t('email.statusAt', { date: formatDateTime(connStatus.status_at) })}</Caption>}
                     </div>
                     <Button variant="secondary" size="sm" onClick={connectOauth} disabled={connecting || !canEditConn}>

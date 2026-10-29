@@ -20,6 +20,7 @@ import { useTranslation } from 'react-i18next'
 import { loadSettings, saveSettings } from './settingsApi'
 import { notifyError } from '@/lib/notify'
 import { extractApiError } from '@/lib/extractApiError'
+import { getBoolSetting } from '@/lib/settings/useAllSettings'
 
 // Coerce a stored (string) API value to the type of its default so the form
 // state stays typed (number/boolean/string) regardless of what the server sent.
@@ -27,7 +28,7 @@ function coerce(raw, sample) {
   // BLANK-RESETS-1: a blank stored value means "not set" — the default, never 0.
   if (raw === '' || raw == null)   return sample
   if (typeof sample === 'number')  return Number(raw)
-  if (typeof sample === 'boolean') return raw === true || raw === 'true'
+  if (typeof sample === 'boolean') return getBoolSetting({ v: raw }, 'v', sample)
   return raw == null ? '' : String(raw)
 }
 
@@ -41,6 +42,8 @@ export function useSettingsForm(defaults) {
   const [loading, setLoading] = useState(true)
   const [saving,  setSaving]  = useState(false)
   const [saved,   setSaved]   = useState(false)
+  // Per-field server validation messages from a 422 ({ key: firstMessage }).
+  const [fieldErrors, setFieldErrors] = useState({})
   // A failed initial load must never be swallowed — otherwise `values` still holds
   // the hardcoded `defaults` and a consumer would render/save them as if they were
   // the real tenant policy (AVG-sensitive settings like retention windows). Consumers
@@ -76,7 +79,16 @@ export function useSettingsForm(defaults) {
     return () => { alive = false }
   }, [base])
 
-  const set = (key, val) => setValues(prev => ({ ...prev, [key]: val }))
+  // Update one key; editing a key also clears its server-side field error.
+  const set = (key, val) => {
+    setValues(prev => ({ ...prev, [key]: val }))
+    setFieldErrors(prev => {
+      if (!(key in prev)) return prev
+      const rest = { ...prev }
+      delete rest[key]
+      return rest
+    })
+  }
 
   // The scaffold's save button is only enabled once the live values actually
   // differ from the last-persisted snapshot.
@@ -97,14 +109,29 @@ export function useSettingsForm(defaults) {
         ? Object.fromEntries(keys.filter(key => key in values).map(key => [key, values[key]]))
         : values
       await saveSettings(payload)
-      setInitial(values)
+      // A cleared (null) value was dropped server-side, so the catalogue default applies:
+      // show that default and make it the dirty baseline (only for keys in the payload).
+      const persisted = { ...values }
+      for (const key of Object.keys(payload)) {
+        if (persisted[key] == null) persisted[key] = base[key]
+      }
+      setValues(persisted)
+      setInitial(persisted)
+      setFieldErrors({})
       setSaved(true)
       setTimeout(() => setSaved(false), 2000)
     } catch (err) {
+      // Tie a 422 to its fields so the section can render the message under the input.
+      const errors = err?.response?.status === 422 ? err.response.data?.errors : null
+      if (errors && typeof errors === 'object') {
+        setFieldErrors(Object.fromEntries(
+          Object.entries(errors).map(([k, m]) => [k, Array.isArray(m) ? m[0] : String(m)]),
+        ))
+      }
       notifyError(extractApiError(err, t('actionFailed')))
     }
     finally { setSaving(false) }
   }
 
-  return { values, set, setValues, initial, dirty, loading, saving, saved, save, loadError }
+  return { values, set, setValues, initial, dirty, loading, saving, saved, save, loadError, fieldErrors }
 }

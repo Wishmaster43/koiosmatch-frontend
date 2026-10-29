@@ -19,6 +19,7 @@ function cspPlugin(env) {
         VITE_API_URL: env.VITE_API_URL,
         VITE_WORKFLOW_API_URL: env.VITE_WORKFLOW_API_URL,
         VITE_CSRF_URL: env.VITE_CSRF_URL,
+        VITE_MAP_TILE_URL: env.VITE_MAP_TILE_URL,
       })
       const tag = `<meta http-equiv="Content-Security-Policy" content="${policy}" />`
       // Insert right after the opening <head> tag (not before </head>): a

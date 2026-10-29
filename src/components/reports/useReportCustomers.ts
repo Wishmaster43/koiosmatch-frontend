@@ -1,19 +1,13 @@
 /**
  * useReportCustomers — data layer for the Shiftmanager customers report table.
- * Fetches /sm_customers once and exposes { customers, loading, error }. `error`
- * is a boolean; the view maps it to a translated message so i18n stays in the
- * component (§3, §5). Cancels on unmount.
+ * Delegates to the shared full-set fetch (useSmCustomerTree) so the endpoint has a
+ * single implementation; exposes { customers, loading, error, truncated }. `error`
+ * is a boolean; the view maps it to a translated message (§3, §5).
  */
-import type { AxiosResponse } from 'axios'
-import { unwrapList } from '@/lib/api'
+import { useSmCustomerTree } from '@/hooks/useSmCustomerTree'
 import type { ReportCustomer } from '@/types/reports'
-import { useAliveListFetch } from './useAliveListFetch'
 
-// Module-scope (stable reference) so useAliveListFetch's effect never sees it as a changed dep.
-const mapSmCustomersResponse = (res: AxiosResponse): ReportCustomer[] => unwrapList<ReportCustomer>(res).rows
-
-// Fetches Shiftmanager customers for the reports table.
-export function useReportCustomers(): { customers: ReportCustomer[]; loading: boolean; error: boolean } {
-  const { data: customers, loading, error } = useAliveListFetch('/sm_customers', mapSmCustomersResponse)
-  return { customers, loading, error }
+// Fetches all Shiftmanager customers for the reports table.
+export function useReportCustomers(): { customers: ReportCustomer[]; loading: boolean; error: boolean; truncated: boolean } {
+  return useSmCustomerTree()
 }

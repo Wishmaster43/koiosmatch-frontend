@@ -298,11 +298,38 @@ describe('EmailSettings · mailbox health statuses', () => {
     expect(screen.getByRole('button', { name: st('email.oauthConnect') })).toBeInTheDocument()
   })
 
-  it('tenant_policy shows the info text and no connect button', async () => {
+  it('tenant_policy shows the server message and offers a reconnect that requests the OAuth redirect', async () => {
+    loadSettings.mockResolvedValue({ [`email_${CONTEXT}_provider`]: 'gmail' })
+    mockedGet.mockResolvedValue({ data: { data: { connected: false, status: 'tenant_policy', provider: 'gmail', status_message: 'Schakel SmtpClientAuthentication in' } } })
+    renderPanel(CONTEXT)
+    expect(await screen.findByText('Schakel SmtpClientAuthentication in')).toBeInTheDocument()
+    const btn = screen.getByRole('button', { name: st('email.oauthConnect') })
+    mockedGet.mockClear()
+    await userEvent.click(btn)
+    await waitFor(() => expect(mockedGet).toHaveBeenCalledWith(`/settings/email/oauth/${CONTEXT}/redirect`, { params: { provider: 'gmail' } }))
+  })
+
+  it('tenant_policy without server text falls back to the translated SMTP sentence', async () => {
     loadSettings.mockResolvedValue({ [`email_${CONTEXT}_provider`]: 'gmail' })
     mockedGet.mockResolvedValue({ data: { data: { connected: false, status: 'tenant_policy', provider: 'gmail' } } })
     renderPanel(CONTEXT)
     expect(await screen.findByText(st('email.tenantPolicy'))).toBeInTheDocument()
-    expect(screen.queryByRole('button', { name: st('email.oauthConnect') })).not.toBeInTheDocument()
+    expect(st('email.tenantPolicy')).toMatch(/SMTP/)
+  })
+
+  it('real-shape tenant_policy (status_reason tenant_policy) renders the translated reason and the connect button', async () => {
+    loadSettings.mockResolvedValue({ [`email_${CONTEXT}_provider`]: 'gmail' })
+    mockedGet.mockResolvedValue({ data: { data: { connected: false, status: 'tenant_policy', status_reason: 'tenant_policy', provider: 'gmail' } } })
+    renderPanel(CONTEXT)
+    expect(await screen.findByText(st('email.oauthReasonTenantPolicy'))).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: st('email.oauthConnect') })).toBeInTheDocument()
+  })
+
+  it('a known status_reason renders the translated sentence, never the raw server text', async () => {
+    loadSettings.mockResolvedValue({ [`email_${CONTEXT}_provider`]: 'gmail' })
+    mockedGet.mockResolvedValue({ data: { data: { connected: false, status: 'needs_reconnect', status_reason: 'provider_denied', provider: 'gmail', status_message: 'Toegang geweigerd door aanbieder' } } })
+    renderPanel(CONTEXT)
+    expect(await screen.findByText(st('email.oauthReasonProviderDenied'))).toBeInTheDocument()
+    expect(screen.queryByText('Toegang geweigerd door aanbieder')).not.toBeInTheDocument()
   })
 })

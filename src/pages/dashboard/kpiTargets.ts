@@ -4,9 +4,10 @@
  */
 import type { KpiTarget } from '@/types/dashboard'
 
-export type TargetLineKind = 'progress' | 'reached' | 'over' | 'within' | 'monthOnly'
+export const TARGET_LINE_KINDS = ['progress', 'reached', 'over', 'within', 'monthOnly', 'monthOnlyMax'] as const
+export type TargetLineKind = (typeof TARGET_LINE_KINDS)[number]
 export type TargetTone = 'muted' | 'success' | 'warning'
-export interface TargetLine { kind: TargetLineKind; value: number | null; target: number }
+export interface TargetLine { kind: TargetLineKind; value: number; target: number }
 export interface TileTargetLine { text: string; tone: TargetTone }
 
 // Dashboard tile id -> tenant setting key in `kpi_targets` (only these five tiles carry a target).
@@ -22,14 +23,15 @@ export const TILE_TARGET_KEY: Record<string, string> = {
 export const PERCENT_TILES = new Set(['fillRate'])
 
 // Tone per kind: only reached (green) and over-maximum (orange) are coloured; progress is never an alarm (M1).
-const TONE: Record<TargetLineKind, TargetTone> = { progress: 'muted', reached: 'success', over: 'warning', within: 'muted', monthOnly: 'muted' }
+const TONE: Record<TargetLineKind, TargetTone> = { progress: 'muted', reached: 'success', over: 'warning', within: 'muted', monthOnly: 'muted', monthOnlyMax: 'muted' }
 export const targetTone = (kind: TargetLineKind): TargetTone => TONE[kind]
 
 // Classify one entry; absent, target-less or value-less entries draw nothing (no fake value).
 export function targetLine(entry: KpiTarget | undefined | null): TargetLine | null {
   if (!entry || entry.target == null || entry.value == null) return null
   const { value, target } = entry
-  if (entry.below_target == null) return { kind: 'monthOnly', value, target }
+  // No verdict (non-month period): a ceiling keeps its maximum wording, never a monthly-goal claim.
+  if (entry.below_target == null) return { kind: entry.comparison === 'lte' ? 'monthOnlyMax' : 'monthOnly', value, target }
   if (entry.comparison === 'gte') return { kind: entry.below_target ? 'progress' : 'reached', value, target }
   if (entry.comparison === 'lte') return { kind: entry.below_target ? 'over' : 'within', value, target }
   return null
@@ -45,7 +47,7 @@ interface FormatArgs {
 export function formatTargetLine(line: TargetLine, isPercent: boolean, { t, num, pct }: FormatArgs): TileTargetLine {
   const fmt = (v: number) => (isPercent ? pct(v) : num(v))
   return {
-    text: t(`kpi.target.${line.kind}`, { value: line.value == null ? '—' : fmt(line.value), target: fmt(line.target) }),
+    text: t(`kpi.target.${line.kind}`, { value: fmt(line.value), target: fmt(line.target) }),
     tone: targetTone(line.kind),
   }
 }

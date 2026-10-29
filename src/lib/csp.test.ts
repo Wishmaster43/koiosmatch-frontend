@@ -71,3 +71,12 @@ describe('buildCsp', () => {
     expect(policy.match(/api\.koiosmatch\.nl/g)?.length).toBe(2) // once in connect-src, once in img-src
   })
 })
+
+describe('buildCsp map tiles (M-004)', () => {
+  it('puts the configured tile origin in img-src and drops the OSM host', () => {
+    const policy = buildCsp({ VITE_MAP_TILE_URL: 'https://{s}.tiles.example.eu/{z}/{x}/{y}.png' })
+    expect(policy).toContain('https://*.tiles.example.eu')
+    expect(policy).not.toContain('openstreetmap.org')
+  })
+})
+

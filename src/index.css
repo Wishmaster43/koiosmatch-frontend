@@ -3,6 +3,7 @@
 @import '@fontsource/inter/400.css';
 @import '@fontsource/inter/500.css';
 @import '@fontsource/inter/600.css';
+@import '@fontsource/inter/700.css';
 @import '@fontsource/jetbrains-mono/400.css';
 @import '@fontsource/jetbrains-mono/500.css';
 
@@ -65,6 +66,9 @@
   --color-archive:       #B45309;
   --color-trash:         #64748B;
   --color-map:           #2563EB;
+  --color-map-pin-ring:  #FFFFFF; /* theme-invariant halo around map pins */
+  /* Auth pages backdrop (login, MFA and tenant walls): ONE 7% primary wash into --bg; redefined in dark because var(--bg) resolves where it is declared. */
+  --auth-backdrop: linear-gradient(160deg, color-mix(in srgb, var(--color-primary) 7%, var(--bg)) 0%, var(--bg) 55%);
 
   /* ── Module registry categorical palette (workflow builder canvas, §5 audit) ──
      One swatch per module family in src/modules/*.ts (`color` = node icon/border,
@@ -225,6 +229,7 @@
 }
 
 [data-theme="dark"] {
+  --auth-backdrop: linear-gradient(160deg, color-mix(in srgb, var(--color-primary) 7%, var(--bg)) 0%, var(--bg) 55%);
   /* Render native form controls (checkboxes, inputs, scrollbars) dark too. */
   color-scheme: dark;
   --sidebar-bg:     #1C1C2E;

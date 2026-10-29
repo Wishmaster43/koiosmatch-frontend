@@ -64,6 +64,21 @@ describe('RadiusMap', () => {
     expect(h.setPrefix).toHaveBeenCalledWith(false)
   })
 
+  it('takes the tile URL and attribution from lib/mapTiles', async () => {
+    const { mapTiles } = await import('@/lib/mapTiles')
+    render(<RadiusMap center={C} radiusKm={10} points={[]} />)
+    expect(h.tileLayer).toHaveBeenCalledWith(mapTiles.url, { attribution: mapTiles.attribution })
+  })
+
+  it('rings pins with the theme-invariant token, never a raw hex', () => {
+    render(<RadiusMap center={C} radiusKm={10} centerMarker={{ label: 'o' }} points={[{ id: 1, lat: 1, lng: 2, label: 'a' }]} />)
+    expect(h.circleMarker).toHaveBeenCalledTimes(2)
+    for (const call of h.circleMarker.mock.calls) {
+      expect(call[1].color).toBe('var(--color-map-pin-ring)')
+      expect(JSON.stringify(call[1])).not.toMatch(/#[0-9a-f]{3,6}/i)
+    }
+  })
+
   it('draws the circle at radiusKm * 1000', () => {
     render(<RadiusMap center={C} radiusKm={12} points={[]} />)
     expect(h.circle.mock.calls[0][1]).toMatchObject({ radius: 12000 })

@@ -6,10 +6,11 @@
   "kpi": {
     "target": {
       "progress": "{{value}} van {{target}}",
-      "reached": "Doel {{target}} gehaald",
-      "over": "Boven maximum {{target}}",
-      "within": "Maximum {{target}}",
-      "monthOnly": "Maanddoel {{target}}"
+      "reached": "{{value}} van {{target}}, doel gehaald",
+      "over": "{{value}}, boven maximum {{target}}",
+      "within": "{{value}} van maximum {{target}}",
+      "monthOnly": "{{value}}, maanddoel {{target}}",
+      "monthOnlyMax": "{{value}}, maximum {{target}}"
     },
     "candidatesTotal": "Totaal kandidaten",
     "inAts": "In het ATS",

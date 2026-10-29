@@ -101,3 +101,46 @@ describe('useSettingsForm · save error handling', () => {
     expect(vi.mocked(extractModule.extractApiError)).toHaveBeenCalled()
   })
 })
+
+// S-008: the BE stores booleans as '1'/'0'; every spelling must read back correctly.
+describe('useSettingsForm · boolean spellings and save round-trip', () => {
+  it('reads "1"/"0" onto boolean defaults and does not flip them on an unrelated save', async () => {
+    api.get.mockResolvedValue({ data: { flag_on: '1', flag_off: '0', note: 'a' } })
+    api.post.mockResolvedValue({})
+    const { result } = renderHook(() => useSettingsForm({ flag_on: false, flag_off: true, note: '' }))
+    await waitFor(() => expect(result.current.loading).toBe(false))
+    expect(result.current.values).toMatchObject({ flag_on: true, flag_off: false })
+    act(() => result.current.set('note', 'b'))
+    await act(async () => { await result.current.save() })
+    expect(api.post).toHaveBeenCalledWith('/settings', { flag_on: 'true', flag_off: 'false', note: 'b' })
+  })
+})
+
+// S-011: a cleared number falls back to the catalogue default after a successful save.
+describe('useSettingsForm · cleared value and 422 field errors', () => {
+  it('shows the default and is clean after saving a null value, POSTing blank', async () => {
+    api.get.mockResolvedValue({ data: { limit: '30' } })
+    api.post.mockResolvedValue({})
+    const { result } = renderHook(() => useSettingsForm({ limit: 60 }))
+    await waitFor(() => expect(result.current.loading).toBe(false))
+    act(() => result.current.set('limit', null))
+    await act(async () => { await result.current.save() })
+    expect(api.post).toHaveBeenCalledWith('/settings', { limit: '' })
+    expect(result.current.values.limit).toBe(60)
+    expect(result.current.dirty).toBe(false)
+  })
+
+  it('maps a 422 to fieldErrors, stays dirty and unsaved, and clears the error on edit', async () => {
+    api.get.mockResolvedValue({ data: { top_cities_n: '10' } })
+    api.post.mockRejectedValue({ response: { status: 422, data: { errors: { top_cities_n: ['must be at least 1'] } } } })
+    const { result } = renderHook(() => useSettingsForm({ top_cities_n: 10 }))
+    await waitFor(() => expect(result.current.loading).toBe(false))
+    act(() => result.current.set('top_cities_n', 0))
+    await act(async () => { await result.current.save() })
+    expect(result.current.fieldErrors.top_cities_n).toBe('must be at least 1')
+    expect(result.current.saved).toBe(false)
+    expect(result.current.dirty).toBe(true)
+    act(() => result.current.set('top_cities_n', 5))
+    expect(result.current.fieldErrors.top_cities_n).toBeUndefined()
+  })
+})

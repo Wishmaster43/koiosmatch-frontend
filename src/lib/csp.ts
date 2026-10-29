@@ -7,9 +7,11 @@
  * it only proxies /api and /sanctum to the local backend (vite.config.js).
  */
 
+import { resolveMapTiles, type MapTileEnv } from './mapTiles'
+
 // Env shape this builder reads — a subset of import.meta.env, passed in so the
 // function stays pure and testable outside the Vite build pipeline.
-interface CspEnv {
+interface CspEnv extends MapTileEnv {
   VITE_API_URL?: string
   VITE_WORKFLOW_API_URL?: string
   VITE_CSRF_URL?: string
@@ -61,9 +63,8 @@ export function buildCsp(env: CspEnv): string {
     ...connectOrigins,
   ].join(' ')
   // img-src includes the API origin(s) too (uploaded avatars/logos/documents),
-  // plus OSM's tile subdomains — every RadiusMap/leaflet surface loads tiles
-  // from https://{a,b,c}.tile.openstreetmap.org (RadiusMap.tsx).
-  const imgSrc = ["'self'", 'data:', 'blob:', 'https://*.tile.openstreetmap.org', ...connectOrigins].join(' ')
+  // plus the configured tile provider origin (mapTiles.ts; OSM only as fallback).
+  const imgSrc = ["'self'", 'data:', 'blob:', resolveMapTiles(env).origin, ...connectOrigins].filter(Boolean).join(' ')
 
   const directives = [
     "default-src 'self'",

@@ -963,7 +963,6 @@
     "dimension": "Dimensão",
     "weight": "Peso",
     "hard": "Rígido",
-    "hardHint": "Um critério rígido pode ativar a rejeição automática por IA.",
     "noCriteria": "Ainda não há critérios.",
     "criteriaCount_one": "{{count}} critério",
     "criteriaCount_other": "{{count}} critérios",
@@ -1160,12 +1159,12 @@
     "oauthReasonProviderDenied": "A ligação da caixa de correio falhou: o fornecedor recusou o acesso.",
     "oauthReasonTokenExchangeFailed": "A ligação da caixa de correio falhou: o fornecedor não emitiu um token de acesso. Tente novamente.",
     "oauthReasonStateInvalid": "A ligação da caixa de correio falhou: a sessão de ligação é inválida ou expirou. Inicie a ligação novamente.",
-    "oauthReasonTenantPolicy": "A ligação da caixa de correio falhou: a sua organização não permite uma caixa de correio própria.",
+    "oauthReasonTenantPolicy": "A ligação da caixa de correio falhou: o Microsoft 365 recusou o início de sessão porque o SMTP autenticado está desativado para a sua organização. Peça a um administrador do Microsoft 365 que o permita e ligue novamente a caixa de correio.",
     "oauthReasonSmtpAuthRefused": "A ligação da caixa de correio falhou: o servidor de correio recusou as credenciais.",
     "oauthReasonSmtpUnreachable": "A ligação da caixa de correio falhou: o servidor de correio não estava acessível. Tente novamente mais tarde.",
     "oauthReasonTenantNotReady": "A ligação da caixa de correio falhou: esta agência ainda não está totalmente configurada. Tente novamente mais tarde.",
     "needsReconnect": "A sua caixa de correio deixou de funcionar. Ligue-a novamente.",
-    "tenantPolicy": "A sua organização não permite uma caixa de correio própria.",
+    "tenantPolicy": "O Microsoft 365 recusou o início de sessão porque o SMTP autenticado está desativado para a sua organização.",
     "statusAt": "Última verificação: {{date}}"
   },
   "notifications": {

@@ -9,6 +9,7 @@ import { useEffect, useRef } from 'react'
 import L from 'leaflet'
 import 'leaflet/dist/leaflet.css'
 import './radiusMap.css'
+import { mapTiles } from '@/lib/mapTiles'
 import type { Id } from '@/types/common'
 
 export interface MapPoint { id: Id; lat: number; lng: number; label: string; sub?: string; color?: string }
@@ -49,14 +50,12 @@ export default function RadiusMap({ center, radiusKm, points, onCenterChange, on
   // Keep the latest callbacks in refs so the map's click handlers never go stale.
   useEffect(() => { onCenterRef.current = onCenterChange; onPickRef.current = onPickPoint })
 
-  // Mount: create the map, OSM tiles, click-to-recentre and the shared layer group.
+  // Mount: create the map, provider tiles, click-to-recentre and the shared layer group.
   useEffect(() => {
     if (!elRef.current) return undefined
     const map = L.map(elRef.current, { center: [initialCenter.current.lat, initialCenter.current.lng], zoom: 9 })
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-      attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
-    }).addTo(map)
-    // Danny 08-09: drop Leaflet's own prefix; the OSM credit stays (ODbL tile licence).
+    L.tileLayer(mapTiles.url, { attribution: mapTiles.attribution }).addTo(map)
+    // Danny 08-09: drop Leaflet's own prefix; the provider credit stays (tile licence).
     map.attributionControl?.setPrefix(false)
     map.on('click', (e: L.LeafletMouseEvent) => onCenterRef.current?.(e.latlng.lat, e.latlng.lng))
     const layer = L.layerGroup()
@@ -77,14 +76,15 @@ export default function RadiusMap({ center, radiusKm, points, onCenterChange, on
     const origin: L.LatLngExpression = [center.lat, center.lng]
     // The search radius around the chosen centre — the fixed, tenant-invariant map token (§4).
     layer.addLayer(L.circle(origin, { radius: radiusKm * 1000, color: 'var(--color-map)', fillColor: 'var(--color-map)', fillOpacity: 0.08, weight: 1.5 }))
+    // Pin rings use a fixed white halo token so pins stay legible on untinted tiles in both themes.
     // Origin pin — bigger, primary-filled, so it reads apart from result pins.
     if (centerMarker) {
-      const pin = L.circleMarker(origin, { radius: 10, color: '#fff', weight: 2.5, fillColor: 'var(--color-primary)', fillOpacity: 1 })
+      const pin = L.circleMarker(origin, { radius: 10, color: 'var(--color-map-pin-ring)', weight: 2.5, fillColor: 'var(--color-primary)', fillOpacity: 1 })
       pin.bindTooltip(tooltipContent(centerMarker.label, centerMarker.sub), { direction: 'top', offset: [0, -8] })
       layer.addLayer(pin)
     }
     points.forEach(p => {
-      const pin = L.circleMarker([p.lat, p.lng], { radius: 7, color: '#fff', weight: 1.5, fillColor: p.color ?? 'var(--color-map)', fillOpacity: 0.95 })
+      const pin = L.circleMarker([p.lat, p.lng], { radius: 7, color: 'var(--color-map-pin-ring)', weight: 1.5, fillColor: p.color ?? 'var(--color-map)', fillOpacity: 0.95 })
       pin.bindTooltip(tooltipContent(p.label, p.sub), { direction: 'top', offset: [0, -6] })
       // Vector layers bubble clicks to the map, so stop it: opening a result must not move the search origin.
       if (onPickRef.current) pin.on('click', (e: L.LeafletMouseEvent) => { L.DomEvent.stopPropagation(e); onPickRef.current?.(p.id) })

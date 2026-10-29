@@ -6,10 +6,11 @@
   "kpi": {
     "target": {
       "progress": "{{value}} de {{target}}",
-      "reached": "Meta {{target}} atingida",
-      "over": "Acima do máximo {{target}}",
-      "within": "Máximo {{target}}",
-      "monthOnly": "Meta mensal {{target}}"
+      "reached": "{{value}} de {{target}}, meta atingida",
+      "over": "{{value}}, acima do máximo {{target}}",
+      "within": "{{value}} de um máximo de {{target}}",
+      "monthOnly": "{{value}}, meta mensal {{target}}",
+      "monthOnlyMax": "{{value}}, máximo {{target}}"
     },
     "candidatesTotal": "Total de candidatos",
     "inAts": "No ATS",
