@@ -454,5 +454,11 @@
     "confirm": "Effacer définitivement",
     "success": "Les données personnelles ont été effacées.",
     "erasedNotice": "Les données personnelles de cet employé ont été effacées le {{date}}. Une nouvelle synchronisation avec Shiftmanager ne les rétablit pas."
+  },
+  "aiOptOut": {
+    "label": "IA et WhatsApp autorisés",
+    "help": "Désactivez si cet employé s'oppose au traitement par IA et aux messages WhatsApp. Seul ce commutateur le modifie.",
+    "failed": "Le paramètre n'a pas pu être enregistré.",
+    "erasedHint": "Pour un employé effacé, ce réglage est toujours désactivé."
   }
 }

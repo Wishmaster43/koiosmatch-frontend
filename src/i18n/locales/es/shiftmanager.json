@@ -454,5 +454,11 @@
     "confirm": "Borrar definitivamente",
     "success": "Los datos personales se han borrado.",
     "erasedNotice": "Los datos personales de este empleado se borraron el {{date}}. Una nueva sincronización con Shiftmanager no los recupera."
+  },
+  "aiOptOut": {
+    "label": "IA y WhatsApp permitidos",
+    "help": "Desactívalo si este empleado se opone al tratamiento por IA y a los mensajes de WhatsApp. Solo este interruptor lo cambia.",
+    "failed": "No se pudo guardar el ajuste.",
+    "erasedHint": "Para un empleado borrado esto está siempre desactivado."
   }
 }

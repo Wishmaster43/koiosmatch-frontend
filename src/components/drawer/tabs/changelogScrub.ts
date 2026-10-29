@@ -10,15 +10,15 @@ export function isScrubbedActivity(bag: unknown): boolean {
   return !!bag && typeof bag === 'object' && !Array.isArray(bag) && (bag as { scrubbed?: unknown }).scrubbed === true
 }
 
-// Reads the scrub marker off an event's properties first, then changes — mirrors the
-// changesOf()/buildH2ChangelogLine() precedence already used for this same payload.
+// Reads the scrub marker off an event's changes first, then properties — the same
+// precedence as changesOf() in EntityChangelogTab, so both read one bag.
 export function scrubbedBagOf(ev: ChangelogEvent): unknown {
-  const bag = ev.properties ?? ev.changes
+  const bag = ev.changes ?? ev.properties
   return isScrubbedActivity(bag) ? bag : undefined
 }
 
 // Which i18n key renders the neutral line — the AVG-erasure reason gets its own
 // wording, anything else (future scrub reasons) falls back to the generic key.
-export function scrubReasonKey(reason: unknown): 'changelog.scrubbedErasure' | 'changelog.scrubbed' {
-  return reason === 'avg_erasure_request' ? 'changelog.scrubbedErasure' : 'changelog.scrubbed'
+export function scrubReasonKey(reason: unknown): 'common:changelogScrubbedErasure' | 'common:changelogScrubbed' {
+  return reason === 'avg_erasure_request' ? 'common:changelogScrubbedErasure' : 'common:changelogScrubbed'
 }

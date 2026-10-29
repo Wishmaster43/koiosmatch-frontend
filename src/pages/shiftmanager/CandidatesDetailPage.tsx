@@ -35,6 +35,9 @@ import CalloutBox from '@/components/ui/CalloutBox'
 import { formatDateOnly } from '@/lib/localDate'
 import { useAuth } from '@/context/AuthContext'
 import { useSmEmployeeErase } from './hooks/useSmEmployeeErase'
+import { useSmEmployeeAiOptOut } from './hooks/useSmEmployeeAiOptOut'
+import { BodyText, Caption } from '@/components/ui/typography'
+import Toggle from '@/components/ui/Toggle'
 import { useRightPanel } from '@/context/RightPanelContext'
 import type { ReportCandidate } from '@/types/reports'
 
@@ -80,6 +83,11 @@ export default function CandidatesDetailPage() {
   const erase = useSmEmployeeErase(detail?.id, () => setDetail(null), tSm('erase.success'))
   // An erased employee says when it happened and offers no second erase (a no-op button, §3).
   const erasedAt = detail ? erasedAtOf(detail) : null
+  // H-003: the staff opt-out switch (the only writer of ai_enabled); needs candidates.update, locked once erased.
+  const canUpdate = (auth?.hasPermission ?? (() => false))('candidates.update')
+  const serverAi = typeof detail?.ai_enabled === 'boolean' ? detail.ai_enabled : undefined
+  const aiOptOut = useSmEmployeeAiOptOut(detail?.id, serverAi, tSm('aiOptOut.failed'))
+  const showAiToggle = canUpdate && aiOptOut.enabled !== undefined
 
   // Single-value status toggle — clicking the same status again clears it (mirrors
   // the native candidates page's donut/KPI pick-one behaviour).
@@ -183,8 +191,20 @@ export default function CandidatesDetailPage() {
       )}
       {detail && (
         <CandidateDetailDrawer candidate={detail} onClose={() => setDetail(null)}
-          notice={erasedAt ? (
-            <CalloutBox variant="info">{tSm('erase.erasedNotice', { date: formatDateOnly(erasedAt) })}</CalloutBox>
+          notice={(erasedAt || showAiToggle) ? (
+            <>
+              {erasedAt && <CalloutBox variant="info">{tSm('erase.erasedNotice', { date: formatDateOnly(erasedAt) })}</CalloutBox>}
+              {showAiToggle && (
+                <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-2)', marginTop: erasedAt ? 'var(--space-2)' : 0 }}>
+                  <Toggle checked={Boolean(aiOptOut.enabled)} onChange={aiOptOut.setEnabled} disabled={Boolean(erasedAt) || aiOptOut.saving}
+                    ariaLabel={tSm('aiOptOut.label')} describedBy="sm-ai-optout-help" />
+                  <div>
+                    <BodyText as="div">{tSm('aiOptOut.label')}</BodyText>
+                    <Caption id="sm-ai-optout-help">{erasedAt ? tSm('aiOptOut.erasedHint') : tSm('aiOptOut.help')}</Caption>
+                  </div>
+                </div>
+              )}
+            </>
           ) : undefined}
           headerActions={canErase && detail.id != null && !erasedAt ? (
             <Button variant="dangerSoft" size="sm" onClick={erase.open}>{tSm('erase.button')}</Button>

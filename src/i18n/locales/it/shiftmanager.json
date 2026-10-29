@@ -457,5 +457,11 @@
     "confirm": "Cancella definitivamente",
     "success": "I dati personali sono stati cancellati.",
     "erasedNotice": "I dati personali di questo dipendente sono stati cancellati il {{date}}. Una nuova sincronizzazione con Shiftmanager non li ripristina."
+  },
+  "aiOptOut": {
+    "label": "IA e WhatsApp consentiti",
+    "help": "Disattiva se questo dipendente si oppone al trattamento tramite IA e ai messaggi WhatsApp. Solo questo interruttore lo modifica.",
+    "failed": "Impossibile salvare l'impostazione.",
+    "erasedHint": "Per un dipendente cancellato è sempre disattivato."
   }
 }

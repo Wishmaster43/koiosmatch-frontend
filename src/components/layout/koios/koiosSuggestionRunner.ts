@@ -9,7 +9,7 @@
  */
 import { useTranslation } from 'react-i18next'
 import { createdRefFromToolResult } from './koiosToolResult'
-import { extractApiError } from '@/lib/extractApiError'
+import { apiErrorMessage } from '@/lib/extractApiError'
 import { useNavigation } from '@/context/NavigationContext'
 import { pageForResultRef } from './koiosResultLinks'
 import { TOOL_FOLLOW_UP } from './koiosSuggestionMeta'
@@ -50,7 +50,7 @@ export function useRun(setExec: (s: ExecState) => void, onDone?: (navigate?: Nav
       }
     } catch (err) {
       const errBody = (err as { response?: { data?: { data?: { budget?: ActionBudget } } } })?.response?.data
-      setExec({ phase: 'error', message: extractApiError(err, t('koios.pendingAction.error')), budget: errBody?.data?.budget })
+      setExec({ phase: 'error', message: apiErrorMessage(err, t, t('koios.pendingAction.error')), budget: errBody?.data?.budget })
     }
   }
 }
@@ -98,7 +98,7 @@ export function useStageAndConfirm(setExec: (s: ExecState) => void, run: ReturnT
         setExec({ phase: 'error', message: body?.message ?? t('koios.pendingAction.error') })
       }
     } catch (err) {
-      setExec({ phase: 'error', message: extractApiError(err, t('koios.pendingAction.error')) })
+      setExec({ phase: 'error', message: apiErrorMessage(err, t, t('koios.pendingAction.error')) })
     }
   }
 }

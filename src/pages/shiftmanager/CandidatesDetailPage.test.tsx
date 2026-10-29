@@ -44,9 +44,9 @@ vi.mock('@/lib/api', async () => {
 })
 
 // Permission set is mutable so the erase gate (H-003) can be exercised both ways.
-const perms = vi.hoisted(() => ({ erase: false }))
+const perms = vi.hoisted(() => ({ erase: false, update: false }))
 vi.mock('@/context/AuthContext', () => ({
-  useAuth: () => ({ refreshUser: vi.fn(), activeTenant: null, user: null, hasPermission: (p: string) => p === 'privacy.erase' && perms.erase }),
+  useAuth: () => ({ refreshUser: vi.fn(), activeTenant: null, user: null, hasPermission: (p: string) => (p === 'privacy.erase' && perms.erase) || (p === 'candidates.update' && perms.update) }),
 }))
 
 function renderPage() {
@@ -133,5 +133,43 @@ describe('CandidatesDetailPage · an erased SM employee', () => {
     await openAnyRow()
     expect(await screen.findByRole('button', { name: ERASE_BUTTON })).toBeInTheDocument()
     expect(screen.queryByText(NOTICE)).toBeNull()
+  })
+})
+
+// H-003: the staff AI/WhatsApp opt-out switch — the only writer of ai_enabled.
+describe('CandidatesDetailPage · SM employee ai_enabled switch (ONIX H-003)', () => {
+  const SWITCH = { name: /aiOptOut\.label|AI and WhatsApp allowed|AI en WhatsApp toegestaan/i }
+  const openAnyRow = async () => {
+    renderPage()
+    await waitFor(() => {
+      Array.from(document.querySelectorAll('tbody tr')).forEach(r => fireEvent.click(r))
+      expect(screen.getByRole('dialog')).toBeInTheDocument()
+    })
+  }
+  afterEach(() => { perms.update = false; rows.forEach(r => { delete (r as Record<string, unknown>).ai_enabled; delete (r as Record<string, unknown>).erased_at }) })
+
+  it('PATCHes /sm_candidates/{id} with { ai_enabled: false } for a permitted user', async () => {
+    perms.update = true
+    rows.forEach(r => { (r as Record<string, unknown>).ai_enabled = true })
+    const api = (await import('@/lib/api')).default as unknown as { patch: ReturnType<typeof vi.fn> }
+    api.patch = vi.fn().mockResolvedValue({ data: { data: { ai_enabled: false } } })
+    await openAnyRow()
+    fireEvent.click(await screen.findByRole('switch', SWITCH))
+    await waitFor(() => expect(api.patch).toHaveBeenCalledWith(expect.stringMatching(/^\/sm_candidates\/\d$/), { ai_enabled: false }))
+  })
+
+  it('is absent without candidates.update', async () => {
+    perms.update = false
+    rows.forEach(r => { (r as Record<string, unknown>).ai_enabled = true })
+    await openAnyRow()
+    expect(screen.queryByRole('switch', SWITCH)).toBeNull()
+  })
+
+  it('is disabled on an erased employee', async () => {
+    perms.update = true
+    rows.forEach(r => { (r as Record<string, unknown>).ai_enabled = false; (r as Record<string, unknown>).erased_at = '2026-10-23T10:00:00Z' })
+    await openAnyRow()
+    expect(await screen.findByRole('switch', SWITCH)).toBeDisabled()
+    expect(screen.getByText(/aiOptOut\.erasedHint|always off for an erased|altijd uit/i)).toBeInTheDocument()
   })
 })

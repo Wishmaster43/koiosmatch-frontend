@@ -300,7 +300,7 @@
       "extraEducations_other": "The CV also contains {{count}} educations. Add them in the dossier after creating the candidate.",
       "noFreeText": "Free text from the CV (summary, motivation, personal notes) is deliberately not copied over.",
       "error": {
-        "notPdf": "Only a pdf, jpg, png, gif, webp, docx or xlsx file can be read.",
+        "notPdf": "This file type is not supported. Allowed: pdf, doc, docx, jpg, jpeg or png.",
         "tooLarge": "This file is larger than 10 MB.",
         "storageUnavailable": "The CV could not be stored: storage is temporarily unavailable. Please try again.",
         "throttled": "Too many CVs in a row. Wait a minute and try again.",
@@ -326,7 +326,6 @@
   "drawer": {
     "subjectExport": "Export personal data (right of access)",
     "subjectExportStarted": "Export started: the download opens in a new tab.",
-    "subjectExportQueued": "Export started: the download follows through the notifications.",
     "subjectExportFailed": "The personal data export failed.",
     "availability": "Availability",
     "label": "Candidate",
@@ -1001,8 +1000,6 @@
     "axisPhase": "Phase",
     "reasonGiven": "reason given",
     "effectiveFrom": "as of {{date}}",
-    "scrubbedErasure": "Data erased at the data subject's request (GDPR)",
-    "scrubbed": "Data erased (GDPR)",
     "actions": {
       "updated": "Updated",
       "created": "Created",
@@ -1527,6 +1524,7 @@
       "eraseAt": " · Will be deleted on {{date}}",
       "consentRefusedByReply": "Candidate refused all contact by message ({{channels}})",
       "consentRefusedByLink": "Candidate unsubscribed from relationship mail via the unsubscribe link",
+      "consentGrantedByReply": "Candidate granted consent for contact by message ({{channel}})",
       "channelWhatsapp": "WhatsApp",
       "channelEmail": "email"
     }

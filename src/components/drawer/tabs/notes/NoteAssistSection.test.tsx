@@ -3,10 +3,10 @@
  * REQUEST body per mode (process/summarize_process, with known_items),
  * the per-mode apply semantics for the TEXT half, and that the ITEMS half is
  * handed to the host via onItems the moment a combined result lands —
- * independent of the text's own Overnemen/Verwerpen.
+ * independent of the text's own apply/discard.
  *
- * DEFAULT-VALUE-1 (Danny 07-08): every button/label carries a Dutch
- * `defaultValue` (no i18n instance in this test tree, so that IS what renders).
+ * DEFAULTVALUE-NL-1: no i18n instance in this test tree, so labels render as
+ * their key (notesAssist.*); the source carries no defaultValue and no _NL constant.
  *
  * The mock is reset INLINE at the top of each test (repo precedent — see the
  * file's own prior version for the Vitest quirk this works around).
@@ -29,7 +29,7 @@ describe('NoteAssistSection · request per mode', () => {
     const user = userEvent.setup()
     vi.mocked(assistNote).mockResolvedValue({ kind: 'combined', text: 'Better.', items: [] })
     render(<NoteAssistSection body="<p>Original</p>" onApply={vi.fn()} language="en" />)
-    await user.click(screen.getByRole('button', { name: 'Verwerken' }))
+    await user.click(screen.getByRole('button', { name: 'notesAssist.process' }))
     expect(assistNote).toHaveBeenCalledWith({ text: '<p>Original</p>', language: 'en', mode: 'process', knownItems: undefined }, expect.anything())
   })
 
@@ -38,7 +38,7 @@ describe('NoteAssistSection · request per mode', () => {
     const user = userEvent.setup()
     vi.mocked(assistNote).mockResolvedValue({ kind: 'combined', text: 'Summary.', items: [] })
     render(<NoteAssistSection body="<p>Original</p>" onApply={vi.fn()} />)
-    await user.click(screen.getByRole('button', { name: 'Samenvatten' }))
+    await user.click(screen.getByRole('button', { name: 'notesAssist.summarizeProcess' }))
     expect(assistNote).toHaveBeenCalledWith(expect.objectContaining({ mode: 'summarize_process' }), expect.anything())
   })
 
@@ -48,7 +48,7 @@ describe('NoteAssistSection · request per mode', () => {
     vi.mocked(assistNote).mockResolvedValue({ kind: 'combined', text: 'Better.', items: [] })
     const known = [{ title: 'Bel terug', type: 'task' }]
     render(<NoteAssistSection body="<p>Original</p>" onApply={vi.fn()} knownItems={known} />)
-    await user.click(screen.getByRole('button', { name: 'Verwerken' }))
+    await user.click(screen.getByRole('button', { name: 'notesAssist.process' }))
     expect(assistNote).toHaveBeenCalledWith(expect.objectContaining({ knownItems: known }), expect.anything())
   })
 
@@ -61,49 +61,49 @@ describe('NoteAssistSection · request per mode', () => {
   it('is genuinely enabled the moment the note has text — no hidden gate beyond hasText', () => {
     vi.mocked(assistNote).mockReset()
     render(<NoteAssistSection body="<p>Real note text</p>" onApply={vi.fn()} />)
-    expect(screen.getByRole('button', { name: 'Verwerken' })).toBeEnabled()
-    expect(screen.getByRole('button', { name: 'Samenvatten' })).toBeEnabled()
+    expect(screen.getByRole('button', { name: 'notesAssist.process' })).toBeEnabled()
+    expect(screen.getByRole('button', { name: 'notesAssist.summarizeProcess' })).toBeEnabled()
     expect(screen.queryByText('notesAssist.needsText')).toBeNull()
   })
 
   it('disables both mode buttons while the note body is empty, with a VISIBLE (non-hover-only) reason', () => {
     vi.mocked(assistNote).mockReset()
     render(<NoteAssistSection body="" onApply={vi.fn()} />)
-    expect(screen.getByRole('button', { name: 'Verwerken' })).toBeDisabled()
-    expect(screen.getByRole('button', { name: 'Samenvatten' })).toBeDisabled()
+    expect(screen.getByRole('button', { name: 'notesAssist.process' })).toBeDisabled()
+    expect(screen.getByRole('button', { name: 'notesAssist.summarizeProcess' })).toBeDisabled()
     expect(screen.getByText('notesAssist.needsText')).toBeInTheDocument()
   })
 })
 
-describe('NoteAssistSection · Overnemen (apply) semantics for the text half', () => {
-  it('process REPLACES the body on Overnemen, never auto-applies before the click', async () => {
+describe('NoteAssistSection · apply semantics for the text half', () => {
+  it('process REPLACES the body on apply, never auto-applies before the click', async () => {
     vi.mocked(assistNote).mockReset()
     const user = userEvent.setup()
     vi.mocked(assistNote).mockResolvedValue({ kind: 'combined', text: 'Rewritten.', items: [] })
     const onApply = vi.fn()
     render(<NoteAssistSection body="<p>Original</p>" onApply={onApply} />)
-    await user.click(screen.getByRole('button', { name: 'Verwerken' }))
+    await user.click(screen.getByRole('button', { name: 'notesAssist.process' }))
     await screen.findByText('Rewritten.')
     expect(onApply).not.toHaveBeenCalled()
-    await user.click(screen.getByRole('button', { name: 'Overnemen' }))
+    await user.click(screen.getByRole('button', { name: 'notesAssist.apply' }))
     expect(onApply).toHaveBeenCalledWith('<p>Rewritten.</p>')
   })
 
-  it('summarize_process APPENDS below the existing body on Overnemen', async () => {
+  it('summarize_process APPENDS below the existing body on apply', async () => {
     vi.mocked(assistNote).mockReset()
     const user = userEvent.setup()
     vi.mocked(assistNote).mockResolvedValue({ kind: 'combined', text: 'Summary.', items: [] })
     const onApply = vi.fn()
     render(<NoteAssistSection body="<p>Original</p>" onApply={onApply} />)
-    await user.click(screen.getByRole('button', { name: 'Samenvatten' }))
+    await user.click(screen.getByRole('button', { name: 'notesAssist.summarizeProcess' }))
     await screen.findByText('Summary.')
-    await user.click(screen.getByRole('button', { name: 'Overnemen' }))
+    await user.click(screen.getByRole('button', { name: 'notesAssist.apply' }))
     expect(onApply).toHaveBeenCalledWith('<p>Original</p><p>Summary.</p>')
   })
 })
 
 describe('NoteAssistSection · items hand-off (onItems)', () => {
-  it('hands the combined result\'s items to the host the moment they arrive — not gated by Overnemen', async () => {
+  it('hands the combined result\'s items to the host the moment they arrive — not gated by apply', async () => {
     vi.mocked(assistNote).mockReset()
     const user = userEvent.setup()
     const items = [{ title: 'Bel terug', type: 'task' as const, due_date: null, note_excerpt: null }]
@@ -111,10 +111,10 @@ describe('NoteAssistSection · items hand-off (onItems)', () => {
     const onItems = vi.fn()
     const onApply = vi.fn()
     render(<NoteAssistSection body="<p>Original</p>" onApply={onApply} onItems={onItems} />)
-    await user.click(screen.getByRole('button', { name: 'Verwerken' }))
+    await user.click(screen.getByRole('button', { name: 'notesAssist.process' }))
     await screen.findByText('Rewritten.')
     expect(onItems).toHaveBeenCalledWith(items)
-    // The text still needs its own explicit Overnemen — items are independent.
+    // The text still needs its own explicit apply — items are independent.
     expect(onApply).not.toHaveBeenCalled()
   })
 
@@ -125,10 +125,10 @@ describe('NoteAssistSection · items hand-off (onItems)', () => {
     vi.mocked(assistNote).mockResolvedValue({ kind: 'combined', text: 'Rewritten.', items })
     const onItems = vi.fn()
     render(<NoteAssistSection body="<p>Original</p>" onApply={vi.fn()} onItems={onItems} />)
-    await user.click(screen.getByRole('button', { name: 'Verwerken' }))
+    await user.click(screen.getByRole('button', { name: 'notesAssist.process' }))
     await screen.findByText('Rewritten.')
     expect(onItems).toHaveBeenCalledTimes(1)
-    await user.click(screen.getByRole('button', { name: 'Verwerpen' }))
+    await user.click(screen.getByRole('button', { name: 'notesAssist.discard' }))
     expect(onItems).toHaveBeenCalledTimes(1)
   })
 })
@@ -140,10 +140,10 @@ describe('NoteAssistSection · failure', () => {
     vi.mocked(assistNote).mockRejectedValue({ response: { status: 402, data: { message: 'Budget op.' } } })
     const onApply = vi.fn()
     render(<NoteAssistSection body="<p>Original</p>" onApply={onApply} />)
-    await user.click(screen.getByRole('button', { name: 'Verwerken' }))
+    await user.click(screen.getByRole('button', { name: 'notesAssist.process' }))
     expect(await screen.findByText('Budget op.')).toBeInTheDocument()
     expect(onApply).not.toHaveBeenCalled()
-    expect(screen.getByRole('button', { name: 'Verwerken' })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'notesAssist.process' })).toBeInTheDocument()
   })
 })
 
@@ -156,9 +156,9 @@ describe('NoteAssistSection — feedback thumbs (note_assist surface)', () => {
     const user = userEvent.setup()
     vi.mocked(assistNote).mockResolvedValue({ kind: 'combined', text: 'Better.', items: [], promptLogId: 'pl-9' })
     render(<NoteAssistSection body="<p>Original</p>" onApply={vi.fn()} language="en" />)
-    await user.click(screen.getByRole('button', { name: 'Verwerken' }))
+    await user.click(screen.getByRole('button', { name: 'notesAssist.process' }))
     await screen.findByText('Better.')
-    expect(screen.getByRole('button', { name: 'Nuttig' })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'koios.feedback.up' })).toBeInTheDocument()
   })
 
   it('stays calm when the assist result has no promptLogId', async () => {
@@ -166,8 +166,17 @@ describe('NoteAssistSection — feedback thumbs (note_assist surface)', () => {
     const user = userEvent.setup()
     vi.mocked(assistNote).mockResolvedValue({ kind: 'combined', text: 'Zonder log.', items: [] })
     render(<NoteAssistSection body="<p>Original</p>" onApply={vi.fn()} language="en" />)
-    await user.click(screen.getByRole('button', { name: 'Verwerken' }))
+    await user.click(screen.getByRole('button', { name: 'notesAssist.process' }))
     await screen.findByText('Zonder log.')
-    expect(screen.queryByRole('button', { name: 'Nuttig' })).not.toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: 'koios.feedback.up' })).not.toBeInTheDocument()
+  })
+})
+
+// Guard: the component source must stay free of Dutch fallback copy.
+describe('NoteAssistSection source', () => {
+  it('has no defaultValue and no _NL constant', async () => {
+    const { default: src } = await import('./NoteAssistSection.tsx?raw')
+    expect(src).not.toMatch(/defaultValue/)
+    expect(src).not.toMatch(/_NL\b/)
   })
 })

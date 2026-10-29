@@ -300,7 +300,7 @@
       "extraEducations_other": "Het cv bevat ook {{count}} opleidingen. Voeg die toe in het dossier nadat de kandidaat is aangemaakt.",
       "noFreeText": "Vrije tekst uit het cv (samenvatting, motivatie, toelichting) wordt bewust niet overgenomen.",
       "error": {
-        "notPdf": "Alleen een pdf-, jpg-, png-, gif-, webp-, docx- of xlsx-bestand kan gelezen worden.",
+        "notPdf": "Dit bestandstype wordt niet ondersteund. Toegestaan: pdf, doc, docx, jpg, jpeg of png.",
         "tooLarge": "Dit bestand is groter dan 10 MB.",
         "storageUnavailable": "Het cv kon niet worden opgeslagen: de opslag is tijdelijk niet beschikbaar. Probeer het opnieuw.",
         "throttled": "Te veel cv's achter elkaar. Wacht een minuut en probeer het opnieuw.",
@@ -326,7 +326,6 @@
   "drawer": {
     "subjectExport": "Exporteer persoonsgegevens (inzagerecht)",
     "subjectExportStarted": "Export gestart: de download opent in een nieuw tabblad.",
-    "subjectExportQueued": "Export gestart: de download volgt via de meldingen.",
     "subjectExportFailed": "De export van persoonsgegevens is mislukt.",
     "availability": "Beschikbaarheid",
     "label": "Kandidaat",
@@ -1001,8 +1000,6 @@
     "axisPhase": "Fase",
     "reasonGiven": "reden opgegeven",
     "effectiveFrom": "per {{date}}",
-    "scrubbedErasure": "Gegevens verwijderd op verzoek van de betrokkene (AVG)",
-    "scrubbed": "Gegevens verwijderd (AVG)",
     "actions": {
       "updated": "Bijgewerkt",
       "created": "Aangemaakt",
@@ -1527,6 +1524,7 @@
       "eraseAt": " · Wordt gewist op {{date}}",
       "consentRefusedByReply": "Kandidaat heeft per bericht alle contact geweigerd ({{channels}})",
       "consentRefusedByLink": "Kandidaat heeft zich via de afmeldlink afgemeld voor relatiemails",
+      "consentGrantedByReply": "Kandidaat heeft per bericht toestemming gegeven voor contact ({{channel}})",
       "channelWhatsapp": "WhatsApp",
       "channelEmail": "e-mail"
     }

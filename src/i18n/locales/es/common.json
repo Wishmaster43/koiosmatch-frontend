@@ -1,4 +1,6 @@
 {
+  "changelogScrubbedErasure": "Datos eliminados a petición del interesado (RGPD)",
+  "changelogScrubbed": "Datos eliminados (RGPD)",
   "trash": {
     "view": "Papelera",
     "markAction": "Eliminar definitivamente",

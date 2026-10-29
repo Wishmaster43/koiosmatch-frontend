@@ -57,15 +57,12 @@ interface NoteAssistSectionProps {
   // request's `source.note_id` by the host's action panel; unused here directly.
   noteId?: string
   // A combined result's items, handed to the host the moment they arrive —
-  // NEVER gated behind the text's own Overnemen/Verwerpen decision.
+  // NEVER gated behind the text's own apply/discard decision.
   onItems?: (items: AssistActionItem[]) => void
   // The panel's current items (title+type), sent as `known_items` so the
   // model dedupes instead of re-suggesting the same thing twice.
   knownItems?: AssistKnownItem[]
 }
-
-// Dutch fallback copy (DEFAULT-VALUE-1) — mode button label.
-const MODE_LABEL_NL: Record<AssistCombinedMode, string> = { process: 'Verwerken', summarize_process: 'Samenvatten' }
 
 // Two buttons — icon + i18n key share the mode name.
 const MODES: { mode: AssistCombinedMode; icon: typeof Wand2 }[] = [
@@ -90,11 +87,11 @@ export default function NoteAssistSection({ body, onApply, language, onItems, kn
   const plainBody = toPlainText(body)
 
   // The items half of a combined result — handed to the host as soon as it
-  // lands, regardless of the text half's Overnemen/Verwerpen fate. Guarded
+  // lands, regardless of the text half's apply/discard fate. Guarded
   // against re-firing on an unrelated re-render (same result object).
   const handedRef = useRef<unknown>(null)
   // Hand the items half to the host as soon as it lands, independent of the text
-  // half's Overnemen/Verwerpen fate; guarded so an unrelated re-render never re-fires on the same result.
+  // half's apply/discard fate; guarded so an unrelated re-render never re-fires on the same result.
   useEffect(() => {
     if (status === 'success' && result && result.kind === 'combined' && handedRef.current !== result) {
       handedRef.current = result
@@ -103,7 +100,7 @@ export default function NoteAssistSection({ body, onApply, language, onItems, kn
     }
   }, [status, result, onItems])
 
-  // "Overnemen" — apply the TEXT half only (process replaces, summarize_process
+  // "apply" — apply the TEXT half only (process replaces, summarize_process
   // appends — see richTextAssistApply), then clear the suggestion.
   const handleApply = () => {
     if (!result || !mode || mode === 'generate') return
@@ -115,7 +112,7 @@ export default function NoteAssistSection({ body, onApply, language, onItems, kn
     <div>
       <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 6 }}>
         <KoiosAiMark size={15} />
-        <GroupLabel>{t('notesAssist.title', { defaultValue: 'Koios AI' })}</GroupLabel>
+        <GroupLabel>{t('notesAssist.title')}</GroupLabel>
         <div style={{ flex: 1 }} />
         <NoteKoiosModeToggle />
       </div>
@@ -125,7 +122,7 @@ export default function NoteAssistSection({ body, onApply, language, onItems, kn
             onClick={() => run(m, body, knownItems ?? (localItems.length ? localItems.map(it => ({ title: it.title, type: it.type })) : undefined))} disabled={loading || !hasText}
             title={hasText ? undefined : t('notesAssist.needsText')}>
             {loading && mode === m ? <Spinner size={12} /> : <Icon size={12} />}
-            {t(`notesAssist.${m === 'process' ? 'process' : 'summarizeProcess'}`, { defaultValue: MODE_LABEL_NL[m] })}
+            {t(`notesAssist.${m === 'process' ? 'process' : 'summarizeProcess'}`)}
           </Button>
         ))}
       </div>
@@ -142,8 +139,8 @@ export default function NoteAssistSection({ body, onApply, language, onItems, kn
       )}
 
       {/* Panel-less hosts: the items half renders through the SHARED execute
-          wizard right here — Uitvoeren appends them as text too (the old
-          idiom), Verwerpen clears them. */}
+          wizard right here — the execute action appends them as text too (the old
+          idiom), discard clears them. */}
       {!onItems && localItems.length > 0 && (
         <div style={{ marginBottom: 6 }}>
           <Suspense fallback={null}>
@@ -160,8 +157,8 @@ export default function NoteAssistSection({ body, onApply, language, onItems, kn
         <div style={{ border: '1px solid var(--border)', borderRadius: 8, padding: '8px 10px', background: 'var(--bg)', display: 'flex', flexDirection: 'column', gap: 8 }}>
           <AssistTextPreview text={result.text} compareWith={plainBody} />
           <div style={{ display: 'flex', gap: 8 }}>
-            <Button variant="primary" size="sm" onClick={handleApply}><Check size={13} /> {t('notesAssist.apply', { defaultValue: 'Overnemen' })}</Button>
-            <AssistDiscardButton onDiscard={discard} label={t('notesAssist.discard', { defaultValue: 'Verwerpen' })} />
+            <Button variant="primary" size="sm" onClick={handleApply}><Check size={13} /> {t('notesAssist.apply')}</Button>
+            <AssistDiscardButton onDiscard={discard} label={t('notesAssist.discard')} />
           </div>
         </div>
       )}

@@ -77,3 +77,17 @@ export function apiErrorKey(err: unknown): string | null {
   const code = (err as { response?: { data?: ServerErrorBody } })?.response?.data?.code
   return (code && ERROR_CODE_KEYS[code]) ?? null
 }
+
+/**
+ * One call for the whole "coded refusal, else server text, else fallback" chain:
+ * a known backend `code` renders its translated `common` copy (never the server's
+ * Dutch sentence), anything else goes through extractApiError.
+ */
+export function apiErrorMessage(
+  err: unknown,
+  t: (key: string, options?: { ns: string }) => string,
+  fallback: string,
+): string {
+  const key = apiErrorKey(err)
+  return key ? t(key, { ns: 'common' }) : extractApiError(err, fallback)
+}

@@ -8,6 +8,7 @@ import { describe, it, expect } from 'vitest'
 import { render, screen } from '@testing-library/react'
 import '@/i18n'
 import nlCandidates from '@/i18n/locales/nl/candidates.json'
+import nlCommon from '@/i18n/locales/nl/common.json'
 import EntityChangelogTab, { type ChangelogEvent } from './EntityChangelogTab'
 
 const uuidA = '11111111-2222-3333-4444-555555555555'
@@ -125,7 +126,7 @@ describe('EntityChangelogTab · CHANGELOG-3 uuid guard', () => {
       properties: { scrubbed: true, reason: 'avg_erasure_request' },
     }]
     render(<EntityChangelogTab items={events} loading={false} error={false} namespace="candidates" />)
-    expect(await screen.findByText(nlCandidates.changelog.scrubbedErasure)).toBeInTheDocument()
+    expect(await screen.findByText(nlCommon.changelogScrubbedErasure)).toBeInTheDocument()
     expect(screen.queryByText('—')).not.toBeInTheDocument()
   })
 
@@ -136,7 +137,7 @@ describe('EntityChangelogTab · CHANGELOG-3 uuid guard', () => {
       changes: { scrubbed: true, reason: 'something_else' },
     }]
     render(<EntityChangelogTab items={events} loading={false} error={false} namespace="candidates" />)
-    expect(await screen.findByText(nlCandidates.changelog.scrubbed)).toBeInTheDocument()
+    expect(await screen.findByText(nlCommon.changelogScrubbed)).toBeInTheDocument()
   })
 
   // A scrubbed row sits beside a normal diff event in the same feed — the normal
@@ -149,8 +150,20 @@ describe('EntityChangelogTab · CHANGELOG-3 uuid guard', () => {
         changes: { attributes: { first_name: 'Nieuwe naam' }, old: { first_name: 'Oude naam' } } },
     ]
     render(<EntityChangelogTab items={events} loading={false} error={false} namespace="candidates" />)
-    expect(await screen.findByText(nlCandidates.changelog.scrubbedErasure)).toBeInTheDocument()
+    expect(await screen.findByText(nlCommon.changelogScrubbedErasure)).toBeInTheDocument()
     expect(screen.getByText('Oude naam')).toBeInTheDocument()
     expect(screen.getByText('Nieuwe naam')).toBeInTheDocument()
+  })
+
+  // Regression: a namespace without its own scrub keys (customers) still shows the
+  // translated sentence, never the raw key (the keys live in common).
+  it('renders the translated scrub line under a foreign namespace, never the raw key', async () => {
+    const events: ChangelogEvent[] = [{
+      id: 'e11', causer_name: 'Danny Polak', created_at: '2026-08-01T10:00:00Z', event: 'updated',
+      changes: { scrubbed: true, reason: 'avg_erasure_request' },
+    }]
+    render(<EntityChangelogTab items={events} loading={false} error={false} namespace="customers" />)
+    expect(await screen.findByText(nlCommon.changelogScrubbedErasure)).toBeInTheDocument()
+    expect(screen.queryByText(/changelogScrubbed/)).not.toBeInTheDocument()
   })
 })

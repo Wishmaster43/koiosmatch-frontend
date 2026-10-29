@@ -454,5 +454,11 @@
     "confirm": "Endgültig löschen",
     "success": "Die personenbezogenen Daten wurden gelöscht.",
     "erasedNotice": "Die personenbezogenen Daten dieses Mitarbeiters wurden am {{date}} gelöscht. Eine neue Synchronisierung mit Shiftmanager stellt sie nicht wieder her."
+  },
+  "aiOptOut": {
+    "label": "KI und WhatsApp erlaubt",
+    "help": "Ausschalten, wenn dieser Mitarbeiter der KI-Verarbeitung und WhatsApp-Nachrichten widerspricht. Nur dieser Schalter ändert das.",
+    "failed": "Die Einstellung konnte nicht gespeichert werden.",
+    "erasedHint": "Bei einem gelöschten Mitarbeiter ist dies immer ausgeschaltet."
   }
 }

@@ -300,7 +300,7 @@
       "extraEducations_other": "Il CV contiene anche {{count}} percorsi formativi. Aggiungili nel dossier dopo aver creato il candidato.",
       "noFreeText": "Il testo libero del CV (riepilogo, motivazione, note personali) non viene deliberatamente ripreso.",
       "error": {
-        "notPdf": "Può essere letto solo un file pdf, jpg, png, gif, webp, docx o xlsx.",
+        "notPdf": "Questo tipo di file non è supportato. Consentiti: pdf, doc, docx, jpg, jpeg o png.",
         "tooLarge": "Questo file è più grande di 10 MB.",
         "storageUnavailable": "Impossibile salvare il CV: l'archiviazione non è temporaneamente disponibile. Riprova.",
         "throttled": "Troppi CV consecutivi. Attendi un minuto e riprova.",
@@ -326,7 +326,6 @@
   "drawer": {
     "subjectExport": "Esporta i dati personali (diritto di accesso)",
     "subjectExportStarted": "Esportazione avviata: il download si apre in una nuova scheda.",
-    "subjectExportQueued": "Esportazione avviata: il download arriva tramite le notifiche.",
     "subjectExportFailed": "L'esportazione dei dati personali non è riuscita.",
     "availability": "Disponibilità",
     "label": "Candidato",
@@ -1001,8 +1000,6 @@
     "axisPhase": "Fase",
     "reasonGiven": "motivo indicato",
     "effectiveFrom": "dal {{date}}",
-    "scrubbedErasure": "Dati cancellati su richiesta dell'interessato (GDPR)",
-    "scrubbed": "Dati cancellati (GDPR)",
     "actions": {
       "updated": "Aggiornato",
       "created": "Creato",
@@ -1527,6 +1524,7 @@
       "eraseAt": " · Verrà eliminato il {{date}}",
       "consentRefusedByReply": "Il candidato ha rifiutato ogni contatto tramite messaggio ({{channels}})",
       "consentRefusedByLink": "Il candidato ha annullato l’iscrizione alle e-mail relazionali tramite il link di disiscrizione",
+      "consentGrantedByReply": "Il candidato ha dato il consenso al contatto tramite messaggio ({{channel}})",
       "channelWhatsapp": "WhatsApp",
       "channelEmail": "e-mail"
     }

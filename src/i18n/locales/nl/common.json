@@ -1,4 +1,6 @@
 {
+  "changelogScrubbedErasure": "Gegevens verwijderd op verzoek van de betrokkene (AVG)",
+  "changelogScrubbed": "Gegevens verwijderd (AVG)",
   "trash": {
     "view": "Prullenbak",
     "markAction": "Definitief verwijderen",

@@ -1,4 +1,6 @@
 {
+  "changelogScrubbedErasure": "Data erased at the data subject's request (GDPR)",
+  "changelogScrubbed": "Data erased (GDPR)",
   "trash": {
     "view": "Trash",
     "markAction": "Delete permanently",

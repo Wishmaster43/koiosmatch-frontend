@@ -16,7 +16,7 @@ import api, { unwrap, unwrapList } from '@/lib/api'
 import { withIdempotencyKey } from '@/lib/idempotency'
 import { useAuth } from '@/context/AuthContext'
 import { useConfirm } from '@/hooks/useConfirm'
-import { extractApiError } from '@/lib/extractApiError'
+import { extractApiError, apiErrorMessage } from '@/lib/extractApiError'
 import { useSeedLabel } from '@/lib/useSeedLabel'
 import { resolveWorkflowBaseURL } from '@/lib/workflowApi'
 import { normalizeWorkflow, denormalizeWorkflow } from '../data/workflowMap'
@@ -254,7 +254,7 @@ export function useWorkflowsData(showArchived: boolean) {
     setWorkflows(prev => prev.map(w => w.id === wf.id ? { ...w, status: nextStatus } : w))
     api.put(`/workflows/${wf.id}`, { status: nextStatus, active: nextStatus === 'active' }).catch((err: unknown) => {
       setWorkflows(prev => prev.map(w => w.id === wf.id ? { ...w, status: wf.status } : w))
-      notifyError(extractApiError(err, t('common:actionFailed')))
+      notifyError(apiErrorMessage(err, t, t('common:actionFailed')))
     })
   }
 
@@ -297,7 +297,7 @@ export function useWorkflowsData(showArchived: boolean) {
       // axios/network string in the user-facing message (§10). INTERVIEW-FLAG-1: the
       // BE's fixed-key 422 (is_interview without an agent step) is translated to its
       // own i18n key instead of showing the raw backend message.
-      const rawMsg = extractApiError(err, t('common:actionFailed'))
+      const rawMsg = apiErrorMessage(err, t, t('common:actionFailed'))
       const msg = rawMsg === 'workflow.interview_requires_agent_step'
         ? t('editor.interviewRequiresAgentStep')
         : rawMsg
@@ -374,7 +374,7 @@ export function useWorkflowsData(showArchived: boolean) {
     api.put(`/workflows/${workflowId}`, { folder_id: folderId }).catch((err: unknown) => {
       // Roll back the optimistic move and say so — mirrors handleToggleStatus's rollback+toast.
       setWorkflows(prev => prev.map(w => w.id === workflowId ? { ...w, folder_id: wf.folder_id } : w))
-      notifyError(extractApiError(err, t('common:actionFailed')))
+      notifyError(apiErrorMessage(err, t, t('common:actionFailed')))
     })
   }
 

@@ -454,5 +454,11 @@
     "confirm": "Erase permanently",
     "success": "The personal data has been erased.",
     "erasedNotice": "This employee's personal data was erased on {{date}}. A new sync with Shiftmanager does not bring it back."
+  },
+  "aiOptOut": {
+    "label": "AI and WhatsApp allowed",
+    "help": "Turn off when this employee objects to AI processing and WhatsApp messages. Only this switch changes it.",
+    "failed": "The setting could not be saved.",
+    "erasedHint": "This is always off for an erased employee."
   }
 }

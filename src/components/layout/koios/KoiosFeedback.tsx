@@ -68,17 +68,17 @@ export default function KoiosFeedback({ promptLogId, surface, t }: KoiosFeedback
 
   // Locked after a successful vote — no re-vote UI (§0B honesty: what happened, happened).
   if (status === 'sent') {
-    return <Caption as="div">{t('koios.feedback.thanks', { defaultValue: 'Bedankt voor je feedback' })}</Caption>
+    return <Caption as="div">{t('koios.feedback.thanks')}</Caption>
   }
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
       {status !== 'error' && <div style={{ display: 'flex', gap: 4 }}>
-        <Button iconOnly variant="ghost" size="sm" aria-label={t('koios.feedback.up', { defaultValue: 'Nuttig' })}
+        <Button iconOnly variant="ghost" size="sm" aria-label={t('koios.feedback.up')}
           disabled={status === 'sending'} onClick={() => submit('up')}>
           <ThumbsUp size={12} />
         </Button>
-        <Button iconOnly variant="ghost" size="sm" aria-label={t('koios.feedback.down', { defaultValue: 'Niet nuttig' })}
+        <Button iconOnly variant="ghost" size="sm" aria-label={t('koios.feedback.down')}
           disabled={status === 'sending'} onClick={() => setStatus('reasoning')}>
           <ThumbsDown size={12} />
         </Button>
@@ -87,17 +87,17 @@ export default function KoiosFeedback({ promptLogId, surface, t }: KoiosFeedback
       {status === 'reasoning' && (
         <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
           <ChipMultiSelect
-            options={REASONS.map((r) => ({ value: r, label: t(`koios.feedback.reasons.${r}`, { defaultValue: r }) }))}
+            options={REASONS.map((r) => ({ value: r, label: t(`koios.feedback.reasons.${r}`) }))}
             values={reasons} onToggle={toggleReason} selectAll={false}
             ariaLabel={t('koios.feedback.reasonsLabel')} />
           <input type="text" value={comment} onChange={(e) => setComment(e.target.value)} maxLength={500}
-            placeholder={t('koios.feedback.commentPlaceholder', { defaultValue: 'Toelichting (optioneel)' })}
-            aria-label={t('koios.feedback.commentPlaceholder', { defaultValue: 'Toelichting (optioneel)' })}
+            placeholder={t('koios.feedback.commentPlaceholder')}
+            aria-label={t('koios.feedback.commentPlaceholder')}
             style={fieldInputStyle} />
           <Button variant="primary" size="sm" disabled={status !== 'reasoning' || reasons.length === 0}
             title={reasons.length === 0 ? t('koios.feedback.reasonRequired') : undefined}
             onClick={() => submit('down', { reasons, comment })}>
-            {t('koios.feedback.send', { defaultValue: 'Versturen' })}
+            {t('koios.feedback.send')}
           </Button>
         </div>
       )}
@@ -109,7 +109,7 @@ export default function KoiosFeedback({ promptLogId, surface, t }: KoiosFeedback
       )}
       {status === 'error' && rating && (
         <Button variant="secondary" size="sm" onClick={() => (rating === 'up' ? submit('up') : setStatus('reasoning'))}>
-          {t('koios.feedback.retry', { defaultValue: 'Opnieuw proberen' })}
+          {t('koios.feedback.retry')}
         </Button>
       )}
     </div>

@@ -114,13 +114,13 @@ describe('KoiosPanel — landing state', () => {
     fireEvent.change(textarea, { target: { value: 'log test' } })
     fireEvent.click(screen.getByRole('button', { name: 'koios.taskPlaceholder' }))
     await screen.findByText('Antwoord met log.')
-    expect(screen.getByRole('button', { name: 'Nuttig' })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'koios.feedback.up' })).toBeInTheDocument()
 
     vi.mocked(sendChat).mockResolvedValueOnce({ answer: 'Antwoord zonder log.', steps: [] })
     fireEvent.change(textarea, { target: { value: 'zonder' } })
     fireEvent.click(screen.getByRole('button', { name: 'koios.taskPlaceholder' }))
     await screen.findByText('Antwoord zonder log.')
-    expect(screen.getAllByRole('button', { name: 'Nuttig' })).toHaveLength(1)
+    expect(screen.getAllByRole('button', { name: 'koios.feedback.up' })).toHaveLength(1)
   })
 })
 

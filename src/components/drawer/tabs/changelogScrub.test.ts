@@ -39,11 +39,23 @@ describe('scrubbedBagOf', () => {
 
 describe('scrubReasonKey', () => {
   it('maps the AVG-erasure reason to its own key', () => {
-    expect(scrubReasonKey('avg_erasure_request')).toBe('changelog.scrubbedErasure')
+    expect(scrubReasonKey('avg_erasure_request')).toBe('common:changelogScrubbedErasure')
   })
 
   it('maps any other reason (or none) to the generic key', () => {
-    expect(scrubReasonKey('something_else')).toBe('changelog.scrubbed')
-    expect(scrubReasonKey(undefined)).toBe('changelog.scrubbed')
+    expect(scrubReasonKey('something_else')).toBe('common:changelogScrubbed')
+    expect(scrubReasonKey(undefined)).toBe('common:changelogScrubbed')
+  })
+})
+
+describe('scrubbedBagOf precedence (changes first, like changesOf)', () => {
+  it('does not scrub a normal changes bag next to a scrubbed properties bag', () => {
+    const ev: ChangelogEvent = { changes: { attributes: { first_name: 'X' }, old: {} }, properties: { scrubbed: true } }
+    expect(scrubbedBagOf(ev)).toBeUndefined()
+  })
+
+  it('scrubs a scrubbed changes bag next to a normal properties bag', () => {
+    const ev: ChangelogEvent = { changes: { scrubbed: true, reason: 'avg_erasure_request' }, properties: { attributes: { a: 1 }, old: {} } }
+    expect(scrubbedBagOf(ev)).toEqual({ scrubbed: true, reason: 'avg_erasure_request' })
   })
 })

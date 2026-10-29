@@ -1,4 +1,6 @@
 {
+  "changelogScrubbedErasure": "Dados eliminados a pedido do titular (RGPD)",
+  "changelogScrubbed": "Dados eliminados (RGPD)",
   "trash": {
     "view": "Reciclagem",
     "markAction": "Eliminar definitivamente",

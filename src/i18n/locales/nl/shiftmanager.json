@@ -454,5 +454,11 @@
     "confirm": "Definitief wissen",
     "success": "De persoonsgegevens zijn gewist.",
     "erasedNotice": "De persoonsgegevens van deze medewerker zijn gewist op {{date}}. Een nieuwe synchronisatie met Shiftmanager zet ze niet terug."
+  },
+  "aiOptOut": {
+    "label": "AI en WhatsApp toegestaan",
+    "help": "Zet uit als deze medewerker bezwaar heeft tegen AI-verwerking en WhatsApp-berichten. Alleen deze schakelaar wijzigt dit.",
+    "failed": "De instelling kon niet worden opgeslagen.",
+    "erasedHint": "Bij een gewiste medewerker staat dit altijd uit."
   }
 }

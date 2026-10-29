@@ -277,7 +277,7 @@
       "extraEducations_other": "Der Lebenslauf enthält außerdem {{count}} Ausbildungen. Fügen Sie sie nach dem Anlegen im Dossier hinzu.",
       "noFreeText": "Freitext aus dem Lebenslauf (Zusammenfassung, Motivation, Anmerkungen) wird bewusst nicht übernommen.",
       "error": {
-        "notPdf": "Es kann nur eine pdf-, jpg-, png-, gif-, webp-, docx- oder xlsx-Datei gelesen werden.",
+        "notPdf": "Dieser Dateityp wird nicht unterstützt. Erlaubt: pdf, doc, docx, jpg, jpeg oder png.",
         "tooLarge": "Diese Datei ist größer als 10 MB.",
         "storageUnavailable": "Der Lebenslauf konnte nicht gespeichert werden: Der Speicher ist vorübergehend nicht verfügbar. Bitte versuchen Sie es erneut.",
         "throttled": "Zu viele Lebensläufe hintereinander. Warten Sie eine Minute und versuchen Sie es erneut.",
@@ -303,7 +303,6 @@
   "drawer": {
     "subjectExport": "Personenbezogene Daten exportieren (Auskunftsrecht)",
     "subjectExportStarted": "Export gestartet: der Download öffnet sich in einem neuen Tab.",
-    "subjectExportQueued": "Export gestartet: der Download folgt über die Benachrichtigungen.",
     "subjectExportFailed": "Der Export der personenbezogenen Daten ist fehlgeschlagen.",
     "availability": "Verfügbarkeit",
     "label": "Kandidat",
@@ -978,8 +977,6 @@
     "axisPhase": "Phase",
     "reasonGiven": "Grund angegeben",
     "effectiveFrom": "per {{date}}",
-    "scrubbedErasure": "Daten auf Antrag der betroffenen Person gelöscht (DSGVO)",
-    "scrubbed": "Daten gelöscht (DSGVO)",
     "actions": {
       "updated": "Aktualisiert",
       "created": "Erstellt",
@@ -1527,6 +1524,7 @@
       "eraseAt": " · Wird gelöscht am {{date}}",
       "consentRefusedByReply": "Kandidat hat per Nachricht jeden Kontakt abgelehnt ({{channels}})",
       "consentRefusedByLink": "Kandidat hat sich über den Abmeldelink von Beziehungs-E-Mails abgemeldet",
+      "consentGrantedByReply": "Kandidat hat per Nachricht der Kontaktaufnahme zugestimmt ({{channel}})",
       "channelWhatsapp": "WhatsApp",
       "channelEmail": "E-Mail"
     }

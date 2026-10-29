@@ -546,3 +546,34 @@ describe('useWorkflowsData · list mutations are partial PUTs (AIK-02)', () => {
     await waitFor(() => expect(notifyError).toHaveBeenCalledWith('Geen geldige vertrekmodule.'))
   })
 })
+
+// I-001: a coded 422 reaches the user as the translated common error on both write paths.
+describe('useWorkflowsData · ai_disclosure_missing is translated, never the raw sentence', () => {
+  const coded = { response: { status: 422, data: { code: 'ai_disclosure_missing', message: 'NL zin' } } }
+
+  it('handleToggleStatus PUTs {status, active} and toasts the translated key on refusal', async () => {
+    seedList()
+    mockedPut.mockRejectedValue(coded)
+    const { result } = renderHook(() => useWorkflowsData(false))
+    await waitFor(() => expect(result.current.loading).toBe(false))
+    const wf = { ...result.current.workflows[0], status: 'inactive' }
+
+    await act(async () => { result.current.handleToggleStatus(wf) })
+
+    await waitFor(() => expect(notifyError).toHaveBeenCalledWith('errors.aiDisclosureMissing'))
+    expect(mockedPut).toHaveBeenCalledWith('/workflows/wf-1', { status: 'active', active: true })
+    expect(notifyError).not.toHaveBeenCalledWith('NL zin')
+  })
+
+  it('handleSave (create) POSTs /workflows and toasts the translated key inside saveFailed', async () => {
+    seedList()
+    mockedPost.mockRejectedValue(coded)
+    const { result } = renderHook(() => useWorkflowsData(false))
+    await waitFor(() => expect(result.current.loading).toBe(false))
+
+    await act(async () => { await result.current.handleSave({ name: 'New flow', status: 'active', steps: [{ id: 's1', type: 'email_send' }] }) })
+
+    expect(mockedPost).toHaveBeenCalledWith('/workflows', expect.objectContaining({ name: 'New flow' }))
+    expect(notifyError).toHaveBeenCalledWith('page.saveFailed::errors.aiDisclosureMissing')
+  })
+})

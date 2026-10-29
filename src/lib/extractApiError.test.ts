@@ -3,7 +3,7 @@
  * → caller fallback; never throws on malformed/absent error shapes.
  */
 import { describe, it, expect } from 'vitest'
-import { extractApiError, apiErrorKey } from './extractApiError'
+import { extractApiError, apiErrorKey, apiErrorMessage } from './extractApiError'
 
 describe('extractApiError', () => {
   it('prefers the first validation error over the generic message', () => {
@@ -69,5 +69,26 @@ describe('apiErrorKey · UPLOADS-SCAN-1 / TENANT-READY codes', () => {
 describe('apiErrorKey · email_unavailable (ONIX C-007)', () => {
   it('maps email_unavailable (422) to its i18n key regardless of the English message', () => {
     expect(apiErrorKey({ response: { data: { code: 'email_unavailable', message: 'This e-mail address cannot be used.' } } })).toBe('errors.emailUnavailable')
+  })
+})
+
+describe('apiErrorMessage', () => {
+  // Key-echo translator that records the namespace it was asked for.
+  const t = (key: string, options?: { ns: string }) => `${options?.ns ?? ''}:${key}`
+
+  it('translates a known backend code from common, ignoring the server sentence', () => {
+    const err = { response: { data: { code: 'ai_disclosure_missing', message: 'NL zin' } } }
+    expect(apiErrorMessage(err, t, 'fallback')).toBe('common:errors.aiDisclosureMissing')
+  })
+  it('falls back to the server message for an unknown code', () => {
+    const err = { response: { data: { code: 'something_new', message: 'Server says no.' } } }
+    expect(apiErrorMessage(err, t, 'fallback')).toBe('Server says no.')
+  })
+  it('uses the first validation message of a bag when there is no known code', () => {
+    const err = { response: { data: { errors: { name: ['Name is taken.'] } } } }
+    expect(apiErrorMessage(err, t, 'fallback')).toBe('Name is taken.')
+  })
+  it('returns the fallback for a network error', () => {
+    expect(apiErrorMessage(new Error('Network Error'), t, 'fallback')).toBe('fallback')
   })
 })

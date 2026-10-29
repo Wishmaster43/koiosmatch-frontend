@@ -457,5 +457,11 @@
     "confirm": "Apagar definitivamente",
     "success": "Os dados pessoais foram apagados.",
     "erasedNotice": "Os dados pessoais deste colaborador foram apagados em {{date}}. Uma nova sincronização com o Shiftmanager não os repõe."
+  },
+  "aiOptOut": {
+    "label": "IA e WhatsApp permitidos",
+    "help": "Desative se este colaborador se opuser ao tratamento por IA e às mensagens de WhatsApp. Só este interruptor o altera.",
+    "failed": "Não foi possível guardar a definição.",
+    "erasedHint": "Num colaborador apagado isto fica sempre desativado."
   }
 }
