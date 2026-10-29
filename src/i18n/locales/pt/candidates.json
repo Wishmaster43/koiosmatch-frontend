@@ -325,7 +325,7 @@
   },
   "drawer": {
     "subjectExport": "Exportar dados pessoais (direito de acesso)",
-    "subjectExportStarted": "Exportação iniciada: a transferência abre num novo separador.",
+    "subjectExportStarted": "Exportação iniciada: a transferência começa agora. Se não começar, abra-a através do ícone neste aviso.",
     "subjectExportFailed": "A exportação de dados pessoais falhou.",
     "availability": "Disponibilidade",
     "label": "Candidato",

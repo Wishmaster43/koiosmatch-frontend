@@ -302,7 +302,7 @@
   },
   "drawer": {
     "subjectExport": "Personenbezogene Daten exportieren (Auskunftsrecht)",
-    "subjectExportStarted": "Export gestartet: der Download öffnet sich in einem neuen Tab.",
+    "subjectExportStarted": "Export gestartet: Der Download beginnt jetzt. Falls er nicht startet, öffnen Sie ihn über das Symbol in dieser Meldung.",
     "subjectExportFailed": "Der Export der personenbezogenen Daten ist fehlgeschlagen.",
     "availability": "Verfügbarkeit",
     "label": "Kandidat",

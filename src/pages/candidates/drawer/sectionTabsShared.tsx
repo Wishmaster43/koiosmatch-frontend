@@ -14,6 +14,8 @@ import SafeHtml from '@/components/ui/SafeHtml'
 import DocPreviewModal from '@/components/drawer/DocPreviewModal'
 import DrawerAddButton from './DrawerAddButton'
 import { downloadFilesSequentially } from '@/lib/downloadFiles'
+import { docScanState, docUrl } from './documentHelpers'
+import type { DocItem } from './documentHelpers'
 
 // One shared render-prop: the "+ Toevoegen" trigger for every Achtergrond
 // sub-tab, styled like the WorkTab "+ Match" reference (2026-07 sweep) instead
@@ -85,12 +87,17 @@ export function resolveLinkedDocument(
 export function DocEntryLinks({ doc, onPreview, onJump }: { doc: RelItem; onPreview: () => void; onJump?: () => void }) {
   const { t } = useTranslation('candidates')
   const iconBtn = { background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-muted)', padding: '2px 3px', display: 'flex' } as const
-  // Same download mechanics as DocumentsSection's own row action (one shared helper).
-  const download = () => { downloadFilesSequentially([{ url: (doc.url as string) ?? (doc.download_url as string), name: (doc.name as string) ?? '' }]) }
+  // Same download mechanics as DocumentsSection's own row action (one shared helper); docUrl puts the signed
+  // download_url first and yields nothing for a pending/rejected scan (F-001), so such a file is never offered live.
+  const scan = docScanState(doc as unknown as DocItem)
+  const dlUrl = docUrl(doc as unknown as DocItem)
+  const scanText = scan ? t(scan === 'pending' ? 'common:upload.scanPending' : 'common:upload.scanRejected') : undefined
+  const download = () => { if (dlUrl) downloadFilesSequentially([{ url: dlUrl, name: (doc.name as string) ?? '' }]) }
   return (
     <div style={{ display: 'flex', alignItems: 'center', gap: 2, marginTop: 6 }}>
       <button type="button" aria-label={t('documents.preview')} title={t('documents.preview')} onClick={onPreview} style={iconBtn}><Eye size={12} /></button>
-      <button type="button" aria-label={t('documents.download')} title={t('documents.download')} onClick={download} style={iconBtn}><Download size={12} /></button>
+      <button type="button" aria-label={scanText ?? t('documents.download')} title={scanText ?? t('documents.download')} onClick={download}
+        disabled={!dlUrl} style={{ ...iconBtn, cursor: dlUrl ? 'pointer' : 'not-allowed', opacity: dlUrl ? 1 : 0.5 }}><Download size={12} /></button>
       {onJump && (
         <button type="button" aria-label={t('documents.jumpToDocuments')} title={t('documents.jumpToDocuments')} onClick={onJump} style={iconBtn}><ArrowRight size={12} /></button>
       )}

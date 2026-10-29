@@ -63,3 +63,40 @@ describe('useCandidateDocuments · uploadAll (N008-DOC-EXPIRY-FE-1)', () => {
     expect(mockedNotifyError).toHaveBeenCalledWith('Dit documenttype vereist een vervaldatum.')
   })
 })
+
+describe('useCandidateDocuments · lane 08 regressions', () => {
+  it('does not upload a stale expires_at after the type switched', async () => {
+    mockedPost.mockResolvedValue({ data: { data: { id: 'd3', name: 'x.pdf', size: 1 } } })
+    const { result } = renderHook(() => useCandidateDocuments(candidate))
+    act(() => {
+      result.current.setPending([{ file: new File(['x'], 'x.pdf'), objectUrl: 'blob:d', name: 'x.pdf', size: '1 KB', type: 'VOG', linkTo: '', expiresAt: '2027-03-31' }])
+    })
+    act(() => result.current.setItemType(0, 'CV'))
+    act(() => result.current.uploadAll())
+    await waitFor(() => expect(mockedPost).toHaveBeenCalled())
+    expect((mockedPost.mock.calls[0][1] as FormData).get('expires_at')).toBeNull()
+  })
+
+  it('link PATCH failure uses the generic server text; a storage 503 never yields the storage sentence', async () => {
+    const mockedPatch = vi.mocked(api.patch)
+    mockedPost.mockResolvedValue({ data: { data: { id: 'd4', name: 'e.pdf', size: 1 } } })
+    mockedPatch.mockRejectedValue({ response: { status: 422, data: { message: 'Koppelen mislukt.' } } })
+    const { result } = renderHook(() => useCandidateDocuments(candidate))
+    act(() => {
+      result.current.setPending([{ file: new File(['x'], 'e.pdf'), objectUrl: 'blob:e', name: 'e.pdf', size: '1 KB', type: 'CV', linkTo: 'education:e1' }])
+    })
+    act(() => result.current.uploadAll())
+    await waitFor(() => expect(mockedNotifyError).toHaveBeenCalledWith('Koppelen mislukt.'))
+    expect(mockedPatch.mock.calls[0][0]).toBe('/candidates/c1/educations/e1')
+    expect(mockedPatch.mock.calls[0][1]).toEqual({ document_id: 'd4' })
+    mockedNotifyError.mockClear()
+    mockedPatch.mockRejectedValue({ response: { status: 503, data: { code: 'storage_unavailable' } } })
+    mockedPost.mockClear()
+    act(() => {
+      result.current.setPending([{ file: new File(['x'], 'f.pdf'), objectUrl: 'blob:f', name: 'f.pdf', size: '1 KB', type: 'CV', linkTo: 'education:e1' }])
+    })
+    act(() => result.current.uploadAll())
+    await waitFor(() => expect(mockedNotifyError).toHaveBeenCalled())
+    expect(mockedNotifyError.mock.calls[0][0]).not.toMatch(/storage|opslag/i)
+  })
+})

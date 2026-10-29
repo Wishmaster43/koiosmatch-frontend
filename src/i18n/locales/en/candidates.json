@@ -325,7 +325,7 @@
   },
   "drawer": {
     "subjectExport": "Export personal data (right of access)",
-    "subjectExportStarted": "Export started: the download opens in a new tab.",
+    "subjectExportStarted": "Export started: the download begins now. If it does not start, open it via the icon in this notice.",
     "subjectExportFailed": "The personal data export failed.",
     "availability": "Availability",
     "label": "Candidate",

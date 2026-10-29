@@ -302,7 +302,7 @@
   },
   "drawer": {
     "subjectExport": "Exporter les données personnelles (droit d'accès)",
-    "subjectExportStarted": "Export lancé : le téléchargement s'ouvre dans un nouvel onglet.",
+    "subjectExportStarted": "Export lancé : le téléchargement démarre. S'il ne démarre pas, ouvrez-le via l'icône de cette notification.",
     "subjectExportFailed": "L'export des données personnelles a échoué.",
     "availability": "Disponibilité",
     "label": "Candidat",

@@ -300,10 +300,12 @@ export function ZzpTab({ c, onSave }: { c: Candidate; onSave?: (v: Record<string
   // Drop the local verdict when another candidate or another VAT number is shown, so it never leaks across dossiers.
   const [viesKey, setViesKey] = useState(`${c.id}|${value.btw}`)
   if (viesKey !== `${c.id}|${value.btw}`) { setViesKey(`${c.id}|${value.btw}`); setVies(null) }
+  // "Never checked" is a missing stamp (BE sends valid:null for it AND for a VIES timeout); only a stamp makes a verdict.
+  const storedAt = (zzp.vat_verified_at as string | null | undefined) ?? null
   const storedValid = zzp.vat_verified_valid as boolean | null | undefined
-  const viesView = vies ?? (storedValid === undefined ? null : {
+  const viesView = vies ?? (storedAt == null ? null : {
     verdict: storedValid === true ? 'valid' as const : storedValid === false ? 'invalid' as const : 'unknown' as const,
-    at: (zzp.vat_verified_at as string | null | undefined) ?? null,
+    at: storedAt,
   })
   // Posts the check; the 200 shape is hand-written because the spec carries no 2xx schema.
   const verifyVat = async () => {
@@ -314,7 +316,11 @@ export function ZzpTab({ c, onSave }: { c: Candidate; onSave?: (v: Record<string
       const d = (res.data?.data ?? res.data) as { verdict?: 'valid' | 'invalid' | 'unknown'; vat_verified_at?: string | null }
       if (mountedRef.current && candidateIdRef.current === forId && d?.verdict) setVies({ verdict: d.verdict, at: d.vat_verified_at ?? null })
     } catch (err) {
-      if (mountedRef.current && candidateIdRef.current === forId) notifyError(extractApiError(err, t('zzp.viesFailed')))
+      if (mountedRef.current && candidateIdRef.current === forId) {
+        // A 422 carries the BE's Dutch "no VAT number" sentence: show the translated text instead.
+        const is422 = (err as { response?: { status?: number } })?.response?.status === 422
+        notifyError(is422 ? t('zzp.viesFailed') : extractApiError(err, t('zzp.viesFailed')))
+      }
     } finally {
       // Always release the button while mounted: a candidate switch mid-flight must never leave it stuck (Opus lens r2).
       if (mountedRef.current) setChecking(false)

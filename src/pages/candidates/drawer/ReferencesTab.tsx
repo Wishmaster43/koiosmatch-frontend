@@ -141,24 +141,24 @@ export default function ReferencesTab({ items = [], onAdd, onEdit, onRemove, onV
   // layout: pair short fields into two columns); the reference letter picker and
   // the free-text block close the form.
   const fields = [
-    { key: 'first_name',  label: t('addFields.referenceFirstName', { defaultValue: 'Voornaam' }), half: true },
+    { key: 'first_name',  label: t('addFields.referenceFirstName'), half: true },
     // KAND-ACHTERGROND-VERPLICHT-1: `last_name` is required on create
     // (CandidateReferenceController::rules, measured 2026-08-17 — REFERENTIE-VELDEN-1's
     // own header already notes it "mirrors the old `name` requiredness").
-    { key: 'last_name',   label: t('addFields.referenceLastName', { defaultValue: 'Achternaam' }), half: true, required: true },
-    { key: 'middle_name', label: t('addFields.referenceMiddleName', { defaultValue: 'Tussenvoegsel' }), half: true },
+    { key: 'last_name',   label: t('addFields.referenceLastName'), half: true, required: true },
+    { key: 'middle_name', label: t('addFields.referenceMiddleName'), half: true },
     { key: 'function',    label: t('addFields.referenceFunction'), half: true },
     // Relation TO the candidate (manager/collega/klant/…) — a SEPARATE tenant
     // lookup from `function` (the referent's own role), sent by id.
-    { key: 'relation_id', label: t('addFields.relation', { defaultValue: 'Relatie' }), options: relationOptions },
-    { key: 'employer',    label: t('addFields.employer', { defaultValue: 'Werkgever' }), half: true },
-    { key: 'phone',       label: t('addFields.phone', { defaultValue: 'Telefoon' }), half: true, type: 'tel' },
-    { key: 'mobile',      label: t('addFields.mobile', { defaultValue: 'Mobiel' }), half: true, type: 'tel' },
-    { key: 'email',       label: t('addFields.email', { defaultValue: 'E-mailadres' }), half: true },
+    { key: 'relation_id', label: t('addFields.relation'), options: relationOptions },
+    { key: 'employer',    label: t('addFields.employer'), half: true },
+    { key: 'phone',       label: t('addFields.phone'), half: true, type: 'tel' },
+    { key: 'mobile',      label: t('addFields.mobile'), half: true, type: 'tel' },
+    { key: 'email',       label: t('addFields.email'), half: true },
     // DOC-EDU-1 mirror: optionally link an already-uploaded proof document (the
     // reference letter) to this entry — same "options" idiom, own field. Offered only
     // once the candidate HAS documents (§3, no always-empty dropdown).
-    ...(documents.length > 0 ? [{ key: 'document_id', label: t('addFields.referenceLetter', { defaultValue: 'Referentiebrief' }), options: documentOptions }] : []),
+    ...(documents.length > 0 ? [{ key: 'document_id', label: t('addFields.referenceLetter'), options: documentOptions }] : []),
     // REF-ERVARING-1 (Danny 08-08 punt 4): the experience this referee is the
     // reference FOR. Same "options" idiom as the reference-letter link right above
     // — a searchable, pick-only CreatableSelect whose clear (X) unlinks, i.e. the
@@ -169,7 +169,7 @@ export default function ReferencesTab({ items = [], onAdd, onEdit, onRemove, onV
     // Danny 08-08: this free-text block is the REFERENCE's own text, not a
     // generic note — the profile block next to it is labelled by what it is, so
     // this one is too ("Referentietekst", key referenceText).
-    { key: 'note',        label: t('addFields.referenceText', { defaultValue: 'Referentietekst' }), richtext: true },
+    { key: 'note',        label: t('addFields.referenceText'), richtext: true },
   ]
   // Sub-tab sort notes: candidate_references has no date column at all, so
   // start/end date are omitted — but it DOES carry the referent's own
@@ -189,7 +189,7 @@ export default function ReferencesTab({ items = [], onAdd, onEdit, onRemove, onV
         explanation instead of a picker with nothing in it — but only where a
         recruiter would look for the link, i.e. once there is at least one reference. */}
     {items.length > 0 && experienceOptions.length === 0 && <NoExperiencesNotice />}
-    <AddableSection title={null} emptyText={t('sections.referencesEmpty', { defaultValue: 'Nog geen referenties.' })}
+    <AddableSection title={null} emptyText={t('sections.referencesEmpty')}
       renderAddButton={renderAddButton} order={order} headerExtra={control}
       dragEnabled={isOwnOrder} onReorder={onReorder}
       items={items} fields={fields} onAdd={onAdd} onEdit={onEdit} onRemove={onRemove}
@@ -239,15 +239,15 @@ export default function ReferencesTab({ items = [], onAdd, onEdit, onRemove, onV
                   <SoftChip color="var(--color-success)" label={
                     <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4 }}>
                       <BadgeCheck size={12} />
-                      {t('references.verified', { defaultValue: 'Geverifieerd' })} · {formatDate(verifiedAt)}
+                      {t('references.verified')} · {formatDate(verifiedAt)}
                     </span>
                   } />
                 ) : (onVerify && isPersisted(r.id)) ? (
                   <Button type="button" variant="secondary" size="sm" onClick={() => onVerify(i)}
                     disabled={verifyingIds?.has(r.id as string | number) ?? false}
-                    title={t('references.verify', { defaultValue: 'Verifiëren' })}>
+                    title={t('references.verify')}>
                     <BadgeCheck size={12} />
-                    {t('references.verify', { defaultValue: 'Verifiëren' })}
+                    {t('references.verify')}
                   </Button>
                 ) : null}
               </div>

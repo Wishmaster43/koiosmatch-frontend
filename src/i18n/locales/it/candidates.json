@@ -325,7 +325,7 @@
   },
   "drawer": {
     "subjectExport": "Esporta i dati personali (diritto di accesso)",
-    "subjectExportStarted": "Esportazione avviata: il download si apre in una nuova scheda.",
+    "subjectExportStarted": "Esportazione avviata: il download sta per iniziare. Se non parte, aprilo tramite l'icona in questo avviso.",
     "subjectExportFailed": "L'esportazione dei dati personali non è riuscita.",
     "availability": "Disponibilità",
     "label": "Candidato",

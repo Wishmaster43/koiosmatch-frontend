@@ -535,7 +535,7 @@ describe('ZzpTab · VIES check', () => {
   })
 
   it('shows the stored verdict from the record and no line when absent', () => {
-    const { unmount } = render(<ZzpTab c={candidate({ vat_verified_valid: false })} />)
+    const { unmount } = render(<ZzpTab c={candidate({ vat_verified_valid: false, vat_verified_at: '2026-10-21T10:00:00Z' })} />)
     expect(screen.getByText('zzp.viesInvalid')).toBeInTheDocument()
     unmount()
     render(<ZzpTab c={candidate()} />)
@@ -547,6 +547,26 @@ describe('ZzpTab · VIES check', () => {
     render(<ZzpTab c={candidate()} />)
     await userEvent.setup().click(screen.getByRole('button', { name: 'zzp.viesCheck' }))
     await vi.waitFor(() => expect(notifyErrorMock).toHaveBeenCalledWith('zzp.viesFailed'))
+  })
+
+  it('renders no verdict for a never-checked record (valid:null, no stamp)', () => {
+    render(<ZzpTab c={candidate({ vat_verified_valid: null, vat_verified_at: null })} />)
+    expect(screen.queryByText('zzp.viesUnknown')).toBeNull()
+    expect(screen.queryByText('zzp.viesValid')).toBeNull()
+    expect(screen.queryByText('zzp.viesInvalid')).toBeNull()
+  })
+
+  it('renders the unknown verdict for a stamped record with valid:null (VIES timeout)', () => {
+    render(<ZzpTab c={candidate({ vat_verified_valid: null, vat_verified_at: '2026-10-21T10:00:00Z' })} />)
+    expect(screen.getByText('zzp.viesUnknown')).toBeInTheDocument()
+  })
+
+  it('shows the translated text, not the Dutch server sentence, on a 422 no-VAT refusal', async () => {
+    apiPostMock.mockRejectedValue({ response: { status: 422, data: { message: 'Geen BTW-nummer geregistreerd.' } } })
+    render(<ZzpTab c={candidate()} />)
+    await userEvent.setup().click(screen.getByRole('button', { name: 'zzp.viesCheck' }))
+    await vi.waitFor(() => expect(notifyErrorMock).toHaveBeenCalledWith('zzp.viesFailed'))
+    expect(apiPostMock.mock.calls[0][0]).toBe('/candidates/cand-1/freelance/verify-vat')
   })
 
   it('drops the local verdict when the drawer switches to another candidate', async () => {

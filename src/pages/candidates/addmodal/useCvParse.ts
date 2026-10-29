@@ -18,6 +18,7 @@ import { useCallback, useEffect, useRef, useState } from 'react'
 import axios from 'axios'
 import api, { unwrap } from '@/lib/api'
 import { getUploadPolicy } from '@/lib/uploadPolicy'
+import { isStorageUnavailable } from '@/lib/uploadError'
 import type { ParsedCvFields, CvPrefillResult } from './cvPrefill'
 
 // Poll cadence + ceiling. The parse is a Claude call over a whole PDF: normally
@@ -87,8 +88,8 @@ const STATUS_KEYS: Record<number, string> = {
   413: CV_ERROR_KEYS.tooLarge,
   422: CV_ERROR_KEYS.notPdf,
   429: CV_ERROR_KEYS.throttled,
-  // F-013/F-011 (BE b2cb6be5): the disk did not confirm the staged CV — no dossier exists, retry is safe.
-  503: CV_ERROR_KEYS.storageUnavailable,
+  // A bare 503 means the CV reader is down; the storage 503 is told apart by its body code in failFromError.
+  503: CV_ERROR_KEYS.unavailable,
 }
 
 interface PollBody {
@@ -140,6 +141,8 @@ export function useCvParse({ onReady }: UseCvParseOptions) {
   // Map a thrown request error onto a message; a deliberate abort is not an error.
   const failFromError = useCallback((err: unknown) => {
     if (axios.isCancel(err) || (err as { code?: string })?.code === 'ERR_CANCELED') return
+    // F-013/F-011 (BE b2cb6be5): only a 503 with code storage_unavailable means the staged CV was not confirmed.
+    if (isStorageUnavailable(err)) { fail(CV_ERROR_KEYS.storageUnavailable); return }
     const status = (err as { response?: { status?: number } })?.response?.status
     fail((status && STATUS_KEYS[status]) || CV_ERROR_KEYS.generic)
   }, [fail])

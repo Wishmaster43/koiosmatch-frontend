@@ -7,11 +7,9 @@
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { extractApiError } from '@/lib/extractApiError'
-import { notifyError, notifySuccess } from '@/lib/notify'
+import { notify, notifyError } from '@/lib/notify'
 import api from '@/lib/api'
 import { Download, Edit2, RotateCcw, Save, Trash2, UserCheck, X, ShieldCheck } from 'lucide-react'
-import { pdf } from '@react-pdf/renderer'
-import { CvDocument } from '../CandidateCvTemplate'
 import type { CvCandidate } from '../CandidateCvTemplate'
 import { useCvSettings } from '@/lib/useCvSettings'
 import { useLocale, useDateFormat } from '@/lib/datetime'
@@ -105,15 +103,18 @@ export function CandidateHeaderActions({ c, isEntryPhase, nextPhase, converting,
 
   // Right of access (ONIX K-001, BE lane D f0855053): POST /exports/subject-access builds the
   // subject-access ZIP (audited, tenant_admin's privacy.subject-export) and answers a signed
-  // download URL — opened as a real navigation, the same path the documents ZIP uses.
+  // download URL — followed as a same-tab navigation (a post-await window.open is blocked by popup blockers).
   const exportSubjectAccess = async () => {
     setSubjectExporting(true)
     try {
       const res = await api.post('/exports/subject-access', { subject_type: 'candidate', subject_id: c.id })
       // Hand-written shape: the spec carries no 2xx schema for this route (responses: never).
       const url = (res.data?.data?.download_url ?? res.data?.download_url) as string | undefined
-      if (url) window.open(url, '_blank', 'noopener,noreferrer')
-      notifySuccess(t(url ? 'drawer.subjectExportStarted' : 'drawer.subjectExportQueued'))
+      // A 201 without a download URL is an error: nothing can be offered to the admin.
+      if (!url) { notifyError(t('drawer.subjectExportFailed')); return }
+      // Attachment response: the drawer stays in place. The toast keeps a link in case the browser refuses.
+      window.location.assign(url)
+      notify('success', t('drawer.subjectExportStarted'), { deepLink: url })
     } catch (err) {
       notifyError(extractApiError(err, t('drawer.subjectExportFailed')))
     } finally { setSubjectExporting(false) }
@@ -123,7 +124,9 @@ export function CandidateHeaderActions({ c, isEntryPhase, nextPhase, converting,
   const downloadCv = async () => {
     setCvGenerating(true)
     try {
-      const blob = await pdf(<CvDocument c={c as unknown as CvCandidate} settings={cvSettings as never} locale={locale} t={t} />).toBlob()
+      // The PDF engine is loaded on demand so it never lands in the shared drawer chunk.
+      const { renderCvBlob } = await import('../cv/renderCvBlob')
+      const blob = await renderCvBlob({ c: c as unknown as CvCandidate, settings: cvSettings as never, locale, t })
       const url = URL.createObjectURL(blob)
       const a = document.createElement('a')
       a.href = url; a.download = `CV - ${c?.name ?? 'candidate'}.pdf`

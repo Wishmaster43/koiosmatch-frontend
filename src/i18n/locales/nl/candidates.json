@@ -325,7 +325,7 @@
   },
   "drawer": {
     "subjectExport": "Exporteer persoonsgegevens (inzagerecht)",
-    "subjectExportStarted": "Export gestart: de download opent in een nieuw tabblad.",
+    "subjectExportStarted": "Export gestart: de download begint. Start hij niet, open hem via het icoon in deze melding.",
     "subjectExportFailed": "De export van persoonsgegevens is mislukt.",
     "availability": "Beschikbaarheid",
     "label": "Kandidaat",
