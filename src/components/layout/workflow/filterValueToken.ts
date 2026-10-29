@@ -15,7 +15,7 @@ export function filterValueToken(number: number, fieldKey: string): string {
 
 // A value is EXACTLY one mapping token (no surrounding text) when it matches
 // this whole-string shape — the only case the backend keeps the raw type for.
-const TOKEN = /^\{\{(.+)\}\}$/
+const TOKEN = /^\{\{([^{}]+)\}\}$/
 
 export function isFilterValueToken(value: string): boolean {
   return TOKEN.test(value.trim())

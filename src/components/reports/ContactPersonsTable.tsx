@@ -17,6 +17,9 @@ import { useSmCustomerTree }  from '@/hooks/useSmCustomerTree'
 import type { ReportContact, ReportFilterGroup } from '@/types/reports'
 
 
+// Option values of the planning-contact filter, shared by the predicate and the options so they cannot drift.
+const PLANNING_CONTACT = { yes: 'yes', no: 'no' } as const
+
 // Searchable, filterable, paginated list of every customer contact person, flattened
 // from the shared customer tree; row click opens the read-only ContactPersonDrawer.
 export default function ContactPersonsTable() {
@@ -41,7 +44,7 @@ export default function ContactPersonsTable() {
     }))
   ), [customers])
 
-  // Distinct, sorted customer names for the "Klant" filter's option list.
+  // Distinct, sorted customer names for the customer filter's option list.
   const customerOptions = useMemo(() =>
     [...new Set(contacts.map(c => c.customer_name).filter((x): x is string => Boolean(x)))].sort(),
     [contacts]
@@ -53,7 +56,7 @@ export default function ContactPersonsTable() {
     if (selectedCustomers.length > 0)
       rows = rows.filter(c => selectedCustomers.includes(c.customer_name as string))
     if (selectedReceives.length > 0) {
-      rows = rows.filter(c => selectedReceives.includes(c.scheduled_order_contact ? 'ja' : 'nee'))
+      rows = rows.filter(c => selectedReceives.includes(c.scheduled_order_contact ? PLANNING_CONTACT.yes : PLANNING_CONTACT.no))
     }
     if (search) {
       const q = search.toLowerCase()
@@ -96,8 +99,8 @@ export default function ContactPersonsTable() {
       key: 'planning_contact', label: t('contacts.filters.planningContact'),
       selected: selectedReceives,
       options: [
-        { value: 'ja',  label: t('contacts.planningYes'), count: contacts.filter(c => Boolean(c.scheduled_order_contact)).length },
-        { value: 'nee', label: t('contacts.planningNo'),  count: contacts.filter(c => !c.scheduled_order_contact).length },
+        { value: PLANNING_CONTACT.yes, label: t('contacts.planningYes'), count: contacts.filter(c => Boolean(c.scheduled_order_contact)).length },
+        { value: PLANNING_CONTACT.no, label: t('contacts.planningNo'),  count: contacts.filter(c => !c.scheduled_order_contact).length },
       ],
       onToggle: v => setSelectedReceives(p => p.includes(v) ? p.filter(x => x !== v) : [...p, v]),
     })

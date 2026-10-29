@@ -13,8 +13,9 @@ import { WORKFLOW_EVENT_KEYS, eventKeyToI18nKey } from './eventCatalog'
 // Manual mirror of TriggerModule::configSchema()'s `event.options` (koiosmatch-api,
 // app/Workflow/Modules/TriggerModule.php ~L68-135) — every key here has a real
 // WorkflowDispatcher::dispatch() call site backing it. REPAIR N5 (2026-09-04):
-// re-counted the backend's FULL options array by hand — 66 keys + match.reopened (BE lane C b8b7dabd4, 21-10) = 67 (57 + 4 added by
-// TRIGGER-VOCAB-1, KLEIN-BE-1 + the 5 approval/blank-fallback keys) — this list carries all 67; the two tests below
+// re-counted the backend's FULL options array by hand: 67 keys (66 earlier:
+// 57 + 4 added by TRIGGER-VOCAB-1/KLEIN-BE-1 + 5 approval/blank-fallback keys;
+// plus match.reopened, BE lane C b8b7dabd4). The two tests below
 // make this an exact bidirectional mirror (no missing key, no fake affordance),
 // not just a "contains" check.
 const BACKEND_DISPATCHED_EVENTS = [

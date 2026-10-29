@@ -3,7 +3,7 @@
  * expandable field tree instead of a raw JSON blob. Root lists become
  * "Bundle 1..N", nested objects/arrays expand inline, and an optional search box
  * filters keys + values. The backend caps list keys at 100 rows and adds a
- * sibling `<key>_total`; that cap is surfaced as "x van y getoond".
+ * sibling `<key>_total`; that cap is surfaced as the tree.capped sentence.
  *
  * OUTPUT-TREE-TYPED-1: four extra options (`typed`/`counts`/`bundles`/the
  * expand-/collapse-all signals), every default OFF so every existing consumer
@@ -175,7 +175,7 @@ function Children({ value, depth, query, t, opts, bundleTotal }: {
     <div>
       {visibleEntries(obj).map(([k, v]) => {
         if (query && !matches(v, k, query)) return null
-        // A capped list shows "x van y getoond" from its `<key>_total` companion.
+        // A capped list shows the tree.capped sentence from its `<key>_total` companion.
         const total = obj[`${k}_total`]
         const hint = Array.isArray(v) && typeof total === 'number' && total > v.length
           ? t('tree.capped', { shown: v.length, total })
@@ -196,7 +196,7 @@ export default function OutputTree({ data, searchable = true, typed, counts, bun
   data: unknown; searchable?: boolean
   typed?: boolean; counts?: boolean; bundles?: boolean
   expandSignal?: number; collapseSignal?: number; bundleTotal?: number; fill?: boolean
-  // RUN-INSPECTOR-1: the search box names what it searches ("Zoeken in invoer…" on the Input column); default = the generic tree.search.
+  // RUN-INSPECTOR-1: the search box names what it searches (the Input column's search placeholder); default = the generic tree.search.
   searchPlaceholder?: string
 }) {
   const { t } = useTranslation('workflows')

@@ -40,3 +40,10 @@ describe('parseFilterValueToken', () => {
     expect(parseFilterValueToken(token)).toEqual({ number: 5, field: 'first_name', format: undefined })
   })
 })
+
+describe('two adjacent tokens', () => {
+  it('are not ONE token and do not parse into a garbage field', () => {
+    expect(isFilterValueToken('{{1.a}},{{2.b}}')).toBe(false)
+    expect(parseFilterValueToken('{{1.a}},{{2.b}}')).toBeNull()
+  })
+})

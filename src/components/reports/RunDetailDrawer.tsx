@@ -132,7 +132,7 @@ export default function RunDetailDrawer({ run, onClose, zIndex }: {
         </Caption>
       )}
       {stopError && (
-        <div style={{ fontSize: 11, color: 'var(--color-danger-text)', marginTop: 4 }}>{stopError}</div>
+        <Caption as="div" style={{ color: 'var(--color-danger-text)', marginTop: 4 }}>{stopError}</Caption>
       )}
     </div>
   )

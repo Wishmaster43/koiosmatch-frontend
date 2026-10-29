@@ -11,6 +11,7 @@
  */
 import { useEffect, useMemo, useState } from 'react'
 import { useTranslation } from 'react-i18next'
+import { useQueryClient } from '@tanstack/react-query'
 import { ChevronsDownUp, ChevronsUpDown } from 'lucide-react'
 import FloatingPanel from '@/components/ui/FloatingPanel'
 import SegmentedControl from '@/components/ui/SegmentedControl'
@@ -23,6 +24,7 @@ import { formatDateTimeStr } from '@/lib/localDate'
 import { useNumberFormat } from '@/lib/formatters'
 import { extractApiError } from '@/lib/extractApiError'
 import { StepStatusBadge, formatDuration } from '@/components/reports/runFormat'
+import { stepReasonLabel } from '@/components/reports/stepReason'
 import OutputTree from './OutputTree'
 import { useModuleCatalog } from './useModuleCatalog'
 import { useRunStepDetail, useRunStepListPage } from './useRunStepDetail'
@@ -67,11 +69,17 @@ function RunStepColumn({ title, data, fields, ownKeys, emptyLabel, expandSignal,
 
 // One attempts_log row: status pill + timestamp + a one-line summary.
 function AttemptLogRow({ row, t }: { row: RunStepAttemptLogRow; t: (k: string, o?: Record<string, unknown>) => string }) {
+  // A known skip code reads as a translated sentence (runs.stepReasons.*); the raw error only shows when no code is known.
+  const { t: tReports } = useTranslation('reports')
+  const rawCode = (row.output as Record<string, unknown> | null | undefined)?.skip_reason
+  const reasonText = stepReasonLabel(typeof rawCode === 'string' ? rawCode : null, tReports)
   return (
     <div style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '4px 6px', borderBottom: '1px solid var(--border)' }}>
       <StepStatusBadge status={row.status} />
       <Mono style={{ fontSize: 11 }}>{row.executed_at ? formatDateTimeStr(row.executed_at) : '—'}</Mono>
-      {row.error && <Caption style={{ color: 'var(--color-danger-text)' }}>{String(row.error)}</Caption>}
+      {reasonText
+        ? <Caption>{reasonText}</Caption>
+        : row.error && <Caption style={{ color: 'var(--color-danger-text)' }}>{String(row.error)}</Caption>}
       <Caption style={{ marginLeft: 'auto' }}>{t('inspector.attempt', { n: row.attempt ?? '—' })}</Caption>
     </div>
   )
@@ -88,6 +96,7 @@ export default function RunStepInspectorPanel({ runId, stepId, moduleLabel, onCl
   // GETALLEN-1: every count the user sees (log rows, list totals, bytes) goes through the active locale.
   const { formatFileSize, formatNumber } = useNumberFormat()
   const { step, loading, error, forbidden, refetch } = useRunStepDetail(runId, stepId)
+  const queryClient = useQueryClient()
   const { catalog } = useModuleCatalog()
   const ownKeys = step?.module_type ? Object.keys(catalog[step.module_type]?.outputFields ?? {}) : null
   const [fields, setFields] = useState<'all' | 'own'>('all')
@@ -217,7 +226,12 @@ export default function RunStepInspectorPanel({ runId, stepId, moduleLabel, onCl
                   const nextPage = (loaded?.page ?? 1) + 1
                   return (
                     <Button key={key} variant="secondary" size="sm" disabled={listLoading && pendingFetch?.key === key}
-                      onClick={() => setPendingFetch({ key, page: nextPage })}>
+                      onClick={() => {
+                        // Retry after a failed page: the same {key,page} would not change the query key, so refetch it explicitly.
+                        if (listErrorObj && pendingFetch?.key === key && pendingFetch.page === nextPage) {
+                          void queryClient.invalidateQueries({ queryKey: ['workflow-run-step-list', runId, stepId, key, nextPage, 50] })
+                        } else setPendingFetch({ key, page: nextPage })
+                      }}>
                       {t('inspector.loadMore', { shown: formatNumber(shown), total: formatNumber(total) })}
                     </Button>
                   )

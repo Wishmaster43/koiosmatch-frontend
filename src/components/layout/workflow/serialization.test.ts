@@ -388,7 +388,8 @@ describe('step label round-trip', () => {
 })
 
 // UNSUBSCRIBE-1 (BE lane N): a hidden step config key the editor never shows (the seeded
-// rejection step's mail_category) must ride along unchanged through the graph round-trip.
+// rejection step's mail_category) must ride along unchanged through stepsToFlow → flowToSteps ONLY
+// (a shallow config copy). The config-edit merge (useWorkflowGraph) and workflowMap normalize/denormalize are not covered here.
 describe('stepsToFlow → flowToSteps keeps hidden config keys', () => {
   it('keeps mail_category on an email step', () => {
     const steps = [{ id: 's1', type: 'email_send', config: { subject: 'x', mail_category: 'rejection' } }] as unknown as WorkflowStep[]

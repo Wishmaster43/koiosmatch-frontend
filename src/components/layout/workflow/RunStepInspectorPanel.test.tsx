@@ -144,3 +144,55 @@ describe('RunStepInspectorPanel · per-column search placeholders', () => {
   })
 })
 
+
+// Builds a step envelope with one attempt row.
+const withAttemptRow = (attempt: Record<string, unknown>, extra: Record<string, unknown> = {}) => ({
+  data: {
+    id: 'step-1', module_type: 'candidates_fetch', status: 'success', output: {}, list_keys: [],
+    attempts_log: [{ attempt: 1, input: {}, executed_at: '2026-10-20T08:00:00Z', ...attempt }], attempts_total: 1, ...extra,
+  },
+  list: null,
+})
+
+describe('RunStepInspectorPanel attempt log', () => {
+  it('renders the translated skip reason and hides the server sentence', async () => {
+    vi.mocked(api.get).mockResolvedValue({ data: withAttemptRow({
+      status: 'skipped', error: 'Geen ontvangers — er is niets verstuurd.', output: { skip_reason: 'no_recipients' },
+    }) } as never)
+    render(<RunStepInspectorPanel runId="run-1" stepId="step-1" moduleLabel="X" onClose={() => {}} />, { wrapper })
+    expect(await screen.findByText('runs.stepReasons.no_recipients')).toBeInTheDocument()
+    expect(screen.queryByText(/Geen ontvangers/)).toBeNull()
+  })
+
+  it('keeps the error in danger ink when no known code exists', async () => {
+    vi.mocked(api.get).mockResolvedValue({ data: withAttemptRow({ status: 'failed', error: 'Boom', output: {} }) } as never)
+    render(<RunStepInspectorPanel runId="run-1" stepId="step-1" moduleLabel="X" onClose={() => {}} />, { wrapper })
+    const err = await screen.findByText('Boom')
+    expect(err).toHaveStyle({ color: 'var(--color-danger-text)' })
+  })
+})
+
+describe('RunStepInspectorPanel load-more retry', () => {
+  it('re-sends the page request after a failed load-more', async () => {
+    const big = withAttemptRow({ status: 'success', output: {} }, {
+      output: { candidates: Array.from({ length: 50 }, (_, i) => ({ id: i })), candidates_total: 120 }, list_keys: ['candidates'],
+    })
+    let listCalls = 0
+    vi.mocked(api.get).mockImplementation((_url, cfg) => {
+      if (!cfg?.params) return Promise.resolve({ data: big } as never)
+      listCalls += 1
+      return listCalls === 1
+        ? Promise.reject(new Error('500'))
+        : Promise.resolve({ data: { list: { key: 'candidates', data: [{ id: 'new-row' }], meta: { current_page: 2, last_page: 3, per_page: 50, total: 120 } } } } as never)
+    })
+    render(<RunStepInspectorPanel runId="run-1" stepId="step-1" moduleLabel="X" onClose={() => {}} />, { wrapper })
+    await userEvent.click(await screen.findByText(/inspector\.loadMore:/))
+    await screen.findByText('inspector.loadMoreFailed')
+    await userEvent.click(screen.getByText(/inspector\.loadMore:/))
+    await waitFor(() => expect(listCalls).toBe(2))
+    expect(api.get).toHaveBeenLastCalledWith('/workflow-runs/run-1/steps/step-1', expect.objectContaining({
+      params: { list: 'candidates', page: 2, per_page: 50 },
+    }))
+    await waitFor(() => expect(screen.queryByText('inspector.loadMoreFailed')).toBeNull())
+  })
+})
