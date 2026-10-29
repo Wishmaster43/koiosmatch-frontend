@@ -3,7 +3,7 @@
  */
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 import { render, screen, fireEvent, act } from '@testing-library/react'
-import { MemoryRouter, Routes, Route } from 'react-router-dom'
+import { MemoryRouter, Routes, Route, useLocation } from 'react-router-dom'
 import { I18nextProvider, initReactI18next } from 'react-i18next'
 import i18next from 'i18next'
 import nlAuth from '@/i18n/locales/nl/auth.json'
@@ -17,7 +17,14 @@ vi.mock('@/lib/api', () => ({
 const setNotice = vi.fn()
 vi.mock('@/lib/authNotice', () => ({ setAuthNotice: (k: string) => setNotice(k) }))
 
+// Signed-in switch for the AuthContext hook.
+let authUser: unknown = null
+vi.mock('@/context/AuthContext', () => ({ useAuth: () => ({ user: authUser }) }))
+
 import SetPasswordForm from './SetPasswordForm'
+
+// Probe that exposes the current location search.
+const LocProbe = () => <span data-testid="loc">{useLocation().search}</span>
 
 const i18n = i18next.createInstance()
 await i18n.use(initReactI18next).init({
@@ -29,6 +36,7 @@ const texts = { title: 'TITLE', subtitle: 'SUB', submit: 'GO', invalid: 'DEAD' }
 const renderForm = (url: string, requestNewLink = false) => render(
   <I18nextProvider i18n={i18n}>
     <MemoryRouter initialEntries={[url]}>
+      <LocProbe />
       <Routes>
         <Route path="/login" element={<div>LOGIN-PAGE</div>} />
         <Route path="/x" element={<SetPasswordForm endpoint="/auth/password/reset" invalidCode="reset_token_invalid"
@@ -99,7 +107,7 @@ describe('SetPasswordForm', () => {
     renderForm(URL_OK)
     fill('longenough', 'longenough')
     await act(async () => { fireEvent.click(go()) })
-    expect(screen.getByText(nlAuth.setPassword.weak)).toBeTruthy()
+    expect(screen.getByText(nlAuth.setPassword.weak.replace('{{min}}', '8'))).toBeTruthy()
     expect(screen.queryByText('The password is too weak.')).toBeNull()
   })
 
@@ -110,5 +118,60 @@ describe('SetPasswordForm', () => {
     await act(async () => { fireEvent.click(go()) })
     expect(screen.getByText(nlAuth.setPassword.throttled.replace('{{seconds}}', '4'))).toBeTruthy()
     expect((go() as HTMLButtonElement).disabled).toBe(true)
+  })
+})
+
+// Lane 08 regressions: signed-in success, URL strip, FieldNotice alert, min-length copy, 422 field bags.
+describe('SetPasswordForm hardening', () => {
+  beforeEach(() => { calls.length = 0; postMock.mockReset(); setNotice.mockReset(); sessionStorage.clear(); vi.useFakeTimers({ toFake: ['setTimeout', 'clearTimeout'] }) })
+  afterEach(() => { vi.useRealTimers(); authUser = null })
+
+  it('strips token and email from the URL yet still posts them', async () => {
+    postMock.mockResolvedValueOnce({ status: 200, data: {} })
+    renderForm(URL_OK)
+    expect(screen.getByTestId('loc').textContent).toBe('')
+    expect(screen.getByLabelText(nlAuth.setPassword.password)).toBeTruthy()
+    fill('longenough', 'longenough')
+    await act(async () => { fireEvent.click(go()) })
+    expect(postMock).toHaveBeenCalledWith('/auth/password/reset', {
+      email: 'a@b.nl', token: 'tok123', password: 'longenough', password_confirmation: 'longenough',
+    })
+  })
+
+  it('shows the success callout in place for a signed-in visitor and sets no notice', async () => {
+    authUser = { id: 1 }
+    postMock.mockResolvedValueOnce({ status: 200, data: {} })
+    renderForm(URL_OK)
+    fill('longenough', 'longenough')
+    await act(async () => { fireEvent.click(go()) })
+    expect(screen.getByText(nlAuth.login.passwordResetDone)).toBeTruthy()
+    expect(sessionStorage.getItem('km_auth_notice')).toBeNull()
+    expect(setNotice).not.toHaveBeenCalled()
+    expect(screen.queryByText('LOGIN-PAGE')).toBeNull()
+  })
+
+  it('announces the mismatch as an alert', () => {
+    renderForm(URL_OK)
+    fill('longenough', 'different1')
+    fireEvent.blur(screen.getByLabelText(nlAuth.setPassword.confirm))
+    expect(screen.getByRole('alert').textContent).toBe(nlAuth.setPassword.mismatch)
+  })
+
+  it('interpolates MIN_LENGTH into the hint and the weak banner', async () => {
+    postMock.mockRejectedValueOnce({ response: { status: 422, data: { errors: { password: ['x'] } } } })
+    renderForm(URL_OK)
+    expect(screen.getByText(nlAuth.setPassword.minHint.replace('{{min}}', '8'))).toBeTruthy()
+    fill('longenough', 'longenough')
+    await act(async () => { fireEvent.click(go()) })
+    expect(screen.getByText(nlAuth.setPassword.weak.replace('{{min}}', '8'))).toBeTruthy()
+  })
+
+  it.each(['email', 'token'])('maps a 422 errors.%s bag to the invalid-link state', async (field) => {
+    postMock.mockRejectedValueOnce({ response: { status: 422, data: { errors: { [field]: ['invalid'] } } } })
+    renderForm(URL_OK)
+    fill('longenough', 'longenough')
+    await act(async () => { fireEvent.click(go()) })
+    expect(screen.getByText('DEAD')).toBeTruthy()
+    expect(screen.queryByLabelText(nlAuth.setPassword.password)).toBeNull()
   })
 })
