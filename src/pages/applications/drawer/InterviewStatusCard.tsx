@@ -124,10 +124,11 @@ export default function InterviewStatusCard({
         <span style={{ fontSize: 12, color: 'var(--text-muted)', fontStyle: 'italic' }}>{t('interview.status.none')}</span>
         {/* Calm plain-text skip reason (+ date); an unknown code reads generically, never raw. */}
         {skipReason && (
-          <Caption>
-            {t(`interview.skipReason.${isInterviewSkipCode(skipReason) ? skipReason : 'unknown'}`)}
-            {skippedAt ? ` ${t('interview.skippedAt', { date: formatDateTimeStr(skippedAt) })}` : ''}
-          </Caption>
+          <>
+            <Caption as="div">{t(`interview.skipReason.${isInterviewSkipCode(skipReason) ? skipReason : 'unknown'}`)}</Caption>
+            {/* The date is its own line, so no locale inherits a code-glued word order. */}
+            {skippedAt && <Caption as="div">{t('interview.skippedAt', { date: formatDateTimeStr(skippedAt) })}</Caption>}
+          </>
         )}
         {workflowOverridePicker}
         {vacancyDefaultBlock}

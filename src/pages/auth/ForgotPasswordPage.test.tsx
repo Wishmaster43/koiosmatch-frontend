@@ -44,6 +44,8 @@ describe('ForgotPasswordPage', () => {
     expect(postMock).toHaveBeenCalledWith('/auth/password/forgot', { email: 'a@b.nl' })
     expect(screen.getByText(nlAuth.forgot.sent)).toBeTruthy()
     expect(screen.queryByText('We sent a link')).toBeNull()
+    // Focus moves to the confirmation wrapper once the form is gone.
+    expect(document.activeElement).toBe(screen.getByText(nlAuth.forgot.sent).closest('[tabindex="-1"]'))
   })
 
   it('maps a 422 to the field text, never the server text', async () => {

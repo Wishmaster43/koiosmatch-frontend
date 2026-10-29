@@ -659,6 +659,19 @@ describe('InterviewStatusCard · skip reason (ONIX K-006)', () => {
 })
 
 
+describe('InterviewStatusCard · skip line composition', () => {
+  it('renders the reason and the date as separate nodes', () => {
+    render(<InterviewStatusCard interview={null} skipReason="brand_new_code" skippedAt="2026-10-01T10:00:00Z" />)
+    expect(screen.getByText('interview.skipReason.unknown')).toBeInTheDocument()
+    expect(screen.getByText('interview.skippedAt')).toBeInTheDocument()
+  })
+
+  it('renders no date node without skippedAt', () => {
+    render(<InterviewStatusCard interview={null} skipReason="brand_new_code" />)
+    expect(screen.queryByText('interview.skippedAt')).not.toBeInTheDocument()
+  })
+})
+
 describe('InterviewStatusCard · skipped start (INTERVIEW-SKIP-ON-APPLICATION-1)', () => {
   const CODES = ['rejected_stage', 'placed_stage', 'no_mobile_or_consent', 'action_rule_blocked', 'no_interview_consent', 'wa_web_send_not_supported', 'no_active_connection', 'send_failed', 'ai_disclosure_missing', 'candidate_in_other_interview']
 
@@ -674,7 +687,20 @@ describe('InterviewStatusCard · skipped start (INTERVIEW-SKIP-ON-APPLICATION-1)
   })
 
   it('appends the skip date in the house format when given', () => {
-    render(<InterviewStatusCard interview={null} skipReason="send_failed" skippedAt="2026-10-21T09:30:00Z" />)
-    expect(mockT).toHaveBeenCalledWith('interview.skippedAt', { date: 'dt(2026-10-21T09:30:00Z)' })
+    // Echo the interpolated date so the RENDERED text proves the result of t() is used.
+    mockT.mockImplementation(((k: string, o?: { date?: string }) => (o?.date ? `${k}:${o.date}` : k)) as never)
+    try {
+      render(<InterviewStatusCard interview={null} skipReason="send_failed" skippedAt="2026-10-21T09:30:00Z" />)
+      expect(screen.getByText('interview.skipReason.send_failed')).toBeInTheDocument()
+      expect(screen.getByText('interview.skippedAt:dt(2026-10-21T09:30:00Z)')).toBeInTheDocument()
+    } finally {
+      mockT.mockImplementation(((k: string) => k) as never)
+    }
+  })
+
+  it('never shows the skip line when a session block exists', () => {
+    render(<InterviewStatusCard interview={fullInterview()} skipReason="send_failed" skippedAt="2026-10-21T09:30:00Z" />)
+    expect(screen.queryByText(/interview\.skipReason/)).toBeNull()
+    expect(screen.queryByText(/interview\.skippedAt/)).toBeNull()
   })
 })

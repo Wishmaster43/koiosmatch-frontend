@@ -102,3 +102,37 @@ describe('useEmailConnection · mailbox health statuses', () => {
     expect(result.current.info.status_at).toBe('2026-10-20T08:00:00Z')
   })
 })
+
+describe('useEmailConnection · stable reload and alive guard (G-009)', () => {
+  beforeEach(() => vi.clearAllMocks())
+
+  it('keeps the reload identity across rerenders', async () => {
+    vi.mocked(api.get).mockResolvedValue({ data: { status: 'disconnected' } })
+    const { result, rerender } = renderHook(() => useEmailConnection())
+    await waitFor(() => expect(result.current.status).toBe('disconnected'))
+    const first = result.current.reload
+    rerender()
+    expect(result.current.reload).toBe(first)
+    expect(api.get).toHaveBeenCalledTimes(1)
+  })
+
+  it('ignores a response that lands after unmount', async () => {
+    let resolveGet: (v: unknown) => void = () => {}
+    vi.mocked(api.get).mockReturnValueOnce(new Promise(r => { resolveGet = r }) as never)
+    const { result, unmount } = renderHook(() => useEmailConnection())
+    unmount()
+    await act(async () => { resolveGet({ data: { status: 'connected' } }) })
+    expect(result.current.status).toBe('loading')
+    expect(api.get).toHaveBeenCalledTimes(1)
+  })
+
+  it('disconnect POSTs /profile/email/disconnect', async () => {
+    vi.mocked(api.get).mockResolvedValue({ data: { status: 'needs_reconnect', provider: 'smtp' } })
+    vi.mocked(api.post).mockResolvedValue({ data: {} })
+    const { result } = renderHook(() => useEmailConnection())
+    await waitFor(() => expect(result.current.status).toBe('needs_reconnect'))
+    await act(async () => { await result.current.disconnect() })
+    expect(api.post).toHaveBeenCalledWith('/profile/email/disconnect')
+    expect(result.current.status).toBe('disconnected')
+  })
+})

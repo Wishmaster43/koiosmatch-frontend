@@ -217,7 +217,8 @@ export function useProposeForm(application: ApplicationDetail) {
   const senderName = (senderUserId && users?.find(u => String(u.id) === senderUserId)?.name) || application.owner?.name || ''
 
   useEffect(() => {
-    if (dirtyRef.current || !recipient) return
+    // Wait for the candidate record: {candidate_short} would render blank (and freeze) before it arrives.
+    if (dirtyRef.current || !recipient || candidateLoading) return
     // Mirrors BE ProposalTemplate::shortName: first name + uppercased last initial.
     const first = candidate?.firstname?.trim() ?? ''
     const last = candidate?.lastname?.trim() ?? ''
@@ -243,7 +244,7 @@ export function useProposeForm(application: ApplicationDetail) {
     // name, not the whole `application`/`proposalSettings`/`users` objects (a new
     // identity every render would re-fire this on every keystroke elsewhere) or `t`.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [recipient?.id, recipient?.name, senderName, settingsValues, candidate?.id])
+  }, [recipient?.id, recipient?.name, senderName, settingsValues, candidate?.id, candidateLoading])
 
   const hasMotivation = Boolean(application.coverLetter)
 

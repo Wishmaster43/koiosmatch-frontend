@@ -3,13 +3,14 @@
  */
 import { useTranslation } from 'react-i18next'
 import { useSearchParams } from 'react-router-dom'
+import { safeEmailParam } from '@/lib/safeEmailParam'
 import LoginShell from '@/components/auth/LoginShell'
 import SetPasswordForm from './SetPasswordForm'
 
 export default function ResetPasswordPage() {
   const { t } = useTranslation('auth')
   const [params] = useSearchParams()
-  const email = params.get('email') ?? ''
+  const email = safeEmailParam(params.get('email'))
   return (
     <LoginShell>
       <SetPasswordForm endpoint="/auth/password/reset" invalidCode="reset_token_invalid" noticeKind="password_reset" requestNewLink

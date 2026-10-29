@@ -17,7 +17,7 @@
 import { useState, useEffect } from 'react'
 import type { ChangeEvent, CSSProperties } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Mail, Eye, EyeOff } from 'lucide-react'
+import { Mail, Eye, EyeOff, Check, AlertTriangle } from 'lucide-react'
 import { useEmailConnection } from './useEmailConnection'
 import type { SmtpForm } from './useEmailConnection'
 import { fieldInputStyle } from '@/components/forms/fieldMetrics'
@@ -25,9 +25,9 @@ import Button from '@/components/ui/Button'
 import Spinner from '@/components/ui/Spinner'
 import SegmentedControl from '@/components/ui/SegmentedControl'
 import CalloutBox from '@/components/ui/CalloutBox'
-import { Check, AlertTriangle } from 'lucide-react'
+import { useDateFormat } from '@/lib/datetime'
 import { getHashParams, oauthReasonKey, stripOauthParams } from '@/lib/hashQuery'
-import { SectionTitle, Mono, formLabelStyle } from '@/components/ui/typography'
+import { SectionTitle, Mono, Caption, formLabelStyle } from '@/components/ui/typography'
 
 const PROVIDERS = [
   { id: 'office', label: 'Office 365' },
@@ -40,14 +40,28 @@ const inputStyle: CSSProperties = fieldInputStyle
 // Shared FormLabel identity (12/500/muted) + this file's own layout (§4: identity from the atom, layout local).
 const labelStyle: CSSProperties = { ...formLabelStyle, marginBottom: 5, display: 'block' }
 
+// Machine reason codes from the mailbox health check, mapped to their translated sentence.
+const REASON_KEYS: Record<string, string> = {
+  smtp_auth_refused: 'profile.email.reasonSmtpAuthRefused',
+  smtp_unreachable: 'profile.email.reasonSmtpUnreachable',
+  token_exchange_failed: 'profile.email.reasonTokenExchangeFailed',
+  provider_denied: 'profile.email.reasonProviderDenied',
+  invalid_grant: 'profile.email.reasonInvalidGrant',
+}
+
 // The signed-in user's personal mailbox connector (OAuth for Office 365/Gmail, manual form for SMTP), distinct from the tenant-wide sender in Settings (see file header).
 export default function ProfileEmailConnect() {
   const { t } = useTranslation('auth')
+  const { formatDateTime } = useDateFormat()
   // Data layer: connection state + the OAuth/SMTP connect flows and disconnect (§3).
   const { status, info, busy, connectOauth, saveSmtp, disconnect, reload } = useEmailConnection()
   const [choice,   setChoice]   = useState('office')
   const [showPass, setShowPass] = useState(false)
   const [smtp, setSmtp] = useState<SmtpForm>({ host: '', port: '587', user: '', pass: '', secure: 'tls', from_name: '', from_email: '' })
+
+  // Health detail: an SMTP mailbox has no OAuth re-link; a known BE reason code reads as a sentence.
+  const isSmtp = info.provider === 'smtp'
+  const reasonKey = info.status_reason ? REASON_KEYS[info.status_reason] : undefined
 
   // G-009: the OAuth callback returns to `#profile?email_oauth=…&context=personal`; show its outcome once, refresh the status on success, then strip the params.
   const [oauthBanner, setOauthBanner] = useState<{ ok: boolean; msg: string } | null>(null)
@@ -105,12 +119,20 @@ export default function ProfileEmailConnect() {
       {status === 'needs_reconnect' && (
         <CalloutBox variant="warning">
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12, flexWrap: 'wrap' }}>
-            <span>{t('profile.email.needsReconnect')}</span>
-            <Button variant="primary" size="sm" onClick={() => connectOauth(info.provider ?? 'office')} disabled={busy}>
-              {busy ? <Spinner size={12} /> : <Mail size={14} />}
-              {t('profile.email.connectWith', { provider: PROVIDERS.find(p => p.id === info.provider)?.label ?? PROVIDERS[0].label })}
-            </Button>
+            <span>{isSmtp ? t('profile.email.needsReconnectSmtp') : t('profile.email.needsReconnect')}</span>
+            <div style={{ display: 'flex', gap: 8 }}>
+              {/* OAuth re-link only for OAuth providers; an SMTP mailbox is dropped and re-entered. */}
+              {!isSmtp && (
+                <Button variant="primary" size="sm" onClick={() => connectOauth(info.provider ?? 'office')} disabled={busy}>
+                  {busy ? <Spinner size={12} /> : <Mail size={14} />}
+                  {t('profile.email.connectWith', { provider: PROVIDERS.find(p => p.id === info.provider)?.label ?? PROVIDERS[0].label })}
+                </Button>
+              )}
+              <Button variant="secondary" size="sm" onClick={disconnect} disabled={busy}>{t('profile.email.disconnect')}</Button>
+            </div>
           </div>
+          {reasonKey && <Caption as="div" style={{ marginTop: 6 }}>{t(reasonKey)}</Caption>}
+          {info.status_at && <Caption as="div">{t('profile.email.statusAt', { date: formatDateTime(info.status_at) })}</Caption>}
         </CalloutBox>
       )}
 

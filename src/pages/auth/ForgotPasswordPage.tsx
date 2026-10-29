@@ -3,7 +3,7 @@
  * The server answers 202 whether or not the address exists, so the page always
  * shows its OWN "sent" text and never branches on the server message.
  */
-import { useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import type { FormEvent } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useGuardedSubmit } from '@/hooks/useGuardedSubmit'
@@ -26,6 +26,9 @@ export default function ForgotPasswordPage() {
   const [email, setEmail] = useState('')
   const [sent, setSent] = useState(false)
   const [failure, setFailure] = useState<Failure>(null)
+  // The submit button unmounts on success: move focus to the confirmation so keyboard and screen-reader users keep their place.
+  const sentRef = useRef<HTMLDivElement>(null)
+  useEffect(() => { if (sent) sentRef.current?.focus() }, [sent])
   // Seconds until the request throttle lifts, counted down live.
   const { countdown, begin } = useAuthRequest()
 
@@ -53,7 +56,7 @@ export default function ForgotPasswordPage() {
     <LoginShell>
       <PageTitle as="h1" style={{ marginBottom: 4 }}>{t('forgot.title')}</PageTitle>
       {sent ? (
-        <div style={{ marginTop: 24 }}>
+        <div ref={sentRef} tabIndex={-1} style={{ marginTop: 24 }}>
           <CalloutBox variant="success" live="polite">{t('forgot.sent')}</CalloutBox>
         </div>
       ) : (

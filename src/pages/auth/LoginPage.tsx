@@ -108,10 +108,10 @@ function CredentialForm({ onMfaRequired, notice }: { onMfaRequired: (token: stri
 
       <form onSubmit={handleSubmit} className="flex flex-col gap-4">
         <AuthTextField id="login-email" label={t('login.email')} type="email" value={email} onChange={setEmail}
-          placeholder={t('login.emailPlaceholder')} required autoFocus />
+          placeholder={t('login.emailPlaceholder')} required autoFocus autoComplete="username" />
 
         <AuthPasswordField id="login-password" label={t('login.password')} value={password} onChange={setPassword}
-          placeholder={t('login.password')} required
+          placeholder={t('login.password')} required autoComplete="current-password"
           showLabel={t('login.showPassword')} hideLabel={t('login.hidePassword')} />
 
         {/* Real link to the reset request page, right-aligned under the password field. */}
@@ -195,9 +195,9 @@ function MfaForm({ mfaToken, onBack, onChallengeUsed }: { mfaToken: string; onBa
         </div>
       </div>
 
-      <p style={{ fontSize: 13, color: 'var(--text-muted)', marginBottom: 24, lineHeight: 1.6 }}>
+      <BodyText style={{ color: 'var(--text-muted)', marginBottom: 24, lineHeight: 1.6 }}>
         {t('mfa.instructions')}
-      </p>
+      </BodyText>
 
       <form onSubmit={handleSubmit} className="flex flex-col gap-4">
         <div>

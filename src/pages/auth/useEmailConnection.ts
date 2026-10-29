@@ -9,7 +9,7 @@
  *   POST /profile/email/smtp {host,port,…}  -> { status:'connected', email }
  *   POST /profile/email/disconnect          -> { status:'disconnected' }
  */
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { useTranslation } from 'react-i18next'
 import api from '@/lib/api'
 import { notifyError } from '@/lib/notify'
@@ -35,16 +35,27 @@ export function useEmailConnection() {
   // Load the current personal-mailbox state (404 → feature unavailable, any
   // other failure → a real error state — never fall into 'disconnected', which
   // would invite a user whose mailbox IS connected to connect it again, §0 four UI states).
-  const load = async () => {
+  // Stable identity (only stable setters are used) so effects depending on `reload` do not re-run every render;
+  // `alive` lets the mount effect drop a response that lands after unmount.
+  const load = useCallback(async (alive: { current: boolean } = { current: true }) => {
     try {
       const d = (await api.get('/profile/email')).data
+      if (!alive.current) return
       setStatus(d?.status ?? 'disconnected')
       setInfo({ provider: d?.provider ?? null, email: d?.email ?? null, status_reason: d?.status_reason ?? null, status_at: d?.status_at ?? null })
     } catch (e) {
+      if (!alive.current) return
       setStatus(statusOf(e) === 404 ? 'unavailable' : 'error')
     }
-  }
-  useEffect(() => { load() }, [])
+  }, [])
+  useEffect(() => {
+    const alive = { current: true }
+    void load(alive)
+    return () => { alive.current = false }
+  }, [load])
+
+  // Public refresh: stable identity and never mistakes a click event for the alive guard.
+  const reload = useCallback(() => load(), [load])
 
   // OAuth providers: fetch a consent URL and redirect the browser to it. A non-404
   // failure must say so — silently resetting `busy` with no feedback (§3) left the
@@ -93,5 +104,5 @@ export function useEmailConnection() {
     setBusy(false)
   }
 
-  return { status, info, busy, connectOauth, saveSmtp, disconnect, reload: load }
+  return { status, info, busy, connectOauth, saveSmtp, disconnect, reload }
 }

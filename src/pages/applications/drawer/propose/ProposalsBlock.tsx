@@ -36,12 +36,15 @@ interface ProposalsBlockProps {
   application: ApplicationDetail
 }
 
-// Human hint for a failed send's error code; null keeps the raw fallback for other codes.
+// Human hint for a failed send's error code; any other code reads as the generic hint, never raw.
 const SEND_ERROR_HINT_KEYS: Record<string, string> = {
   recipient_suppressed: 'propose.sendError.recipientSuppressed',
   worker_lost: 'propose.sendError.workerLost',
   claim_expired: 'propose.sendError.claimExpired',
+  no_recipient_email: 'propose.sendError.noRecipientEmail',
+  send_failed: 'propose.sendError.sendFailed',
 }
+const SEND_ERROR_GENERIC_KEY = 'propose.sendError.generic'
 
 // K-248: resolves a proposal's delivery-truth chip, or null for a legacy row
 // with neither send_status nor sent_at. queued/sent/failed/no_consent/not_sent are
@@ -66,7 +69,7 @@ function sendStatusChip(p: Proposal, t: TFunction) {
   return (
     <SoftChip label={t(`propose.sendStatus.${status}`)} color={colorByStatus[status]}
       title={status === 'failed' && p.send_error
-        ? (SEND_ERROR_HINT_KEYS[p.send_error] ? t(SEND_ERROR_HINT_KEYS[p.send_error]) : p.send_error) : undefined} />
+        ? (SEND_ERROR_HINT_KEYS[p.send_error] ? t(SEND_ERROR_HINT_KEYS[p.send_error]) : t(SEND_ERROR_GENERIC_KEY)) : undefined} />
   )
 }
 

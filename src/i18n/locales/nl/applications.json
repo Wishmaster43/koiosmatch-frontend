@@ -574,7 +574,10 @@
     "sendError": {
       "recipientSuppressed": "Adres geblokkeerd na een eerdere bounce of klacht; geen nieuwe poging",
       "workerLost": "Mislukt, opnieuw proberen",
-      "claimExpired": "Mislukt, opnieuw proberen"
+      "claimExpired": "Mislukt, opnieuw proberen",
+      "noRecipientEmail": "Geen e-mailadres bij de ontvanger, niet verzonden",
+      "sendFailed": "Verzenden mislukt, opnieuw proberen",
+      "generic": "Verzenden mislukt"
     },
     "sendStatus": {
       "queued": "Wordt verzonden",

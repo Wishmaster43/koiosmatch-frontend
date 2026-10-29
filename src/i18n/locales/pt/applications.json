@@ -574,7 +574,10 @@
     "sendError": {
       "recipientSuppressed": "Endereço bloqueado após um bounce ou queixa anterior; sem nova tentativa",
       "workerLost": "Falhou, tente novamente",
-      "claimExpired": "Falhou, tente novamente"
+      "claimExpired": "Falhou, tente novamente",
+      "noRecipientEmail": "O destinatário não tem endereço de e-mail, nada foi enviado",
+      "sendFailed": "Falha no envio, tente novamente",
+      "generic": "Falha no envio"
     },
     "sendStatus": {
       "queued": "A ser enviado",

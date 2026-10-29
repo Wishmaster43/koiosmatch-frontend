@@ -574,7 +574,10 @@
     "sendError": {
       "recipientSuppressed": "Indirizzo bloccato dopo un precedente bounce o reclamo; nessun nuovo tentativo",
       "workerLost": "Non riuscito, riprova",
-      "claimExpired": "Non riuscito, riprova"
+      "claimExpired": "Non riuscito, riprova",
+      "noRecipientEmail": "Il destinatario non ha un indirizzo e-mail, nulla è stato inviato",
+      "sendFailed": "Invio non riuscito, riprova",
+      "generic": "Invio non riuscito"
     },
     "sendStatus": {
       "queued": "Invio in corso",

@@ -14,6 +14,7 @@ import api from '@/lib/api'
 vi.mock('react-i18next', () => ({
   useTranslation: () => ({ t: (key: string, opts?: { provider?: string }) => opts?.provider ? `${key}:${opts.provider}` : key }),
 }))
+vi.mock('@/lib/datetime', () => ({ useDateFormat: () => ({ formatDateTime: (v: string) => `dt(${v})` }) }))
 vi.mock('@/lib/api', () => ({ default: { get: vi.fn(), post: vi.fn() } }))
 
 describe('ProfileEmailConnect · connected mailbox', () => {
@@ -90,5 +91,34 @@ describe('ProfileEmailConnect · mailbox health', () => {
     render(<ProfileEmailConnect />)
     expect(await screen.findByText('profile.email.tenantPolicy')).toBeInTheDocument()
     expect(screen.queryByRole('button')).not.toBeInTheDocument()
+  })
+})
+
+describe('ProfileEmailConnect · needs_reconnect detail (T-006)', () => {
+  it('shows the translated reason and the formatted check time, never the ISO string', async () => {
+    vi.mocked(api.get).mockResolvedValueOnce({ data: { status: 'needs_reconnect', provider: 'gmail', status_reason: 'smtp_auth_refused', status_at: '2026-10-22T20:00:00Z' } })
+    render(<ProfileEmailConnect />)
+    expect(await screen.findByText('profile.email.reasonSmtpAuthRefused')).toBeInTheDocument()
+    expect(screen.getByText('profile.email.statusAt')).toBeInTheDocument()
+    expect(screen.queryByText(/2026-10-22T/)).not.toBeInTheDocument()
+  })
+
+  it('an SMTP mailbox gets no OAuth connect button, and disconnect posts to the disconnect route', async () => {
+    vi.mocked(api.get).mockResolvedValueOnce({ data: { status: 'needs_reconnect', provider: 'smtp' } })
+    vi.mocked(api.post).mockResolvedValueOnce({ data: {} })
+    render(<ProfileEmailConnect />)
+    expect(await screen.findByText('profile.email.needsReconnectSmtp')).toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: /profile\.email\.connectWith/ })).not.toBeInTheDocument()
+    await userEvent.setup().click(screen.getByRole('button', { name: 'profile.email.disconnect' }))
+    expect(api.post).toHaveBeenCalledWith('/profile/email/disconnect')
+  })
+
+  it('a gmail mailbox re-links with its own provider and also offers disconnect', async () => {
+    vi.mocked(api.get).mockResolvedValueOnce({ data: { status: 'needs_reconnect', provider: 'gmail' } })
+    vi.mocked(api.post).mockResolvedValueOnce({ data: {} })
+    render(<ProfileEmailConnect />)
+    await userEvent.setup().click(await screen.findByRole('button', { name: 'profile.email.connectWith:Gmail' }))
+    expect(api.post).toHaveBeenCalledWith('/profile/email/connect', { provider: 'gmail' })
+    expect(screen.getByRole('button', { name: 'profile.email.disconnect' })).toBeInTheDocument()
   })
 })

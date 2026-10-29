@@ -554,7 +554,10 @@
     "sendError": {
       "recipientSuppressed": "Adresse bloquée après un rebond ou une plainte antérieurs ; aucune nouvelle tentative",
       "workerLost": "Échec, réessayez",
-      "claimExpired": "Échec, réessayez"
+      "claimExpired": "Échec, réessayez",
+      "noRecipientEmail": "Le destinataire n'a pas d'adresse e-mail, rien n'a été envoyé",
+      "sendFailed": "Échec de l'envoi, réessayez",
+      "generic": "Échec de l'envoi"
     },
     "sendStatus": {
       "queued": "Envoi en cours",

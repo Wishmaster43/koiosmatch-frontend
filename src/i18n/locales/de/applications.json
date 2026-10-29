@@ -554,7 +554,10 @@
     "sendError": {
       "recipientSuppressed": "Adresse nach früherem Bounce oder früherer Beschwerde gesperrt; kein neuer Versuch",
       "workerLost": "Fehlgeschlagen, erneut versuchen",
-      "claimExpired": "Fehlgeschlagen, erneut versuchen"
+      "claimExpired": "Fehlgeschlagen, erneut versuchen",
+      "noRecipientEmail": "Der Empfänger hat keine E-Mail-Adresse, nichts wurde gesendet",
+      "sendFailed": "Senden fehlgeschlagen, erneut versuchen",
+      "generic": "Senden fehlgeschlagen"
     },
     "sendStatus": {
       "queued": "Wird gesendet",

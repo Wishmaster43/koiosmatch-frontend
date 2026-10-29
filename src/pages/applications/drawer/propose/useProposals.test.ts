@@ -8,7 +8,7 @@ import { createElement } from 'react'
 import type { ReactNode } from 'react'
 import { renderHook, act } from '@testing-library/react'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
-import { useProposals } from './useProposals'
+import { useProposals, proposalsPollInterval, PROPOSALS_POLL_DELAYS_MS } from './useProposals'
 
 function wrapper({ children }: { children: ReactNode }) {
   const qc = new QueryClient({ defaultOptions: { queries: { retry: false } } })
@@ -53,14 +53,35 @@ describe('useProposals · revoke', () => {
 })
 
 describe('useProposals · polling', () => {
-  it('keeps a 60 s refetchInterval while a row has send_status queued', async () => {
+  const NOW = Date.parse('2026-10-29T12:00:00Z')
+  const queued = (sent_at: string | null) => [{ id: 'p1', send_status: 'queued', sent_at }] as never
+
+  it('polls a fresh queued row after 15 s, backing off on later updates', () => {
+    expect(proposalsPollInterval(queued(null), 1, NOW)).toBe(15_000)
+    expect(proposalsPollInterval(queued('2026-10-29T11:59:00Z'), 2, NOW)).toBe(30_000)
+    expect(proposalsPollInterval(queued(null), 3, NOW)).toBe(60_000)
+  })
+
+  it('stops once the queued row is older than the cutoff', () => {
+    expect(proposalsPollInterval(queued('2026-10-29T11:00:00Z'), 1, NOW)).toBe(false)
+  })
+
+  it('stops once the update-count cap is reached', () => {
+    expect(proposalsPollInterval(queued(null), PROPOSALS_POLL_DELAYS_MS.length + 1, NOW)).toBe(false)
+  })
+
+  it('stops when no row is queued any more (sent)', () => {
+    expect(proposalsPollInterval([{ id: 'p1', send_status: 'sent', sent_at: null }] as never, 1, NOW)).toBe(false)
+  })
+
+  it('wires the query interval to the helper (15 s on the first load)', async () => {
     const qc = new QueryClient({ defaultOptions: { queries: { retry: false } } })
     const wrap = ({ children }: { children: ReactNode }) => createElement(QueryClientProvider, { client: qc }, children)
-    ;(api.get as unknown as ReturnType<typeof vi.fn>).mockResolvedValueOnce({ data: { data: [{ id: 'p1', send_status: 'queued' }] } })
+    ;(api.get as unknown as ReturnType<typeof vi.fn>).mockResolvedValueOnce({ data: { data: [{ id: 'p1', send_status: 'queued', sent_at: null }] } })
     const { result } = renderHook(() => useProposals('app-1'), { wrapper: wrap })
     await vi.waitFor(() => expect(result.current.proposals.length).toBe(1))
     const query = qc.getQueryCache().find({ queryKey: ['applications', 'app-1', 'proposals'] })!
     const interval = (query.options as { refetchInterval: (q: unknown) => number | false }).refetchInterval(query)
-    expect(interval).toBe(60_000)
+    expect(interval).toBe(15_000)
   })
 })

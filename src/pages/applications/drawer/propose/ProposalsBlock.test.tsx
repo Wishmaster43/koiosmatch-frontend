@@ -166,12 +166,21 @@ describe('ProposalsBlock', () => {
 
   // K-248 PROPOSE-SEND-1: the delivery-truth chip renders the send_status label
   // and, on a failed send, the send_error as its tooltip (title attribute).
-  it('shows the send-status chip with the send_error as a tooltip on failure', () => {
+  it('shows the send-status chip with a generic hint (never the raw code) for an unknown send_error', () => {
     setProposals([proposal({ send_status: 'failed', send_error: 'SMTP timeout' })])
     render(<ProposalsBlock application={app} />)
     const chip = screen.getByText('propose.sendStatus.failed')
-    expect(chip.closest('[title]')).toHaveAttribute('title', 'SMTP timeout')
+    expect(chip.closest('[title]')).toHaveAttribute('title', 'propose.sendError.generic')
   })
+
+  it.each([['send_failed', 'propose.sendError.sendFailed'], ['no_recipient_email', 'propose.sendError.noRecipientEmail']])(
+    'shows the translated %s hint as the chip tooltip', (code, key) => {
+      setProposals([proposal({ send_status: 'failed', send_error: code })])
+      render(<ProposalsBlock application={app} />)
+      const title = screen.getByText('propose.sendStatus.failed').closest('[title]')
+      expect(title).toHaveAttribute('title', key)
+      expect(title).not.toHaveAttribute('title', code)
+    })
 
   // A legacy row (send_status null) falls back to sent_at, mirroring the
   // backend resource's own fallback.

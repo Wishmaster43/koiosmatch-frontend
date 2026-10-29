@@ -345,6 +345,14 @@ describe('InterviewsTab · interview consent on the manual start (START-CONSENT-
     expect(screen.queryByRole('checkbox', { name: 'addModal.interviewConsent' })).toBeNull()
   })
 
+  it('hides the consent row after the 404 safety net marks Start unavailable', async () => {
+    mockPost.mockRejectedValueOnce({ response: { status: 404 } })
+    renderTab(app({ interviewWorkflow: OWN_WF, interviewConsentGivenAt: null }))
+    await clickStart()
+    await waitFor(() => expect(screen.getByRole('button', { name: 'interview.start.label' })).toBeDisabled())
+    expect(screen.queryByRole('checkbox', { name: 'addModal.interviewConsent' })).toBeNull()
+  })
+
   it('sends interview_consent: true when the row is ticked before Start', async () => {
     mockPost.mockResolvedValueOnce({ status: 201, data: { data: { category: 'busy', id: 'iv-9' } } })
     renderTab(app({ interviewWorkflow: OWN_WF, interviewConsentGivenAt: null }))
@@ -529,7 +537,7 @@ describe('InterviewsTab · skipped start (INTERVIEW-SKIP-ON-APPLICATION-1)', () 
   it('passes the skip reason and time to the status card', () => {
     renderTab(app({ interviewSkipReason: 'send_failed', interviewSkippedAt: '2026-10-21T09:30:00Z' }))
     expect(screen.getByText(/interview\.skipReason\.send_failed/)).toBeInTheDocument()
-    expect(screen.getByText(/interview\.skipReason\.send_failed.*interview\.skippedAt/)).toBeInTheDocument()
+    expect(screen.getByText('interview.skippedAt')).toBeInTheDocument()
   })
 })
 

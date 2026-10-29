@@ -204,3 +204,21 @@ describe('LoginPage · forgot link and handed-over notices', () => {
     expect(sessionStorage.getItem('km_auth_notice')).toBeNull()
   })
 })
+
+describe('LoginPage · input purposes and MFA copy atom', () => {
+  it('declares the autocomplete purposes for the credential fields', () => {
+    renderLogin()
+    expect(screen.getByLabelText(nlAuth.login.email)).toHaveAttribute('autocomplete', 'username')
+    expect(document.getElementById('login-password')).toHaveAttribute('autocomplete', 'current-password')
+  })
+
+  it('renders the MFA instructions as a paragraph without a local font size', async () => {
+    loginMock.mockResolvedValue({ mfaRequired: true, mfaToken: 'tok' })
+    renderLogin()
+    await act(async () => { submit() })
+    await screen.findByLabelText(nlAuth.mfa.codeLabel)
+    const p = screen.getByText(nlAuth.mfa.instructions)
+    expect(p.tagName).toBe('P')
+    expect(p.style.fontSize).toBe('13px')
+  })
+})

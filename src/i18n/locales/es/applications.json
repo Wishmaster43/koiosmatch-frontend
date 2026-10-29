@@ -554,7 +554,10 @@
     "sendError": {
       "recipientSuppressed": "Dirección bloqueada tras un rebote o queja anterior; sin nuevo intento",
       "workerLost": "Fallido, inténtalo de nuevo",
-      "claimExpired": "Fallido, inténtalo de nuevo"
+      "claimExpired": "Fallido, inténtalo de nuevo",
+      "noRecipientEmail": "El destinatario no tiene dirección de correo, no se envió nada",
+      "sendFailed": "Error al enviar, inténtalo de nuevo",
+      "generic": "Error al enviar"
     },
     "sendStatus": {
       "queued": "Enviándose",

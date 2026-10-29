@@ -33,6 +33,18 @@ describe('useAddApplicationForm · unmapped 422 banner (ONIX N-005)', () => {
   })
 })
 
+describe('useAddApplicationForm · single toast on an unmapped-only 422', () => {
+  it('fires exactly one toast (the banner) when the 422 carries only an unmapped key', async () => {
+    vi.mocked(api.post).mockRejectedValue({
+      response: { status: 422, data: { message: 'invalid', errors: { 'custom_fields.x': ['The custom_fields.x field is required.'] } } },
+    })
+    const { result } = mountHook()
+    await act(async () => { await result.current.submit() })
+    expect(notifyError).toHaveBeenCalledTimes(1)
+    expect(notifyError).toHaveBeenCalledWith(expect.stringContaining('common:validation.fieldRequiredNamed'))
+  })
+})
+
 describe('useAddApplicationForm · interview consent (ONIX K-006)', () => {
   it('POSTs interview_consent: true only after the box is ticked', async () => {
     vi.mocked(api.post).mockResolvedValue({ data: {} })

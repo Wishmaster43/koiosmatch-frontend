@@ -446,4 +446,38 @@ describe('useProposeForm', () => {
     await waitFor(() => expect(result.current.subject).toContain('Sanne D.'))
     expect(result.current.subject).not.toContain('{candidate_short}')
   })
+
+  // T-005: nothing is filled (no blank "Kandidaat  voorgesteld") until the candidate record has arrived.
+  it('keeps subject and body empty while the candidate GET is pending, then fills "Sanne D."', async () => {
+    settingsFixture = { application_proposal: JSON.stringify({ subject_template: 'Kandidaat {candidate_short} voorgesteld', body_template: 'Over {candidate_short}' }) }
+    let resolveCandidate: (v: unknown) => void = () => {}
+    apiGet.mockImplementation((url: string) => {
+      if (url.startsWith('/customers/')) return Promise.resolve({ data: { contacts: [{ id: 'ct1', name: 'Piet Klaassen', email: 'piet@zorggroep.nl' }] } })
+      if (url.startsWith('/candidates/')) return new Promise(r => { resolveCandidate = r })
+      return Promise.resolve({ data: {} })
+    })
+    const { result } = renderHook(() => useProposeForm(app()), { wrapper })
+    await waitFor(() => expect(result.current.contactsLoading).toBe(false))
+    expect(result.current.subject).toBe('')
+    expect(result.current.body).toBe('')
+    expect(result.current.subject).not.toContain('Kandidaat  voorgesteld')
+    await act(async () => { resolveCandidate({ data: { id: 'c1', firstname: 'Sanne', lastname: 'de Vries' } }) })
+    await waitFor(() => expect(result.current.subject).toBe('Kandidaat Sanne D. voorgesteld'))
+  })
+
+  // T-005: a manual edit made before the candidate arrives is kept, and never carries a blank name.
+  it('keeps a body typed before the candidate resolves', async () => {
+    settingsFixture = { application_proposal: JSON.stringify({ body_template: 'Over {candidate_short}' }) }
+    let resolveCandidate: (v: unknown) => void = () => {}
+    apiGet.mockImplementation((url: string) => {
+      if (url.startsWith('/customers/')) return Promise.resolve({ data: { contacts: [{ id: 'ct1', name: 'Piet Klaassen', email: 'piet@zorggroep.nl' }] } })
+      if (url.startsWith('/candidates/')) return new Promise(r => { resolveCandidate = r })
+      return Promise.resolve({ data: {} })
+    })
+    const { result } = renderHook(() => useProposeForm(app()), { wrapper })
+    await waitFor(() => expect(result.current.contactsLoading).toBe(false))
+    act(() => { result.current.setBody('mine') })
+    await act(async () => { resolveCandidate({ data: { id: 'c1', firstname: 'Sanne', lastname: 'de Vries' } }) })
+    expect(result.current.body).toBe('mine')
+  })
 })

@@ -9,6 +9,7 @@ import { useTranslation } from 'react-i18next'
 import { useGuardedSubmit } from '@/hooks/useGuardedSubmit'
 import { useAuthRequest } from '@/hooks/useAuthRequest'
 import api from '@/lib/api'
+import { safeEmailParam } from '@/lib/safeEmailParam'
 import { retryAfterOf } from '@/lib/retryAfter'
 import { setAuthNotice } from '@/lib/authNotice'
 import { useAuth } from '@/context/AuthContext'
@@ -51,7 +52,7 @@ export default function SetPasswordForm({ endpoint, invalidCode, noticeKind, tex
   const [params, setParams] = useSearchParams()
   // Capture the single-use token + address once, so they survive the URL strip below.
   const [token] = useState(() => params.get('token') ?? '')
-  const [email] = useState(() => params.get('email') ?? '')
+  const [email] = useState(() => safeEmailParam(params.get('email')))
   // Remove token and address from the address bar and history as soon as they are captured.
   useEffect(() => {
     if (params.has('token') || params.has('email')) setParams({}, { replace: true })

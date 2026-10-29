@@ -574,7 +574,10 @@
     "sendError": {
       "recipientSuppressed": "Address blocked after an earlier bounce or complaint; no new attempt",
       "workerLost": "Failed, try again",
-      "claimExpired": "Failed, try again"
+      "claimExpired": "Failed, try again",
+      "noRecipientEmail": "The recipient has no email address, nothing was sent",
+      "sendFailed": "Sending failed, try again",
+      "generic": "Sending failed"
     },
     "sendStatus": {
       "queued": "Being sent",

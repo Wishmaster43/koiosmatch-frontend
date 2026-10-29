@@ -229,14 +229,15 @@ export function useAddApplicationForm({
       // only toast a message when there is NO validation bag to render inline
       // (DUP-04: extractApiError would surface the bag's raw Laravel sentence).
       const formErrors = extractFormErrors(err, API_TO_FORM)
-      if (formErrors) {
-        setErrors(formErrors)
-      } else {
-        notifyError(extractApiError(err, t(editing ? 'work.applicationUpdateFailed' : 'work.applicationFailed')))
-      }
       // ONIX N-005: a 422 key no field renders (e.g. a required custom field) gets a banner too.
       const banner = formatUnmappedErrors(unmappedFormErrors(err, API_TO_FORM), t)
-      if (banner) notifyError(banner)
+      if (formErrors) {
+        setErrors(formErrors)
+        if (banner) notifyError(banner)
+      } else {
+        // One toast only: the unmapped-keys banner wins over the generic message.
+        notifyError(banner ?? extractApiError(err, t(editing ? 'work.applicationUpdateFailed' : 'work.applicationFailed')))
+      }
     } finally { setSaving(false) }
   }
 

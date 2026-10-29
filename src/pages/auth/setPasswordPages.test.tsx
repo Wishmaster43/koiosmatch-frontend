@@ -36,7 +36,7 @@ describe('set-password pages', () => {
 
   it('ResetPasswordPage posts to the reset endpoint with the password_reset notice', async () => {
     mount(<ResetPasswordPage />)
-    expect(screen.getByText('Kies een nieuw wachtwoord voor u@x.nl.')).toBeTruthy()
+    expect(screen.getByText(nlAuth.reset.subtitle.replace('{{email}}', 'u@x.nl'))).toBeTruthy()
     await submitWith(nlAuth.reset.submit)
     expect(postMock.mock.calls[0][0]).toBe('/auth/password/reset')
     expect(setNotice).toHaveBeenCalledWith('password_reset')
@@ -52,6 +52,17 @@ describe('set-password pages', () => {
     await submitWith(nlAuth.invite.submit)
     expect(postMock.mock.calls[0][0]).toBe('/auth/invite/accept')
     expect(setNotice).toHaveBeenCalledWith('invite_accepted')
+  })
+
+  it('AcceptInvitePage shows the invitation subtitle with the address from the query string', () => {
+    mount(<AcceptInvitePage />)
+    expect(screen.getByText(nlAuth.invite.subtitle.replace('{{email}}', 'u@x.nl'))).toBeTruthy()
+  })
+
+  it('a crafted ?email= sentence lands in the invalid-link state, never in the subtitle', () => {
+    mount(<ResetPasswordPage />, '?token=tk&email=Call+me+now')
+    expect(screen.getByText(nlAuth.reset.requestNew)).toBeTruthy()
+    expect(screen.queryByText(/Call me now/)).toBeNull()
   })
 
   it('AcceptInvitePage dead link shows the invitation text without a new-link link', () => {
