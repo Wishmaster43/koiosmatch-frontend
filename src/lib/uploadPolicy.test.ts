@@ -40,9 +40,10 @@ describe('uploadPolicy', () => {
     expect(fn).toHaveBeenCalledTimes(1)
   })
   it('renders refusal text with the 422 keys', () => {
-    expect(uploadRefusalText({ ok: true }, t)).toBe('')
-    expect(uploadRefusalText({ ok: false, reason: 'type', allowed: ['a', 'b'] }, t)).toBe('T:common:upload.typeNotAllowed:{"allowed":"a, b"}')
+    expect(uploadRefusalText({ ok: true }, t, 'nl-NL')).toBe('')
+    expect(uploadRefusalText({ ok: false, reason: 'type', allowed: ['a', 'b'] }, t, 'nl-NL')).toBe('T:common:upload.typeNotAllowed:{"allowed":"a, b"}')
     expect(uploadRefusalText({ ok: false, reason: 'size', maxBytes: 5 * 1024 * 1024 }, t, 'en-GB')).toBe('T:common:upload.tooLargeMax:{"max":"5"}')
+    expect(uploadRefusalText({ ok: false, reason: 'size', maxBytes: 1.5 * 1024 * 1024 }, t, 'nl-NL')).toBe('T:common:upload.tooLargeMax:{"max":"1,5"}')
   })
 })
 

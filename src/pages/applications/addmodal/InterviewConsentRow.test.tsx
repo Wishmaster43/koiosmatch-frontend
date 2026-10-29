@@ -14,4 +14,11 @@ describe('InterviewConsentRow', () => {
     fireEvent.click(box)
     expect(onChange).toHaveBeenCalledWith(true)
   })
+
+  // K-006: the help text is the checkbox's accessible description (no unnamed group).
+  it('describes the checkbox with the help text and renders no unnamed group', () => {
+    render(<InterviewConsentRow checked={false} onChange={vi.fn()} />)
+    expect(screen.getByRole('checkbox')).toHaveAccessibleDescription('addModal.interviewConsentHelp')
+    expect(screen.queryByRole('group')).toBeNull()
+  })
 })

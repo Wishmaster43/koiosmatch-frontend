@@ -42,7 +42,16 @@ export default function InterviewProgressCell({ interview, onClick }: Props) {
     // ONE row (Danny 08-08: "Bezig 2/12 1 regel geen 2 regels") — chip and
     // progress sit side by side; the compact "2/12" form keeps the column
     // narrow where the drawer can afford the spelled-out "Stap 2 van 12".
-    <span onClick={onClick ? e => { stopPropagation(e); onClick() } : undefined}
+    // Keyboard parity: with a destination the cell is a real tab stop (role button, Enter/Space).
+    <span
+      {...(onClick ? {
+        role: 'button', tabIndex: 0,
+        'aria-label': t('interview.stepOf', { step: interview.step ?? '–', total: interview.total }),
+        onClick: (e: React.MouseEvent) => { stopPropagation(e); onClick() },
+        onKeyDown: (e: React.KeyboardEvent) => {
+          if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); e.stopPropagation(); onClick() }
+        },
+      } : {})}
       style={{ display: 'inline-flex', alignItems: 'center', gap: 6, whiteSpace: 'nowrap', cursor: onClick ? 'pointer' : 'default' }}>
       <StatusPill label={t(`interview.category.${interview.category}`)} color={interviewCategoryColor(interview.category)} />
       {interview.total > 0 && (

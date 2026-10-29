@@ -93,12 +93,15 @@ export function useCustomFields(entityType: CustomFieldEntityType) {
     const key = tenantEntityKey(entityType)
     const hit = cacheByEntity.get(key)
     if (hit) { setRaw(hit); setLoading(false); return }
+    // Alive guard: a fast entityType switch must never let the previous entity's response win.
+    let alive = true
     setLoading(true); setError(false)
     // Concurrent hook mounts for the same entity share one in-flight request.
     dedupedGet('/custom-fields', { params: { entity_type: entityType } })
-      .then(r => { const list = (unwrapList(r).rows) as RawDef[]; cacheByEntity.set(key, list); setRaw(list) })
-      .catch(() => setError(true))
-      .finally(() => setLoading(false))
+      .then(r => { const list = (unwrapList(r).rows) as RawDef[]; cacheByEntity.set(key, list); if (alive) setRaw(list) })
+      .catch(() => { if (alive) setError(true) })
+      .finally(() => { if (alive) setLoading(false) })
+    return () => { alive = false }
   }, [entityType, retryNonce])
 
   // Map the generic defs to CustomFieldDef in the active language.

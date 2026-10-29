@@ -250,3 +250,19 @@ describe('useCustomFields · concurrent-mount dedupe (LOOKUP-DEDUPE-1)', () => {
     expect(b.result.current.allFields.map(f => f.key)).toEqual(['shared'])
   })
 })
+
+describe('useCustomFields · entity switch race', () => {
+  it('a late response of the previous entity never overwrites the current one', async () => {
+    mockedTenantId.mockReturnValue('tenant-cf-race')
+    const resolvers: Record<string, (v: unknown) => void> = {}
+    mockedGet.mockImplementation(((_u: string, cfg: { params: { entity_type: string } }) =>
+      new Promise(resolve => { resolvers[cfg.params.entity_type] = resolve })) as never)
+    const { result, rerender } = renderHook(({ e }) => useCustomFields(e), { initialProps: { e: 'task' as 'task' | 'customer' } })
+    await waitFor(() => expect(resolvers.task).toBeDefined())
+    rerender({ e: 'customer' })
+    await waitFor(() => expect(resolvers.customer).toBeDefined())
+    await act(async () => { resolvers.customer({ data: { data: [{ id: '2', key: 'cust', type: 'text', active: true }] } }) })
+    await act(async () => { resolvers.task({ data: { data: [{ id: '1', key: 'tsk', type: 'text', active: true }] } }) })
+    expect(result.current.allFields.map(f => f.key)).toEqual(['cust'])
+  })
+})

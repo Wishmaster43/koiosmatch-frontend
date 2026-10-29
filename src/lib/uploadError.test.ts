@@ -1,4 +1,5 @@
-import { describe, it, expect } from 'vitest'
+import { describe, it, expect, afterEach } from 'vitest'
+import i18n from '@/i18n'
 import { isPayloadTooLarge, isStorageUnavailable, uploadErrorMessage } from './uploadError'
 
 const t = ((k: string) => `T:${k}`) as never
@@ -48,5 +49,18 @@ describe('uploadErrorMessage 422 codes', () => {
   })
   it('lets an unknown 422 code fall through', () => {
     expect(uploadErrorMessage(e({ code: 'other', message: 'Nope' }), tt, 'fb')).toBe('Nope')
+  })
+})
+
+// P-014: the size number follows the active language with no locale argument (the callers' path).
+describe('uploadErrorMessage · active-language size', () => {
+  const tOpts = ((k: string, o?: { max?: string }) => `${k}:${o?.max ?? ''}`) as never
+  const err = { response: { status: 422, data: { code: 'file_too_large', context: { max_bytes: 2621440 } } } }
+  afterEach(async () => { await i18n.changeLanguage('nl') })
+  it('renders 2.5 under English and 2,5 under Dutch', async () => {
+    await i18n.changeLanguage('en')
+    expect(uploadErrorMessage(err, tOpts, 'fb')).toBe('common:upload.tooLargeMax:2.5')
+    await i18n.changeLanguage('nl')
+    expect(uploadErrorMessage(err, tOpts, 'fb')).toBe('common:upload.tooLargeMax:2,5')
   })
 })

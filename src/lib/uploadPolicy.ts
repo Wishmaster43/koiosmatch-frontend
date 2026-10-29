@@ -80,7 +80,7 @@ export function checkUploadFile(surface: UploadSurface, file: { name: string; si
 }
 
 // Refusal sentence with the same wording as the 422 codes; empty for an accepted file.
-export function uploadRefusalText(result: UploadCheck, t: TFunction, locale = 'nl-NL'): string {
+export function uploadRefusalText(result: UploadCheck, t: TFunction, locale: string): string {
   if (result.ok) return ''
   if (result.reason === 'type') return t('common:upload.typeNotAllowed', { allowed: result.allowed.join(', ') })
   return t('common:upload.tooLargeMax', { max: formatFileSizeMb(result.maxBytes, locale) })

@@ -151,6 +151,11 @@ export function useSettingsLoadState(): { state: LoadState; retry: () => void } 
   return { state, retry }
 }
 
+// Wire form of one setting: null/undefined become '' (never the literal "null"), strings stay, the rest is JSON.
+export function toSettingWireValue(v: unknown): string {
+  return v == null ? '' : typeof v === 'string' ? v : JSON.stringify(v)
+}
+
 /** Persist a partial set of keys (merge), update the ACTIVE tenant's cache slot and notify its subscribers.
  * Optimistic: the cache updates before the POST, but a rejected save REVERTS the
  * slot and renotifies before rethrowing — a refused write must never keep
@@ -160,7 +165,7 @@ export async function saveSettingsKeys(partial: Record<string, unknown>): Promis
   Object.entries(partial).forEach(([k, v]) => {
     // The BE health check owns email_<group>_status; posting such a key answers 422.
     if (/^email_[a-z]+_status$/.test(k)) return
-    stringified[k] = typeof v === 'string' ? v : JSON.stringify(v)
+    stringified[k] = toSettingWireValue(v)
   })
   const key = activeTenantKey()
   const previous = cacheByTenant.get(key)

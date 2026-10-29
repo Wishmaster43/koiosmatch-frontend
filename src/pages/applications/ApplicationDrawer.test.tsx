@@ -147,3 +147,20 @@ describe('ApplicationDrawer · open existing proposal switches to the applicatio
   })
 })
 
+
+describe('ApplicationDrawer · open existing proposal is repeatable', () => {
+  it('switches to the application tab again after browsing away', () => {
+    vi.mocked(useAuth).mockReturnValue({ hasPermission: () => true } as unknown as ReturnType<typeof useAuth>)
+    const app = application({ bucket: 'active', vacancyId: 'v1', candidateId: 'cand-1', customerId: 'cust-1' } as Partial<ApplicationDetail>)
+    renderDrawer({ application: app, onClose: vi.fn(), canManage: true, initialTab: 'notes' })
+    const appTab = () => screen.getByRole('tab', { name: nlApplications.drawer.tabs.application })
+    fireEvent.click(screen.getByRole('button', { name: 'Voorstellen aan klant' }))
+    fireEvent.click(screen.getByRole('button', { name: 'open-existing-stub' }))
+    expect(appTab()).toHaveAttribute('aria-selected', 'true')
+    fireEvent.click(screen.getByRole('tab', { name: nlApplications.drawer.tabs.notes }))
+    expect(appTab()).toHaveAttribute('aria-selected', 'false')
+    fireEvent.click(screen.getByRole('button', { name: 'Voorstellen aan klant' }))
+    fireEvent.click(screen.getByRole('button', { name: 'open-existing-stub' }))
+    expect(appTab()).toHaveAttribute('aria-selected', 'true')
+  })
+})

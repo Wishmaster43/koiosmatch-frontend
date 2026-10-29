@@ -138,3 +138,25 @@ describe('useDocumentTypes — expiry mapping (N008-DOC-EXPIRY-FE-1)', () => {
     expect(cv).toMatchObject({ requiresExpiry: false, defaultValidityMonths: null })
   })
 })
+
+// §10 tolerance: Laravel may serialise the month count as a string.
+describe('useDocumentTypes — validity months tolerance', () => {
+  it('reads "12" as 12 and "" / null as null', async () => {
+    vi.resetModules()
+    const freshApi = (await import('@/lib/api')).default
+    vi.mocked(freshApi.get).mockResolvedValue({
+      data: { data: [
+        { id: 1, name: 'A', label: 'A', default_validity_months: '12' },
+        { id: 2, name: 'B', label: 'B', default_validity_months: '' },
+        { id: 3, name: 'C', label: 'C', default_validity_months: null },
+      ] },
+    })
+    const { useDocumentTypes: fresh } = await import('./useDocumentTypes')
+    const { result } = renderHook(() => fresh())
+    await waitFor(() => expect(result.current.types).toHaveLength(3))
+    const months = (v: string) => (result.current.types.find((tp: { value: string }) => tp.value === v) as { defaultValidityMonths: number | null }).defaultValidityMonths
+    expect(months('A')).toBe(12)
+    expect(months('B')).toBeNull()
+    expect(months('C')).toBeNull()
+  })
+})

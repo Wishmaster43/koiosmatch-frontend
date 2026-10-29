@@ -37,6 +37,7 @@ import { toLookupOption } from './lookupOption'
 import { buildLookupHelpers } from './buildLookupHelpers'
 import type { LookupOption } from '@/types/common'
 import { unwrapList } from '@/lib/api'
+import { toFiniteNumber, type NumberInput } from '@/lib/numberFormat'
 
 // Seed defaults (labels NL, colours = the previous DOC_COLORS map, icons = the
 // backend's DOCTYPE-ICON-1 seed) — API overrides per tenant.
@@ -83,14 +84,13 @@ const FALLBACK_COLOR = '#6B7280'
 const norm = (s?: unknown) => (s ?? '').toString().trim().toLowerCase()
 
 // Normalise an API row via the shared mapper, adding the document-specific icon
-// slug plus the N008-DOC-EXPIRY-FE-1 expiry fields — read tolerantly, since the
-// BE lane that adds them may not have landed yet (absent row → false/null, never
-// a crash).
+// slug plus the N008-DOC-EXPIRY-FE-1 expiry fields — confirmed in the contract (CONTRACT-CHANGELOG 2026-10-05) and read
+// tolerantly (a numeric string becomes a number, absent → false/null, never a crash).
 const toOption = (r: Record<string, unknown>): LookupOption => ({
   ...toLookupOption(r, FALLBACK_COLOR),
   icon: (r.icon as string) ?? null,
   requiresExpiry: r.requires_expiry === true,
-  defaultValidityMonths: typeof r.default_validity_months === 'number' ? r.default_validity_months : null,
+  defaultValidityMonths: toFiniteNumber(r.default_validity_months as NumberInput),
 })
 
 // null = nothing usable in this response — useCachedLookup keeps the seed and retries next mount.

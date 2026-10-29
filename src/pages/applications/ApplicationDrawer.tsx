@@ -3,7 +3,8 @@
  * wires them to the shared EntityDrawer shell. No heavy JSX, no business logic;
  * see the default export's own doc comment below for the tab-order rationale.
  */
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
+import type { MutableRefObject } from 'react'
 import type { ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Unlink, ArchiveRestore, Edit2, Save, Send, X, XCircle } from 'lucide-react'
@@ -83,6 +84,12 @@ interface ApplicationDrawerProps extends ApplicationLinkSourceProps {
  * ApplicationDrawer — thin container: declares the header config + tab list and
  * wires them to the shared EntityDrawer shell. No heavy JSX, no business logic.
  */
+// Renders nothing: hands EntityDrawer's tab setter to the drawer through a ref (written in an effect).
+function TabSwitchBridge({ setter, targetRef }: { setter: (id: string) => void; targetRef: MutableRefObject<((id: string) => void) | null> }) {
+  useEffect(() => { targetRef.current = setter }, [setter, targetRef])
+  return null
+}
+
 export default function ApplicationDrawer({ application: a, onClose, expanded, onToggleExpand, onReject, onAdjustScore, onPhaseChange, onOwnerChange, onLinkVacancy, onUpdateSource, users, onDetach, onRestore, canManage, onUpdateCustomFields, initialTab, onCandidateUpdated, detailPhase }: ApplicationDrawerProps) {
   const { t } = useTranslation('applications')
   const { formatDate, formatDateTime } = useDateFormat()
@@ -98,13 +105,10 @@ export default function ApplicationDrawer({ application: a, onClose, expanded, o
   // Danny 25-07: "propose to customer" — the CV-in-house-style + optional
   // motivation letter flow, gated below on canManage + a linked candidate/customer.
   const [proposeModalOpen, setProposeModalOpen] = useState(false)
-  // CLAIM-1 (propose 409 conflict): "Bekijk bestaand voorstel" asks the drawer to show the
-  // Voorstellen block, which lives on the application tab. A requested tab rides as the
-  // drawer's initialTab (EntityDrawer switches on a changed deep-link) and is dropped the
-  // moment an external deep-link arrives, so it never masks a later table-cell click.
-  const [requestedTab, setRequestedTab] = useState<string | null>(null)
-  const [seenInitialTab, setSeenInitialTab] = useState(initialTab)
-  if (initialTab !== seenInitialTab) { setSeenInitialTab(initialTab); setRequestedTab(null) }
+  // CLAIM-1 (propose 409 conflict): "Bekijk bestaand voorstel" switches to the application tab
+  // (where the Voorstellen block lives) through EntityDrawer's own setter, captured by the
+  // header bridge below, so every click is a real switch (a stale tab request never masks a later one).
+  const switchTabRef = useRef<((id: string) => void) | null>(null)
   // Funnel phases (Settings lookup) for the header phase picker; never hardcoded.
   const { funnelTypes } = useLookups() as unknown as { funnelTypes: Array<{ value: string; label: string; color?: string; is_rejected?: boolean }> }
   // The Extra tab only shows when the tenant has defined application custom fields (§3A(f)).
@@ -202,7 +206,7 @@ export default function ApplicationDrawer({ application: a, onClose, expanded, o
       entity={a}
       // An explicit deep-link always wins; otherwise fall back to the NAV-BACK-1
       // remembered tab (see rememberedTab above).
-      initialTab={requestedTab ?? initialTab ?? rememberedTab ?? undefined}
+      initialTab={initialTab ?? rememberedTab ?? undefined}
       expanded={expanded}
       onToggleExpand={onToggleExpand}
       footer={(
@@ -246,7 +250,9 @@ export default function ApplicationDrawer({ application: a, onClose, expanded, o
         </div>
       )}
       tabs={tabIds.map(id => ({ id, label: t(`drawer.tabs.${id}`), render: (setActiveTab?: (id: string) => void) => renderTab(id, setActiveTab) }))}
-      header={() => (
+      header={({ setActiveTab }) => (
+        <>
+        <TabSwitchBridge setter={setActiveTab} targetRef={switchTabRef} />
         <EntityHeader
           // TITEL-CHIP-1 (Danny 19-08): the vacancy IS the title, as a deep link with
           // the new-tab icon; static word only while unlinked.
@@ -316,6 +322,7 @@ export default function ApplicationDrawer({ application: a, onClose, expanded, o
               restoreLabel={t('restore.button')} />
           )}
         </EntityHeader>
+        </>
       )}
     />
     {/* S15: the reason-required detach confirm — a small modal, not a native
@@ -340,7 +347,7 @@ export default function ApplicationDrawer({ application: a, onClose, expanded, o
         letter, mounted only while open (mirrors the detach/reject modals above). */}
     {proposeModalOpen && (
       <ProposeCandidateModal application={a} onClose={() => setProposeModalOpen(false)}
-        onOpenExisting={() => { setProposeModalOpen(false); setRequestedTab('application') }} />
+        onOpenExisting={() => { setProposeModalOpen(false); switchTabRef.current?.('application') }} />
     )}
     </>
   )

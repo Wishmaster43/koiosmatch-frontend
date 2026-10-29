@@ -265,3 +265,14 @@ describe('dedupedGet', () => {
     expect(mockedGet).toHaveBeenCalledTimes(2)
   })
 })
+
+describe('dedupedGet · per-caller signal', () => {
+  it('two concurrent calls with different signals make one api.get without a signal', async () => {
+    const url = '/test-deduped-signal'
+    mockedGet.mockImplementation(() => new Promise(() => {}))
+    dedupedGet(url, { signal: new AbortController().signal })
+    dedupedGet(url, { signal: new AbortController().signal })
+    expect(mockedGet).toHaveBeenCalledTimes(1)
+    expect((mockedGet.mock.calls[0][1] as { signal?: unknown }).signal).toBeUndefined()
+  })
+})

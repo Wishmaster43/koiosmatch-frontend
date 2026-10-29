@@ -1,3 +1,4 @@
+import i18next from 'i18next'
 import type { TFunction } from 'i18next'
 import { extractApiError } from '@/lib/extractApiError'
 // Pure helper from the side-effect-free module, never from `formatters` (DATETIME-IMPORT-LES).
@@ -17,8 +18,9 @@ export function isStorageUnavailable(err: unknown): boolean {
 
 // Upload failure text: an HTTP 413 gets the honest "too large" sentence (the proxy answers
 // before Laravel runs, so there is no message), a storage 503 the "try again" sentence;
-// anything else keeps the extractApiError path.
-export function uploadErrorMessage(err: unknown, t: TFunction, fallback: string, locale = 'nl-NL'): string {
+// anything else keeps the extractApiError path. The size number follows the ACTIVE language
+// (Intl accepts the bare language tag), so no caller has to thread a locale through.
+export function uploadErrorMessage(err: unknown, t: TFunction, fallback: string, locale: string = i18next.language || 'nl-NL'): string {
   if (isPayloadTooLarge(err)) return t('common:upload.tooLarge')
   if (isStorageUnavailable(err)) return t('common:upload.storageUnavailable')
   // UPLOAD-POLICY-1: 422 refusal codes carry their own context (allowed set, ceiling).

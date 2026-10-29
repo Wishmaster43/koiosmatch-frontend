@@ -13,7 +13,7 @@ import { describe, it, expect, vi, afterEach } from 'vitest'
 import { renderHook, waitFor, act } from '@testing-library/react'
 import api, { getActiveTenantId } from '../api'
 import {
-  useAllSettings, useSettingsLoaded, useSettingsLoadState, saveSettingsKeys, invalidateAllSettingsCache,
+  toSettingWireValue, useAllSettings, useSettingsLoaded, useSettingsLoadState, saveSettingsKeys, invalidateAllSettingsCache,
   getBoolSetting,
 } from './useAllSettings'
 
@@ -208,5 +208,18 @@ describe('saveSettingsKeys · BE-owned status keys', () => {
     // The planning group keeps the fixture English (english-code ceiling); the filter is group-agnostic.
     await saveSettingsKeys({ email_planning_status: 'connected', email_planning_provider: 'gmail' })
     expect(mockedPost).toHaveBeenCalledWith('/settings', { email_planning_provider: 'gmail' })
+  })
+})
+
+describe('saveSettingsKeys · wire values (S-011)', () => {
+  it('posts null/undefined as empty string, numbers and objects as JSON', async () => {
+    mockedPost.mockResolvedValue({ data: {} })
+    await saveSettingsKeys({ a: null, b: undefined, c: 3, d: { x: 1 } })
+    expect(mockedPost).toHaveBeenCalledWith('/settings', { a: '', b: '', c: '3', d: '{"x":1}' })
+  })
+  it('toSettingWireValue keeps strings and never yields the literal "null"', () => {
+    expect(toSettingWireValue('x')).toBe('x')
+    expect(toSettingWireValue(null)).toBe('')
+    expect(toSettingWireValue(false)).toBe('false')
   })
 })

@@ -57,16 +57,13 @@ function paramsSuffix(params: unknown): string {
 // await the SAME promise instead of each firing their own request. The slot clears
 // once the request settles (success or failure), so a later call always refetches —
 // this is purely a concurrency guard, never a result cache (callers keep their own).
-// Test seam: drops every in-flight promise. A suite whose cases mock the client per case
-// (a never-resolving promise for a loading state, a reset mock) would otherwise hand the
-// previous case's promise to the next mount of the same url.
-export function clearInFlightLookups(): void { inFlight.clear() }
-
 export function dedupedGet(url: string, config?: AxiosRequestConfig): Promise<AxiosResponse> {
+  // The shared promise must not carry one caller's AbortSignal (it would cancel everyone's request).
+  const sharedConfig = config?.signal ? { ...config, signal: undefined } : config
   const key = tenantCacheKey(url) + paramsSuffix(config?.params)
   let request = inFlight.get(key)
   if (!request) {
-    request = api.get(url, config)
+    request = api.get(url, sharedConfig)
     inFlight.set(key, request)
     // Settle-cleanup runs once (not per caller). The trailing .catch swallows THIS
     // chain's rejection — the real error is handled per-consumer at their own .catch;
@@ -75,6 +72,11 @@ export function dedupedGet(url: string, config?: AxiosRequestConfig): Promise<Ax
   }
   return request
 }
+
+// Test seam: drops every in-flight promise. A suite whose cases mock the client per case
+// (a never-resolving promise for a loading state, a reset mock) would otherwise hand the
+// previous case's promise to the next mount of the same url.
+export function clearInFlightLookups(): void { inFlight.clear() }
 
 // The generic tenant-scoped, session-cached lookup loader.
 export function useCachedLookup<T>(

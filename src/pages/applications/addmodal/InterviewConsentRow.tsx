@@ -14,10 +14,9 @@ export default function InterviewConsentRow({ checked, onChange, style }: {
   const { t } = useTranslation('applications')
   const id = useId()
   return (
-    // CheckboxField does not forward aria-describedby, so the group carries the help text link.
-    <div role="group" aria-describedby={`${id}-help`} style={{ marginBottom: 14, ...style }}>
+    <div style={{ marginBottom: 14, ...style }}>
       <BodyText as="label" htmlFor={id} style={{ display: 'flex', alignItems: 'center', gap: 8, cursor: 'pointer' }}>
-        <CheckboxField id={id} checked={checked} onChange={onChange} />
+        <CheckboxField id={id} describedBy={`${id}-help`} checked={checked} onChange={onChange} />
         {t('addModal.interviewConsent')}
       </BodyText>
       <Caption id={`${id}-help`} style={{ display: 'block', marginTop: 3, marginLeft: 22 }}>{t('addModal.interviewConsentHelp')}</Caption>
