@@ -1,5 +1,5 @@
 [
-  { "name": "png-js", "licence": "none", "reason": "Q-008 decision pending (accept or replace): lock entry has no licence field", "expires": "2026-11-29" },
+  { "name": "png-js", "licence": "MIT", "reason": "Q-008 accepted by Danny 29-10-2026: the npm package ships a LICENSE file (MIT, (c) 2017 Devon Govett) and only the package.json license field is missing; production path of the CV-PDF engine via @react-pdf/image and @react-pdf/pdfkit; yearly re-check of the LICENSE file", "expires": "2027-10-29" },
   { "name": "@fontsource/inter", "licence": "OFL-1.1", "reason": "SIL Open Font License permits bundling and redistributing the font files unmodified", "expires": "2027-10-29" },
   { "name": "@fontsource/jetbrains-mono", "licence": "OFL-1.1", "reason": "SIL Open Font License permits bundling and redistributing the font files unmodified", "expires": "2027-10-29" },
   { "name": "caniuse-lite", "licence": "CC-BY-4.0", "reason": "Dev-only browser-support data, never shipped in the bundle; attribution licence", "expires": "2027-10-29" }
