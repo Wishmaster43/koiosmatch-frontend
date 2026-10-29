@@ -240,7 +240,7 @@
     "detailsSoon": "The criteria breakdown appears here once scoring is configured.",
     "saveOverride": "Save score",
     "cancelOverride": "Cancel score change",
-    "hardHint": "Knock-out criterion: if the candidate scores below 50% here, Koios flags the application as a candidate for automatic rejection. A recruiter always confirms it.",
+    "hardHint": "Knock-out criterion: below 50% here, Koios proposes a rejection that a recruiter confirms.",
     "weightLegend": "Dots = weight (1 to 5): how heavily this criterion counts in the overall score."
   },
   "profile": {
@@ -463,7 +463,7 @@
     "rejected": "Rejected",
     "placed": "Placed",
     "aiAdvice": "Koios advises rejection",
-    "aiAuto": "Hard criteria failed. Auto-rejection eligible.",
+    "aiAuto": "Hard criteria failed. Koios proposes rejection; you decide.",
     "aiConfirm": "Review and confirm before a message is sent.",
     "adviceReasons": {
       "hard_fail": "Hard criterion not met: {{criterion}}.",

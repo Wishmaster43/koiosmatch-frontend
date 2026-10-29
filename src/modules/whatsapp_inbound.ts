@@ -21,7 +21,7 @@ export default {
     { key: 'source', label: 'Source', type: 'select', required: true, default: 'meta',
       options: [
         { value: 'meta',   label: 'Meta webhook (WABA + Coexistence)' },
-        { value: 'wa_web', label: 'WhatsApp Web (eigen nummer)' },
+        { value: 'wa_web', label: 'WhatsApp Web (own number)' },
       ] },
   ],
 }

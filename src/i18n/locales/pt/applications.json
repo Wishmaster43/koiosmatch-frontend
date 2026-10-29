@@ -240,7 +240,7 @@
     "detailsSoon": "A discriminação de critérios aparece aqui assim que a pontuação estiver configurada.",
     "saveOverride": "Guardar pontuação",
     "cancelOverride": "Cancelar alteração da pontuação",
-    "hardHint": "Critério de eliminação: se o candidato pontuar abaixo de 50% neste critério, o Koios assinala a candidatura como candidata a rejeição automática. Um recrutador confirma isso sempre.",
+    "hardHint": "Critério de eliminação: abaixo de 50% neste critério, o Koios propõe uma rejeição que um recrutador confirma.",
     "weightLegend": "Pontos = ponderação (1 a 5): quanto este critério pesa na pontuação total."
   },
   "profile": {
@@ -463,7 +463,7 @@
     "rejected": "Rejeitado",
     "placed": "Colocado",
     "aiAdvice": "O Koios recomenda rejeição",
-    "aiAuto": "Critérios obrigatórios não cumpridos. Rejeição automática possível.",
+    "aiAuto": "Critérios obrigatórios não cumpridos. O Koios propõe a rejeição; a decisão é sua.",
     "aiConfirm": "Reveja e confirme antes de ser enviada uma mensagem.",
     "adviceReasons": {
       "hard_fail": "Critério obrigatório não cumprido: {{criterion}}.",

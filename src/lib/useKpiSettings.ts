@@ -14,9 +14,8 @@ export const SETTING_DEFAULTS: Record<string, number> = {
   // KPI targets
   new_candidates_target:   15,
   // Weergave
-  // ONIX N-010 (BE lane A2 6f1f0af6): the candidates list serves at most 100 per page (422 above);
-  // the tenant value is clamped to that ceiling where the request is built.
-  candidates_per_page:     100,
+  // Feeds /sm_candidates only (server clamp 500, SmCandidateController::index); not on the N-010 capped list.
+  candidates_per_page:     500,
   top_cities_n:            10,
   shifts_detail_limit:     500,
   activity_log_limit:      200,

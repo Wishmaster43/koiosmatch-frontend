@@ -14,6 +14,7 @@ import { render, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import InterviewsTab from './InterviewsTab'
+import tabSource from './InterviewsTab.tsx?raw'
 import api from '@/lib/api'
 import type { ApplicationDetail } from '@/types/application'
 
@@ -364,6 +365,37 @@ describe('InterviewsTab · interview consent on the manual start (START-CONSENT-
     expect(mockPost).toHaveBeenCalledWith('/applications/app-1/interview', undefined, expect.anything())
   })
 
+  it('hides the consent row after a refused ticked start (the server already saved it) and re-sends no body', async () => {
+    mockPost.mockRejectedValueOnce({ response: { status: 422, data: { reason: 'budget_exceeded' } } })
+    mockPost.mockResolvedValueOnce({ status: 201, data: { data: { category: 'busy', id: 'iv-9' } } })
+    renderTab(app({ interviewWorkflow: OWN_WF, interviewConsentGivenAt: null }))
+    const user = userEvent.setup()
+    await user.click(await screen.findByRole('checkbox', { name: 'addModal.interviewConsent' }))
+    await clickStart()
+
+    await waitFor(() => expect(mockNotifyError).toHaveBeenCalledWith('interview.start.reasons.budget_exceeded'))
+    expect(screen.queryByRole('checkbox', { name: 'addModal.interviewConsent' })).toBeNull()
+    await clickStart()
+    expect(mockPost).toHaveBeenLastCalledWith('/applications/app-1/interview', undefined, expect.anything())
+  })
+
+  it.each([
+    [422, { errors: {} }],
+    [429, {}],
+  ])('keeps the consent row after a %s answer the recorder never saw and re-sends the consent', async (status, data) => {
+    mockPost.mockRejectedValueOnce({ response: { status, data } })
+    mockPost.mockResolvedValueOnce({ status: 201, data: { data: { category: 'busy', id: 'iv-9' } } })
+    renderTab(app({ interviewWorkflow: OWN_WF, interviewConsentGivenAt: null }))
+    const user = userEvent.setup()
+    await user.click(await screen.findByRole('checkbox', { name: 'addModal.interviewConsent' }))
+    await clickStart()
+
+    await waitFor(() => expect(mockNotifyError).toHaveBeenCalled())
+    expect(screen.getByRole('checkbox', { name: 'addModal.interviewConsent' })).toBeInTheDocument()
+    await clickStart()
+    expect(mockPost).toHaveBeenLastCalledWith('/applications/app-1/interview', { interview_consent: true }, expect.anything())
+  })
+
   it.each(['no_interview_consent', 'ai_disclosure_missing', 'action_rule_blocked'])(
     'reads the status card skip sentence for a 422 %s (the K-006/I-001 gates)', async reason => {
       mockPost.mockRejectedValueOnce({ response: { status: 422, data: { reason } } })
@@ -498,5 +530,12 @@ describe('InterviewsTab · skipped start (INTERVIEW-SKIP-ON-APPLICATION-1)', () 
     renderTab(app({ interviewSkipReason: 'send_failed', interviewSkippedAt: '2026-10-21T09:30:00Z' }))
     expect(screen.getByText(/interview\.skipReason\.send_failed/)).toBeInTheDocument()
     expect(screen.getByText(/interview\.skipReason\.send_failed.*interview\.skippedAt/)).toBeInTheDocument()
+  })
+})
+
+// The loading/error copy has ONE source (the locale files): no inline Dutch defaultValue in the component.
+describe('InterviewsTab · single i18n source', () => {
+  it('carries no defaultValue literal', () => {
+    expect(tabSource).not.toMatch(/defaultValue\s*:/)
   })
 })

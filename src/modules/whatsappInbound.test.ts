@@ -13,3 +13,13 @@ describe('whatsapp_inbound schema', () => {
     expect(START_MODULE_TYPES.has('whatsapp_inbound')).toBe(true)
   })
 })
+
+// The source option labels carry no Dutch and resolve to fieldOptions keys in the active language.
+describe('whatsapp_inbound source option labels', () => {
+  const field = whatsappInbound.schema.find(s => s.key === 'source') as Record<string, unknown>
+  const options = field.options as Array<{ value: string; label: string }>
+
+  it('uses English source labels', () => {
+    expect(options.map(o => o.label)).toEqual(['Meta webhook (WABA + Coexistence)', 'WhatsApp Web (own number)'])
+  })
+})

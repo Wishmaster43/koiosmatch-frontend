@@ -250,6 +250,7 @@
     "numberLoading": "Nummers ophalen…",
     "noInboundNumbers": "Geen gekoppeld nummer voor deze bron; koppel eerst een nummer onder Instellingen → Communicatie.",
     "numberHint": "Eén actief inbound-scenario per nummer en bron.",
+    "numberUnavailable": "Dit nummer is niet meer gekoppeld. Kies een ander nummer.",
     "shortMonthNote": "Valt in kortere maanden op de laatste dag van de maand."
   },
   "modules": {
@@ -1013,7 +1014,6 @@
     "Interviewflow": "Interviewflow",
     "FAQ's gebruiken": "FAQ's gebruiken",
     "AI-instructies": "AI-instructies",
-    "Afwijzingsmodus": "Afwijzingsmodus",
     "Intro-template": "Intro-template",
     "Naam": "Naam",
     "Primair contact": "Primair contact",
@@ -1045,6 +1045,8 @@
     "Richting/label voor de ontvanger": "Richting/label voor de ontvanger"
   },
   "fieldOptions": {
+    "WhatsApp Web (own number)": "WhatsApp Web (eigen nummer)",
+    "Meta webhook (WABA + Coexistence)": "Meta-webhook (WABA + Coexistence)",
     "Array (meerdere bundles)": "Array (meerdere bundles)",
     "Enkel object": "Enkel object",
     "Geen": "Geen",

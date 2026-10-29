@@ -123,6 +123,8 @@ function StartInterviewAction({ applicationId, effective, consentGivenAt, onStar
   const [unavailable, setUnavailable] = useState(false)
   // Unchecked by default: the system never assumes consent (K-006).
   const [consent, setConsent] = useState(false)
+  // Set once a ticked start reached the server: the BE records the consent before it judges the start.
+  const [consentRecorded, setConsentRecorded] = useState(false)
 
   if (!canManage) return null
 
@@ -138,7 +140,7 @@ function StartInterviewAction({ applicationId, effective, consentGivenAt, onStar
       // INTERVIEW-FLAG-1: the server derives the agent from the effective workflow, so the
       // only body is the staff consent of START-CONSENT-FE-1, sent when the row was ticked.
       // Starting an interview session is irreversible-feeling: one Idempotency-Key per click.
-      const body = consent ? { interview_consent: true } : undefined
+      const body = consent && !consentRecorded ? { interview_consent: true } : undefined
       const res = await api.post(`/applications/${applicationId}/interview`, body, withIdempotencyKey())
       const raw = unwrap<NonNullable<ApiApplication['interview']>>(res)
       const iv = mapInterview(raw)
@@ -149,6 +151,8 @@ function StartInterviewAction({ applicationId, effective, consentGivenAt, onStar
     } catch (err) {
       const status = (err as { response?: { status?: number } })?.response?.status
       const reason = (err as { response?: { data?: { reason?: string } } })?.response?.data?.reason
+      // Recorded before the starter judges: 409, or 422 with a reason; stop asking again.
+      if (consent && (status === 409 || (status === 422 && reason != null))) setConsentRecorded(true)
       if (status === 404) {
         setUnavailable(true)
         notifyError(t('interview.start.unavailable'))
@@ -175,7 +179,7 @@ function StartInterviewAction({ applicationId, effective, consentGivenAt, onStar
     <div style={{ display: 'flex', flexDirection: 'column', gap: 8, padding: '10px 12px',
       background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 10 }}>
       {/* START-CONSENT-FE-1: asked only while no consent is recorded AND Start can run (§3: no tick that goes nowhere). */}
-      {!consentGivenAt && effective && !unavailable && (
+      {!consentGivenAt && !consentRecorded && effective && !unavailable && (
         <InterviewConsentRow checked={consent} onChange={setConsent} style={{ marginBottom: 0 }} />
       )}
       <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
@@ -254,14 +258,14 @@ export default function InterviewsTab({ application: a, detailPhase }: { applica
   if (detailPhase === 'loading') {
     return (
       <Caption as="div" style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '24px 0' }}>
-        <Spinner size={14} /> {t('interview.loadingDetail', { defaultValue: 'Interviewgegevens laden…' })}
+        <Spinner size={14} /> {t('interview.loadingDetail')}
       </Caption>
     )
   }
   if (detailPhase === 'error') {
     return (
       <Caption as="div" style={{ padding: '24px 0' }}>
-        {t('interview.detailError', { defaultValue: 'Interviewgegevens konden niet worden geladen. Sluit de drilldown en probeer opnieuw.' })}
+        {t('interview.detailError')}
       </Caption>
     )
   }

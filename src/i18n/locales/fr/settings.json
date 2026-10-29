@@ -1869,7 +1869,7 @@
           "rejected": "Rejetés : {{formatted}}",
           "failed": "Échoués : {{formatted}}"
         },
-        "oldestPending": "Lead en attente la plus ancienne : {{date}}",
+        "oldestPending": "Lead en attente le plus ancien : {{date}}",
         "filterLabel": "Filtrer par statut",
         "status": {
           "all": "Tous les statuts",

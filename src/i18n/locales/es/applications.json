@@ -240,7 +240,7 @@
     "weightLabel": "Ponderación",
     "saveOverride": "Guardar puntuación",
     "cancelOverride": "Cancelar el cambio de puntuación",
-    "hardHint": "Criterio eliminatorio: si el candidato puntúa por debajo del 50 % aquí, Koios marca la candidatura como candidata a rechazo automático. Un reclutador siempre lo confirma.",
+    "hardHint": "Criterio eliminatorio: por debajo del 50 % aquí, Koios propone un rechazo que un reclutador confirma.",
     "weightLegend": "Puntos = ponderación (1 a 5): cuánto pesa este criterio en la puntuación total."
   },
   "profile": {
@@ -442,7 +442,7 @@
     "confirm": "Rechazar",
     "rejected": "Rechazado",
     "aiAdvice": "Koios aconseja rechazar",
-    "aiAuto": "Criterios estrictos no cumplidos. Apto para rechazo automático.",
+    "aiAuto": "Criterios estrictos no cumplidos. Koios propone rechazar; tú decides.",
     "aiConfirm": "Revisa y confirma antes de enviar un mensaje.",
     "adviceReasons": {
       "hard_fail": "Criterio obligatorio no cumplido: {{criterion}}.",

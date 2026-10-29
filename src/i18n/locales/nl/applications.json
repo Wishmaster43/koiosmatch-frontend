@@ -240,7 +240,7 @@
     "detailsSoon": "De criteria-uitsplitsing verschijnt hier zodra de scoring is ingesteld.",
     "saveOverride": "Score opslaan",
     "cancelOverride": "Score-aanpassing annuleren",
-    "hardHint": "Knock-outcriterium: scoort de kandidaat hierop onder de 50%, dan markeert Koios de sollicitatie als kandidaat voor automatische afwijzing. Een recruiter bevestigt dat altijd zelf.",
+    "hardHint": "Knock-outcriterium: scoort de kandidaat hierop onder de 50%, dan stelt Koios een afwijzing voor die een recruiter bevestigt.",
     "weightLegend": "Stippen = weging (1 tot 5): hoe zwaar dit criterium in de totaalscore meetelt."
   },
   "profile": {
@@ -463,7 +463,7 @@
     "rejected": "Afgewezen",
     "placed": "Geplaatst",
     "aiAdvice": "Koios adviseert afwijzen",
-    "aiAuto": "Harde criteria niet gehaald. Auto-afwijzen mogelijk.",
+    "aiAuto": "Harde criteria niet gehaald. Koios stelt afwijzen voor; jij beslist.",
     "aiConfirm": "Beoordeel en bevestig voordat er een bericht uitgaat.",
     "adviceReasons": {
       "hard_fail": "Hard criterium niet gehaald: {{criterion}}.",

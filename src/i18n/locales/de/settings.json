@@ -1869,7 +1869,7 @@
           "rejected": "Abgelehnt: {{formatted}}",
           "failed": "Fehlgeschlagen: {{formatted}}"
         },
-        "oldestPending": "Älteste wartende Lead: {{date}}",
+        "oldestPending": "Ältester wartender Lead: {{date}}",
         "filterLabel": "Nach Status filtern",
         "status": {
           "all": "Alle Status",
@@ -1892,7 +1892,7 @@
         "retry": "Erneut versuchen",
         "empty": "Keine Leads mit diesem Status.",
         "loadError": "Die Warteschlange konnte nicht geladen werden.",
-        "alreadyRetrieved": "Diese Lead wurde bereits abgerufen.",
+        "alreadyRetrieved": "Dieser Lead wurde bereits abgerufen.",
         "retryFailed": "Der erneute Versuch ist fehlgeschlagen."
       }
   },

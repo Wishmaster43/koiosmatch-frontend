@@ -9,6 +9,7 @@
 import { describe, it, expect, vi, afterEach } from 'vitest'
 import { renderHook, waitFor } from '@testing-library/react'
 import api, { getActiveTenantId } from './api'
+import displaySchema from '@/pages/settings/schemas/display'
 import { useKpiSettings, invalidateKpiCache, SETTING_DEFAULTS } from './useKpiSettings'
 
 // The default client is stubbed, plus getActiveTenantId — overridden per-call
@@ -96,5 +97,25 @@ describe('useKpiSettings · tenant scoping', () => {
     const backToTenantB = renderHook(() => useKpiSettings())
     await waitFor(() => expect(backToTenantB.result.current.new_candidates_target).toBe(7))
     expect(mockedGet).toHaveBeenCalledTimes(3)
+  })
+})
+
+describe('useKpiSettings · defaults', () => {
+  // Every key shared with the display schema keeps the schema default (pins candidates_per_page to 500).
+  it('SETTING_DEFAULTS equals the display schema default for shared keys', () => {
+    const fields = (displaySchema as { fields: Array<{ key: string; default: number }> }).fields
+    fields.forEach(f => {
+      if (f.key in SETTING_DEFAULTS) expect(SETTING_DEFAULTS[f.key]).toBe(f.default)
+    })
+    expect(SETTING_DEFAULTS.candidates_per_page).toBe(500)
+  })
+
+  // A tenant without a stored row gets 500 per page.
+  it('yields candidates_per_page 500 when /settings returns no stored row', async () => {
+    mockedTenantId.mockReturnValue('tenant-kpi-perpage')
+    mockedGet.mockResolvedValue({ data: {} })
+    const { result } = renderHook(() => useKpiSettings())
+    await waitFor(() => expect(mockedGet).toHaveBeenCalledTimes(1))
+    expect(result.current.candidates_per_page).toBe(500)
   })
 })

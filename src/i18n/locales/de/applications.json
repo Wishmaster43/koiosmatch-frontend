@@ -240,7 +240,7 @@
     "weightLabel": "Gewichtung",
     "saveOverride": "Score speichern",
     "cancelOverride": "Score-Änderung abbrechen",
-    "hardHint": "K.-o.-Kriterium: liegt der Kandidat hier unter 50 %, markiert Koios die Bewerbung als Kandidat für eine automatische Absage. Ein Recruiter bestätigt das immer selbst.",
+    "hardHint": "K.-o.-Kriterium: liegt der Kandidat hier unter 50 %, schlägt Koios eine Absage vor, die ein Recruiter bestätigt.",
     "weightLegend": "Punkte = Gewichtung (1 bis 5): wie stark dieses Kriterium in der Gesamtbewertung zählt."
   },
   "profile": {
@@ -443,7 +443,7 @@
     "rejected": "Abgelehnt",
     "placed": "Platziert",
     "aiAdvice": "Koios empfiehlt Ablehnung",
-    "aiAuto": "Harte Kriterien nicht erfüllt. Für Auto-Ablehnung geeignet.",
+    "aiAuto": "Harte Kriterien nicht erfüllt. Koios schlägt eine Absage vor; Sie entscheiden.",
     "aiConfirm": "Prüfen und bestätigen, bevor eine Nachricht gesendet wird.",
     "adviceReasons": {
       "hard_fail": "Hartes Kriterium nicht erfüllt: {{criterion}}.",

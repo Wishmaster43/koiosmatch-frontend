@@ -9,6 +9,7 @@ import { describe, it, expect, vi, afterEach } from 'vitest'
 import { renderHook, waitFor } from '@testing-library/react'
 import { useReportCandidates } from './useReportCandidates'
 import api from '@/lib/api'
+import { SETTING_DEFAULTS } from '@/lib/useKpiSettings'
 
 vi.mock('@/lib/api', async () => {
   const actual = await vi.importActual<typeof import('@/lib/api')>('@/lib/api')
@@ -25,6 +26,13 @@ describe('useReportCandidates', () => {
 
     await waitFor(() => expect(mockedGet).toHaveBeenCalled())
     expect(mockedGet).toHaveBeenCalledWith('/sm_candidates?per_page=500')
+  })
+
+  it('requests per_page=500 when the setting is unset (the default)', async () => {
+    mockedGet.mockResolvedValue({ data: { data: [] } })
+    renderHook(() => useReportCandidates(SETTING_DEFAULTS.candidates_per_page))
+
+    await waitFor(() => expect(mockedGet).toHaveBeenCalledWith('/sm_candidates?per_page=500'))
   })
 
   it('normalises first_name/last_name into firstname/lastname on the returned rows', async () => {

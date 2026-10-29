@@ -182,6 +182,7 @@
     "numberLoading": "Loading numbers…",
     "noInboundNumbers": "No linked number for this source; link a number first under Settings → Communication.",
     "numberHint": "One active inbound scenario per number and source.",
+    "numberUnavailable": "This number is no longer connected. Choose another number.",
     "shortMonthNote": "Falls on the last day of the month in shorter months."
   },
   "modules": {
@@ -945,7 +946,6 @@
     "Interviewflow": "Interview flow",
     "FAQ's gebruiken": "Use FAQs",
     "AI-instructies": "AI instructions",
-    "Afwijzingsmodus": "Rejection mode",
     "Intro-template": "Intro template",
     "Naam": "Name",
     "Primair contact": "Primary contact",
@@ -979,6 +979,8 @@
     "Richting/label voor de ontvanger": "Direction/label for the receiver"
   },
   "fieldOptions": {
+    "WhatsApp Web (own number)": "WhatsApp Web (own number)",
+    "Meta webhook (WABA + Coexistence)": "Meta webhook (WABA + Coexistence)",
     "Array (meerdere bundles)": "Array (multiple bundles)",
     "Enkel object": "Single object",
     "Geen": "None",

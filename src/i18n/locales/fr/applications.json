@@ -240,7 +240,7 @@
     "weightLabel": "Pondération",
     "saveOverride": "Enregistrer le score",
     "cancelOverride": "Annuler la modification du score",
-    "hardHint": "Critère éliminatoire : si le candidat obtient moins de 50 % ici, Koios signale la candidature comme candidate à un refus automatique. Un recruteur le confirme toujours lui-même.",
+    "hardHint": "Critère éliminatoire : en dessous de 50 % ici, Koios propose un refus qu'un recruteur confirme.",
     "weightLegend": "Points = pondération (1 à 5) : le poids de ce critère dans le score global."
   },
   "profile": {
@@ -442,7 +442,7 @@
     "confirm": "Refuser",
     "rejected": "Refusé",
     "aiAdvice": "Koios conseille le refus",
-    "aiAuto": "Critères stricts non remplis. Éligible au refus automatique.",
+    "aiAuto": "Critères stricts non remplis. Koios propose un refus ; c'est vous qui décidez.",
     "aiConfirm": "Vérifiez et confirmez avant l'envoi d'un message.",
     "adviceReasons": {
       "hard_fail": "Critère obligatoire non rempli : {{criterion}}.",

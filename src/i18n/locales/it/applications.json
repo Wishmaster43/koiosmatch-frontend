@@ -240,7 +240,7 @@
     "detailsSoon": "La ripartizione dei criteri comparirà qui non appena lo scoring sarà configurato.",
     "saveOverride": "Salva punteggio",
     "cancelOverride": "Annulla modifica punteggio",
-    "hardHint": "Criterio knock-out: se il candidato ottiene meno del 50% qui, Koios segnala la candidatura come candidata al rifiuto automatico. Un recruiter lo conferma sempre personalmente.",
+    "hardHint": "Criterio knock-out: sotto il 50% qui, Koios propone un rifiuto che un recruiter conferma.",
     "weightLegend": "I puntini indicano il peso (da 1 a 5): quanto conta questo criterio nel punteggio totale."
   },
   "profile": {
@@ -463,7 +463,7 @@
     "rejected": "Respinto",
     "placed": "Collocato",
     "aiAdvice": "Koios consiglia il rifiuto",
-    "aiAuto": "Criteri obbligatori non soddisfatti. Rifiuto automatico possibile.",
+    "aiAuto": "Criteri obbligatori non soddisfatti. Koios propone il rifiuto; decidi tu.",
     "aiConfirm": "Verifica e conferma prima che venga inviato un messaggio.",
     "adviceReasons": {
       "hard_fail": "Criterio obbligatorio non soddisfatto: {{criterion}}.",

@@ -49,6 +49,11 @@ const rejectedApp = (over: Partial<ApplicationDetail> = {}) => app({
 })
 
 describe('RejectionModal', () => {
+  it('renders the aiAuto proposal sentence when the AI advises rejection with the hard-fail flag', () => {
+    render(<RejectionModal application={rejectedApp({ bucket: 'active' })} onCancel={vi.fn()} onConfirm={vi.fn()} />)
+    expect(screen.getByText('rejection.aiAuto')).toBeInTheDocument()
+  })
+
   it('renders the reason picker as a searchable CreatableSelect (S8), not a bare <select>', async () => {
     render(<RejectionModal application={app()} onCancel={vi.fn()} onConfirm={vi.fn()} />)
     const toggle = await screen.findByRole('button', { name: 'rejection.reasonPlaceholder' })
