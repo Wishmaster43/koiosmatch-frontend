@@ -15,11 +15,13 @@ const TARGETS = {
 }
 
 // Collect every field of every exported schema (fields may be nested in sections).
-const collect = (node, out = []) => {
+interface Field { key: string; type: string; min?: number; default?: unknown; max?: number }
+const collect = (node: unknown, out: Field[] = []): Field[] => {
   if (Array.isArray(node)) node.forEach((n) => collect(n, out))
   else if (node && typeof node === 'object') {
-    if (node.key && node.type === 'number') out.push(node)
-    Object.values(node).forEach((v) => typeof v === 'object' && collect(v, out))
+    const rec = node as Record<string, unknown>
+    if (rec.key && rec.type === 'number') out.push(rec as unknown as Field)
+    Object.values(rec).forEach((v) => typeof v === 'object' && collect(v, out))
   }
   return out
 }
@@ -29,10 +31,10 @@ describe('kpi target schema fields', () => {
   it.each(Object.entries(TARGETS))('%s has min 1 and its default', (key, def) => {
     const f = fields.find((x) => x.key === key)
     expect(f).toBeTruthy()
-    expect(f.min).toBe(1)
-    expect(f.default).toBe(def)
+    expect(f?.min).toBe(1)
+    expect(f?.default).toBe(def)
   })
   it('keeps max 100 on fill rate', () => {
-    expect(fields.find((x) => x.key === 'fill_rate_target').max).toBe(100)
+    expect(fields.find((x) => x.key === 'fill_rate_target')?.max).toBe(100)
   })
 })

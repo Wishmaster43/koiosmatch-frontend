@@ -47,7 +47,7 @@ describe('SchemaSection · optional placeholder/unit', () => {
   // via `i18n.t(...)`), rather than a mock that could hide a regression here.
   it('renders a text field WITH a translated placeholder', async () => {
     const key = 'catalog.sections.company.fields.billing_email_test_only.placeholder'
-    const text = 'facturen@voorbeeld.nl'
+    const text = 'billing@example.com'
     i18n.addResource(i18n.language, 'settings', key, text)
     const schema: Schema = {
       i18nKey: 'catalog.sections.company',
@@ -62,7 +62,7 @@ describe('SchemaSection · optional placeholder/unit', () => {
   // lives next to it, not under the folder convention — measured 29-09: the interview
   // hours row's "uur" never rendered because only `${base}.unit` was read.
   it('renders a catalogue number row\'s unit from the sibling of its own label key', async () => {
-    i18n.addResource(i18n.language, 'settings', 'settings.windows.stalled_hours_test_only.label', 'Wacht na')
+    i18n.addResource(i18n.language, 'settings', 'settings.windows.stalled_hours_test_only.label', 'Wait after')
     i18n.addResource(i18n.language, 'settings', 'settings.windows.stalled_hours_test_only.unit', 'uur-test')
     const schema: Schema = {
       i18nKey: 'catalog.sections.windows',

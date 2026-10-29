@@ -365,7 +365,7 @@ export default function AddOpportunityModal({ onClose, onCreated, users = [], cu
               branchId={branchId} onBranchChange={setBranchId}
               branchOptions={withCurrentOption(
                 branchLocations.map(l => ({ value: String(l.value), label: l.label })),
-                branchId ? { value: branchId, label: allBranchLocations.find(l => String(l.value) === branchId)?.label || existing?.branch || '' } : null,
+                branchId ? { value: branchId, label: allBranchLocations.find(l => String(l.value) === branchId)?.label || existing?.branch || branchId } : null,
               )}
             />
 

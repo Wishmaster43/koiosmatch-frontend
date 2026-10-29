@@ -268,4 +268,41 @@ describe('ReportsDashboard · matches_expiring card (S-004)', () => {
     await userEvent.click(screen.getByRole('button', { name: '5 Matches die aflopen' }))
     expect(mockNavigate).toHaveBeenCalledWith('matches', { expiring_within_days: 2, expiring_within_unit: 'weeks' })
   })
+
+  it('falls back to the report page when the card carries no expiring horizon', async () => {
+    setSuccess()
+    mockNavigate.mockClear()
+    renderDashboard()
+    await userEvent.click(screen.getByRole('button', { name: '5 Matches die aflopen' }))
+    expect(mockNavigate).toHaveBeenCalledWith('reports.matches')
+  })
+
+  it('stays a button with an unknown report when the horizon is present, and a plain row without it', async () => {
+    setSuccess()
+    mockNavigate.mockClear()
+    mockHub.mockReturnValue({
+      data: { signals: HUB_CARDS.map(c => (c.key === 'matches_expiring' ? { ...c, report: 'unknown_report', filters: { expiring_within_days: 14, expiring_within_unit: 'days' } } : c)) },
+      loading: false, error: false, errorObject: undefined, refetch: vi.fn(),
+    })
+    const first = renderDashboard()
+    await userEvent.click(screen.getByRole('button', { name: '5 Matches die aflopen' }))
+    expect(mockNavigate).toHaveBeenCalledWith('matches', { expiring_within_days: 14, expiring_within_unit: 'days' })
+    first.unmount()
+    mockHub.mockReturnValue({
+      data: { signals: HUB_CARDS.map(c => (c.key === 'matches_expiring' ? { ...c, report: 'unknown_report', filters: {} } : c)) },
+      loading: false, error: false, errorObject: undefined, refetch: vi.fn(),
+    })
+    renderDashboard()
+    expect(screen.queryByRole('button', { name: '5 Matches die aflopen' })).not.toBeInTheDocument()
+  })
+
+  it('formats the count in the accessible name like the visible count', () => {
+    setSuccess()
+    mockHub.mockReturnValue({
+      data: { signals: HUB_CARDS.map(c => (c.key === 'candidates_no_follow_up' ? { ...c, count: 1234 } : c)) },
+      loading: false, error: false, errorObject: undefined, refetch: vi.fn(),
+    })
+    renderDashboard()
+    expect(screen.getByRole('button', { name: '1.234 Kandidaten zonder opvolging' })).toBeInTheDocument()
+  })
 })

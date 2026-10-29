@@ -13,7 +13,7 @@ import OutreachCreate from './OutreachCreate'
 
 // Talent pools for the optional source picker (shared /pools resource).
 vi.mock('@/lib/api', () => ({
-  default: { get: vi.fn(() => Promise.resolve({ data: [{ id: 'p1', name: 'Zorgpool Noord' }] })) },
+  default: { get: vi.fn(() => Promise.resolve({ data: [{ id: 'p1', name: 'Logistics pool North' }] })) },
 }))
 const { createCampaign } = vi.hoisted(() => ({
   createCampaign: vi.fn<(body: Record<string, unknown>) => Promise<{ id: string; name: string }>>(
@@ -61,9 +61,9 @@ describe('OutreachCreate · shared wide-form frame', () => {
     const user = userEvent.setup()
     render(<OutreachCreate onClose={vi.fn()} onCreated={vi.fn()} />)
     await user.click(await screen.findByRole('button', { name: 'channel.whatsapp' }))
-    await user.type(screen.getByPlaceholderText('create.namePlaceholder'), 'Bellijst West')
+    await user.type(screen.getByPlaceholderText('create.namePlaceholder'), 'Call list West')
     await user.click(screen.getByRole('button', { name: 'create.submit' }))
-    await waitFor(() => expect(createCampaign).toHaveBeenCalledWith({ name: 'Bellijst West', channel: 'whatsapp' }))
+    await waitFor(() => expect(createCampaign).toHaveBeenCalledWith({ name: 'Call list West', channel: 'whatsapp' }))
   })
 })
 
@@ -82,7 +82,7 @@ describe('OutreachCreate · pools load failure (D8)', () => {
     const api = (await import('@/lib/api')).default
     vi.mocked(api.get)
       .mockRejectedValueOnce(new Error('500'))
-      .mockResolvedValueOnce({ data: [{ id: 'p1', name: 'Zorgpool Noord' }] })
+      .mockResolvedValueOnce({ data: [{ id: 'p1', name: 'Logistics pool North' }] })
     render(<OutreachCreate onClose={vi.fn()} onCreated={vi.fn()} />)
     await screen.findByText('create.poolsLoadError')
     await user.click(screen.getByRole('button', { name: /retry|opnieuw/i }))
@@ -125,9 +125,9 @@ describe('OutreachCreate · validation + submit payload (unchanged behaviour)', 
     const onClose = vi.fn()
     const user = userEvent.setup()
     render(<OutreachCreate onClose={onClose} onCreated={onCreated} />)
-    await user.type(screen.getByPlaceholderText('create.namePlaceholder'), '  Bellijst Noord  ')
+    await user.type(screen.getByPlaceholderText('create.namePlaceholder'), '  Call list North  ')
     await user.click(screen.getByRole('button', { name: 'create.submit' }))
-    await waitFor(() => expect(createCampaign).toHaveBeenCalledWith({ name: 'Bellijst Noord', channel: 'call' }))
+    await waitFor(() => expect(createCampaign).toHaveBeenCalledWith({ name: 'Call list North', channel: 'call' }))
     // MODULE-FACE-BEVRIES: the create body carries no location_id until Danny's go.
     expect(vi.mocked(createCampaign).mock.calls.at(-1)?.[0]).not.toHaveProperty('location_id')
     expect(onCreated).toHaveBeenCalledWith({ id: 'c-new', name: 'New' })
@@ -137,20 +137,20 @@ describe('OutreachCreate · validation + submit payload (unchanged behaviour)', 
   it('Enter in the name field submits (SPLITS-R2 regression: TextField dropped onKeyDown)', async () => {
     const user = userEvent.setup()
     render(<OutreachCreate onClose={vi.fn()} onCreated={vi.fn()} />)
-    await user.type(screen.getByPlaceholderText('create.namePlaceholder'), 'Bellijst Oost{Enter}')
-    await waitFor(() => expect(createCampaign).toHaveBeenCalledWith({ name: 'Bellijst Oost', channel: 'call' }))
+    await user.type(screen.getByPlaceholderText('create.namePlaceholder'), 'Call list East{Enter}')
+    await waitFor(() => expect(createCampaign).toHaveBeenCalledWith({ name: 'Call list East', channel: 'call' }))
   })
 
   it('includes from_pool_id when a source pool is picked (pool-seeding unchanged)', async () => {
     const user = userEvent.setup()
     render(<OutreachCreate onClose={vi.fn()} onCreated={vi.fn()} />)
-    await user.type(screen.getByPlaceholderText('create.namePlaceholder'), 'Bellijst Zuid')
+    await user.type(screen.getByPlaceholderText('create.namePlaceholder'), 'Call list South')
     // The pool list loads async from /pools — open the picker once it has arrived.
     // FieldRow (§3A label-left canon) names the trigger after its field label.
     await user.click(screen.getByRole('button', { name: 'create.pool' }))
-    await user.click(await screen.findByRole('button', { name: 'Zorgpool Noord' }))
+    await user.click(await screen.findByRole('button', { name: 'Logistics pool North' }))
     await user.click(screen.getByRole('button', { name: 'create.submit' }))
-    await waitFor(() => expect(createCampaign).toHaveBeenCalledWith({ name: 'Bellijst Zuid', channel: 'call', from_pool_id: 'p1' }))
+    await waitFor(() => expect(createCampaign).toHaveBeenCalledWith({ name: 'Call list South', channel: 'call', from_pool_id: 'p1' }))
   })
 })
 
@@ -161,7 +161,7 @@ describe('OutreachCreate · name-collision 422 (CALLLIST-KEY-1)', () => {
     const user = userEvent.setup()
     createCampaign.mockRejectedValueOnce({ response: { data: { code: 'call_list_name_taken' } } })
     render(<OutreachCreate onClose={vi.fn()} onCreated={vi.fn()} />)
-    await user.type(screen.getByPlaceholderText('create.namePlaceholder'), 'Bellijst Noord')
+    await user.type(screen.getByPlaceholderText('create.namePlaceholder'), 'Call list North')
     await user.click(screen.getByRole('button', { name: 'create.submit' }))
     expect(await screen.findByText('create.nameTaken')).toBeInTheDocument()
   })
@@ -172,7 +172,7 @@ describe('OutreachCreate · name-collision 422 (CALLLIST-KEY-1)', () => {
       response: { data: { code: 'call_list_name_taken', meta: { existing_call_list_id: 'uuid-1', existing_reference_number: 'CL-042' } } },
     })
     render(<OutreachCreate onClose={vi.fn()} onCreated={vi.fn()} />)
-    await user.type(screen.getByPlaceholderText('create.namePlaceholder'), 'Bellijst Noord')
+    await user.type(screen.getByPlaceholderText('create.namePlaceholder'), 'Call list North')
     await user.click(screen.getByRole('button', { name: 'create.submit' }))
     expect(await screen.findByText('create.nameTakenRef')).toBeInTheDocument()
     expect(screen.queryByText(/uuid-1/)).toBeNull()
@@ -182,7 +182,7 @@ describe('OutreachCreate · name-collision 422 (CALLLIST-KEY-1)', () => {
     const user = userEvent.setup()
     createCampaign.mockRejectedValueOnce({ response: { data: { code: 'call_list_name_taken_archived' } } })
     render(<OutreachCreate onClose={vi.fn()} onCreated={vi.fn()} />)
-    await user.type(screen.getByPlaceholderText('create.namePlaceholder'), 'Bellijst Noord')
+    await user.type(screen.getByPlaceholderText('create.namePlaceholder'), 'Call list North')
     await user.click(screen.getByRole('button', { name: 'create.submit' }))
     expect(await screen.findByText('create.nameTakenArchived')).toBeInTheDocument()
   })
@@ -193,7 +193,7 @@ describe('OutreachCreate · name-collision 422 (CALLLIST-KEY-1)', () => {
       response: { data: { code: 'call_list_name_taken_archived', meta: { existing_call_list_id: 'uuid-2', existing_reference_number: 'CL-099' } } },
     })
     render(<OutreachCreate onClose={vi.fn()} onCreated={vi.fn()} />)
-    await user.type(screen.getByPlaceholderText('create.namePlaceholder'), 'Bellijst Noord')
+    await user.type(screen.getByPlaceholderText('create.namePlaceholder'), 'Call list North')
     await user.click(screen.getByRole('button', { name: 'create.submit' }))
     expect(await screen.findByText('create.nameTakenArchivedRef')).toBeInTheDocument()
     expect(screen.queryByText(/uuid-2/)).toBeNull()
@@ -203,7 +203,7 @@ describe('OutreachCreate · name-collision 422 (CALLLIST-KEY-1)', () => {
     const user = userEvent.setup()
     createCampaign.mockRejectedValueOnce(new Error('network'))
     render(<OutreachCreate onClose={vi.fn()} onCreated={vi.fn()} />)
-    await user.type(screen.getByPlaceholderText('create.namePlaceholder'), 'Bellijst Noord')
+    await user.type(screen.getByPlaceholderText('create.namePlaceholder'), 'Call list North')
     await user.click(screen.getByRole('button', { name: 'create.submit' }))
     expect(await screen.findByText('create.error')).toBeInTheDocument()
     expect(screen.queryByText('create.nameTaken')).toBeNull()
@@ -214,7 +214,7 @@ describe('OutreachCreate · name-collision 422 (CALLLIST-KEY-1)', () => {
     createCampaign.mockRejectedValueOnce({ response: { data: { code: 'call_list_name_taken' } } })
     render(<OutreachCreate onClose={vi.fn()} onCreated={vi.fn()} />)
     const input = screen.getByPlaceholderText('create.namePlaceholder')
-    await user.type(input, 'Bellijst Noord')
+    await user.type(input, 'Call list North')
     await user.click(screen.getByRole('button', { name: 'create.submit' }))
     expect(await screen.findByText('create.nameTaken')).toBeInTheDocument()
     await user.type(input, '2')

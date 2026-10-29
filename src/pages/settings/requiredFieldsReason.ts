@@ -6,7 +6,8 @@
  * and the five other-entity inventories (App\Services\Fields\FieldInventory /
  * OtherEntityFieldInventory) draw their reason PROSE from the same small, closed
  * vocabulary (consent / financial / relation / webhook-stamped / custom-fields), plus
- * the customer-family-only "write-only pivot" relation text.
+ * the customer-family-only "write-only pivot" relation text and the application-only
+ * set-after-creation text (APP-REQUIRED-CREATE-ONLY-1).
  */
 
 // The exact measured backend reason strings mapped to their `settings.fieldInventory.reason.*` key.

@@ -2,7 +2,7 @@
  * Single-line settings field that saves one key on blur (settings kit; used by the career-site and AI-interview screens).
  * Draft state is local; a failed save reverts the draft and surfaces the server error.
  */
-import { useState } from 'react'
+import { useId, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { saveSettingsKeys } from '@/lib/settings/useAllSettings'
 import { notifyError } from '@/lib/notify'
@@ -30,6 +30,9 @@ export default function BlurSaveField({
   const { t } = useTranslation('settings')
   const [draft, setDraft] = useState(stored)
   const [invalid, setInvalid] = useState(false)
+  // Id that links the invalid message to the input for screen readers.
+  const errId = useId()
+  const showError = invalid && !!invalidMessage
 
   // Validate, then save only a changed value; revert the draft when the server refuses.
   const handleBlur = () => {
@@ -49,13 +52,15 @@ export default function BlurSaveField({
         <input
           type={type}
           aria-label={label}
+          aria-invalid={invalid || undefined}
+          aria-describedby={showError ? errId : undefined}
           value={draft}
           onChange={e => setDraft(e.target.value)}
           onBlur={handleBlur}
           placeholder={placeholder}
           style={{ ...fieldInputStyle, width: 280, borderColor: invalid ? 'var(--color-danger)' : 'var(--border)' }}
         />
-        {invalid && invalidMessage && <span role="alert"><Caption as="span" style={{ color: 'var(--color-danger-text)' }}>{invalidMessage}</Caption></span>}
+        {showError && <span id={errId} role="alert"><Caption as="span" style={{ color: 'var(--color-danger-text)' }}>{invalidMessage}</Caption></span>}
       </div>
     </SettingRow>
   )

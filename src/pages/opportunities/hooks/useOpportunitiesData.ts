@@ -46,15 +46,9 @@ const EMPTY_OPPORTUNITIES: Opportunity[] = []
 // any consumer that feeds these into a memo behind an effect.
 const EMPTY_CUSTOMERS: PageCustomer[] = []
 
-// OpportunityQuery::rules() caps per_page at `between:1,200`. Fixed 2026-08-05 (audit:
-// "rows per page niet overal toegepast"): this hook used to call GET /opportunities
-// with NO per_page/page at all, so the controller's own default (25) silently capped
-// EVERY consumer of `rows` — the table, the board, the donuts and the KPI cards —
-// to at most 25 opportunities total, regardless of the page's own pageSize picker
-// (mirrors the "84 vs 25" bug useMatches.ts already fixed for matches). Now fetches
-// the FULL set via a page loop, safety-capped at 5 pages (1000 rows), same scale as
-// useMatches.ts's fetch-all.
-// BE silently clamps per_page via PageSize::from(request, 25, 100) (validation says 500): request the effective cap.
+// The BE clamps per_page via PageSize::from(request, 25, 100), so we request 100 and loop
+// at most OPPORTUNITIES_MAX_PAGES pages: at most 500 rows (2026-08-05: the hook used to send
+// no per_page and silently capped every consumer at 25).
 export const OPPORTUNITIES_MAX_PER_PAGE = 100
 const OPPORTUNITIES_MAX_PAGES = 5
 

@@ -91,7 +91,8 @@ describe('workflowRunHistory · days only', () => {
     vi.mocked(api.post).mockResolvedValue({ data: {} } as Awaited<ReturnType<typeof api.post>>)
     render(<SchemaSection schema={workflowRunHistory} />)
     await waitFor(() => expect(screen.getByRole('textbox')).toHaveValue('31'))
-    expect(screen.queryByRole('button', { name: st('settings.retention.workflow_run_retention_days_unit.label') })).toBeNull()
+    // Only the save button exists: no unit picker renders next to the single number field.
+    expect(screen.getAllByRole('button').map(b => b.textContent?.trim())).toEqual([st('common.save')])
     fireEvent.change(screen.getByRole('textbox'), { target: { value: '10' } })
     fireEvent.click(screen.getByRole('button', { name: st('common.save') }))
     await waitFor(() => expect(api.post).toHaveBeenCalled())

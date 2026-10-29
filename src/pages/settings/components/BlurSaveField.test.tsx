@@ -74,4 +74,14 @@ describe('BlurSaveField', () => {
     await user.tab()
     await vi.waitFor(() => expect(input.value).toBe('old'))
   })
+
+  // The invalid state is exposed to assistive tech and linked to its message.
+  it('marks the input aria-invalid and points aria-describedby at the alert', async () => {
+    const { user, input } = setup({ isValid: () => false, invalidMessage: 'Not valid' })
+    await user.clear(input)
+    await user.type(input, 'x')
+    await user.tab()
+    expect(input).toHaveAttribute('aria-invalid', 'true')
+    expect(input.getAttribute('aria-describedby')).toBe(screen.getByRole('alert').id)
+  })
 })

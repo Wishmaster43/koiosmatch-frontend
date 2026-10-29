@@ -34,6 +34,11 @@ function resolveReportId(report: string, hasWhatsapp: boolean): ReportId | null 
   return null
 }
 
+// A signal is clickable when its report resolves, or when it is the expiring-matches card that drills into the matches list.
+function isSignalReachable(s: { key: string; filters?: { expiring_within_days?: number } }, target: string | null | undefined): boolean {
+  return (s.key === 'matches_expiring' && s.filters?.expiring_within_days != null) || !!target
+}
+
 // The attention list block: only non-zero signals, each a real button row.
 export default function ReportsHubAttention() {
   const { t } = useTranslation('analytics')
@@ -72,13 +77,13 @@ export default function ReportsHubAttention() {
           </span>
         )
         // No reachable report: the count still shows, but nothing pretends to be a link.
-        if (!target) {
+        if (!isSignalReachable(s, target)) {
           return <div key={s.key} style={{ display: 'flex', alignItems: 'center', height: 28, padding: '0 8px' }}>{body}</div>
         }
         return (
           <Button key={s.key} variant="ghost" size="sm"
             onClick={() => openSignal(s)}
-            aria-label={`${s.count} ${label}`}
+            aria-label={`${formatNumber(s.count)} ${label}`}
             style={{ width: '100%', justifyContent: 'space-between', padding: '0 8px' }}>
             {body}
             <ChevronRight size={14} style={{ color: 'var(--text-muted)', flexShrink: 0 }} />
