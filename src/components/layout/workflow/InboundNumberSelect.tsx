@@ -4,9 +4,9 @@
  * ONE number row per lane. The options come ONCE from GET /inbound-numbers and
  * are filtered on `group === source`; a failed fetch is an error, never "empty".
  */
-import { useState, useEffect, useId } from 'react'
+import { useState, useEffect, useId, useCallback } from 'react'
 import { useTranslation } from 'react-i18next'
-import { unwrapList } from '@/lib/api'
+import api, { unwrapList } from '@/lib/api'
 import CreatableSelect from '@/components/ui/CreatableSelect'
 import Spinner from '@/components/ui/Spinner'
 import ErrorBanner from '@/components/ui/ErrorBanner'
@@ -31,18 +31,23 @@ export function InboundNumberSelect({ source, numberId, onSourceChange, onNumber
   const sourceId = useId()
   const numberLabelId = useId()
 
-  // Fetch the bureau's inbound numbers once (alive-guarded against unmount).
+  // Fetch the bureau's inbound numbers (alive-guarded against unmount; also the retry action).
+  const load = useCallback((isAlive: () => boolean = () => true) => {
+    setLoading(true); setFailed(false)
+    api.get('/inbound-numbers')
+      .then(r => { if (isAlive()) setRows(unwrapList<InboundNumber>(r).rows) })
+      .catch(() => { if (isAlive()) setFailed(true) })
+      .finally(() => { if (isAlive()) setLoading(false) })
+  }, [])
   useEffect(() => {
     let alive = true
-    setLoading(true); setFailed(false)
-    import('@/lib/api').then(m => m.default.get('/inbound-numbers'))
-      .then(r => { if (alive) setRows(unwrapList<InboundNumber>(r).rows) })
-      .catch(() => { if (alive) setFailed(true) })
-      .finally(() => { if (alive) setLoading(false) })
+    load(() => alive)
     return () => { alive = false }
-  }, [])
+  }, [load])
 
   const laneRows = rows.filter(n => n.group === source)
+  // A stored number the list no longer offers (only judged once the list loaded fine): shown as a notice, never as a raw id.
+  const stale = !loading && !failed && numberId !== '' && !laneRows.some(n => n.value === numberId)
   const sourceOptions = SOURCES.map(s => ({
     value: s, label: t(s === 'meta' ? 'scheduleModal.sourceMeta' : 'scheduleModal.sourceWaWeb'),
   }))
@@ -65,15 +70,17 @@ export function InboundNumberSelect({ source, numberId, onSourceChange, onNumber
       <div style={{ marginTop: 12 }}>
         <label id={numberLabelId} style={sectionLabel}>{t('fieldLabels.WhatsApp number')}</label>
         {loading && <Spinner label={t('scheduleModal.numberLoading')} />}
-        {failed && <ErrorBanner>{t('common:actionFailed')}</ErrorBanner>}
+        {failed && <ErrorBanner onRetry={() => load()}>{t('common:actionFailed')}</ErrorBanner>}
         {!loading && !failed && laneRows.length === 0 && (
           <Caption as="p">{t('scheduleModal.noInboundNumbers')}</Caption>
         )}
         {!loading && !failed && laneRows.length > 0 && (
-          <CreatableSelect value={numberId} onChange={onNumberChange} aria-labelledby={numberLabelId}
+          <CreatableSelect value={stale ? '' : numberId} onChange={onNumberChange} aria-labelledby={numberLabelId}
             allowCreate={false} placeholder={t('scheduleModal.numberSelect')}
             options={laneRows.map(n => ({ value: n.value, label: n.label }))} style={selectStyle} />
         )}
+        {/* The live region is the wrapper because the typography atom carries no ARIA props. */}
+        {stale && <div role="status" style={{ marginTop: 6 }}><Caption as="span">{t('scheduleModal.numberUnavailable')}</Caption></div>}
         <Caption as="p" style={{ marginTop: 6 }}>{t('scheduleModal.numberHint')}</Caption>
       </div>
     </>

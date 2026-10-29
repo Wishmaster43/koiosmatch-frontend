@@ -40,14 +40,27 @@ import type { WorkflowVarGroup } from '@/types/workflow'
 // pattern). These day counts are small plain integers (no thousands separator
 // ever applies), so a minimal local integer field avoids the transitive break
 // instead of carrying it into a canon-protected test suite.
+// The input face is inline on purpose for the same reason (a shared field face would
+// import the formatters). A local string draft lets the user clear the field to type a
+// new number; the parent only sees the parsed value.
 function DayCountInput({ value, onChange, ariaLabel, style }: {
   value: number | null; onChange: (n: number | null) => void; ariaLabel: string; style?: CSSProperties
 }) {
+  const [draft, setDraft] = useState(value == null ? '' : String(value))
+  // Re-sync the draft from the parent unless it already represents that value (an empty draft stands for null or 0).
+  useEffect(() => {
+    setDraft(d => {
+      const parsed = d === '' ? null : Number(d)
+      if (parsed === value || (d === '' && value === 0)) return d
+      return value == null ? '' : String(value)
+    })
+  }, [value])
   return (
     <input type="number" min={0} step={1} inputMode="numeric"
-      value={value == null ? '' : String(value)} aria-label={ariaLabel}
+      value={draft} aria-label={ariaLabel}
       onChange={e => {
         const raw = e.target.value
+        setDraft(raw)
         if (raw === '') { onChange(null); return }
         const n = Math.max(0, Math.round(Number(raw)))
         onChange(Number.isFinite(n) ? n : null)

@@ -152,3 +152,21 @@ describe('KoiosMessage — search results grouping', () => {
     expect(screen.getByText('reference (1)')).toBeInTheDocument()
   })
 })
+
+// KOIOS-EN-1: the legacy `resultaten`/`overgeslagen`/`reden` payload renders the same groups and skipped lines as the English one.
+describe('KoiosMessage — legacy result key alias', () => {
+  const refs = [{ type: 'candidate', id: 'c1', label: 'Ahmed Vos' }]
+  const build = (step: Record<string, unknown>): KoiosChatMessage => ({
+    role: 'assistant', answer: 'Found', steps: [{ tool: 'search_all', refs, ...step } as unknown as Record<string, unknown>],
+  } as unknown as KoiosChatMessage)
+
+  // The legacy keys are quoted: they are fixtures of the pre-KOIOS-EN-1 payload, not identifiers of ours.
+  it('renders identical output for the legacy and the English payload', () => {
+    const english = render(<KoiosMessage msg={build({ result: { candidates: { count: 1 }, tasks: { skipped: true, reason: 'no permission' } } })} t={t} />)
+    const englishText = english.container.textContent
+    english.unmount()
+    const legacy = render(<KoiosMessage msg={build({ 'resultaten': { candidates: { count: 1 }, tasks: { 'overgeslagen': true, 'reden': 'no permission' } } })} t={t} />)
+    expect(legacy.container.textContent).toBe(englishText)
+    expect(legacy.container.textContent).toContain('no permission')
+  })
+})

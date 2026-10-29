@@ -5,7 +5,7 @@
  */
 import { describe, it, expect, vi } from 'vitest'
 import { render, screen, fireEvent } from '@testing-library/react'
-import RescheduleEditor from './RescheduleEditor'
+import RescheduleEditor from './SuggestionEditor'
 
 vi.mock('react-i18next', async (importOriginal) => ({
   ...(await importOriginal<typeof import('react-i18next')>()),
@@ -21,7 +21,7 @@ vi.mock('@/components/forms/fields', () => ({
   ),
 }))
 
-const action = { tool: 'wijzig_taak', input: { task_id: 't-1', due_date: '2026-09-29' } }
+const action = { tool: 'update_task', input: { task_id: 't-1', due_date: '2026-09-29' } }
 
 describe('RescheduleEditor', () => {
   it('prefills the proposed date and shows the Koios badge', () => {

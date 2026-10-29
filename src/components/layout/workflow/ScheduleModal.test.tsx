@@ -182,7 +182,9 @@ describe('ScheduleModal · webhook (AI-agent) trigger', () => {
   // as "tenant genuinely has zero agents" (`.catch(() => setAgents([]))`) — a
   // recruiter could never tell a real outage from an empty tenant.
   it('BUG 4 regression: a failed agent fetch shows a distinct error, never the empty-state copy', async () => {
-    vi.mocked(api.get).mockRejectedValueOnce(new Error('network down'))
+    // URL-aware so only the agents request fails, whatever order the requests fire in.
+    const defaultGet = vi.mocked(api.get).getMockImplementation()
+    vi.mocked(api.get).mockImplementation((url: string) => (url === '/ai/agents' ? Promise.reject(new Error('network down')) : defaultGet!(url)))
     render(<ScheduleModal onSave={vi.fn()} onClose={vi.fn()} />)
     fireEvent.click(screen.getByText('scheduleModal.trigger.webhook'))
 
@@ -192,6 +194,8 @@ describe('ScheduleModal · webhook (AI-agent) trigger', () => {
     expect(screen.queryByText('scheduleModal.agentEmpty')).not.toBeInTheDocument()
     // No picker is rendered at all, so an empty agent can never be saved from here.
     expect(screen.queryByRole('button', { name: 'scheduleModal.agentLabel scheduleModal.agentSelect' })).not.toBeInTheDocument()
+    // Restore the default answers for the following tests.
+    vi.mocked(api.get).mockImplementation(defaultGet!)
   })
 
   it('BUG 4 regression: Save is disabled while no agent is chosen, even once agents load successfully', async () => {

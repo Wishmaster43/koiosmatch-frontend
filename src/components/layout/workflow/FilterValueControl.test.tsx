@@ -120,6 +120,21 @@ describe('FilterValueControl · date_* operators', () => {
     expect(onChange).toHaveBeenLastCalledWith('now-30d')
   })
 
+  it('REGRESSION: clearing the relative amount leaves the field empty (wire now), then typing 5 writes now-5d', () => {
+    const onChange = vi.fn()
+    const { rerender } = render(<FilterValueControl operator="date_gte" value="now-30d" onChange={onChange} ariaLabel="value" />)
+    const rerenderWire = () => rerender(<FilterValueControl operator="date_gte" value={onChange.mock.calls.at(-1)?.[0]} onChange={onChange} ariaLabel="value" />)
+    fireEvent.change(screen.getAllByLabelText('value').pop() as HTMLInputElement, { target: { value: '' } })
+    rerenderWire()
+    const cleared = screen.getAllByLabelText('value').pop() as HTMLInputElement
+    expect(cleared.value).toBe('')
+    expect(onChange).toHaveBeenLastCalledWith('now')
+    fireEvent.change(cleared, { target: { value: '5' } })
+    rerenderWire()
+    expect((screen.getAllByLabelText('value').pop() as HTMLInputElement).value).toBe('5')
+    expect(onChange).toHaveBeenLastCalledWith('now-5d')
+  })
+
   it('REGRESSION: starting from now, picking weeks then typing 2 writes now-2w (the chosen unit is not lost when the amount was 0)', () => {
     const onChange = vi.fn()
     const { rerender } = render(<FilterValueControl operator="date_gte" value="now" onChange={onChange} ariaLabel="value" />)

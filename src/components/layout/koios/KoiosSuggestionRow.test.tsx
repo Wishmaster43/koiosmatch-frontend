@@ -228,7 +228,7 @@ describe('KoiosSuggestionRow · icon-button actions (CMBE addendum action shape)
   // KOIOS-SUGGEST-COMPACT-2 (Danny 28-09: "Bij kandidaat mis ik conversatie starten"):
   // a candidate ref ALWAYS gets the conversation icon now — the old contact.whatsapp
   // gate is gone — even when contact.whatsapp is false or absent.
-  it('shows the conversation icon for a candidate ref regardless of contact.whatsapp, opening the Communicatie tab', () => {
+  it('shows the conversation icon for a candidate ref regardless of contact.whatsapp, opening the Communication tab', () => {
     const suggestion = {
       kind: 'candidate_no_contact' as const, title: 'Sanne', body: 'x',
       refs: [{ type: 'candidate', id: 'c1', label: 'Sanne', contact: { phone: '0612345678', whatsapp: false } }],
@@ -333,7 +333,7 @@ describe('KoiosSuggestionRow · staged/confirm leg (unchanged, moved from KoiosA
     await screen.findByText(/pendingAction\.confirmed/)
   })
 
-  it('Uitvoeren stages the descriptor, shows the preview and confirms with the staged id', async () => {
+  it('Run stages the descriptor, shows the preview and confirms with the staged id', async () => {
     const suggestion = { kind: 'task_overdue' as const, title: 'Bel Ahmed', body: 'x', refs: [], action: { tool: 'wijzig_taak', input: { task_id: 't1' } } }
     mockPost.mockResolvedValueOnce({ data: { status: 'staged', action: { id: 'pa-77', title: 'Bel Ahmed', preview: [{ label: 'Deadline', before: '26-08-2026', after: '28-08-2026' }] } } })
     render(<KoiosSuggestionRow suggestion={suggestion} />)

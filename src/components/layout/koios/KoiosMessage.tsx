@@ -38,7 +38,7 @@ const ENTITY_TYPE_MAP: Record<string, string> = {
 }
 
 // Extracts per-entity search metadata and groups refs by entity type.
-// If the backend sends full metadata in the step (e.g. for a zoek_alles tool),
+// If the backend sends full metadata in the step (e.g. for a search_all tool),
 // this parses it; otherwise, reconstructs grouping from refs alone.
 function groupSearchResults(step: Record<string, unknown>, refs: KoiosResultRef[]): KoiosSearchResultsGrouped {
   const groups: KoiosSearchResultsGrouped['groups'] = []
@@ -48,8 +48,8 @@ function groupSearchResults(step: Record<string, unknown>, refs: KoiosResultRef[
   // include raw tool output as { query, result: {...} } — KOIOS-EN-1 phase B:
   // English-first `result`, Dutch fallback `resultaten`, plus the pre-existing
   // `results` alias — during the dual-key period).
-  const resultaten = (pick<Record<string, unknown>>(step, 'result', 'resultaten') ?? step.results) as Record<string, unknown> | undefined
-  const resultaatPerEntity = resultaten || {}
+  const rawResult = (pick<Record<string, unknown>>(step, 'result', 'resultaten') ?? step.results) as Record<string, unknown> | undefined
+  const bucketsByEntity = rawResult || {}
 
   // Group refs by entity type in the canonical order
   const refsByEntity = new Map<string, KoiosResultRef[]>()
@@ -64,14 +64,14 @@ function groupSearchResults(step: Record<string, unknown>, refs: KoiosResultRef[
   // never silently dropped — the raw key is the fallback entity label).
   const entityOrder = ['candidate', 'vacancy', 'customer', 'opportunity', 'match', 'contact', 'task', 'location']
   const seen = new Set<string>()
-  const bucketEntityTypes = Object.keys(resultaatPerEntity).map((key) => ENTITY_TYPE_MAP[key] || key)
+  const bucketEntityTypes = Object.keys(bucketsByEntity).map((key) => ENTITY_TYPE_MAP[key] || key)
   const refEntityTypes = Array.from(refsByEntity.keys())
   for (const entityType of [...entityOrder, ...bucketEntityTypes, ...refEntityTypes]) {
     if (seen.has(entityType)) continue
     seen.add(entityType)
     const entityRefs = refsByEntity.get(entityType) || []
-    const bucketKey = Object.keys(resultaatPerEntity).find((key) => (ENTITY_TYPE_MAP[key] || key) === entityType)
-    if (entityRefs.length > 0 || (bucketKey && resultaatPerEntity[bucketKey])) {
+    const bucketKey = Object.keys(bucketsByEntity).find((key) => (ENTITY_TYPE_MAP[key] || key) === entityType)
+    if (entityRefs.length > 0 || (bucketKey && bucketsByEntity[bucketKey])) {
       groups.push({
         entity: entityType,
         refs: entityRefs,
@@ -83,7 +83,7 @@ function groupSearchResults(step: Record<string, unknown>, refs: KoiosResultRef[
 
   // Collect skipped entities from the step's per-entity metadata (English-first
   // `skipped`/`reason`, Dutch fallback `overgeslagen`/`reden`).
-  for (const [key, value] of Object.entries(resultaatPerEntity)) {
+  for (const [key, value] of Object.entries(bucketsByEntity)) {
     const entry = value as Record<string, unknown>
     const isSkipped = pick<boolean>(entry, 'skipped', 'overgeslagen') === true
     const reason = pick<string>(entry, 'reason', 'reden')

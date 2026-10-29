@@ -14,7 +14,7 @@ import type { LucideIcon } from 'lucide-react'
 import Button from '@/components/ui/Button'
 import Spinner from '@/components/ui/Spinner'
 import ActionMenu from '@/components/ui/ActionMenu'
-import { Caption } from '@/components/ui/typography'
+import { Caption, SectionTitle } from '@/components/ui/typography'
 import LookupIcon from '@/components/ui/LookupIcon'
 import { KoiosRefChip } from './KoiosResultCards'
 import { useNavigation } from '@/context/NavigationContext'
@@ -146,7 +146,7 @@ export default function KoiosSuggestionRow({ suggestion, onAskKoios, onDone }: {
           : (
             <>
               <span style={{ display: 'flex', flexShrink: 0, color: taskType?.color ?? meta.color }}>{rowIcon}</span>
-              <span style={{ fontSize: 12, fontWeight: 600, color: 'var(--text)', flexShrink: 0 }}>{suggestion.title}</span>
+              <SectionTitle as="span" style={{ flexShrink: 0 }}>{suggestion.title}</SectionTitle>
             </>
           )}
         {/* One line, never the server's raw prose — the full body stays the tooltip. */}

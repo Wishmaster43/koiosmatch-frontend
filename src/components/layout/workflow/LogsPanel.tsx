@@ -205,6 +205,8 @@ export default function LogsPanel({ workflowId, liveRun, onClose, onOpenHistory 
                   {run.dry_run && <DryRunBanner />}
                   {steps.map((step, i) => {
                     const time = stepTime(step)
+                    // Resolve the step reason sentence once per step.
+                    const reasonText = stepReasonLabel(step.reason, t)
                     return (
                       <div key={i} style={{ border: '1px solid var(--border)', borderRadius: 8, padding: '8px 10px' }}>
                         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 8 }}>
@@ -223,8 +225,8 @@ export default function LogsPanel({ workflowId, liveRun, onClose, onOpenHistory 
                           <Mono as="div" style={{ fontSize: 11, fontWeight: 600, color: 'var(--text)', marginTop: 4 }}>{time}</Mono>
                         )}
                         {/* A known step reason reads as a translated sentence in place of the raw error text. */}
-                        {stepReasonLabel(step.reason, t)
-                          ? <Caption as="div" style={{ marginTop: 4 }}>{stepReasonLabel(step.reason, t)}</Caption>
+                        {reasonText
+                          ? <Caption as="div" style={{ marginTop: 4 }}>{reasonText}</Caption>
                           : step.error != null && (
                             <div style={{ fontSize: 11, color: 'var(--color-danger-text)', marginTop: 4 }}>{String(step.error)}</div>
                           )}

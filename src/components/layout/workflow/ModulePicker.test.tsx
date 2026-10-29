@@ -103,3 +103,14 @@ describe('ModulePicker · POPUP-AUDIT-1 FloatingPanel migration', () => {
     expect(onClose).toHaveBeenCalled()
   })
 })
+
+// PICKER-OUTREACH: every registry category with an offered module gets its own tab.
+describe('ModulePicker · category tabs', () => {
+  it('shows a tab for the outreach category when an outreach module is offered', () => {
+    mockCatalog = {}
+    render(<ModulePicker insertAfterEdgeId={null} onSelect={noop} onClose={noop} />)
+    const offered = Object.values(MODULE_META).some(m => (m as { category?: string }).category === 'outreach')
+    expect(offered).toBe(true)
+    expect(screen.getByRole('button', { name: /call lists|categories\.outreach/i })).toBeInTheDocument()
+  })
+})

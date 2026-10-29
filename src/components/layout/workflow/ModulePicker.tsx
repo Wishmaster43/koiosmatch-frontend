@@ -16,7 +16,7 @@ import FloatingPanel from '@/components/ui/FloatingPanel'
 // One [type, meta] pair from the module registry (used by the picker rows).
 type ModuleMetaEntry = [string, (typeof MODULE_META)[string]]
 
-const CATEGORY_ORDER = ['all', 'triggers', 'candidates', 'applications', 'vacancies', 'matches', 'opportunities', 'tasks', 'customers', 'planning', 'communication', 'ai', 'shiftmanager', 'helloflex', 'intus', 'facebook', 'flow', 'text']
+const CATEGORY_ORDER = ['all', 'triggers', 'candidates', 'applications', 'vacancies', 'matches', 'opportunities', 'tasks', 'customers', 'outreach', 'planning', 'communication', 'ai', 'shiftmanager', 'helloflex', 'intus', 'facebook', 'flow', 'text']
 
 // PICKER-INTERSECT: trigger-role modules (registry category 'triggers' — webhook,
 // applicant_event, gateway_mail_hook) start a workflow run rather than execute as an
