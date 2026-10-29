@@ -514,6 +514,16 @@ describe('CommunicationTab · initialAction=start (CONVERSATION-START-1)', () =>
     render(<CommunicationTab c={candidate()} initialSubTab="conversations" initialAction="start" />)
     expect(screen.queryByRole('dialog', { name: 'conversations.startModalTitle' })).not.toBeInTheDocument()
   })
+
+  it('consumes the action when page.whatsapp is missing, so a later gate flip opens no stale modal', () => {
+    mockUseAuth.mockReturnValue({ hasPermission: () => false })
+    const onConsumed = vi.fn()
+    const { rerender } = render(<CommunicationTab c={candidate({}, { mobile: '+31612345678' })} initialSubTab="conversations" initialAction="start" onInitialActionConsumed={onConsumed} />)
+    expect(onConsumed).toHaveBeenCalled()
+    mockUseAuth.mockReturnValue({ hasPermission: (p: string) => p === 'page.whatsapp' })
+    rerender(<CommunicationTab c={candidate({}, { mobile: '+31612345678' })} initialSubTab="conversations" initialAction="start" onInitialActionConsumed={onConsumed} />)
+    expect(screen.queryByRole('dialog', { name: 'conversations.startModalTitle' })).not.toBeInTheDocument()
+  })
 })
 
 // CONSENT-TRISTATE-FE-1 (K-008): a toggle is ON only for an explicit grant (null = not

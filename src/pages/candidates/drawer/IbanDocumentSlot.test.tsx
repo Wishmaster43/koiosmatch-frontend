@@ -8,12 +8,15 @@ import { render, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import IbanDocumentSlot from './IbanDocumentSlot'
 import api from '@/lib/api'
+import { notifyError } from '@/lib/notify'
+import { acceptFor } from '@/lib/uploadPolicy'
 
 vi.mock('@/lib/api', async (importOriginal) => {
   const actual = await importOriginal<typeof import('@/lib/api')>()
   return { ...actual, default: { get: vi.fn(), post: vi.fn() } }
 })
-vi.mock('react-i18next', () => ({ useTranslation: () => ({ t: (k: string, o?: { name?: string }) => (o?.name ? `${k}|${o.name}` : k) }) }))
+vi.mock('react-i18next', () => ({ useTranslation: () => ({ t: (k: string, o?: { name?: string }) => (o?.name ? `${k}|${o.name}` : k), i18n: { language: 'nl' } }) }))
+vi.mock('@/lib/notify', () => ({ notifyError: vi.fn() }))
 vi.mock('@/i18n', () => ({ LOCALE_BY_LANG: { nl: 'nl-NL', en: 'en-GB' } }))
 // A plain vi.fn default so individual tests can override the returned types
 // (N008-DOC-EXPIRY-FE-1 needs a per-test requiresExpiry type) without touching
@@ -113,6 +116,8 @@ describe('IbanDocumentSlot', () => {
     await user.click(screen.getByRole('button', { name: /bankDoc\.link/ }))
     // react-datepicker's customInput parses typed text in MM/dd/yyyy (its own
     // locale default) — mirrors PendingUploadQueue.test.tsx's own pattern.
+    // The date picker chunk is lazy: wait for the real picker before typing.
+    await waitFor(() => expect(document.querySelector('.react-datepicker__input-container')).toBeTruthy(), { timeout: 5000 })
     const dateInput = screen.getByRole('textbox')
     await user.type(dateInput, '01/31/2027')
     const input = screen.getByLabelText('bankDoc.uploadNew', { selector: 'input' })
@@ -153,5 +158,23 @@ describe('IbanDocumentSlot', () => {
     const input = screen.getByLabelText('bankDoc.uploadNew', { selector: 'input' })
     await user.upload(input as HTMLInputElement, new File(['x'], 'vog.pdf', { type: 'application/pdf' }))
     expect(await screen.findByText('common:upload.tooLarge')).toBeInTheDocument()
+  })
+
+  // P-014: the picker follows the documents upload policy.
+  it('sets the documents policy accept string on the hidden input', async () => {
+    const user = userEvent.setup()
+    render(<IbanDocumentSlot candidateId="c1" documents={docs} linkedDocumentId={null} onLink={vi.fn()} />)
+    await user.click(screen.getByRole('button', { name: /bankDoc\.link/ }))
+    expect((screen.getByLabelText('bankDoc.uploadNew', { selector: 'input' }) as HTMLInputElement).accept).toBe(acceptFor('documents'))
+  })
+
+  it('refuses a disallowed file type: no POST and one error toast', async () => {
+    const user = userEvent.setup({ applyAccept: false })
+    vi.mocked(notifyError).mockClear()
+    render(<IbanDocumentSlot candidateId="c1" documents={docs} linkedDocumentId={null} onLink={vi.fn()} />)
+    await user.click(screen.getByRole('button', { name: /bankDoc\.link/ }))
+    await user.upload(screen.getByLabelText('bankDoc.uploadNew', { selector: 'input' }) as HTMLInputElement, new File(['x'], 'virus.exe'))
+    expect(api.post).not.toHaveBeenCalled()
+    expect(notifyError).toHaveBeenCalledTimes(1)
   })
 })

@@ -3,7 +3,7 @@
  * Toestemmingen · Taken · Notities · Tijdlijn · Conversaties. Each section renders
  * on its own; NotesTab is reused per-section via its show* flags (no duplication).
  */
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { BodyText, Caption } from '@/components/ui/typography'
 import type { ComponentType } from 'react'
 import { useTranslation } from 'react-i18next'
@@ -111,6 +111,12 @@ export default function CommunicationTab({ c, onSave, onEditStatusEvent, initial
     () => initialAction === 'start' && resolvedSubTab === 'conversations'
   )
   const [convRefreshKey, setConvRefreshKey] = useState(0)
+  // CONVERSATION-START-1: a user without page.whatsapp can never see the start modal,
+  // so the deep-link action is consumed right away; a later remount must not open a stale one.
+  // (A missing mobile is NOT consumed here: the Koios path opens a stub { id } first.)
+  useEffect(() => {
+    if (showStartModal && !canStartConversation) { setShowStartModal(false); onInitialActionConsumed?.() }
+  }, [showStartModal, canStartConversation, onInitialActionConsumed])
   // AVG-RET-2-TAAL-1: the agency default backs a candidate without an own preferred language.
   const settingsValues = useAllSettings()
 

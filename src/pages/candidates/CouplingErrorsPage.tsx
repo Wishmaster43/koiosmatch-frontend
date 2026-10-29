@@ -3,7 +3,7 @@
  * `coupling_errors` KPI tile (K-173 fase 5). Not a sidebar item: it only
  * exists so a tile click lands somewhere real instead of the generic
  * candidates list. Lists every backoffice mapping whose last sync attempt
- * failed, with the reason, so a recruiter can see and act on what is broken.
+ * failed and every downstream-erasure request not yet confirmed, with the reason, so a recruiter can see and act on what is broken.
  */
 import { useMemo } from 'react'
 import { useTranslation } from 'react-i18next'

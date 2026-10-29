@@ -13,7 +13,7 @@ import CandidatesPage from './CandidatesPage'
 vi.mock('./CandidatesTable', () => ({ default: () => null }))
 
 vi.mock('./hooks/useCandidatesData', () => ({
-  CANDIDATES_MAX_PER_PAGE: 200,
+  CANDIDATES_MAX_PER_PAGE: 100,
   useCandidatesData: () => ({
     candidates: [], setCandidates: vi.fn(), loading: false, error: null, total: 0, setTotal: vi.fn(),
     lastPage: 1, stats: null, statsFailed: false, locations: [], rowsEpoch: 0, fetching: false,

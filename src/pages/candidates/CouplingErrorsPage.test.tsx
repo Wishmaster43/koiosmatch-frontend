@@ -88,4 +88,33 @@ describe('CouplingErrorsPage — downstream-erasure rows', () => {
     expect(screen.getByText('Wisverzoek vraagt handmatige afhandeling')).toBeInTheDocument()
     expect(screen.queryByText('manual_required')).toBeNull()
   })
+
+  it('renders an erasure_contact row as plain text, never a link', async () => {
+    mockedUseCouplingErrors.mockReturnValue({ rows: [{ entity_type: 'erasure_contact', entity_id: 'req-10', entity_label: 'Verwijderd contact',
+      system: 'webhook', error: 'pending', synced_at: null }], loading: false, error: false, refetch: vi.fn() })
+    renderPage()
+    expect(await screen.findByText('Verwijderd contact')).toBeInTheDocument()
+    expect(screen.queryByRole('link')).toBeNull()
+    expect(screen.getByText('Wisverzoek wacht op bevestiging van het ontvangende systeem')).toBeInTheDocument()
+  })
+
+  it('renders the translated sentence for a failed erasure status', async () => {
+    mockedUseCouplingErrors.mockReturnValue({ rows: [{ entity_type: 'erasure_candidate', entity_id: 'req-11', entity_label: 'Kandidaat X',
+      system: 'webhook', error: 'failed', synced_at: null }], loading: false, error: false, refetch: vi.fn() })
+    renderPage()
+    expect(await screen.findByText('Wisverzoek is mislukt')).toBeInTheDocument()
+  })
+
+  it('shows an unknown erasure status as plain text without crashing', async () => {
+    mockedUseCouplingErrors.mockReturnValue({ rows: [{ entity_type: 'erasure_candidate', entity_id: 'req-12', entity_label: 'Kandidaat Y',
+      system: 'webhook', error: 'zzz_new', synced_at: null }], loading: false, error: false, refetch: vi.fn() })
+    renderPage()
+    expect(await screen.findByText('zzz_new')).toBeInTheDocument()
+  })
+
+  it('renders the subtitle covering both row kinds', async () => {
+    mockedUseCouplingErrors.mockReturnValue({ rows: [], loading: false, error: false, refetch: vi.fn() })
+    renderPage()
+    expect(await screen.findByText(/wisverzoeken die een ontvangend systeem nog niet heeft bevestigd/)).toBeInTheDocument()
+  })
 })

@@ -1,8 +1,8 @@
 /**
- * MatchModal — klant-loos Contractvorm DOM coverage (MATCH-KLANTLOOS-1). A
+ * MatchModal — customer-less contract form DOM coverage (MATCH-KLANTLOOS-1). A
  * dedicated lightweight harness (own candidateTypes mock, unlike the shared
  * MatchModal.test.tsx which mocks an empty list) proving the visible surface:
- * picking a flagged Contractvorm hides Klant/Locatie/Afdeling/Contactpersoon,
+ * picking a flagged Contractvorm hides Customer/Location/Department/Contact person,
  * disables submit until Vestiging is filled, and switching back restores the
  * fields. The exact POST-body seam (which keys ride/don't ride) is covered at
  * the hook level in useMatchForm.customerless.test.ts — this file only proves the
@@ -62,50 +62,61 @@ import api from '@/lib/api'
 
 const apiPost = api.post as unknown as ReturnType<typeof vi.fn>
 
-// `@/lib/datetime` (transitively imported by MatchModal) is NOT mocked here —
-// its real bootstrap loads real i18n (mirrors the module-scope note in
-// MatchModal.test.tsx), so pickers resolve their REAL nl translated placeholder
-// text rather than a raw key; the selectors below use those Dutch strings.
+// `@/lib/datetime` would bootstrap the REAL i18n (poisoning t() into real Dutch);
+// mocking it keeps t() returning raw keys, so selectors below use keys, not copy
+// (same mock as MatchModal.test.tsx).
+vi.mock('@/lib/datetime', () => ({
+  useDateFormat: () => ({ formatDate: (v: string) => `fmt(${v})`, locale: 'nl-NL' }),
+  useLocale: () => 'nl-NL',
+  toLocalIsoDate: () => '',
+  humanizeIsoDates: (s: string) => s,
+  formatDateOnly: (s: string) => s,
+  formatDateTimeStr: (s: string) => s,
+  ddmmyyyy: () => '',
+  hhmm: () => '',
+  hhmmss: () => '',
+  formatMonthYear: () => '',
+}))
 // Each trigger's accessible name is "<field label> <placeholder>" (aria-labelledby
 // concatenates the external label span with the button's own placeholder span) —
 // match the placeholder tail only, mirroring MatchModal.test.tsx's own regex idiom.
 const pickerBtn = (placeholder: string) => screen.getByRole('button', { name: new RegExp(`${placeholder}$`) })
 const queryPickerBtn = (placeholder: string) => screen.queryByRole('button', { name: new RegExp(`${placeholder}$`) })
 
-describe('MatchModal · klant-loos Contractvorm DOM (MATCH-KLANTLOOS-1)', () => {
+describe('MatchModal · customer-less contract form DOM (MATCH-KLANTLOOS-1)', () => {
   it('hides Klant/Locatie/Afdeling/Contactpersoon once a flagged Contractvorm is picked, and restores them on switch-back', async () => {
     const user = userEvent.setup()
     render(<MatchModal candidateId="cand-1" onClose={vi.fn()} onCreated={vi.fn()} />)
 
     // Unflagged by default: the customer field is visible.
-    expect(pickerBtn('Kies klant')).toBeInTheDocument()
+    expect(pickerBtn('placement.pickCustomer')).toBeInTheDocument()
 
     await user.click(screen.getByRole('button', { name: 'ZZP', pressed: false }))
 
-    await waitFor(() => expect(queryPickerBtn('Kies klant')).not.toBeInTheDocument())
-    expect(queryPickerBtn('Kies locatie')).not.toBeInTheDocument()
-    expect(queryPickerBtn('Kies contactpersoon')).not.toBeInTheDocument()
-    expect(screen.queryByText('Afdeling')).not.toBeInTheDocument()
+    await waitFor(() => expect(queryPickerBtn('placement.pickCustomer')).not.toBeInTheDocument())
+    expect(queryPickerBtn('placement.pickLocation')).not.toBeInTheDocument()
+    expect(queryPickerBtn('placement.pickContact')).not.toBeInTheDocument()
+    expect(screen.queryByText('placement.department')).not.toBeInTheDocument()
 
     // Switch back to an unflagged form — the fields return.
     await user.click(screen.getByRole('button', { name: 'Uitzend', pressed: false }))
-    await waitFor(() => expect(pickerBtn('Kies klant')).toBeInTheDocument())
+    await waitFor(() => expect(pickerBtn('placement.pickCustomer')).toBeInTheDocument())
   })
 
   it('blocks submit with an empty branch, then POSTs branch_id with none of the four customer keys once filled', async () => {
     const user = userEvent.setup()
     render(<MatchModal candidateId="cand-1" onClose={vi.fn()} onCreated={vi.fn()} />)
 
-    await user.click(pickerBtn('Kies functie'))
+    await user.click(pickerBtn('placement.pickFunction'))
     await user.click(await screen.findByText('Verzorgende IG'))
     await user.click(screen.getByRole('button', { name: 'ZZP', pressed: false }))
 
-    const saveBtn = await screen.findByRole('button', { name: 'Match aanmaken' })
+    const saveBtn = await screen.findByRole('button', { name: 'placement.create' })
     expect(saveBtn).toBeDisabled()
 
     // The branch field now shows the REQUIRED placeholder (pickBranch), not the
     // plain "optional" one it carries when the form isn't klant-loos.
-    await user.click(pickerBtn('Kies vestiging'))
+    await user.click(pickerBtn('placement.pickBranch'))
     await user.click(await screen.findByText('Vestiging Noord'))
     await waitFor(() => expect(saveBtn).not.toBeDisabled())
 

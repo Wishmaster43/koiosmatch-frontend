@@ -21,4 +21,14 @@ describe('ContactDataTab channel consent lines', () => {
     expect(screen.getByText('consentState.notAsked')).toBeTruthy()
     expect(screen.queryByRole('switch')).toBeNull()
   })
+
+  it('renders no consent block when the server sent no state for any channel', () => {
+    const contact = { id: 'c2', customerId: 'k1', whatsappConsentState: null, emailConsentState: null, newsletterConsentState: null } as unknown as Contact
+    render(<ContactDataTab contact={contact} tableEpoch={0} fields={[]} values={{}} onSaveFields={vi.fn()} editing={false}
+      onStartEdit={vi.fn()} onCancel={vi.fn()} onSaveDescription={vi.fn()} onToggleRetentionConsent={vi.fn()}
+      locations={[]} departments={[]} linkedLocationIds={[]} linkedDepartmentIds={[]} onLinkChange={vi.fn()}
+      t={(k: string) => k} />)
+    expect(screen.queryByText('communication.consentWhatsapp')).toBeNull()
+    expect(screen.queryByText('consentState.title')).toBeNull()
+  })
 })

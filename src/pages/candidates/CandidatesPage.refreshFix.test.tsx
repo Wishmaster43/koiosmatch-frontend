@@ -68,7 +68,7 @@ vi.mock('./CandidatesTable', () => ({
 // so setCandidates from CandidatesPage's optimistic merge + REFRESH-FIX-2 reconcile
 // actually reaches the list row this test reads back out.
 vi.mock('./hooks/useCandidatesData', () => ({
-  CANDIDATES_MAX_PER_PAGE: 200,
+  CANDIDATES_MAX_PER_PAGE: 100,
   useCandidatesData: () => {
     const [candidates, setCandidates] = useState<Candidate[]>([seedCandidate])
     const [total, setTotal] = useState(1)

@@ -41,21 +41,25 @@ export default function DocumentVersionHistory({ versions }: { versions: DocVers
       </button>
       {expanded && (
         <div style={{ display: 'flex', flexDirection: 'column', gap: 3, marginTop: 4, paddingLeft: 14, borderLeft: '2px solid var(--border)' }}>
-          {versions.map(v => (
+          {versions.map(v => {
+            // Scan state computed once per row (pending / rejected / null when clean).
+            const st = scanState(v.scan_status)
+            return (
             <div key={String(v.id)} style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 10, color: 'var(--text-muted)' }}>
               <span>{v.created_at ? formatDateTime(v.created_at) : '—'}</span>
               {v.replaced_by_name && <span>· {v.replaced_by_name}</span>}
               {v.file_size != null && <span>· {v.file_size}</span>}
               {/* UPLOADS-SCAN-1: a non-clean version shows its state instead of a download link. */}
-              {scanState(v.scan_status) && <span>· {t(scanState(v.scan_status) === 'pending' ? 'common:upload.scanPending' : 'common:upload.scanRejected')}</span>}
-              {!scanState(v.scan_status) && v.download_url && (
+              {st && <span>· {t(st === 'pending' ? 'common:upload.scanPending' : 'common:upload.scanRejected')}</span>}
+              {!st && v.download_url && (
                 <a href={v.download_url} download rel="noopener noreferrer" aria-label={t('documents.downloadVersion')}
                   style={{ display: 'flex', color: 'var(--color-primary-text)' }}>
                   <Download size={10} />
                 </a>
               )}
             </div>
-          ))}
+            )
+          })}
         </div>
       )}
     </div>

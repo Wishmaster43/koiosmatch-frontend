@@ -46,6 +46,9 @@ interface Params {
 
 // Builds ContactsPanel's DataTable column set (see file docblock above), dropping
 // the location/department column that would be redundant inside that own scope.
+// Shared inline wrapper of the last-contact cell (date, type icon and overdue chip).
+const LAST_CONTACT_ROW_STYLE = { display: 'inline-flex', alignItems: 'center', gap: 6 } as const
+
 export function useContactsPanelColumns({ scope, scopeId, locationScope, locations, departments, onUpdate }: Params): Column<Contact>[] {
   const { t } = useTranslation('customers')
   const { labelOf: lastContactLabel, iconOf: lastContactIcon } = useLastContactTypes('contact')
@@ -132,11 +135,11 @@ export function useContactsPanelColumns({ scope, scopeId, locationScope, locatio
         const alarm = p.noContactDue
           ? <SoftChip label={t('contacts.noContactDue')} color="var(--color-warning)" title={t('contacts.noContactDueTitle')} />
           : null
-        if (!p.lastContactAt) return <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}><span style={{ color: 'var(--text-muted)' }}>—</span>{alarm}</span>
+        if (!p.lastContactAt) return <span style={LAST_CONTACT_ROW_STYLE}><span style={{ color: 'var(--text-muted)' }}>—</span>{alarm}</span>
         const label = lastContactLabel(p.lastContactType)
         const icon = p.lastContactType ? lastContactIcon(p.lastContactType) : undefined
         return (
-          <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}>
+          <span style={LAST_CONTACT_ROW_STYLE}>
             <span title={label} style={{ display: 'inline-flex', alignItems: 'center', gap: 5, color: 'var(--text)', fontSize: 12 }}>
               {formatDate(p.lastContactAt)}
               {icon && <span style={{ display: 'inline-flex', flexShrink: 0, opacity: 0.6 }}><LookupIcon icon={icon} size={12} /></span>}

@@ -5,7 +5,7 @@
  * required-and-empty row exists.
  */
 import { describe, it, expect, vi } from 'vitest'
-import { render, screen } from '@testing-library/react'
+import { render, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import PendingUploadQueue from './PendingUploadQueue'
 import type { PendingItem } from './PendingUploadQueue'
@@ -65,9 +65,11 @@ describe('PendingUploadQueue · expiry field (N008-DOC-EXPIRY-FE-1)', () => {
     const user = userEvent.setup()
     const onSetExpiry = vi.fn()
     const { rerender } = render(<PendingUploadQueue {...baseProps} pending={[item({ type: 'VOG' })]} onSetExpiry={onSetExpiry} />)
+    // The date picker chunk is lazy: wait for the real picker before typing.
+    await waitFor(() => expect(document.querySelector('.react-datepicker__input-container')).toBeTruthy(), { timeout: 5000 })
     const field = screen.getByRole('textbox')
     await user.type(field, '12/31/2027')
-    expect(onSetExpiry).toHaveBeenCalled()
+    expect(onSetExpiry).toHaveBeenLastCalledWith(0, '2027-12-31')
     // Simulate the parent applying the picked date back into the queued item.
     rerender(<PendingUploadQueue {...baseProps} pending={[item({ type: 'VOG', expiresAt: '2027-12-31' })]} onSetExpiry={onSetExpiry} />)
     expect(screen.getByRole('button', { name: /common:add/ })).not.toBeDisabled()

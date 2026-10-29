@@ -25,7 +25,7 @@ import { Caption, GroupLabel } from '@/components/ui/typography'
 import type { VacancyOption } from '../hooks/useVacancyOptions'
 import Button from '@/components/ui/Button'
 
-// Mirrors the backend's `status_reason` column limit (CandidateProfileRequest: string|max:255).
+// Mirrors the backend request maximum for `status_reason` (max:255, J-014); the column itself is TEXT.
 const STATUS_REASON_MAX = 255
 
 interface MatchRow { id?: string | number; vacancyTitle?: string; client?: string }

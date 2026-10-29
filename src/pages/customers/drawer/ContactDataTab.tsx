@@ -41,6 +41,8 @@ export default function ContactDataTab({
   onLinkChange: (patch: { locationIds?: Id[]; departmentIds?: Id[] }) => void
   t: Tx
 }) {
+  // K-008: an older BE build may send no consent state at all; show no labels without a value.
+  const hasConsentState = [contact.whatsappConsentState, contact.emailConsentState, contact.newsletterConsentState].some(Boolean)
   return (
     <>
       {/* CANON-DIVIDER-1 (Danny 05-08): candidate ProfileTab canon — no line
@@ -68,6 +70,7 @@ export default function ContactDataTab({
       />
 
       {/* K-008: read-only channel consent states; no toggle, the contact writer has no consent PATCH path. */}
+      {hasConsentState && (
       <div role="group" aria-labelledby="contact-consent-state-heading" style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
         <GroupLabel id="contact-consent-state-heading">{t('consentState.title', { ns: 'common' })}</GroupLabel>
         {[
@@ -81,6 +84,7 @@ export default function ContactDataTab({
           </div>
         ))}
       </div>
+      )}
 
       {/* Koppeling — same shape and behaviour as "+ Vestiging" (Danny 28-07). */}
       <ContactLinkSection locationIds={linkedLocationIds} departmentIds={linkedDepartmentIds}

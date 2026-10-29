@@ -28,6 +28,7 @@ import { Caption, Mono } from '@/components/ui/typography'
 import { DateField } from '@/components/forms/fields'
 import DocPreviewModal from '@/components/drawer/DocPreviewModal'
 import { uploadErrorMessage } from '@/lib/uploadError'
+import { useUploadPickFilter } from '@/lib/useUploadPickFilter'
 
 type Loose = Record<string, unknown>
 type AnyProps = Record<string, unknown>
@@ -67,6 +68,8 @@ export default function IbanDocumentSlot({ candidateId, documents = [], linkedDo
   const activeTypeOpt = types.find((tp: { value: string }) => String(tp.value) === (uploadType || defaultType)) as { label?: string; requiresExpiry?: boolean; defaultValidityMonths?: number | null } | undefined
   const expiryRequired = Boolean(activeTypeOpt?.requiresExpiry) && activeTypeOpt?.defaultValidityMonths == null
   const fileRef = useRef<HTMLInputElement | null>(null)
+  // P-014: the documents-surface upload policy (accept string + refusal filter), as on the Documents tab.
+  const { accept: docsAccept, filterPicked } = useUploadPickFilter('documents')
   const expiryFieldId = useId()
 
   if (linkedDocumentId === undefined) return null
@@ -165,9 +168,9 @@ export default function IbanDocumentSlot({ candidateId, documents = [], linkedDo
             </div>
           )}
           {uploadError && <Caption as="div" style={{ color: 'var(--color-danger-text)' }}>{uploadError}</Caption>}
-          <input ref={fileRef} type="file" accept="application/pdf,image/*" style={{ display: 'none' }}
+          <input ref={fileRef} type="file" accept={docsAccept} style={{ display: 'none' }}
             aria-label={t('bankDoc.uploadNew')}
-            onChange={e => { const f = e.target.files?.[0]; if (f) uploadAndLink(f); e.target.value = '' }} />
+            onChange={e => { const [f] = filterPicked(Array.from(e.target.files ?? [])); if (f) uploadAndLink(f); e.target.value = '' }} />
         </div>
       )}
 
