@@ -6,7 +6,7 @@ import type { TFunction } from 'i18next'
 import api from '../lib/api'
 import { sortActiveRows, makeMetaResolver } from '../lib/lookupUtils'
 import { translateSeedList } from '../lib/lookupSeedI18n'
-import { useAuth } from './AuthContext'
+import { useBureauScope } from './auth/useBureauScope'
 
 /**
  * LookupsContext — the tenant-configurable candidate lookups.
@@ -203,13 +203,12 @@ export function LookupsProvider({ children }: { children: ReactNode }) {
   const [statusesRaw,       setStatuses]       = useState<LookupItem[]>(DEFAULT_STATUSES)
   const [availabilityRaw] = useState<LookupItem[]>(DEFAULT_AVAILABILITY)
   const [loading,        setLoading]        = useState(true)
-  // Session state gates the fetch — providers mount before login (App shell order).
-  const { user } = useAuth() ?? {}
+  // The shared bureau gate (TENANT-GATE-FE-1): keep the seeds before login and before the bureau
+  // pick, reload per login / pick / tenant switch.
+  const { ready, scopeKey } = useBureauScope()
 
   useEffect(() => {
-    // No session yet → keep the seeds and stay quiet (no pre-login 401 in the console);
-    // the effect re-runs the moment the user logs in (or switches tenant).
-    if (!user) { setLoading(false); return }
+    if (!ready) { setLoading(false); return }
     // Alive guard: a response from a previous session/tenant must not overwrite the new tenant's lookups after an in-SPA 401/re-login (§8 AVG isolation).
     let alive = true
     api.get('/settings/candidate-lookups?active=1')
@@ -227,8 +226,7 @@ export function LookupsProvider({ children }: { children: ReactNode }) {
     // /availability-options endpoint was removed backend-side — keep the seed
     // default and stop fetching (kills the 404). Full removal of the axis is C-39.
     return () => { alive = false }
-    // eslint-disable-next-line react-hooks/exhaustive-deps -- refetch per login/tenant-switch
-  }, [user?.id])
+  }, [ready, scopeKey])
 
   // Seeded defaults render in the user language; a tenant value stays as typed (LOOKUP-I18N-1).
   const candidateTypes = useMemo(() => translateSeedList(t, 'candidateTypes', candidateTypesRaw), [candidateTypesRaw, t])

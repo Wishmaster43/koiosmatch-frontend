@@ -13,7 +13,7 @@ import { createContext, useContext, useState, useEffect } from 'react'
 import type { ReactNode, ComponentType } from 'react'
 import { Sparkles, Landmark, ShieldCheck } from 'lucide-react'
 import api from '../lib/api'
-import { useAuth } from './AuthContext'
+import { useBureauScope } from './auth/useBureauScope'
 // Real brand logos (local assets, §7 CSP) for the connectors that have one.
 import helloflexLogo from '@/assets/integrations/helloflex.png'
 import shiftmanagerLogo from '@/assets/integrations/shiftmanager.png'
@@ -360,15 +360,14 @@ export function AppsProvider({ children }: { children: ReactNode }) {
     try { return JSON.parse(localStorage.getItem('enabled_apps') ?? '[]') as string[] } catch { return [] }
   })
   const [loading, setLoading] = useState(true)
-  // Session state gates the fetch — the provider mounts before login (App shell order).
-  const { user } = useAuth() ?? {}
+  // The shared bureau gate (TENANT-GATE-FE-1): quiet before login and before the bureau pick,
+  // a new scope key per login / pick / tenant switch.
+  const { ready, scopeKey } = useBureauScope()
 
-  // Fetch the authoritative enabled-apps list once on mount and update the cache.
+  // Fetch the authoritative enabled-apps list per bureau scope and update the cache.
   // Backend contract: GET /settings/apps returns { enabled: ["whatsapp", ...] }.
   useEffect(() => {
-    // No session yet → cached/default apps and stay quiet (no pre-login 401);
-    // the effect re-runs the moment the user logs in (or switches tenant).
-    if (!user) { setLoading(false); return }
+    if (!ready) { setLoading(false); return }
     // Alive guard: a late response from a previous session/tenant must not overwrite state or poison the shared localStorage cache (mirrors LookupsContext).
     let alive = true
     api.get('/settings/apps')
@@ -382,8 +381,7 @@ export function AppsProvider({ children }: { children: ReactNode }) {
       .catch(() => {})
       .finally(() => { if (alive) setLoading(false) })
     return () => { alive = false }
-    // eslint-disable-next-line react-hooks/exhaustive-deps -- refetch per login/tenant-switch
-  }, [user?.id])
+  }, [ready, scopeKey])
 
   // True if the given app ID is currently enabled (used to gate UI/modules).
   const isAppEnabled = (appId: string) => enabled.includes(appId)
