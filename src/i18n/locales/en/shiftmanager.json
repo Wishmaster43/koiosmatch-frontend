@@ -195,6 +195,7 @@
       "started": "Sync started. This can take a few minutes",
       "awaiting": "Sync started…",
       "failed": "Sync failed",
+      "unknownConnection": "Unknown or inactive Shiftmanager account for this organisation",
       "tooManyRequests": "Too many attempts, try again in {{secs}}s"
     },
     "empty": "No shifts in this selection"

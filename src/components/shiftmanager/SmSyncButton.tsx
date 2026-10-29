@@ -73,7 +73,7 @@ export default function SmSyncButton() {
           {result.kind === 'queued' ? <Check size={11} /> : result.kind === 'throttled' ? <Clock size={11} /> : <AlertTriangle size={11} />}
           {result.kind === 'queued' ? t('charts.sync.started')
             : result.kind === 'throttled' ? t('charts.sync.tooManyRequests', { secs: result.retryAfter })
-            : (result.detail ?? t('charts.sync.failed'))}
+            : t(result.reason === 'unknownConnection' ? 'charts.sync.unknownConnection' : 'charts.sync.failed')}
         </Caption>
       )}
     </div>

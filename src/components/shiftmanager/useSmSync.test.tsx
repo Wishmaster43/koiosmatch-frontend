@@ -136,22 +136,22 @@ describe('useSmSync · backoff poll', () => {
     expect(mockedPost).toHaveBeenCalledWith('/sm_reports/sync', { connection_id: 'c1', scope: 'candidates' })
   })
 
-  it('surfaces the 422 field error without polling', async () => {
+  it('maps the 422 to the translated unknownConnection reason without polling or server prose', async () => {
     const client = new QueryClient({ defaultOptions: { queries: { retry: false } } })
     const invalidateSpy = vi.spyOn(client, 'invalidateQueries')
-    mockedPost.mockRejectedValue({ response: { status: 422, data: { errors: { connection_id: ['inactive'] }, message: 'x' } } })
+    mockedPost.mockRejectedValue({ response: { status: 422, data: { errors: { connection_id: ['Onbekend of niet-actief'] }, message: 'x' } } })
     const { result } = renderHook(() => useSmSync(), { wrapper: makeWrapper(client) })
     await act(async () => { await result.current.sync('c1') })
-    expect(result.current.result).toEqual({ kind: 'error', detail: 'inactive' })
+    expect(result.current.result).toEqual({ kind: 'error', reason: 'unknownConnection' })
     expect(result.current.awaitingSnapshot).toBe(false)
     expect(invalidateSpy).not.toHaveBeenCalled()
   })
 
-  it('falls back to the server message on a 500', async () => {
+  it('maps a 500 to the generic failed reason, never the server message', async () => {
     const client = new QueryClient({ defaultOptions: { queries: { retry: false } } })
     mockedPost.mockRejectedValue({ response: { status: 500, data: { message: 'server broke' } } })
     const { result } = renderHook(() => useSmSync(), { wrapper: makeWrapper(client) })
     await act(async () => { await result.current.sync('c1') })
-    expect(result.current.result).toEqual({ kind: 'error', detail: 'server broke' })
+    expect(result.current.result).toEqual({ kind: 'error', reason: 'failed' })
   })
 })

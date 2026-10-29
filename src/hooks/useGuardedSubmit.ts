@@ -1,6 +1,6 @@
 /**
  * useGuardedSubmit — ONE submit in flight per dialog (ONIX N-007, FE correctness):
- * a double-click on "Aanmaken" created two identical contacts/locations/departments
+ * a double-click on the Create button created two identical contacts/locations/departments
  * because those dialogs had no saving state. The guard ignores every call while the
  * previous one is still running, exposes `saving` for the footer (button busy +
  * disabled), and always resets — a rejected run must not leave the dialog stuck.

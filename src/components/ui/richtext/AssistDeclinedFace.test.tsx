@@ -9,7 +9,7 @@ import { render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import AssistDeclinedFace from './AssistDeclinedFace'
 
-vi.mock('react-i18next', () => ({ useTranslation: () => ({ t: (k: string, opts?: { defaultValue?: string }) => opts?.defaultValue ?? k }) }))
+vi.mock('react-i18next', () => ({ useTranslation: () => ({ t: (k: string) => k }) }))
 
 describe('AssistDeclinedFace', () => {
   it('renders the proposal_in_flight reason by code', () => {
@@ -23,10 +23,10 @@ describe('AssistDeclinedFace', () => {
   })
 
   it('falls back to the server reason, then the forbidden text, for an unknown code', () => {
-    const { rerender } = render(<AssistDeclinedFace code={null} reason="Eigen serverreden" onForceSend={vi.fn()} />)
-    expect(screen.getByText('Eigen serverreden')).toBeInTheDocument()
+    const { rerender } = render(<AssistDeclinedFace code={null} reason="Own server reason" onForceSend={vi.fn()} />)
+    expect(screen.getByText('Own server reason')).toBeInTheDocument()
     rerender(<AssistDeclinedFace code={null} onForceSend={vi.fn()} />)
-    expect(screen.getByText('Geen rechten')).toBeInTheDocument()
+    expect(screen.getByText('notesAssist.execute.forbidden')).toBeInTheDocument()
   })
 
   it('shows the existing-proposal chip only with both a proposalId and an applicationId', () => {

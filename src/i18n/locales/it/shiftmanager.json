@@ -195,6 +195,7 @@
       "started": "Sincronizzazione avviata. Può richiedere alcuni minuti",
       "awaiting": "Sincronizzazione avviata…",
       "failed": "Sincronizzazione non riuscita",
+      "unknownConnection": "Account Shiftmanager sconosciuto o non attivo per questa organizzazione",
       "tooManyRequests": "Troppi tentativi, riprova tra {{secs}}s"
     },
     "empty": "Nessun turno in questa selezione"

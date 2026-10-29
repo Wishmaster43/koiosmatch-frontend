@@ -195,6 +195,7 @@
       "started": "Synchronisierung gestartet. Kann einige Minuten dauern",
       "awaiting": "Synchronisierung gestartet…",
       "failed": "Synchronisierung fehlgeschlagen",
+      "unknownConnection": "Unbekanntes oder inaktives Shiftmanager-Konto für diese Organisation",
       "tooManyRequests": "Zu viele Versuche, in {{secs}}s erneut versuchen"
     },
     "empty": "Keine Schichten in dieser Auswahl"

@@ -195,6 +195,7 @@
       "started": "Synchronisation démarrée. Cela peut prendre quelques minutes",
       "awaiting": "Synchronisation démarrée…",
       "failed": "Échec de la synchronisation",
+      "unknownConnection": "Compte Shiftmanager inconnu ou inactif pour cette organisation",
       "tooManyRequests": "Trop de tentatives, réessayez dans {{secs}}s"
     },
     "empty": "Aucun poste dans cette sélection"

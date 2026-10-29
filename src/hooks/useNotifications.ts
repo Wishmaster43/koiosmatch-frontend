@@ -165,14 +165,28 @@ export function useNotifications(pollMs = 60000) {
   // NOTIF-I18N-1: remove one notification — optimistic, reverted with a toast on
   // failure (the shared shape every list-row delete in the app already uses).
   const removeNotification = useCallback((id: string | number) => {
-    const removed = items.find(n => n.id === id)
-    const index = items.findIndex(n => n.id === id)
-    setItems(prev => prev.filter(n => n.id !== id))
+    // Snapshot the row from the latest state (not the render closure) so quick removals and polls cannot restore a stale index.
+    let removed: (typeof items)[number] | undefined
+    let index = -1
+    setItems(prev => {
+      const at = prev.findIndex(n => n.id === id)
+      if (at >= 0) { removed = prev[at]; index = at }
+      return prev.filter(n => n.id !== id)
+    })
     api.delete(`/notifications/${id}`).catch(() => {
-      if (removed) setItems(prev => { const next = [...prev]; next.splice(index, 0, removed); return next })
+      // Idempotent revert: never re-add a row a poll already brought back.
+      if (removed) {
+        const row = removed
+        setItems(prev => {
+          if (prev.some(n => n.id === id)) return prev
+          const next = [...prev]
+          next.splice(Math.min(index, next.length), 0, row)
+          return next
+        })
+      }
       notify('error', t('notifications.removeFailed'))
     })
-  }, [items, t])
+  }, [t])
 
   return { items, unseen, markAllSeen, removeNotification, reload: load }
 }

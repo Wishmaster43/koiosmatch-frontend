@@ -57,13 +57,13 @@ describe('SmSyncButton', () => {
     render(<SmSyncButton />)
     fireEvent.click(screen.getByRole('button'))
     expect(mockSync).not.toHaveBeenCalled()
-    expect(screen.getByText(/Kies Shiftmanager-account/i)).toBeInTheDocument()
+    expect(screen.getByText(nlShiftmanager.charts.sync.choose)).toBeInTheDocument()
   })
 
   it('shows the queued feedback after a successful sync', () => {
     mockUseSmSync.mockReturnValue({ syncing: false, result: { kind: 'queued' }, sync: mockSync })
     render(<SmSyncButton />)
-    expect(screen.getByText(/Synchronisatie gestart/i)).toBeInTheDocument()
+    expect(screen.getByText(nlShiftmanager.charts.sync.started)).toBeInTheDocument()
   })
 
   it('shows the throttle feedback with the retry delay', () => {
@@ -73,7 +73,7 @@ describe('SmSyncButton', () => {
   })
 
   it('shows the error feedback', () => {
-    mockUseSmSync.mockReturnValue({ syncing: false, awaitingSnapshot: false, result: { kind: 'error' }, sync: mockSync })
+    mockUseSmSync.mockReturnValue({ syncing: false, awaitingSnapshot: false, result: { kind: 'error', reason: 'failed' }, sync: mockSync })
     render(<SmSyncButton />)
     // The real nl copy of the failure label, read from the locale file (never a Dutch literal in a test).
     expect(screen.getByText(nlShiftmanager.charts.sync.failed)).toBeInTheDocument()
@@ -87,20 +87,20 @@ describe('SmSyncButton', () => {
     render(<SmSyncButton />)
     const button = screen.getByRole('button')
     expect(button).toBeDisabled()
-    expect(screen.getByText(/Sync gestart/i)).toBeInTheDocument()
+    expect(screen.getByText(nlShiftmanager.charts.sync.awaiting)).toBeInTheDocument()
     fireEvent.click(button)
     expect(mockSync).not.toHaveBeenCalled()
   })
 
   // #109: the feedback chip rides the Caption atom with the -text ink twins, no own font size.
   it.each([
-    [{ kind: 'queued' }, /Synchronisatie gestart/i, 'var(--color-info-text)'],
+    [{ kind: 'queued' }, nlShiftmanager.charts.sync.started, 'var(--color-info-text)'],
     [{ kind: 'throttled', retryAfter: 42 }, /42/, 'var(--color-warning-text)'],
-    [{ kind: 'error', detail: 'boom' }, /boom/, 'var(--color-danger-text)'],
+    [{ kind: 'error', reason: 'unknownConnection' }, nlShiftmanager.charts.sync.unknownConnection, 'var(--color-danger-text)'],
   ])('renders %j feedback in the Caption atom with its ink twin', (result, text, ink) => {
     mockUseSmSync.mockReturnValue({ syncing: false, awaitingSnapshot: false, result, sync: mockSync })
     render(<SmSyncButton />)
-    const el = screen.getByText(text as RegExp)
+    const el = screen.getByText(text as string | RegExp)
     expect(el.style.fontSize).toBe('11px')
     expect(el.style.color).toBe(ink)
   })

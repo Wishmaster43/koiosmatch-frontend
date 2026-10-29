@@ -4,9 +4,10 @@
  * fetch silently reading as "no documents".
  */
 import { describe, it, expect, vi, beforeEach } from 'vitest'
-import { renderHook, waitFor } from '@testing-library/react'
+import { renderHook, waitFor, act } from '@testing-library/react'
 import { useEntityDocuments } from './useEntityDocuments'
 import api from '@/lib/api'
+import { notifyError } from '@/lib/notify'
 
 vi.mock('@/lib/api', async () => {
   const actual = await vi.importActual<typeof import('@/lib/api')>('@/lib/api')
@@ -50,5 +51,46 @@ describe('useEntityDocuments · loading/error state', () => {
     expect(result.current.error).toBe(false)
     expect(result.current.docs).toEqual([])
     expect(mockGet).not.toHaveBeenCalled()
+  })
+})
+
+// F-013: the delete path names the real cause (storage 503), keeps a 404 silent and falls back to the generic text.
+describe('useEntityDocuments · remove failures', () => {
+  const mockDelete = api.delete as unknown as ReturnType<typeof vi.fn>
+  const seed = () => mockGet.mockResolvedValue({ data: { data: [{ id: 'd1', name: 'a.pdf' }, { id: 'd2', name: 'b.pdf' }] } })
+
+  beforeEach(() => { mockDelete.mockReset(); vi.mocked(notifyError).mockClear() })
+
+  it('restores the row at its index and shows the storage sentence on a 503 storage_unavailable', async () => {
+    seed()
+    mockDelete.mockRejectedValue({ response: { status: 503, data: { code: 'storage_unavailable' } } })
+    const { result } = renderHook(() => useEntityDocuments('vacancies', 'v1'))
+    await waitFor(() => expect(result.current.docs).toHaveLength(2))
+    act(() => { result.current.remove('d1') })
+    await waitFor(() => expect(notifyError).toHaveBeenCalledWith('common:upload.storageUnavailable'))
+    expect(mockDelete).toHaveBeenCalledWith('/vacancies/v1/documents/d1')
+    expect(result.current.docs.map(d => d.id)).toEqual(['d1', 'd2'])
+  })
+
+  it('keeps the row removed and stays silent on a 404', async () => {
+    seed()
+    mockDelete.mockRejectedValue({ response: { status: 404 } })
+    const { result } = renderHook(() => useEntityDocuments('vacancies', 'v1'))
+    await waitFor(() => expect(result.current.docs).toHaveLength(2))
+    act(() => { result.current.remove('d1') })
+    await waitFor(() => expect(mockDelete).toHaveBeenCalled())
+    await act(async () => { await Promise.resolve() })
+    expect(result.current.docs.map(d => d.id)).toEqual(['d2'])
+    expect(notifyError).not.toHaveBeenCalled()
+  })
+
+  it('falls back to the generic action-failed text on a 500', async () => {
+    seed()
+    mockDelete.mockRejectedValue({ response: { status: 500, data: {} } })
+    const { result } = renderHook(() => useEntityDocuments('vacancies', 'v1'))
+    await waitFor(() => expect(result.current.docs).toHaveLength(2))
+    act(() => { result.current.remove('d2') })
+    await waitFor(() => expect(notifyError).toHaveBeenCalledWith('common:actionFailed'))
+    expect(result.current.docs.map(d => d.id)).toEqual(['d1', 'd2'])
   })
 })

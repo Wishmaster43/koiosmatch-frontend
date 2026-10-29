@@ -269,4 +269,21 @@ describe('useNotifications · remove (NOTIF-I18N-1)', () => {
     window.removeEventListener('km:toast', onToast)
     unmount()
   })
+
+  // Race: a poll re-adds the row before the failed DELETE reverts — the revert must not duplicate it.
+  it('does not duplicate a row that a poll brought back before the DELETE failed', async () => {
+    vi.mocked(api.get).mockResolvedValue({ data: { data: [row(1, false), row(2, true)] } })
+    let rejectDelete: (e: Error) => void = () => {}
+    vi.mocked(api.delete).mockReturnValueOnce(new Promise((_, rej) => { rejectDelete = rej }) as never)
+    const { result, unmount } = renderHook(() => useNotifications(999999))
+    await waitFor(() => expect(result.current.items).toHaveLength(2))
+    act(() => { result.current.removeNotification(1) })
+    expect(result.current.items.map(n => n.id)).toEqual([2])
+    await act(async () => { await result.current.reload() })
+    expect(result.current.items.map(n => n.id)).toEqual([1, 2])
+    await act(async () => { rejectDelete(new Error('boom')) })
+    expect(result.current.items.filter(n => n.id === 1)).toHaveLength(1)
+    expect(result.current.unseen).toBe(1)
+    unmount()
+  })
 })

@@ -18,7 +18,7 @@ export type SmSyncScope = 'all' | 'candidates' | 'customers' | 'shifts'
 export type SmSyncResult =
   | { kind: 'queued' }
   | { kind: 'throttled'; retryAfter: number }
-  | { kind: 'error'; detail?: string }
+  | { kind: 'error'; reason: 'unknownConnection' | 'failed' }
 
 // Fires the queued sync + tracks queued/throttled/error feedback, then backoff-polls
 // sync-sources until it changes or the cap runs out (see module doc above).
@@ -86,15 +86,13 @@ export function useSmSync() {
       await queryClient.invalidateQueries({ queryKey: ['dashboard', 'sync-sources'] })
       pollUntilLandedRef.current(generationRef.current, before, 0)
     } catch (err) {
-      const e = err as { response?: { status?: number; data?: { message?: string; retry_after?: number; errors?: Record<string, string[]> } } }
+      const e = err as { response?: { status?: number; data?: { retry_after?: number } } }
       const status = e.response?.status
       if (status === 429) {
         setResult({ kind: 'throttled', retryAfter: e.response?.data?.retry_after ?? 60 })
       } else {
-        // 422 (unknown/inactive connection) surfaces the field error; other statuses
-        // fall back to the server message, then the generic i18n failed-copy.
-        const detail = e.response?.data?.errors?.connection_id?.[0] ?? e.response?.data?.message
-        setResult({ kind: 'error', detail })
+        // Never render server prose: 422 (unknown/inactive connection) maps to a translated reason.
+        setResult({ kind: 'error', reason: status === 422 ? 'unknownConnection' : 'failed' })
       }
     } finally {
       setSyncing(false)

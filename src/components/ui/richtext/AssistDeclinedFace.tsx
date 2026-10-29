@@ -51,7 +51,7 @@ export default function AssistDeclinedFace({ code, reason, applicationId, propos
         ? (code!.endsWith('_archived')
           ? t('notesAssist.execute.declined.duplicate_archived')
           : t('notesAssist.execute.declined.duplicate'))
-        : (reason ?? t('notesAssist.execute.forbidden', { defaultValue: 'Geen rechten' }))
+        : (reason ?? t('notesAssist.execute.forbidden'))
   // A duplicate's existing-record chip only renders when the ref's type
   // resolves to a real page — same degrade-safely rule as KoiosRefChip.
   const existingPage = existingRef ? pageForResultRef(existingRef.type) : null

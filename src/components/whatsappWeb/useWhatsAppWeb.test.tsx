@@ -62,6 +62,22 @@ describe('useWhatsAppWeb', () => {
     expect(api.get).toHaveBeenCalledTimes(2)
   })
 
+  // Each click carries its own Idempotency-Key, so two deliberate clicks are never collapsed server-side.
+  it('connect() sends a different Idempotency-Key on two consecutive calls', async () => {
+    vi.mocked(api.get).mockResolvedValue({ data: { data: [{ id: 7, status: 'disconnected' }] } })
+    vi.mocked(api.post).mockResolvedValue({ data: { status: 'connecting' } })
+    const { result } = renderHook(() => useWhatsAppWeb(), { wrapper })
+    await waitFor(() => expect(result.current.phase).toBe('ready'))
+
+    await act(async () => { await result.current.connect(7) })
+    await act(async () => { await result.current.connect(7) })
+
+    const keys = vi.mocked(api.post).mock.calls.map(c => (c[2] as { headers: Record<string, string> }).headers['Idempotency-Key'])
+    expect(keys).toHaveLength(2)
+    expect(keys[0]).toBeTruthy()
+    expect(keys[0]).not.toBe(keys[1])
+  })
+
   it('connect() 501 surfaces as notEnabledId, never a silent catch', async () => {
     vi.mocked(api.get).mockResolvedValue({ data: { data: [{ id: 7, status: 'disconnected' }] } })
     vi.mocked(api.post).mockRejectedValue({ response: { status: 501 } })

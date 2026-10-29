@@ -1,6 +1,7 @@
-import { describe, it, expect } from 'vitest'
+import { describe, it, expect, vi } from 'vitest'
 import { render } from '@testing-library/react'
 import SafeHtml from './SafeHtml'
+import * as sanitizer from '@/lib/sanitizeHtml'
 
 describe('SafeHtml', () => {
   it('renders safe formatting markup', () => {
@@ -37,5 +38,16 @@ describe('SafeHtml', () => {
   it('renders nothing harmful for null input', () => {
     const { container } = render(<SafeHtml html={null} />)
     expect(container.textContent).toBe('')
+  })
+
+  // Memoisation: the sanitiser runs once per html value, not per render.
+  it('sanitises once on a re-render with the same html and again when html changes', () => {
+    const spy = vi.spyOn(sanitizer, 'sanitizeHtml')
+    const { rerender } = render(<SafeHtml html="<b>a</b>" style={{ color: 'red' }} />)
+    rerender(<SafeHtml html="<b>a</b>" style={{ color: 'blue' }} />)
+    expect(spy).toHaveBeenCalledTimes(1)
+    rerender(<SafeHtml html="<b>b</b>" style={{ color: 'blue' }} />)
+    expect(spy).toHaveBeenCalledTimes(2)
+    spy.mockRestore()
   })
 })

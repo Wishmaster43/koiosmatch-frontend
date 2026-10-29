@@ -81,7 +81,7 @@ export function useTrashFlow({ entityPath, onMarked, onUnmarked }: Args) {
       notifyError(t('actionFailed'))
     } finally {
       unmarkInFlight.current.delete(key)
-      setUnmarkBusy(false)
+      setUnmarkBusy(unmarkInFlight.current.size > 0)
     }
   }, [entityPath, onUnmarked, t])
 

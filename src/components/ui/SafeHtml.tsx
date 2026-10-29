@@ -8,7 +8,7 @@
  * (the editor's own allow-list) strips everything that is not our formatting
  * markup before it ever touches the DOM.
  */
-import type { CSSProperties } from 'react'
+import { useMemo, type CSSProperties } from 'react'
 import { sanitizeHtml } from '@/lib/sanitizeHtml'
 
 interface SafeHtmlProps {
@@ -19,6 +19,7 @@ interface SafeHtmlProps {
 
 // Renders rich-text HTML after the allow-list sanitiser (§7: the one sanctioned dangerouslySetInnerHTML use, see the module doc comment above).
 export default function SafeHtml({ html, style, className }: SafeHtmlProps) {
-  const clean = sanitizeHtml(html)
+  // Sanitise once per html value, not on every parent re-render.
+  const clean = useMemo(() => sanitizeHtml(html), [html])
   return <div className={className} style={style} dangerouslySetInnerHTML={{ __html: clean }} />
 }

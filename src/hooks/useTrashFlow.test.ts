@@ -126,6 +126,21 @@ describe('useTrashFlow · unmark', () => {
     expect(result.current.unmarkBusy).toBe(false)
   })
 
+  it('keeps unmarkBusy true until the LAST in-flight id settles', async () => {
+    const resolvers: Record<string, (v: unknown) => void> = {}
+    vi.mocked(api.post).mockImplementation(((url: string) => new Promise(resolve => { resolvers[url] = resolve })) as never)
+    const { result } = renderHook(() => useTrashFlow({ entityPath: 'matches' }))
+    let pa: Promise<void> = Promise.resolve()
+    let pb: Promise<void> = Promise.resolve()
+    act(() => { pa = result.current.unmark('a'); pb = result.current.unmark('b') })
+    expect(api.post).toHaveBeenCalledWith('/matches/a/unmark-deletion', undefined, expect.objectContaining({ headers: expect.objectContaining({ 'Idempotency-Key': expect.any(String) }) }))
+    expect(api.post).toHaveBeenCalledWith('/matches/b/unmark-deletion', undefined, expect.objectContaining({ headers: expect.objectContaining({ 'Idempotency-Key': expect.any(String) }) }))
+    await act(async () => { resolvers['/matches/a/unmark-deletion']({ data: {} }); await pa })
+    expect(result.current.unmarkBusy).toBe(true)
+    await act(async () => { resolvers['/matches/b/unmark-deletion']({ data: {} }); await pb })
+    expect(result.current.unmarkBusy).toBe(false)
+  })
+
   it('surfaces the failure toast and skips the refresh when the POST rejects', async () => {
     const onUnmarked = vi.fn()
     vi.mocked(api.post).mockRejectedValue({ response: { status: 500 } })

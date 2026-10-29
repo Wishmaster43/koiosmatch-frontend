@@ -195,6 +195,7 @@
       "started": "Synchronisatie gestart. Kan enkele minuten duren",
       "awaiting": "Sync gestart…",
       "failed": "Synchroniseren mislukt",
+      "unknownConnection": "Onbekend of niet-actief Shiftmanager-account voor deze organisatie",
       "tooManyRequests": "Te veel pogingen, probeer over {{secs}}s opnieuw"
     },
     "empty": "Geen diensten in deze selectie"

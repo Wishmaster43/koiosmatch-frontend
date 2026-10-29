@@ -1,6 +1,6 @@
 /**
  * useInterviewOptions — INTERVIEW-PICKER-AUTHZ-FE (option A, Danny 30-09): the
- * application drawer's Interview tab reads its workflow + agent pickers from
+ * application drawer's Interview tab reads its workflow picker from
  * ONE narrow read endpoint gated on `applications.update`, instead of the two
  * management-list endpoints (`GET /workflows?kind=interview`, `GET /ai/agents`)
  * that a planner/recruitermanager may not have the right to view. Those two
@@ -34,7 +34,7 @@ export interface InterviewWorkflowOption { value: string; label: string }
 // Stable empty array so every consumer keeps one identity while loading (SEED-IDENTITY-1).
 const NO_WORKFLOWS: InterviewOptionWorkflow[] = []
 
-// The interview tab's ONE picker source: workflow + agent options from the narrow
+// The interview tab's ONE picker source: workflow options from the narrow
 // `applications.update`-gated endpoint, one cached react-query entry per tenant.
 export function useInterviewOptions(enabled: boolean = true) {
   const client = useQueryClient()
