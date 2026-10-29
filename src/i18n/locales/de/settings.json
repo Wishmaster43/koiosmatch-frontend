@@ -1870,6 +1870,7 @@
           "failed": "Fehlgeschlagen: {{formatted}}"
         },
         "oldestPending": "Ältester wartender Lead: {{date}}",
+        "summaryLoadError": "Die Zusammenfassung konnte nicht geladen werden.",
         "filterLabel": "Nach Status filtern",
         "status": {
           "all": "Alle Status",
@@ -4513,6 +4514,7 @@
     },
     "generateResult": "{{generated}} erzeugt, {{alreadyFinal}} bereits endgültig.",
     "generateResultFailed": "{{generated}} erzeugt, {{alreadyFinal}} bereits endgültig, {{failed}} fehlgeschlagen: {{names}}",
+    "generateMoreNames": "+{{rest}} weitere",
     "sendingSince": "E-Mail-Versand läuft seit {{since}}",
     "resolveNotSent": "Als nicht gesendet markieren",
     "resolveIntro": "Diese Rechnungs-E-Mail ist hängen geblieben. Markieren Sie sie als nicht gesendet, um sie erneut senden zu können.",

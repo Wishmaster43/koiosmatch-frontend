@@ -30,10 +30,12 @@ export function isOpaqueBody(data: unknown): boolean {
   return false
 }
 
-// The identity of a write: method + base URL + path + stable body. `null` = never deduped.
-export function requestKey(method: string, url: string, data: unknown, baseURL?: string): string | null {
+// The identity of a write: method + base URL + path + stable body + stable query params. `null` = never deduped.
+// Idempotency-Key and X-Tenant stay OUT of the key on purpose: collapsing two clicks is the whole point
+// (a per-click key would switch the double-click net off).
+export function requestKey(method: string, url: string, data: unknown, baseURL?: string, params?: unknown): string | null {
   if (isOpaqueBody(data)) return null
-  return `${method.toUpperCase()} ${baseURL ?? ''}${url} ${stableStringify(data)}`
+  return `${method.toUpperCase()} ${baseURL ?? ''}${url} ${stableStringify(data)}${params === undefined ? '' : ` ?${stableStringify(params)}`}`
 }
 
 const inFlight = new Map<string, Promise<unknown>>()

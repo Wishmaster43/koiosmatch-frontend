@@ -123,20 +123,32 @@
     "below_target": {
       "title": "{{label}} está por debajo del objetivo",
       "body": "{{label}} estaba en {{value}} con un objetivo de {{target}} ({{period}})."
+    },
+    "labels": {
+      "new_candidates_target": "Nuevos candidatos",
+      "open_tasks_target": "Tareas abiertas",
+      "daily_calls_target": "Llamadas realizadas",
+      "uncalled_warning_threshold": "Contactos aún por llamar",
+      "placements_target": "Nuevos matches",
+      "fill_rate_target": "Tasa de cobertura de vacantes"
     }
   },
   "facebook": {
+    "forms_suffix": " Formularios: {{forms}}.",
     "lead_pending": {
       "title": "Lead de Facebook pendiente de recuperar",
-      "body": "Leads de Facebook que llevan más de 24 horas pendientes de recuperar: {{count}}.{{forms}} Revisa la conexión de Facebook."
+      "body": "Leads de Facebook que llevan más de 24 horas pendientes de recuperar: {{count}}.{{forms}} Revise la conexión de Facebook."
     },
     "lead_failed": {
       "title": "Lead de Facebook fallido definitivamente",
-      "body": "Leads de Facebook que no se pudieron recuperar y se descartaron: {{count}}.{{forms}} Vuelve a intentarlo o revisa la conexión de Facebook."
+      "body": "Leads de Facebook que no se pudieron recuperar y se descartaron: {{count}}.{{forms}} Vuelva a intentarlo o revise la conexión de Facebook."
     },
     "leads_retrieval_missing": {
       "title": "A la app de Facebook le falta leads_retrieval",
-      "body": "La app de Facebook de esta agencia no tiene el permiso leads_retrieval, así que los leads perdidos no se pueden recuperar. Solicita el permiso en Meta."
+      "body": "La app de Facebook de esta agencia no tiene el permiso leads_retrieval, así que los leads perdidos no se pueden recuperar. Solicite el permiso en Meta."
+    },
+    "lead_archived_candidate": {
+      "title": "Lead de Facebook vinculado a un candidato archivado"
     }
   }
 }

@@ -13,11 +13,11 @@ import { isLucideSlug, lazyFor } from './lazyLucide'
 // One Suspense-wrapped component per slug, created once (exported for tests).
 export const lucideWrapperCache = new Map<string, LucideIcon>()
 
-// Builds the wrapper: a same-sized blank keeps the layout still while the icon chunk arrives.
+// Builds the wrapper: a same-sized blank (lucide's default size is 24) keeps the layout still while the icon chunk arrives.
 function makeWrapper(slug: string): LucideIcon {
   const Lazy = lazyFor(slug)
   const Wrapper = (props: LucideProps) => {
-    const size = props.size ?? 16
+    const size = props.size ?? 24
     return createElement(
       Suspense,
       { fallback: createElement('span', { 'aria-hidden': true, style: { display: 'inline-block', width: size, height: size } }) },

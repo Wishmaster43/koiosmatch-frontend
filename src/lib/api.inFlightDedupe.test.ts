@@ -58,4 +58,20 @@ describe('api · in-flight dedupe of writes', () => {
       expect((await p).data).toEqual({ done: true }); expect(n).toBe(2)
     } finally { vi.useRealTimers() }
   })
+
+  it('differing params send two requests, equal params one', async () => {
+    const d = deferredAdapter(); api.defaults.adapter = d.adapter; d.release()
+    await Promise.all([api.post('/x', { a: 1 }, { params: { p: 1 } }), api.post('/x', { a: 1 }, { params: { p: 2 } })])
+    expect(d.calls).toHaveLength(2)
+    const e = deferredAdapter(); api.defaults.adapter = e.adapter; e.release()
+    await Promise.all([api.post('/x', { a: 1 }, { params: { p: 1 } }), api.post('/x', { a: 1 }, { params: { p: 1 } })])
+    expect(e.calls).toHaveLength(1)
+  })
+
+  it('a call carrying an abort signal is never merged with another', async () => {
+    const d = deferredAdapter(); api.defaults.adapter = d.adapter; d.release()
+    const c = new AbortController()
+    await Promise.all([api.post('/y', { a: 1 }, { signal: c.signal }), api.post('/y', { a: 1 })])
+    expect(d.calls).toHaveLength(2)
+  })
 })

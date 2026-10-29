@@ -26,4 +26,12 @@ describe('lucideByName', () => {
     await waitFor(() => expect(container.querySelector('svg')).not.toBeNull())
     expect(screen.queryByTestId('ico')).not.toBeNull()
   })
+
+  it('the blank defaults to lucide\'s 24px when no size is given', () => {
+    const Icon = lucideByName('house', Circle)
+    const { container } = render(createElement(Icon, {} as never))
+    const blank = container.querySelector('span[aria-hidden]') as HTMLElement | null
+    expect(blank?.style.width).toBe('24px')
+    expect(blank?.style.height).toBe('24px')
+  })
 })

@@ -1870,6 +1870,7 @@
           "failed": "Échoués : {{formatted}}"
         },
         "oldestPending": "Lead en attente le plus ancien : {{date}}",
+        "summaryLoadError": "Le résumé n’a pas pu être chargé.",
         "filterLabel": "Filtrer par statut",
         "status": {
           "all": "Tous les statuts",
@@ -4513,6 +4514,7 @@
     },
     "generateResult": "{{generated}} générées, {{alreadyFinal}} déjà finalisées.",
     "generateResultFailed": "{{generated}} générées, {{alreadyFinal}} déjà finalisées, {{failed}} en échec : {{names}}",
+    "generateMoreNames": "+{{rest}} de plus",
     "sendingSince": "Envoi en cours depuis {{since}}",
     "resolveNotSent": "Marquer comme non envoyée",
     "resolveIntro": "Cet e-mail de facture est resté bloqué. Marquez-le comme non envoyé pour pouvoir le renvoyer.",

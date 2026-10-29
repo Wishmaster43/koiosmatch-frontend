@@ -240,6 +240,8 @@ api.interceptors.response.use(
     // AuthContext's catch owns the UI state.
     if (status === 401 && url.includes('/auth/me')) {
       clearDeviceCaches()
+      // ONIX C-005: remember a revoked session so the login screen can explain it after the quiet boot probe.
+      if (isSessionRevokedError(error)) sessionStorage.setItem(SESSION_REVOKED_FLAG, '1')
     }
 
     // ONIX C-002: a 401 on the single-use MFA verify is an invalid code for the form, never a lost session.
@@ -279,8 +281,10 @@ for (const method of ['post', 'put', 'patch', 'delete'] as const) {
   ;(api as unknown as Record<string, unknown>)[method] = (url: string, ...rest: unknown[]) => {
     const hasBody = method !== 'delete'
     const data = hasBody ? rest[0] : (rest[0] as { data?: unknown } | undefined)?.data
-    const config = (hasBody ? rest[1] : rest[0]) as { baseURL?: string } | undefined
-    return dedupeInFlight(requestKey(method, url, data, config?.baseURL ?? api.defaults.baseURL), () => raw(url, ...rest))
+    const config = (hasBody ? rest[1] : rest[0]) as { baseURL?: string; params?: unknown; signal?: unknown } | undefined
+    // A caller-owned abort signal must never reach a shared promise (§9), so such a call is not deduped.
+    const key = config?.signal ? null : requestKey(method, url, data, config?.baseURL ?? api.defaults.baseURL, config?.params)
+    return dedupeInFlight(key, () => raw(url, ...rest))
   }
 }
 
@@ -304,19 +308,19 @@ export function isServiceUnavailable(error: unknown): boolean {
 
 type ResponseLike = AxiosResponse | { data: unknown }
 
-/** Unwrap a single resource to its payload (handles { data } or a bare object). */
-// A 403 answer: the caller's role lacks the right, not a transient fault — a picker
-// says so calmly and never retries (INTERVIEW-403-1, measured 29-09 as a recruiter).
 // A 409 whose body says the same write is still being processed (BE CLAIM-1 `request_in_flight`).
 export function isRequestInFlight(error: unknown): boolean {
   const r = (error as { response?: { status?: number; data?: { code?: string } | null } } | null)?.response
   return r?.status === 409 && r?.data?.code === 'request_in_flight'
 }
 
+// A 403 answer: the caller's role lacks the right, not a transient fault — a picker
+// says so calmly and never retries (INTERVIEW-403-1, measured 29-09 as a recruiter).
 export function isForbidden(error: unknown): boolean {
   return (error as { response?: { status?: number } } | null)?.response?.status === 403
 }
 
+/** Unwrap a single resource to its payload (handles { data } or a bare object). */
 export function unwrap<T = unknown>(res: ResponseLike): T {
   const body = (res as { data?: unknown })?.data ?? res
   if (body && typeof body === 'object' && !Array.isArray(body) && 'data' in body) {

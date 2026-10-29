@@ -123,12 +123,21 @@
     "below_target": {
       "title": "{{label}} está abaixo da meta",
       "body": "{{label}} estava em {{value}} para uma meta de {{target}} ({{period}})."
+    },
+    "labels": {
+      "new_candidates_target": "Novos candidatos",
+      "open_tasks_target": "Tarefas abertas",
+      "daily_calls_target": "Chamadas efetuadas",
+      "uncalled_warning_threshold": "Contactos ainda por ligar",
+      "placements_target": "Novos matches",
+      "fill_rate_target": "Taxa de preenchimento de vagas"
     }
   },
   "facebook": {
+    "forms_suffix": " Formulários: {{forms}}.",
     "lead_pending": {
-      "title": "Lead do Facebook aguardando recuperação",
-      "body": "Leads do Facebook aguardando recuperação há mais de 24 horas: {{count}}.{{forms}} Verifique a ligação ao Facebook."
+      "title": "Lead do Facebook à espera de recuperação",
+      "body": "Leads do Facebook à espera de recuperação há mais de 24 horas: {{count}}.{{forms}} Verifique a ligação ao Facebook."
     },
     "lead_failed": {
       "title": "Lead do Facebook falhou definitivamente",
@@ -137,6 +146,9 @@
     "leads_retrieval_missing": {
       "title": "A app do Facebook não tem leads_retrieval",
       "body": "A app do Facebook desta agência não tem a permissão leads_retrieval, por isso os leads perdidos não podem ser recuperados. Peça a permissão na Meta."
+    },
+    "lead_archived_candidate": {
+      "title": "Lead do Facebook associado a um candidato arquivado"
     }
   }
 }

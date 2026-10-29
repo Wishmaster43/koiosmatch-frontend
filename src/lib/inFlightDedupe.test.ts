@@ -7,6 +7,10 @@ describe('stableStringify / requestKey', () => {
     expect(requestKey('post', '/tasks', { a: 1 }, 'http://x/api')).toBe('POST http://x/api/tasks {"a":1}')
     expect(requestKey('post', '/tasks', undefined)).toBe('POST /tasks ')
   })
+  it('adds stable query params to the key and ignores their order', () => {
+    expect(requestKey('post', '/x', { a: 1 }, undefined, { p: 1, q: 2 })).toBe(requestKey('post', '/x', { a: 1 }, undefined, { q: 2, p: 1 }))
+    expect(requestKey('post', '/x', { a: 1 }, undefined, { p: 1 })).not.toBe(requestKey('post', '/x', { a: 1 }, undefined, { p: 2 }))
+  })
   it('never keys an upload', () => {
     expect(requestKey('post', '/upload', new FormData())).toBeNull()
     expect(requestKey('post', '/upload', new Blob(['x']))).toBeNull()
