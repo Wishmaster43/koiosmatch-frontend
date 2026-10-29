@@ -154,6 +154,7 @@
     "resendTitle": "¿Enviar una nueva invitación?",
     "resendConfirm": "{{email}} recibirá un nuevo enlace para establecer una contraseña. Los enlaces anteriores caducan.",
     "resent": "Invitación reenviada a {{email}}",
-    "resendFailed": "Error al enviar"
+    "resendFailed": "Error al enviar",
+    "resendThrottled": "Demasiadas invitaciones enviadas, inténtalo de nuevo en un minuto"
   }
 }

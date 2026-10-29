@@ -8,7 +8,8 @@ import { useState, useRef, useEffect } from 'react'
 import type { ChangeEvent } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Webhook } from 'lucide-react'
-import { createSubscription } from './webhooksApi'
+import { createSubscription, WEBHOOK_URL_MAX } from './webhooksApi'
+import { extractApiError } from '@/lib/extractApiError'
 import EventCatalog from './EventCatalog'
 import OneTimeSecretReveal from '@/pages/settings/components/OneTimeSecretReveal'
 import SettingsDetailHeader from '@/pages/settings/components/SettingsDetailHeader'
@@ -40,7 +41,9 @@ export default function WebhookCreate({ onBack, onCreated }: WebhookCreateProps)
   const [name, setName]     = useState('')
   const [url, setUrl]       = useState('')
   const [events, setEvents] = useState<string[]>([])
-  const { saving, setSaving, error, setError, result, setResult } = useCreateForm<WebhookSubscriptionCreated>()
+  const { saving, setSaving, result, setResult } = useCreateForm<WebhookSubscriptionCreated>()
+  // Server reason (or the generic fallback) of a failed create; null while idle.
+  const [error, setError] = useState<string | null>(null)
   const firstField          = useRef<HTMLInputElement>(null)
 
   // Focus the name field on open.
@@ -53,13 +56,14 @@ export default function WebhookCreate({ onBack, onCreated }: WebhookCreateProps)
   const submit = async () => {
     if (!canSubmit) return
     setSaving(true)
-    setError(false)
+    setError(null)
     try {
       const created = await createSubscription({ name: name.trim(), url: url.trim(), events })
       setResult(created)
       onCreated?.(created)
-    } catch {
-      setError(true)
+    } catch (err) {
+      // Keep the server's 422 reason (e.g. the url length cap) instead of a bare failure.
+      setError(extractApiError(err, t('webhooks.outgoing.createError')))
     }
     setSaving(false)
   }
@@ -108,6 +112,7 @@ export default function WebhookCreate({ onBack, onCreated }: WebhookCreateProps)
               <input
                 id="wh-url"
                 value={url}
+                maxLength={WEBHOOK_URL_MAX}
                 onChange={(e: ChangeEvent<HTMLInputElement>) => setUrl(e.target.value)}
                 placeholder={t('webhooks.outgoing.urlPlaceholder')}
                 // eslint-disable-next-line huisstijlLegacy/no-restricted-syntax -- the input element itself must carry the font; the Mono atom renders a separate element and cannot apply to native input text
@@ -119,7 +124,7 @@ export default function WebhookCreate({ onBack, onCreated }: WebhookCreateProps)
               <EventCatalog value={events} onChange={setEvents} />
             </div>
 
-            {error && <div style={{ fontSize: 12, color: 'var(--color-danger-text)' }}>{t('webhooks.outgoing.createError')}</div>}
+            {error && <div style={{ fontSize: 12, color: 'var(--color-danger-text)' }}>{error}</div>}
 
             <div style={{ display: 'flex', gap: 10 }}>
               <Button variant="primary" onClick={submit} disabled={saving || !canSubmit}>

@@ -410,6 +410,25 @@ describe('EditUserModal · resend invitation', () => {
     await waitFor(() => expect(notifyError).toHaveBeenCalled())
   })
 
+  it('maps a 429 to the translated throttled copy, never the server text', async () => {
+    vi.mocked(api.post).mockRejectedValueOnce({ response: { status: 429, data: { message: 'Too many requests. Please wait.', retry_after: 30 } } })
+    const user = userEvent.setup()
+    render(<EditUserModal user={testUser} onClose={noop} onSaved={noop} />)
+    await user.click(await screen.findByRole('button', { name: 'invite.resend' }))
+    await user.click(within(screen.getByRole('dialog', { name: 'invite.resendTitle' })).getByRole('button', { name: 'invite.resend' }))
+    await waitFor(() => expect(notifyError).toHaveBeenCalledWith('invite.resendThrottled'))
+    expect(notifyError).not.toHaveBeenCalledWith('Too many requests. Please wait.')
+  })
+
+  it('maps a 404 to the generic failure copy without leaking the model class', async () => {
+    vi.mocked(api.post).mockRejectedValueOnce({ response: { status: 404, data: { message: 'No query results for model [App\\Models\\CentralUser] 5' } } })
+    const user = userEvent.setup()
+    render(<EditUserModal user={testUser} onClose={noop} onSaved={noop} />)
+    await user.click(await screen.findByRole('button', { name: 'invite.resend' }))
+    await user.click(within(screen.getByRole('dialog', { name: 'invite.resendTitle' })).getByRole('button', { name: 'invite.resend' }))
+    await waitFor(() => expect(notifyError).toHaveBeenCalledWith('invite.resendFailed'))
+  })
+
   it('is absent without users.create and for yourself', async () => {
     canCreate = false
     const { unmount } = render(<EditUserModal user={testUser} onClose={noop} onSaved={noop} />)

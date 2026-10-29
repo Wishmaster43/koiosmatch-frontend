@@ -76,19 +76,20 @@ describe('CandidatesDetailPage · KPI row sources stats, not the row page (SM-ST
   })
 })
 
-describe('CandidatesDetailPage · SM employee erase (ONIX H-003)', () => {
-  // Clicks rows until the drawer opens (the first rows may still be loading skeletons).
-  const openFirstRow = async () => {
-    renderPage()
-    await waitFor(() => {
-      Array.from(document.querySelectorAll('tbody tr')).forEach(r => fireEvent.click(r))
-      expect(screen.getByRole('dialog')).toBeInTheDocument()
-    })
-  }
+// Clicks rows until the drawer opens (the first rows may still be loading skeletons).
+const openDrawer = async () => {
+  renderPage()
+  await waitFor(() => {
+    Array.from(document.querySelectorAll('tbody tr')).forEach(r => fireEvent.click(r))
+    expect(screen.getByRole('dialog')).toBeInTheDocument()
+  })
+}
+const ERASE_BUTTON = /erase\.button|Erase personal data|Persoonsgegevens wissen/i
 
+describe('CandidatesDetailPage · SM employee erase (ONIX H-003)', () => {
   it('shows no erase action without privacy.erase', async () => {
     perms.erase = false
-    await openFirstRow()
+    await openDrawer()
     expect(screen.queryByRole('button', { name: /erase|wissen|Persoonsgegevens/i })).toBeNull()
   })
 
@@ -96,8 +97,8 @@ describe('CandidatesDetailPage · SM employee erase (ONIX H-003)', () => {
     perms.erase = true
     const api = (await import('@/lib/api')).default as unknown as { post: ReturnType<typeof vi.fn> }
     api.post = vi.fn().mockRejectedValue({ response: { status: 403 } })
-    await openFirstRow()
-    fireEvent.click(await screen.findByRole('button', { name: /erase\.button|Erase personal data|Persoonsgegevens wissen/i }))
+    await openDrawer()
+    fireEvent.click(await screen.findByRole('button', { name: ERASE_BUTTON }))
     fireEvent.change(document.querySelector('input[type="password"]') as HTMLInputElement, { target: { value: 'pw' } })
     fireEvent.click(screen.getByRole('button', { name: /erase\.confirm|Erase permanently|Definitief wissen/i }))
     await waitFor(() => expect(api.post).toHaveBeenCalledWith('/sm_candidates/1/erase', { password: 'pw' }))
@@ -108,29 +109,20 @@ describe('CandidatesDetailPage · SM employee erase (ONIX H-003)', () => {
 
 // An erased employee (ONIX H-003, decision 10g): the drawer says when, and the no-op erase action is gone (§3).
 describe('CandidatesDetailPage · an erased SM employee', () => {
-  // Clicks rows until the drawer opens (the first rows may still be loading skeletons).
-  const openAnyRow = async () => {
-    renderPage()
-    await waitFor(() => {
-      Array.from(document.querySelectorAll('tbody tr')).forEach(r => fireEvent.click(r))
-      expect(screen.getByRole('dialog')).toBeInTheDocument()
-    })
-  }
-  const ERASE_BUTTON = /erase\.button|Erase personal data|Persoonsgegevens wissen/i
   const NOTICE = /erase\.erasedNotice|erased on 23-10-2026|gewist op 23-10-2026/i
   afterEach(() => { rows.forEach(r => { delete (r as Record<string, unknown>).erased_at }) })
 
   it('shows the erased notice and no erase action, even with privacy.erase', async () => {
     perms.erase = true
     rows.forEach(r => { (r as Record<string, unknown>).erased_at = '2026-10-23T10:00:00Z' })
-    await openAnyRow()
+    await openDrawer()
     expect(await screen.findByText(NOTICE)).toBeInTheDocument()
     expect(screen.queryByRole('button', { name: ERASE_BUTTON })).toBeNull()
   })
 
   it('keeps the erase action and shows no notice on a live employee', async () => {
     perms.erase = true
-    await openAnyRow()
+    await openDrawer()
     expect(await screen.findByRole('button', { name: ERASE_BUTTON })).toBeInTheDocument()
     expect(screen.queryByText(NOTICE)).toBeNull()
   })
@@ -139,13 +131,6 @@ describe('CandidatesDetailPage · an erased SM employee', () => {
 // H-003: the staff AI/WhatsApp opt-out switch — the only writer of ai_enabled.
 describe('CandidatesDetailPage · SM employee ai_enabled switch (ONIX H-003)', () => {
   const SWITCH = { name: /aiOptOut\.label|AI and WhatsApp allowed|AI en WhatsApp toegestaan/i }
-  const openAnyRow = async () => {
-    renderPage()
-    await waitFor(() => {
-      Array.from(document.querySelectorAll('tbody tr')).forEach(r => fireEvent.click(r))
-      expect(screen.getByRole('dialog')).toBeInTheDocument()
-    })
-  }
   afterEach(() => { perms.update = false; rows.forEach(r => { delete (r as Record<string, unknown>).ai_enabled; delete (r as Record<string, unknown>).erased_at }) })
 
   it('PATCHes /sm_candidates/{id} with { ai_enabled: false } for a permitted user', async () => {
@@ -153,7 +138,7 @@ describe('CandidatesDetailPage · SM employee ai_enabled switch (ONIX H-003)', (
     rows.forEach(r => { (r as Record<string, unknown>).ai_enabled = true })
     const api = (await import('@/lib/api')).default as unknown as { patch: ReturnType<typeof vi.fn> }
     api.patch = vi.fn().mockResolvedValue({ data: { data: { ai_enabled: false } } })
-    await openAnyRow()
+    await openDrawer()
     fireEvent.click(await screen.findByRole('switch', SWITCH))
     await waitFor(() => expect(api.patch).toHaveBeenCalledWith(expect.stringMatching(/^\/sm_candidates\/\d$/), { ai_enabled: false }))
   })
@@ -161,14 +146,14 @@ describe('CandidatesDetailPage · SM employee ai_enabled switch (ONIX H-003)', (
   it('is absent without candidates.update', async () => {
     perms.update = false
     rows.forEach(r => { (r as Record<string, unknown>).ai_enabled = true })
-    await openAnyRow()
+    await openDrawer()
     expect(screen.queryByRole('switch', SWITCH)).toBeNull()
   })
 
   it('is disabled on an erased employee', async () => {
     perms.update = true
     rows.forEach(r => { (r as Record<string, unknown>).ai_enabled = false; (r as Record<string, unknown>).erased_at = '2026-10-23T10:00:00Z' })
-    await openAnyRow()
+    await openDrawer()
     expect(await screen.findByRole('switch', SWITCH)).toBeDisabled()
     expect(screen.getByText(/aiOptOut\.erasedHint|always off for an erased|altijd uit/i)).toBeInTheDocument()
   })

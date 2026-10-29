@@ -115,7 +115,7 @@ export default function EventCatalog({ value = [], onChange }: EventCatalogProps
                 // ONIX G-002 (BE lane D f0855053): the catalogue names the payload keys that may leave
                 // per event (`fields`) and whether they carry personal data (`pii`) — both ride as
                 // hover text on the row (a caveat is a title, never a dot), the pii one also as an icon.
-                const m = (meta as Record<string, { pii: boolean; fields: string[] }> | undefined)?.[ev]
+                const m = meta[ev]
                 const fieldsTitle = m && m.fields.length > 0 ? t('webhooks.events.fieldsTitle', { fields: m.fields.join(', ') }) : undefined
                 const piiTitle = m?.pii ? t('webhooks.events.piiTitle') : undefined
                 const title = [fieldsTitle, piiTitle].filter(Boolean).join(' · ') || undefined

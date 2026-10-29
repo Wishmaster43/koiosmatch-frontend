@@ -61,7 +61,7 @@ export default function TasksPage({ intent }: { intent?: unknown } = {}) {
 function TasksPageInner({ intent }: { intent?: unknown }) {
   const auth = useAuth()
   // Bulk archive (soft-delete, reversible → update-class gating; the backend re-checks).
-  const canArchive = (auth as unknown as { hasPermission?: (p: string) => boolean })?.hasPermission?.('tasks.update') ?? false
+  const canUpdateTasks = (auth as unknown as { hasPermission?: (p: string) => boolean })?.hasPermission?.('tasks.update') ?? false
   // TRASH-OVERAL-2: mark-for-erasure is delete-class — its own permission (§7).
   const canMarkDeletion = (auth as unknown as { hasPermission?: (p: string) => boolean })?.hasPermission?.('tasks.delete') ?? false
   // RIGHTS-GATE-OPENERS-1: mirrors tasks.create permission (backend: tasks-outreach.php:67 POST /tasks).
@@ -242,8 +242,8 @@ function TasksPageInner({ intent }: { intent?: unknown }) {
                     {/* canEdit reuses the same tasks.update right the BE checks for a PATCH */}
                     <TasksBulkBar count={selectedIds.size} onClear={clearSelection}
                       onSetStatus={bulkSetStatus} onSetPriority={bulkSetPriority} onSetAssignee={bulkSetAssignee}
-                      onArchive={bulkArchive} canArchive={canArchive}
-                      canEdit={canArchive}
+                      onArchive={bulkArchive} canArchive={canUpdateTasks}
+                      canEdit={canUpdateTasks}
                       statuses={statuses} priorities={priorities} users={users} />
                   </div>
                 )}
@@ -281,14 +281,14 @@ function TasksPageInner({ intent }: { intent?: unknown }) {
         onRemoveLink={handleRemoveLink}
         onSubtaskCreated={bumpSubtaskTotal}
         // Restore is update-class (reversible, BE gates tasks.update) — same signal as archive.
-        onRestore={canArchive ? restoreTask : undefined}
+        onRestore={canUpdateTasks ? restoreTask : undefined}
         // ONIX N-007: disables the restore button while its own request runs.
         restoring={restoring}
         // TRASH-OVERAL-2: shared trash section (mark = tasks.delete, unmark =
         // tasks.update; backend re-checks, §7) — reconciled locally above.
         trash={{
           canMark: canMarkDeletion,
-          canUnmark: canArchive,
+          canUnmark: canUpdateTasks,
           users: users.map(u => ({ value: String(u.id), label: u.name })),
           onMarked: onTaskMarked,
           onUnmarked: onTaskUnmarked,

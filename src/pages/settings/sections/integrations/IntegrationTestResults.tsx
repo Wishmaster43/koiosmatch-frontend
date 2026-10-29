@@ -8,7 +8,7 @@
  */
 import { CheckCircle2, XCircle } from 'lucide-react'
 import CalloutBox from '@/components/ui/CalloutBox'
-import { Caption } from '@/components/ui/typography'
+import { Caption, SectionTitle } from '@/components/ui/typography'
 import type { TestFailure, TestSuccess, DualTestResult, DualTestOutcome, TestReasonCode } from './integrationsApi'
 
 export type TestOutcome = TestSuccess | TestFailure | DualTestResult
@@ -28,7 +28,7 @@ function ResultLine({ titleKey, outcome, t }: { titleKey: string; outcome: DualT
     <div style={{ display: 'flex', alignItems: 'flex-start', gap: 8, padding: '4px 0' }}>
       <Icon size={16} color={color} style={{ flexShrink: 0, marginTop: 2 }} aria-hidden="true" />
       <div>
-        <Caption style={{ fontWeight: 600, color: 'var(--text)' }}>{t(titleKey)}</Caption>
+        <SectionTitle as="div">{t(titleKey)}</SectionTitle>
         <Caption as="p" style={{ margin: 0 }}>
           {outcome.ok
             ? (outcome.connected_as ? t('integrations.connection.testOk', { name: outcome.connected_as }) : t('integrations.connection.testOk', { name: '' }).trim())

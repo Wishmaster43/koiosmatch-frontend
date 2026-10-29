@@ -81,25 +81,25 @@ export default function WaWebQueueTab({ status, canManage }: { status: string; c
           {/* Send now = pull a waiting (queued/paused) item forward; never re-send a sent one. */}
           {(r.status === 'queued' || r.status === 'paused') && (
             <Button size="sm" variant="secondary" iconOnly aria-label={t('waWebQueue.action.sendNow')}
-              title={t('waWebQueue.action.sendNow')} onClick={() => sendNow.mutate(r.id)} disabled={sendNow.isPending}>
+              title={t('waWebQueue.action.sendNow')} onClick={() => sendNow.mutate(r.id)} disabled={sendNow.isPendingFor(r.id)}>
               <Send size={13} />
             </Button>
           )}
           {r.status === 'queued' && (
             <Button size="sm" variant="secondary" iconOnly aria-label={t('waWebQueue.action.pause')}
-              title={t('waWebQueue.action.pause')} onClick={() => pause.mutate(r.id)} disabled={pause.isPending}>
+              title={t('waWebQueue.action.pause')} onClick={() => pause.mutate(r.id)} disabled={pause.isPendingFor(r.id)}>
               <Pause size={13} />
             </Button>
           )}
           {r.status === 'failed' && (
             <Button size="sm" variant="secondary" iconOnly aria-label={t('waWebQueue.action.retry')}
-              title={t('waWebQueue.action.retry')} onClick={() => retry.mutate(r.id)} disabled={retry.isPending}>
+              title={t('waWebQueue.action.retry')} onClick={() => retry.mutate(r.id)} disabled={retry.isPendingFor(r.id)}>
               <RotateCcw size={13} />
             </Button>
           )}
           {r.status !== 'canceled' && r.status !== 'sent' && (
             <Button size="sm" variant="dangerSoft" iconOnly aria-label={t('waWebQueue.action.cancel')}
-              title={t('waWebQueue.action.cancel')} onClick={() => cancel.mutate(r.id)} disabled={cancel.isPending}>
+              title={t('waWebQueue.action.cancel')} onClick={() => cancel.mutate(r.id)} disabled={cancel.isPendingFor(r.id)}>
               <X size={13} />
             </Button>
           )}

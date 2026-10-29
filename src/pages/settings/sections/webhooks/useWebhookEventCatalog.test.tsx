@@ -52,6 +52,19 @@ describe('useWebhookEventCatalog', () => {
     expect(result.current.isFallback).toBe(false)
   })
 
+  it('exposes pii/fields meta per event on the live path', async () => {
+    mockedGet.mockResolvedValue({ data: { data: [
+      { key: 'candidate.created', label: 'Candidate created', group: 'candidates', pii: true, fields: ['id', 'status'] },
+      { key: 'match.created', label: 'Match created', group: 'matches' },
+    ] } })
+    const { result } = renderHook(() => useWebhookEventCatalog(), { wrapper })
+    await waitFor(() => expect(result.current.isLoading).toBe(false))
+    expect(result.current.meta).toEqual({
+      'candidate.created': { pii: true, fields: ['id', 'status'] },
+      'match.created': { pii: false, fields: [] },
+    })
+  })
+
   it('an event key the static list lacks is still selectable (server is the live source of truth)', async () => {
     mockedGet.mockResolvedValue({ data: { data: [
       { key: 'candidate.brand_new_signal', label: 'Brand new signal', group: 'candidates', pii: false },
@@ -82,6 +95,7 @@ describe('useWebhookEventCatalog', () => {
     const { result } = renderHook(() => useWebhookEventCatalog(), { wrapper })
     await waitFor(() => expect(result.current.isError).toBe(true))
     expect(result.current.isFallback).toBe(true)
+    expect(result.current.meta).toEqual({})
     expect(result.current.groups.flatMap((g) => g.events)).toEqual(FALLBACK_ALL_EVENTS)
   })
 })

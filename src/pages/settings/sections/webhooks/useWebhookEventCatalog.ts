@@ -10,23 +10,28 @@ import { useMemo } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import api, { unwrap } from '@/lib/api'
 import { EVENT_GROUPS as FALLBACK_EVENT_GROUPS } from './webhookEvents'
+import type { WebhookEventGroup } from './webhookEvents'
+
+// Hand-written: the spec carries no 2xx schema for GET /webhook-events.
+export interface WebhookEventItem { key: string; label?: string; group: string; pii?: boolean; fields?: string[] }
+export interface WebhookEventMeta { pii: boolean; fields: string[] }
 
 export const WEBHOOK_EVENT_CATALOG_QUERY_KEY = ['webhook-events']
 
 // Fetch the flat event catalog: [{ key, label, group, pii, fields }, ...] — `fields` is the
 // allow-list of payload keys that may leave for that event (ONIX G-002, BE lane D f0855053).
-const fetchWebhookEventCatalog = () => api.get('/webhook-events').then(unwrap)
+const fetchWebhookEventCatalog = (): Promise<WebhookEventItem[]> => api.get('/webhook-events').then(unwrap) as Promise<WebhookEventItem[]>
 
 // Groups a flat [{ key, group }] list into [{ group, events: [key, ...] }],
 // preserving first-seen group order (mirrors the backend's own list order).
-function groupEvents(flat) {
-  const order = []
-  const byGroup = new Map()
+function groupEvents(flat: WebhookEventItem[]): WebhookEventGroup[] {
+  const order: string[] = []
+  const byGroup = new Map<string, string[]>()
   for (const ev of flat) {
     if (!byGroup.has(ev.group)) { byGroup.set(ev.group, []); order.push(ev.group) }
-    byGroup.get(ev.group).push(ev.key)
+    byGroup.get(ev.group)!.push(ev.key)
   }
-  return order.map((group) => ({ group, events: byGroup.get(group) }))
+  return order.map((group) => ({ group, events: byGroup.get(group) ?? [] }))
 }
 
 // Live catalogue, grouped the same shape as the static fallback (EVENT_GROUPS);
@@ -46,7 +51,7 @@ export function useWebhookEventCatalog() {
   // Per-event meta for the picker's hover text: { pii, fields } keyed by event key; empty on
   // the static fallback (it carries keys only), so a consumer renders nothing extra there.
   const meta = useMemo(() => {
-    const out = {}
+    const out: Record<string, WebhookEventMeta> = {}
     for (const ev of flat ?? []) out[ev.key] = { pii: ev.pii === true, fields: Array.isArray(ev.fields) ? ev.fields : [] }
     return out
   }, [flat])

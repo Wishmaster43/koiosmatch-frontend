@@ -10,7 +10,7 @@
  * only (no nested number object) and `priority` as a raw integer snapshot of
  * the message type at enqueue time, never a high/normal/low slug.
  */
-import { useRef } from 'react'
+import { useCallback, useRef, useState } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import api, { unwrapList } from '@/lib/api'
 import { withIdempotencyKey } from '@/lib/idempotency'
@@ -79,20 +79,27 @@ export function useWaWebQueueStats(active: boolean) {
 // re-fires while the previous call for the SAME row is still in flight — the
 // test fires two clicks synchronously, before `isPending` can re-render the
 // button). A row-id-keyed latch (ref, written in the handler only) drops the
-// second call; the mutation's own `isPending` still disables the row button.
+// second call; `isPendingFor(id)` (state mirror of the latch) disables only
+// THAT row's button, while the shared `isPending` would disable every row.
 function useLatchedMutation(mutationFn: (id: string) => Promise<unknown>, invalidate: () => void) {
   const inFlight = useRef<Set<string>>(new Set())
+  const [pendingIds, setPendingIds] = useState<ReadonlySet<string>>(new Set())
   const mutation = useMutation({
     mutationFn,
     onSuccess: invalidate,
-    onSettled: (_data, _err, id) => { inFlight.current.delete(id as string) },
+    onSettled: (_data, _err, id) => {
+      inFlight.current.delete(id as string)
+      setPendingIds(prev => { const next = new Set(prev); next.delete(id as string); return next })
+    },
   })
   const mutate = (id: string) => {
     if (inFlight.current.has(id)) return
     inFlight.current.add(id)
+    setPendingIds(prev => new Set(prev).add(id))
     mutation.mutate(id)
   }
-  return { ...mutation, mutate }
+  const isPendingFor = useCallback((id: string) => pendingIds.has(id), [pendingIds])
+  return { ...mutation, mutate, isPendingFor }
 }
 
 // The three mutating actions + cancel, each invalidating both queries so the

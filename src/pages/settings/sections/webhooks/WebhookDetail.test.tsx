@@ -226,3 +226,15 @@ describe('WebhookDetail — a rejected mutation tells the admin', () => {
     await waitFor(() => expect(notifyError).toHaveBeenCalledWith(expect.any(String)))
   })
 })
+
+describe('WebhookDetail — url length cap (J-014)', () => {
+  it('the edit-mode url input is capped at 255 characters', async () => {
+    vi.mocked(api.get).mockResolvedValue({ data: { id: 'wh-1', name: 'ATS integration', url: 'https://example.test/hook', events: ['candidate.created'], status: 'active' } })
+    const user = userEvent.setup()
+    const listRow = { id: 'wh-1', name: 'ATS integration', url: 'https://example.test/hook', events: ['candidate.created'], status: 'active' as const }
+    renderWithQueryClient(<WebhookDetail subId="wh-1" listRow={listRow} onBack={vi.fn()} onPatch={vi.fn()} onDelete={vi.fn()} />)
+    await waitFor(() => screen.getByRole('button', { name: st('webhooks.outgoing.edit') }))
+    await user.click(screen.getByRole('button', { name: st('webhooks.outgoing.edit') }))
+    expect(screen.getByDisplayValue('https://example.test/hook')).toHaveAttribute('maxLength', '255')
+  })
+})

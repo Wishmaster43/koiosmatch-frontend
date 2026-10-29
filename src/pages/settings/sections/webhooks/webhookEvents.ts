@@ -36,7 +36,9 @@
 
 // Display order = catalog order = config/webhooks.php's own order. Each group
 // renders as a section in the picker.
-export const EVENT_GROUPS = [
+export interface WebhookEventGroup { group: string; events: string[] }
+
+export const EVENT_GROUPS: WebhookEventGroup[] = [
   { group: 'candidates', events: [
     'candidate.created', 'candidate.updated', 'candidate.status_changed', 'candidate.reactivated',
     'candidate.archived', 'candidate.document_expiring', 'candidate.availability_changed',
@@ -89,8 +91,8 @@ export const EVENT_GROUPS = [
 ]
 
 // Flat list of every event key (e.g. for "select all" and validation).
-export const ALL_EVENTS = EVENT_GROUPS.flatMap((g) => g.events)
+export const ALL_EVENTS: string[] = EVENT_GROUPS.flatMap((g) => g.events)
 
 // The action is always the LAST dot-segment (created/updated/deleted/…) — also
 // correct for the one three-segment key, `backoffice.link.updated` -> `updated`.
-export const actionOf = (eventKey) => String(eventKey).split('.').pop()
+export const actionOf = (eventKey: string): string => String(eventKey).split('.').pop() ?? ''

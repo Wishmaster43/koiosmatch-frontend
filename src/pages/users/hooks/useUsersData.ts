@@ -23,7 +23,9 @@ export function useUsersData() {
   // Load users + roles once; super_admin/tenant_admin are not user-assignable here.
   // Branch links arrive ON the list rows (USERS-BRANCHES-LIST-1) — no per-user calls.
   useEffect(() => {
-    Promise.all([api.get('/users'), api.get('/roles')])
+    // Abort on cleanup so StrictMode's double mount never leaves two requests completing.
+    const ctrl = new AbortController()
+    Promise.all([api.get('/users', { signal: ctrl.signal }), api.get('/roles', { signal: ctrl.signal })])
       .then(([usersRes, rolesRes]) => {
         const list = unwrapList<ManagedUser>(usersRes).rows
         const rows = Array.isArray(list) ? list : []
@@ -31,8 +33,13 @@ export function useUsersData() {
         const roleList = rolesRes.data ?? []
         setRoles(roleList.filter((r: AvailableRole) => r.name !== 'super_admin' && r.name !== 'tenant_admin'))
       })
-      .catch(err => setError(err?.response?.status === 403 ? t('noAccess') : t('loadError')))
-      .finally(() => setLoading(false))
+      .catch(err => {
+        // A cancelled request is the cleanup, not a failure.
+        if (ctrl.signal.aborted) return
+        setError(err?.response?.status === 403 ? t('noAccess') : t('loadError'))
+      })
+      .finally(() => { if (!ctrl.signal.aborted) setLoading(false) })
+    return () => ctrl.abort()
   }, [])
 
   // Optimistically set a user's icon colour (PUT /users/{id}); revert on failure.

@@ -8,6 +8,9 @@
 import api, { unwrap, unwrapList } from '@/lib/api'
 
 // List all subscriptions for the active tenant (no signing secret).
+// J-014 (CONTRACT-CHANGELOG): the subscription url column and its validation are max:255; longer answers 422.
+export const WEBHOOK_URL_MAX = 255
+
 export const listSubscriptions = () => api.get('/webhook-subscriptions').then(unwrapList)
 
 // Full detail incl. event_types and url (no secret).

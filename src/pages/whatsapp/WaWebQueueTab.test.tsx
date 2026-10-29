@@ -26,8 +26,8 @@ vi.mock('./hooks/useWaWebQueue', () => ({
   useWaWebQueueList: (status?: string) => mockList(status),
   useWaWebQueueStats: (active: boolean) => mockStats(active),
   useWaWebQueueActions: () => ({
-    sendNow: { mutate: sendNowMutate, isPending: sendNowPending }, pause: { mutate: pauseMutate, isPending: false },
-    retry: { mutate: retryMutate, isPending: false }, cancel: { mutate: cancelMutate, isPending: false },
+    sendNow: { mutate: sendNowMutate, isPendingFor: (id: string) => sendNowPending && id === 'q1' }, pause: { mutate: pauseMutate, isPendingFor: () => false },
+    retry: { mutate: retryMutate, isPendingFor: () => false }, cancel: { mutate: cancelMutate, isPendingFor: () => false },
   }),
 }))
 
@@ -79,6 +79,19 @@ describe('WaWebQueueTab', () => {
     mockStats.mockReturnValue({ data: [], isLoading: false })
     render(<WaWebQueueTab status="" canManage />)
     expect(screen.getByRole('button', { name: i18n.t('whatsapp:waWebQueue.action.sendNow') })).toBeDisabled()
+  })
+
+  // Only the row whose own send is in flight is disabled; a sibling row stays usable.
+  it('keeps the send-now button of another row enabled while q1 is pending', async () => {
+    sendNowPending = true
+    mockList.mockReturnValue({ data: [row({ id: 'q1', status: 'paused' }), row({ id: 'q2', status: 'paused' })], isLoading: false, isError: false })
+    mockStats.mockReturnValue({ data: [], isLoading: false })
+    render(<WaWebQueueTab status="" canManage />)
+    const buttons = screen.getAllByRole('button', { name: i18n.t('whatsapp:waWebQueue.action.sendNow') })
+    expect(buttons[0]).toBeDisabled()
+    expect(buttons[1]).toBeEnabled()
+    await userEvent.click(buttons[1])
+    expect(sendNowMutate).toHaveBeenCalledWith('q2')
   })
 
   it('cancel action calls the mutation with the row id', async () => {

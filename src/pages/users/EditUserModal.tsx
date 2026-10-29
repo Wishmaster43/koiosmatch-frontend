@@ -94,7 +94,10 @@ export default function EditUserModal({ user, onClose, onSaved }: {
       await api.post(`/users/${user.id}/invite`)
       notifySuccess(t('invite.resent', { email: user.email ?? '' }))
     } catch (err) {
-      notifyError(extractApiError(err, t('invite.resendFailed')))
+      // Map by code/status, never the raw server message: this endpoint has no domain message worth showing (404 model text, 429 "Too Many Attempts.").
+      const status = (err as { response?: { status?: number } })?.response?.status
+      const key = apiErrorKey(err)
+      notifyError(key ? t(key, { ns: 'common' }) : status === 429 ? t('invite.resendThrottled') : t('invite.resendFailed'))
     }
   }
   // VALIDATIE-LIVE-1-rest: live, on-blur/typing format check for email — own

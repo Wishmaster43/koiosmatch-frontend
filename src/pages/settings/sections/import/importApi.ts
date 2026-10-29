@@ -56,7 +56,7 @@ export interface ImportRunResult {
 
 // Parse the filename the backend sets via Content-Disposition. Mirrors
 // ExportSettings.jsx's own parseFilename/downloadCsv — duplicated rather than
-// imported because this task's scope is limited to the Importeren files; a later
+// imported because this task's scope is limited to the import files; a later
 // pass could extract both into one shared lib/downloadBlob.ts.
 function parseFilename(header?: string | null): string | null {
   if (!header) return null
@@ -69,7 +69,7 @@ function parseFilename(header?: string | null): string | null {
 // axios client (cookie + CSRF already attached), never a bare <a href> navigation.
 export async function downloadImportTemplate(entity: string): Promise<void> {
   const res = await api.get(`/imports/${entity}/template.csv`, { responseType: 'blob' })
-  const filename = parseFilename(res.headers?.['content-disposition']) ?? `import-voorbeeld-${entity}.csv`
+  const filename = parseFilename(res.headers?.['content-disposition']) ?? `import-example-${entity}.csv`
   const url = URL.createObjectURL(res.data as Blob)
   const a = document.createElement('a')
   a.href = url

@@ -154,6 +154,7 @@
     "resendTitle": "Send a new invitation?",
     "resendConfirm": "{{email}} will receive a new link to set a password. Earlier links expire.",
     "resent": "Invitation resent to {{email}}",
-    "resendFailed": "Sending failed"
+    "resendFailed": "Sending failed",
+    "resendThrottled": "Too many invitations sent, try again in a minute"
   }
 }

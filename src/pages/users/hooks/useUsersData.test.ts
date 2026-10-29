@@ -53,3 +53,18 @@ describe('useUsersData · setColor', () => {
     expect(notifyError).toHaveBeenCalledWith('saveFailed')
   })
 })
+
+describe('useUsersData · load', () => {
+  beforeEach(() => vi.clearAllMocks())
+
+  it('requests /users and /roles once per mount, each with an abort signal that fires on unmount', async () => {
+    vi.mocked(api.get).mockResolvedValue({ data: { data: [] } })
+    const { unmount } = renderHook(() => useUsersData())
+    expect(api.get).toHaveBeenCalledTimes(2)
+    const calls = vi.mocked(api.get).mock.calls as unknown as [string, { signal: AbortSignal }][]
+    expect(calls.map(c => c[0])).toEqual(['/users', '/roles'])
+    expect(calls[0][1].signal.aborted).toBe(false)
+    unmount()
+    expect(calls[0][1].signal.aborted).toBe(true)
+  })
+})

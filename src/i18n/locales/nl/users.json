@@ -154,6 +154,7 @@
     "resendTitle": "Nieuwe uitnodiging sturen?",
     "resendConfirm": "{{email}} krijgt een nieuwe link om een wachtwoord in te stellen. Eerdere links vervallen.",
     "resent": "Uitnodiging opnieuw verstuurd naar {{email}}",
-    "resendFailed": "Versturen mislukt"
+    "resendFailed": "Versturen mislukt",
+    "resendThrottled": "Te veel uitnodigingen verstuurd, probeer het over een minuut opnieuw"
   }
 }

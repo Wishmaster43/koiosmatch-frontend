@@ -4,6 +4,7 @@
 import { describe, it, expect } from 'vitest'
 import { render, screen } from '@testing-library/react'
 import i18n from '@/i18n'
+import { sectionTitleStyle } from '@/components/ui/typography'
 import IntegrationTestResults from './IntegrationTestResults'
 
 const t = (key: string | string[], opts?: Record<string, unknown>) => i18n.t(key, { ns: 'settings', ...opts }) as string
@@ -45,5 +46,25 @@ describe('IntegrationTestResults', () => {
     expect(screen.getByText(t('integrations.reason.auth_failed'))).toBeInTheDocument()
     expect(screen.getByText('Invalid API key.')).toBeInTheDocument()
     expect(screen.getByText(t('integrations.connection.correlation', { id: 'corr-2' }))).toBeInTheDocument()
+  })
+
+  it('renders titles through the SectionTitle atom without a local weight override', () => {
+    render(
+      <IntegrationTestResults
+        t={t}
+        result={{
+          ok: false,
+          results: {
+            token_api: { ok: true, connected_as: 'Bureau X' },
+            company_api: { ok: false, reason_code: 'auth_failed' },
+          },
+        }}
+      />,
+    )
+    const title = screen.getByText(t('integrations.connection.tokenApiTitle'))
+    expect(title).toHaveStyle({ fontWeight: String(sectionTitleStyle.fontWeight) })
+    expect(title.tagName).toBe('DIV')
+    expect(screen.getByText(t('integrations.connection.companyApiTitle'))).toBeInTheDocument()
+    expect(screen.getByText(new RegExp(t('integrations.reason.auth_failed')))).toBeInTheDocument()
   })
 })

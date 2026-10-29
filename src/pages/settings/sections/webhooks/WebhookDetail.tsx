@@ -7,7 +7,7 @@ import Spinner from '@/components/ui/Spinner'
 import { CredentialActionMenu } from '@/pages/settings/components/CredentialActionMenu'
 import CalloutBox from '@/components/ui/CalloutBox'
 import { useConfirm } from '@/hooks/useConfirm'
-import { getSubscription, updateSubscription, deleteSubscription, regenerateSecret } from './webhooksApi'
+import { getSubscription, updateSubscription, deleteSubscription, regenerateSecret, WEBHOOK_URL_MAX } from './webhooksApi'
 import EventCatalog from './EventCatalog'
 import SettingsDetailHeader from '@/pages/settings/components/SettingsDetailHeader'
 import SecretRevealBox from '@/pages/settings/components/SecretRevealBox'
@@ -194,6 +194,7 @@ export default function WebhookDetail({ subId, listRow, onBack, onPatch, onDelet
               <label style={labelStyle}>{t('webhooks.outgoing.field.url')}</label>
               <input
                 value={form.url ?? ''}
+                maxLength={WEBHOOK_URL_MAX}
                 onChange={(e: ChangeEvent<HTMLInputElement>) => setForm((f) => ({ ...f, url: e.target.value }))}
                 // eslint-disable-next-line huisstijlLegacy/no-restricted-syntax -- the input element itself must carry the font; the Mono atom renders a separate element and cannot apply to native input text
                 style={{ ...inputStyle, fontFamily: "'JetBrains Mono', monospace" }}

@@ -98,4 +98,16 @@ describe('useWaWebQueueActions', () => {
     })
     await waitFor(() => expect(api.post).toHaveBeenCalledTimes(2))
   })
+
+  // Per-row pending: only the row whose request is in flight reports pending.
+  it('isPendingFor is true only for the in-flight row and clears when it settles', async () => {
+    let resolvePost: (() => void) | undefined
+    vi.mocked(api.post).mockImplementation(() => new Promise(res => { resolvePost = () => res({ data: {} }) }))
+    const { result } = renderHook(() => useWaWebQueueActions(), { wrapper })
+    act(() => { result.current.sendNow.mutate('row-1') })
+    await waitFor(() => expect(result.current.sendNow.isPendingFor('row-1')).toBe(true))
+    expect(result.current.sendNow.isPendingFor('row-2')).toBe(false)
+    await act(async () => { resolvePost?.() })
+    await waitFor(() => expect(result.current.sendNow.isPendingFor('row-1')).toBe(false))
+  })
 })

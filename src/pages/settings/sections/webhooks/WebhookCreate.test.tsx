@@ -101,4 +101,21 @@ describe('WebhookCreate — the create request', () => {
       expect(secretDisplay).toBeInTheDocument()
     })
   })
+
+  it('caps the url input at 255 characters (J-014)', () => {
+    renderWithQueryClient(<WebhookCreate onBack={vi.fn()} onCreated={vi.fn()} />)
+    expect(screen.getByLabelText(st('webhooks.outgoing.field.url'))).toHaveAttribute('maxLength', '255')
+  })
+
+  it('shows the server 422 reason instead of the generic failure text', async () => {
+    const reason = 'The url may not be greater than 255 characters.'
+    vi.mocked(api.post).mockRejectedValue({ response: { status: 422, data: { errors: { url: [reason] } } } })
+    const user = userEvent.setup()
+    renderWithQueryClient(<WebhookCreate onBack={vi.fn()} onCreated={vi.fn()} />)
+
+    await fillAndSubmit(user)
+
+    expect(await screen.findByText(reason)).toBeInTheDocument()
+    expect(screen.queryByText(st('webhooks.outgoing.createError'))).not.toBeInTheDocument()
+  })
 })

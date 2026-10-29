@@ -154,6 +154,7 @@
     "resendTitle": "Enviar um novo convite?",
     "resendConfirm": "{{email}} receberá uma nova ligação para definir uma palavra-passe. As ligações anteriores expiram.",
     "resent": "Convite reenviado para {{email}}",
-    "resendFailed": "Falha no envio"
+    "resendFailed": "Falha no envio",
+    "resendThrottled": "Demasiados convites enviados, tente novamente dentro de um minuto"
   }
 }

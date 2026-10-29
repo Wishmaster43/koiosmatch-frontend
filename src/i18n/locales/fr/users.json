@@ -154,6 +154,7 @@
     "resendTitle": "Envoyer une nouvelle invitation ?",
     "resendConfirm": "{{email}} recevra un nouveau lien pour définir un mot de passe. Les liens précédents expirent.",
     "resent": "Invitation renvoyée à {{email}}",
-    "resendFailed": "Échec de l’envoi"
+    "resendFailed": "Échec de l’envoi",
+    "resendThrottled": "Trop d’invitations envoyées, réessayez dans une minute"
   }
 }

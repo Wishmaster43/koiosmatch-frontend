@@ -154,6 +154,7 @@
     "resendTitle": "Neue Einladung senden?",
     "resendConfirm": "{{email}} erhält einen neuen Link zum Festlegen eines Passworts. Frühere Links verfallen.",
     "resent": "Einladung erneut an {{email}} gesendet",
-    "resendFailed": "Senden fehlgeschlagen"
+    "resendFailed": "Senden fehlgeschlagen",
+    "resendThrottled": "Zu viele Einladungen gesendet, versuchen Sie es in einer Minute erneut"
   }
 }

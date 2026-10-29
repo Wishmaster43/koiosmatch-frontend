@@ -154,6 +154,7 @@
     "resendTitle": "Inviare un nuovo invito?",
     "resendConfirm": "{{email}} riceverà un nuovo link per impostare una password. I link precedenti scadono.",
     "resent": "Invito inviato di nuovo a {{email}}",
-    "resendFailed": "Invio non riuscito"
+    "resendFailed": "Invio non riuscito",
+    "resendThrottled": "Troppi inviti inviati, riprova tra un minuto"
   }
 }
