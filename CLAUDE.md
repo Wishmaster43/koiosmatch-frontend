@@ -1579,3 +1579,39 @@ every lane, verifier and manager from now on.
   names it, is render-identical by construction (JSX moved verbatim, props unchanged), and the verifier states
   per file what a user sees before and after; a behaviour change there (an accept filter, a hidden block) is
   named to Danny in the same status message (VISIBLE-FIX-IS-REPORTED-1).**
+
+## 19. Lessons from the post-decision evening of ONIX-RECHECK-1 (29-10-2026: GAPS/TENANT-GATE lanes, the HelloFlex send, and MAJORS-FE-1 step 1, vitest 2 → 5; each rule was paid for with a measured breakage)
+
+- **BARREL-HEAVY-1 — a barrel never re-exports a module that imports a heavy library.** The candidate barrel
+  re-exported ONE pdf-side symbol (CvDocument / paletteFor) and put the whole @react-pdf engine (480 kB gzip)
+  into the chunk every barrel consumer loads: BARREL-DATETIME-LES at bundle scale. `src/lib/heavyDeps.houseStyle.test.js`
+  and `src/components/forms/entryGraph.guard.test.js` fail on it now.
+- **TENANT-GATE-FE-1 — a comment that promises what the deps do not deliver is DOCS-CLAIM-1 inside code.** The
+  shell providers claimed to refetch "per login/tenant-switch" while their effect deps were `[user?.id]` and they
+  fired bureau routes before the bureau pick (400 tenant_required in Danny's console). The fix of two identical
+  effect heads created a jscpd clone on the spot (CLONE-BY-CONSTRUCTION-1), so the shared `useBureauScope` hook
+  landed with it.
+- **DOCS-REBASE-1 — after every conflict resolution, grep the file for the change you meant to land before
+  pushing.** Keeping the HEAD side of a WORKLIST hunk silently dropped the FE marker move that sat in the same hunk;
+  the commit said "1 file changed" and looked fine.
+- **LANDING-TESTGLOB-1 — the landing log must SHOW a bucket's test file in its vitest line, or the gate did not run
+  it.** land.sh's bucket glob matched only `.test.(ts|tsx|js|jsx)`, so `.test.mjs` files beside the gate scripts
+  were never run by the landing that introduced them (only CI's full suite covered them). The glob now includes
+  mjs/cjs; a test in a new extension or folder is checked against the landing log, not assumed.
+- **TOOLCHAIN-BUCKET-1 — a bucket that changes the test toolchain in the lock (vitest/jsdom/jest-dom) is gated
+  honestly only in a worktree with its OWN `npm ci`; the landing trees symlink the shared node_modules, so the shared
+  WC is reconciled to the new lock (`npm install`, lock byte-identical afterwards) BEFORE the landing.** Measured
+  on MAJORS-1: the jsdom-30 serialisation fix ("transparent 84%") would have gone red on jsdom 29 for the wrong reason.
+- **TEARDOWN-LOG-1 — a full-run log line `stderr | <file>` without a test name is a finding, not noise.** vitest 5
+  reports a console log still pending when the worker closes as an unhandled error and exits 1 on an all-green run;
+  vitest 2 swallowed it. The source was the API client's dev log on lookup requests that nine unmocked test trees
+  fired and never awaited. A test that renders a tree with lookups mocks the seam with the house form
+  (`vi.mock('@/lib/api', importActual + offline default)`); the race is timing-dependent, so the inventory comes from
+  the full-run log (`grep -E "^stderr \| [^ ]+\.test\.[a-z]+$"`), never from one green run.
+- **DYNAMIC-IMPORT-MOCK-1 — a dynamic `import('@/lib/api')` inside a hook escapes the module mock of that path.**
+  Measured in `useLookupOptions`: the requests reached the real interceptor while the static importers were
+  mocked. Test-side: mock the hook. Code-side: a static import, since the module is already in the graph and the
+  dynamic import splits nothing.
+- **TEST-EDIT-TSC-1 — the per-file vitest run is not the type gate for a test edit.** A `vi.mock` block inserted into
+  a test that never imported `vi` passed vitest (the mock hoister injects the import) and failed the landing on tsc
+  (10 × TS2304). An edit that adds `vi.` / `expect.` / `it.` usage runs `tsc --noEmit` before the landing.
