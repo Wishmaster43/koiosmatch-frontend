@@ -123,9 +123,18 @@
     "below_target": {
       "title": "{{label}} is below target",
       "body": "{{label}} was {{value}} against a target of {{target}} ({{period}})."
+    },
+    "labels": {
+      "new_candidates_target": "New candidates",
+      "open_tasks_target": "Open tasks",
+      "daily_calls_target": "Calls made",
+      "uncalled_warning_threshold": "Contacts still to call",
+      "placements_target": "New matches",
+      "fill_rate_target": "Vacancy fill rate"
     }
   },
   "facebook": {
+    "forms_suffix": " Forms: {{forms}}.",
     "lead_pending": {
       "title": "Facebook lead waiting to be retrieved",
       "body": "Facebook leads that have been waiting to be retrieved for over 24 hours: {{count}}.{{forms}} Check the Facebook connection."
@@ -137,6 +146,9 @@
     "leads_retrieval_missing": {
       "title": "Facebook app is missing leads_retrieval",
       "body": "This agency's Facebook app has no leads_retrieval permission, so missed leads cannot be recovered. Request the permission in Meta."
+    },
+    "lead_archived_candidate": {
+      "title": "Facebook lead linked to an archived candidate"
     }
   }
 }

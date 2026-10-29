@@ -99,3 +99,23 @@ describe('api · coded 401s (SESSION-CODES-FE-1)', () => {
     expect(sessionStorage.getItem('km_session_revoked')).toBeNull()
   })
 })
+
+describe('api · boot probe /auth/me (ONIX C-005)', () => {
+  beforeEach(() => { sessionStorage.clear() })
+
+  it('a coded session_revoked 401 on /auth/me sets the revoked flag without an event', async () => {
+    const seen = vi.fn()
+    window.addEventListener('km:auth-expired', seen)
+    const err = { response: { status: 401, data: { code: 'session_revoked' } }, config: { url: '/auth/me', method: 'get' } }
+    await expect(rejected()(err)).rejects.toBe(err)
+    expect(sessionStorage.getItem('km_session_revoked')).toBe('1')
+    expect(seen).not.toHaveBeenCalled()
+    window.removeEventListener('km:auth-expired', seen)
+  })
+
+  it('an uncoded 401 on /auth/me stays quiet', async () => {
+    const err = { response: { status: 401, data: {} }, config: { url: '/auth/me', method: 'get' } }
+    await expect(rejected()(err)).rejects.toBe(err)
+    expect(sessionStorage.getItem('km_session_revoked')).toBeNull()
+  })
+})

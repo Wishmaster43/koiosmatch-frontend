@@ -68,6 +68,22 @@ describe('pushSubscription', () => {
     })
   })
 
+  it('subscribe(): a refused registration (422) drops the browser subscription and rethrows', async () => {
+    installBrowserMocks()
+    fakeSubscription.unsubscribe.mockClear()
+    vi.mocked(api.get).mockResolvedValue({ data: { key: 'QUFBQUFBQUFBQUFB' } })
+    const refusal = { response: { status: 422, data: { errors: { endpoint: ['Unknown push service'] } } } }
+    vi.mocked(api.post).mockRejectedValue(refusal)
+
+    await expect(subscribe()).rejects.toBe(refusal)
+
+    expect(api.post).toHaveBeenCalledWith('/push/subscriptions', {
+      endpoint: 'https://push.example/abc',
+      keys: { p256dh: 'p256dh-key', auth: 'auth-key' },
+    })
+    expect(fakeSubscription.unsubscribe).toHaveBeenCalled()
+  })
+
   it('subscribe(): throws and never POSTs when permission is denied', async () => {
     installBrowserMocks({ permission: 'denied' })
     await expect(subscribe()).rejects.toThrow('push_permission_denied')

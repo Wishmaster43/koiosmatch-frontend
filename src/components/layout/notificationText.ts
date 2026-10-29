@@ -12,6 +12,7 @@
  */
 import i18n from '@/i18n'
 import type { AppNotification } from '@/hooks/useNotifications'
+import { localizeNotificationParams } from './notificationParams'
 
 export type TFunction = (key: string, opts?: Record<string, unknown>) => string
 
@@ -37,8 +38,9 @@ function resolveHalf(key: string | null | undefined, serverText: string | undefi
 
 // The row's title/body, resolved to the viewing user's language.
 export function notificationText(n: AppNotification, t: TFunction): { title: string; body: string } {
+  const params = localizeNotificationParams(n, t)
   return {
-    title: resolveHalf(n.title_key, n.title, n.params, t),
-    body: resolveHalf(n.body_key, n.body, n.params, t),
+    title: resolveHalf(n.title_key, n.title, params, t),
+    body: resolveHalf(n.body_key, n.body, params, t),
   }
 }

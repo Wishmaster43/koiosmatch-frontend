@@ -58,7 +58,13 @@ export async function subscribe(): Promise<void> {
     userVisibleOnly: true,
     applicationServerKey: urlBase64ToUint8Array(key) as BufferSource,
   })
-  await api.post('/push/subscriptions', toSubscriptionBody(subscription))
+  // A refused registration must not leave the browser holding a subscription the server never accepted.
+  try {
+    await api.post('/push/subscriptions', toSubscriptionBody(subscription))
+  } catch (err) {
+    await subscription.unsubscribe().catch(() => {})
+    throw err
+  }
 }
 
 /**

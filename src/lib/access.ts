@@ -120,6 +120,13 @@ const SUB_PAGE_GATES: Record<string, string> = {
   // Deep-link-only destination behind the coupling_errors KPI (K-173 fase 5) —
   // no sidebar entry, gated the same as its parent list (candidates).
   'coupling-errors': 'candidates',
+  // Shiftmanager drill-downs inherit the parent's 'sm' module gate (+ role whitelist).
+  'details.candidates':  'shiftmanager',
+  'details.customers':   'shiftmanager',
+  'details.locations':   'shiftmanager',
+  'details.departments': 'shiftmanager',
+  'details.contacts':    'shiftmanager',
+  'details.orders':      'shiftmanager',
 }
 
 // Pages that can additionally be restricted at the user/role level via page.*
@@ -175,6 +182,10 @@ export function canAccessPage(pageId: string, auth?: AuthLike | null): boolean {
   // for the tenant, so its pages stay hidden everywhere (Danny 2026-07-02). Server 403s too.
   const reqModule = PAGE_REQUIRED_MODULE[base]
   if (reqModule && !hasModule(reqModule, auth?.activeTenant ?? auth?.user?.tenant)) return false
+
+  // A sub-page inherits its parent's module gate for everyone too (details.candidates needs 'sm', also for a super admin).
+  const parentModule = PAGE_REQUIRED_MODULE[SUB_PAGE_GATES[pageId] ?? '']
+  if (parentModule && !hasModule(parentModule, auth?.activeTenant ?? auth?.user?.tenant)) return false
 
   // Super admins bypass the role/access-page gates below (but not the module gate above).
   if (auth?.user?.is_super_admin === true) return true

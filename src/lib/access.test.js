@@ -96,3 +96,15 @@ describe('canUseKoiosAssist — PRIJSMODEL-C any-of gate (koios_ai OR koios_assi
     expect(canUseKoiosAssist({ user: { is_super_admin: true }, activeTenant: { modules: ['ats'] } })).toBe(true)
   })
 })
+
+// Shiftmanager drill-downs inherit the 'sm' module gate.
+describe('canAccessPage: details.* Shiftmanager drill-downs', () => {
+  const ats = { user: { is_super_admin: true }, activeTenant: { modules: ['ats'] } }
+  const sm = { user: { is_super_admin: true }, activeTenant: { modules: ['ats', 'sm'] } }
+  it('is closed without the sm module and open with it', () => {
+    for (const id of ['details.candidates', 'details.orders']) {
+      expect(canAccessPage(id, ats)).toBe(false)
+      expect(canAccessPage(id, sm)).toBe(true)
+    }
+  })
+})

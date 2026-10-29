@@ -240,6 +240,18 @@ describe('MyNotificationsSettings', () => {
       expect(notifyError).toHaveBeenCalledWith(t('notifications.push.subscribeFailed'))
     })
 
+    it('shows the server refusal text (422) and rolls the switch back', async () => {
+      vi.mocked(pushSubscription.subscribe).mockRejectedValue({ response: { status: 422, data: { errors: { endpoint: ['Unknown push service'] } } } })
+      const user = userEvent.setup()
+      render(<MyNotificationsSettings />)
+      const toggle = await screen.findByRole('switch', { name: t('notifications.push.title') })
+
+      await user.click(toggle)
+
+      await waitFor(() => expect(toggle).toHaveAttribute('aria-checked', 'false'))
+      expect(notifyError).toHaveBeenCalledWith('Unknown push service')
+    })
+
     it('renders disabled with an honest notice when unsupported (§3, no fake affordance)', async () => {
       vi.mocked(pushSubscription.isSupported).mockReturnValue(false)
       render(<MyNotificationsSettings />)

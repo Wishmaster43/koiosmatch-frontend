@@ -123,9 +123,18 @@
     "below_target": {
       "title": "{{label}} ligt onder het doel",
       "body": "{{label}} stond op {{value}} bij een doel van {{target}} ({{period}})."
+    },
+    "labels": {
+      "new_candidates_target": "Nieuwe kandidaten",
+      "open_tasks_target": "Open taken",
+      "daily_calls_target": "Gebelde contacten",
+      "uncalled_warning_threshold": "Nog te bellen contacten",
+      "placements_target": "Nieuwe matches",
+      "fill_rate_target": "Vervullingsgraad vacatures"
     }
   },
   "facebook": {
+    "forms_suffix": " Formulieren: {{forms}}.",
     "lead_pending": {
       "title": "Facebook-lead wacht op ophalen",
       "body": "Facebook-leads die al meer dan 24 uur op ophalen wachten: {{count}}.{{forms}} Controleer de Facebook-koppeling."
@@ -137,6 +146,9 @@
     "leads_retrieval_missing": {
       "title": "Facebook-app mist leads_retrieval",
       "body": "De Facebook-app van dit bureau heeft geen leads_retrieval-toestemming, dus gemiste leads kunnen niet worden hersteld. Vraag de toestemming aan in Meta."
+    },
+    "lead_archived_candidate": {
+      "title": "Facebook-lead gekoppeld aan gearchiveerde kandidaat"
     }
   }
 }

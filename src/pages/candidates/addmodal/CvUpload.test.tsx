@@ -111,6 +111,13 @@ describe('CV upload · the request', () => {
     expect(await screen.findByText('modal.cv.error.notPdf')).toBeInTheDocument()
   })
 
+  it('refuses a .gif in the browser with no POST and the policy sentence (UPLOAD-POLICY-1)', async () => {
+    render(<AddCandidateModal onClose={noop} />)
+    await upload(new File(['x'], 'photo.gif', { type: 'image/gif' }))
+    expect(postMock).not.toHaveBeenCalled()
+    expect(await screen.findByText('modal.cv.error.notPdf')).toBeInTheDocument()
+  })
+
   it.each(['jpg', 'jpeg', 'png', 'doc', 'docx'])(
     'uploads a .%s file — PARSE-FORMATS-1 widened the accepted set to match the backend',
     async (ext) => {
