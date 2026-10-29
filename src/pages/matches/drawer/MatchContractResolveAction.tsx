@@ -1,8 +1,8 @@
 /**
  * MatchContractResolveAction — CLAIM-RESOLVE-1: beside the match's contract
  * status, while a HelloFlex send is stuck (`contractStatus === 'sending'`)
- * this shows the "sinds …" age and a dangerSoft "Markeer als niet verzonden"
- * button that opens the shared ResolveClaimDialog. On success the match's
+ * this shows the sending-since age (drawer.contract.sendingSince) and a dangerSoft
+ * mark-as-not-sent button (drawer.contract.resolveNotSent) that opens the shared ResolveClaimDialog. On success the match's
  * contractStatus flips to 'failed' locally (via onUpdate), so only THIS
  * action disappears immediately — MatchClientRow's lock caption stays (it
  * locks on any contractStatus !== 'none', and 'failed' still qualifies); the

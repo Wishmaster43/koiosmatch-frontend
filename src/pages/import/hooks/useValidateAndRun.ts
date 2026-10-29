@@ -25,7 +25,7 @@ type AsyncState =
 
 // Explicit-file dry-run/run pair for this wizard's preview+confirm steps (see the module doc above for why it does not reuse useImportWizard's closure-based file).
 export function useValidateAndRun(entity: string) {
-  const { t } = useTranslation()
+  const { t, i18n } = useTranslation()
   const [preview, setPreview] = useState<AsyncState>({ status: 'idle' })
   const [run, setRun] = useState<AsyncState>({ status: 'idle' })
 
@@ -39,10 +39,10 @@ export function useValidateAndRun(entity: string) {
       setPreview({ status: 'success', result })
       return true
     } catch (err) {
-      setPreview({ status: 'error', message: uploadErrorMessage(err, t, '') })
+      setPreview({ status: 'error', message: uploadErrorMessage(err, t, '', i18n.language) })
       return false
     }
-  }, [entity, t])
+  }, [entity, t, i18n.language])
 
   // The real write — only ever called once the caller confirms a validated file.
   const confirm = useCallback(async (file: File): Promise<boolean> => {
@@ -52,10 +52,10 @@ export function useValidateAndRun(entity: string) {
       setRun({ status: 'success', result })
       return true
     } catch (err) {
-      setRun({ status: 'error', message: uploadErrorMessage(err, t, '') })
+      setRun({ status: 'error', message: uploadErrorMessage(err, t, '', i18n.language) })
       return false
     }
-  }, [entity, t])
+  }, [entity, t, i18n.language])
 
   // Clears both async states back to idle, e.g. when the caller re-maps rows and the previous preview/run result no longer applies.
   const reset = useCallback(() => {

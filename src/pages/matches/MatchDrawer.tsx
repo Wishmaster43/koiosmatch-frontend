@@ -1,36 +1,15 @@
 /**
- * MatchDrawer — the drill-down for one match, built on the shared EntityDrawer +
- * EntityHeader shell (§3A blueprint). The match facts (candidate/vacancy/client/
- * score/stage) stay read-only — a match is the continuation of a Hired
- * application (§3B) and those are derived — but the match's contract/financial
- * layer IS editable in-place. Content tabs: Overzicht (facts/score/status,
- * PLUS the candidate/vacancy/klant relation hyperlinks that used to live on
- * their own Relaties tab — M9 of the overzicht-layout cluster folded that
- * tab's whole content into Overview and removed it), Statistieken
- * (MOVED-FROM-OVERVIEW-1, Danny 22-08: the MATCH-ORDINAL-1 ordinal footnote
- * that used to sit under Overview's Matchgegevens card now lives here, WITH
- * who/what the other matches on each axis are — StatisticsTab), Contract &
- * financieel (MatchContractSection, moved as-is) and
- * Notities (NT-MATCH-1, 2026-08-04 — MatchNoteController now exists, so the
- * placeholder note above about "no /matches/{id}/notes route yet" no longer
- * applies). ChangelogTab renders BOTH as the title-row icon-popover (quick
- * glance) and as the Tijdlijn tab (TIJDLIJN-OVERAL, Danny 27-08). Header
- * meta row (DRAWER-STD-1, 2026-07-14): a standard Status picker (the same
- * /match-statuses lookup the board/table use, ~160) + a real Eigenaar picker
- * (MATCH-OWNER-1, 2026-07-31) — PATCH /matches/{id} accepts `owner_id`
- * (UpdateMatchRequest → PlacementRules trait, tenant-validated), so reassigning
- * persists like every other entity. A "Beëindigen" header action
- * (MATCH-TERMINATE-1, 2026-08-04) opens TerminateMatchModal, which POSTs
- * /matches/{id}/terminate and hands the updated match back through onUpdate —
- * hidden once the match's status already carries the tenant's is_closed flag,
- * or once archived. A "Verlengen" header action (G04/MATCH-RENEWAL-1,
- * 2026-08-08) opens RenewMatchModal, which POSTs /matches/{id}/renew and hands
- * the updated match back the same way — visible whenever the permission is
- * there, but DISABLED with an honest reason once closed/archived (unlike
- * terminate's hide-outright, per G04: "disabled with a reason where the BE
- * refuses" is the more informative choice for an already-ended match). Thin
- * container: header config + tab list + the useMatchApproval wiring; all body
- * markup lives in the tab/header components.
+ * MatchDrawer — the drill-down for one match on the shared EntityDrawer +
+ * EntityHeader shell (§3A). Match facts (candidate/vacancy/client/score/stage)
+ * are read-only, derived from the Hired application (§3B); the contract and
+ * financial layer is editable in place. Tabs: Overview (facts, score, status and
+ * the candidate/vacancy/client relation links), Contract & financial, Notes
+ * (NT-MATCH-1), Timeline (TIJDLIJN-OVERAL, also the title-row changelog popover)
+ * and Statistics last (MOVED-FROM-OVERVIEW-1). Header meta: status picker (the
+ * /match-statuses lookup) and owner picker (MATCH-OWNER-1, PATCH owner_id).
+ * Header actions: terminate (MATCH-TERMINATE-1, hidden once closed or archived)
+ * and renew (MATCH-RENEWAL-1, disabled with a reason once closed or archived).
+ * Thin container: header config + tab list + the useMatchApproval wiring.
  */
 import { useState, useMemo } from 'react'
 import { useTranslation } from 'react-i18next'

@@ -246,6 +246,19 @@ describe('useSubEntitySave', () => {
     expect(result.current.fieldMessages).toEqual({})
   })
 
+  // ONIX #352: a bag that explains nothing must still show the generic message.
+  it.each([
+    ['an empty errors bag', {}],
+    ['a bag holding only the duplicate-contact id', { duplicate_contact_id: ['abc'] }],
+  ])('falls back to the generic error for %s', (_label, errors) => {
+    const { result } = renderHook(() => useSubEntitySave({
+      initial: null, apiToFormMap: API_TO_FORM, t: mockT,
+      onImported: vi.fn(), onClose: vi.fn(), importEntity: 'departments',
+    }))
+    act(() => { result.current.handleApiError({ response: { data: { errors } } }) })
+    expect(result.current.createError).toBe('common:errorGeneric')
+  })
+
   it('toggles import panel open/closed', () => {
     const { result } = renderHook(() => useSubEntitySave({
       initial: null,

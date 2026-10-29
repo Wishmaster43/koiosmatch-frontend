@@ -1,7 +1,7 @@
 /**
- * useContactEraseAction — ONIX K-005: the "Persoon wissen" dialog state + the
- * actual erase POST, extracted out of ContactDetail (§3 split trigger, file
- * passed ~430 lines) so the component only wires a button and a dialog.
+ * useContactEraseAction — ONIX K-005: the erase-person dialog state + the
+ * actual erase POST, extracted out of ContactDetail so the component only wires a button and a
+ * dialog (the file size itself is cured by ContactTitleActions).
  * SHARED-UNIT-TEST-1: own test asserts the route/body, the refresh broadcast
  * and the close callback.
  */

@@ -62,11 +62,11 @@ export default function UploadStep({ entity, canView, canImport, onFileReady }: 
 
   return (
     <FileDropZoneUI
-        dropHint={t('import.dropHere')}
+      dropHint={t('import.dropHere')}
       entity={entity}
       canView={canView}
       canImport={canImport}
-      acceptAttribute=".csv,.txt"
+      acceptAttribute={ACCEPTED_EXTENSIONS.join(',')}
       acceptedTypesHint={t('import.acceptedTypesCsvOnly')}
       downloadLabel={t('import.downloadTemplate')}
       selectLabel={t('import.selectCsv')}

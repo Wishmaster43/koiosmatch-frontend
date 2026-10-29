@@ -64,7 +64,9 @@ export function useSubEntitySave({
       // A bag key no rendered field maps to would otherwise silently fail — surface it.
       const unmapped = unmappedFormErrors(err, apiToFormMap, renderedKeys)
       const banner = formatUnmappedErrors(unmapped, t)
+      // An empty bag (or one holding only the duplicate-id metadata) explains nothing: fall back to the generic text.
       if (banner) setCreateError(banner)
+      else if (Object.keys(mapped.errors).length === 0) setCreateError(t('common:errorGeneric'))
     } else {
       setCreateError(extractApiError(err, t('common:errorGeneric')))
     }

@@ -11,7 +11,7 @@ import { useRightPanel } from '@/context/RightPanelContext'
 import { useBranchOptions } from '@/lib/useBranchOptions'
 import type { DashData } from '@/types/dashboard'
 
-// Period filter slugs — stable values sent to the backend as `period`. Labels are
+// Period filter slugs — stable values sent to the backend as `period` (a contract: the Dutch slugs vandaag/maand move only with a BE-lockstep rename). Labels are
 // translated inside the hook (a module-scope const can't call t()); Vestiging +
 // status options come live from GET /dashboard (filters.locations / filters.statuses).
 const PERIOD_VALUES = ['vandaag', 'week', 'maand', 'kwartaal', 'jaar'] as const
@@ -44,7 +44,7 @@ export function useDashboardFilterPanel({
     { key: 'branch', label: t('filters.locationLabel'), selected: selBranch,
       options: branchOptions,
       onToggle: (v: string | number) => setSelBranch(p => p.includes(v) ? p.filter(x => x !== v) : [...p, v]) },
-    { key: 'kandidaatstatus', label: t('filters.statusLabel'), selected: selStatus,
+    { key: 'status', label: t('filters.statusLabel'), selected: selStatus,
       options: (dash?.filters?.statuses ?? []).map(s => ({ value: s.value, label: s.label })),
       onToggle: (v: string) => setSelStatus(p => p.includes(v) ? p.filter(x => x !== v) : [...p, v]) },
     // Setters are stable (useState identity) but are now received as params rather than

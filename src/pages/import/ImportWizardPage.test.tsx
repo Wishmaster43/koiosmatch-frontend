@@ -145,6 +145,28 @@ describe('ImportWizardPage — mapping + editable preview', () => {
     expect(screen.queryByRole('button', { name: t('import.preview.confirm') })).not.toBeInTheDocument()
   })
 
+  // ONIX #174: a proxy 413 (no Laravel body) maps to the honest too-large sentence on both calls.
+  it('shows the too-large sentence and no Confirm button when the dry-run answers 413', async () => {
+    const user = userEvent.setup()
+    await uploadAndReachPreview(user)
+    ;(api.post as MockFn).mockRejectedValueOnce({ response: { status: 413 } })
+    await user.click(screen.getByRole('button', { name: t('import.runPreview') }))
+    expect(await screen.findByText(i18n.t('upload.tooLarge', { ns: 'common' }))).toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: t('import.preview.confirm') })).not.toBeInTheDocument()
+  })
+
+  it('shows the too-large sentence and no result when the confirm POST answers 413', async () => {
+    const user = userEvent.setup()
+    await uploadAndReachPreview(user)
+    ;(api.post as MockFn).mockResolvedValueOnce({ data: { data: { ...emptyResult(true), summary: { rows: 1, create: 1, update: 0, skip: 0, error: 0 } } } })
+    await user.click(screen.getByRole('button', { name: t('import.runPreview') }))
+    await screen.findByRole('button', { name: t('import.preview.confirm') })
+    ;(api.post as MockFn).mockRejectedValueOnce({ response: { status: 413 } })
+    await user.click(screen.getByRole('button', { name: t('import.preview.confirm') }))
+    expect(await screen.findByText(i18n.t('upload.tooLarge', { ns: 'common' }))).toBeInTheDocument()
+    expect(screen.queryByText(t('import.result.title'))).not.toBeInTheDocument()
+  })
+
   // The .xlsx entry point lives on the raw-upload screens (settings importeren,
   // the shared EntityImportCard, SubEntityImportCard) — THIS screen parses the file
   // client-side for column mapping (no xlsx parser in the repo), so it stays
