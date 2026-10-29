@@ -116,3 +116,11 @@ describe('inbound scenario codes', () => {
     expect(apiErrorMessage(err({ code: 'nope' }), t, 'fb')).toBe('fb')
   })
 })
+
+// IDEMP-BODY-1: a reused Idempotency-Key with a different body answers 422 idempotency_key_reused.
+describe('idempotency_key_reused', () => {
+  it('maps to the translated common sentence', () => {
+    const err = { response: { data: { code: 'idempotency_key_reused', message: 'x' } } }
+    expect(apiErrorKey(err)).toBe('errors.idempotencyKeyReused')
+  })
+})

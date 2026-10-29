@@ -49,6 +49,8 @@ export function extractApiError(err: unknown, fallback: string, fieldLabels?: Re
  * through one translation layer in the backend's ClaudeClient.
  */
 const ERROR_CODE_KEYS: Record<string, string> = {
+  // IDEMP-BODY-1 (422): a reused Idempotency-Key arrived with a different body or query.
+  idempotency_key_reused: 'errors.idempotencyKeyReused',
   koios_credit_exhausted: 'errors.koiosCreditExhausted',
   koios_unavailable: 'errors.koiosUnavailable',
   // HF-CONTRACTMAP-1: the manual send-to-HelloFlex path returns this 409 when the

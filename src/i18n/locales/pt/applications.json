@@ -277,6 +277,8 @@
       "no_active_connection": "Não iniciada: não há ligação WhatsApp ativa.",
       "send_failed": "Não iniciada: não foi possível enviar a primeira mensagem.",
       "candidate_in_other_interview": "Não iniciada: o candidato já está numa entrevista para outra candidatura.",
+      "already_has_session": "Não iniciada: o candidato já tem uma sessão de entrevista para este fluxo da vaga.",
+      "interview_flow_inactive": "Não iniciada: o fluxo de entrevista desta vaga está desativado.",
       "unknown": "Não iniciada: a entrevista foi ignorada."
     },
     "skippedAt": "Ignorada em {{date}}",
@@ -295,6 +297,7 @@
     },
     "stepOf": "Passo {{step}} de {{total}}",
     "filterBusy": "Em entrevista",
+    "filterSkipped": "Ignorada",
     "start": {
       "label": "Iniciar entrevista",
       "needsWorkflow": "Escolhe primeiro um fluxo de entrevista acima, ou define o predefinido na vaga.",

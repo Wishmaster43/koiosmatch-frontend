@@ -277,6 +277,8 @@
       "no_active_connection": "Niet gestart: er is geen actieve WhatsApp-koppeling.",
       "send_failed": "Niet gestart: het eerste bericht kon niet worden verstuurd.",
       "candidate_in_other_interview": "Niet gestart: de kandidaat zit al in een interview voor een andere sollicitatie.",
+      "already_has_session": "Niet gestart: de kandidaat heeft al een interviewsessie voor deze vacatureflow.",
+      "interview_flow_inactive": "Niet gestart: de interviewflow van deze vacature staat uit.",
       "unknown": "Niet gestart: het interview is overgeslagen."
     },
     "skippedAt": "Overgeslagen op {{date}}",
@@ -295,6 +297,7 @@
     },
     "stepOf": "Stap {{step}} van {{total}}",
     "filterBusy": "In interview",
+    "filterSkipped": "Overgeslagen",
     "start": {
       "label": "Interview starten",
       "needsWorkflow": "Kies eerst een interview-workflow hierboven, of stel de standaard op de vacature in.",

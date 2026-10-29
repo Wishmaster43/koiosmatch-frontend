@@ -2150,6 +2150,7 @@
           "attempts": "Tentativi",
           "lastError": "Ultimo errore",
           "nextAttempt": "Prossimo tentativo",
+          "rejectionAnnounced": "Rifiuto comunicato il",
           "retrieved": "Recuperato il",
           "candidate": "Candidato"
         },
@@ -2158,6 +2159,7 @@
         "empty": "Nessun lead con questo stato.",
         "loadError": "Impossibile caricare la coda.",
         "alreadyRetrieved": "Questo lead è già stato recuperato.",
+        "retryInFlight": "Questo lead è in fase di recupero. Riprova tra un momento.",
         "retryFailed": "Il nuovo tentativo non è riuscito."
       }
   },
@@ -4430,7 +4432,8 @@
         "relation": "Non ancora disponibile da rendere obbligatorio. Questo campo sarà aggiunto in una fase successiva.",
         "webhookStamped": "Compilato automaticamente da un sistema esterno. Non esiste un campo di inserimento da rendere obbligatorio.",
         "customFields": "I campi personalizzati hanno una propria impostazione di obbligatorietà sulla definizione del campo stesso.",
-        "setAfterCreation": "Compilato solo dopo la creazione. Renderlo obbligatorio bloccherebbe ogni nuova candidatura."
+        "setAfterCreation": "Compilato solo dopo la creazione. Renderlo obbligatorio bloccherebbe ogni nuova candidatura.",
+        "inlineCandidate": "Compilato solo per un candidato inline. L'obbligatorietà è decisa sul candidato collegato."
       }
     }
   },

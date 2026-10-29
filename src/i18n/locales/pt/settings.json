@@ -2150,6 +2150,7 @@
           "attempts": "Tentativas",
           "lastError": "Último erro",
           "nextAttempt": "Próxima tentativa",
+          "rejectionAnnounced": "Rejeição comunicada em",
           "retrieved": "Recuperado em",
           "candidate": "Candidato"
         },
@@ -2158,6 +2159,7 @@
         "empty": "Não há leads com este estado.",
         "loadError": "Não foi possível carregar a fila.",
         "alreadyRetrieved": "Este lead já foi recuperado.",
+        "retryInFlight": "Este lead está a ser recuperado neste momento. Tente novamente daqui a pouco.",
         "retryFailed": "A nova tentativa falhou."
       }
   },
@@ -4430,7 +4432,8 @@
         "relation": "Ainda não disponível para tornar obrigatório. Este campo será adicionado numa fase posterior.",
         "webhookStamped": "Preenchido automaticamente por um sistema externo. Não existe um campo de introdução para tornar obrigatório.",
         "customFields": "Os campos personalizados têm a sua própria definição de obrigatoriedade na própria definição do campo.",
-        "setAfterCreation": "Preenchido apenas após a criação. Torná-lo obrigatório bloquearia cada nova candidatura."
+        "setAfterCreation": "Preenchido apenas após a criação. Torná-lo obrigatório bloquearia cada nova candidatura.",
+        "inlineCandidate": "Preenchido apenas para um candidato inline. A obrigatoriedade é decidida no candidato associado."
       }
     }
   },

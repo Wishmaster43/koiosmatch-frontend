@@ -277,6 +277,8 @@
       "no_active_connection": "Not started: there is no active WhatsApp connection.",
       "send_failed": "Not started: the first message could not be sent.",
       "candidate_in_other_interview": "Not started: the candidate is already in an interview for another application.",
+      "already_has_session": "Not started: the candidate already has an interview session for this vacancy flow.",
+      "interview_flow_inactive": "Not started: the interview flow of this vacancy is switched off.",
       "unknown": "Not started: the interview was skipped."
     },
     "skippedAt": "Skipped on {{date}}",
@@ -295,6 +297,7 @@
     },
     "stepOf": "Step {{step}} of {{total}}",
     "filterBusy": "In interview",
+    "filterSkipped": "Skipped",
     "start": {
       "label": "Start interview",
       "needsWorkflow": "Pick an interview workflow above first, or set the default on the vacancy.",

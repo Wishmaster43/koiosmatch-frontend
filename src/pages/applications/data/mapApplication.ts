@@ -18,7 +18,7 @@ import type {
  * detail contract's interview() omits it but always sends completed_at/
  * disqualified_reason, so derive it the same way the backend does when
  * absent. Null (no session at all) stays null — that's the `interview_status=
- * none` filter bucket, never a synthetic 'none' category value.
+ * none` filter bucket (CONTRACT-FOLLOW-1: none = no session AND no skip stamp; a stamped skip is `skipped`), never a synthetic 'none' category value.
  *
  * INTERVIEW-VISIBILITY-1 is LIVE (measured 01-08 in InterviewSessionResource).
  * Which endpoint carries what is NOT uniform, so read the split before using a

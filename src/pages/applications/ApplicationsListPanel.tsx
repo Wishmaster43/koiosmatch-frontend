@@ -8,7 +8,7 @@
  */
 import type { RefObject } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Plus, Archive, MessageCircle, Pause, Users, X } from 'lucide-react'
+import { Plus, Archive, MessageCircle, Pause, SkipForward, Users, X } from 'lucide-react'
 import ViewModeToggle from '@/components/ui/ViewModeToggle'
 import { tableBoardViewOptions } from '@/components/ui/listViewOptions'
 import InsightsRow from '@/components/insights/InsightsRow'
@@ -55,6 +55,8 @@ interface ApplicationsListPanelProps {
   onToggleInterviewBusy: () => void
   interviewPaused: boolean
   onToggleInterviewPaused: () => void
+  interviewSkipped: boolean
+  onToggleInterviewSkipped: () => void
   // Loosely typed (mirrors the page's usePageMemory('apps.view', 'table') — no
   // explicit generic there, so the state itself is a plain string) — ViewModeToggle
   // is itself generic (T extends string = string) and infers its concrete union
@@ -106,6 +108,7 @@ export default function ApplicationsListPanel({
   onAddOpen, canCreate, searchEpoch, onSearch, anyFilterActive, onClearFilters,
   candidateScopeCount, onClearCandidateScope,
   showArchived, onToggleArchived, interviewBusy, onToggleInterviewBusy, interviewPaused, onToggleInterviewPaused,
+  interviewSkipped, onToggleInterviewSkipped,
   view, onViewChange,
   selectedCount, onClearSelection, onBulkSetPhase, onBulkDetach, canManage, funnelPhases,
   tableScrollRef, tableRows, loading, error, selectedId, onSelect, selectedIds, onToggleRow, onToggleAll, selectionBusy,
@@ -176,6 +179,9 @@ export default function ApplicationsListPanel({
         {/* W27: "Paused" — a real server-side interview_status=paused quick-view. */}
         <QuickViewToggle active={interviewPaused} onToggle={onToggleInterviewPaused}
           label={t('interview.category.paused')} color={interviewCategoryColor('paused')} icon={Pause} />
+        {/* CONTRACT-FOLLOW-1 A3: "Skipped" — server-side interview_status=skipped (a stamped skip reason). */}
+        <QuickViewToggle active={interviewSkipped} onToggle={onToggleInterviewSkipped}
+          label={t('interview.filterSkipped')} color="var(--text-muted)" icon={SkipForward} />
         {/* Table/board switcher — shared soft-tint component (§4), never a solid fill. */}
         <ViewModeToggle value={view} onChange={onViewChange} options={tableBoardViewOptions(t)} />
         </div>

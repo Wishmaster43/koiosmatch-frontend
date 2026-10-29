@@ -673,7 +673,7 @@ describe('InterviewStatusCard · skip line composition', () => {
 })
 
 describe('InterviewStatusCard · skipped start (INTERVIEW-SKIP-ON-APPLICATION-1)', () => {
-  const CODES = ['rejected_stage', 'placed_stage', 'no_mobile_or_consent', 'action_rule_blocked', 'no_interview_consent', 'wa_web_send_not_supported', 'no_active_connection', 'send_failed', 'ai_disclosure_missing', 'candidate_in_other_interview']
+  const CODES = ['rejected_stage', 'placed_stage', 'no_mobile_or_consent', 'action_rule_blocked', 'no_interview_consent', 'wa_web_send_not_supported', 'no_active_connection', 'send_failed', 'ai_disclosure_missing', 'candidate_in_other_interview', 'already_has_session', 'interview_flow_inactive']
 
   it.each(CODES)('renders the line for %s', code => {
     render(<InterviewStatusCard interview={null} skipReason={code} />)

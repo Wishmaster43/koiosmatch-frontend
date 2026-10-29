@@ -4,6 +4,7 @@
 export const INTERVIEW_SKIP_CODES = [
   'rejected_stage', 'placed_stage', 'no_mobile_or_consent', 'action_rule_blocked', 'no_interview_consent',
   'wa_web_send_not_supported', 'no_active_connection', 'send_failed', 'ai_disclosure_missing', 'candidate_in_other_interview',
+  'already_has_session', 'interview_flow_inactive',
 ] as const
 
 export type InterviewSkipCode = (typeof INTERVIEW_SKIP_CODES)[number]

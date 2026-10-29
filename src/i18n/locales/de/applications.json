@@ -277,6 +277,8 @@
       "no_active_connection": "Nicht gestartet: Es gibt keine aktive WhatsApp-Verbindung.",
       "send_failed": "Nicht gestartet: Die erste Nachricht konnte nicht gesendet werden.",
       "candidate_in_other_interview": "Nicht gestartet: Der Kandidat befindet sich bereits in einem Interview für eine andere Bewerbung.",
+      "already_has_session": "Nicht gestartet: Der Kandidat hat bereits eine Interviewsitzung für diesen Vakanzablauf.",
+      "interview_flow_inactive": "Nicht gestartet: Der Interviewablauf dieser Vakanz ist ausgeschaltet.",
       "unknown": "Nicht gestartet: Das Interview wurde übersprungen."
     },
     "skippedAt": "Übersprungen am {{date}}",
@@ -295,6 +297,7 @@
     },
     "stepOf": "Schritt {{step}} von {{total}}",
     "filterBusy": "Im Interview",
+    "filterSkipped": "Übersprungen",
     "start": {
       "label": "Interview starten",
       "needsWorkflow": "Wähle zuerst oben einen Interview-Workflow, oder lege den Standard auf der Stelle fest.",

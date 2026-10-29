@@ -576,6 +576,8 @@
       "syncing": "Sincronizando…",
       "syncSuccess": "Sincronización completada",
       "syncFailed": "Error al sincronizar",
+      "syncNotFound": "Este empleado no existe en Shiftmanager o sus datos personales se han borrado.",
+      "syncUnexpected": "Shiftmanager ha devuelto una respuesta inesperada. Inténtalo de nuevo más tarde.",
       "lastSynced": "Última sincronización: {{date}}"
     },
     "common": {
@@ -798,6 +800,7 @@
     "emailUnavailable": "Esta dirección de correo electrónico no se puede utilizar.",
     "inboundScenarioClash": "Ya hay otro escenario activo para este número y este carril: {{clash_name}}.",
     "inboundScenarioNumberMissing": "Este escenario no indica ningún número de esta agencia en su carril y no puede activarse.",
+    "idempotencyKeyReused": "Esta acción ya se envió con otros datos. Inténtalo de nuevo.",
     "documentNotAvailable": "Este documento aún no está disponible: el análisis antivirus no ha terminado o ha rechazado el archivo.",
     "tenantNotReady": "Esta agencia aún se está configurando o su configuración ha fallado. Inténtalo más tarde o elige otra agencia.",
     "aiDisclosureMissing": "Falta la mención obligatoria de IA en la introducción de la entrevista; modifica la plantilla antes de activarlo.",

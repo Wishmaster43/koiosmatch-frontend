@@ -576,6 +576,8 @@
       "syncing": "Sincronizzazione…",
       "syncSuccess": "Sincronizzazione riuscita",
       "syncFailed": "Sincronizzazione non riuscita",
+      "syncNotFound": "Questo dipendente non esiste in Shiftmanager oppure i dati personali sono stati cancellati.",
+      "syncUnexpected": "Shiftmanager ha risposto in modo inatteso. Riprova più tardi.",
       "lastSynced": "Ultima sincronizzazione: {{date}}"
     },
     "common": {
@@ -798,6 +800,7 @@
     "emailUnavailable": "Questo indirizzo e-mail non può essere utilizzato.",
     "inboundScenarioClash": "Un altro scenario attivo risponde già a questo numero e a questa lane: {{clash_name}}.",
     "inboundScenarioNumberMissing": "Questo scenario non indica alcun numero di questa agenzia sulla sua lane e non può essere attivato.",
+    "idempotencyKeyReused": "Questa azione è già stata inviata con dati diversi. Riprova.",
     "documentNotAvailable": "Questo documento non è ancora disponibile: la scansione antivirus non è terminata o ha rifiutato il file.",
     "tenantNotReady": "Questa agenzia è ancora in fase di configurazione o la configurazione è fallita. Riprova più tardi o scegli un'altra agenzia.",
     "aiDisclosureMissing": "Nell'introduzione del colloquio manca l'informativa obbligatoria sull'IA; modifica il modello prima di attivarlo.",

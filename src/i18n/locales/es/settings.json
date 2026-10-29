@@ -1890,6 +1890,7 @@
           "attempts": "Intentos",
           "lastError": "Último error",
           "nextAttempt": "Próximo intento",
+          "rejectionAnnounced": "Rechazo comunicado el",
           "retrieved": "Recuperado el",
           "candidate": "Candidato"
         },
@@ -1898,6 +1899,7 @@
         "empty": "No hay leads con este estado.",
         "loadError": "No se pudo cargar la cola.",
         "alreadyRetrieved": "Este lead ya se ha recuperado.",
+        "retryInFlight": "Este lead se está recuperando ahora mismo. Inténtalo de nuevo en un momento.",
         "retryFailed": "El reintento ha fallado."
       }
   },
@@ -4429,7 +4431,8 @@
         "relation": "Todavía no se puede marcar como obligatorio. Este campo se añadirá en una fase posterior.",
         "webhookStamped": "Se rellena automáticamente mediante un sistema externo. No existe un campo de entrada que hacer obligatorio.",
         "customFields": "Los campos personalizados tienen su propio ajuste de obligatoriedad en la propia definición del campo.",
-        "setAfterCreation": "Se completa después de la creación. Hacerlo obligatorio bloquearía cada nueva solicitud."
+        "setAfterCreation": "Se completa después de la creación. Hacerlo obligatorio bloquearía cada nueva solicitud.",
+        "inlineCandidate": "Solo se rellena para un candidato en línea. Si es obligatorio se decide en el candidato vinculado."
       }
     }
   },

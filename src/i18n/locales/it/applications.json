@@ -277,6 +277,8 @@
       "no_active_connection": "Non avviato: non c'è alcuna connessione WhatsApp attiva.",
       "send_failed": "Non avviato: non è stato possibile inviare il primo messaggio.",
       "candidate_in_other_interview": "Non avviato: il candidato è già in un colloquio per un'altra candidatura.",
+      "already_has_session": "Non avviato: il candidato ha già una sessione di colloquio per questo flusso della posizione.",
+      "interview_flow_inactive": "Non avviato: il flusso di colloquio di questa posizione è disattivato.",
       "unknown": "Non avviato: il colloquio è stato saltato."
     },
     "skippedAt": "Saltato il {{date}}",
@@ -295,6 +297,7 @@
     },
     "stepOf": "Passo {{step}} di {{total}}",
     "filterBusy": "In colloquio",
+    "filterSkipped": "Saltato",
     "start": {
       "label": "Avvia colloquio",
       "needsWorkflow": "Scegli prima un flusso di colloquio qui sopra, oppure imposta quello predefinito sulla posizione.",

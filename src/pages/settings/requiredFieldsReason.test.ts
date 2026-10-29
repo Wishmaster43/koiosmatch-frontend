@@ -45,3 +45,20 @@ describe('togglePhaseKeyedField', () => {
     expect(togglePhaseKeyedField(next, 'customer', 'phone', new Set())).toEqual({ lead: ['email'], customer: ['email'] })
   })
 })
+
+// CONTRACT-FOLLOW-1 A4: new_candidate reason, reason_key first layer, creatable:false rows.
+describe('CONTRACT-FOLLOW-1 field inventory', () => {
+  const t = (k: string) => `T:${k}`
+  it('maps the inline-candidate sentence and prefers a structured reason_key', () => {
+    expect(reasonI18nKey('inline candidate: the alternative create shape; required-ness is decided on candidate_id')).toBe('settings.fieldInventory.reason.inlineCandidate')
+    expect(reasonI18nKey('unknown prose', 'consent')).toBe('settings.fieldInventory.reason.consent')
+    expect(reasonI18nKey('relation — slice 2', 'bogus')).toBe('settings.fieldInventory.reason.relation')
+  })
+
+  it('shows a creatable:false row as set after creation and not requirable', () => {
+    const rows = buildInventoryRows([
+      { key: 'match_score', requirable: true, creatable: false, requires_permission: null, reason: null },
+    ], {}, () => true, t)
+    expect(rows[0]).toEqual({ key: 'match_score', labelKey: 'match_score', requirable: false, reason: 'T:settings.fieldInventory.reason.setAfterCreation' })
+  })
+})

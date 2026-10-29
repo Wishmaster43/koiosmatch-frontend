@@ -38,6 +38,8 @@ export interface FieldInventoryField {
   requires_permission: string | null
   /** Present whenever `requirable` is false — consent / financial / relation / webhook-stamped. */
   reason: string | null
+  /** Additive BE category code (CONTRACT-FOLLOW-1); absent today. */
+  reason_key?: string | null
 }
 
 export interface FieldInventoryResponse {

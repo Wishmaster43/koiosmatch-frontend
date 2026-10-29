@@ -576,6 +576,8 @@
       "syncing": "Syncing…",
       "syncSuccess": "Sync completed",
       "syncFailed": "Sync failed",
+      "syncNotFound": "This employee does not exist in Shiftmanager, or the personal data was erased.",
+      "syncUnexpected": "Shiftmanager returned an unexpected response. Try again later.",
       "lastSynced": "Last synced: {{date}}"
     },
     "common": {
@@ -798,6 +800,7 @@
     "emailUnavailable": "This e-mail address cannot be used.",
     "inboundScenarioClash": "Another active scenario already answers this number and lane: {{clash_name}}.",
     "inboundScenarioNumberMissing": "This scenario names no number of this bureau on its lane and cannot go active.",
+    "idempotencyKeyReused": "This action was already sent with different data. Please try again.",
     "documentNotAvailable": "This document is not available yet: the virus scan has not finished or has rejected the file.",
     "tenantNotReady": "This agency is still being set up, or its setup failed. Try again later or choose another agency.",
     "aiDisclosureMissing": "The interview intro is missing the mandatory AI disclosure; adjust the template before you activate this.",

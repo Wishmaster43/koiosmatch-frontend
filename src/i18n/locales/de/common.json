@@ -576,6 +576,8 @@
       "syncing": "Synchronisieren…",
       "syncSuccess": "Synchronisierung abgeschlossen",
       "syncFailed": "Synchronisierung fehlgeschlagen",
+      "syncNotFound": "Dieser Mitarbeiter existiert in Shiftmanager nicht oder die personenbezogenen Daten wurden gelöscht.",
+      "syncUnexpected": "Shiftmanager hat unerwartet geantwortet. Versuchen Sie es später erneut.",
       "lastSynced": "Zuletzt synchronisiert: {{date}}"
     },
     "common": {
@@ -798,6 +800,7 @@
     "emailUnavailable": "Diese E-Mail-Adresse kann nicht verwendet werden.",
     "inboundScenarioClash": "Für diese Nummer und diese Lane gibt es bereits ein aktives Szenario: {{clash_name}}.",
     "inboundScenarioNumberMissing": "Dieses Szenario nennt keine Nummer dieses Büros auf seiner Lane und kann nicht aktiv werden.",
+    "idempotencyKeyReused": "Diese Aktion wurde bereits mit anderen Daten gesendet. Bitte versuchen Sie es erneut.",
     "documentNotAvailable": "Dieses Dokument ist noch nicht verfügbar: Die Virenprüfung ist nicht abgeschlossen oder hat die Datei abgelehnt.",
     "tenantNotReady": "Diese Agentur wird noch eingerichtet oder die Einrichtung ist fehlgeschlagen. Versuchen Sie es später erneut oder wählen Sie eine andere Agentur.",
     "aiDisclosureMissing": "Im Interview-Intro fehlt der verpflichtende KI-Hinweis; passen Sie die Vorlage an, bevor Sie dies aktivieren.",

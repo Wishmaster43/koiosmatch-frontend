@@ -277,6 +277,8 @@
       "no_active_connection": "Non démarré : aucune connexion WhatsApp active.",
       "send_failed": "Non démarré : le premier message n'a pas pu être envoyé.",
       "candidate_in_other_interview": "Non démarré : le candidat participe déjà à un entretien pour une autre candidature.",
+      "already_has_session": "Non démarré : le candidat a déjà une session d'entretien pour ce flux de vacance.",
+      "interview_flow_inactive": "Non démarré : le flux d'entretien de cette vacance est désactivé.",
       "unknown": "Non démarré : l'entretien a été ignoré."
     },
     "skippedAt": "Ignoré le {{date}}",
@@ -295,6 +297,7 @@
     },
     "stepOf": "Étape {{step}} sur {{total}}",
     "filterBusy": "En entretien",
+    "filterSkipped": "Ignoré",
     "start": {
       "label": "Démarrer l'entretien",
       "needsWorkflow": "Choisissez d'abord un workflow d'entretien ci-dessus, ou définissez celui par défaut sur l'offre.",

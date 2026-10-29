@@ -2150,6 +2150,7 @@
           "attempts": "Pogingen",
           "lastError": "Laatste fout",
           "nextAttempt": "Volgende poging",
+          "rejectionAnnounced": "Afwijzing gemeld op",
           "retrieved": "Opgehaald op",
           "candidate": "Kandidaat"
         },
@@ -2158,6 +2159,7 @@
         "empty": "Geen leads met deze status.",
         "loadError": "De wachtrij kon niet worden geladen.",
         "alreadyRetrieved": "Deze lead is al opgehaald.",
+        "retryInFlight": "Deze lead wordt op dit moment opgehaald. Probeer het zo opnieuw.",
         "retryFailed": "Opnieuw proberen is mislukt."
       }
   },
@@ -4429,7 +4431,8 @@
         "relation": "Nog niet beschikbaar om verplicht te stellen. Dit veld wordt in een latere fase toegevoegd.",
         "webhookStamped": "Wordt automatisch ingevuld door een extern systeem. Er is geen invoerveld om te verplichten.",
         "customFields": "Eigen velden hebben hun eigen verplichtingsinstelling op de velddefinitie zelf.",
-        "setAfterCreation": "Wordt pas na het aanmaken ingevuld. Verplicht stellen zou elke nieuwe sollicitatie blokkeren."
+        "setAfterCreation": "Wordt pas na het aanmaken ingevuld. Verplicht stellen zou elke nieuwe sollicitatie blokkeren.",
+        "inlineCandidate": "Alleen invullen bij een inline kandidaat. Of het verplicht is, wordt bepaald op de gekoppelde kandidaat."
       }
     }
   },

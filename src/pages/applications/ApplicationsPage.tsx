@@ -92,7 +92,7 @@ export default function ApplicationsPage({ intent }: { intent?: unknown } = {}) 
     selectedOwner, setSelectedOwner, selectedSource, setSelectedSource,
     selectedVac, setSelectedVac, selectedClient, setSelectedClient,
     showArchived, setShowArchived, showTrash, setShowTrash, query, setQuery,
-    interviewBusy, setInterviewBusy, interviewPaused, setInterviewPaused, refMode, cvFilter, setCvFilter,
+    interviewBusy, setInterviewBusy, interviewPaused, setInterviewPaused, interviewSkipped, setInterviewSkipped, refMode, cvFilter, setCvFilter,
     selectedBranch, setSelectedBranch,
     selectedCandidateIds, setSelectedCandidateIds,
     selectedCandidateOwnerId, setSelectedCandidateOwnerId,
@@ -117,7 +117,7 @@ export default function ApplicationsPage({ intent }: { intent?: unknown } = {}) 
   // against the stale rows during a filter/page fetch survived the swap — the
   // input-triggered clear above fires too early to catch that window on its own.
   useEffect(() => { setSelectedIds(new Set()) },
-    [bucket, showArchived, showTrash, interviewBusy, interviewPaused, page, pageSize,
+    [bucket, showArchived, showTrash, interviewBusy, interviewPaused, interviewSkipped, page, pageSize,
       selectedPhase, selectedOwner, selectedSource, selectedVac, selectedClient, query, rowsEpoch])
 
   // Board columns = the funnel lookup, normalised to { key, label, color }.
@@ -204,7 +204,7 @@ export default function ApplicationsPage({ intent }: { intent?: unknown } = {}) 
   // Reset to the first page whenever the bucket, any filter, or the sort changes
   // (DATATABLE-SORT-1: a new order restarts pagination, same as every filter above).
   useEffect(() => { setPage(1) }, [bucket, attention, selectedPhase, selectedOwner, selectedSource, selectedVac,
-    selectedClient, showArchived, showTrash, dateRange, interviewBusy, interviewPaused, query, selectedCandidateIds,
+    selectedClient, showArchived, showTrash, dateRange, interviewBusy, interviewPaused, interviewSkipped, query, selectedCandidateIds,
     selectedCandidateOwnerId, sort, setPage])
 
   // TABLE rows: the server's page — W27: now narrowed server-side by every filter
@@ -307,8 +307,9 @@ export default function ApplicationsPage({ intent }: { intent?: unknown } = {}) 
         anyFilterActive={anyFilterActive} onClearFilters={clearAllFilters}
         candidateScopeCount={selectedCandidateIds.length} onClearCandidateScope={() => setSelectedCandidateIds([])}
         showArchived={showArchived} onToggleArchived={() => setShowArchived(v => !v)}
-        interviewBusy={interviewBusy} onToggleInterviewBusy={() => { setInterviewPaused(false); setInterviewBusy(v => !v) }}
-        interviewPaused={interviewPaused} onToggleInterviewPaused={() => { setInterviewBusy(false); setInterviewPaused(v => !v) }}
+        interviewBusy={interviewBusy} onToggleInterviewBusy={() => { setInterviewPaused(false); setInterviewSkipped(false); setInterviewBusy(v => !v) }}
+        interviewPaused={interviewPaused} onToggleInterviewPaused={() => { setInterviewBusy(false); setInterviewSkipped(false); setInterviewPaused(v => !v) }}
+        interviewSkipped={interviewSkipped} onToggleInterviewSkipped={() => { setInterviewBusy(false); setInterviewPaused(false); setInterviewSkipped(v => !v) }}
         view={view} onViewChange={setView}
         selectedCount={selectedIds.size} onClearSelection={() => setSelectedIds(new Set())}
         onBulkSetPhase={bulkSetPhase} onBulkDetach={bulkDetach} canManage={canManage} funnelPhases={funnelTypes}

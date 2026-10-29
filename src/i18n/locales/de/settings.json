@@ -1890,6 +1890,7 @@
           "attempts": "Versuche",
           "lastError": "Letzter Fehler",
           "nextAttempt": "Nächster Versuch",
+          "rejectionAnnounced": "Ablehnung gemeldet am",
           "retrieved": "Abgerufen am",
           "candidate": "Kandidat"
         },
@@ -1898,6 +1899,7 @@
         "empty": "Keine Leads mit diesem Status.",
         "loadError": "Die Warteschlange konnte nicht geladen werden.",
         "alreadyRetrieved": "Dieser Lead wurde bereits abgerufen.",
+        "retryInFlight": "Dieser Lead wird gerade abgerufen. Versuchen Sie es gleich noch einmal.",
         "retryFailed": "Der erneute Versuch ist fehlgeschlagen."
       }
   },
@@ -4429,7 +4431,8 @@
         "relation": "Noch nicht verpflichtend wählbar. Dieses Feld wird in einer späteren Phase ergänzt.",
         "webhookStamped": "Wird automatisch von einem externen System befüllt. Es gibt kein Eingabefeld, das verpflichtend gemacht werden kann.",
         "customFields": "Eigene Felder haben ihre eigene Pflichteinstellung direkt an der Felddefinition.",
-        "setAfterCreation": "Wird erst nach dem Anlegen ausgefüllt. Eine Pflichtangabe würde jede neue Bewerbung blockieren."
+        "setAfterCreation": "Wird erst nach dem Anlegen ausgefüllt. Eine Pflichtangabe würde jede neue Bewerbung blockieren.",
+        "inlineCandidate": "Wird nur bei einem Inline-Kandidaten ausgefüllt. Ob es Pflicht ist, wird am verknüpften Kandidaten entschieden."
       }
     }
   },

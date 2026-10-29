@@ -318,3 +318,21 @@ describe('useApplicationFilters · CV presence (has_cv)', () => {
   })
 })
 
+
+// CONTRACT-FOLLOW-1 A3: the third quick-view sends interview_status=skipped; clearing resets it.
+describe('useApplicationFilters — interview skipped quick-view (CONTRACT-FOLLOW-1)', () => {
+  it('sends interview_status=skipped and flips anyFilterActive', () => {
+    const { result } = renderHook(() => useApplicationFilters())
+    act(() => { result.current.setInterviewSkipped(true) })
+    expect(result.current.filterParams.interview_status).toBe('skipped')
+    expect(result.current.anyFilterActive).toBe(true)
+  })
+
+  it('clearAllFilters resets it', () => {
+    const { result } = renderHook(() => useApplicationFilters())
+    act(() => { result.current.setInterviewSkipped(true) })
+    act(() => { result.current.clearAllFilters() })
+    expect(result.current.interviewSkipped).toBe(false)
+    expect(result.current.filterParams.interview_status).toBeUndefined()
+  })
+})

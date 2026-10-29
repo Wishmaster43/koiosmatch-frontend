@@ -23,12 +23,16 @@ const REASON_CATEGORY_BY_TEXT: Record<string, string> = {
   // OtherEntityFieldInventory::UPDATE_ONLY_REASON (BE APP-REQUIRED-CREATE-ONLY-1, 205e5741f) — five application
   // fields set after creation (interview flow/workflow, match criteria/score, rejection reason).
   'set after creation — the required-field check runs when an application is created and the create form does not accept this field, so requiring it would block every new application': 'setAfterCreation',
+  // OtherEntityFieldInventory::INLINE_CANDIDATE_REASON (CONTRACT-FOLLOW-1) — the alternative create shape.
+  'inline candidate: the alternative create shape; required-ness is decided on candidate_id': 'inlineCandidate',
 }
 
 // The translated i18n key for a raw inventory reason, or null when the text is not one
 // of the known categories (caller falls back to the raw string in that case).
-export function reasonI18nKey(reason: string): string | null {
-  const category = REASON_CATEGORY_BY_TEXT[reason]
+export function reasonI18nKey(reason: string, reasonKey?: string | null): string | null {
+  // A structured BE `reason_key` wins when present (additive contract); the sentence map is the fallback layer.
+  const category = (reasonKey && Object.values(REASON_CATEGORY_BY_TEXT).includes(reasonKey) ? reasonKey : null)
+    ?? REASON_CATEGORY_BY_TEXT[reason]
   return category ? `settings.fieldInventory.reason.${category}` : null
 }
 
@@ -46,6 +50,10 @@ interface InventorySourceField {
   requirable: boolean
   requires_permission: string | null
   reason: string | null
+  /** Additive BE category code; read first when present. */
+  reason_key?: string | null
+  /** False for update-only keys: set after creation, never requirable at create. */
+  creatable?: boolean
 }
 
 /**
@@ -88,12 +96,14 @@ export function buildInventoryRows(
   return fields
     .filter(f => !f.requires_permission || hasPermission(f.requires_permission))
     .map(f => {
-      const reasonKey = f.reason ? reasonI18nKey(f.reason) : null
+      // creatable:false = set after creation: never requirable at create, even if the BE reason text is absent.
+      const updateOnly = f.creatable === false
+      const reasonKey = f.reason ? reasonI18nKey(f.reason, f.reason_key) : updateOnly ? 'settings.fieldInventory.reason.setAfterCreation' : null
       return {
         key: f.key,
         labelKey: labelKeys[f.key] ?? f.key,
-        requirable: f.requirable,
-        reason: f.reason ? (reasonKey ? t(reasonKey) : f.reason) : null,
+        requirable: f.requirable && !updateOnly,
+        reason: f.reason ? (reasonKey ? t(reasonKey) : f.reason) : reasonKey ? t(reasonKey) : null,
       }
     })
 }

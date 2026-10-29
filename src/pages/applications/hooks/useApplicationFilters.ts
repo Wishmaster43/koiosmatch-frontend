@@ -93,6 +93,8 @@ export function useApplicationFilters() {
   // keep them mutually exclusive (each clears its sibling before toggling on).
   const [interviewBusy,   setInterviewBusy]   = usePageMemory('apps.interviewBusy', false)
   const [interviewPaused, setInterviewPaused] = usePageMemory('apps.interviewPaused', false)
+  // CONTRACT-FOLLOW-1 A3: third quick-view, applications whose interview start was skipped (stamped).
+  const [interviewSkipped, setInterviewSkipped] = usePageMemory('apps.interviewSkipped', false)
   // APP-CV-AUTOMATION-1: CV presence filter — 'with' | 'without' | null (any), sticky per page.
   const [cvFilter, setCvFilter] = usePageMemory<'with' | 'without' | null>('apps.cv', null)
   // 11.1: deep-link scope from the candidates bulk "manage per application"
@@ -106,7 +108,7 @@ export function useApplicationFilters() {
   const [selectedCandidateOwnerId, setSelectedCandidateOwnerId] = useState<Id | null>(null)
 
   // Anything narrowing the default view → the shared clear-button shows.
-  const anyFilterActive = Boolean(query.trim() || attention || showArchived || showTrash || dateRange || interviewBusy || interviewPaused || cvFilter
+  const anyFilterActive = Boolean(query.trim() || attention || showArchived || showTrash || dateRange || interviewBusy || interviewPaused || interviewSkipped || cvFilter
     || (bucket !== 'active' && bucket !== 'allActive')
     || selectedPhase.length || selectedOwner.length || selectedSource.length || selectedVac.length
     || selectedClient.length || selectedBranch.length || selectedCandidateIds.length || selectedCandidateOwnerId)
@@ -116,7 +118,7 @@ export function useApplicationFilters() {
   const clearAllFilters = () => {
     setSearchEpoch(e => e + 1); setQuery(''); setAttention(null); setShowArchived(false); setShowTrash(false); setBucket('active')
     setSelectedPhase([]); setSelectedOwner([]); setSelectedSource([]); setSelectedVac([]); setInterviewBusy(false)
-    setInterviewPaused(false); setSelectedClient([]); setSelectedBranch([]); setSelectedCandidateIds([]); setDateRange(null)
+    setInterviewPaused(false); setInterviewSkipped(false); setSelectedClient([]); setSelectedBranch([]); setSelectedCandidateIds([]); setDateRange(null)
     setSelectedCandidateOwnerId(null); setCvFilter(null)
   }
 
@@ -212,6 +214,7 @@ export function useApplicationFilters() {
     // are true (the page's click handlers keep them mutually exclusive already).
     if (interviewBusy) p.interview_status = 'busy'
     else if (interviewPaused) p.interview_status = 'paused'
+    else if (interviewSkipped) p.interview_status = 'skipped'
     // APP-CV-AUTOMATION-1: server-side CV presence (fail-open on has_cv=0 without an is_cv type).
     if (cvFilter) p.has_cv = cvFilter === 'with' ? 1 : 0
     // 11.1: the candidates-bulk deep-link scope — a real, working server filter.
@@ -229,7 +232,7 @@ export function useApplicationFilters() {
     if (!showArchived && !showTrash && bucket === 'placed') p.has_match = 1
     return p
   }, [selectedPhase, selectedVac, selectedClient, selectedSource, selectedOwner, query, showArchived, showTrash,
-    interviewBusy, interviewPaused, selectedCandidateIds, selectedCandidateOwnerId, selectedBranch, attention, dateRange, bucket, cvFilter])
+    interviewBusy, interviewPaused, interviewSkipped, selectedCandidateIds, selectedCandidateOwnerId, selectedBranch, attention, dateRange, bucket, cvFilter])
 
   // Bucket param — TABLE query only (never board/stats): 'allActive' has no server
   // equivalent (spans two buckets) and showArchived's/showTrash's reveal must not be
@@ -245,7 +248,7 @@ export function useApplicationFilters() {
     selectedOwner, setSelectedOwner, selectedSource, setSelectedSource,
     selectedVac, setSelectedVac, selectedClient, setSelectedClient,
     showArchived, setShowArchived, showTrash, setShowTrash, query, setQuery,
-    interviewBusy, setInterviewBusy, interviewPaused, setInterviewPaused, refMode, cvFilter, setCvFilter,
+    interviewBusy, setInterviewBusy, interviewPaused, setInterviewPaused, interviewSkipped, setInterviewSkipped, refMode, cvFilter, setCvFilter,
     selectedBranch, setSelectedBranch,
     selectedCandidateIds, setSelectedCandidateIds,
     selectedCandidateOwnerId, setSelectedCandidateOwnerId,

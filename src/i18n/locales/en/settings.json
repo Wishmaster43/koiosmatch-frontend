@@ -2150,6 +2150,7 @@
           "attempts": "Attempts",
           "lastError": "Last error",
           "nextAttempt": "Next attempt",
+          "rejectionAnnounced": "Rejection announced at",
           "retrieved": "Retrieved on",
           "candidate": "Candidate"
         },
@@ -2158,6 +2159,7 @@
         "empty": "No leads with this status.",
         "loadError": "The queue could not be loaded.",
         "alreadyRetrieved": "This lead has already been retrieved.",
+        "retryInFlight": "This lead is being retrieved right now. Try again in a moment.",
         "retryFailed": "Retrying failed."
       }
   },
@@ -4429,7 +4431,8 @@
         "relation": "Not available to require yet. This field is added in a later phase.",
         "webhookStamped": "Filled in automatically by an external system. There is no input to require.",
         "customFields": "Custom fields carry their own required setting on the field definition itself.",
-        "setAfterCreation": "Filled in after creation. Requiring it would block every new application."
+        "setAfterCreation": "Filled in after creation. Requiring it would block every new application.",
+        "inlineCandidate": "Only filled for an inline candidate. Whether it is required is decided on the linked candidate."
       }
     }
   },

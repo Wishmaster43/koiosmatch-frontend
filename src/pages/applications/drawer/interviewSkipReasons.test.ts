@@ -19,3 +19,11 @@ describe('isInterviewSkipCode', () => {
     expect(isInterviewSkipCode(42)).toBe(false)
   })
 })
+
+// CONTRACT-FOLLOW-1 A1: the two new codes of c36143c0c.
+describe('CONTRACT-FOLLOW-1 skip codes', () => {
+  it('accepts already_has_session and interview_flow_inactive', () => {
+    expect(isInterviewSkipCode('already_has_session')).toBe(true)
+    expect(isInterviewSkipCode('interview_flow_inactive')).toBe(true)
+  })
+})

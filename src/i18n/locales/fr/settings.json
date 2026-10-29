@@ -1890,6 +1890,7 @@
           "attempts": "Tentatives",
           "lastError": "Dernière erreur",
           "nextAttempt": "Prochaine tentative",
+          "rejectionAnnounced": "Rejet signalé le",
           "retrieved": "Récupéré le",
           "candidate": "Candidat"
         },
@@ -1898,6 +1899,7 @@
         "empty": "Aucun lead avec ce statut.",
         "loadError": "Impossible de charger la file d'attente.",
         "alreadyRetrieved": "Ce lead a déjà été récupéré.",
+        "retryInFlight": "Ce lead est en cours de récupération. Réessayez dans un instant.",
         "retryFailed": "La nouvelle tentative a échoué."
       }
   },
@@ -4429,7 +4431,8 @@
         "relation": "Pas encore disponible à rendre obligatoire. Ce champ sera ajouté à une phase ultérieure.",
         "webhookStamped": "Rempli automatiquement par un système externe. Il n'existe aucun champ de saisie à rendre obligatoire.",
         "customFields": "Les champs personnalisés ont leur propre réglage d'obligation sur la définition du champ.",
-        "setAfterCreation": "Renseigné seulement après la création. Le rendre obligatoire bloquerait chaque nouvelle candidature."
+        "setAfterCreation": "Renseigné seulement après la création. Le rendre obligatoire bloquerait chaque nouvelle candidature.",
+        "inlineCandidate": "Renseigné uniquement pour un candidat en ligne. Le caractère obligatoire est décidé sur le candidat lié."
       }
     }
   },
