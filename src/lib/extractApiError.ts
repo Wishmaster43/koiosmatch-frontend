@@ -57,6 +57,11 @@ const ERROR_CODE_KEYS: Record<string, string> = {
   // match's contract form has no row in Settings → HelloFlex → Contractmap yet —
   // an honest "not configured" notice, never a raw server message.
   helloflex_contract_type_unmapped: 'errors.helloflexContractTypeUnmapped',
+  // HF-CONTRACT-SEND-1: the manual contract send's coded 409 refusals.
+  contract_in_flight: 'errors.contractInFlight',
+  contract_unconfirmed: 'errors.contractUnconfirmed',
+  contract_sent: 'errors.contractSent',
+  two_way_off: 'errors.twoWayOff',
   // The proposal send is refused up front (422) for a suppressed recipient address.
   recipient_suppressed: 'errors.recipientSuppressed',
   // UPLOADS-SCAN-1 (423): the file is not clean yet, or was rejected by the scanner.

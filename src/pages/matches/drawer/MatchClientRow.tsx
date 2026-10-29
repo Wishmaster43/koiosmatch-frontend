@@ -58,6 +58,7 @@ import { useAuth } from '@/context/AuthContext'
 import { useLookupsOptional } from '@/context/LookupsContext'
 import { useMatchClientEdit } from '../hooks/useMatchClientEdit'
 import MatchContractResolveAction from './MatchContractResolveAction'
+import MatchContractSendAction from './MatchContractSendAction'
 import { Field } from './MatchFieldRow'
 import type { MatchRow } from '@/types/match'
 
@@ -135,6 +136,8 @@ export default function MatchClientRow({ match, onUpdate }: Props) {
             <MatchContractResolveAction match={match} onUpdate={onUpdate} />
           </div>
         )}
+        {/* HF-CONTRACT-SEND-1: manual contract send; self-gates on permission, app and state. */}
+        <MatchContractSendAction match={match} onUpdate={onUpdate} />
       </>
     )
   }
