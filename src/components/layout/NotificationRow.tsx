@@ -9,10 +9,10 @@
  * + a remove button on top of the existing click-through/status-line logic.
  */
 import { useState } from 'react'
-import type { MouseEvent as ReactMouseEvent, KeyboardEvent as ReactKeyboardEvent } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Trash2, ExternalLink } from 'lucide-react'
 import Button from '@/components/ui/Button'
+import TextButton from '@/components/ui/TextButton'
 import Spinner from '@/components/ui/Spinner'
 import { BodyText, Caption } from '@/components/ui/typography'
 import KoiosAiMark from '@/components/ui/KoiosAiMark'
@@ -65,13 +65,6 @@ export default function NotificationRow({ n, isLast, fmt, showRemove, onRemove, 
   const primary = actions[0]
 
   const goClick = () => { if (target) navigateToNotificationTarget(target); else if (href) window.open(href, '_blank', 'noopener,noreferrer'); onClose() }
-  const goKeyDown = (e: ReactKeyboardEvent) => {
-    // Only the row itself (not a child control/input) triggers row-navigation —
-    // otherwise Enter/Space on any action button, the trash icon or an inline
-    // editor field would bubble up and hijack the keypress into a navigate (§6).
-    if (e.target !== e.currentTarget) return
-    if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); goClick() }
-  }
 
   // TASK-CREATE-EDIT-1 idiom: an action with a known editor spec (reschedule_task)
   // opens the inline editor first; anything else stages straight away.
@@ -82,19 +75,23 @@ export default function NotificationRow({ n, isLast, fmt, showRemove, onRemove, 
   }
 
   return (
+    // Plain list item: the title is the single navigation control (no nested interactives, §6).
     <div
-      role={clickable ? 'button' : undefined}
-      tabIndex={clickable ? 0 : -1}
-      onClick={clickable ? goClick : undefined}
-      onKeyDown={clickable ? goKeyDown : undefined}
+      role="listitem"
       style={{
         padding: '10px 16px', borderBottom: isLast ? 'none' : '1px solid var(--border)',
         display: 'flex', alignItems: 'flex-start', gap: 8,
-        cursor: clickable ? 'pointer' : 'default',
       }}
     >
       <div style={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column', gap: 2 }}>
-        <BodyText style={{ fontWeight: n.seen ? 400 : 600 }}>{title || '—'}</BodyText>
+        {clickable ? (
+          // The title is the row's single navigation control; TextButton keeps long titles wrapping.
+          <TextButton onClick={goClick} style={{ fontSize: 13, fontWeight: n.seen ? 400 : 600 }}>
+            {title || '—'}
+          </TextButton>
+        ) : (
+          <BodyText style={{ fontWeight: n.seen ? 400 : 600 }}>{title || '—'}</BodyText>
+        )}
         {body && <Caption style={{ display: 'block' }}>{body}</Caption>}
         {/* NOTIF-I18N-1: the record this notification is about — a deep-link chip
             under the title, never repeated inside the title itself. */}
@@ -104,7 +101,7 @@ export default function NotificationRow({ n, isLast, fmt, showRemove, onRemove, 
             the chip just opened the drawer behind it, so leaving the panel open over
             it is the fake-affordance case (§3). */}
         {n.record?.label && (
-          <span onClick={(e: ReactMouseEvent) => { e.stopPropagation(); onClose() }} style={{ alignSelf: 'flex-start' }}>
+          <span onClick={onClose} style={{ alignSelf: 'flex-start' }}>
             <KoiosRefChip item={{ type: n.record.type, id: n.record.id, label: n.record.label }} />
           </span>
         )}
@@ -123,14 +120,14 @@ export default function NotificationRow({ n, isLast, fmt, showRemove, onRemove, 
         {koiosPrompt && (
           <div style={{ marginTop: 4 }}>
             <Button variant="ghost" size="sm"
-              onClick={(e: ReactMouseEvent) => { e.stopPropagation(); askKoios(koiosPrompt); onClose() }}>
+              onClick={() => { askKoios(koiosPrompt); onClose() }}>
               <KoiosAiMark tone="soft" size={12} /> {t('notifications.askKoios')}
             </Button>
           </div>
         )}
         {/* NOTIF-I18N-1: executable actions, same shape/runner as a Koios suggestion row. */}
         {actions.length > 0 && exec.phase === 'idle' && (
-          <div style={{ display: 'flex', gap: 4, marginTop: 4 }} onClick={(e: ReactMouseEvent) => e.stopPropagation()}>
+          <div style={{ display: 'flex', gap: 4, marginTop: 4 }}>
             {actions.map(a => {
               const Ico = toolIcon(a)
               const label = t(a.label_key, { defaultValue: t(a.tool_label_key, { defaultValue: t('koios.tools.unknown') }) })
@@ -144,7 +141,7 @@ export default function NotificationRow({ n, isLast, fmt, showRemove, onRemove, 
           </div>
         )}
         {exec.phase === 'editing' && exec.editingAction && (
-          <div onClick={(e: ReactMouseEvent) => e.stopPropagation()}>
+          <div>
             <SuggestionEditor
               action={exec.editingAction}
               onConfirm={(input) => { void stageAndConfirm(stagePendingAction, confirmPendingAction, exec.editingAction!.tool, input) }}
@@ -153,7 +150,7 @@ export default function NotificationRow({ n, isLast, fmt, showRemove, onRemove, 
           </div>
         )}
         {(exec.phase === 'staged' || (exec.phase === 'submitting' && exec.staged)) && (
-          <div onClick={(e: ReactMouseEvent) => e.stopPropagation()}><StagedPreview exec={exec} setExec={setExec} /></div>
+          <div><StagedPreview exec={exec} setExec={setExec} /></div>
         )}
         {exec.phase === 'staging' && <span style={{ display: 'flex' }}><Spinner size={12} /></span>}
         {exec.phase === 'executed' && <ExecutedNotice created={exec.created} t={t} />}
@@ -162,8 +159,7 @@ export default function NotificationRow({ n, isLast, fmt, showRemove, onRemove, 
       {/* EntityLink idiom: the row name navigates in-app, this icon opens
           the same record's deep link in a new browser tab. */}
       {clickable && (
-        <Button href={target ? buildNotificationDeepLink(target) : href!} target="_blank" rel="noopener noreferrer"
-          onClick={(e: ReactMouseEvent) => e.stopPropagation()} variant="ghost" iconOnly size="sm"
+        <Button href={target ? buildNotificationDeepLink(target) : href!} target="_blank" rel="noopener noreferrer" variant="ghost" iconOnly size="sm"
           title={t('openInNewTab')} aria-label={t('openInNewTab')}
           style={{ flexShrink: 0, opacity: 0.65, marginTop: 2 }}>
           <ExternalLink size={12} />
@@ -171,7 +167,7 @@ export default function NotificationRow({ n, isLast, fmt, showRemove, onRemove, 
       )}
       {/* NOTIF-I18N-1: per-row delete — only once the backend actually sends the new shape. */}
       {showRemove && onRemove && (
-        <Button size="sm" variant="ghost" iconOnly onClick={(e: ReactMouseEvent) => { e.stopPropagation(); onRemove(n.id) }}
+        <Button size="sm" variant="ghost" iconOnly onClick={() => onRemove(n.id)}
           aria-label={t('notifications.remove')} title={t('notifications.remove')}
           style={{ flexShrink: 0, opacity: 0.65, marginTop: 2 }}>
           <Trash2 size={12} />

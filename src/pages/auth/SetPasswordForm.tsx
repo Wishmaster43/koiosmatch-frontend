@@ -97,7 +97,7 @@ export default function SetPasswordForm({ endpoint, invalidCode, noticeKind, tex
       <>
         <PageTitle as="h1" style={{ marginBottom: 4 }}>{texts.title}</PageTitle>
         <div style={{ marginTop: 24 }}>
-          <CalloutBox variant="success" live="polite">{noticeKind === 'password_reset' ? t('login.passwordResetDone') : t('login.inviteAccepted')}</CalloutBox>
+          <CalloutBox variant="success" live="polite">{t('setPassword.doneSignedIn')}</CalloutBox>
         </div>
         <div style={{ marginTop: 16 }}>
           <AuthLink to="/" label={t('setPassword.toApp')} />

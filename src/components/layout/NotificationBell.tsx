@@ -124,7 +124,7 @@ export default function NotificationBell() {
               {t('notifications.empty')}
             </div>
           ) : (
-            items.map((n, i) => (
+            <div role="list">{items.map((n, i) => (
               <NotificationRow
                 key={n.id ?? i}
                 n={n}
@@ -134,7 +134,7 @@ export default function NotificationBell() {
                 onRemove={removeNotification}
                 onClose={() => setOpen(false)}
               />
-            ))
+            ))}</div>
           )}
         </div>
       )}

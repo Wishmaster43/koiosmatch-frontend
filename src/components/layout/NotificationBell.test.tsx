@@ -163,7 +163,12 @@ describe('NotificationBell row click-through', () => {
     window.addEventListener('popstate', onPopState)
     render(<NotificationBell />)
     fireEvent.click(screen.getByRole('button', { name: /notificat/i }))
-    fireEvent.click(screen.getByText('Match verloopt'))
+    // The title is the single navigation control (button), not the whole row.
+    const titleBtn = screen.getByRole('button', { name: 'Match verloopt' })
+    // Long titles wrap: no nowrap, no fixed 28px height.
+    expect(titleBtn.style.whiteSpace).not.toBe('nowrap')
+    expect(titleBtn.style.height).toBe('')
+    fireEvent.click(titleBtn)
     expect(window.location.hash).toBe('#matches?open=55')
     expect(onPopState).toHaveBeenCalledTimes(1)
     window.removeEventListener('popstate', onPopState)
@@ -192,10 +197,10 @@ describe('NotificationBell row click-through', () => {
     window.addEventListener('popstate', onPopState)
     render(<NotificationBell />)
     fireEvent.click(screen.getByRole('button', { name: /notificat/i }))
-    // A row without a target is plain content: no button role, default cursor.
-    const row = screen.getByText('System message').closest('[tabindex="-1"]') as HTMLElement
-    expect(row).not.toHaveAttribute('role')
-    expect(row).toHaveStyle({ cursor: 'default' })
+    // A row without a target is plain content: a list item with no title button.
+    const row = screen.getByText('System message').closest('[role="listitem"]') as HTMLElement
+    expect(row).not.toHaveAttribute('tabindex')
+    expect(screen.queryByRole('button', { name: 'System message' })).toBeNull()
     fireEvent.click(row)
     expect(window.location.hash).toBe('')
     expect(onPopState).not.toHaveBeenCalled()
@@ -450,8 +455,32 @@ describe('NotificationBell · NOTIF-I18N-1 (bell speaks the user\'s language, na
     fireEvent.keyDown(screen.getByRole('button', { name: i18n.t('koios.assistant.actions.restore_candidate') }), { key: 'Enter' })
     expect(navigateSpy).not.toHaveBeenCalled()
     expect(window.location.hash).toBe('')
-    // The row itself still navigates on its own Enter.
-    fireEvent.keyDown(screen.getByText('ESCALATION').closest('[role]') ?? screen.getByText('ESCALATION'), { key: 'Enter' })
+    // The title button is the navigation control: a real button, keyboard-focusable.
+    const titleBtn = screen.getByRole('button', { name: 'ESCALATION' })
+    titleBtn.focus()
+    expect(titleBtn).toHaveFocus()
+    fireEvent.click(titleBtn)
+    expect(navigateSpy).toHaveBeenCalledTimes(1)
+  })
+
+  // #248: no interactive role may contain another button (nested-interactive).
+  it('renders no button nested inside another button or role=button element', () => {
+    vi.spyOn(useNotificationsModule, 'useNotifications').mockReturnValue({
+      items: [{
+        id: 'n-1', title: 'ESCALATION', body: '...', seen: false, entity_type: 'candidate', entity_id: 'c-1',
+        title_key: null, body_key: null, params: {},
+        record: { type: 'candidate', id: 'c-1', label: 'Jane Doe' },
+        actions: [{ key: 'restore_candidate', tool: 'restore_candidate', input: { candidate_id: 'c-1' }, label_key: 'koios.assistant.actions.restore_candidate', tool_label_key: 'koios.tools.restore_candidate' }],
+      }],
+      unseen: 1, markAllSeen: vi.fn(), reload: vi.fn(), removeNotification: vi.fn(),
+    } as unknown as ReturnType<typeof useNotificationsModule.useNotifications>)
+    render(<NotificationBell />)
+    fireEvent.click(screen.getByRole('button', { name: /notificat/i }))
+    const list = screen.getByRole('list')
+    list.querySelectorAll('button').forEach(b => {
+      expect(b.parentElement?.closest('button, [role="button"]')).toBeNull()
+    })
+    expect(list.querySelector('[role="button"]')).toBeNull()
   })
 
   it('removes a row via DELETE /notifications/{id}, optimistically', async () => {

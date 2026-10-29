@@ -321,6 +321,8 @@ export default defineConfig([
   // gets the hard check below; the rest of the tree pays down over time. ──
   {
     files: ['src/**/*.{js,jsx,ts,tsx}'],
+    // TextButton is the wrapping-text control atom: its own raw <button> IS the canonical identity (like Button).
+    ignores: ['src/components/ui/TextButton.tsx'],
     plugins: { huisstijlLegacy: huisstijlPlugin },
     rules: {
       'huisstijlLegacy/no-restricted-syntax': ['warn', {
