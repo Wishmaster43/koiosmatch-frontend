@@ -86,8 +86,8 @@ export default function NotificationRow({ n, isLast, fmt, showRemove, onRemove, 
       <div style={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column', gap: 2 }}>
         {clickable ? (
           // The title is the row's single navigation control; TextButton keeps long titles wrapping.
-          <TextButton onClick={goClick} style={{ fontSize: 13, fontWeight: n.seen ? 400 : 600 }}>
-            {title || '—'}
+          <TextButton onClick={goClick}>
+            <BodyText as="span" style={{ fontWeight: n.seen ? 400 : 600 }}>{title || '—'}</BodyText>
           </TextButton>
         ) : (
           <BodyText style={{ fontWeight: n.seen ? 400 : 600 }}>{title || '—'}</BodyText>

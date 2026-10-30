@@ -7,7 +7,7 @@
  * it only proxies /api and /sanctum to the local backend (vite.config.js).
  */
 
-import { resolveMapTiles, type MapTileEnv } from './mapTiles'
+import { resolveMapTiles, type MapTileEnv } from './mapTiles.ts'
 
 // Env shape this builder reads — a subset of import.meta.env, passed in so the
 // function stays pure and testable outside the Vite build pipeline.

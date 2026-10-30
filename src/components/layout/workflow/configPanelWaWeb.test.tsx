@@ -20,9 +20,8 @@ vi.mock('@/lib/api', async () => {
   const offline = () => Promise.reject(new Error('network disabled in this test'))
   return { ...actual, default: { get: vi.fn(offline), post: vi.fn(offline), put: vi.fn(offline), patch: vi.fn(offline), delete: vi.fn(offline), request: vi.fn(offline) } }
 })
-// useLookupOptions reaches the client through a dynamic import() that the module mock above does not
-// intercept, so its three WhatsApp lookups still hit the real client after the last test; this test is about the
-// static channel select, so the lookup fields render honestly empty and idle.
+// The lookup fields are not under test (the channel select is static): mocking the hook keeps the three
+// WhatsApp lookups from being requested at all, so nothing can log during worker teardown (TEARDOWN-LOG-1).
 vi.mock('./fieldControls/useLookupOptions', () => ({
   useLookupOptions: () => ({ opts: [], error: false, loading: false, retry: vi.fn() }),
 }))

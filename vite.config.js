@@ -4,7 +4,7 @@ import { loadEnv } from 'vite'
 import react from '@vitejs/plugin-react'
 import tailwindcss from '@tailwindcss/vite'
 import { fileURLToPath } from 'node:url'
-import { buildCsp } from './src/lib/csp'
+import { buildCsp } from './src/lib/csp.ts'
 
 // Injects the production Content-Security-Policy <meta> tag into index.html.
 // Build-only (`apply: 'build'`): dev keeps no CSP because Vite's HMR client
