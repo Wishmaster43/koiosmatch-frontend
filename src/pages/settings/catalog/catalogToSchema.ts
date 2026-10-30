@@ -14,6 +14,8 @@ export interface SchemaField {
   default: unknown
   min?: number
   max?: number | undefined
+  // Per-unit amount ceilings from the catalogue (applied against the chosen companion unit).
+  maxPerUnit?: Record<string, number> | undefined
   step?: number
   options?: Array<{ value: string; label: string }>
   labelKey: string
@@ -97,6 +99,7 @@ export function catalogToSchema(sectionId: string, rows: CatalogRow[], meta: Sch
     let min: number | undefined
     let max: number | undefined
     let step: number | undefined
+    let maxPerUnit: Record<string, number> | undefined
     let options: Array<{ value: string; label: string }> | undefined
     let format: string | undefined
 
@@ -110,6 +113,8 @@ export function catalogToSchema(sectionId: string, rows: CatalogRow[], meta: Sch
         if (row.constraints?.min !== undefined) min = row.constraints.min
         if (row.constraints?.max !== undefined && row.constraints.max !== null) max = row.constraints.max
         if (row.constraints?.step !== undefined) step = row.constraints.step
+        // Carry the catalogue's per-unit ceilings; `max` stays the literal bound.
+        if (row.constraints?.max_per_unit) maxPerUnit = row.constraints.max_per_unit
         break
       case 'string':
         // SETTINGS-UNIT-PAIRS-1: a `string` row that still carries `options` (an older
@@ -153,6 +158,7 @@ export function catalogToSchema(sectionId: string, rows: CatalogRow[], meta: Sch
       ...(min !== undefined && { min }),
       ...(max !== undefined && { max }),
       ...(step !== undefined && { step }),
+      ...(maxPerUnit && { maxPerUnit }),
       ...(options && { options }),
       ...(format && { format }),
       ...(row.group && { group: row.group }),

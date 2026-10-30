@@ -21,6 +21,8 @@ export interface CatalogRow {
     min?: number
     max?: number | null
     step?: number
+    // FOLLOW-UP-2910-1: per-unit amount ceilings of a governed window row.
+    max_per_unit?: Record<string, number>
   }
   // SETTINGS-UNIT-PAIRS-1: a `<key>_unit` row names the amount key it belongs to,
   // so the generic renderer places it inline right of that amount (never its own row).

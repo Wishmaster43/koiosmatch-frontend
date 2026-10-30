@@ -309,3 +309,71 @@ describe('SchemaSection · save outcomes', () => {
     expect(await screen.findByText(i18n.t('validation.outOfRange', { ns: 'settings', min: '1', max: '50' }))).toBeInTheDocument()
   })
 })
+
+// FOLLOW-UP-2910-1: the amount cap follows the CHOSEN unit (catalogue maxPerUnit wins).
+describe('SchemaSection · per-unit amount cap', () => {
+  const schema: Schema = {
+    i18nKey: 'catalog.sections.company',
+    fields: [
+      { key: 'stale_days', type: 'number', default: 14, maxPerUnit: { days: 365, weeks: 52 }, labelKey: 'catalog.sections.company.fields.stale_days.label' },
+      {
+        key: 'stale_days_unit', type: 'select', unitOf: 'stale_days', default: 'days',
+        options: [{ value: 'days', label: 'a' }, { value: 'weeks', label: 'b' }],
+        labelKey: 'catalog.sections.company.fields.stale_days_unit.label',
+      },
+    ],
+  }
+
+  it('clamps a typed amount to 365 for days and to 52 after switching to weeks', async () => {
+    render(<SchemaSection schema={schema} />)
+    const input = await screen.findByRole('textbox')
+    await waitFor(() => expect(input).toHaveValue('14'))
+    fireEvent.change(input, { target: { value: '400' } })
+    fireEvent.blur(input)
+    expect(input).toHaveValue('365')
+    fireEvent.click(screen.getByRole('button', { name: i18n.t('catalog.sections.company.fields.stale_days_unit.label', { ns: 'settings' }) }))
+    fireEvent.click(await screen.findByText('weeks'))
+    fireEvent.change(input, { target: { value: '100' } })
+    fireEvent.blur(input)
+    expect(input).toHaveValue('52')
+  })
+})
+
+// FOLLOW-UP-2910-1 gaps A+B: a unit switch re-clamps the stored amount; toggle windows clamp per unit.
+describe('SchemaSection · unit switch and toggle window', () => {
+  const unitLabel = (k: string) => i18n.t(`catalog.sections.company.fields.${k}.label`, { ns: 'settings' })
+  const unitOptions = [{ value: 'days', label: 'a' }, { value: 'weeks', label: 'b' }]
+
+  it('re-clamps a stored 300 days to 52 when the unit switches to weeks, without retyping', async () => {
+    const schema: Schema = {
+      i18nKey: 'catalog.sections.company',
+      fields: [
+        { key: 'stale_days', type: 'number', default: 300, maxPerUnit: { days: 365, weeks: 52 }, labelKey: 'catalog.sections.company.fields.stale_days.label' },
+        { key: 'stale_days_unit', type: 'select', unitOf: 'stale_days', default: 'days', options: unitOptions, labelKey: 'catalog.sections.company.fields.stale_days_unit.label' },
+      ],
+    }
+    render(<SchemaSection schema={schema} />)
+    const input = await screen.findByRole('textbox')
+    await waitFor(() => expect(input).toHaveValue('300'))
+    fireEvent.click(screen.getByRole('button', { name: unitLabel('stale_days_unit') }))
+    fireEvent.click(await screen.findByText('weeks'))
+    await waitFor(() => expect(input).toHaveValue('52'))
+  })
+
+  it('clamps a toggle window amount per the chosen unit', async () => {
+    const schema: Schema = {
+      i18nKey: 'catalog.sections.company',
+      fields: [
+        { key: 'chase', type: 'toggle', default: true, windowKeys: ['chase_days', 'chase_days_unit'], labelKey: 'catalog.sections.company.fields.chase.label' },
+        { key: 'chase_days', type: 'number', default: 5, maxPerUnit: { days: 365, weeks: 52 }, labelKey: 'catalog.sections.company.fields.chase_days.label' },
+        { key: 'chase_days_unit', type: 'select', unitOf: 'chase_days', default: 'weeks', options: unitOptions, labelKey: 'catalog.sections.company.fields.chase_days_unit.label' },
+      ],
+    }
+    render(<SchemaSection schema={schema} />)
+    const input = await screen.findByRole('textbox')
+    await waitFor(() => expect(input).toHaveValue('5'))
+    fireEvent.change(input, { target: { value: '100' } })
+    fireEvent.blur(input)
+    expect(input).toHaveValue('52')
+  })
+})

@@ -19,7 +19,7 @@
 import { useTranslation } from 'react-i18next'
 import { useSettingsForm } from '../lib/useSettingsForm'
 import { SettingsScaffold, SettingCardList, SettingRow, NumberField, SelectField } from '../components/SettingsKit'
-import { WINDOW_UNIT_OPTIONS, WINDOW_UNIT_MAX_AMOUNT } from '../components/windowUnitOptions'
+import { WINDOW_UNIT_OPTIONS, effectiveWindowMax } from '../components/windowUnitOptions'
 import CatalogSection from './CatalogSection'
 
 // O23 UNIT-NAAST-BEDRAG-1: window-unit options translated for the SelectField shape.
@@ -29,7 +29,7 @@ function useWindowUnitOptions() {
 }
 
 // Per-unit amount bounds of a day-window field (grace keeps its 7-day floor for day-like units).
-const windowMax = (unit: string) => WINDOW_UNIT_MAX_AMOUNT[unit] ?? 365
+const windowMax = (unit: string) => effectiveWindowMax({}, unit) ?? 365
 const graceMin = (unit: string) => (unit === 'days' || unit === 'workdays' ? 7 : 1)
 
 // Tenant-wide AVG retention windows editor (see the module doc above): the only screen that edits the policy the backend derives retention_expires_at from.

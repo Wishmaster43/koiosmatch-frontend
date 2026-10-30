@@ -88,6 +88,13 @@ describe('catalogToSchema · SETTINGS-UNIT-PAIRS-1', () => {
     label_key: 'settings.windows.x.label', ui: 'generic', fe_screen: null, ...overrides,
   }) as Parameters<typeof catalogToSchema>[1][number]
 
+  it('a row with constraints.max_per_unit yields a field with maxPerUnit and keeps max', () => {
+    const perUnit = { days: 365, weeks: 52 }
+    const schema = catalogToSchema('windows', [baseRow({ constraints: { min: 1, max: 365, max_per_unit: perUnit } })])
+    expect(schema.fields[0].maxPerUnit).toEqual(perUnit)
+    expect(schema.fields[0].max).toBe(365)
+  })
+
   it('maps unit_of to the schema field\'s unitOf', () => {
     const row = { key: 'candidate_no_contact_days_unit', section: 'windows', type: 'enum', rules: [], default: 'days', aliases: [],
       label_key: 'settings.windows.candidate_no_contact_days_unit.label', ui: 'generic', fe_screen: null,

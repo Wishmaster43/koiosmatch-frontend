@@ -19,6 +19,7 @@ import { useTranslation } from 'react-i18next'
 import type { TFunction } from 'i18next'
 import { useAuth } from '@/context/AuthContext'
 import { useSettingsForm } from '../lib/useSettingsForm'
+import { effectiveWindowMax } from './windowUnitOptions'
 import { SlidersHorizontal } from 'lucide-react'
 import { SectionTitle } from '@/components/ui/typography'
 import FieldNotice from '@/components/ui/FieldNotice'
@@ -40,6 +41,8 @@ export interface SchemaField {
   options?: Array<string | { value: string; label: string }>
   min?: number
   max?: number
+  // Per-unit amount ceilings (catalogue), applied with the live companion unit.
+  maxPerUnit?: Record<string, number>
   step?: number
   format?: string
   group?: string
@@ -89,8 +92,10 @@ interface FieldControlProps {
   // O23: a companion unit picker sits beside this number field — omit the static
   // unit suffix text then, the picker itself already says the unit.
   hideUnit?: boolean
+  // Current value of the companion unit picker, so the amount is capped per unit.
+  unitValue?: string
 }
-function FieldControl({ field, value, onChange, t, base, label, disabled, hideUnit }: FieldControlProps) {
+function FieldControl({ field, value, onChange, t, base, label, disabled, hideUnit, unitValue }: FieldControlProps) {
   // A catalogue row's secondary texts (unit, placeholder) live next to its own `label_key`
   // (settings.windows.<key>.unit), the folder convention's next to `${base}` — measured
   // 29-09: the hours row's "uur" never rendered because only the folder path was read.
@@ -147,7 +152,7 @@ function FieldControl({ field, value, onChange, t, base, label, disabled, hideUn
         // and the catalogue default shows again), never a silent 0 (a cleared WhatsApp cap
         // used to become 0 messages per hour).
         <NumberField value={value as number | null} onChange={onChange} onEmpty={() => onChange(null)} ariaLabel={label}
-          min={field.min} max={field.max} step={field.step}
+          min={field.min} max={unitValue ? effectiveWindowMax(field, unitValue) : field.max} step={field.step}
           unit={hideUnit ? undefined : optionalT(t, sibling('unit'))} disabled={disabled} />
       )
   }
@@ -194,20 +199,37 @@ export default function SchemaSection({ schema, embedded = false }: SchemaSectio
     schema.fields.filter(f => f.windowKeys).flatMap(f => f.windowKeys as string[]),
   )
 
+  // Live value of the unit picker paired with an amount field (undefined when it has none).
+  const unitValueOf = (field: SchemaField): string | undefined => {
+    const unitField = schema.fields.find(f => f.unitOf === field.key)
+    return unitField ? String(form.values[unitField.key] ?? unitField.default) : undefined
+  }
+
+  // Unit switch: set the unit and pull the paired amount down to the new unit's ceiling in the same change.
+  const setUnit = (unitKey: string, amountKey: string, unit: unknown) => {
+    form.set(unitKey, unit)
+    const amountField = schema.fields.find(f => f.key === amountKey)
+    const max = amountField ? effectiveWindowMax(amountField, String(unit)) : undefined
+    if (max !== undefined && Number(form.values[amountKey]) > max) form.set(amountKey, max)
+  }
+
   // Renders a companion field (an amount's unit, or a toggle's amount/unit) inline —
   // shared by both branches of renderRow below so the two never drift into two copies.
-  const renderCompanion = (field: SchemaField, hideUnit = false) => (
+  const renderCompanion = (field: SchemaField, hideUnit = false, unitValue?: string, pairedAmountKey?: string) => (
     <FieldControl key={field.key} field={field} value={form.values[field.key]}
-      onChange={v => form.set(field.key, v)} t={t} base={`${k}.fields.${field.key}`}
+      onChange={v => (pairedAmountKey ? setUnit(field.key, pairedAmountKey, v) : form.set(field.key, v))}
+      t={t} base={`${k}.fields.${field.key}`}
       label={t(field.labelKey ?? `${k}.fields.${field.key}.label`)}
-      disabled={!canEdit} hideUnit={hideUnit} />
+      disabled={!canEdit} hideUnit={hideUnit} unitValue={unitValue} />
   )
 
-  // Per-field 422 text: the min/max range when the schema bounds the field, else a generic sentence.
+  // Per-field 422 text: the min/max range (max in the live unit) when the schema bounds the field, else a generic sentence.
   const fieldErrorText = (field: SchemaField): string | null => {
     if (!(form.fieldErrors as Record<string, string> | undefined)?.[field.key]) return null
-    return field.min != null && field.max != null
-      ? t('validation.outOfRange', { min: formatNumber(field.min), max: formatNumber(field.max) })
+    const unit = unitValueOf(field)
+    const max = unit ? effectiveWindowMax(field, unit) : field.max
+    return field.min != null && max != null
+      ? t('validation.outOfRange', { min: formatNumber(field.min), max: formatNumber(max) })
       : t('validation.invalid')
   }
 
@@ -226,6 +248,7 @@ export default function SchemaSection({ schema, embedded = false }: SchemaSectio
       ? schema.fields.find(f => f.key === field.windowKeys![1])
       : schema.fields.find(f => f.unitOf === field.key)
     const amountField = field.windowKeys ? schema.fields.find(f => f.key === field.windowKeys![0]) : undefined
+    const liveUnit = unitField ? String(form.values[unitField.key] ?? unitField.default) : undefined
     return (
       <SettingRow key={field.key}
         label={label}
@@ -234,9 +257,10 @@ export default function SchemaSection({ schema, embedded = false }: SchemaSectio
           <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
             <FieldControl field={field} value={form.values[field.key]}
               onChange={v => form.set(field.key, v)} t={t} base={base} label={label}
-              disabled={!canEdit} hideUnit={!field.windowKeys && !!unitField} />
-            {amountField && renderCompanion(amountField, !!unitField)}
-            {unitField && renderCompanion(unitField)}
+              disabled={!canEdit} hideUnit={!field.windowKeys && !!unitField}
+              unitValue={field.windowKeys ? undefined : liveUnit} />
+            {amountField && renderCompanion(amountField, !!unitField, liveUnit)}
+            {unitField && renderCompanion(unitField, false, undefined, amountField?.key ?? field.key)}
           </div>
           <FieldNotice text={fieldErrorText(field)} />
         </div>

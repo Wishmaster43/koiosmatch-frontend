@@ -34,3 +34,14 @@ export function unitFieldFor(amountKey: string, section: string, defaultUnit = '
     labelKey: `settings.${section}.${amountKey}_unit.label`,
   }
 }
+
+// Effective amount ceiling for the CHOSEN unit: the catalogue's per-unit table wins, the FE
+// table is the fallback, and a literal `max` bound can only tighten it. Undefined = unbounded.
+export function effectiveWindowMax(
+  field: { max?: number | undefined; maxPerUnit?: Record<string, number> | undefined },
+  unit?: string,
+): number | undefined {
+  const perUnit = unit ? (field.maxPerUnit?.[unit] ?? WINDOW_UNIT_MAX_AMOUNT[unit]) : undefined
+  if (perUnit === undefined) return field.max
+  return field.max === undefined ? perUnit : Math.min(perUnit, field.max)
+}
