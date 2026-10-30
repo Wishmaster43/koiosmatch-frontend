@@ -122,7 +122,11 @@
   "kpi": {
     "below_target": {
       "title": "{{label}} ligt onder het doel",
-      "body": "{{label}} stond op {{value}} bij een doel van {{target}} ({{period}})."
+      "body": "{{label}} stond op {{value}} bij een doel van {{target}} ({{period}}).\n{{recruiters}}"
+    },
+    "recruiter_below_target": {
+      "title": "Een recruiter ligt onder het doel",
+      "body": "{{recruiters}}\nDoel: {{target}} ({{period}})."
     },
     "above_maximum": {
       "title": "{{label}} ligt boven het maximum",

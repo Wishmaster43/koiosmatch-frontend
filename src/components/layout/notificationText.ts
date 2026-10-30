@@ -41,6 +41,7 @@ export function notificationText(n: AppNotification, t: TFunction): { title: str
   const params = localizeNotificationParams(n, t)
   return {
     title: resolveHalf(kpiAwareKey(n.title_key, n.meta), n.title, params, t),
-    body: resolveHalf(kpiAwareKey(n.body_key, n.meta), n.body, params, t),
+    // Trim: an empty {{recruiters}} line leaves a trailing newline.
+    body: resolveHalf(kpiAwareKey(n.body_key, n.meta), n.body, params, t).trim(),
   }
 }

@@ -73,12 +73,16 @@ function localizeForms(params: Params, t: T): Params {
 
 // The row's params, localised to the viewer; the input is never mutated.
 export function localizeNotificationParams(n: AppNotification, t: T): Params | undefined {
-  let params = n.params
+  const key = `${n.title_key ?? ''} ${n.body_key ?? ''}`
+  const isRecruiterKpi = key.includes('.kpi.below_target') || key.includes('.kpi.recruiter_below_target')
+  // A recruiter-aware KPI row always gets a params object so {{recruiters}} never shows raw.
+  let params = n.params ?? (isRecruiterKpi ? {} : undefined)
   if (!params) return params
   const locale = activeLocale()
-  const key = `${n.title_key ?? ''} ${n.body_key ?? ''}`
   const meta = (n.meta && typeof n.meta === 'object' ? n.meta : {}) as Params
-  if (key.includes('.kpi.below_target') || key.includes('.kpi.above_maximum')) params = localizeKpi(params, meta, t, locale)
+  if (isRecruiterKpi || key.includes('.kpi.above_maximum')) params = localizeKpi(params, meta, t, locale)
+  // Recruiters below target: the lines (array of strings) become one multi-line value, empty when absent.
+  if (isRecruiterKpi) params = { ...params, recruiters: Array.isArray(params.recruiters) ? params.recruiters.filter((l) => typeof l === 'string').join('\n') : typeof params.recruiters === 'string' ? params.recruiters : '' }
   if (key.includes('.facebook.')) params = localizeForms(params, t)
   if ('period' in params) params = { ...params, period: localizePeriod(params.period, locale) }
   return params

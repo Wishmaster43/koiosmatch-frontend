@@ -63,6 +63,8 @@
  "email.mailbox_needs_reconnect.body",
  "kpi.below_target.title",
  "kpi.below_target.body",
+ "kpi.recruiter_below_target.title",
+ "kpi.recruiter_below_target.body",
  "kpi.labels.new_candidates_target",
  "kpi.labels.open_tasks_target",
  "kpi.labels.daily_calls_target",

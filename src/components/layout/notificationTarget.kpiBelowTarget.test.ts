@@ -19,4 +19,9 @@ describe('resolveNotificationTarget: kpi.below_target', () => {
     const n = { id: 2, type: 'kpi.above_maximum', meta: { kpi: 'open_tasks_target' } } as unknown as AppNotification
     expect(resolveNotificationTarget(n)).toEqual({ page: 'dashboard', id: '', hash: '#dashboard' })
   })
+
+  it('deep-links a kpi.recruiter_below_target row to the dashboard too', () => {
+    const n = { id: 3, type: 'kpi.recruiter_below_target', meta: { kpi: 'placements_target' } } as unknown as AppNotification
+    expect(resolveNotificationTarget(n)).toEqual({ page: 'dashboard', id: '', hash: '#dashboard' })
+  })
 })

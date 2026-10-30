@@ -122,7 +122,11 @@
   "kpi": {
     "below_target": {
       "title": "{{label}} está abaixo da meta",
-      "body": "{{label}} estava em {{value}} para uma meta de {{target}} ({{period}})."
+      "body": "{{label}} estava em {{value}} para uma meta de {{target}} ({{period}}).\n{{recruiters}}"
+    },
+    "recruiter_below_target": {
+      "title": "Um recrutador está abaixo da meta",
+      "body": "{{recruiters}}\nMeta: {{target}} ({{period}})."
     },
     "above_maximum": {
       "title": "{{label}} está acima do máximo",
