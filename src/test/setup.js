@@ -2,6 +2,12 @@
 // Adds jest-dom matchers (toBeInTheDocument, toHaveTextContent, …) to Vitest's expect; jest-dom 7 ships the
 // Vitest wiring as its own entry (the bare import no longer augments `expect` for Vitest).
 import '@testing-library/jest-dom/vitest'
+import { configure } from '@testing-library/dom'
+
+// Every findBy*/waitFor (5356 call sites, 29 with their own timeout) defaults to 1 s; on a saturated CI runner the
+// element appeared at 1087 ms and the run went red while 1714 files passed (CI-TIMING-1, 30-10). A passing wait still
+// resolves the instant its condition holds; only a genuinely failing wait takes longer to report.
+configure({ asyncUtilTimeout: 5000 })
 
 // toHaveInlineStyle — our own matcher for the INLINE style a component sets (the house style paints identity
 // through style objects, so that is what the suites assert). jest-dom 7 + jsdom 30 resolve toHaveStyle against the

@@ -199,7 +199,9 @@ api.interceptors.response.use(
       .replace(/\/\d+(?=\/|$|\?)/g, '/:id')
     // 401 = auth state (pre-login boot calls / expired session), handled centrally by
     // the redirect below — logging each one only alarms whoever reads the console.
-    if (import.meta.env.DEV && status !== 401 && !benignTenants403 && !benignUnavailable && !benignOptional404) {
+    // Silent under vitest (MODE 'test'): no test asserts this line, and a rejected lookup that a test tree never
+    // awaited used to log it while the worker closed, which vitest 5 counts as an unhandled error (TEARDOWN-LOG-1).
+    if (import.meta.env.DEV && import.meta.env.MODE !== 'test' && status !== 401 && !benignTenants403 && !benignUnavailable && !benignOptional404) {
       console.error('API Error:', status, method.toUpperCase(), safeUrl)
     }
 

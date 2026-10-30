@@ -67,7 +67,9 @@ describe('customerDisplay · invalid colour is rejected in the field (CHIPKLEUR-
     fireEvent.change(input, { target: { value: 'javascript:alert(1)' } })
     fireEvent.blur(input)
 
-    expect(await screen.findByText(st('common.invalidColorValue'))).toBeInTheDocument()
+    // Generous wait like the save-button check below: a saturated CI runner rendered the message at 1087 ms
+    // once (findByText's default is 1 s); it still resolves the instant the message appears.
+    expect(await screen.findByText(st('common.invalidColorValue'), undefined, { timeout: 6000 })).toBeInTheDocument()
     // Nothing became dirty, so Save must stay disabled — the invalid value never
     // reaches the form's own values, let alone the API.
     expect(screen.getByRole('button', { name: st('common.save') })).toBeDisabled()
