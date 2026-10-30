@@ -43,13 +43,19 @@ export async function drillDowns({ page, errors }) {
     // data render can outlast 1200ms — Kansen/Bellijsten alternately read as empty
     // while being fine in isolation; a red here must mean genuinely broken).
     let drawerText = 0
-    for (let tries = 0; tries < 20 && drawerText < 80; tries++) {
+    for (let tries = 0; tries < 25 && drawerText < 80; tries++) {
       await sleep(400)
       drawerText = await page.evaluate(() => {
-        // The drawers render as a right panel; take the last major section's text length.
-        const candidates = [...document.querySelectorAll('div')].filter(d => d.offsetWidth > 300 && d.offsetWidth < 900 && d.offsetHeight > 400)
+        // The drawer is the panel that holds the tab bar (the anchor drilldown-render uses: tablist → two
+        // levels up); the width heuristic below is the fallback for a drawer without tabs. The old
+        // 300–900px-wide heuristic alone read an expanded or wider drawer as "0 tekens" (30-10, Kandidaten
+        // and Taken on alternate runs while the pages rendered fine).
+        const tabs = document.querySelector('[role="tablist"]')
+        const panel = tabs?.parentElement?.parentElement ?? null
+        const fromTabs = panel ? panel.innerText.length : 0
+        const candidates = [...document.querySelectorAll('div')].filter(d => d.offsetWidth > 300 && d.offsetWidth < 1200 && d.offsetHeight > 400)
         const el = candidates.at(-1)
-        return el ? el.innerText.length : 0
+        return Math.max(fromTabs, el ? el.innerText.length : 0)
       })
     }
     if (drawerText < 80) failures.push(`${nav}: drawer leeg/niet geopend (${drawerText} tekens)`)
