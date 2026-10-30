@@ -16,7 +16,10 @@ import api from '@/lib/api'
 import { notifyError, notifySuccess } from '@/lib/notify'
 import type { ManagedUser } from '@/types/api'
 
-vi.mock('react-i18next', () => ({ useTranslation: () => ({ t: (k: string) => k }) }))
+vi.mock('react-i18next', async importOriginal => ({
+  ...(await importOriginal<typeof import('react-i18next')>()),
+  useTranslation: () => ({ t: (k: string) => k }),
+}))
 vi.mock('@/lib/notify', () => ({ notifyError: vi.fn(), notifySuccess: vi.fn() }))
 vi.mock('@/lib/useLocations', () => ({
   useLocations: () => ([{ value: 'loc-1', label: 'Amsterdam' }, { value: 'loc-2', label: 'Rotterdam' }]),
@@ -399,6 +402,29 @@ describe('EditUserModal · resend invitation', () => {
     await user.click(within(screen.getByRole('dialog', { name: 'invite.resendTitle' })).getByRole('button', { name: 'invite.resend' }))
     await waitFor(() => expect(api.post).toHaveBeenCalledWith('/users/u1/invite'))
     await waitFor(() => expect(notifySuccess).toHaveBeenCalledWith('invite.resent'))
+  })
+
+  const inviteOf = (can_resend: boolean) => ({ ...testUser, invitation: { status: 'pending' as const, sent_at: '2026-10-01T10:00:00Z', expires_at: '2026-10-08T10:00:00Z', can_resend } })
+
+  it('hides the resend button when can_resend is false, even for a pending invitation', async () => {
+    render(<EditUserModal user={inviteOf(false)} onClose={noop} onSaved={noop} />)
+    expect(await screen.findByText('invite.status.pending')).toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: 'invite.resend' })).not.toBeInTheDocument()
+  })
+
+  it('shows the resend button when can_resend is true and posts after confirming', async () => {
+    vi.mocked(api.post).mockResolvedValueOnce({ data: { message: 'ok' } })
+    const user = userEvent.setup()
+    render(<EditUserModal user={inviteOf(true)} onClose={noop} onSaved={noop} />)
+    await user.click(await screen.findByRole('button', { name: 'invite.resend' }))
+    await user.click(within(screen.getByRole('dialog', { name: 'invite.resendTitle' })).getByRole('button', { name: 'invite.resend' }))
+    await waitFor(() => expect(api.post).toHaveBeenCalledWith('/users/u1/invite'))
+  })
+
+  it('renders no status row when the server sends no invitation object', async () => {
+    render(<EditUserModal user={testUser} onClose={noop} onSaved={noop} />)
+    expect(await screen.findByRole('button', { name: 'invite.resend' })).toBeInTheDocument()
+    expect(screen.queryByText('invite.statusLabel')).not.toBeInTheDocument()
   })
 
   it('shows the error toast when the resend fails', async () => {

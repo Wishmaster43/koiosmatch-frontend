@@ -81,7 +81,16 @@ interface UserBranchLink {
   name?: string | null
 }
 
+// Invitation state per user (BE FOLLOW-UP-2910-1). Hand-written: the generated spec carries no 2xx schema.
+export interface UserInvitation {
+  status: 'pending' | 'accepted' | 'expired' | 'none'
+  sent_at: string | null
+  expires_at: string | null
+  can_resend: boolean
+}
+
 export interface ManagedUser extends User {
+  invitation?: UserInvitation | null
   avatar_color?: string | null
   // Merged in by useUsersData (interim per-user fetch — USERS-BRANCHES-LIST-1).
   branches?: UserBranchLink[]

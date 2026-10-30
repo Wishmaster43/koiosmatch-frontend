@@ -155,6 +155,13 @@
     "resendConfirm": "{{email}} will receive a new link to set a password. Earlier links expire.",
     "resent": "Invitation resent to {{email}}",
     "resendFailed": "Sending failed",
-    "resendThrottled": "Too many invitations sent, try again in a minute"
+    "resendThrottled": "Too many invitations sent, try again in a minute",
+    "statusLabel": "Invitation",
+    "status": {
+      "pending": "sent on {{sent}}, expires on {{expires}}",
+      "expired": "expired on {{expires}}",
+      "accepted": "accepted",
+      "none": "not invited"
+    }
   }
 }

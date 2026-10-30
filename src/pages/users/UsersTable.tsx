@@ -16,6 +16,7 @@ import type { Column } from '@/components/ui/DataTable'
 import SoftChip from '@/components/ui/SoftChip'
 import { useDateFormat } from '@/lib/datetime'
 import { RoleBadge, EditableAvatar, isSuperAdminUser, SUPER_ADMIN_COLOR } from './usersParts'
+import { InvitationIcon } from './InvitationStatus'
 import { isArchivedUser, userDisplayName } from './userRow'
 import type { UserRow } from './userRow'
 
@@ -58,6 +59,7 @@ export default function UsersTable({
             <EditableAvatar user={u} onPick={canUpdate ? color => onPickColor(u, color) : undefined} />
             <div style={{ fontWeight: 500, color: 'var(--text)', display: 'flex', alignItems: 'center', gap: 6 }}>
               {userDisplayName(u)}
+              <InvitationIcon invitation={u.invitation} />
               {/* System accounts are never edited from the tenant surface. */}
               {/* pencil=secondary per the row icon-action idiom; Button's sm (28px) is
                   visibly larger than the old 20px inline icon — kept, gap unchanged. */}

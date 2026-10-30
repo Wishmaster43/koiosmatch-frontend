@@ -35,6 +35,7 @@ import { FieldRow, TextField, CheckboxField } from '@/components/forms/fields'
 import { cardHead, cardBox } from '@/components/ui/modalCards'
 import ModalErrorSubmitFooter from '@/components/forms/ModalErrorSubmitFooter'
 import UserNameCard from './UserNameCard'
+import { InvitationStatusRow } from './InvitationStatus'
 import UserModalColumns from './UserModalColumns'
 // SETTINGS-INCON-B2 (Danny 13-09, "Pop-up wijzigen gebruiker is te smal … Naam
 // niet leesbaar"): the wide-form footprint every create modal shares (mirrors
@@ -86,7 +87,8 @@ export default function EditUserModal({ user, onClose, onSaved }: {
     (changePassword && form.password !== '') || form.email.trim() !== (user.email ?? '')
   )
   // T-003: re-send the invitation mail; independent of the form save, never for yourself.
-  const canInvite = (auth?.hasPermission?.('users.create') ?? false) && !isSelf
+  // can_resend gates the button; an absent invitation object (older BE) keeps the old behaviour.
+  const canInvite = (auth?.hasPermission?.('users.create') ?? false) && !isSelf && (user.invitation ? user.invitation.can_resend === true : true)
   const [confirmInvite, setConfirmInvite] = useState(false)
   const resendInvite = async () => {
     setConfirmInvite(false)
@@ -216,6 +218,7 @@ export default function EditUserModal({ user, onClose, onSaved }: {
                       <Caption as="p" style={{ marginTop: 5 }}>{t('currentPasswordHint')}</Caption>
                     </div>
                   )}
+                  <InvitationStatusRow invitation={user.invitation} />
                   {/* Resend the invitation mail (users.create, never for yourself); confirmed first, independent of the form save. */}
                   {canInvite && (
                     <div>

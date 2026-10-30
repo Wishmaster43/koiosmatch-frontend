@@ -155,6 +155,13 @@
     "resendConfirm": "{{email}} recevra un nouveau lien pour définir un mot de passe. Les liens précédents expirent.",
     "resent": "Invitation renvoyée à {{email}}",
     "resendFailed": "Échec de l’envoi",
-    "resendThrottled": "Trop d’invitations envoyées, réessayez dans une minute"
+    "resendThrottled": "Trop d’invitations envoyées, réessayez dans une minute",
+    "statusLabel": "Invitation",
+    "status": {
+      "pending": "envoyée le {{sent}}, expire le {{expires}}",
+      "expired": "expirée le {{expires}}",
+      "accepted": "acceptée",
+      "none": "non invité"
+    }
   }
 }

@@ -155,6 +155,13 @@
     "resendConfirm": "{{email}} recibirá un nuevo enlace para establecer una contraseña. Los enlaces anteriores caducan.",
     "resent": "Invitación reenviada a {{email}}",
     "resendFailed": "Error al enviar",
-    "resendThrottled": "Demasiadas invitaciones enviadas, inténtalo de nuevo en un minuto"
+    "resendThrottled": "Demasiadas invitaciones enviadas, inténtalo de nuevo en un minuto",
+    "statusLabel": "Invitación",
+    "status": {
+      "pending": "enviada el {{sent}}, caduca el {{expires}}",
+      "expired": "caducada el {{expires}}",
+      "accepted": "aceptada",
+      "none": "no invitado"
+    }
   }
 }

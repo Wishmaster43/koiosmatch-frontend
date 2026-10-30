@@ -155,6 +155,13 @@
     "resendConfirm": "{{email}} receberá uma nova ligação para definir uma palavra-passe. As ligações anteriores expiram.",
     "resent": "Convite reenviado para {{email}}",
     "resendFailed": "Falha no envio",
-    "resendThrottled": "Demasiados convites enviados, tente novamente dentro de um minuto"
+    "resendThrottled": "Demasiados convites enviados, tente novamente dentro de um minuto",
+    "statusLabel": "Convite",
+    "status": {
+      "pending": "enviado em {{sent}}, expira em {{expires}}",
+      "expired": "expirado em {{expires}}",
+      "accepted": "aceite",
+      "none": "não convidado"
+    }
   }
 }

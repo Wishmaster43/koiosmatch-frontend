@@ -155,6 +155,13 @@
     "resendConfirm": "{{email}} krijgt een nieuwe link om een wachtwoord in te stellen. Eerdere links vervallen.",
     "resent": "Uitnodiging opnieuw verstuurd naar {{email}}",
     "resendFailed": "Versturen mislukt",
-    "resendThrottled": "Te veel uitnodigingen verstuurd, probeer het over een minuut opnieuw"
+    "resendThrottled": "Te veel uitnodigingen verstuurd, probeer het over een minuut opnieuw",
+    "statusLabel": "Uitnodiging",
+    "status": {
+      "pending": "verstuurd op {{sent}}, verloopt op {{expires}}",
+      "expired": "verlopen op {{expires}}",
+      "accepted": "geaccepteerd",
+      "none": "niet uitgenodigd"
+    }
   }
 }
