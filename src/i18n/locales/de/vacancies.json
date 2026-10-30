@@ -266,6 +266,7 @@
       "confirmWithCount_one": "Soll {{count}} bestehender Bewerber dieser Stelle auch vom Agenten übernommen werden? Dies verschickt WhatsApp-Nachrichten.",
       "confirmWithCount_other": "Sollen {{count}} bestehende Bewerber dieser Stelle auch vom Agenten übernommen werden? Dies verschickt WhatsApp-Nachrichten.",
       "resultToast": "{{started}} von {{eligibleTotal}} gestartet.",
+      "queuedClause": " {{queued}} in der Warteschlange.",
       "resultToastWithReasons": "{{started}} von {{eligibleTotal}} gestartet, {{skippedTotal}} übersprungen: {{reasons}}.",
       "unavailable": "Interview für bestehende Bewerber starten ist noch nicht verfügbar. Wartet auf die Backend-Anbindung.",
       "reasons": {

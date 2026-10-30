@@ -266,6 +266,7 @@
       "confirmWithCount_one": "Vuoi far gestire anche {{count}} candidato esistente di questa posizione dall'agente? Questo invia messaggi WhatsApp.",
       "confirmWithCount_other": "Vuoi far gestire anche {{count}} candidati esistenti di questa posizione dall'agente? Questo invia messaggi WhatsApp.",
       "resultToast": "{{started}} su {{eligibleTotal}} avviati.",
+      "queuedClause": " {{queued}} in coda.",
       "resultToastWithReasons": "{{started}} su {{eligibleTotal}} avviati, {{skippedTotal}} saltati: {{reasons}}.",
       "unavailable": "Avviare i colloqui per i candidati esistenti non è ancora disponibile. In attesa del collegamento con il backend.",
       "reasons": {

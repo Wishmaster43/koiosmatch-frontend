@@ -27,7 +27,7 @@ const blockStyle: CSSProperties = { borderRadius: 10, overflow: 'hidden', border
 
 // One skipped applicant per INTERVIEW-BACKFILL-1's confirmed contract.
 interface BackfillSkip { application_id?: Id; reason?: string }
-interface BackfillResult { started?: number; skipped?: BackfillSkip[]; eligible_total?: number }
+interface BackfillResult { started?: number; queued?: number; skipped?: BackfillSkip[]; eligible_total?: number }
 
 // The full skip-reason vocabulary (7 shared 422 guard reasons + the two
 // backfill-only codes already_has_session/error) — every entry gets its own
@@ -84,14 +84,18 @@ function BackfillInterviewsAction({ vacancyId, applicationsCount }: { vacancyId:
       // One fresh Idempotency-Key per click (IDEMP-KEY-BODYLESS-1): a body-less start is never derived by the BE, and this sends real WhatsApp messages.
       const res = await api.post(`/vacancies/${vacancyId}/start-interviews`, undefined, withIdempotencyKey())
       const result = unwrap<BackfillResult>(res)
+      // Queued starts are reported in their own clause, never counted as started (E2-QUEUED).
+      const queued = result?.queued ?? 0
       const started = result?.started ?? 0
       const skipped = result?.skipped ?? []
-      const eligibleTotal = result?.eligible_total ?? started
-      notifySuccess(skipped.length > 0
+      const eligibleTotal = result?.eligible_total ?? started + queued
+      const base = skipped.length > 0
         ? t('aiagent.backfill.resultToastWithReasons', {
             started, eligibleTotal, skippedTotal: skipped.length, reasons: summarizeSkips(skipped),
           })
-        : t('aiagent.backfill.resultToast', { started, eligibleTotal }))
+        : t('aiagent.backfill.resultToast', { started, eligibleTotal })
+      // One clause appended to either variant, never a second copy of the sentence.
+      notifySuccess(queued > 0 ? base + t('aiagent.backfill.queuedClause', { queued }) : base)
     } catch (err) {
       const status = (err as { response?: { status?: number } })?.response?.status
       if (status === 404) {

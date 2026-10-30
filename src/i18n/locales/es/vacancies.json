@@ -266,6 +266,7 @@
       "confirmWithCount_one": "¿Debe el agente también encargarse del {{count}} candidato existente de esta vacante? Esto enviará mensajes de WhatsApp.",
       "confirmWithCount_other": "¿Debe el agente también encargarse de los {{count}} candidatos existentes de esta vacante? Esto enviará mensajes de WhatsApp.",
       "resultToast": "{{started}} de {{eligibleTotal}} iniciadas.",
+      "queuedClause": " {{queued}} en cola.",
       "resultToastWithReasons": "{{started}} de {{eligibleTotal}} iniciadas, {{skippedTotal}} omitidas: {{reasons}}.",
       "unavailable": "Iniciar entrevistas para los candidatos existentes aún no está disponible. A la espera de la conexión con el backend.",
       "reasons": {

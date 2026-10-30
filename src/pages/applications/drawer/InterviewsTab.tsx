@@ -3,7 +3,7 @@
  * REAL InterviewSession (APP-INTERVIEW-HISTORY-1), with its outcome chip and the
  * full transcript. Empty state when there are none.
  */
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { MessageCircle, FileText } from 'lucide-react'
 import StatusPill from '@/components/ui/StatusPill'
@@ -24,6 +24,8 @@ import InterviewStatusCard from './InterviewStatusCard'
 import InterviewConsentRow from '../addmodal/InterviewConsentRow'
 import { isInterviewSkipCode } from './interviewSkipReasons'
 import { mapInterview } from '../data/mapApplication'
+import QueuedInterviewNotice from './QueuedInterviewNotice'
+import { useQueuedInterviewPoll } from './useQueuedInterviewPoll'
 import { resolveEffectiveInterviewWorkflow, type EffectiveInterviewWorkflow } from '../data/interviewWorkflowEffective'
 import type { ApplicationDetail, ApplicationInterview, ApiApplication } from '@/types/application'
 import type { Id } from '@/types/common'
@@ -106,7 +108,7 @@ function TranscriptBubble({ msg }: { msg: TranscriptMsg }) {
  * and a ticked row sends `interview_consent: true`. The server decides whether
  * the vacancy needs it (hidden = no), so the button never blocks on the row.
  */
-function StartInterviewAction({ applicationId, effective, consentGivenAt, onStarted }: {
+function StartInterviewAction({ applicationId, effective, consentGivenAt, skippedAt, onStarted }: {
   applicationId: Id | undefined
   // The resolved workflow in effect, or null when none — computed once by the
   // parent (InterviewsTab) so this card and the status card's own caption
@@ -114,6 +116,8 @@ function StartInterviewAction({ applicationId, effective, consentGivenAt, onStar
   effective: EffectiveInterviewWorkflow | null
   // When the application's interview consent was recorded (null = not yet, so the card asks for it).
   consentGivenAt: string | null | undefined
+  // The earlier skip the tab shows; a queued retry must not mistake it for a new verdict.
+  skippedAt?: string | null
   onStarted: (iv: ApplicationInterview) => void
 }) {
   const { t } = useTranslation('applications')
@@ -125,6 +129,28 @@ function StartInterviewAction({ applicationId, effective, consentGivenAt, onStar
   const [consent, setConsent] = useState(false)
   // Set once a ticked start reached the server: the BE records the consent before it judges the start.
   const [consentRecorded, setConsentRecorded] = useState(false)
+  // Run id of a start the server queued (202); the poll waits for the session.
+  const [queuedRunId, setQueuedRunId] = useState<string | null>(null)
+  // Queue refusal flag (button returns with a notice) and the skipped_at held at the 202: only a different one is fresh.
+  const [queueSkipped, setQueueSkipped] = useState(false)
+  const skippedSnapshot = useRef<string | null>(null)
+
+  // Reads the application and maps its interview block (same GET the drawer detail uses).
+  const fetchInterview = async () => {
+    const res = await api.get(`/applications/${applicationId}`)
+    const raw = unwrap<ApiApplication>(res)?.interview
+    const iv = mapInterview(raw)
+    if (iv) return { kind: 'landed' as const, iv }
+    // A refused start comes back as a skipped block, which is not a session.
+    return raw?.status === 'skipped' && raw.skipped_at && raw.skipped_at !== skippedSnapshot.current
+      ? { kind: 'skipped' as const } : null
+  }
+  // The session landed: hand it over once and announce the start.
+  const { capped } = useQueuedInterviewPoll({
+    applicationId, runId: queuedRunId, fetchInterview,
+    onLanded: iv => { setQueuedRunId(null); onStarted(iv); notifySuccess(t('interview.start.started')) },
+    onSkipped: () => { setQueuedRunId(null); setQueueSkipped(true) },
+  })
 
   if (!canManage) return null
 
@@ -143,6 +169,14 @@ function StartInterviewAction({ applicationId, effective, consentGivenAt, onStar
       const body = consent && !consentRecorded ? { interview_consent: true } : undefined
       const res = await api.post(`/applications/${applicationId}/interview`, body, withIdempotencyKey())
       const raw = unwrap<NonNullable<ApiApplication['interview']>>(res)
+      // 202 = queued behind a running worker: no session yet, so wait instead of faking one.
+      const queued = raw as unknown as { status?: string; run_id?: string } | null
+      if (res.status === 202 || queued?.status === 'queued') {
+        setQueueSkipped(false)
+        skippedSnapshot.current = skippedAt ?? null
+        setQueuedRunId(queued?.run_id ?? 'queued')
+        return
+      }
       const iv = mapInterview(raw)
       if (iv) onStarted(iv)
       // 200 = the idempotent dup on this SAME application (existing session
@@ -196,11 +230,16 @@ function StartInterviewAction({ applicationId, effective, consentGivenAt, onStar
         {/* House Button (Danny 20-08, pasted this pill: "this one too") — the 05-08
             soft-tint predates PRIMAIR-VLAK-1; an accent ACTION wears the solid trio
             via Button, at the drawer sm standard. */}
-        <Button variant="primary" onClick={onStart} disabled={busy || unavailable || !effective}
-          title={!effective ? t('interview.start.needsWorkflow') : undefined}>
-          {t('interview.start.label')}
-        </Button>
+        {queuedRunId ? (
+          <QueuedInterviewNotice state={capped ? 'capped' : 'queued'} />
+        ) : (
+          <Button variant="primary" onClick={onStart} disabled={busy || unavailable || !effective}
+            title={!effective ? t('interview.start.needsWorkflow') : undefined}>
+            {t('interview.start.label')}
+          </Button>
+        )}
       </div>
+      {queueSkipped && !queuedRunId && <QueuedInterviewNotice state="skipped" />}
       {/* No effective workflow at all: disabled button + an honest reason (§3). */}
       {!effective && <Caption style={{ fontStyle: 'italic' }}>{t('interview.start.needsWorkflow')}</Caption>}
       {unavailable && (
@@ -209,7 +248,6 @@ function StartInterviewAction({ applicationId, effective, consentGivenAt, onStar
     </div>
   )
 }
-
 
 // The application drawer's interviews tab: schedule/history only. The live
 // conversation thread moved to its own Gesprekken tab (GESPREK-CONSISTENT-1-FE,
@@ -290,7 +328,7 @@ export default function InterviewsTab({ application: a, detailPhase }: { applica
       />
       {canStartNew && (
         <StartInterviewAction applicationId={a.id} effective={effectiveWorkflow}
-          consentGivenAt={a.interviewConsentGivenAt} onStarted={setStartedOverride} />
+          consentGivenAt={a.interviewConsentGivenAt} skippedAt={a.interviewSkippedAt} onStarted={setStartedOverride} />
       )}
 
       {/* ONE "nothing yet" message, never two (Danny 22-08, screenshot): while no

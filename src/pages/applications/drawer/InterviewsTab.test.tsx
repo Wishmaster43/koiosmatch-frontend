@@ -9,11 +9,12 @@
  * inactive/budget_exceeded/workflow_failed/already_running reasons), the 404
  * safety-net gate, and every hide condition.
  */
-import { describe, it, expect, vi, beforeEach } from 'vitest'
-import { render, screen, waitFor } from '@testing-library/react'
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
+import { render, screen, waitFor, act } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import InterviewsTab from './InterviewsTab'
+import { QUEUED_INTERVIEW_POLL_DELAYS_MS } from './useQueuedInterviewPoll'
 import tabSource from './InterviewsTab.tsx?raw'
 import api from '@/lib/api'
 import type { ApplicationDetail } from '@/types/application'
@@ -565,5 +566,71 @@ describe('InterviewsTab · workflow saved in the card', () => {
     await user.click(await screen.findByText('New workflow'))
     await waitFor(() => expect(mockPatch).toHaveBeenCalledWith('/applications/app-1', { interview_workflow_id: 'wf-new' }))
     await waitFor(() => expect(screen.getByRole('button', { name: 'interview.start.label' })).not.toBeDisabled())
+  })
+
+  describe('queued start (202, E2-QUEUED)', () => {
+    afterEach(() => { vi.useRealTimers() })
+    const startQueued = async () => {
+      vi.useFakeTimers({ shouldAdvanceTime: true })
+      mockPost.mockResolvedValueOnce({ status: 202, data: { status: 'queued', run_id: 'run-1' } })
+      renderTab(app({ interviewWorkflow: OWN_WF }))
+      await clickStart()
+      await screen.findByText('interview.start.queued')
+    }
+
+    it('shows the queued notice, no started toast, and polls GET /applications/{id} until the session lands', async () => {
+      mockGet.mockResolvedValue({ data: { data: { id: 'app-1', interview: null } } })
+      await startQueued()
+      expect(mockNotifySuccess).not.toHaveBeenCalled()
+      expect(mockPost).toHaveBeenCalledWith('/applications/app-1/interview', undefined, expect.objectContaining({
+        headers: expect.objectContaining({ 'Idempotency-Key': expect.any(String) }),
+      }))
+      expect(screen.queryByRole('button', { name: 'interview.start.label' })).toBeNull()
+      await act(async () => { await vi.advanceTimersByTimeAsync(QUEUED_INTERVIEW_POLL_DELAYS_MS[0]) })
+      expect(mockGet).toHaveBeenCalledWith('/applications/app-1')
+      expect(mockNotifySuccess).not.toHaveBeenCalled()
+      // The session now exists: started once, queued notice gone.
+      mockGet.mockResolvedValue({ data: { data: { id: 'app-1', interview: { category: 'busy', id: 'iv-9', agent: { id: 'a-own', name: 'Own agent' } } } } })
+      await act(async () => { await vi.advanceTimersByTimeAsync(QUEUED_INTERVIEW_POLL_DELAYS_MS[1]) })
+      await waitFor(() => expect(mockNotifySuccess).toHaveBeenCalledTimes(1))
+      expect(mockNotifySuccess).toHaveBeenCalledWith('interview.start.started')
+      expect(screen.queryByText('interview.start.queued')).toBeNull()
+    })
+
+    it('stops on a skipped start: button back, skipped notice, no further polling', async () => {
+      mockGet.mockResolvedValue({ data: { data: { id: 'app-1', interview: { status: 'skipped', skipped_at: '2026-10-30T10:00:00Z' } } } })
+      await startQueued()
+      await act(async () => { await vi.advanceTimersByTimeAsync(QUEUED_INTERVIEW_POLL_DELAYS_MS[0]) })
+      expect(await screen.findByText('interview.start.queuedSkipped')).toBeInTheDocument()
+      expect(screen.getByRole('button', { name: 'interview.start.label' })).toBeInTheDocument()
+      expect(screen.queryByText('interview.start.queued')).toBeNull()
+      await act(async () => { await vi.advanceTimersByTimeAsync(60000) })
+      expect(mockGet).toHaveBeenCalledTimes(1)
+    })
+
+    it('ignores the OLD skipped block of an earlier attempt and keeps polling', async () => {
+      mockGet.mockResolvedValue({ data: { data: { id: 'app-1', interview: { status: 'skipped', skipped_at: 'X' } } } })
+      vi.useFakeTimers({ shouldAdvanceTime: true })
+      mockPost.mockResolvedValueOnce({ status: 202, data: { status: 'queued', run_id: 'run-1' } })
+      renderTab(app({ interviewWorkflow: OWN_WF, interviewSkippedAt: 'X' } as Partial<ApplicationDetail>))
+      await clickStart()
+      await screen.findByText('interview.start.queued')
+      await act(async () => { await vi.advanceTimersByTimeAsync(QUEUED_INTERVIEW_POLL_DELAYS_MS[0] + QUEUED_INTERVIEW_POLL_DELAYS_MS[1]) })
+      expect(mockGet).toHaveBeenCalledTimes(2)
+      expect(screen.queryByText('interview.start.queuedSkipped')).toBeNull()
+      // A fresh skipped_at is a new verdict.
+      mockGet.mockResolvedValue({ data: { data: { id: 'app-1', interview: { status: 'skipped', skipped_at: 'Y' } } } })
+      await act(async () => { await vi.advanceTimersByTimeAsync(QUEUED_INTERVIEW_POLL_DELAYS_MS[2]) })
+      expect(await screen.findByText('interview.start.queuedSkipped')).toBeInTheDocument()
+    })
+
+    it('falls back to the still-waiting notice at the cap', async () => {
+      mockGet.mockResolvedValue({ data: { data: { id: 'app-1', interview: null } } })
+      await startQueued()
+      const total = QUEUED_INTERVIEW_POLL_DELAYS_MS.reduce((a, b) => a + b, 0)
+      await act(async () => { await vi.advanceTimersByTimeAsync(total + 1000) })
+      expect(await screen.findByText('interview.start.queuedStillWaiting')).toBeInTheDocument()
+      expect(mockNotifySuccess).not.toHaveBeenCalled()
+    })
   })
 })

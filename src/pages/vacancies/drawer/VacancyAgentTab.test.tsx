@@ -14,6 +14,7 @@
  * a test never relies on a transitive side effect for its own setup).
  */
 import '@/i18n'
+import i18n from 'i18next'
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { render, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
@@ -235,6 +236,19 @@ describe('VacancyAgentTab · backfill existing applicants (INTERVIEW-BACKFILL-1)
 
     await waitFor(() => expect(mockNotifySuccess).toHaveBeenCalledWith(
       '2 van 5 gestart, 3 overgeslagen: 2 geen WhatsApp-toestemming, 1 loopt al.',
+    ))
+  })
+
+  it('appends the queued clause as its own sentence', async () => {
+    mockGet.mockImplementation(routeGet(rawDetail({ ai_agent: { id: 'a1', name: 'Kelly' } })))
+    renderHarness()
+    await waitFor(() => screen.getByText('Zorgintake (9 stappen)'))
+    const user = userEvent.setup()
+    await user.click(screen.getByRole('button', { name: BACKFILL_BUTTON }))
+    mockPost.mockResolvedValueOnce({ data: { data: { started: 2, queued: 1, skipped: [], eligible_total: 3 } } })
+    await user.click(screen.getByRole('button', { name: 'Bevestigen' }))
+    await waitFor(() => expect(mockNotifySuccess).toHaveBeenCalledWith(
+      '2 van 3 gestart.' + i18n.t('vacancies:aiagent.backfill.queuedClause', { queued: 1 }),
     ))
   })
 

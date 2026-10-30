@@ -266,6 +266,7 @@
       "confirmWithCount_one": "L'agent doit-il aussi prendre en charge le {{count}} candidat existant de cette offre ? Cela enverra des messages WhatsApp.",
       "confirmWithCount_other": "L'agent doit-il aussi prendre en charge les {{count}} candidats existants de cette offre ? Cela enverra des messages WhatsApp.",
       "resultToast": "{{started}} sur {{eligibleTotal}} démarré(s).",
+      "queuedClause": " {{queued}} en file d'attente.",
       "resultToastWithReasons": "{{started}} sur {{eligibleTotal}} démarré(s), {{skippedTotal}} ignoré(s) : {{reasons}}.",
       "unavailable": "Démarrer l'entretien pour les candidats existants n'est pas encore disponible. En attente de la liaison backend.",
       "reasons": {

@@ -266,6 +266,7 @@
       "confirmWithCount_one": "Also have the agent pick up this vacancy's {{count}} existing applicant? This sends WhatsApp messages.",
       "confirmWithCount_other": "Also have the agent pick up this vacancy's {{count}} existing applicants? This sends WhatsApp messages.",
       "resultToast": "{{started}} of {{eligibleTotal}} started.",
+      "queuedClause": " {{queued}} queued.",
       "resultToastWithReasons": "{{started}} of {{eligibleTotal}} started, {{skippedTotal}} skipped: {{reasons}}.",
       "unavailable": "Starting interviews for existing applicants isn't available yet. Waiting on the backend link.",
       "reasons": {

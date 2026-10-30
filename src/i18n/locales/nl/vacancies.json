@@ -266,6 +266,7 @@
       "confirmWithCount_one": "{{count}} bestaande sollicitant van deze vacature ook laten oppakken door de agent? Dit stuurt WhatsApp-berichten.",
       "confirmWithCount_other": "{{count}} bestaande sollicitanten van deze vacature ook laten oppakken door de agent? Dit stuurt WhatsApp-berichten.",
       "resultToast": "{{started}} van {{eligibleTotal}} gestart.",
+      "queuedClause": " {{queued}} in de wachtrij.",
       "resultToastWithReasons": "{{started}} van {{eligibleTotal}} gestart, {{skippedTotal}} overgeslagen: {{reasons}}.",
       "unavailable": "Interview starten voor bestaande sollicitanten is nog niet beschikbaar. Wacht op de backend-koppeling.",
       "reasons": {
