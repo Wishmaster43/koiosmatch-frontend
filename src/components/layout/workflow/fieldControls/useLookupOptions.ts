@@ -34,8 +34,11 @@ export function useLookupOptions<T>(
     setError(false)
     setLoading(true)
     // A static client import: the former dynamic import() split nothing (the module is already in the
-    // graph through unwrap/unwrapList) and escaped vi.mock('@/lib/api') in the config-panel tests.
-    api.get(endpoint)
+    // graph through unwrap/unwrapList) and escaped vi.mock('@/lib/api') in the config-panel tests. The call
+    // is deferred into the chain so a client that throws synchronously (a partial test mock without `get`)
+    // lands in the error state exactly as the import() timing did, never as an uncaught error in the effect.
+    Promise.resolve()
+      .then(() => api.get(endpoint))
       .then(r => {
         const rows = (responseKey
           ? ((unwrap(r) as Record<string, unknown> | null)?.[responseKey] ?? [])

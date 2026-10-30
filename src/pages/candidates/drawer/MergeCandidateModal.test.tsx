@@ -204,7 +204,9 @@ describe('MergeCandidateModal · duplicate picker (punt 20)', () => {
     getMock.mockRejectedValue(new Error('boom'))
     mount()
     openPickerAndType()
-    expect(await screen.findByText(/merge\.errSearch|zoeken mislukt/i, undefined, { timeout: 2000 })).toBeTruthy()
+    // SearchSelect debounces 250 ms before the rejected read lands; under a full-suite load the error text
+    // took longer than 2 s once in 1715 files, so the wait is generous (it still resolves as soon as it renders).
+    expect(await screen.findByText(/merge\.errSearch|zoeken mislukt/i, undefined, { timeout: 6000 })).toBeTruthy()
   })
 })
 

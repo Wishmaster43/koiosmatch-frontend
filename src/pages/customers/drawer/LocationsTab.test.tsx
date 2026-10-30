@@ -91,7 +91,9 @@ describe('LocationsTab · tenant-configured default status filter (TENANT-DEFAUL
   it('still guesses "active only" when no default is configured (today\'s behaviour)', async () => {
     render(<LocationsTab {...base} locations={twoLocations} statuses={statuses} />)
     await waitFor(() => expect(screen.getByText('Actieve locatie')).toBeInTheDocument())
-    expect(screen.queryByText('Inactieve locatie')).toBeNull()
+    // The default filter settles asynchronously after the first paint: wait for the inactive row to be gone
+    // instead of asserting the instant the active row appears (flaked once in 1715 files under full load).
+    await waitFor(() => expect(screen.queryByText('Inactieve locatie')).toBeNull())
   })
 
   it('applies the configured default status when the tab opens', async () => {

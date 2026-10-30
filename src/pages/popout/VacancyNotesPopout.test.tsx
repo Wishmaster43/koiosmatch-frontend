@@ -8,6 +8,14 @@ import { render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import VacancyNotesPopout from './VacancyNotesPopout'
 
+// The rendered tree fires a settings read this test never awaits; the real client would reject it after the
+// last test and log "API Error" during worker teardown, which vitest 5 counts as an unhandled error
+// (TEARDOWN-LOG-1). The stub rejects the same way without the client's logging.
+vi.mock('@/lib/api', async () => {
+  const actual = await vi.importActual('@/lib/api')
+  const offline = () => Promise.reject(new Error('network disabled in this test'))
+  return { ...actual, default: { get: vi.fn(offline), post: vi.fn(offline), put: vi.fn(offline), patch: vi.fn(offline), delete: vi.fn(offline), request: vi.fn(offline) } }
+})
 vi.mock('@/lib/datetime', () => ({ useDateFormat: () => ({ formatDate: (v: string) => v, formatDateTime: (v: string) => v, formatTime: (v: string) => v, locale: 'nl-NL' }) }))
 vi.mock('@/lib/useNoteTypes', () => ({ useNoteTypes: () => ({ types: [], writableTypes: [] }), SYSTEM_NOTE_TYPES: new Set() }))
 vi.mock('@/context/AuthContext', () => ({ useAuth: () => ({ user: { name: 'Koios' }, hasPermission: () => false }) }))

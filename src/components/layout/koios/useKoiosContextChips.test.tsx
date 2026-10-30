@@ -6,6 +6,15 @@ import type { ReactNode } from 'react'
 import { useKoiosContextChips } from './useKoiosContextChips'
 import { SelectionProvider, usePublishSelection } from '@/context/SelectionContext'
 
+// The hook looks up a chip's label through the client; these tests never await that read, so the real client
+// would reject it after the last test and log during worker teardown (vitest 5 counts that as an unhandled
+// error, TEARDOWN-LOG-1). The stub rejects the same way without the client's logging.
+vi.mock('@/lib/api', async () => {
+  const actual = await vi.importActual('@/lib/api')
+  const offline = () => Promise.reject(new Error('network disabled in this test'))
+  return { ...actual, default: { get: vi.fn(offline), post: vi.fn(offline), put: vi.fn(offline), patch: vi.fn(offline), delete: vi.fn(offline), request: vi.fn(offline) } }
+})
+
 // t() echoes the key (plus its interpolation options, for the count/entity
 // assertions below) so tests read as the contract, not as Dutch copy.
 vi.mock('react-i18next', () => ({
