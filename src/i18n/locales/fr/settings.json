@@ -597,6 +597,10 @@
       "whatsappWebDevices_other": "{{count}} appareils WhatsApp Web",
       "apiKeys_one": "{{count}} clé API",
       "apiKeys_other": "{{count}} clés API",
+      "outreachCampaigns_one": "{{count}} liste d'appels",
+      "outreachCampaigns_other": "{{count}} listes d'appels",
+      "branchLinks_one": "{{count}} liaison client",
+      "branchLinks_other": "{{count}} liaisons clients",
       "appointments_one": "{{count}} rendez-vous",
       "appointments_other": "{{count}} rendez-vous"
     },

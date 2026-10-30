@@ -619,6 +619,10 @@
       "whatsappWebDevices_other": "{{count}} WhatsApp-Web-apparaten",
       "apiKeys_one": "{{count}} API-sleutel",
       "apiKeys_other": "{{count}} API-sleutels",
+      "outreachCampaigns_one": "{{count}} bellijst",
+      "outreachCampaigns_other": "{{count}} bellijsten",
+      "branchLinks_one": "{{count}} klantkoppeling",
+      "branchLinks_other": "{{count}} klantkoppelingen",
       "appointments_one": "{{count}} afspraak",
       "appointments_other": "{{count}} afspraken"
     },

@@ -619,6 +619,10 @@
       "whatsappWebDevices_other": "{{count}} dispositivos WhatsApp Web",
       "apiKeys_one": "{{count}} chave API",
       "apiKeys_other": "{{count}} chaves API",
+      "outreachCampaigns_one": "{{count}} lista de chamadas",
+      "outreachCampaigns_other": "{{count}} listas de chamadas",
+      "branchLinks_one": "{{count}} ligação de cliente",
+      "branchLinks_other": "{{count}} ligações de clientes",
       "appointments_one": "{{count}} marcação",
       "appointments_other": "{{count}} marcações"
     },

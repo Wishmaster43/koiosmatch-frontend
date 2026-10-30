@@ -71,6 +71,8 @@ const USAGE_LABEL_KEYS: Record<string, string> = {
   // cascade silently now block the delete too — every key the server can send has a label.
   staff_couplings: 'staffCouplings', role_couplings: 'roleCouplings', webhooks: 'webhooks',
   webhook_subscriptions: 'webhookSubscriptions', whatsapp_web_devices: 'whatsappWebDevices', api_keys: 'apiKeys',
+  // BE E1 (FOLLOW-UP wave 2, 30-10): call lists on the branch and customer-branch links block the delete too.
+  outreach_campaigns: 'outreachCampaigns', branch_links: 'branchLinks',
 }
 
 // Turn `{ candidates: 3, tasks: 1 }` into "3 candidates, 1 task" (translated,
