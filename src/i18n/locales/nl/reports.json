@@ -455,7 +455,10 @@
       "applications_nothing_created": "Er is geen sollicitatie aangemaakt.",
       "no_effect": "Geen van de ontvangers is bereikt, er is niets verstuurd.",
       "calllist_archived_twin": "Er bestaat al een gearchiveerde bellijst met deze naam, er is niets toegevoegd.",
-      "calllist_nothing_new": "Elke gevraagde kandidaat staat al op de lijst, er is niets toegevoegd."
+      "calllist_nothing_new": "Elke gevraagde kandidaat staat al op de lijst, er is niets toegevoegd.",
+      "candidate_not_visible": "De kandidaat valt buiten de vestiging van deze run, de planningstap is overgeslagen.",
+      "shift_not_visible": "De dienst valt buiten de vestiging van deze run, de planningstap is overgeslagen.",
+      "planning_no_shift_matched": "Geen passende dienst gevonden, de planningstap is overgeslagen."
     },
     "reasonLabel": "Reden",
     "openHistory": "Bekijk in geschiedenis",

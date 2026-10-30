@@ -601,6 +601,8 @@
       "outreachCampaigns_other": "{{count}} Anruflisten",
       "branchLinks_one": "{{count}} Kundenkopplung",
       "branchLinks_other": "{{count}} Kundenkopplungen",
+      "customerLocations_one": "{{count}} Kundenstandort",
+      "customerLocations_other": "{{count}} Kundenstandorte",
       "appointments_one": "{{count}} Termin",
       "appointments_other": "{{count}} Termine"
     },

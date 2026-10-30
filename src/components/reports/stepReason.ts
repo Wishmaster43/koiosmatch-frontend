@@ -33,6 +33,11 @@ export const STEP_REASON_CODES = [
   'no_effect',
   'calllist_archived_twin',
   'calllist_nothing_new',
+  // BE E1 (WAVE2-HIGH-PRIVACY-SCOPE-1, e7a5e827b): planning steps skip when the candidate or shift is outside the
+  // run's branch scope, or when no shift matched.
+  'candidate_not_visible',
+  'shift_not_visible',
+  'planning_no_shift_matched',
 ] as const
 
 export type StepReasonCode = (typeof STEP_REASON_CODES)[number]

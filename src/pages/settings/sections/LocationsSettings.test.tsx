@@ -203,10 +203,10 @@ describe('LocationsSettings', () => {
     expect(String(vi.mocked(notifyError).mock.calls.at(-1)?.[0])).not.toMatch(/staff_couplings|role_couplings|api_keys/)
   })
 
-  // BE E1 (30-10): call lists and customer-branch links on the branch block the delete too.
-  it('a 409 with the E1 counts lists call lists and customer links translated (never a raw outreach_campaigns key)', async () => {
+  // BE E1 (WAVE2-HIGH-PRIVACY-SCOPE-1): call lists, customer-branch links and customer locations on the branch block the delete too.
+  it('a 409 with the E1 counts lists call lists, customer links and customer locations translated (never a raw outreach_campaigns key)', async () => {
     mockedApi.get.mockResolvedValue({ data: { data: [location()] } })
-    mockedApi.delete.mockRejectedValue({ response: { status: 409, data: { in_use: true, counts: { outreach_campaigns: 1, branch_links: 2 } } } })
+    mockedApi.delete.mockRejectedValue({ response: { status: 409, data: { in_use: true, counts: { outreach_campaigns: 1, branch_links: 2, customer_locations: 3 } } } })
     const { notifyError } = await import('@/lib/notify')
     const user = userEvent.setup()
     render(<LocationsSettings />)
@@ -217,9 +217,10 @@ describe('LocationsSettings', () => {
     const expectedList = [
       st('locations.usage.outreachCampaigns', { count: 1 }),
       st('locations.usage.branchLinks', { count: 2 }),
+      st('locations.usage.customerLocations', { count: 3 }),
     ].join(', ')
     await waitFor(() => expect(notifyError).toHaveBeenCalledWith(st('locations.deleteBlocked', { list: expectedList })))
-    expect(String(vi.mocked(notifyError).mock.calls.at(-1)?.[0])).not.toMatch(/outreach_campaigns|branch_links/)
+    expect(String(vi.mocked(notifyError).mock.calls.at(-1)?.[0])).not.toMatch(/outreach_campaigns|branch_links|customer_locations/)
   })
 
   it('a non-409 delete failure surfaces the generic notifyError, not a raw server error', async () => {

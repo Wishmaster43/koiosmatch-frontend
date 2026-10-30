@@ -623,6 +623,8 @@
       "outreachCampaigns_other": "{{count}} call lists",
       "branchLinks_one": "{{count}} customer link",
       "branchLinks_other": "{{count}} customer links",
+      "customerLocations_one": "{{count}} customer location",
+      "customerLocations_other": "{{count}} customer locations",
       "appointments_one": "{{count}} appointment",
       "appointments_other": "{{count}} appointments"
     },

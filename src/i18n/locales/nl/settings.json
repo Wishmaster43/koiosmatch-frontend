@@ -623,6 +623,8 @@
       "outreachCampaigns_other": "{{count}} bellijsten",
       "branchLinks_one": "{{count}} klantkoppeling",
       "branchLinks_other": "{{count}} klantkoppelingen",
+      "customerLocations_one": "{{count}} klantvestiging",
+      "customerLocations_other": "{{count}} klantvestigingen",
       "appointments_one": "{{count}} afspraak",
       "appointments_other": "{{count}} afspraken"
     },

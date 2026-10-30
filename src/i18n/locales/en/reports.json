@@ -455,7 +455,10 @@
       "applications_nothing_created": "No application was created.",
       "no_effect": "None of the recipients was reached, nothing was sent.",
       "calllist_archived_twin": "An archived call list with this name already exists, nothing was added.",
-      "calllist_nothing_new": "Every requested candidate is already on the list, nothing was added."
+      "calllist_nothing_new": "Every requested candidate is already on the list, nothing was added.",
+      "candidate_not_visible": "The candidate is outside this run's branch, the planning step was skipped.",
+      "shift_not_visible": "The shift is outside this run's branch, the planning step was skipped.",
+      "planning_no_shift_matched": "No matching shift was found, the planning step was skipped."
     },
     "reasonLabel": "Reason",
     "openHistory": "View in history",

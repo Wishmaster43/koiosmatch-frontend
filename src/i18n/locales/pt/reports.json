@@ -455,7 +455,10 @@
       "applications_nothing_created": "Nenhuma candidatura foi criada.",
       "no_effect": "Nenhum dos destinatários foi alcançado, nada foi enviado.",
       "calllist_archived_twin": "Já existe uma lista de chamadas arquivada com este nome, nada foi adicionado.",
-      "calllist_nothing_new": "Todos os candidatos pedidos já estão na lista, nada foi adicionado."
+      "calllist_nothing_new": "Todos os candidatos pedidos já estão na lista, nada foi adicionado.",
+      "candidate_not_visible": "O candidato está fora da filial desta execução, o passo de planeamento foi ignorado.",
+      "shift_not_visible": "O turno está fora da filial desta execução, o passo de planeamento foi ignorado.",
+      "planning_no_shift_matched": "Nenhum turno adequado encontrado, o passo de planeamento foi ignorado."
     },
     "reasonLabel": "Motivo",
     "openHistory": "Ver no histórico",

@@ -623,6 +623,8 @@
       "outreachCampaigns_other": "{{count}} liste di chiamate",
       "branchLinks_one": "{{count}} collegamento cliente",
       "branchLinks_other": "{{count}} collegamenti clienti",
+      "customerLocations_one": "{{count}} sede cliente",
+      "customerLocations_other": "{{count}} sedi cliente",
       "appointments_one": "{{count}} appuntamento",
       "appointments_other": "{{count}} appuntamenti"
     },

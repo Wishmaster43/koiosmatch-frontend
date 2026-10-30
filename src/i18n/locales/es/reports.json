@@ -455,7 +455,10 @@
       "applications_nothing_created": "No se ha creado ninguna candidatura.",
       "no_effect": "No se ha llegado a ninguno de los destinatarios, no se ha enviado nada.",
       "calllist_archived_twin": "Ya existe una lista de llamadas archivada con este nombre, no se ha añadido nada.",
-      "calllist_nothing_new": "Todos los candidatos solicitados ya están en la lista, no se ha añadido nada."
+      "calllist_nothing_new": "Todos los candidatos solicitados ya están en la lista, no se ha añadido nada.",
+      "candidate_not_visible": "El candidato está fuera de la sede de esta ejecución, el paso de planificación se omitió.",
+      "shift_not_visible": "El turno está fuera de la sede de esta ejecución, el paso de planificación se omitió.",
+      "planning_no_shift_matched": "No se encontró ningún turno adecuado, el paso de planificación se omitió."
     },
     "reasonLabel": "Motivo",
     "openHistory": "Ver en el historial",

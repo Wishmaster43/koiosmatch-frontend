@@ -455,7 +455,10 @@
       "applications_nothing_created": "Es wurde keine Bewerbung erstellt.",
       "no_effect": "Keiner der Empfänger wurde erreicht, es wurde nichts gesendet.",
       "calllist_archived_twin": "Eine archivierte Anrufliste mit diesem Namen existiert bereits, es wurde nichts hinzugefügt.",
-      "calllist_nothing_new": "Alle angefragten Kandidaten stehen bereits auf der Liste, es wurde nichts hinzugefügt."
+      "calllist_nothing_new": "Alle angefragten Kandidaten stehen bereits auf der Liste, es wurde nichts hinzugefügt.",
+      "candidate_not_visible": "Der Kandidat liegt außerhalb der Niederlassung dieses Laufs, der Planungsschritt wurde übersprungen.",
+      "shift_not_visible": "Die Schicht liegt außerhalb der Niederlassung dieses Laufs, der Planungsschritt wurde übersprungen.",
+      "planning_no_shift_matched": "Keine passende Schicht gefunden, der Planungsschritt wurde übersprungen."
     },
     "reasonLabel": "Grund",
     "openHistory": "In Verlauf anzeigen",

@@ -18,6 +18,12 @@ describe('stepReasonLabel', () => {
     expect(stepReasonLabel('retention_link_unsupported', mockT)).toBe('runs.stepReasons.retention_link_unsupported')
   })
 
+  it('resolves the E1 planning skip codes (branch scope, no shift matched) instead of leaving a raw code', () => {
+    expect(stepReasonLabel('candidate_not_visible', mockT)).toBe('runs.stepReasons.candidate_not_visible')
+    expect(stepReasonLabel('shift_not_visible', mockT)).toBe('runs.stepReasons.shift_not_visible')
+    expect(stepReasonLabel('planning_no_shift_matched', mockT)).toBe('runs.stepReasons.planning_no_shift_matched')
+  })
+
   it('returns null for an unknown code, so the caller keeps the server sentence (never a raw code)', () => {
     expect(stepReasonLabel('some_future_reason', mockT)).toBeNull()
   })
@@ -29,7 +35,8 @@ describe('stepReasonLabel', () => {
   })
 
   it('has a translated sentence for every code in all seven locales, without an em dash (§5)', () => {
-    expect(STEP_REASON_CODES).toHaveLength(20)
+    // 20 engine codes + the three E1 planning skip codes (BE WAVE2-HIGH-PRIVACY-SCOPE-1).
+    expect(STEP_REASON_CODES).toHaveLength(23)
     for (const [lc, json] of Object.entries({ nl, en, de, fr, es, it: it_, pt })) {
       const labels = (json as { runs: { stepReasons: Record<string, string> } }).runs.stepReasons
       for (const code of STEP_REASON_CODES) {

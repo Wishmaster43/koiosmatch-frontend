@@ -455,7 +455,10 @@
       "applications_nothing_created": "Aucune candidature n'a été créée.",
       "no_effect": "Aucun des destinataires n'a été atteint, rien n'a été envoyé.",
       "calllist_archived_twin": "Une liste d'appels archivée portant ce nom existe déjà, rien n'a été ajouté.",
-      "calllist_nothing_new": "Tous les candidats demandés figurent déjà sur la liste, rien n'a été ajouté."
+      "calllist_nothing_new": "Tous les candidats demandés figurent déjà sur la liste, rien n'a été ajouté.",
+      "candidate_not_visible": "Le candidat est hors de l'agence de cette exécution, l'étape de planification a été ignorée.",
+      "shift_not_visible": "Le service est hors de l'agence de cette exécution, l'étape de planification a été ignorée.",
+      "planning_no_shift_matched": "Aucun service correspondant trouvé, l'étape de planification a été ignorée."
     },
     "reasonLabel": "Motif",
     "openHistory": "Voir dans l'historique",
