@@ -6,7 +6,7 @@ export function PageLoader() {
   const { t } = useTranslation('common')
   return (
     <div className="flex items-center justify-center h-full">
-      <p className="text-sm text-[var(--text-muted)] animate-pulse">{t('loading')}</p>
+      <p className="text-sm text-(--text-muted) animate-pulse">{t('loading')}</p>
     </div>
   )
 }
@@ -18,7 +18,7 @@ export function NoAccessPage() {
     <div className="flex items-center justify-center h-full">
       <div className="text-center">
         <p className="text-sm font-medium" style={{ color: 'var(--text)' }}>{t('noAccess')}</p>
-        <p className="mt-1 text-xs text-[var(--text-muted)]">{t('noAccessDesc')}</p>
+        <p className="mt-1 text-xs text-(--text-muted)">{t('noAccessDesc')}</p>
       </div>
     </div>
   )

@@ -1,15 +1,29 @@
 /* ONIX M-003: fonts are self-hosted (bundled woff2, served from 'self') so no visitor IP reaches Google. */
-@import '@fontsource/inter/300.css';
-@import '@fontsource/inter/400.css';
-@import '@fontsource/inter/500.css';
-@import '@fontsource/inter/600.css';
-@import '@fontsource/inter/700.css';
-@import '@fontsource/jetbrains-mono/400.css';
-@import '@fontsource/jetbrains-mono/500.css';
+@import '@fontsource/inter/300.css' layer(base);
+@import '@fontsource/inter/400.css' layer(base);
+@import '@fontsource/inter/500.css' layer(base);
+@import '@fontsource/inter/600.css' layer(base);
+@import '@fontsource/inter/700.css' layer(base);
+@import '@fontsource/jetbrains-mono/400.css' layer(base);
+@import '@fontsource/jetbrains-mono/500.css' layer(base);
 
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import 'tailwindcss';
+
+/* Tailwind 4 theme (MAJORS-FE-1 step 3): the two font utilities the templates use (font-sans ×3, font-mono ×12)
+   keep the house faces; v3's tailwind.config.js carried exactly these two entries plus a `primary` colour alias
+   that no template referenced, so the config file is gone and this block is its whole successor. */
+@theme {
+  --font-sans: 'Inter', system-ui, sans-serif;
+  --font-mono: 'JetBrains Mono', monospace;
+}
+
+/* Tailwind 4 changed two defaults that the v3 templates rely on; these base rules keep the v3 rendering
+   (Tailwind upgrade guide): a bare `border` utility (1063 sites) stays v3's gray-200 instead of currentColor,
+   and an enabled button or role=button keeps the pointer cursor instead of v4's default cursor. */
+@layer base {
+  *, ::after, ::before, ::backdrop, ::file-selector-button { border-color: #e5e7eb; }
+  button:not(:disabled), [role='button']:not(:disabled) { cursor: pointer; }
+}
 
 :root {
   /* Typography tokens (HUISSTIJL-1): the UI face and the numbers/IDs face. Inline

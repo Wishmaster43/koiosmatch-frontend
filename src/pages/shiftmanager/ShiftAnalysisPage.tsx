@@ -22,10 +22,10 @@ import { SectionTitle } from '@/components/ui/typography'
 // Centered empty/info block for the unavailable + empty states.
 function InfoBlock({ text }: { text: string }) {
   return (
-    <div className="flex flex-col items-center justify-center gap-2 text-center bg-[var(--surface)] rounded-xl"
+    <div className="flex flex-col items-center justify-center gap-2 text-center bg-(--surface) rounded-xl"
       style={{ border: '1px solid var(--border)', minHeight: 220 }}>
       <CalendarClock size={22} style={{ color: 'var(--text-muted)' }} />
-      <p className="text-sm text-[var(--text-muted)]" style={{ maxWidth: 420 }}>{text}</p>
+      <p className="text-sm text-(--text-muted)" style={{ maxWidth: 420 }}>{text}</p>
     </div>
   )
 }
@@ -64,10 +64,10 @@ export default function ShiftAnalysisPage() {
       </div>
 
       {loading ? (
-        <div className="flex flex-col items-center justify-center gap-3 bg-[var(--surface)] rounded-xl"
+        <div className="flex flex-col items-center justify-center gap-3 bg-(--surface) rounded-xl"
           style={{ border: '1px solid var(--border)', minHeight: 220 }}>
           <span style={{ color: 'var(--text-muted)' }}><Spinner size={20} /></span>
-          <p className="text-sm text-[var(--text-muted)]">{t('shiftAnalysis.loading')}</p>
+          <p className="text-sm text-(--text-muted)">{t('shiftAnalysis.loading')}</p>
         </div>
       ) : error ? (
         <ErrorBanner>{t('shiftAnalysis.error')}</ErrorBanner>
@@ -100,7 +100,7 @@ export default function ShiftAnalysisPage() {
           ) : (
             <>
               {/* Geplande UZK per maand */}
-              <div className="p-5 mb-6 bg-[var(--surface)] rounded-xl" style={{ border: '1px solid var(--border)' }}>
+              <div className="p-5 mb-6 bg-(--surface) rounded-xl" style={{ border: '1px solid var(--border)' }}>
                 <BarChartCard title={t('shiftAnalysis.plannedTitle')} data={plannedData}
                   colors={['var(--color-success)']} height={240} />
               </div>

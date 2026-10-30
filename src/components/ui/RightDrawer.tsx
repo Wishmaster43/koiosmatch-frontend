@@ -24,7 +24,7 @@ export default function RightDrawer({ title, subtitle, onClose, width = 480, chi
       className="fixed top-0 bottom-0 right-0 flex flex-col"
       // HUISSTIJL-1: aria-modal dialog panel — shadow-modal role.
       style={{ zIndex: 'var(--z-drawer)', width, maxWidth: '92vw', background: 'var(--surface)', boxShadow: 'var(--shadow-drawer)' }}>
-      <div className="flex items-start justify-between flex-shrink-0" style={{ padding: '16px 20px', borderBottom: '1px solid var(--border)' }}>
+      <div className="flex items-start justify-between shrink-0" style={{ padding: '16px 20px', borderBottom: '1px solid var(--border)' }}>
         <div style={{ minWidth: 0 }}>
           <PageTitle as="div">{title}</PageTitle>
           {subtitle && <div style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 2 }}>{subtitle}</div>}

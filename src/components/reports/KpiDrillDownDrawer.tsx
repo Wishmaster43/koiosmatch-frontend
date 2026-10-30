@@ -306,7 +306,7 @@ export default function KpiDrillDownDrawer({ mode, title, candidates = [], onClo
       <DrawerBackdrop onClick={onClose} />
 
       <div ref={panelRef} role="dialog" aria-modal="true" aria-label={typeof title === 'string' ? title : undefined} tabIndex={-1}
-        className="fixed top-0 bottom-0 right-0 flex flex-col bg-[var(--surface)]"
+        className="fixed top-0 bottom-0 right-0 flex flex-col bg-(--surface)"
         style={{ width: 520, zIndex: 'var(--z-drawer)', boxShadow: 'var(--shadow-drawer)' }}>
 
         {/* Header */}

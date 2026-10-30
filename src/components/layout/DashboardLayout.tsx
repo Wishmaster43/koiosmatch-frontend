@@ -124,7 +124,7 @@ export default function DashboardLayout() {
 
         {/* Topbar */}
         <div
-          className="km-topbar flex items-center flex-shrink-0 gap-3 px-5"
+          className="km-topbar flex items-center shrink-0 gap-3 px-5"
           style={{ height: 52, background: 'var(--topbar-bg)', borderBottom: '1px solid var(--border)' }}
         >
           {/* Sidebar toggle */}
@@ -132,7 +132,7 @@ export default function DashboardLayout() {
             onClick={() => setExpanded(e => !e)}
             aria-label={expanded ? t('sidebarCollapse') : t('sidebarExpand')}
             title={expanded ? t('sidebarCollapse') : t('sidebarExpand')}
-            className="flex items-center justify-center flex-shrink-0 rounded-lg transition-colors"
+            className="flex items-center justify-center shrink-0 rounded-lg transition-colors"
             // eslint-disable-next-line huisstijlLegacy/no-restricted-syntax -- app-chrome control (components/layout = chrome, HUISSTIJL-1): nav-rail/topbar place-marker with its own active state, not an action button; Button's variants deliberately don't cover the rail
             style={{
               width: 30, height: 30, border: 'none', cursor: 'pointer',
@@ -147,9 +147,9 @@ export default function DashboardLayout() {
           {/* Tenant name — the start of the breadcrumb ("Yesway › Dashboard"). The logo
               itself sits on the right of the bar (LOGO-PLACE-1, Danny 14/7); the KM
               brand mark stays in the sidebar. */}
-          <div className="flex items-center flex-shrink-0 gap-2">
+          <div className="flex items-center shrink-0 gap-2">
             <div
-              className="flex items-center justify-center flex-shrink-0 rounded-md"
+              className="flex items-center justify-center shrink-0 rounded-md"
               // eslint-disable-next-line huisstijlLegacy/no-restricted-syntax -- chrome accent surface (active nav marker/brand circle, see the adjacent ACCENT-INK/SIDEBAR-CONTRAST comments), not an action surface
               style={{ width: 22, height: 22, background: 'var(--color-primary)', fontSize: 11, color: 'var(--color-on-accent)', fontWeight: 700 }}
             >
@@ -186,7 +186,7 @@ export default function DashboardLayout() {
           )}
 
           {/* Right actions */}
-          <div className="flex items-center flex-shrink-0 gap-2 ml-auto">
+          <div className="flex items-center shrink-0 gap-2 ml-auto">
             {/* Tenant logo — between the breadcrumb and the right-side actions
                 (LOGO-PLACE-1, Danny 14/7). logo_url is a fresh signed URL per
                 response (12 h workday TTL since LOGO-TTL-1b): render it straight from the tenant payload,
@@ -302,7 +302,7 @@ export default function DashboardLayout() {
           {/* Right filter panel — same height as content, slides next to page */}
           {rightPanelOpen && hasFilters && (
             <div
-              className="km-right-panel flex-shrink-0 overflow-y-auto"
+              className="km-right-panel shrink-0 overflow-y-auto"
               style={{ width: 360, borderLeft: '1px solid var(--border)', background: 'var(--surface)' }}
             >
               <ReportFilterSidebar

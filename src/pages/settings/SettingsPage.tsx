@@ -362,7 +362,7 @@ export default function SettingsPage() {
 
           {!currentItem && (
             <div className="flex items-center justify-center" style={{ height: '60%' }}>
-              <p className="text-sm text-[var(--text-muted)]">{t('shell.empty')}</p>
+              <p className="text-sm text-(--text-muted)">{t('shell.empty')}</p>
             </div>
           )}
 

@@ -170,7 +170,7 @@ export default function ShiftsDrillDownDrawer({ metric, metricOptions, periods, 
 
       <div ref={panelRef} role="dialog" aria-modal="true" aria-label={title} tabIndex={-1}
         onKeyDown={e => { if (e.target instanceof HTMLInputElement) return; if (e.key === 'ArrowLeft') goPeriod(-1); else if (e.key === 'ArrowRight') goPeriod(1) }}
-        className="fixed top-0 bottom-0 right-0 flex flex-col bg-[var(--surface)]"
+        className="fixed top-0 bottom-0 right-0 flex flex-col bg-(--surface)"
         style={{ width: 620, zIndex: 'var(--z-drawer)', boxShadow: 'var(--shadow-drawer)' }}>
 
         {/* Header: title + month pager + count — DRY round 10, DRAWERSHELLS: shared

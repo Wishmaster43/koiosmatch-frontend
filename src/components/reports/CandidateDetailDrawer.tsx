@@ -134,7 +134,7 @@ function TabGeneral({ c }: { c: ReportCandidate }) {
                   <BodyText>{r.global_rate?.internal_description ?? '—'}</BodyText>
                   <Caption style={{ marginTop: 1 }}>{r.step_name ?? '—'}</Caption>
                 </div>
-                <div className="text-right flex-shrink-0">
+                <div className="text-right shrink-0">
                   <SectionTitle as="span" style={monoStyle}>
                     {r.hour_rate != null ? formatCurrency(r.hour_rate, undefined, 2) : '—'}
                   </SectionTitle>
@@ -193,13 +193,13 @@ export default function CandidateDetailDrawer({ candidate: c, onClose, headerAct
         onClick={onClose} />
 
       <div ref={panelRef} role="dialog" aria-modal="true" aria-label={fullName} tabIndex={-1}
-        className="fixed top-0 bottom-0 right-0 flex flex-col bg-[var(--surface)]"
+        className="fixed top-0 bottom-0 right-0 flex flex-col bg-(--surface)"
         style={{ width: 520, zIndex: 'var(--z-drawer)', boxShadow: 'var(--shadow-drawer)', overflow: 'hidden' }}>
 
         {/* Header region: calm EntityHeader idiom — a top row with only close (no
             expand/label, this overlay has no expand mode), then avatar + name +
             status badge + reference, then the tab bar (§3A). */}
-        <div className="flex-shrink-0" style={{ padding: '14px 16px 0', borderBottom: '1px solid var(--border)' }}>
+        <div className="shrink-0" style={{ padding: '14px 16px 0', borderBottom: '1px solid var(--border)' }}>
           <div className="flex justify-end items-center" style={{ marginBottom: 8, gap: 8 }}>
             {headerActions}
             <Button variant="ghost" iconOnly size="sm" onClick={onClose} aria-label={t('common:close')}>
@@ -224,7 +224,7 @@ export default function CandidateDetailDrawer({ candidate: c, onClose, headerAct
         </div>
 
         {/* The record-level notice, shown on every tab. */}
-        {notice && <div className="flex-shrink-0" style={{ padding: '12px 16px 0' }}>{notice}</div>}
+        {notice && <div className="shrink-0" style={{ padding: '12px 16px 0' }}>{notice}</div>}
 
         {/* Tab content */}
         {activeTab === 'general' && <TabGeneral c={c} />}

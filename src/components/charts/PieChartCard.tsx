@@ -70,7 +70,7 @@ export default function PieChartCard({ title, data = [], colors = DEFAULT_COLORS
       {/* Chart on the left, legend on the right */}
       <div className="flex items-center gap-6">
         <ErrorBoundary compact>
-        <div className="flex-shrink-0">
+        <div className="shrink-0">
           <PieChart width={size} height={size}>
             <Pie
               data={data}
@@ -115,11 +115,11 @@ export default function PieChartCard({ title, data = [], colors = DEFAULT_COLORS
                 onMouseLeave={e => { if (clickable) e.currentTarget.style.background = 'none' }}
               >
                 <div className="flex items-center min-w-0 gap-2">
-                  <span className="flex-shrink-0 rounded-full"
+                  <span className="shrink-0 rounded-full"
                     style={{ width: 8, height: 8, background: colors[i % colors.length] }} />
                   <span className="text-xs truncate" style={{ color: 'var(--text-muted)' }}>{entry.name}</span>
                 </div>
-                <span className="flex-shrink-0 text-xs font-medium" style={{ color: 'var(--text)' }}>
+                <span className="shrink-0 text-xs font-medium" style={{ color: 'var(--text)' }}>
                   {showPercent ? pct : formatNumber(entry.value)}
                 </span>
               </div>

@@ -2,6 +2,7 @@
 import { defineConfig, configDefaults } from 'vitest/config'
 import { loadEnv } from 'vite'
 import react from '@vitejs/plugin-react'
+import tailwindcss from '@tailwindcss/vite'
 import { fileURLToPath } from 'node:url'
 import { buildCsp } from './src/lib/csp'
 
@@ -38,7 +39,7 @@ export default defineConfig(({ mode }) => {
   // even though they are not exported to process.env by default.
   const env = loadEnv(mode, process.cwd(), 'VITE_')
   return {
-    plugins: [react(), cspPlugin(env)],
+    plugins: [react(), tailwindcss(), cspPlugin(env)],
     // "@/" resolves to src/ — no deep ../../../ chains (CLAUDE.md §11).
     resolve: { alias: { '@': fileURLToPath(new URL('./src', import.meta.url)) } },
     // Always run on 5173; fail loudly if it's taken instead of silently using 5174.

@@ -92,7 +92,7 @@ export function ReportTableToolbar({ title, summary, searchValue, onSearchChange
   searchPlaceholder: string
 }) {
   return (
-    <div className="flex items-center justify-between flex-shrink-0" style={{ marginBottom: 16 }}>
+    <div className="flex items-center justify-between shrink-0" style={{ marginBottom: 16 }}>
       <div>
         {/* pageTitleStyle raw identity (not a hand-picked size/weight pair, §4 typography) */}
         <h1 style={{ ...pageTitleStyle, fontSize: 18 }}>{title}</h1>
@@ -145,7 +145,7 @@ export function ReportTableFrame({ loading, loadingLabel, empty, emptyLabel, emp
   children: ReactNode
 }) {
   return (
-    <div className="flex flex-1 min-h-0 overflow-hidden bg-[var(--surface)] rounded-xl"
+    <div className="flex flex-1 min-h-0 overflow-hidden bg-(--surface) rounded-xl"
       style={{ border: '1px solid var(--border)' }}>
       <div className="flex-1 min-w-0 overflow-auto">
         {loading ? (

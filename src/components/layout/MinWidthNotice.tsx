@@ -28,7 +28,7 @@ export default function MinWidthNotice() {
 
   if (!below || dismissed) return null
   return (
-    <div role="status" className="flex-shrink-0 px-3 py-2">
+    <div role="status" className="shrink-0 px-3 py-2">
       <CalloutBox variant="warning" live="off" onDismiss={dismiss} dismissLabel={t('minWidth.dismiss')}>
         {t('minWidth.notice', { width: formatNumber(DESKTOP_MIN_WIDTH) })}
       </CalloutBox>

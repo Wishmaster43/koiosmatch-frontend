@@ -42,7 +42,7 @@ export default function ReportDrawerChrome({
       <DrawerBackdrop onClick={onClose} zIndex={zIndex} />
 
       <div ref={panelRef} role="dialog" aria-modal="true" aria-label={title} tabIndex={-1}
-        className="fixed top-0 bottom-0 right-0 flex flex-col bg-[var(--surface)]"
+        className="fixed top-0 bottom-0 right-0 flex flex-col bg-(--surface)"
         style={{ width, zIndex, boxShadow: 'var(--shadow-drawer)' }}>
 
         {/* Header */}

@@ -27,8 +27,8 @@ type Rec = Record<string, unknown>
 function DashboardCardHeader({ title, viewAllLabel }: { title: string; viewAllLabel: string }) {
   return (
     <div className="flex items-center justify-between px-4 py-3" style={{ borderBottom: '1px solid var(--border)' }}>
-      <span className="font-medium text-[var(--text)]" style={{ fontSize: 13 }}>{title}</span>
-      <span className="text-xs text-[var(--text-muted)] cursor-pointer">{viewAllLabel}</span>
+      <span className="font-medium text-(--text)" style={{ fontSize: 13 }}>{title}</span>
+      <span className="text-xs text-(--text-muted) cursor-pointer">{viewAllLabel}</span>
     </div>
   )
 }
@@ -152,15 +152,15 @@ export default function ShiftmanagerDashboard() {
       {hasAI && <div className="grid grid-cols-2 gap-4 mt-6 mb-6">
 
         {/* Recent runs */}
-        <div className="overflow-hidden bg-[var(--surface)] rounded-xl" style={{ border: '1px solid var(--border)' }}>
+        <div className="overflow-hidden bg-(--surface) rounded-xl" style={{ border: '1px solid var(--border)' }}>
           <DashboardCardHeader title={t('dashboard.recentRuns')} viewAllLabel={t('dashboard.viewAll')} />
           {runs.length === 0 && (
-            <div className="px-4 py-6 text-xs text-center text-[var(--text-muted)]">{t('charts.empty', { defaultValue: '—' })}</div>
+            <div className="px-4 py-6 text-xs text-center text-(--text-muted)">{t('charts.empty', { defaultValue: '—' })}</div>
           )}
           {runs.map((r, i) => (
             <div key={i} className="flex items-center gap-3 px-4 py-3"
               style={{ borderBottom: i < runs.length - 1 ? '1px solid var(--hover-bg)' : 'none' }}>
-              <div className="flex items-center justify-center flex-shrink-0 rounded-lg"
+              <div className="flex items-center justify-center shrink-0 rounded-lg"
                 style={{ width: 28, height: 28, background: r.ok === true ? 'var(--color-success-bg)' : r.ok === false ? 'var(--color-danger-bg)' : 'var(--hover-bg)' }}>
                 {r.ok === true
                   ? <CheckCircle size={13} color="var(--color-success)" />
@@ -169,32 +169,32 @@ export default function ShiftmanagerDashboard() {
                   : <Clock size={13} color="var(--text-muted)" />}
               </div>
               <div className="flex-1 min-w-0">
-                <div className="font-medium text-[var(--text)] truncate" style={{ fontSize: 13 }}>{r.name}</div>
-                <div className="text-xs text-[var(--text-muted)]">{r.ok === true ? t('dashboard.candidates', { n: r.n }) : r.ok === false ? (r.err ?? t('dashboard.runFailed')) : t('dashboard.runInProgress')}</div>
+                <div className="font-medium text-(--text) truncate" style={{ fontSize: 13 }}>{r.name}</div>
+                <div className="text-xs text-(--text-muted)">{r.ok === true ? t('dashboard.candidates', { n: r.n }) : r.ok === false ? (r.err ?? t('dashboard.runFailed')) : t('dashboard.runInProgress')}</div>
               </div>
-              <span className="flex-shrink-0 text-xs text-[var(--text-muted)]">{r.time}</span>
+              <span className="shrink-0 text-xs text-(--text-muted)">{r.time}</span>
             </div>
           ))}
         </div>
 
         {/* Recent conversations */}
-        <div className="overflow-hidden bg-[var(--surface)] rounded-xl" style={{ border: '1px solid var(--border)' }}>
+        <div className="overflow-hidden bg-(--surface) rounded-xl" style={{ border: '1px solid var(--border)' }}>
           <DashboardCardHeader title={t('dashboard.recentConversations')} viewAllLabel={t('dashboard.viewAll')} />
           {conversations.length === 0 && (
-            <div className="px-4 py-6 text-xs text-center text-[var(--text-muted)]">{t('charts.empty', { defaultValue: '—' })}</div>
+            <div className="px-4 py-6 text-xs text-center text-(--text-muted)">{t('charts.empty', { defaultValue: '—' })}</div>
           )}
           {conversations.map((c, i) => (
             <div key={i} className="flex items-start gap-3 px-4 py-3"
               style={{ borderBottom: i < conversations.length - 1 ? '1px solid var(--hover-bg)' : 'none' }}>
-              <div className="flex items-center justify-center flex-shrink-0 rounded-full"
+              <div className="flex items-center justify-center shrink-0 rounded-full"
                 style={{ width: 28, height: 28, background: 'var(--color-primary-bg)', color: 'var(--color-primary-text)', fontSize: 11 }}>
                 {c.name.split(' ').map(n => n[0]).join('')}
               </div>
               <div className="flex-1 min-w-0">
-                <div className="font-medium text-[var(--text)] truncate" style={{ fontSize: 13 }}>{c.name}</div>
-                <div className="text-xs text-[var(--text-muted)] truncate">{c.msg}</div>
+                <div className="font-medium text-(--text) truncate" style={{ fontSize: 13 }}>{c.name}</div>
+                <div className="text-xs text-(--text-muted) truncate">{c.msg}</div>
               </div>
-              <span className="flex-shrink-0 text-xs text-[var(--text-muted)]">{c.time}</span>
+              <span className="shrink-0 text-xs text-(--text-muted)">{c.time}</span>
             </div>
           ))}
         </div>

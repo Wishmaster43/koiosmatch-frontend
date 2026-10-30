@@ -230,7 +230,7 @@ export function ChartCard({ title, subtitle, action, loading, error, children }:
   return (
     // §4: design tokens only — replaces the hardcoded Tailwind slate-* palette
     // (was a lone outlier vs. every sibling shiftmanager component using var(--text*)).
-    <div className="overflow-hidden bg-[var(--surface)] border shadow-sm rounded-2xl border-[var(--border)]">
+    <div className="overflow-hidden bg-(--surface) border shadow-sm rounded-2xl border-(--border)">
       <div className="p-5">
         {/* Title + subtitle on one line; optional action (e.g. Waarden|%) on the right (Danny). */}
         <div className="flex items-center justify-between gap-2 mb-3">
@@ -242,15 +242,15 @@ export function ChartCard({ title, subtitle, action, loading, error, children }:
           {action}
         </div>
         {loading && (
-          <div className="flex items-center justify-center h-64 text-[var(--text-muted)]">{t('charts.loading')}</div>
+          <div className="flex items-center justify-center h-64 text-(--text-muted)">{t('charts.loading')}</div>
         )}
         {error && !loading && (
-          <div className="flex items-center justify-center h-64 text-[var(--color-danger)]">{error}</div>
+          <div className="flex items-center justify-center h-64 text-(--color-danger)">{error}</div>
         )}
         {/* Local boundary: a broken chart (bad data / lib error) shows a fallback, not a dead page. */}
         {!loading && !error && (
           <ErrorBoundary fallback={() => (
-            <div className="flex items-center justify-center h-64 text-[var(--text-muted)]">—</div>
+            <div className="flex items-center justify-center h-64 text-(--text-muted)">—</div>
           )}>
             {children}
           </ErrorBoundary>

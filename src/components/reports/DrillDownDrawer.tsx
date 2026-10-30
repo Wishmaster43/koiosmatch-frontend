@@ -69,21 +69,21 @@ export default function DrillDownDrawer({ title, subtitle, candidates = [], onCl
   return (
     <DrawerPanelShell panelRef={panelRef} onClose={onClose}
       ariaLabel={typeof title === 'string' ? title : undefined}
-      className="fixed top-0 bottom-0 right-0 flex flex-col bg-[var(--surface)]"
+      className="fixed top-0 bottom-0 right-0 flex flex-col bg-(--surface)"
       style={{ width: expanded ? 900 : 560, zIndex: 'var(--z-drawer)', transition: 'width 0.2s ease', boxShadow: 'var(--shadow-drawer)' }}>
 
         {/* Header */}
-        <div className="flex items-start justify-between flex-shrink-0"
+        <div className="flex items-start justify-between shrink-0"
           style={{ padding: '16px 20px', borderBottom: '1px solid var(--border)' }}>
           <div>
             <PageTitle>{currentTab?.label ?? title}</PageTitle>
-            <div className="text-sm text-[var(--text-muted)] mt-0.5">
+            <div className="text-sm text-(--text-muted) mt-0.5">
               {t('drilldown.candidatesCount', { count: shown.length })}
-              {subtitle && <span className="ml-1 text-[var(--text-muted)]">· {subtitle}</span>}
+              {subtitle && <span className="ml-1 text-(--text-muted)">· {subtitle}</span>}
             </div>
           </div>
           {/* Expand/collapse + close — mirrors the candidate drawer header actions */}
-          <div className="flex items-center flex-shrink-0" style={{ marginLeft: 12 }}>
+          <div className="flex items-center shrink-0" style={{ marginLeft: 12 }}>
             <Button variant="ghost" iconOnly onClick={() => setExpanded(v => !v)} aria-label={expanded ? t('common:collapse') : t('common:expand')}
               onMouseEnter={e => (e.currentTarget.style.background = 'var(--hover-bg)')}
               onMouseLeave={e => (e.currentTarget.style.background = 'none')}>
@@ -99,14 +99,14 @@ export default function DrillDownDrawer({ title, subtitle, candidates = [], onCl
 
         {/* Bucket switcher (shared DrillTabs) — badge = count per bucket */}
         {tabs && tabs.length > 1 && activeTab && (
-          <div className="flex-shrink-0 px-4 py-3" style={{ borderBottom: '1px solid var(--hover-bg)' }}>
+          <div className="shrink-0 px-4 py-3" style={{ borderBottom: '1px solid var(--hover-bg)' }}>
             <DrillTabs tabs={tabs.map(tb => ({ key: tb.key, label: tb.label, count: tb.candidates.length, title: tb.title }))}
               active={activeTab} onChange={setActiveTab} />
           </div>
         )}
 
         {/* Search bar */}
-        <div className="flex-shrink-0 px-4 py-3" style={{ borderBottom: '1px solid var(--hover-bg)' }}>
+        <div className="shrink-0 px-4 py-3" style={{ borderBottom: '1px solid var(--hover-bg)' }}>
           <div className="flex items-center gap-2 px-3 rounded-lg"
             style={{ background: 'var(--hover-bg)', border: '1px solid var(--border)' }}>
             <Search size={13} color="var(--text-muted)" />
@@ -114,7 +114,7 @@ export default function DrillDownDrawer({ title, subtitle, candidates = [], onCl
               value={search}
               onChange={e => setSearch(e.target.value)}
               placeholder={t('drilldown.searchFull')}
-              className="flex-1 py-2 text-[var(--text)] bg-transparent outline-none"
+              className="flex-1 py-2 text-(--text) bg-transparent outline-none"
               style={{ border: 'none', fontSize: 12 }}
             />
           </div>
@@ -123,7 +123,7 @@ export default function DrillDownDrawer({ title, subtitle, candidates = [], onCl
         {/* Candidates list */}
         <div className="flex-1 overflow-auto">
           {filtered.length === 0 ? (
-            <div className="flex items-center justify-center h-32 text-sm text-[var(--text-muted)]">
+            <div className="flex items-center justify-center h-32 text-sm text-(--text-muted)">
               {t('candidates.empty')}
             </div>
           ) : (
@@ -141,7 +141,7 @@ export default function DrillDownDrawer({ title, subtitle, candidates = [], onCl
                 >
                   <div className="flex items-start gap-3">
                     {/* Avatar */}
-                    <div className="flex items-center justify-center flex-shrink-0 font-medium rounded-full"
+                    <div className="flex items-center justify-center shrink-0 font-medium rounded-full"
                       style={{ width: 36, height: 36, background: 'var(--color-primary-bg)', color: 'var(--color-primary-text)', fontSize: 12 }}>
                       {initials || '?'}
                     </div>
@@ -149,7 +149,7 @@ export default function DrillDownDrawer({ title, subtitle, candidates = [], onCl
                     <div className="flex-1 min-w-0">
                       {/* Name + status */}
                       <div className="flex items-center gap-2 mb-2">
-                        <span className="font-medium text-[var(--text)] truncate" style={{ fontSize: 13 }}>
+                        <span className="font-medium text-(--text) truncate" style={{ fontSize: 13 }}>
                           {fullName || t('candidateDrawer.unknownName')}
                         </span>
                         <StatusBadge status={c.status} />
@@ -183,9 +183,9 @@ export default function DrillDownDrawer({ title, subtitle, candidates = [], onCl
         </div>
 
         {/* Footer */}
-        <div className="flex items-center justify-between flex-shrink-0 px-4 py-3"
+        <div className="flex items-center justify-between shrink-0 px-4 py-3"
           style={{ borderTop: '1px solid var(--border)', background: 'var(--hover-bg)' }}>
-          <span className="text-xs text-[var(--text-muted)]">
+          <span className="text-xs text-(--text-muted)">
             {t('drilldown.shownOf', { shown: filtered.length, total: shown.length })}
           </span>
           <div className="flex items-center gap-2">

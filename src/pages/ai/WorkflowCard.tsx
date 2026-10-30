@@ -98,7 +98,7 @@ export default function WorkflowCard({ workflow, onRun, canRun = true, onEdit, c
       <div className="flex items-start justify-between gap-3">
         <div className="flex items-center min-w-0 gap-3">
           <div
-            className="flex items-center justify-center flex-shrink-0 rounded-lg"
+            className="flex items-center justify-center shrink-0 rounded-lg"
             style={{ width: 36, height: 36, background: 'var(--color-primary-bg)' }}
           >
             <Zap size={16} color="var(--color-primary)" />
@@ -107,20 +107,20 @@ export default function WorkflowCard({ workflow, onRun, canRun = true, onEdit, c
             <SectionTitle as="div" style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
               {displayName}
             </SectionTitle>
-            <div className="text-xs text-[var(--text-muted)] mt-0.5">{t(triggerKeyForType(workflow.trigger_type))}</div>
+            <div className="text-xs text-(--text-muted) mt-0.5">{t(triggerKeyForType(workflow.trigger_type))}</div>
           </div>
         </div>
         {archived ? (
           /* Archived soft chip (§4 tint via lib/tint) — mirrors WorkflowListRow */
-          <div className="flex-shrink-0">
+          <div className="shrink-0">
             <SoftChip round label={t('list.archivedBadge')} color="var(--color-danger)" />
           </div>
         ) : (
           <div
-            className="flex items-center gap-1.5 rounded-full px-2.5 py-1 flex-shrink-0"
+            className="flex items-center gap-1.5 rounded-full px-2.5 py-1 shrink-0"
             style={{ background: status.bg, color: status.color }}
           >
-            <span className="flex-shrink-0 rounded-full" style={{ width: 5, height: 5, background: status.dot }} />
+            <span className="shrink-0 rounded-full" style={{ width: 5, height: 5, background: status.dot }} />
             <span style={{ fontSize: 11, fontWeight: 500 }}>{t(`status.${workflow.status}`, { defaultValue: workflow.status })}</span>
           </div>
         )}
@@ -146,10 +146,10 @@ export default function WorkflowCard({ workflow, onRun, canRun = true, onEdit, c
                 ? <CheckCircle size={13} color="var(--color-success)" />
                 : <AlertCircle size={13} color="var(--color-danger)" />
               }
-              <span className="text-xs text-[var(--text-muted)]">{formatDateTime(workflow.last_run.time)}</span>
+              <span className="text-xs text-(--text-muted)">{formatDateTime(workflow.last_run.time)}</span>
             </>
           ) : (
-            <span className="text-xs text-[var(--text-muted)]">{t('page.notRun')}</span>
+            <span className="text-xs text-(--text-muted)">{t('page.notRun')}</span>
           )}
         </div>
 

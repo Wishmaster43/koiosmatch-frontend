@@ -151,7 +151,7 @@ export function PlaceholderPage({ pageKey }: { pageKey: string }) {
   const title: ReactNode = t(pageKey, { ns: 'pageTitles', keySeparator: false, defaultValue: PAGE_TITLES[pageKey] || pageKey })
   return (
     <div className="flex items-center justify-center h-full">
-      <p className="font-mono text-sm text-[var(--text-muted)]">{title} — {t('comingSoon')}</p>
+      <p className="font-mono text-sm text-(--text-muted)">{title} — {t('comingSoon')}</p>
     </div>
   )
 }

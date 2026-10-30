@@ -53,7 +53,7 @@ function BootLoader() {
           style={{ width: 40, height: 40, background: 'var(--color-primary)' }}>
           <span style={{ color: 'var(--color-on-accent)', fontSize: 18 }}>⚡</span>
         </div>
-        <p className="text-sm text-[var(--text-muted)]">{t('loading')}</p>
+        <p className="text-sm text-(--text-muted)">{t('loading')}</p>
       </div>
     </div>
   )

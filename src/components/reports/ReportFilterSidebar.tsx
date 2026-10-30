@@ -98,7 +98,7 @@ export default function ReportFilterSidebar({
   })
 
   return (
-    <div className="flex flex-col flex-shrink-0 bg-[var(--surface)]"
+    <div className="flex flex-col shrink-0 bg-(--surface)"
       style={{ width: '100%', borderLeft: '1px solid var(--border)' }}>
 
       {/* Header */}

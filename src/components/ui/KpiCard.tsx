@@ -31,7 +31,7 @@ export default function KpiCard({ label, value, delta, icon: Icon, iconBg, iconC
 
   if (loading) {
     return (
-      <div className="p-5 bg-[var(--surface)] rounded-xl" style={{ border: '1px solid var(--border)' }}>
+      <div className="p-5 bg-(--surface) rounded-xl" style={{ border: '1px solid var(--border)' }}>
         <div className="w-10 h-10 mb-4 rounded-lg animate-pulse" style={{ background: 'var(--hover-bg)' }} />
         <div className="w-16 mb-1 rounded h-7 animate-pulse" style={{ background: 'var(--hover-bg)' }} />
         <div className="h-4 rounded w-28 animate-pulse" style={{ background: 'var(--hover-bg)' }} />
@@ -45,7 +45,7 @@ export default function KpiCard({ label, value, delta, icon: Icon, iconBg, iconC
   // focusable (WCAG 2.1.1 Keyboard, 4.1.2 Name/Role/Value).
   return (
     <div
-      className="flex flex-col gap-3 p-5 bg-[var(--surface)] rounded-xl"
+      className="flex flex-col gap-3 p-5 bg-(--surface) rounded-xl"
       style={{
         border: '1px solid var(--border)',
         cursor: onClick ? 'pointer' : 'default',
@@ -57,7 +57,7 @@ export default function KpiCard({ label, value, delta, icon: Icon, iconBg, iconC
       onMouseLeave={e => onClick && (e.currentTarget.style.boxShadow = 'none')}
     >
       <div className="flex items-start justify-between">
-        <div className="flex items-center justify-center flex-shrink-0 rounded-lg"
+        <div className="flex items-center justify-center shrink-0 rounded-lg"
           style={{ width: 40, height: 40, background: iconBg }}>
           {Icon && <Icon size={18} color={iconColor} />}
         </div>

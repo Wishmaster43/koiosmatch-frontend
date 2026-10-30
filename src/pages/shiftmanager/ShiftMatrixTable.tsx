@@ -36,7 +36,7 @@ export default function ShiftMatrixTable({ columns, rows, metric }: {
   const totals = columns.map(c => rows.reduce((s, r) => s + (Number(r.months[c]?.[metric]) || 0), 0))
 
   return (
-    <div className="overflow-auto bg-[var(--surface)] rounded-xl" style={{ border: '1px solid var(--border)' }}>
+    <div className="overflow-auto bg-(--surface) rounded-xl" style={{ border: '1px solid var(--border)' }}>
       <table style={{ borderCollapse: 'collapse', minWidth: 240 + columns.length * 90 }}>
         <thead>
           <tr>

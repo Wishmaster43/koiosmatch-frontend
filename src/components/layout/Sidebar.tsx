@@ -156,7 +156,7 @@ function SubNavItem({ item, active, onNavigate }: SubNavItemProps) {
         color:      active ? 'var(--color-primary-text)' : hovered ? 'var(--sidebar-text)' : 'var(--sidebar-muted)',
       }}
     >
-      <div className="flex-shrink-0 rounded-full"
+      <div className="shrink-0 rounded-full"
         // MERKSTIP-TINT-1 (Danny 04-09: "merkstippen = tintpaar"): a placement marker
         // wears the ACTIVE tint pair (16/50), never the raw brand fill (PRIMAIR-VLAK-1).
         style={{ width: 4, height: 4, marginLeft: 2, boxSizing: 'border-box',
@@ -288,12 +288,12 @@ export default function Sidebar({ expanded, activePage, setActivePage, koiosOpen
   const showSettings       = canAccessPage('settings', auth)
 
   return (
-    <nav aria-label={t('nav.main')} className="flex flex-col flex-shrink-0 overflow-hidden transition-all duration-200"
+    <nav aria-label={t('nav.main')} className="flex flex-col shrink-0 overflow-hidden transition-all duration-200"
       style={{ width: expanded ? 220 : 56, background: 'var(--sidebar-bg)',
                borderRight: '1px solid var(--sidebar-border)' }}>
 
       {/* Brand */}
-      <div className="flex items-center justify-center flex-shrink-0"
+      <div className="flex items-center justify-center shrink-0"
         style={{
           padding:      '14px 0 13px',
           borderBottom: '1px solid var(--sidebar-border)',
@@ -363,7 +363,7 @@ export default function Sidebar({ expanded, activePage, setActivePage, koiosOpen
             color: 'var(--color-primary-text)',
           }}
         >
-          <div className="flex items-center justify-center rounded-full flex-shrink-0"
+          <div className="flex items-center justify-center rounded-full shrink-0"
             // eslint-disable-next-line huisstijlLegacy/no-restricted-syntax -- chrome accent surface (active nav marker/brand dot, see the adjacent ACCENT-INK/SIDEBAR-CONTRAST comments), not an action surface
             style={{ width: 18, height: 18, background: 'var(--color-primary)' }}>
             {/* The solid accent brand circle is the one constant across both states;

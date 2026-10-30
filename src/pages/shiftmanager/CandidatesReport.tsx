@@ -10,9 +10,9 @@ import CandidatesReport from "@/components/reports/CandidatesReport";
 function ComingSoon({ label }: { label: string }) {
   const { t } = useTranslation('shiftmanager')
   return (
-    <div className="flex items-center justify-center h-64 bg-[var(--surface)] rounded-xl"
+    <div className="flex items-center justify-center h-64 bg-(--surface) rounded-xl"
       style={{ border: '1px solid var(--border)' }}>
-      <p className="font-mono text-sm text-[var(--text-muted)]">{t('comingSoon', { label })}</p>
+      <p className="font-mono text-sm text-(--text-muted)">{t('comingSoon', { label })}</p>
     </div>
   )
 }

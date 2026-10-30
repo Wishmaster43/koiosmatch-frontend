@@ -59,7 +59,7 @@ function StepIconStack({ steps }: { steps: WorkflowStep[] }) {
   const visible = overflow ? steps.slice(0, STACK_SLOTS - 1) : steps.slice(0, STACK_SLOTS)
   const extra = steps.length - visible.length
   return (
-    <div className="flex items-center flex-shrink-0">
+    <div className="flex items-center shrink-0">
       {visible.map((step, i) => {
         const meta = step.type ? MODULE_META[step.type] : undefined
         const Icon = (meta?.Icon ?? HelpCircle) as unknown as LucideIcon
@@ -146,17 +146,17 @@ export default function WorkflowListRow({ workflow, folderName, onRun, canRun = 
 
       <div className="min-w-0 flex-1">
         <SectionTitle as="div" style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{displayName}</SectionTitle>
-        <div className="flex items-center gap-1 text-xs text-[var(--text-muted)] truncate">
+        <div className="flex items-center gap-1 text-xs text-(--text-muted) truncate">
           {workflow.last_run && (workflow.last_run.ok
-            ? <CheckCircle size={11} color="var(--color-success)" className="flex-shrink-0" />
-            : <AlertCircle size={11} color="var(--color-danger)" className="flex-shrink-0" />)}
+            ? <CheckCircle size={11} color="var(--color-success)" className="shrink-0" />
+            : <AlertCircle size={11} color="var(--color-danger)" className="shrink-0" />)}
           <span className="truncate">{metaParts.join(' · ')}</span>
         </div>
       </div>
 
       {/* Trigger indicator — role="img" so the aria-label is actually exposed (a bare div isn't) */}
       <div role="img" title={t(trig.key)} aria-label={t(trig.key)}
-        className="flex items-center justify-center flex-shrink-0" style={{ width: 20, color: 'var(--text-muted)' }}>
+        className="flex items-center justify-center shrink-0" style={{ width: 20, color: 'var(--text-muted)' }}>
         <trig.Icon size={15} />
       </div>
 
@@ -165,13 +165,13 @@ export default function WorkflowListRow({ workflow, folderName, onRun, canRun = 
           {/* TRASH-OVERAL-2: the trashed row says when it entered the trash and when
               it erases for good (DD-MM-YYYY via the house formatter). */}
           {inTrash && (
-            <span className="text-xs flex-shrink-0 truncate" style={{ color: 'var(--color-danger-text)', maxWidth: 320 }}>
+            <span className="text-xs shrink-0 truncate" style={{ color: 'var(--color-danger-text)', maxWidth: 320 }}>
               {buildTrashNote(t, formatDate, workflow.pending_erase_at, graceWindow)}
             </span>
           )}
 
           {/* Archived soft chip (§4 tint via lib/tint) — read-only, no run/toggle for a deleted workflow */}
-          <div className="flex-shrink-0">
+          <div className="shrink-0">
             <SoftChip round label={t('list.archivedBadge')} color="var(--color-danger)" />
           </div>
 

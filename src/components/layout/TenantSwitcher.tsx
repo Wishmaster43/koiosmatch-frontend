@@ -125,7 +125,7 @@ export default function TenantSwitcher({ expanded }: { expanded?: boolean }) {
   // Collapsed rail: just the badge.
   if (!expanded) {
     return (
-      <div className="flex justify-center flex-shrink-0 mt-3">
+      <div className="flex justify-center shrink-0 mt-3">
         <div className="flex items-center justify-center rounded"
           // eslint-disable-next-line huisstijlLegacy/no-restricted-syntax -- chrome brand circle: tenant initials on the accent surface (same class as the Koios circle in Sidebar), not an action button
           style={{ width: 28, height: 28, background: 'var(--color-primary)', fontSize: 9, color: 'var(--color-on-accent)', fontWeight: 700 }}>
@@ -136,7 +136,7 @@ export default function TenantSwitcher({ expanded }: { expanded?: boolean }) {
   }
 
   return (
-    <div ref={ref} className="relative flex-shrink-0 mx-3 mt-3">
+    <div ref={ref} className="relative shrink-0 mx-3 mt-3">
       <button
         onClick={() => canSwitch && setOpen(o => !o)}
         className="flex items-center w-full transition-colors rounded-lg"
@@ -145,7 +145,7 @@ export default function TenantSwitcher({ expanded }: { expanded?: boolean }) {
         onMouseEnter={e => canSwitch && (e.currentTarget.style.background = 'var(--hover-bg)')}
         onMouseLeave={e => (e.currentTarget.style.background = 'var(--hover-bg)')}
       >
-        <div className="flex items-center justify-center flex-shrink-0 rounded"
+        <div className="flex items-center justify-center shrink-0 rounded"
           // eslint-disable-next-line huisstijlLegacy/no-restricted-syntax -- chrome brand circle: tenant initials on the accent surface (same class as the Koios circle in Sidebar), not an action button
           style={{ width: 22, height: 22, background: 'var(--color-primary)', fontSize: 8, color: 'var(--color-on-accent)', fontWeight: 700 }}>
           {initials}
@@ -165,7 +165,7 @@ export default function TenantSwitcher({ expanded }: { expanded?: boolean }) {
       </button>
 
       {open && canSwitch && (
-        <div className="absolute left-0 right-0 mt-1 overflow-hidden bg-[var(--surface)] top-full rounded-xl"
+        <div className="absolute left-0 right-0 mt-1 overflow-hidden bg-(--surface) top-full rounded-xl"
           style={{ border: '1px solid var(--border)', boxShadow: 'var(--shadow-float)', zIndex: 'var(--z-popover)' }}>
           <div className="p-2" style={{ borderBottom: '1px solid var(--border)' }}>
             <div className="relative">
@@ -205,15 +205,15 @@ export default function TenantSwitcher({ expanded }: { expanded?: boolean }) {
                   {(() => {
                     const swatch = isHexColor(tn.primary_color) ? tn.primary_color : APP_DEFAULT_PRIMARY
                     return (
-                      <div className="flex items-center justify-center flex-shrink-0 rounded"
+                      <div className="flex items-center justify-center shrink-0 rounded"
                         style={{ width: 24, height: 24, background: swatch, fontSize: 9, color: readableOn(swatch), fontWeight: 700 }}>
                         {tenantInitials(tn.name)}
                       </div>
                     )
                   })()}
                   <div className="flex-1 min-w-0 text-left">
-                    <div className="text-sm font-medium text-[var(--text)] truncate">{tn.name ?? tn.id}</div>
-                    {tenantDomain(tn) && <div className="text-xs text-[var(--text-muted)] truncate">{tenantDomain(tn)}</div>}
+                    <div className="text-sm font-medium text-(--text) truncate">{tn.name ?? tn.id}</div>
+                    {tenantDomain(tn) && <div className="text-xs text-(--text-muted) truncate">{tenantDomain(tn)}</div>}
                   </div>
                   {/* Pending/failed bureaus show their provisioning state and cannot be picked. */}
                   <TenantProvisioningChip status={tn.provisioning_status} />
@@ -221,7 +221,7 @@ export default function TenantSwitcher({ expanded }: { expanded?: boolean }) {
                     ? <span style={{ display: 'flex', color: 'var(--text-muted)' }}><Spinner size={13} label={t('loading')} /></span>
                     // MERKSTIP-TINT-1 (Danny 04-09): the active-tenant marker wears the active tint pair, never the raw brand fill.
                     // eslint-disable-next-line huisstijlLegacy/no-restricted-syntax -- tintBg/tintBorder ARE the canonical §4 tint helpers; the primary token here is only their argument
-                    : isActive && <div className="flex-shrink-0 rounded-full" style={{ width: 6, height: 6, boxSizing: 'border-box', background: tintBg('var(--color-primary)', true), border: `1px solid ${tintBorder('var(--color-primary)', true)}` }} />}
+                    : isActive && <div className="shrink-0 rounded-full" style={{ width: 6, height: 6, boxSizing: 'border-box', background: tintBg('var(--color-primary)', true), border: `1px solid ${tintBorder('var(--color-primary)', true)}` }} />}
                 </button>
               )
             })}
