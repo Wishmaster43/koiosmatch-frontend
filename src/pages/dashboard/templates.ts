@@ -159,6 +159,7 @@ export const BLOCK_LABEL_KEY: Record<string, string> = {
   'block.appointmentsNext48h': 'block.appointmentsNext48h',
   'block.redeployRadar': 'block.redeployRadar',
   'block.productivityByRecruiter': 'block.productivityByRecruiter',
+  'block.callsPerRecruiter': 'block.callsPerRecruiter',
   'block.fillRateTimeseries': 'block.fillRateTimeseries',
   'block.fillRateByBranch': 'block.fillRateByBranch',
   'block.matchesByContractType': 'block.matchesByContractType',

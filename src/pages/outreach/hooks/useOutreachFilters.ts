@@ -12,7 +12,7 @@
  */
 import { useState, useMemo } from 'react'
 import type { Campaign } from './useOutreachCampaigns'
-import { statusKey, channelKey, targetsOf, ownerNameOf, targetGroupNameOf } from '../data/outreachCampaignFields'
+import { statusKey, channelKey, targetsOf, targetGroupNameOf } from '../data/outreachCampaignFields'
 
 interface UseOutreachFiltersArgs {
   campaigns: Campaign[]
@@ -20,18 +20,20 @@ interface UseOutreachFiltersArgs {
   lifecycleOf: (c?: Campaign) => string
   showArchived: boolean
   showTrash: boolean
+  // Dashboard deep-link: seed the owner filter once with this user id.
+  intentOwnerId?: string
 }
 
 // Owns the outreach page's filter dimensions and derives the filtered row set
 // from either the active list or the archived/trash view (see file docblock).
-export function useOutreachFilters({ campaigns, archived, lifecycleOf, showArchived, showTrash }: UseOutreachFiltersArgs) {
+export function useOutreachFilters({ campaigns, archived, lifecycleOf, showArchived, showTrash, intentOwnerId }: UseOutreachFiltersArgs) {
   // KPI/donut click-to-filter (status) + checkbox selection.
   const [selectedStatus, setSelectedStatus] = useState<string[]>([])
   // Channel filter (second donut) + targets-only KPI toggle.
   const [selectedChannel, setSelectedChannel] = useState<string[]>([])
   const [kpiTargets, setKpiTargets] = useState(false)
   // Right-panel-only filters: owner + target group (source pool).
-  const [selectedOwner, setSelectedOwner] = useState<string[]>([])
+  const [selectedOwner, setSelectedOwner] = useState<string[]>(() => (intentOwnerId ? [intentOwnerId] : []))
   const [selectedTargetGroup, setSelectedTargetGroup] = useState<string[]>([])
   const [query, setQuery] = useState('')  // shared header search (client-side, R-5)
   // Remount the (self-stateful) search input on clear so the visible text resets too.
@@ -48,7 +50,7 @@ export function useOutreachFilters({ campaigns, archived, lifecycleOf, showArchi
   const filtered = useMemo(() => {
     let byStatus = selectedStatus.length ? baseRows.filter((c) => selectedStatus.includes(statusKey(c))) : baseRows
     if (selectedChannel.length) byStatus = byStatus.filter((c) => selectedChannel.includes(channelKey(c)))
-    if (selectedOwner.length) byStatus = byStatus.filter((c) => selectedOwner.includes(ownerNameOf(c)))
+    if (selectedOwner.length) byStatus = byStatus.filter((c) => selectedOwner.includes(c.owner?.id ?? ''))
     if (selectedTargetGroup.length) byStatus = byStatus.filter((c) => selectedTargetGroup.includes(targetGroupNameOf(c)))
     if (kpiTargets) byStatus = byStatus.filter((c) => targetsOf(c) > 0)
     if (!query.trim()) return byStatus

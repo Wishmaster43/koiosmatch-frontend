@@ -112,6 +112,7 @@
   "chart": {
     "byStatus": "Candidats par statut",
     "byRecruiter": "Candidats par recruteur",
+    "unassigned": "Non attribué",
     "funnel": "Entonnoir de candidatures",
     "byStage": "Opportunités par phase",
     "oppStageUnavailable": "Données par étape d'opportunité non disponibles.",
@@ -151,6 +152,7 @@
     "appointmentsNext48h": "Agenda d'intégration (48 heures)",
     "redeployRadar": "Radar de replacement",
     "productivityByRecruiter": "Candidatures proposées et placements par recruteur (30 jours)",
+    "callsPerRecruiter": "Appels par recruteur",
     "fillRateTimeseries": "Taux de pourvoi, 14 derniers jours",
     "fillRateByBranch": "Taux de pourvoi par agence",
     "matchesByContractType": "Placements par type de contrat",

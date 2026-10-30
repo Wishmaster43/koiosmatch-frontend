@@ -103,7 +103,10 @@ export default function OutreachPage({ intent }: { intent?: unknown } = {}) {
   const { archived, archLoading, archError, lifecycleOf, refetchArchived, removeArchived } = useOutreachArchivedCampaigns(showArchived, showTrash)
 
   // Filter state + the filtered row set (table + board share this).
-  const filters = useOutreachFilters({ campaigns, archived, lifecycleOf, showArchived, showTrash })
+  const rawIntent = intent as { owner?: unknown; ownerName?: unknown } | undefined
+  const intentOwnerId = typeof rawIntent?.owner === 'string' && rawIntent.owner ? rawIntent.owner : undefined
+  const intentOwnerName = typeof rawIntent?.ownerName === 'string' ? rawIntent.ownerName : undefined
+  const filters = useOutreachFilters({ campaigns, archived, lifecycleOf, showArchived, showTrash, intentOwnerId })
   const { selectedStatus, setSelectedStatus, selectedChannel, setSelectedChannel,
     selectedOwner, setSelectedOwner, selectedTargetGroup, setSelectedTargetGroup,
     kpiTargets, setKpiTargets, query, filtered } = filters
@@ -115,7 +118,7 @@ export default function OutreachPage({ intent }: { intent?: unknown } = {}) {
   // Insights row (donuts + KPIs), board columns and the owner/target-group filter options.
   const { columns, statusData, channelData, ownerOptions, targetGroupOptions, insightDonuts, insightKpis } = useOutreachInsights({
     campaigns, selectedStatus, setSelectedStatus, selectedChannel, setSelectedChannel, kpiTargets, setKpiTargets,
-    stats: outreachStats,
+    stats: outreachStats, seedOwner: intentOwnerId ? { id: intentOwnerId, name: intentOwnerName } : undefined,
   })
 
   // Register the right-panel filters (status/channel/owner/target-group/archived).

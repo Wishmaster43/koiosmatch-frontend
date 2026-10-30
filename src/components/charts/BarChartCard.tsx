@@ -24,6 +24,8 @@ function BarTooltip({ active, payload, label, total, showPercent, percentValues,
             Intl's default fraction digits leak through, e.g. "45,882%"). */}
         {percentValues ? fmt(value) : showPercent ? pct : formatNumber(value)}
       </div>
+      {/* Optional per-datum detail line (e.g. "value / target"). */}
+      {payload[0].payload?.sub && <Caption style={{ display: 'block' }}>{payload[0].payload.sub}</Caption>}
     </div>
   )
 }

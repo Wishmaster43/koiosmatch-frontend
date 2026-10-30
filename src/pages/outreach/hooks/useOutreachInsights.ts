@@ -34,6 +34,8 @@ interface UseOutreachInsightsArgs {
   kpiTargets: boolean
   setKpiTargets: Dispatch<SetStateAction<boolean>>
   // KPI-RIJ-9-1: optional so every existing call site/test keeps working unchanged.
+  // Dashboard deep-link owner: shown as a chip option even when no loaded campaign carries it.
+  seedOwner?: { id: string; name?: string }
   stats?: OutreachFleetStats | null
 }
 
@@ -43,7 +45,7 @@ const plainCard = (key: string, label: string, value: number | string | null, su
 
 // Board columns + donuts/KPIs derived from the active campaign list, plus the
 // owner/target-group filter option lists (see file docblock).
-export function useOutreachInsights({ campaigns, selectedStatus, setSelectedStatus, selectedChannel, setSelectedChannel, kpiTargets, setKpiTargets, stats }: UseOutreachInsightsArgs) {
+export function useOutreachInsights({ campaigns, selectedStatus, setSelectedStatus, selectedChannel, setSelectedChannel, kpiTargets, setKpiTargets, stats, seedOwner }: UseOutreachInsightsArgs) {
   const { t } = useTranslation('outreach')
   const { formatPercent } = useNumberFormat()
 
@@ -65,8 +67,18 @@ export function useOutreachInsights({ campaigns, selectedStatus, setSelectedStat
     campaigns.forEach((c) => { const n = nameOf(c); if (n) m.set(n, (m.get(n) ?? 0) + 1) })
     return [...m.entries()].map(([value, count]) => ({ value, label: value, count }))
   }, [campaigns])
-  // Owner filter options, derived from the loaded campaigns (never hardcoded).
-  const ownerOptions = useMemo(() => optionsFrom(ownerNameOf), [optionsFrom])
+  // Owner filter options are id-keyed (two recruiters may share a name), derived from the loaded campaigns plus the intent's owner.
+  const ownerOptions = useMemo(() => {
+    const m = new Map<string, { value: string; label: string; count: number }>()
+    campaigns.forEach((c) => {
+      const id = c.owner?.id
+      if (!id) return
+      const cur = m.get(id)
+      if (cur) cur.count += 1; else m.set(id, { value: id, label: ownerNameOf(c), count: 1 })
+    })
+    if (seedOwner?.id && seedOwner.name && !m.has(seedOwner.id)) m.set(seedOwner.id, { value: seedOwner.id, label: seedOwner.name, count: 0 })
+    return [...m.values()]
+  }, [campaigns, seedOwner])
   const targetGroupOptions = useMemo(() => optionsFrom(targetGroupNameOf), [optionsFrom])
 
   // Donut/KPI click = set exactly one status/channel value (or clear when clicked again).

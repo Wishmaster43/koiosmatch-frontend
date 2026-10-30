@@ -112,6 +112,7 @@
   "chart": {
     "byStatus": "Kandidaten nach Status",
     "byRecruiter": "Kandidaten nach Recruiter",
+    "unassigned": "Nicht zugewiesen",
     "funnel": "Bewerbungs-Funnel",
     "byStage": "Chancen nach Phase",
     "oppStageUnavailable": "Daten zu Verkaufschancen-Phasen nicht verfügbar.",
@@ -151,6 +152,7 @@
     "appointmentsNext48h": "Intake-Agenda (48 Stunden)",
     "redeployRadar": "Wiedereinsatz-Radar",
     "productivityByRecruiter": "Vorschläge und Platzierungen pro Recruiter (30 Tage)",
+    "callsPerRecruiter": "Anrufe pro Recruiter",
     "fillRateTimeseries": "Fill Rate, letzte 14 Tage",
     "fillRateByBranch": "Fill Rate nach Niederlassung",
     "matchesByContractType": "Vermittlungen nach Vertragstyp",

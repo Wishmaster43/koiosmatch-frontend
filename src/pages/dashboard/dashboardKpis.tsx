@@ -37,7 +37,7 @@ interface BuildArgs {
   onNavigate?: (page: string, intent?: Record<string, unknown>) => void
   // KPI-TARGETS-ALERT-1: GET /dashboard `kpi_targets` + a locale percent formatter; both optional (older server).
   targets?: Record<string, KpiTarget>
-  pct?: (v: number) => string
+  pct: (v: number) => string
 }
 
 // i18n-scan: dashboard — pure builder: `t` is a parameter, so the keysExist
@@ -46,17 +46,15 @@ export function buildDashboardKpis(args: BuildArgs): Record<string, DashboardKpi
   const tiles = buildTiles(args)
   // Attach the target line to the five tiles that carry one; the big number stays the flat `kpis` value.
   if (!args.targets) return tiles
-  const { pct } = args
   for (const [id, key] of Object.entries(TILE_TARGET_KEY)) {
     const line = targetLine(args.targets[key])
-    // A percent tile without a locale formatter gets no line: never a hand-built `${n}%`.
     const isPct = PERCENT_TILES.has(id)
-    if (line && tiles[id] && (!isPct || pct)) tiles[id].targetLine = formatTargetLine(line, isPct, { t: args.t, num: args.num, pct: pct ?? args.num })
+    if (line && tiles[id]) tiles[id].targetLine = formatTargetLine(line, isPct, { t: args.t, num: args.num, pct: args.pct })
   }
   return tiles
 }
 
-function buildTiles({ t, kpis, drills = {}, num, eur, opp, onNavigate }: BuildArgs): Record<string, DashboardKpi> {
+function buildTiles({ t, kpis, drills = {}, num, eur, opp, onNavigate, pct }: BuildArgs): Record<string, DashboardKpi> {
   // K-173 fase 2 — resolve a tile's onClick: a present drill descriptor navigates
   // via entity+params (the exact filters that reproduce this tile's own number);
   // an explicit `null` descriptor means no drill (undefined onClick, no dead
@@ -96,7 +94,7 @@ function buildTiles({ t, kpis, drills = {}, num, eur, opp, onNavigate }: BuildAr
       sub: t('kpi.sumOpenOpps'), color: 'var(--color-success-text)', bg: 'var(--color-success-bg)', Icon: Briefcase, onClick: resolveClick('pipeline_quotes', () => onNavigate?.('opportunities', {})) },
     placements:        { id: 'placements', label: t('kpi.placements'), value: num(kpis.placements), sub: t('kpi.placementsSub'), color: 'var(--color-success-text)', bg: 'var(--color-success-bg)', Icon: Briefcase, onClick: resolveClick('placements', () => onNavigate?.('matches', {})) },
     intakes:           { id: 'intakes', label: t('kpi.intakes'), value: num(kpis.intake_planned), sub: t('kpi.intakesSub'), color: 'var(--color-primary-text)', bg: 'var(--color-primary-bg)', Icon: CalendarCheck, onClick: resolveClick('intake_planned', () => onNavigate?.('candidates', { attention: 'intakePlanned' })) },
-    fillRate:          { id: 'fillRate', label: t('kpi.fillRate'), value: kpis.fill_rate != null ? `${num(kpis.fill_rate)}%` : '—', sub: t('kpi.fillRateSub'), color: 'var(--color-success-text)', bg: 'var(--color-success-bg)', Icon: TrendingUp, onClick: resolveClick('fill_rate', () => onNavigate?.('vacancies', {})) },
+    fillRate:          { id: 'fillRate', label: t('kpi.fillRate'), value: kpis.fill_rate != null ? pct(kpis.fill_rate) : '—', sub: t('kpi.fillRateSub'), color: 'var(--color-success-text)', bg: 'var(--color-success-bg)', Icon: TrendingUp, onClick: resolveClick('fill_rate', () => onNavigate?.('vacancies', {})) },
     // Live vacancy count (non-archived) — replaced the feed-less Invulgraad card.
     openVacancies:     { id: 'openVacancies', label: t('kpi.openVacancies'), value: num(kpis.open_vacancies), sub: t('kpi.openVacanciesSub'), color: 'var(--color-primary-text)', bg: 'var(--color-primary-bg)', Icon: Briefcase, onClick: resolveClick('open_vacancies', () => onNavigate?.('vacancies', {})) },
     incompleteRuns:    { id: 'incompleteRuns', label: t('kpi.incompleteRuns'), value: num(kpis.incomplete_runs), sub: t('kpi.incompleteRunsSub'), color: 'var(--color-danger-text)', bg: 'var(--color-danger-bg)', Icon: Zap, onClick: resolveClick('incomplete_runs', () => onNavigate?.('aiagents', {})) },

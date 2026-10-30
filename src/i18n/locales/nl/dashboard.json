@@ -112,6 +112,7 @@
   "chart": {
     "byStatus": "Kandidaten per status",
     "byRecruiter": "Kandidaten per recruiter",
+    "unassigned": "Niet toegewezen",
     "funnel": "Sollicitatie-funnel",
     "byStage": "Kansen per fase",
     "oppStageUnavailable": "Kansen per fase niet beschikbaar.",
@@ -151,6 +152,7 @@
     "appointmentsNext48h": "Intake-agenda (48 uur)",
     "redeployRadar": "Herplaatsingsradar",
     "productivityByRecruiter": "Voordrachten en plaatsingen per recruiter (30 dagen)",
+    "callsPerRecruiter": "Gebelde contacten per recruiter",
     "fillRateTimeseries": "Fill rate laatste 14 dagen",
     "fillRateByBranch": "Fill rate per vestiging",
     "matchesByContractType": "Plaatsingen naar contracttype",

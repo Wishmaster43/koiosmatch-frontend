@@ -124,7 +124,12 @@ export interface WaWebQueueFeed { in_queue: number; sending: number; failed: num
 export interface KpiTarget {
   value: number | null; target: number | null; comparison: 'gte' | 'lte' | null
   below_target: boolean | null; metric: string; period_scope: 'month' | 'day' | null
+  // Hand-written (the generated spec carries no 2xx schema): daily-calls entries only; user_id null = unassigned calls (informational).
+  per_recruiter?: PerRecruiterCallsRow[]
 }
+
+// One recruiter's calls vs the daily target (BE FOLLOW-UP-2910-1).
+export interface PerRecruiterCallsRow { user_id: string | null; name: string; value: number; target: number; below: boolean }
 
 // GET /dashboard (single summary call).
 export interface DashData {

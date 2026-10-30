@@ -2,7 +2,7 @@
  * kpiTargets — pure helpers that turn a server `kpi_targets` entry (BE KPI-TARGETS-ALERT-1)
  * into the one target line under a dashboard KPI tile. No side-effect imports on purpose.
  */
-import type { KpiTarget } from '@/types/dashboard'
+import type { KpiTarget, PerRecruiterCallsRow } from '@/types/dashboard'
 
 export const TARGET_LINE_KINDS = ['progress', 'reached', 'over', 'within', 'monthOnly', 'monthOnlyMax'] as const
 export type TargetLineKind = (typeof TARGET_LINE_KINDS)[number]
@@ -50,4 +50,10 @@ export function formatTargetLine(line: TargetLine, isPercent: boolean, { t, num,
     text: t(`kpi.target.${line.kind}`, { value: fmt(line.value), target: fmt(line.target) }),
     tone: targetTone(line.kind),
   }
+}
+
+// Chart rows for the per-recruiter calls card: server order kept, the unassigned row (user_id null) always last.
+export function perRecruiterRows(entry: KpiTarget | undefined | null): PerRecruiterCallsRow[] {
+  const rows = entry?.per_recruiter ?? []
+  return [...rows.filter(r => r.user_id != null), ...rows.filter(r => r.user_id == null)]
 }

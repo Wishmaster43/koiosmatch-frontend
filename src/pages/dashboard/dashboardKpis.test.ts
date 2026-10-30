@@ -19,6 +19,7 @@ const baseArgs = (kpis: Record<string, number | null | undefined>, onNavigate: N
   t: (k: string) => k,
   kpis,
   num: (v?: number | null) => (v == null ? '—' : String(v)),
+  pct: (v: number) => `${v}%`,
   eur: (v?: unknown) => String(v),
   opp: null,
   candidateTotalLabel: '0',
@@ -186,12 +187,12 @@ describe('buildDashboardKpis · DASH-V3-UITROL-1 tiles', () => {
 // through the house `num` formatter, mirroring the oppsWinRate tile, not a
 // hand-built `${n}%` template literal.
 describe('buildDashboardKpis · GETALLEN-1 percent tiles use the house formatter', () => {
-  it('fillRate renders through num(), not a raw template literal', () => {
+  it('fillRate renders through pct(), not a raw template literal', () => {
     const onNavigate: NavMock = vi.fn()
-    const num = vi.fn((v?: number | null) => (v == null ? '—' : `fmt(${v})`))
-    const kpis = buildDashboardKpis({ ...baseArgs({ fill_rate: 82.5 }, onNavigate), num })
-    expect(kpis.fillRate.value).toBe('fmt(82.5)%')
-    expect(num).toHaveBeenCalledWith(82.5)
+    const pct = vi.fn((v: number) => `pct(${v})`)
+    const kpis = buildDashboardKpis({ ...baseArgs({ fill_rate: 82.5 }, onNavigate), pct })
+    expect(kpis.fillRate.value).toBe('pct(82.5)')
+    expect(pct).toHaveBeenCalledWith(82.5)
   })
 
   it('occupancy renders through num(), not a raw template literal', () => {
@@ -238,11 +239,6 @@ describe('buildDashboardKpis · KPI-TARGETS-ALERT-1 target lines', () => {
     const k = buildDashboardKpis(args(undefined))
     expect(Object.values(k).every(t => t.targetLine === undefined)).toBe(true)
   })
-  it('skips the fillRate line when no locale percent formatter is passed', () => {
-    const k = buildDashboardKpis({ ...args({ fill_rate_target: tgt({ value: 40, target: 80 }), placements_target: tgt({}) }), pct: undefined })
-    expect(k.fillRate.targetLine).toBeUndefined()
-    expect(k.placements.targetLine).toBeDefined()
-  })
 })
 
 // CONTRACT-FOLLOW-1 (6): never_contacted_alert off -> kpis.never_contacted null: no value, no attention caption.
@@ -261,5 +257,19 @@ describe('buildDashboardKpis · never_contacted null', () => {
   it('uncalled tile value is kpis.calllist_uncalled (equals the threshold target value)', () => {
     const k = buildDashboardKpis({ ...baseArgs({ calllist_uncalled: 9 }, vi.fn()), targets: { uncalled_warning_threshold: { value: 9, target: 25, comparison: 'lte', below_target: false, metric: 'm', period_scope: 'month' } } })
     expect(k.uncalledCallist.value).toBe('9')
+  })
+})
+
+describe('buildDashboardKpis · fill-rate tile equals its target line', () => {
+  it('formats the tile value and the target-line value through the same percent formatter', () => {
+    const pct = (v: number) => `${Math.round(v * 10) / 10}%`
+    const args = {
+      ...baseArgs({ fill_rate: 58.824 }, vi.fn() as NavMock), pct,
+      t: (k: string, o?: Record<string, unknown>) => (o?.value ? String(o.value) : k),
+      targets: { fill_rate_target: { value: 58.82, target: 70, comparison: 'gte' as const, below_target: true, metric: 'fill_rate', period_scope: 'month' as const } },
+    }
+    const tile = buildDashboardKpis(args).fillRate
+    expect(tile.value).toBe(pct(58.824))
+    expect(tile.targetLine?.text).toBe(tile.value)
   })
 })

@@ -28,7 +28,7 @@ vi.mock('recharts', () => ({
   // `content` arrives as an already-built element (`<BarTooltip .../>`), not a
   // component type — recharts clones it at render time with active/payload.
   Tooltip: (props: Record<string, unknown>) =>
-    cloneElement(props.content as ReactElement<Record<string, unknown>>, { active: true, payload: [{ value: 45.882, fill: '#000' }] }),
+    cloneElement(props.content as ReactElement<Record<string, unknown>>, { active: true, payload: [{ value: 45.882, fill: '#000', payload: (globalThis as { __sub?: string }).__sub ? { sub: (globalThis as { __sub?: string }).__sub } : undefined }] }),
 }))
 
 const data = [{ name: 'A', value: 45.882 }, { name: 'B', value: 12.1 }]
@@ -42,5 +42,17 @@ describe('BarChartCard · percentValues renders through formatPercent', () => {
   it('the tooltip value uses formatPercent, not `${formatNumber(x)}%`', () => {
     const { getByText } = render(<BarChartCard data={data} percentValues />)
     expect(getByText('P:45.882')).toBeInTheDocument()
+  })
+})
+
+describe('BarChartCard · optional datum sub line', () => {
+  it('shows the sub line in the tooltip when the datum carries one, and nothing extra otherwise', () => {
+    ;(globalThis as { __sub?: string }).__sub = '5 / 10'
+    const { queryByText, unmount } = render(<BarChartCard data={[{ name: 'A', value: 5, sub: '5 / 10' }]} />)
+    expect(queryByText('5 / 10')).toBeInTheDocument()
+    unmount()
+    ;(globalThis as { __sub?: string }).__sub = undefined
+    const again = render(<BarChartCard data={[{ name: 'A', value: 5 }]} />)
+    expect(again.queryByText('5 / 10')).toBeNull()
   })
 })

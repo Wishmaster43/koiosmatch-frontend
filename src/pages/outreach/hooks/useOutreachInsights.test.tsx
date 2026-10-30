@@ -71,9 +71,14 @@ describe('useOutreachInsights · owner filter options', () => {
   it('derives distinct owner names with counts from the loaded rows, never a hardcoded list', () => {
     const { result } = build()
     expect(result.current.ownerOptions).toEqual([
-      { value: 'Nora', label: 'Nora', count: 1 },
-      { value: 'Sara', label: 'Sara', count: 1 },
+      { value: 'u1', label: 'Nora', count: 1 },
+      { value: 'u2', label: 'Sara', count: 1 },
     ])
+  })
+
+  it('adds the dashboard-seeded owner with count 0 when no loaded row carries it', () => {
+    const { result } = build({ seedOwner: { id: 'u9', name: 'Kim' } })
+    expect(result.current.ownerOptions).toContainEqual({ value: 'u9', label: 'Kim', count: 0 })
   })
 
   it('target-group options stay empty when no campaign carries a pool_name', () => {

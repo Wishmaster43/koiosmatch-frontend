@@ -6,7 +6,7 @@ import fr from '@/i18n/locales/fr/dashboard.json'
 import es from '@/i18n/locales/es/dashboard.json'
 import it_ from '@/i18n/locales/it/dashboard.json'
 import pt from '@/i18n/locales/pt/dashboard.json'
-import { targetLine, formatTargetLine, TILE_TARGET_KEY, TARGET_LINE_KINDS } from './kpiTargets'
+import { targetLine, formatTargetLine, perRecruiterRows, TILE_TARGET_KEY, TARGET_LINE_KINDS } from './kpiTargets'
 import type { KpiTarget } from '@/types/dashboard'
 
 const entry = (o: Partial<KpiTarget>): KpiTarget => ({ value: 4, target: 10, comparison: 'gte', below_target: true, metric: 'm', period_scope: 'month', ...o })
@@ -63,5 +63,18 @@ describe('kpi.target locale strings', () => {
   it('formatTargetLine renders the formatted value for each kind', () => {
     const args = { t: (k: string, o?: Record<string, unknown>) => `${k}|${o?.value}|${o?.target}`, num: (v?: number | null) => `n${v}`, pct: (v: number) => `${v}%` }
     for (const kind of TARGET_LINE_KINDS) expect(formatTargetLine({ kind, value: 22, target: 30 }, false, args).text).toContain('|n22|')
+  })
+})
+
+describe('perRecruiterRows', () => {
+  const r = (user_id: string | null, name: string, below = false) => ({ user_id, name, value: 5, target: 10, below })
+  it('keeps order, puts unassigned last and carries the below flag', () => {
+    const rows = perRecruiterRows(entry({ per_recruiter: [r(null, 'x'), r('u1', 'A', true), r('u2', 'B')] }))
+    expect(rows.map(x => x.user_id)).toEqual(['u1', 'u2', null])
+    expect(rows[0].below).toBe(true)
+  })
+  it('returns [] for an absent entry or feed', () => {
+    expect(perRecruiterRows(undefined)).toEqual([])
+    expect(perRecruiterRows(entry({}))).toEqual([])
   })
 })

@@ -112,6 +112,7 @@
   "chart": {
     "byStatus": "Candidates by status",
     "byRecruiter": "Candidates by recruiter",
+    "unassigned": "Unassigned",
     "funnel": "Application funnel",
     "byStage": "Opportunities by stage",
     "oppStageUnavailable": "Opportunity stage data not available.",
@@ -151,6 +152,7 @@
     "appointmentsNext48h": "Intake agenda (48 hours)",
     "redeployRadar": "Redeployment radar",
     "productivityByRecruiter": "Submissions and placements per recruiter (30 days)",
+    "callsPerRecruiter": "Calls per recruiter",
     "fillRateTimeseries": "Fill rate, last 14 days",
     "fillRateByBranch": "Fill rate by branch",
     "matchesByContractType": "Placements by contract type",

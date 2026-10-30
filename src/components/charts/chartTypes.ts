@@ -11,7 +11,7 @@ export const CHART_SERIES_COLORS = [
 ]
 /* eslint-enable no-restricted-syntax */
 
-export interface ChartDatum { name: string; value: number; key?: string; color?: string; [k: string]: unknown }
+export interface ChartDatum { name: string; value: number; key?: string; color?: string; sub?: string; [k: string]: unknown }
 
 // A recharts tooltip payload entry (only the fields our tooltips read).
 interface TipEntry {
@@ -20,7 +20,7 @@ interface TipEntry {
   color?: string
   fill?: string
   dataKey?: string | number
-  payload?: { fill?: string }
+  payload?: { fill?: string; sub?: string }
 }
 
 // Props recharts injects into a custom Tooltip `content` element.

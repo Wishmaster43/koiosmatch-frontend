@@ -112,6 +112,7 @@
   "chart": {
     "byStatus": "Candidatos por estado",
     "byRecruiter": "Candidatos por reclutador",
+    "unassigned": "Sin asignar",
     "funnel": "Embudo de candidaturas",
     "byStage": "Oportunidades por etapa",
     "oppStageUnavailable": "Datos por etapa de oportunidad no disponibles.",
@@ -151,6 +152,7 @@
     "appointmentsNext48h": "Agenda de admisión (48 horas)",
     "redeployRadar": "Radar de recolocación",
     "productivityByRecruiter": "Propuestas y colocaciones por reclutador (30 días)",
+    "callsPerRecruiter": "Llamadas por reclutador",
     "fillRateTimeseries": "Tasa de cobertura, últimos 14 días",
     "fillRateByBranch": "Tasa de cobertura por sucursal",
     "matchesByContractType": "Colocaciones por tipo de contrato",

@@ -8,6 +8,7 @@ import TasksDueTodayList from './TasksDueTodayList'
 import AppointmentsNext48hList from './AppointmentsNext48hList'
 import RedeployRadarList from './RedeployRadarList'
 import ProductivityByRecruiterBars from './ProductivityByRecruiterBars'
+import CallsPerRecruiterBar from './CallsPerRecruiterBar'
 import FillRateTimeseriesLine from './FillRateTimeseriesLine'
 
 // K-173 fase 6 — the recruitment_manager team-load block, now a registry tile.
@@ -36,6 +37,12 @@ export const RECRUITER_TILES: FeedTileEntry[] = [
     span: 2,
     hasData: arrayFeed('productivity_by_recruiter'),
     render: (dash, ctx) => <ProductivityByRecruiterBars rows={dash.productivity_by_recruiter!} onNavigate={ctx.onNavigate} />,
+  },
+  {
+    blockId: 'block.callsPerRecruiter',
+    feedKey: 'kpi_targets',
+    hasData: (dash) => (dash.kpi_targets?.daily_calls_target?.per_recruiter?.length ?? 0) > 0,
+    render: (dash, ctx) => <CallsPerRecruiterBar entry={dash.kpi_targets?.daily_calls_target} onNavigate={ctx.onNavigate} />,
   },
   {
     blockId: 'block.tasksDueToday',

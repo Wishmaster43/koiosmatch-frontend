@@ -12,6 +12,7 @@ describe('dashboard KPI row guard', () => {
   // Minimal stub args — only the shape matters, not the values, for id resolution.
   const kpiById = buildDashboardKpis({
     t: (k: string) => k,
+    pct: (v: number) => String(v),
     kpis: {},
     num: () => '',
     eur: () => '',

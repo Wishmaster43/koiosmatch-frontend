@@ -113,3 +113,31 @@ describe('useOutreachFilters · clearOwnFilters', () => {
     expect(result.current.anyFilterActive).toBe(true)
   })
 })
+
+describe('useOutreachFilters · dashboard owner intent', () => {
+  it('seeds the owner filter by id right away; filtering is by id; a manual change wins afterwards', () => {
+    const { result, rerender } = build({ intentOwnerId: 'u1' })
+    expect(result.current.selectedOwner).toEqual(['u1'])
+    expect(result.current.filtered.map(c => c.id)).toEqual(['c1'])
+    act(() => result.current.setSelectedOwner([]))
+    rerender()
+    expect(result.current.selectedOwner).toEqual([])
+    expect(result.current.filtered).toEqual(campaigns)
+  })
+
+  it('an unknown owner id yields an honestly empty list with the clear button available', () => {
+    const { result } = build({ intentOwnerId: 'nope' })
+    expect(result.current.selectedOwner).toEqual(['nope'])
+    expect(result.current.filtered).toEqual([])
+    expect(result.current.anyFilterActive).toBe(true)
+  })
+
+  it('keeps two owners with the same name separate', () => {
+    const twins: Campaign[] = [
+      { id: 'a', name: 'A', status: 'active', channel: 'call', owner: { id: 'x1', name: 'Sam' } },
+      { id: 'b', name: 'B', status: 'active', channel: 'call', owner: { id: 'x2', name: 'Sam' } },
+    ]
+    const { result } = build({ campaigns: twins, intentOwnerId: 'x2' })
+    expect(result.current.filtered.map(c => c.id)).toEqual(['b'])
+  })
+})
