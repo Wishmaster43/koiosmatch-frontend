@@ -391,9 +391,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     // on a failing browser/server call.
     unsubscribePush().catch(() => {})
     try { await api.post('/auth/logout') } catch { /* clear local state regardless */ }
+    // Also re-arms the once-per-session MFA-gate flag (deviceCaches owns the key list, gap #116).
     clearDeviceCaches()
-    // Allow the MFA-gate signal to fire again in a fresh session (see api.ts).
-    sessionStorage.removeItem('km_mfa_gate')
     // Re-arm the once-per-boot tenant refusal signal too.
     clearTenantPickSignal()
     // AUDIT 03-09 (frontend-security-quality-1/-15, CRITICAL): the next user in this
