@@ -8,7 +8,7 @@
  * "undefined"/"NaN" text (see lib.mjs's scanForLeaks for the exact patterns).
  * Bails per entity on the first bad tab (runtime budget) but still visits every entity.
  */
-import { go, ensureTableView, expect, sleep, scanForLeaks } from '../lib.mjs'
+import { go, ensureTableView, expect, quiet, closeDrawer, scanForLeaks } from '../lib.mjs'
 import { ENTITIES } from './entities.mjs'
 
 export async function drilldownRender({ page, errors }) {
@@ -28,7 +28,7 @@ export async function drilldownRender({ page, errors }) {
     // zo een ANDERE drawer. Klikken-met-bewijs: retry tot de tabbalk er echt staat.
     for (let poging = 0; poging < 3; poging++) {
       await page.locator('table tbody tr').first().click()
-      await sleep(1000)
+      await page.locator('[role="tablist"]').first().waitFor({ state: 'visible', timeout: 4000 }).catch(() => {})
       if (await page.locator('[role="tablist"]').first().count()) break
     }
 
@@ -49,7 +49,7 @@ export async function drilldownRender({ page, errors }) {
       const label = (await tab.innerText()).trim()
       const at = errors.length
       await tab.click()
-      await sleep(800)
+      await quiet(page)
       const fresh = errors.slice(at)
       if (fresh.length) { findings.push(`${nav} / ${label}: ${fresh.join(' | ')}`); entityFailed = true; break }
       const leaks = scanForLeaks(await drawer.innerText())
@@ -65,7 +65,7 @@ export async function drilldownRender({ page, errors }) {
           const subLabel = (await subTab.innerText()).trim()
           const at2 = errors.length
           await subTab.click()
-          await sleep(800)
+          await quiet(page)
           const fresh2 = errors.slice(at2)
           if (fresh2.length) { findings.push(`${nav} / ${label} / ${subLabel}: ${fresh2.join(' | ')}`); entityFailed = true; break }
           const subLeaks = scanForLeaks(await drawer.innerText())
@@ -73,7 +73,7 @@ export async function drilldownRender({ page, errors }) {
         }
       }
     }
-    await page.keyboard.press('Escape'); await sleep(300)
+    await closeDrawer(page)
   }
   expect(findings.length === 0, findings.join('\n    '))
 }

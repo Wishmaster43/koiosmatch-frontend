@@ -5,7 +5,7 @@
  * channel → author visible, and super-search through note text. These run through
  * the real UI + real API, so a broken seam turns the suite red — not Danny's demo.
  */
-import { go, expect, sleep } from '../lib.mjs'
+import { go, expect, quiet, closeDrawer } from '../lib.mjs'
 
 // Open the drawer of the first candidate row; returns the candidate's name.
 async function openFirstCandidate(page, { withStatus = false } = {}) {
@@ -18,7 +18,8 @@ async function openFirstCandidate(page, { withStatus = false } = {}) {
   expect(await row.count(), 'geen kandidaat-rijen')
   const name = (await row.locator('td').nth(1).innerText()).split('\n')[0].trim()
   await row.click()
-  await sleep(1200)
+  await page.locator('[role="tablist"]').first().waitFor({ state: 'visible', timeout: 10000 })
+  await quiet(page)
   return name
 }
 
@@ -51,10 +52,11 @@ export async function statusWithReason({ page, errors }) {
   const date = page.locator('input[type="date"]').last()
   if (await date.count()) await date.fill('2026-08-01')
   await page.locator('button:has-text("Opslaan")').last().click()
-  await sleep(1200)
+  await modal.waitFor({ state: 'hidden', timeout: 10000 })
+  await quiet(page)
   const fresh = errors.slice(at)
   expect(fresh.length === 0, `statuswissel gaf fouten: ${fresh.join(' | ')}`)
-  await page.keyboard.press('Escape'); await sleep(300)
+  await closeDrawer(page)
 }
 
 // Archive from the drawer → the archived view must CONTAIN the candidate (ARCH-1 guard).
@@ -66,7 +68,7 @@ export async function archiveAndFindBack({ page, errors }) {
   // match), close it and try the next row. Ends by RESTORING — original state back.
   await go(page, 'Kandidaten')
   const wis = page.locator('button:has-text("Wis alle filters")').first()
-  if (await wis.count()) { await wis.click(); await sleep(600) }
+  if (await wis.count()) { await wis.click(); await quiet(page) }
   let name = null
   const rowCount = Math.min(await page.locator('table tbody tr').count(), 10)
   expect(rowCount > 0, 'geen kandidaat-rijen')
@@ -106,11 +108,18 @@ export async function archiveAndFindBack({ page, errors }) {
       await confirm.click()
       const archivedRes = await archived
       expect(archivedRes !== null, 'archive DELETE never fired after confirm click')
-      await sleep(400)
+      await confirm.waitFor({ state: 'hidden', timeout: 5000 }).catch(() => {})
+      await quiet(page)
     }
     // Guard modal = this candidate has live business → close and try the next row.
     const guard = page.locator('text=/live sollicitatie|actieve match|lopende/i').first()
-    if (await guard.count()) { await page.keyboard.press('Escape'); await sleep(300); await page.keyboard.press('Escape'); await sleep(400); continue }
+    if (await guard.count()) {
+      // Close the guard modal first, then the drawer behind it.
+      await page.keyboard.press('Escape')
+      await guard.waitFor({ state: 'hidden', timeout: 5000 }).catch(() => {})
+      await closeDrawer(page)
+      continue
+    }
     name = rowName
   }
   page.off('dialog', acceptDialog)
@@ -131,10 +140,10 @@ export async function archiveAndFindBack({ page, errors }) {
   const restored = page.waitForResponse(r => r.url().includes('/restore') && r.request().method() === 'POST', { timeout: 15000 }).catch(() => null)
   await restoreBtn.first().click()
   await restored
-  await page.keyboard.press('Escape'); await sleep(300)
+  await closeDrawer(page)
   // Leave the archived view clean for the next flow.
   await page.locator('button:has-text("Gearchiveerd")').first().click()
-  await sleep(600)
+  await quiet(page)
   // The guard-409 on DELETE /candidates is EXPECTED noise for this walk (20-07:
   // the reconciled seed gives early rows live matches, so the guard now actually
   // fires before we reach an archivable candidate) — any OTHER error still fails.
@@ -147,20 +156,24 @@ export async function noteWithChannel({ page, errors }) {
   const at = errors.length
   await openFirstCandidate(page)
   await page.locator('button:has-text("Communicatie"), [role="tab"]:has-text("Communicatie")').first().click()
-  await sleep(800)
-  await page.locator('[aria-label="Nieuwe notitie"]').first().click()
-  await sleep(400)
+  const newNote = page.locator('[aria-label="Nieuwe notitie"]').first()
+  await newNote.waitFor({ state: 'visible', timeout: 10000 })
+  await newNote.click()
+  await page.locator('[contenteditable="true"], textarea').last().waitFor({ state: 'visible', timeout: 10000 })
   // Pick a channel chip (WhatsApp) then write + save.
   const chip = page.locator('button:has-text("WhatsApp")').last()
   if (await chip.count()) await chip.click()
   const editor = page.locator('[contenteditable="true"], textarea').last()
   await editor.fill?.('Gebeld over de dienst (demo)').catch?.(() => {})
   try { await editor.fill('Contactmoment vastgelegd (demo)') } catch { await editor.type('Contactmoment vastgelegd (demo)') }
+  // Arm the save-response wait before the click so a fast POST is not missed.
+  const saved = page.waitForResponse(r => r.request().method() === 'POST' && r.url().includes('/api/'), { timeout: 10000 }).catch(() => null)
   await page.locator('button[title="Opslaan"], button:has-text("Opslaan")').last().click()
-  await sleep(1400)
+  await saved
+  await quiet(page)
   const fresh = errors.slice(at)
   expect(fresh.length === 0, `notitie opslaan gaf fouten: ${fresh.join(' | ')}`)
-  await page.keyboard.press('Escape'); await sleep(300)
+  await closeDrawer(page)
 }
 
 // Super-search: a term from note bodies must return rows (blind-index seam).
@@ -169,10 +182,14 @@ export async function superSearch({ page, errors }) {
   await go(page, 'Kandidaten')
   const search = page.locator('input[placeholder*="Zoek"]').first()
   expect(await search.count(), 'zoekbalk niet gevonden')
+  // Wait for the debounced search REQUEST's answer, not for the debounce timer.
+  const searched = page.waitForResponse(r => r.url().includes('/candidates') && r.url().includes('search=ziek'), { timeout: 15000 }).catch(() => null)
   await search.fill('ziek')
-  await sleep(1600)
+  expect((await searched) !== null, 'search response for "ziek" never arrived')
+  await quiet(page)
   const rows = await page.locator('table tbody tr').count()
-  await search.fill(''); await sleep(600)
+  await search.fill('')
+  await quiet(page)
   expect(rows > 0, 'super-search "ziek" gaf 0 resultaten (SEARCH-1-naad)')
   const fresh = errors.slice(at)
   expect(fresh.length === 0, `zoeken gaf fouten: ${fresh.join(' | ')}`)

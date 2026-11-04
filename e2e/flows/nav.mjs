@@ -3,7 +3,7 @@
  * drill-down (row click → drawer with content) actually opens. Catches dead pages,
  * empty drawers and 4xx/5xx on the detail endpoints.
  */
-import { go, hasNav, expect, sleep } from '../lib.mjs'
+import { go, hasNav, expect, sleep, closeDrawer } from '../lib.mjs'
 
 // Core pages every tenant has; MODULE_PAGES only exist when the tenant's add-ons
 // grant them (reports/plan/sm/hf) — visit those only when the sidebar shows them.
@@ -62,8 +62,7 @@ export async function drillDowns({ page, errors }) {
     const fresh = errors.slice(at)
     if (fresh.length) failures.push(`${nav}: ${fresh.join(' | ')}`)
     // Close via Escape so the next page starts clean.
-    await page.keyboard.press('Escape')
-    await sleep(400)
+    await closeDrawer(page)
   }
   expect(failures.length === 0, failures.join('\n    '))
 }

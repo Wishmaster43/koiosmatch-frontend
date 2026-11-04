@@ -42,6 +42,7 @@ export const MFA_USER = { email: env('SMOKE_MFA_EMAIL') ?? 'sara@demo.nl', passw
 export async function boot({ tenant = 'demo' } = {}) {
   const browser = await chromium.launch()
   const page = await browser.newPage()
+  trackInflight(page)
   const errors = []
   // OPTIONAL endpoints (app has a seed fallback + calls them with quiet404): a 404 here
   // is the agreed "backend hasn't shipped this lookup yet" state, not a finding. Remove
@@ -78,19 +79,76 @@ export async function boot({ tenant = 'demo' } = {}) {
   await page.fill('#login-email', CREDS.email)
   await page.fill('input[type="password"]', CREDS.password)
   await page.click('button[type="submit"]')
-  await page.waitForTimeout(2500)
+  // Logged in = the sidebar nav is attached and the first API burst has settled.
+  await page.locator('button', { hasText: /^\s*Dashboard\s*$/ }).first().waitFor({ state: 'attached', timeout: 20000 })
+  await quiet(page)
   // D1/H3 guard: no credential may ever appear in localStorage.
   const token = await page.evaluate(() => localStorage.getItem('auth_token'))
   if (token) errors.push('[d1] auth_token staat in localStorage — het Bearer-pad is gesloopt, dit mag NOOIT!')
   return { browser, page, errors }
 }
 
+// Poll an async predicate until truthy (returns its value) or throw a label-named timeout.
+export async function until(fn, { timeout = 10000, interval = 200, label = 'condition' } = {}) {
+  const end = Date.now() + timeout
+  let lastErr = null
+  for (;;) {
+    try { const v = await fn(); if (v) return v } catch (e) { lastErr = e }
+    if (Date.now() >= end) throw new Error(`[e2e] timed out after ${timeout}ms waiting for ${label}${lastErr ? `: ${lastErr.message}` : ''}`)
+    await sleep(interval)
+  }
+}
+
+// In-flight API request counter per page: a SPA re-renders after its fetches land, so
+// "no API request pending for a moment" is the real settle signal (Playwright's own
+// networkidle only fires once per document, which is useless for client-side routing).
+const inflight = new WeakMap()
+export function trackInflight(page) {
+  if (inflight.has(page)) return inflight.get(page)
+  const state = { n: 0 }
+  inflight.set(page, state)
+  const isApi = (r) => r.url().includes('/api/')
+  page.on('request', r => { if (isApi(r)) state.n++ })
+  const done = (r) => { if (isApi(r)) state.n = Math.max(0, state.n - 1) }
+  page.on('requestfinished', done)
+  page.on('requestfailed', done)
+  return state
+}
+
+// Wait until no API request has been pending for `quietMs`; capped, never throws (a polling page must not fail a flow).
+export async function quiet(page, { quietMs = 300, timeout = 8000 } = {}) {
+  const state = trackInflight(page)
+  let idleSince = null
+  await until(() => {
+    if (state.n > 0) { idleSince = null; return false }
+    idleSince ??= Date.now()
+    return Date.now() - idleSince >= quietMs
+  }, { timeout, interval: 100, label: 'API quiet' }).catch(() => {})
+}
+
+// What a nav page renders once mounted: a heading, a table, a board card or the flow canvas.
+const PAGE_CONTENT = 'h1, h2, table, [role="grid"], .react-flow, [draggable="true"]'
+
 // Navigate via the sidebar (hash boot is flaky headless; the sidebar is the real UX path).
 // Match the exact BUTTON text — the old `text=` substring matcher could hit page content
 // (e.g. a heading or settings row) and then fail on "element intercepts pointer events".
-export async function go(page, navLabel, ms = 1400) {
+// Waits for the page content to attach and the list fetches to settle, not for a fixed time.
+export async function go(page, navLabel) {
+  // A mid-flight navigation destroys the evaluate context; read it as unknown and let the poll retry.
+  const where = () => page.evaluate(() => location.pathname + location.hash).catch(() => null)
+  const before = await where()
   await page.locator('button', { hasText: new RegExp(`^\\s*${navLabel.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\s*$`) }).first().click()
-  await page.waitForTimeout(ms)
+  // PAGE_CONTENT also matches the previous page, so first wait for the route itself to change
+  // (a click on the page already shown leaves the location unchanged by design and is skipped).
+  await until(async () => (await where()) !== before, { timeout: 3000, label: `route change to ${navLabel}` }).catch(() => {})
+  await page.locator(PAGE_CONTENT).first().waitFor({ state: 'attached', timeout: 10000 })
+  await quiet(page)
+}
+
+// Escape closes the open drawer; wait until its tab bar is gone instead of sleeping.
+export async function closeDrawer(page) {
+  await page.keyboard.press('Escape')
+  await page.locator('[role="tablist"]').first().waitFor({ state: 'hidden', timeout: 5000 }).catch(() => {})
 }
 
 // True when the sidebar actually shows this nav page (module-gated pages differ per tenant).
@@ -106,9 +164,14 @@ export async function hasNav(page, navLabel) {
 // ViewModeToggle call sites) so this works regardless of the button's i18n label,
 // which differs per entity namespace. No-op on pages with no board toggle at all
 // (candidates/vacancies/customers) or already on table view.
-export async function ensureTableView(page, ms = 800) {
+export async function ensureTableView(page) {
   const tableBtn = page.locator('button:has(svg.lucide-layout-list)').first()
-  if (await tableBtn.count()) { await tableBtn.click(); await sleep(ms) }
+  if (await tableBtn.count()) {
+    await tableBtn.click()
+    // The table (or its empty state) replaces the board; an empty list may render no <table> at all.
+    await page.locator('table').first().waitFor({ state: 'attached', timeout: 5000 }).catch(() => {})
+    await quiet(page)
+  }
 }
 
 // Content-leak scan for a drawer/tab's rendered text — the exact classes Danny

@@ -16,7 +16,7 @@
  * Read-only throughout: asserts zero POST/PATCH/DELETE fired, and zero request
  * to /api/ai/ (API-CREDITS-1 — this flow must never be able to trigger an AI call).
  */
-import { APP, expect, sleep } from '../lib.mjs'
+import { APP, expect, until, quiet } from '../lib.mjs'
 
 // Data markers: proof the report GET returned 200 AND rendered. Two honest
 // outcomes exist (verify-les 29-08, fresh schema): data present renders the KPI
@@ -29,6 +29,14 @@ const LEADS_EMPTY_MARKER = 'Geen leads in deze periode'
 const leadsRendered = async page =>
   (await page.locator(`text=${LEADS_DATA_MARKER}`).count()) > 0 ||
   (await page.locator(`text=${LEADS_EMPTY_MARKER}`).count()) > 0
+
+// Wait (capped, never throws) until the switch bar and the data-or-empty state have rendered;
+// the assertions that follow still judge the outcome.
+async function settleLeads(page) {
+  await page.locator('[role="radio"][aria-checked="true"]').first().waitFor({ state: 'visible', timeout: 10000 }).catch(() => {})
+  await until(() => leadsRendered(page), { timeout: 10000, label: 'leads data or empty state' }).catch(() => {})
+  await quiet(page)
+}
 
 // ROUTING assertion: the switch bar's active radio must be the Leads position —
 // this proves the deep-link/alias landed right even when the data fetch fails.
@@ -50,7 +58,7 @@ export async function reportDeeplinkDrill({ page, errors }) {
   try {
     // 1. Cold deep-link: routing first, then data — separate, honest messages.
     await page.goto(`${APP}/#reports.candidates?view=leads`, { waitUntil: 'networkidle' })
-    await sleep(1200)
+    await settleLeads(page)
     await expectLeadsPosition(page, 'cold deep-link #reports.candidates?view=leads')
     expect(await leadsRendered(page),
       `cold deep-link routed to Leads but neither data nor the honest empty state rendered — report GET failed?`)
@@ -58,7 +66,7 @@ export async function reportDeeplinkDrill({ page, errors }) {
     // 2. Legacy alias: #reports.leads must resolve to the SAME leads view
     // (LEGACY_REPORT_ROUTE_ALIASES → reportId=candidates, view=leads).
     await page.goto(`${APP}/#reports.leads`, { waitUntil: 'networkidle' })
-    await sleep(1200)
+    await settleLeads(page)
     await expectLeadsPosition(page, 'legacy alias #reports.leads')
     expect(await leadsRendered(page),
       `legacy alias routed to Leads but neither data nor the honest empty state rendered`)
@@ -77,7 +85,7 @@ export async function reportDeeplinkDrill({ page, errors }) {
     const kpiCard = page.locator('[role="button"]').first()
     expect((await kpiCard.count()) > 0, 'no clickable KPI card found on the Leads view')
     await kpiCard.click()
-    await sleep(1000)
+    await page.locator('[role="dialog"]').first().waitFor({ state: 'visible', timeout: 10000 }).catch(() => {})
 
     // Drawer opens as a role="dialog" (RightDrawer) — its presence alone proves
     // the click wired through to ReportDrillDrawer.
@@ -88,6 +96,9 @@ export async function reportDeeplinkDrill({ page, errors }) {
     // section renders row links, the empty state renders drill.noRecords
     // ("Geen onderliggende records.", analytics.json). No digit-anywhere
     // fallback: a blank/loading drawer must FAIL here (verify-les 28-08).
+    // Let the drawer's record fetch land (rows or the empty text) before judging it.
+    await until(async () => (await dialog.locator('[role="button"], a').count()) > 0 || (await dialog.locator('text=Geen onderliggende records').count()) > 0,
+      { timeout: 10000, label: 'drill rows or empty state' }).catch(() => {})
     const rowCount = await dialog.locator('[role="button"], a').count()
     const emptyCount = await dialog.locator('text=Geen onderliggende records').count()
     expect(rowCount > 0 || emptyCount > 0,
@@ -96,11 +107,11 @@ export async function reportDeeplinkDrill({ page, errors }) {
     // 4. Close the drawer via Escape (RightDrawer wires Escape to onClose)
     // and confirm it is gone; fall back to the explicit close button.
     await page.keyboard.press('Escape')
-    await sleep(500)
+    await page.locator('[role="dialog"]').first().waitFor({ state: 'hidden', timeout: 5000 }).catch(() => {})
     if ((await page.locator('[role="dialog"]').count()) > 0) {
       const closeBtn = page.locator('[role="dialog"] button[aria-label]').last()
       if (await closeBtn.count() > 0) await closeBtn.click()
-      await sleep(500)
+      await page.locator('[role="dialog"]').first().waitFor({ state: 'hidden', timeout: 5000 }).catch(() => {})
     }
     expect((await page.locator('[role="dialog"]').count()) === 0, 'drawer did not close (Escape nor close button worked)')
   } catch (mainErr) {

@@ -2,7 +2,7 @@
  * Smoke flow: every kanban board — switch to board view, drag a card CROSS-column
  * with real DragEvents, and verify the PATCH fires, no cards vanish and no errors.
  */
-import { go, expect, sleep } from '../lib.mjs'
+import { go, expect, quiet } from '../lib.mjs'
 
 const BOARDS = ['Sollicitaties', 'Kansen', 'Taken', 'Bellijsten']
 
@@ -13,13 +13,18 @@ export async function boardsDrag({ page, errors }) {
     await go(page, nav)
     const toggle = page.locator('button[title*="anban"], button[title*="oard"], button[title*="ord"]').first()
     if (!(await toggle.count())) { failures.push(`${nav}: geen board-toggle`); continue }
-    await toggle.click(); await sleep(1200)
+    await toggle.click()
+    // Board cards replace the table; an empty board has none, so the wait is capped and the count below judges.
+    await page.locator('[draggable="true"]').first().waitFor({ state: 'attached', timeout: 10000 }).catch(() => {})
+    await quiet(page)
     const before = await page.locator('[draggable="true"]').count()
     if (before === 0) { failures.push(`${nav}: leeg board`); continue }
     // Cross-column drop via native DragEvents (React catches them on the column div).
     let patched = false
     const onReq = (r) => { if (r.method() === 'PATCH' && r.url().includes('/api/')) patched = true }
     page.on('request', onReq)
+    // Arm the PATCH answer wait before the drop so a fast response is not missed.
+    const patchAnswer = page.waitForResponse(r => r.request().method() === 'PATCH' && r.url().includes('/api/'), { timeout: 5000 }).catch(() => null)
     const crossable = await page.evaluate(() => {
       const cards = [...document.querySelectorAll('[draggable="true"]')].map(c => ({ el: c, x: Math.round(c.getBoundingClientRect().x) }))
       const src = cards[0]
@@ -31,7 +36,8 @@ export async function boardsDrag({ page, errors }) {
       fire(src.el, 'dragend')
       return !!other
     })
-    await sleep(1400)
+    if (crossable) await patchAnswer
+    await quiet(page)
     page.off('request', onReq)
     const after = await page.locator('[draggable="true"]').count()
     if (after < before - 1) failures.push(`${nav}: kaarten verdwenen (${before}→${after})`)

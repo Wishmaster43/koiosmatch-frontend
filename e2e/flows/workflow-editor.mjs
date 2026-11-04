@@ -14,7 +14,7 @@
  * used, the workflow is never run/activated, and a request collector asserts
  * no call to /api/ai/ happened during the whole flow.
  */
-import { go, expect, sleep } from '../lib.mjs'
+import { go, expect, until, quiet } from '../lib.mjs'
 
 // Marker name so the probe workflow is unambiguous in the list and cleanup can find it.
 const PROBE_NAME = 'E2E-GRAPH-PROBE'
@@ -83,17 +83,19 @@ export async function workflowEditorGraph({ page, errors }) {
 
     // 2. Create a new DRAFT workflow (never activated) with the probe marker name.
     await page.locator('button', { hasText: L.newWorkflow }).first().click()
-    await sleep(600)
+    await page.getByLabel(L.nameInput).waitFor({ state: 'visible', timeout: 10000 })
     await page.getByLabel(L.nameInput).fill(PROBE_NAME)
 
     // 3. Add two non-AI entity modules via the floating "Module toevoegen" FAB —
     //    each click appends a new step; the picker's tile title attribute matches
     //    the module's translated label exactly (ModulePicker.tsx renderTile).
-    for (const tile of MODULE_TILES) {
+    for (const [index, tile] of MODULE_TILES.entries()) {
       await page.locator('button', { hasText: L.addModule }).first().click()
-      await sleep(300)
-      await page.locator(`[role="dialog"] button[title="${tile}"]`).first().click()
-      await sleep(300)
+      const tileBtn = page.locator(`[role="dialog"] button[title="${tile}"]`).first()
+      await tileBtn.waitFor({ state: 'visible', timeout: 10000 })
+      await tileBtn.click()
+      // The step is on the canvas once the node count grew.
+      await until(async () => (await page.locator('.react-flow__node').count()) >= index + 1, { label: `canvas node ${index + 1}` })
     }
 
     // 3b. Connect A → B by dragging the xyflow source handle onto B's target
@@ -106,19 +108,21 @@ export async function workflowEditorGraph({ page, errors }) {
     const tgtBox = await tgtHandle.boundingBox()
     expect(!!tgtBox, 'target handle not found for edge drag')
     await page.mouse.move(tgtBox.x + tgtBox.width / 2, tgtBox.y + tgtBox.height / 2, { steps: 12 })
-    await page.mouse.up(); await sleep(300)
+    await page.mouse.up()
+    await page.locator('.react-flow__edge').first().waitFor({ state: 'attached', timeout: 5000 })
 
     // 4. Save (without closing) — creates the workflow and assigns a real id.
     await page.locator('button', { hasText: L.save }).first().click()
-    await sleep(1200)
 
     // Recover the assigned id from the workflows list via the API (the editor
     // patches its own id in-place, so reading the list is the honest external check).
-    const { status: listStatus, json: listBody } = await apiFetch(page, 'GET', '/workflows?per_page=500')
-    expect(listStatus >= 200 && listStatus < 300, `GET /workflows failed: ${listStatus}`)
-    const list = Array.isArray(listBody?.data) ? listBody.data : listBody
-    const probe = list.find(w => w.name === PROBE_NAME)
-    expect(!!probe, 'saved probe workflow not found via GET /workflows')
+    // Poll until the save has landed instead of sleeping for it.
+    const probe = await until(async () => {
+      const { status: listStatus, json: listBody } = await apiFetch(page, 'GET', '/workflows?per_page=500')
+      expect(listStatus >= 200 && listStatus < 300, `GET /workflows failed: ${listStatus}`)
+      const list = Array.isArray(listBody?.data) ? listBody.data : listBody
+      return list.find(w => w.name === PROBE_NAME)
+    }, { label: 'saved probe workflow in GET /workflows' })
     workflowId = probe.id
 
     const graphBeforeReload = await fetchGraph(page, workflowId)
@@ -138,9 +142,14 @@ export async function workflowEditorGraph({ page, errors }) {
     //    same URL is a same-document no-op in Chromium — no reload happens — so
     //    `reload()` is the only way to actually exercise the round trip.)
     await page.reload()
-    await sleep(1800)
-    await page.locator('button', { hasText: L.save }).first().click()
-    await sleep(1200)
+    const saveBtn = page.locator('button', { hasText: L.save }).first()
+    await saveBtn.waitFor({ state: 'visible', timeout: 15000 })
+    await page.locator('.react-flow__node').nth(1).waitFor({ state: 'attached', timeout: 15000 })
+    await quiet(page)
+    // Arm the save-answer wait before the click so a fast response is not missed.
+    const resaved = page.waitForResponse(r => /\/workflows/.test(r.url()) && ['PUT', 'PATCH', 'POST'].includes(r.request().method()), { timeout: 15000 })
+    await saveBtn.click()
+    await resaved
 
     const graphAfterReload = await fetchGraph(page, workflowId)
 

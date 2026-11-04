@@ -12,7 +12,7 @@
  *      — never silently stuck showing a number bigger than what's actually in effect.
  * Bails per page on the first bad option (runtime budget) but still visits every page.
  */
-import { go, ensureTableView, expect, sleep } from '../lib.mjs'
+import { go, ensureTableView, expect, quiet } from '../lib.mjs'
 import { ENTITIES } from './entities.mjs'
 
 // The exact Dutch label PaginationBar renders next to its <select> — the one string
@@ -53,7 +53,8 @@ export async function pagination({ page, errors }) {
       await trigger.click()
       const lid = await trigger.getAttribute('aria-controls')
       await page.locator(`[id="${lid}"] button`, { hasText: opt }).first().click()
-      await sleep(1300)
+      // Some lists page client-side (no request), so settle on API quiet rather than on a specific response.
+      await quiet(page, { quietMs: 500 })
       const fresh = errors.slice(at)
       const toastAfter = await page.locator('[role="alert"]').count()
       if (fresh.length) { findings.push(`${nav} @ ${opt}/pagina: ${fresh.join(' | ')}`); break }
