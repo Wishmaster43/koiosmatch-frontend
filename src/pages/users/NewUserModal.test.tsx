@@ -292,6 +292,21 @@ describe('NewUserModal · email_unavailable (ONIX C-007)', () => {
   })
 })
 
+describe('NewUserModal · uncoded failure', () => {
+  it('POSTs /users and shows the server sentence when the rejection carries no known code', async () => {
+    vi.mocked(api.post).mockRejectedValueOnce({ response: { status: 422, data: { message: 'Server says no.' } } })
+    const user = userEvent.setup()
+    render(<NewUserModal onClose={noop} onCreated={vi.fn()} />)
+    await user.type(screen.getByLabelText('firstName', { exact: false }), 'Jan')
+    await user.type(screen.getByLabelText('email', { exact: false }), 'jan@bedrijf.nl')
+    await user.type(screen.getByLabelText('password', { exact: false }), 'wachtwoord123')
+    await pickRole(user, 'backoffice')
+    await user.click(screen.getByRole('button', { name: 'create' }))
+    await waitFor(() => expect(api.post).toHaveBeenCalledWith('/users', expect.objectContaining({ email: 'jan@bedrijf.nl' })))
+    expect(await screen.findByText('Server says no.')).toBeInTheDocument()
+  })
+})
+
 // T-003: staff invitation — the new user sets their own password via a mailed link.
 describe('NewUserModal · invitation', () => {
   // Drop queued results/calls a previous test may have left on the shared post mock.

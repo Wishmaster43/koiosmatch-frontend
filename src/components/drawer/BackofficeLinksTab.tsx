@@ -17,7 +17,7 @@ import type { ReactNode } from 'react'
 import { useApps } from '@/context/AppsContext'
 import api, { unwrap } from '@/lib/api'
 import { notify, notifySuccess, notifyError } from '@/lib/notify'
-import { extractApiError, apiErrorKey } from '@/lib/extractApiError'
+import { apiErrorMessage } from '@/lib/extractApiError'
 import { useTranslation } from 'react-i18next'
 import { HelloflexCard, ShiftmanagerCard } from './backofficeLinkCards'
 import { backofficeLinkOf } from '@/lib/backofficeLink'
@@ -135,8 +135,7 @@ export default function BackofficeLinksTab({ entity, id, helloflexLink, shiftman
     } catch (err) {
       // HF-CONTRACTMAP-1: an unmapped contract form is an honest, actionable notice
       // (points at Settings → HelloFlex), never the raw 409 server message.
-      const key = apiErrorKey(err)
-      notifyError(key ? t(key) : extractApiError(err, t('backofficeLinks.common.linkFailed')))
+      notifyError(apiErrorMessage(err, t, t('backofficeLinks.common.linkFailed')))
     } finally {
       setLinking(s => ({ ...s, [system]: false }))
     }
@@ -168,7 +167,7 @@ export default function BackofficeLinksTab({ entity, id, helloflexLink, shiftman
       const code = (err as { response?: { data?: { code?: string } } })?.response?.data?.code
       const codeKey = code === 'sm_not_found' ? 'backofficeLinks.shiftmanager.syncNotFound'
         : code === 'sm_unexpected_response' ? 'backofficeLinks.shiftmanager.syncUnexpected' : null
-      notifyError(codeKey ? t(codeKey) : extractApiError(err, t('backofficeLinks.shiftmanager.syncFailed')))
+      notifyError(codeKey ? t(codeKey) : apiErrorMessage(err, t, t('backofficeLinks.shiftmanager.syncFailed')))
     } finally {
       setSyncing(false)
     }

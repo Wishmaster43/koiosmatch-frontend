@@ -25,7 +25,6 @@ vi.mock('react-i18next', () => ({ useTranslation: () => ({ t: (k: string) => k }
 
 const { notifyError, notifySuccess } = vi.hoisted(() => ({ notifyError: vi.fn(), notifySuccess: vi.fn() }))
 vi.mock('@/lib/notify', () => ({ notifyError, notifySuccess }))
-vi.mock('@/lib/extractApiError', async () => ({ extractApiError: (_err: unknown, fallback: string) => fallback, apiErrorKey: (await vi.importActual<typeof import('@/lib/extractApiError')>('@/lib/extractApiError')).apiErrorKey }))
 
 const { buildProposalCvBlob } = vi.hoisted(() => ({ buildProposalCvBlob: vi.fn(() => Promise.resolve(new Blob(['pdf']))) }))
 vi.mock('@/lib/proposalCv', () => ({ buildProposalCvBlob }))
@@ -396,6 +395,17 @@ describe('useProposeForm', () => {
     expect(result.current.conflict).toBeNull()
   })
 
+  // An uncoded rejection with a server sentence shows that sentence (the shared apiErrorMessage chain).
+  it('shows the server sentence on an uncoded 422', async () => {
+    apiPost.mockRejectedValueOnce({ response: { status: 422, data: { message: 'Server says no.' } } })
+    const { result } = renderHook(() => useProposeForm(app()), { wrapper })
+    await waitFor(() => expect(result.current.candidateLoading).toBe(false))
+    act(() => { result.current.setConsentConfirmed(true) })
+    await waitFor(() => expect(result.current.disabledReason).toBeNull())
+    await act(async () => { await result.current.submit() })
+    expect(notifyError).toHaveBeenCalledWith('Server says no.')
+  })
+
   // Any other 409/4xx code keeps today's generic toast — the conflict callout
   // is reserved for the two documented codes only.
   it('falls back to the generic toast on a 409 with an unknown code', async () => {
@@ -405,7 +415,7 @@ describe('useProposeForm', () => {
     act(() => { result.current.setConsentConfirmed(true) })
     await waitFor(() => expect(result.current.disabledReason).toBeNull())
     await act(async () => { await result.current.submit() })
-    expect(notifyError).toHaveBeenCalled()
+    expect(notifyError).toHaveBeenCalledWith('common:actionFailed')
     expect(result.current.conflict).toBeNull()
   })
 
@@ -418,7 +428,7 @@ describe('useProposeForm', () => {
     await waitFor(() => expect(result.current.disabledReason).toBeNull())
     await act(async () => { await result.current.submit() })
     expect(apiPost).toHaveBeenLastCalledWith(`/applications/${app().id}/propose`, expect.anything(), expect.anything())
-    expect(notifyError).toHaveBeenCalledWith('common:errors.recipientSuppressed')
+    expect(notifyError).toHaveBeenCalledWith('errors.recipientSuppressed')
   })
 
   // Agency token reads the tenant's company_name setting, falls back to empty.

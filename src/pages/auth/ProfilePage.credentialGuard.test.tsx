@@ -114,7 +114,9 @@ describe('ProfilePage · CredentialChangeGuard on PUT /auth/me (CMBE bundle B)',
     expect(screen.getByText('profile.currentPasswordRequired')).toBeInTheDocument()
   })
 
-  it('(d) a 403 with a different code keeps the generic saveFailed behaviour', async () => {
+  // APIERR-ADOPT-1: the save error runs through the shared apiErrorMessage chain, so an unknown code with a
+  // server sentence shows that sentence (consistent with every other form); the password prompt stays off.
+  it('(d) a 403 with a different code shows the server sentence, never the current-password prompt', async () => {
     vi.mocked(api.put).mockClear()
     vi.mocked(api.put).mockRejectedValueOnce({
       response: { status: 403, data: { message: 'Some other server error', code: 'some_other_code' } },
@@ -130,7 +132,8 @@ describe('ProfilePage · CredentialChangeGuard on PUT /auth/me (CMBE bundle B)',
     await user.type(currentPasswordInput, 'geheim')
     await user.click(screen.getByText('profile.saveChanges'))
 
-    expect(await screen.findByText('profile.saveFailed')).toBeInTheDocument()
+    expect(await screen.findByText('Some other server error')).toBeInTheDocument()
+    expect(screen.queryByText('profile.saveFailed')).not.toBeInTheDocument()
     expect(screen.queryByText('profile.currentPasswordRequired')).not.toBeInTheDocument()
   })
 })

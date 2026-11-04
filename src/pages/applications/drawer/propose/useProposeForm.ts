@@ -19,7 +19,7 @@ import api, { unwrap } from '@/lib/api'
 // DOUBLE-SUBMIT-FE-1 point 2: one Idempotency-Key per click on an irreversible action (BE IDEMP-1 replays).
 import { withIdempotencyKey } from '@/lib/idempotency'
 import { notifyError, notifySuccess } from '@/lib/notify'
-import { apiErrorKey, extractApiError } from '@/lib/extractApiError'
+import { apiErrorMessage } from '@/lib/extractApiError'
 import { useLookups } from '@/context/LookupsContext'
 import { useCvSettings } from '@/lib/useCvSettings'
 import { useAllSettings, getJsonSetting, getStringSetting } from '@/lib/settings/useAllSettings'
@@ -355,8 +355,7 @@ export function useProposeForm(application: ApplicationDetail) {
         return false
       }
       // A coded refusal (422 recipient_suppressed) reads as translated copy, never the English server message.
-      const errorKey = apiErrorKey(err)
-      notifyError(errorKey ? t(`common:${errorKey}`) : extractApiError(err, t('common:actionFailed')))
+      notifyError(apiErrorMessage(err, t, t('common:actionFailed')))
       return false
     } finally {
       setSubmitting(false)

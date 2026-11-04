@@ -116,6 +116,23 @@ describe('useProfileForm avatar blob URL lifecycle', () => {
   })
 })
 
+describe('useProfileForm save · uncoded failure', () => {
+  it('PUTs /auth/me and shows the server sentence when the rejection carries no known code', async () => {
+    vi.mocked(api.put).mockRejectedValueOnce({ response: { status: 422, data: { message: 'Server says no.' } } })
+    const { result } = renderHook(() => useProfileForm())
+    await act(async () => { await result.current.handleSave() })
+    expect(api.put).toHaveBeenCalledWith('/auth/me', expect.objectContaining({ email: 'jane@x.nl' }))
+    expect(result.current.error).toBe('Server says no.')
+  })
+
+  it('shows the profile.saveFailed fallback when the rejection carries no server message', async () => {
+    vi.mocked(api.put).mockRejectedValueOnce(new Error('500'))
+    const { result } = renderHook(() => useProfileForm())
+    await act(async () => { await result.current.handleSave() })
+    expect(result.current.error).toBe('profile.saveFailed')
+  })
+})
+
 describe('useProfileForm save · email_unavailable', () => {
   it('PUTs /auth/me and shows the translated text, never the English server message', async () => {
     vi.mocked(api.put).mockRejectedValueOnce({

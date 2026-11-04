@@ -110,6 +110,15 @@ describe('BackofficeLinksTab · entity-agnostic "Koppelen" POST (§13: asserts t
     await waitFor(() => expect(mockNotifyError).toHaveBeenCalledWith('errors.helloflexContractTypeUnmapped'))
   })
 
+  it('shows the server sentence on an uncoded link failure', async () => {
+    mockPost.mockRejectedValue({ response: { status: 500, data: { message: 'Server says no.' } } })
+    const user = userEvent.setup()
+    render(<BackofficeLinksTab entity="matches" id="7" helloflexLink={null} shiftmanagerLink={null} canLink />)
+    const [helloflexBtn] = screen.getAllByRole('button', { name: /backofficeLinks.common.linkButton/ })
+    await user.click(helloflexBtn)
+    await waitFor(() => expect(mockNotifyError).toHaveBeenCalledWith('Server says no.'))
+  })
+
   it('POSTs /sync/{entity}/{id} for locations/departments/contacts too (same generic route)', async () => {
     mockPost.mockResolvedValue({ data: { link: { status: 'pending' } } })
     for (const entity of ['locations', 'departments', 'contacts']) {
