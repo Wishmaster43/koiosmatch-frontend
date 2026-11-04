@@ -2,6 +2,7 @@ import { defineConfig } from 'vitest/config'
 import { loadEnv } from 'vite'
 import react from '@vitejs/plugin-react'
 import { fileURLToPath } from 'node:url'
+import { STATIC_HOST_SECURITY_HEADERS } from '../src/lib/securityHeaders.ts'
 
 // Standalone public career site — its OWN Vite app inside the repo, entirely
 // separate from the admin build. `root` is pinned to this directory because
@@ -22,7 +23,10 @@ export default defineConfig(({ mode }) => {
     base: env.VITE_CAREER_BASE ?? '/',
     plugins: [react()],
     // Fixed dev port so the public site never collides with the admin app (:5173).
-    server: { port: 5273 },
+    // L-004-DEV-1: dev and preview send the static-host security headers; in production the hosting
+    // widens frame-ancestors to the bureau's embed_origins (CAREER-EMBED-1), dev keeps 'none'.
+    server: { port: 5273, headers: STATIC_HOST_SECURITY_HEADERS },
+    preview: { headers: STATIC_HOST_SECURITY_HEADERS },
     // Same "@/" alias convention as the admin app (CLAUDE.md §11) — no deep relative chains.
     resolve: { alias: { '@': fileURLToPath(new URL('./src', import.meta.url)) } },
     build: {

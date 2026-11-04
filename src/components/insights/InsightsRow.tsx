@@ -26,8 +26,14 @@ interface DonutChannel { label: string; value: ReactNode; color: string }
 export interface DonutSpec { key: string; title?: ReactNode; data: unknown[]; colors?: string[]; onPick?: (d: unknown) => void; active?: boolean; onClear?: () => void; picked?: string | null }
 export interface KpiSpec { key: string; label?: ReactNode; value?: number | string | null; sub?: ReactNode; color?: string; onClick?: () => void; active?: boolean; channels?: DonutChannel[]; render?: ReactNode }
 
+// CMFE-KPI-1 (measured 24-10 at 1280×720 with an open 580px drawer): with `minWidth: 0` the ten
+// candidate cards shrank to ~34px, the donuts overlapped and the labels read as one letter. A floor per
+// card makes the row scroll horizontally instead (the strip below already has `overflowX: 'auto'`);
+// 80px keeps every page unchanged at 1280px and wider without a drawer (eleven cards need 980px of the
+// 1012px content width next to the 220px sidebar), so only the squashed case changes.
+export const CARD_MIN_WIDTH = 80
 const CARD: CSSProperties = {
-  flex: '1 1 0', minWidth: 0, height: 96, boxSizing: 'border-box',
+  flex: '1 1 0', minWidth: CARD_MIN_WIDTH, height: 96, boxSizing: 'border-box',
   border: '1px solid var(--border)', borderRadius: 10, padding: '9px 12px',
   background: 'var(--surface)', display: 'flex', flexDirection: 'column',
 }

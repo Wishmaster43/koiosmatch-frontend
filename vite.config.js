@@ -5,6 +5,7 @@ import react from '@vitejs/plugin-react'
 import tailwindcss from '@tailwindcss/vite'
 import { fileURLToPath } from 'node:url'
 import { buildCsp } from './src/lib/csp.ts'
+import { STATIC_HOST_SECURITY_HEADERS } from './src/lib/securityHeaders.ts'
 
 // Injects the production Content-Security-Policy <meta> tag into index.html.
 // Build-only (`apply: 'build'`): dev keeps no CSP because Vite's HMR client
@@ -48,6 +49,9 @@ export default defineConfig(({ mode }) => {
     // the cookie, D1-DEV-1). Harmless in bearer mode: absolute API URLs bypass the proxy.
     server: {
       port: 5173, strictPort: true,
+      // L-004-DEV-1: the dev server sends the static-host security headers (frame-ancestors 'none' etc.)
+      // so the iframe check can be rehearsed locally; production sends them from the static host.
+      headers: STATIC_HOST_SECURITY_HEADERS,
       // Poll for changes instead of relying on fs events (measured 25-07-2026): after a
       // long-running dev session with many file writes from outside the editor, the
       // native watcher silently stopped firing — the server kept serving the CACHED
@@ -61,6 +65,8 @@ export default defineConfig(({ mode }) => {
         '/sanctum': { target: 'http://koiosmatch-api.test', changeOrigin: true },
       },
     },
+    // `vite preview` serves the production build locally: same headers as the dev server.
+    preview: { headers: STATIC_HOST_SECURITY_HEADERS },
     // Use the automatic JSX runtime everywhere (incl. test files), so test JSX
     // doesn't need an explicit `import React`.
     esbuild: { jsx: 'automatic' },

@@ -5,7 +5,7 @@
  */
 import { describe, it, expect } from 'vitest'
 import { render, screen, fireEvent } from '@testing-library/react'
-import InsightsRow from './InsightsRow'
+import InsightsRow, { CARD_MIN_WIDTH } from './InsightsRow'
 
 describe('InsightsRow · notice', () => {
   it('renders the notice text in a role="status" banner when set', () => {
@@ -43,5 +43,27 @@ describe('InsightsRow · donut clear button colour', () => {
     expect(clearBtn).toHaveInlineStyle({ background: 'var(--button-fill)', color: 'var(--button-ink)' })
     fireEvent.mouseLeave(clearBtn)
     expect(clearBtn).toHaveInlineStyle({ background: 'var(--button-fill)', color: 'var(--button-ink)' })
+  })
+})
+
+// CMFE-KPI-1: a card never shrinks below its floor, so a strip that does not fit (1280×720 with an open
+// drawer) scrolls horizontally instead of overlapping donuts and one-letter labels.
+describe('InsightsRow · card minimum width (CMFE-KPI-1)', () => {
+  it('gives every donut and KPI card the shared minimum width and keeps the strip horizontally scrollable', () => {
+    const { container } = render(
+      <InsightsRow
+        donuts={[{ key: 'status', title: 'Status', data: [{ name: 'a', value: 3 }] }]}
+        kpis={[{ key: 'a', label: 'A', value: 1 }, { key: 'b', label: 'B', value: 2 }]}
+      />,
+    )
+    const strip = container.firstElementChild as HTMLElement
+    expect(strip).toHaveInlineStyle({ overflowX: 'auto' })
+    const cards = Array.from(strip.children) as HTMLElement[]
+    expect(cards).toHaveLength(3)
+    for (const card of cards) expect(card).toHaveInlineStyle({ minWidth: `${CARD_MIN_WIDTH}px` })
+  })
+
+  it('keeps the floor at 80px so no page changes at 1280px without a drawer (eleven cards fit 1012px)', () => {
+    expect(CARD_MIN_WIDTH).toBe(80)
   })
 })
