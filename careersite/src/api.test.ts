@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
-import { fetchSite, fetchVacancies, fetchVacancy, applyToVacancy } from './api'
+import { fetchSite, fetchVacancies, fetchVacancy, applyToVacancy, fetchPrivacyNotice } from './api'
 
 // Builds a minimal fetch Response stand-in — only the members parseJsonOrThrow
 // actually reads (ok/status/json). Avoids depending on jsdom's (absent) Fetch API.
@@ -17,6 +17,15 @@ describe('api client — request construction', () => {
 
   afterEach(() => {
     vi.unstubAllGlobals()
+  })
+
+  // K-012: privacy notice GET.
+  it('fetchPrivacyNotice GETs the tenant privacy-notice with the locale and returns the flat body', async () => {
+    const mockFetch = vi.mocked(fetch)
+    mockFetch.mockResolvedValue(mockJsonResponse({ text: 'Tekst', locale: 'nl' }))
+    const notice = await fetchPrivacyNotice('acme', 'nl')
+    expect(mockFetch).toHaveBeenCalledWith('http://koiosmatch-api.test/api/public/acme/privacy-notice?locale=nl', { credentials: 'omit' })
+    expect(notice).toEqual({ text: 'Tekst', locale: 'nl' })
   })
 
   it('fetchSite hits GET {base}/public/{tenant}/site with no credentials', async () => {
@@ -178,6 +187,21 @@ describe('api client — request construction', () => {
     const [, init] = mockFetch.mock.calls[0]
     const body = init?.body as FormData
     expect(body.get('interview_consent')).toBeNull()
+  })
+
+  // K-012: privacy_consent is sent only for a real true tick, never as '0'.
+  it('sends privacy_consent as "1" when true, omits it when false or undefined', async () => {
+    const mockFetch = vi.mocked(fetch)
+    const base = { first_name: 'Jane', last_name: 'Doe', email: 'jane@example.com', phone: '0612345678', website: '' }
+    const bodyFor = async (privacy_consent?: boolean) => {
+      mockFetch.mockReset()
+      mockFetch.mockResolvedValue(mockJsonResponse({ status: 'applied' }, 201))
+      await applyToVacancy('acme', 'REF-1', { ...base, privacy_consent })
+      return mockFetch.mock.calls[0][1]?.body as FormData
+    }
+    expect((await bodyFor(true)).get('privacy_consent')).toBe('1')
+    expect((await bodyFor(false)).get('privacy_consent')).toBeNull()
+    expect((await bodyFor(undefined)).get('privacy_consent')).toBeNull()
   })
 
   it('throws ApiError carrying the status, never the raw response body', async () => {

@@ -27,6 +27,8 @@ export interface ApplyFormValues {
   // INTERVIEW-CONSENT-PERSIST-1: undefined when the vacancy's setting hides the
   // field (never sent); otherwise the checkbox's real checked state.
   interviewConsent?: boolean
+  // K-012: true only when the privacy notice was shown and the AVG box ticked; else undefined.
+  privacyConsent?: boolean
 }
 
 interface ApplySubmitState {
@@ -62,6 +64,7 @@ export function useApplySubmit(tenant: string | undefined, reference: string | u
         // INTERVIEW-CONSENT-PERSIST-1: passed through as-is (boolean or undefined) —
         // the api layer decides the wire format ('1'/'0'), this hook just forwards it.
         interview_consent: values.interviewConsent,
+        privacy_consent: values.privacyConsent,
       })
       setState({ status: 'success', errorMessage: null })
     } catch (err) {

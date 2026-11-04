@@ -2,6 +2,7 @@ import type {
   ApplyPayload,
   ApplyResponse,
   PaginatedResponse,
+  PrivacyNotice,
   SiteInfo,
   VacancyDetail,
   VacancySummary,
@@ -39,6 +40,13 @@ async function parseJsonOrThrow<T>(res: Response): Promise<T> {
 export async function fetchSite(tenant: string): Promise<SiteInfo> {
   const res = await fetch(publicUrl(tenant, '/site'), { credentials: 'omit' })
   return parseJsonOrThrow<SiteInfo>(res)
+}
+
+// GET /public/{tenant}/privacy-notice?locale=xx — bureau text or platform fallback, always 200.
+export async function fetchPrivacyNotice(tenant: string, locale: string): Promise<PrivacyNotice> {
+  const query = new URLSearchParams({ locale }).toString()
+  const res = await fetch(`${publicUrl(tenant, '/privacy-notice')}?${query}`, { credentials: 'omit' })
+  return parseJsonOrThrow<PrivacyNotice>(res)
 }
 
 export interface VacancyListParams {
@@ -122,6 +130,8 @@ function buildApplyFormData(payload: ApplyPayload): FormData {
   if (payload.interview_consent !== undefined) {
     formData.set('interview_consent', payload.interview_consent ? '1' : '0')
   }
+  // K-012: only a true tick is sent ('1'), never '0' and never when undefined.
+  if (payload.privacy_consent === true) formData.set('privacy_consent', '1')
   appendEntries(formData, 'experiences', payload.experiences ?? [])
   appendEntries(formData, 'educations', payload.educations ?? [])
   formData.set('website', payload.website)

@@ -1,6 +1,9 @@
 // Central NL copy for the public career site. One module, not strings scattered
 // through JSX — an i18n-ready seam (a real multi-locale layer is a follow-up;
 // this MVP only ships Dutch, the market this career site targets first).
+// The career site is Dutch-only (index.html lang="nl"); this locale selects the privacy notice.
+export const CAREERSITE_LOCALE = 'nl'
+
 export const strings = {
   header: {
     fallbackName: 'Vacatures',
@@ -127,6 +130,12 @@ export const strings = {
     },
     consentLabel:
       'Ik ga akkoord dat mijn gegevens worden gebruikt om mijn sollicitatie te behandelen. Zie de privacyverklaring van deze werkgever.',
+    privacyNotice: {
+      summary: 'Lees de privacyverklaring',
+      loading: 'Privacyverklaring laden…',
+      error: 'De privacyverklaring kon niet worden geladen.',
+      retry: 'Opnieuw proberen',
+    },
     submit: 'Verstuur sollicitatie',
     submitting: 'Versturen…',
     success: 'Bedankt voor je sollicitatie! We nemen zo snel mogelijk contact met je op.',

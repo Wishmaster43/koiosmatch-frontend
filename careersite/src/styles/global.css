@@ -460,6 +460,24 @@ a {
   color: var(--text-muted);
 }
 
+.apply-form__notice {
+  font-size: 13px;
+  color: var(--text-muted);
+}
+
+.apply-form__notice summary {
+  cursor: pointer;
+  font-weight: 600;
+  color: var(--text);
+}
+
+.apply-form__notice-text {
+  white-space: pre-line;
+  max-height: 12rem;
+  overflow-y: auto;
+  margin: 8px 0 0;
+}
+
 .apply-form__consent input {
   margin-top: 3px;
 }

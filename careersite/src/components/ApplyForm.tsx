@@ -1,5 +1,5 @@
 import { useState, type FormEvent } from 'react'
-import { strings } from '../strings'
+import { strings, CAREERSITE_LOCALE } from '../strings'
 import { validateCvFile } from '../lib/validateFile'
 import { validatePhotoFile } from '../lib/validatePhotoFile'
 import { validateMotivationLength, getPlainTextLength } from '../lib/richText'
@@ -12,6 +12,7 @@ import { PhotoField } from './apply/PhotoField'
 import { ExperienceList } from './apply/ExperienceList'
 import { EducationList } from './apply/EducationList'
 import { RemarksField } from './apply/RemarksField'
+import { PrivacyNoticeDisclosure } from './PrivacyNoticeDisclosure'
 import { DEFAULT_COUNTRY_CODE, dialCodeFor } from './apply/countryCodes'
 import type { ApplicationSettings, EducationEntry, ExperienceEntry } from '../types'
 
@@ -67,6 +68,8 @@ export function ApplyForm({ tenant, reference, applicationSettings }: ApplyFormP
   const [educations, setEducations] = useState<EducationEntry[]>([])
   const [interviewConsent, setInterviewConsent] = useState(false)
   const [consent, setConsent] = useState(false)
+  // K-012: true only while the privacy notice text is really rendered.
+  const [noticeShown, setNoticeShown] = useState(false)
   // Honeypot — invisible to real visitors; a bot filling this in tells the backend to reject.
   const [website, setWebsite] = useState('')
   const [errors, setErrors] = useState<FieldErrors>({})
@@ -163,6 +166,8 @@ export function ApplyForm({ tenant, reference, applicationSettings }: ApplyFormP
       // actually shown (mirrors every other settings-gated field) — a hidden setting
       // must never leak the checkbox's default state into the request.
       interviewConsent: applicationSettings.interview_consent !== 'hidden' ? interviewConsent : undefined,
+      // K-012: the tick counts as privacy consent only when the notice was really shown.
+      privacyConsent: noticeShown && consent ? true : undefined,
     })
   }
 
@@ -254,6 +259,8 @@ export function ApplyForm({ tenant, reference, applicationSettings }: ApplyFormP
           ) : null}
         </>
       ) : null}
+
+      <PrivacyNoticeDisclosure tenant={tenant} locale={CAREERSITE_LOCALE} onLoadedChange={setNoticeShown} />
 
       <label className="apply-form__consent">
         <input type="checkbox" checked={consent} onChange={(event) => setConsent(event.target.checked)} />

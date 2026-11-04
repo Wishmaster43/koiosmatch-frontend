@@ -19,6 +19,15 @@ async function submitWith(error: unknown): Promise<string | null> {
   return result.current.errorMessage
 }
 
+describe('useApplySubmit privacy consent', () => {
+  it('forwards privacyConsent true as privacy_consent', async () => {
+    vi.mocked(api.applyToVacancy).mockResolvedValue({ status: 'applied' })
+    const { result } = renderHook(() => useApplySubmit('t', 'ref'))
+    await act(async () => { await result.current.submit({ ...values, privacyConsent: true }) })
+    expect(vi.mocked(api.applyToVacancy).mock.calls.at(-1)?.[2].privacy_consent).toBe(true)
+  })
+})
+
 describe('useApplySubmit errors', () => {
   it('shows the too-large text on a 413', async () => {
     expect(await submitWith(new api.ApiError(413))).toBe(strings.apply.errorTooLarge)

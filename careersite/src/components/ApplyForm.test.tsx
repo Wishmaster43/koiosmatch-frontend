@@ -10,10 +10,12 @@ import type { ApplicationSettings } from '../types'
 // so this test proves the actual REQUEST is (or isn't) made, not just that a callback fired.
 vi.mock('../api', async () => {
   const actual = await vi.importActual<typeof import('../api')>('../api')
-  return { ...actual, applyToVacancy: vi.fn() }
+  return { ...actual, applyToVacancy: vi.fn(), fetchPrivacyNotice: vi.fn() }
 })
 
 const mockedApply = vi.mocked(api.applyToVacancy)
+const mockedNotice = vi.mocked(api.fetchPrivacyNotice)
+const NOTICE_TEXT = 'Wij verwerken je gegevens voor deze sollicitatie.'
 
 // Baseline settings mirror the pre-formulier-v2 form shape (photo/remarks/interview
 // consent off) so the original consent-gate/motivation tests keep asserting a single
@@ -30,6 +32,8 @@ beforeEach(() => {
   mockedApply.mockReset()
   // The API deliberately sends no reference any more (N-011).
   mockedApply.mockResolvedValue({ status: 'applied' })
+  mockedNotice.mockReset()
+  mockedNotice.mockResolvedValue({ text: NOTICE_TEXT, locale: 'nl' })
 })
 
 // Fills the four required contact fields; consent/CV are each test's own concern.
@@ -274,5 +278,53 @@ describe('ApplyForm — payload assembly (address, remarks, phone, repeatable en
     expect(payload.educations).toEqual([
       { name: 'Verpleegkunde diploma', organisation: '', issued_at: '', license_number: '' },
     ])
+  })
+})
+
+describe('ApplyForm — privacy notice + privacy_consent (K-012)', () => {
+  it('requests the notice once for (tenant, nl) and renders its text', async () => {
+    render(<ApplyForm tenant="acme" reference="REF-1" applicationSettings={BASE_SETTINGS} />)
+    expect(await screen.findByText(NOTICE_TEXT)).toBeTruthy()
+    expect(mockedNotice).toHaveBeenCalledTimes(1)
+    expect(mockedNotice).toHaveBeenCalledWith('acme', 'nl')
+  })
+
+  it('shows the notice open by default once it loaded', async () => {
+    const { container } = render(<ApplyForm tenant="acme" reference="REF-1" applicationSettings={BASE_SETTINGS} />)
+    await screen.findByText(NOTICE_TEXT)
+    expect(container.querySelector('details.apply-form__notice')?.hasAttribute('open')).toBe(true)
+  })
+
+  it('sends privacy_consent true once the notice loaded and the box is ticked', async () => {
+    const user = userEvent.setup()
+    render(<ApplyForm tenant="acme" reference="REF-1" applicationSettings={BASE_SETTINGS} />)
+    await screen.findByText(NOTICE_TEXT)
+    await fillRequiredFields(user)
+    await user.click(screen.getByRole('checkbox'))
+    await user.click(screen.getByRole('button', { name: strings.apply.submit }))
+    expect(await screen.findByText(strings.apply.success)).toBeTruthy()
+    expect(mockedApply.mock.calls[0][2].privacy_consent).toBe(true)
+  })
+
+  it('shows an error + retry when the notice fails, still submits, and sends no privacy_consent', async () => {
+    mockedNotice.mockRejectedValue(new Error('down'))
+    const user = userEvent.setup()
+    render(<ApplyForm tenant="acme" reference="REF-1" applicationSettings={BASE_SETTINGS} />)
+    expect(await screen.findByText(strings.apply.privacyNotice.error)).toBeTruthy()
+    expect(screen.getByRole('button', { name: strings.apply.privacyNotice.retry })).toBeTruthy()
+    await fillRequiredFields(user)
+    await user.click(screen.getByRole('checkbox'))
+    await user.click(screen.getByRole('button', { name: strings.apply.submit }))
+    expect(await screen.findByText(strings.apply.success)).toBeTruthy()
+    expect(mockedApply.mock.calls[0][2].privacy_consent).toBeUndefined()
+  })
+
+  it('retry fetches again and renders the text once it resolves', async () => {
+    mockedNotice.mockRejectedValueOnce(new Error('down'))
+    const user = userEvent.setup()
+    render(<ApplyForm tenant="acme" reference="REF-1" applicationSettings={BASE_SETTINGS} />)
+    await user.click(await screen.findByRole('button', { name: strings.apply.privacyNotice.retry }))
+    expect(await screen.findByText(NOTICE_TEXT)).toBeTruthy()
+    expect(mockedNotice).toHaveBeenCalledTimes(2)
   })
 })

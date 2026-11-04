@@ -13,6 +13,16 @@ export interface SiteInfo {
   // (default OFF/opt-in). When false, the data endpoints (vacancies/apply/feeds)
   // 404 — the frontend must gate on this flag rather than treat it as an error.
   active: boolean
+  // CAREER-EMBED-1 (additive): origins allowed to frame the site; read by the hosting
+  // edge for frame-ancestors, the app itself has no UI for it.
+  embed_origins?: string[]
+}
+
+// K-012: GET /public/{tenant}/privacy-notice — always answers 200 with a flat body;
+// `text` is plain multiline text (never HTML) and never empty.
+export interface PrivacyNotice {
+  text: string
+  locale: string
 }
 
 export interface HoursRange {
@@ -128,6 +138,9 @@ export interface ApplyPayload {
   // consent — undefined when the vacancy's setting hides the field entirely
   // (never sent, mirrors how photo/remarks stay unset rather than blank).
   interview_consent?: boolean
+  // K-012: sent (as true) ONLY when the privacy notice text was rendered and the AVG
+  // box is ticked; otherwise left undefined so the field never reaches the request.
+  privacy_consent?: boolean
   experiences?: ExperienceEntry[]
   educations?: EducationEntry[]
   // Honeypot — must stay empty; a filled value marks the submission as a bot to the backend.
