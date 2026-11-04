@@ -75,10 +75,13 @@ export default function StatusListModal({
           // (key/label/options/default) is unchanged.
           <div style={{ marginBottom: 14 }}>
             <div style={{ fontSize: 12, color: 'var(--text-muted)', marginBottom: 5 }}>{extraField.label}</div>
-            <SearchSelect closeOnToggle width={352}
+            {/* DROPDOWN-CLEAR-1: opt-out unless the field is nullable (default null, e.g. a nationality's country);
+                a required extra field (unit, modality) persists straight to the row and must never be empty. */}
+            <SearchSelect closeOnToggle clearable={extraField.default == null} width={352}
               options={extraField.options}
-              selected={[draft[extraField.key] as string]}
+              selected={draft[extraField.key] ? [draft[extraField.key] as string] : []}
               onToggle={value => setDraft(d => ({ ...d, [extraField.key]: value }))}
+              onClear={() => setDraft(d => ({ ...d, [extraField.key]: null }))}
               triggerLabel={extraField.options.find(o => o.value === draft[extraField.key])?.label ?? extraField.label} />
           </div>
         )}

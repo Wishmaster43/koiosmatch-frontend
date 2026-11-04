@@ -73,12 +73,10 @@ export default function LeadQueuePanel() {
           )}
         </div>
       )}
-      {/* The wrapper is as wide as the field, so the shared clear control sits inside it (a full-width wrapper pushed it to the far right). */}
-      <div style={{ width: 220 }}>
-        <SearchSelect closeOnToggle selectAll={false} width={220} options={options}
-          selected={q.status ? [q.status] : []} onClear={() => q.setStatus('')} triggerLabel={statusLabel} triggerAriaLabel={t('facebookLeads.queue.filterLabel')}
-          onToggle={(v) => q.setStatus(v as ReceiptStatus | '')} />
-      </div>
+      {/* The single-pick SearchSelect shrinks its own root to the trigger, so the clear control anchors to it without a sizing wrapper. */}
+      <SearchSelect closeOnToggle selectAll={false} width={220} options={options}
+        selected={q.status ? [q.status] : []} onClear={() => q.setStatus('')} triggerLabel={statusLabel} triggerAriaLabel={t('facebookLeads.queue.filterLabel')}
+        onToggle={(v) => q.setStatus(v as ReceiptStatus | '')} />
       {q.retryError && <ErrorBanner>{q.retryError}</ErrorBanner>}
       {q.error ? (
         <ErrorBanner onRetry={q.reload} retryLabel={t('facebookLeads.retry')}>{t('facebookLeads.queue.loadError')}</ErrorBanner>

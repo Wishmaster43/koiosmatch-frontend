@@ -156,7 +156,9 @@ export default function ProvincesSettings() {
       {/* Country picker — the list below always shows THIS country's provinces. */}
       <div style={{ marginBottom: 16 }}>
         <div style={{ fontSize: 12, color: 'var(--text-muted)', marginBottom: 5 }}>{t('provinces.country')}</div>
-        <SearchSelect closeOnToggle width={280}
+        {/* DROPDOWN-CLEAR-1: an empty country would fetch /provinces?country= and POST an empty
+            country on add; the picker's only legal state is a picked country. */}
+        <SearchSelect closeOnToggle clearable={false} width={280}
           options={countryOptions}
           selected={[country]}
           onToggle={(next: string) => { if (next !== country) setCountry(next) }}

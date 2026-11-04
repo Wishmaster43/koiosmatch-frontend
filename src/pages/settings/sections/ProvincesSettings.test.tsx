@@ -59,6 +59,15 @@ describe('ProvincesSettings', () => {
     await screen.findByText(st('provinces.empty'))
   })
 
+  // DROPDOWN-CLEAR-1 opt-out: the country picker holds a picked country and offers no clear control.
+  it('renders the country picker without a clear button', async () => {
+    api.get.mockResolvedValue({ data: [] })
+    render(<ProvincesSettings />)
+
+    await screen.findByText(st('provinces.empty'))
+    expect(screen.queryByRole('button', { name: ct('clear') })).not.toBeInTheDocument()
+  })
+
   it('adding a province POSTs the selected country with the typed name', async () => {
     api.get.mockResolvedValue({ data: [] })
     api.post.mockResolvedValue({ data: province({ id: 'p2', name: 'Zuid-Holland' }) })
