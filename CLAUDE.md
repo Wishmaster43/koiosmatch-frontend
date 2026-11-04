@@ -73,7 +73,7 @@ compliant alternative.
     house you can put 10 more floors on."
 11. **Business automation is a WORKFLOW, not a coded job (Danny 2026-08-14:
     "we willen niet werken met coded jobs, alles is workflow tokens" —
-    immediately narrowed by him to "oké niet alles", so the line below is the
+    immediately narrowed by him to "oké niet alles" (translated: "okay, not everything"), so the line below is the
     working boundary until he sharpens it).** If a TENANT should be able to see
     it, change it, switch it off, or want it to run differently than the tenant
     next door, it is a workflow built from workflow tokens (`src/modules/`) —
@@ -101,7 +101,7 @@ compliant alternative.
     meeste willen — dat zijn wel Koios Tokens").** So the workflow-versus-code
     choice is a COMMERCIAL choice as well as a product one: a workflow run is
     billable consumption, plumbing and mass sweeps are not. **Unit names since
-    PRIJSMODEL-C (Danny 30-08, staffels) — label updated by K-242 (Danny 31-08,
+    PRIJSMODEL-C (Danny 30-08, tiers) — label updated by K-242 (Danny 31-08,
     verbatim "WhatsApp-Tokens worden gewoon Workflowtokens!"):** the workflow unit is
     a **workflow-token** (user-facing label "Workflow-tokens"; unit KEY stays
     `workflow_run`; one module execution — wait/failed/plumbing steps do not count;
@@ -194,30 +194,30 @@ Rules:
 
 - Everything is `.ts/.tsx`; an entity page never imports another entity page's
   internals — shared behaviour lives in `components/` / `hooks/` / `lib/`.
-- **Cross-entity hergebruik loopt door de PUBLIEKE surface (§2 barrel-besluit,
-  Danny 21-08):** wat een entiteit aan anderen aanbiedt staat in
-  `pages/<entiteit>/shared.ts`; elke import vanuit een andere map gebruikt dat
-  pad, nooit een diep intern pad (lint-gehandhaafd, per-entiteit gegenereerde
-  blokken in eslint.config.js). Wie een module wijzigt die in shared.ts staat,
-  weet dat buitenstaanders meerijden. TESTLES (zelfde dag gemeten): een barrel
-  laadt ál zijn modules eager — een unit-test mockt de barrel PLAT met precies
-  wat de component eruit gebruikt (pure functies via `vi.importActual` op hun
-  eigen diepe module), nooit `importOriginal` op de barrel zelf, anders trekt
-  de test de hele boom (en de i18n-init-bijwerking) binnen. **BARREL-DATETIME-LES (25-08, gemeten):** machinerie die TWEE entiteiten
-  delen (het WhatsApp-Web-devicescherm van profiel én instellingen) hoort in
-  `components/` of `hooks/`, nooit als re-export in een entity-barrel — de barrel
-  laadt eager, en zodra één re-export `@/lib/datetime` raakt rijdt de i18n-init mee
-  in elke barrel-consumer; twee ongerelateerde suites braken zo (NoteKoiosModeToggle,
-  AddOpportunityModal). Bij twijfel: check met een HEAD-worktree of de breuk van jou is.
-  **DATETIME-IMPORT-LES (10-09, DRY-ronde 10, lane MISC):** dezelfde val zonder barrel:
-  een PURE helper (de AI-insight-bouwers) die bij adopt-first `daysSince` uit
-  `@/lib/datetime` gaat importeren, sleept de i18n-init mee in elke consument van
-  die helper — vier suites rood (ApplicationTab, DetailsTab, ContextSubTab,
-  RejectionModal) terwijl de directe unit-tests groen bleven. Regel: een
-  datumhelper zonder locale hoort in `lib/localDate` (bijwerkingsvrij; `datetime`
-  re-exporteert hem), en de testset van een wijziging die IMPORTS verandert is de
-  TRANSITIEVE consument (de paginamappen van elk scherm dat de module rendert),
-  nooit alleen `grep -rl <basename>`.
+- **Cross-entity reuse goes through the PUBLIC surface (§2 barrel decision,
+  Danny 21-08):** what an entity offers to others lives in
+  `pages/<entiteit>/shared.ts`; every import from another folder uses that
+  path, never a deep internal path (lint-enforced, per-entity generated
+  blocks in eslint.config.js). Whoever changes a module listed in shared.ts
+  knows that outsiders ride along. TESTLES (measured the same day): a barrel
+  loads ALL its modules eagerly — a unit test mocks the barrel FLAT with exactly
+  what the component uses from it (pure functions via `vi.importActual` on their
+  own deep module), never `importOriginal` on the barrel itself, otherwise the
+  test pulls in the whole tree (and the i18n-init side effect). **BARREL-DATETIME-LES (25-08, measured):** machinery that TWO entities
+  share (the WhatsApp-Web device screen of both profile and settings) belongs in
+  `components/` or `hooks/`, never as a re-export in an entity barrel — the barrel
+  loads eagerly, and as soon as one re-export touches `@/lib/datetime` the i18n-init rides along
+  in every barrel consumer; two unrelated suites broke that way (NoteKoiosModeToggle,
+  AddOpportunityModal). When in doubt: check with a HEAD worktree whether the breakage is yours.
+  **DATETIME-IMPORT-LES (10-09, DRY round 10, lane MISC):** the same trap without a barrel:
+  a PURE helper (the AI-insight builders) that starts importing `daysSince` from
+  `@/lib/datetime` on adopt-first drags the i18n-init into every consumer of
+  that helper — four suites red (ApplicationTab, DetailsTab, ContextSubTab,
+  RejectionModal) while the direct unit tests stayed green. Rule: a
+  date helper without a locale belongs in `lib/localDate` (side-effect free; `datetime`
+  re-exports it), and the test set of a change that alters IMPORTS is the
+  TRANSITIVE consumer (the page folders of every screen that renders the module),
+  never only `grep -rl <basename>`.
 - Shared UI in `components/ui` is **dumb**: no API calls, no business logic.
 - If a file doesn't clearly belong somewhere, the design is wrong — stop and fix.
 - A `features/`-style layout (per-domain barrels) remains the long-term target if
@@ -280,44 +280,44 @@ surface, built from the same shared parts** — an `<Entity>Page` composing an
 > config-driven, click-to-filter); (b) the **"+ Add" button sits in the same place/style**;
 > (c) the **drawer header stays calm** — a colour-coded read-only phase/outcome **badge**
 > next to the title (not a wall of pickers), plus at most an owner picker; (d) **record
-> history is a changelog *icon* (popover) in the title-row VOOR de snelle blik, én
-> sinds TIJDLIJN-OVERAL (Danny 27-08) óók een **Tijdlijn-tab op de voor-laatste
-> positie** (Statistieken blijft laatste) — de oude "nooit een tab"-regel is
-> daarmee vervangen**; (e) controlled
+> history is a changelog *icon* (popover) in the title-row FOR the quick glance, and
+> since TIJDLIJN-OVERAL (Danny 27-08) also a **Timeline tab in the second-to-last
+> position** (Statistics stays last) — the old "never a tab" rule is
+> thereby superseded**; (e) controlled
 > vocabularies are **multi-value tenant lookups shown as soft chips** (mirror *Contractvorm*
 > / `candidateTypes`); (f) an **"Extra" tab appears only when ≥1 tenant custom field is
 > active** (Settings-driven). If the candidate feature and an entity disagree, the candidate
 > feature wins and the entity is brought in line.
 
-**DRILLDOWN-VOLGORDE-CANON (Danny 21-08, na twee gemiste rondes op de match-drilldown:
-"We hebben een volgorde … neem het nu eens goed op!!").** De overzichtstab van ELKE
-entity-drilldown volgt één vaste blokvolgorde, de kandidaat-volgorde: (1) **INFORMATIE**
-— de veldenkaarten; (2) de **VRIJE TEKST** van de entiteit (profieltekst / vacaturetekst /
-matchtekst / bedrijfstekst), gebouwd "zoals de profieltekst": rich text mét het
-second-screen-pop-out-icoon (TEKST-POPOUT-1-recept, registratie in
-`pages/popout/TextPopoutPage.tsx`); (3) het **KOIOS AI**-blok; (4) **VESTIGING** als
-LAATSTE blok — het gedeelde `components/drawer/BranchSection` (met `readOnly` wanneer de
-koppeling afgeleid is en er geen membership-routes zijn, §3 geen nep-affordance). En BINNEN
-de veldenkaarten: **LABEL LINKS, WAARDE RECHTS** (`CANON_LABEL_STYLE` ~120px, de
-EditableFieldTable/FieldRow-look) — nooit label-boven-waarde, nooit een per-scherm
-labelbreedte. Een drilldown die hiervan afwijkt zonder geschreven reden is een finding;
-de match-drilldown (`pages/matches/drawer/OverviewTab.tsx`) is naast de kandidaat de
-tweede referentie-implementatie.
+**DRILLDOWN-VOLGORDE-CANON (Danny 21-08, after two missed rounds on the match drill-down:
+"We hebben een volgorde … neem het nu eens goed op!!" (translated: "We have an order … write it down properly now!!")).** The overview tab of EVERY
+entity drill-down follows one fixed block order, the candidate order: (1) **INFORMATION**
+— the field cards; (2) the entity's **FREE TEXT** (profile text / vacancy text /
+match text / company text), built "like the profile text": rich text WITH the
+second-screen pop-out icon (TEKST-POPOUT-1 recipe, registration in
+`pages/popout/TextPopoutPage.tsx`); (3) the **KOIOS AI** block; (4) **BRANCH** as the
+LAST block — the shared `components/drawer/BranchSection` (with `readOnly` when the
+link is derived and there are no membership routes, §3 no fake affordance). And WITHIN
+the field cards: **LABEL LEFT, VALUE RIGHT** (`CANON_LABEL_STYLE` ~120px, the
+EditableFieldTable/FieldRow look) — never label-above-value, never a per-screen
+label width. A drill-down that deviates from this without a written reason is a finding;
+the match drill-down (`pages/matches/drawer/OverviewTab.tsx`) is, next to the candidate, the
+second reference implementation.
 
 **Table** — `<Entity>Table` only declares **columns** and hands them to the shared
 `components/ui/DataTable` (sorting, selection, loading/empty/row-click live there). Cells
 reuse `Avatar`, `StatusPill` and the soft-chip convention. No table chrome re-implemented.
 **CEL-DOORKLIK-CANON (Danny 22-08: "alle informatie in de tabellen moet nuttig zijn en
-wil je meer weten moet je bij de juiste drilldown uitkomen").** Every table cell that
+wil je meer weten moet je bij de juiste drilldown uitkomen" (translated: "all information in the tables must be useful and if you want to know more you must end up in the right drill-down")).** Every table cell that
 refers to more information than it shows deep-links to the CORRECT drill-down TAB of the
 right entity — a cell is a gateway, never a dead end. Two hard rules: (1) a NEW column
 ships only after ASKING Danny which drilldown/tab it must link to — never guessed, never
 silently unlinked; (2) an audit finding of a wrong/missing cell link is INVENTORIED and
 put to Danny as a question, never self-decided (his explicit instruction: "niet zelf
-aanpassen maar mij vragen, wel inventariseren"). The rule governs columns added
+aanpassen maar mij vragen, wel inventariseren" (translated: "don't change it yourself but ask me, do inventory")). The rule governs columns added
 AFTER 22-08; columns that predate it are the audit's inventory, and the matches
 "Type" column (born in the same delivery as this rule) is explicitly on Danny's
-question list for its routing. A periodic all-tables doorklik-audit
+question list for its routing. A periodic all-tables click-through audit
 (TABEL-DOORKLIK-AUDIT-1 in WORKLIST) verifies cell → tab routing per table.
 
 **Insights row** — `<Entity>InsightsRow` is **config-driven** (`donuts[]` + `kpis[]`),
@@ -375,74 +375,74 @@ same validation/UX, lookups via `useX()` hooks (never hardcoded option lists).
   soft-tint style for selection pills inside the candidate drawer. Both exist because the
   2026-07-22/23 audit rounds found the same solid-fill pill hand-rolled 6+ times; a new
   toggle/pill reuses these, never a fresh inline copy.
-- **ALTIJD een zoekbare dropdown — een native `<select>` is een finding (Danny
-  2026-08-08, met nadruk, twee keer).** Elke keuzelijst in de app is zoekbaar —
-  óók een lijst van drie opties (Danny zag Verplicht/Optioneel/Verborgen zonder
-  zoekveld en wil ook dáár de zoekbare variant): gebruik `CreatableSelect`
-  (`allowCreate={false}`), `SearchSelect`, of de gedeelde `SelectMenu` — die
-  filtert sinds 08-08 zélf, dus elk bestaand gebruik erft het zoekveld
-  automatisch. Nooit een kale `<select>`. Dit geldt voor drawers, modals, instellingen,
-  filterpanelen, inline rij-editors en formulieren; ook voor korte lijstjes,
-  zodat het overal hetzelfde voelt. Bij het aanraken van een scherm: vervang de
-  `<select>`s die je tegenkomt, ook als ze niet in je opdracht stonden. Een
-  nieuwe `<select>` toevoegen mag alleen met een geschreven reden in de code
-  (bijv. een browser-native control die bewust nodig is) — anders is het een bug.
-- **Het systeem gokt nooit stil — een voorstel draagt het Koios-merkje (Danny
-  2026-08-13, "ALTIJD LEEG!!" + afbeelding).** Een veld dat de app zelf zou kunnen
-  invullen start LEEG; automatische voorinvulling op basis van een aanname (zoals
-  de oude "enige vacature"-gok in de intake-popup) is een finding. Wanneer Koios
-  later waarden VOORSTELT, staat er zichtbaar het Koios-teken bij (het gedeelde
-  `KoiosAiMark`, soft-variant — zoals het ✦-merkje in Danny's referentiebeeld,
-  maar dan ons eigen merk): de gebruiker ziet in één oogopslag "dit is een
-  voorstel, geen feit" en kan het wissen of overnemen. Eerste toepassingsgeval
-  (GEBOUWD 13-08): het vacature-voorstel in de intake-/solliciteren-popup — de
-  enige-geschiedenis-vacature seedt als `suggestedVacancyId` met de gedeelde
-  `KoiosSuggestionBadge` ernaast; wissen of anders kiezen lost het merkje op.
-  Uitzondering: expliciete
-  CONTEXT is geen gok — wie op "Solliciteren" klikt op een vacaturekaart, of een
-  intake plant vanuit een vacature, krijgt díe vacature gewoon ingevuld.
-  **Koios is het gezicht van álle systeemvoorstellen (Danny 13-08: "ondanks dat het
-  logica is die wij programmeren, doen we het voorkomen dat het Koios AI is").**
-  Ook een puur geprogrammeerde heuristiek (de enige-vacature-regel, een
-  standaard-afleiding) presenteert zich aan de eindgebruiker als Koios-voorstel
-  met hetzelfde merkje — implementatie (regel of model) is voor de gebruiker
-  onzichtbaar en irrelevant. Nooit een tweede "gewone-logica"-markering invoeren.
-- **DROPDOWN-CLEAR-1 — ELKE zoekbare keuzelijst heeft een wiskruis, standaard AAN
-  (Danny 08-09 op het WhatsApp-Web-nummerformulier: "ik kan vestiging niet wissen,
+- **ALWAYS a searchable dropdown — a native `<select>` is a finding (Danny
+  2026-08-08, emphatically, twice).** Every dropdown in the app is searchable —
+  even a list of three options (Danny saw Verplicht/Optioneel/Verborgen (Required/Optional/Hidden) without a
+  search field and wants the searchable variant there too): use `CreatableSelect`
+  (`allowCreate={false}`), `SearchSelect`, or the shared `SelectMenu` — it
+  filters by itself since 08-08, so every existing use inherits the search field
+  automatically. Never a bare `<select>`. This applies to drawers, modals, settings,
+  filter panels, inline row editors and forms; also for short lists,
+  so that it feels the same everywhere. When you touch a screen: replace the
+  `<select>`s you come across, even if they were not in your brief. Adding a
+  new `<select>` is only allowed with a written reason in the code
+  (e.g. a browser-native control that is deliberately needed) — otherwise it is a bug.
+- **The system never guesses silently — a proposal carries the Koios mark (Danny
+  2026-08-13, "ALTIJD LEEG!!" (translated: "ALWAYS EMPTY!!") + image).** A field the app could fill in
+  itself starts EMPTY; automatic prefilling based on an assumption (such as
+  the old "only vacancy" guess in the intake popup) is a finding. When Koios
+  later PROPOSES values, the Koios sign is visibly shown next to it (the shared
+  `KoiosAiMark`, soft variant — like the ✦ mark in Danny's reference image,
+  but then our own mark): the user sees at a glance "this is a
+  proposal, not a fact" and can clear or accept it. First use case
+  (BUILT 13-08): the vacancy proposal in the intake/apply popup — the
+  vacancy that is the only one in the history seeds as `suggestedVacancyId` with the shared
+  `KoiosSuggestionBadge` next to it; clearing or choosing otherwise removes the mark.
+  Exception: explicit
+  CONTEXT is not a guess — whoever clicks "Solliciteren" (Apply) on a vacancy card, or plans an
+  intake from a vacancy, simply gets THAT vacancy filled in.
+  **Koios is the face of ALL system proposals (Danny 13-08: "ondanks dat het
+  logica is die wij programmeren, doen we het voorkomen dat het Koios AI is" (translated: "even though it is logic that we program, we make it appear to be Koios AI")).**
+  Even a purely programmed heuristic (the only-vacancy rule, a
+  default derivation) presents itself to the end user as a Koios proposal
+  with the same mark — the implementation (rule or model) is invisible and
+  irrelevant to the user. Never introduce a second "plain logic" marking.
+- **DROPDOWN-CLEAR-1 — EVERY searchable dropdown has a clear button, ON by default
+  (Danny 08-09 on the WhatsApp-Web number form: "ik kan vestiging niet wissen,
   dit is een bekende bug, niet in elke zoekbare dropdown is een clear … we zouden
-  reusable components gebruiken"; vervangt VAC-CLEAR-1's opt-in van 13-08).**
-  Gemeten vóór de fix: 286 keuzelijsten, 142 zonder wiskruis — SelectMenu kende
-  het niet, CreatableSelect alleen als opt-in, en het formulier-kit `SelectField`
-  gaf het nooit door: precies zo ontstaat een kopie zonder clear. Sinds de fix
-  renderen CreatableSelect, SelectMenu en SearchSelect (enkelkeuze-rol) het
-  gedeelde `components/ui/SelectClearButton` zodra er een waarde staat; wissen is
-  een pick met `''` en de onChange MOET `''` echt verwerken (een onChange die `''`
-  negeert is een finding). Een formulierveld wist je vóór het opslaan, ook als het
-  verplicht is: validatie loopt bij Opslaan. Opt-out (`clearable={false}`) mag
-  ALLEEN waar een lege waarde de opgeslagen staat zou breken (in-place editor op
-  een verplicht veld dat direct persisteert) en draagt een `// DROPDOWN-CLEAR-1:
-  <reden>`-commentaar direct erboven (max. zes regels); `components/ui/dropdownClear.houseStyle.test.js` bewaakt
-  die reden én dat er nergens een rauwe `<select>` bestaat. Elke gerepareerde
-  kiezer krijgt een pick→clear→placeholder-regressietest.
-- **Een toevoeg-actie IS een knop, geen tekstlink (Danny 2026-08-08).** Elke
-  "+ X toevoegen"-affordance (vaardigheid, taal, opleiding, locatie, notitie, rij
-  in een tabel …) rendert als de gedeelde `DrawerAddButton` / een echte knop met
-  rand + soft-tint (§4) — nooit als kale gekleurde tekst met een plusje. Reden:
-  gekleurde tekst leest niet als klikbaar en drift per scherm. Kom je een
-  tekstvariant tegen, vervang hem meteen, ook buiten je opdracht.
+  reusable components gebruiken" (translated: "I can't clear branch, this is a known bug, not every searchable dropdown has a clear … we were supposed to use reusable components"); replaces VAC-CLEAR-1's opt-in of 13-08).**
+  Measured before the fix: 286 dropdowns, 142 without a clear button — SelectMenu did not have
+  it, CreatableSelect only as an opt-in, and the form kit `SelectField`
+  never passed it on: that is exactly how a copy without clear arises. Since the fix,
+  CreatableSelect, SelectMenu and SearchSelect (single-choice role) render the
+  shared `components/ui/SelectClearButton` as soon as there is a value; clearing is
+  a pick with `''` and the onChange MUST really handle `''` (an onChange that ignores
+  `''` is a finding). A form field can be cleared before saving, even when it is
+  required: validation runs on Save. Opt-out (`clearable={false}`) is allowed
+  ONLY where an empty value would break the stored state (in-place editor on
+  a required field that persists directly) and carries a `// DROPDOWN-CLEAR-1:
+  <reason>` comment directly above it (max. six lines); `components/ui/dropdownClear.houseStyle.test.js` guards
+  that reason and that a raw `<select>` exists nowhere. Every repaired
+  picker gets a pick→clear→placeholder regression test.
+- **An add action IS a button, not a text link (Danny 2026-08-08).** Every
+  "+ add X" affordance (skill, language, education, location, note, row
+  in a table …) renders as the shared `DrawerAddButton` / a real button with
+  border + soft-tint (§4) — never as bare coloured text with a plus. Reason:
+  coloured text does not read as clickable and drifts per screen. If you come across a
+  text variant, replace it immediately, even outside your brief.
 - **Soft-chip convention** (everywhere — table + drawer): coloured chips =
   `color + '1A'` background, `color` text, `color + '55'` border. Never solid fills.
 - **In-place edit pattern:** a pencil toggles to diskette (save) + ✕ (cancel), shown
   above the block — never floating over the rows.
 - **Every free-text field is a rich-text block (Danny 2026-07-14).** Any multi-line
-  text field (omschrijving / opmerkingen / beschrijving / toelichting / summary /
-  wervingsproblemen …) uses the shared `components/ui/RichTextEditor` (bold, italic,
+  text field (description / remarks / details / explanation / summary /
+  recruitment problems …) uses the shared `components/ui/RichTextEditor` (bold, italic,
   lists, …) with `SafeHtml` display and its OWN pencil → save/✕ — mirror the
   candidate profile text. A bare `<textarea>` for user-facing prose is a finding.
   (Single-line inputs and code/ID fields are exempt.)
 - **Field layout (Danny 2026-08-13, supersedes label-above):** modals/popups mirror
   the drill-down — **label LEFT of the field** (EditableFieldTable look, canon label
-  width ~120px), grouped into titled cards (Persoonlijk / Contact / Adres …); short
+  width ~120px), grouped into titled cards (Personal / Contact / Address …); short
   fields may still pair into columns. Applies app-wide (candidates, customers,
   vacancies, applications); implemented as ONE sweep from the shared form kit
   (`components/forms/fields.tsx`) — never restyled per modal.
@@ -452,7 +452,7 @@ functions, industries, genders, languages, levels, pools → a Settings-managed 
 a `useX()` hook with a sensible fallback (mirror `useGenders` / `useFunctions`). No
 literal option lists inside components.
 
-**Calm by default (rust).** One accent colour (primary); colour only where it carries
+**Calm by default (calm).** One accent colour (primary); colour only where it carries
 meaning (status/stage), never as decoration; hierarchy via typography and whitespace,
 not borders. Always handle the four UI states (loading/error/empty/success).
 
@@ -460,11 +460,11 @@ not borders. Always handle the four UI states (loading/error/empty/success).
 `koiosmatch-api/docs/contract/AXIS-MATRIX.md` is the system-wide rulebook: allowed state
 combinations, action × state levels (allow/warn/block + which popup P1–P10),
 non-interactive rules (workflows/bulk/seeder) and the automations catalogue.
-**READ IT before building or changing any create/transition flow** (solliciteren,
-koppelen, intake, match, taak, bellijst, WhatsApp, status/fase-wissels, klant-acties)
+**READ IT before building or changing any create/transition flow** (applying,
+linking, intake, match, task, call list, WhatsApp, status/phase switches, customer actions)
 and verify the built behaviour against it — a UI that allows what the matrix
 blocks, skips a required popup, or misses an expected automation is a finding.
-The matrix is tenant-configurable data (seeded defaults, Settings → Actieregels);
+The matrix is tenant-configurable data (seeded defaults, Settings → Action rules);
 the FE preflight and BE guards read the same tenant rule set.
 
 ---
@@ -603,18 +603,19 @@ the code is worse than no rule, because the next reader builds on it. What is tr
 ### Fields & formatting
 
 - Dates render **DD-MM-YYYY** (`nl-NL`, `lib/formatters`) — birthdate, available-from, everywhere.
-- **Een gebruiker ziet NOOIT "13/08/2026" of ISO "2027-08-08" (Danny 13-08, DATUM-1 — met
-  nadruk: "neem op in claude.md dat dit nooit zo weergegeven mag worden").** Elke
-  gebruikszichtbare datum is **DD-MM-YYYY** (+ ` HH:mm` waar tijd hoort) via
-  `useDateFormat`/`lib/formatters` — nooit een raw API-veld in JSX, nooit
-  `toLocaleDateString` met slash-locale, nooit handmatige stringbouw. Ook
-  **server-gecomponeerde prozateksten** (AXIS-preflightbanners e.d.) mogen geen ISO
-  lekken: render ze door `humanizeIsoDates` (`lib/localDate`) — herschrijft alléén de
-  notatie, nooit de bewoording — én meld de bron aan backend-Claude zodat de server
-  het zelf ook goed opstelt. De enige (tijdelijke) uitzondering is de weergave BINNEN
-  een native `<input type="date/datetime-local">` — die tekent de browser zelf in
-  OS-locale en is niet stuurbaar; overal buiten het invulveld geldt de regel hard.
-  Een nieuwe datumweergave zonder de huisformatter is een finding.
+- **A user NEVER sees "13/08/2026" or ISO "2027-08-08" (Danny 13-08, DATUM-1 — with
+  emphasis: "neem op in claude.md dat dit nooit zo weergegeven mag worden" (translated: "put it in
+  claude.md that this must never be displayed like this")).** Every
+  user-visible date is **DD-MM-YYYY** (+ ` HH:mm` where a time belongs) via
+  `useDateFormat`/`lib/formatters` — never a raw API field in JSX, never
+  `toLocaleDateString` with a slash locale, never hand-built strings. Also
+  **server-composed prose texts** (AXIS preflight banners and the like) must not leak
+  ISO: render them through `humanizeIsoDates` (`lib/localDate`) — it rewrites only the
+  notation, never the wording — and report the source to backend-Claude so the server
+  words it correctly itself too. The only (temporary) exception is the display INSIDE
+  a native `<input type="date/datetime-local">` — the browser draws that itself in the
+  OS locale and it cannot be steered; everywhere outside the input field the rule is hard.
+  A new date display without the house formatter is a finding.
 - Add **birthplace** (`place_of_birth`); surface **Facebook Lead ID** (when present) in drawer + table.
 - `last_contact_at` + `last_contact_type` shown in table + drawer; seeder randomises both so KPIs test.
 - Skills render as a vertical **list** (edit/remove per row), not inline chips.
@@ -669,97 +670,97 @@ the code is worse than no rule, because the next reader builds on it. What is tr
   duplicate.
 - Tailwind discipline: extract repeated class strings into a component or a
   shared constant; don't copy-paste 15-class strings across files.
-- **HET DESIGNSYSTEEM WOONT IN `components/ui/` + `lib/tint` + `config/buttonMetrics`
-  (HUISSTIJL-1, Danny 2026-08-19: atomen/moleculen/organismen — "niet 100 keer
-  hetzelfde maar een element dat hergebruikt wordt").** Geen nieuwe `layout/`-map:
-  `components/ui` IS de huisstijlmap (100+ gedeelde componenten wonen er al);
-  `components/layout` blijft app-chrome (Sidebar, topbar, Koios-paneel). De
-  taxonomie, met per atoom het bestaande component — nieuw UI-werk COMPONEERT
-  hieruit; ontbreekt een atoom, bouw het EERST hier en gebruik het dan:
-  · Knoppen/acties → `Button` (varianten+maten), `DrawerAddButton`, `ActionMenu`
-  · Formulier → `SelectMenu`/`SearchSelect`/`CreatableSelect` (nooit `<select>`),
-    `Toggle` (nooit een eigen switch), `Slider`, `RichTextEditor`, `forms/fields`
+- **THE DESIGN SYSTEM LIVES IN `components/ui/` + `lib/tint` + `config/buttonMetrics`
+  (HUISSTIJL-1, Danny 2026-08-19: atoms/molecules/organisms — "niet 100 keer
+  hetzelfde maar een element dat hergebruikt wordt" (translated: "not 100 times the same thing but one element that is reused")).** No new `layout/` folder:
+  `components/ui` IS the house-style folder (100+ shared components already live there);
+  `components/layout` stays app chrome (Sidebar, topbar, Koios panel). The
+  taxonomy, with the existing component per atom — new UI work COMPOSES
+  from it; if an atom is missing, build it FIRST here and then use it:
+  · Buttons/actions → `Button` (variants+sizes), `DrawerAddButton`, `ActionMenu`
+  · Form → `SelectMenu`/`SearchSelect`/`CreatableSelect` (never `<select>`),
+    `Toggle` (never a custom switch), `Slider`, `RichTextEditor`, `forms/fields`
   · Status/data → `SoftChip`/`StatusPill`/`StatusBadge`, `Avatar`, `KpiCard`,
     `DataTable` (+`SortCaret`), `TableScrollFrame`, `PaginationBar`
   · Overlays/feedback → `ModalFooter`, `ConfirmDialog`, `FloatingPanel`,
-    `Toaster`, `ErrorBanner`, `CalloutBox`, `EntityDrawer`-familie
-  · Schakelaars/weergave → `QuickViewToggle`, `ViewModeToggle`, `SegmentedControl`
-  · Typografie → `components/ui/typography`: `PageTitle` (15/600) ·
+    `Toaster`, `ErrorBanner`, `CalloutBox`, `EntityDrawer` family
+  · Switches/view → `QuickViewToggle`, `ViewModeToggle`, `SegmentedControl`
+  · Typography → `components/ui/typography`: `PageTitle` (15/600) ·
     `SectionTitle` (13/600) · `BodyText` (13/400) · `Caption` (11 muted) ·
-    `GroupLabel` (11/600 uppercase) · `Mono` (JetBrains). Een losse
-    fontSize/fontWeight voor een kop/alinea/bijschrift is een finding, en een
-    LOKALE label-/caption-STIJLCONSTANTE ook (r6: zo ontstaan de kopieën) —
-    het atoom neemt layout via zijn style-prop, identiteit nooit lokaal; wie
-    écht het stijl-OBJECT nodig heeft (stijlfabriek) importeert de raw
-    identiteit (`sectionTitleStyle`/`captionStyle`/`groupLabelStyle`) uit
-    dezelfde module. Lint bewaakt 15px, 11/muted en 13/600.
-  · Laden → `Spinner` (nooit een losse Loader2+animate-spin meer).
-  · Tokens → kleuren/tinten via `--color-*` + `lib/tint` (huispaar 10/33,
-    actief 16/50); maten via `BTN_H`; SPACING via `--space-1..8` (4px-grid);
-    SCHADUW via `--shadow-card/float/modal` (drie niveaus, nooit een eigen
-    boxShadow); STAPELING via `--z-sticky/drawer/overlay/popover/toast`
-    (nooit een los getal — de lintregel vangt numerieke én string-literals,
-    maar NIET Tailwind-klassen: een `z-40`/`z-50` in een className is dezelfde
-    fout en moet je zelf zien; report/sm-drawers zijn geveegd op 27-08
-    (KPIDRILL-CHROME-1) — 0 resterend);
-    BEWEGING via `--motion-fast`.
-  Per-tenant instelbaarheid loopt uitsluitend via de tokens die Instellingen →
-  Bedrijf → Branding in de backend-DB bewaart — een component dat een kleur
-  hardcodeert onttrekt zich daaraan en is fout. Popupformaten mogen verschillen;
-  de STIJL (chrome, knoppen, koppen, velden) komt altijd uit deze set.
-- **PRIMAIR-VLAK-1 + SM-STANDAARD (Danny 2026-08-19, reeks aanwijzingen op de
-  knoppen zelf).** (1) Elke accent-actie (knoppen, sorteer-/filtertriggers,
-  geselecteerde pillen/chips, telbadges eromheen geïnverteerd) leest het
-  KNOP-DRIETAL `--button-fill` / `--button-ink` / `--button-border` — nu de
-  volle tenantkleur; "alle knoppen lichter" is één tokenwissel in index.css
-  (nooit een nieuwe veegronde). Tint blijft de taal van status-/datachips,
-  van GESELECTEERDE LIJSTRIJEN (menu-opties, zoekresultaten) en van de ACTIEVE
-  NAVIGATIE (zijbalk, rustende tabs): dat zijn plaatsmarkeringen, geen acties —
-  een menu vol volle vullingen schreeuwt (besluit bij Opus-review F, punt 8).
-  (2) Destructief (verwijderen/beëindigen), gearchiveerd en datakleuren doen
-  NIET mee — Danny's expliciete uitzondering. (2a) **CHIP-TINT-1 (Danny 20-08,
-  screenshot voorkeuren-chips: "het oranje is te krachtig — de chips doen we in
-  dat lichte rode, en dit geldt voor ALLE chips"; vervangt de 19-08-regel
-  "geselecteerde pillen/chips = drietal"):** geselecteerde KEUZE-CHIPS (dagen,
-  branches, contractvormen, notitietype, dag-/weekdagcellen — alles waar je uit
-  opties kiest) dragen de ACTIEVE tint (16/50) + `chipInk` + 600 + vinkje —
-  nooit het volle vlak. Het drietal blijft voor KNOPPEN, actiebalken
-  ("Alles selecteren"), toolbar-toggles (QuickViewToggle's kale-accentgeval),
-  import-triggers en filtertriggers. Kortweg: kies-je-eruit = tint,
-  doe-je-ermee = vol. (2b) Drie randregels uit de
-  herhaal-audits (20-08): een GEÏNVERTEERD vlak op het drietal draait fill en
-  ink om (bg=`--button-ink`, tekst=`--button-fill` — het gedeelde `CountBadge`;
-  nooit een derde token als inkt, dat mat 2,52:1); `var(--color-primary)` als
-  background-WAARDE is in een component altijd fout — het accentvlak leest
-  `--button-fill`, de rauwe token hoort alleen in index.css en lib/tint; en een
-  dropdown-/select-TRIGGER is een FORMULIERVELD, geen actieknop — hij erft zijn
-  face van SearchSelect/fieldMetrics, nooit een eigen height per call-site
-  (30/32px-drift kwam precies daarvandaan). Een kleurcomment die een vulling
-  verantwoordt is geen reden om Button te omzeilen: de identiteit komt uit
-  Button, het comment hoort bij de variant in Button.tsx. (3) DE MAAT (Danny 19-08, slotwet: "drill downs moeten ALLEMAAL zelfde
-  zijn — zelfde geldt voor de instellingen; boven elke tabel groot mag"):
-  Button's STANDAARD is `sm` (28px · 12px · r6) — élke knop in drawers,
-  instellingen, kaarten en modals erft die maat vanzelf; breedte volgt de
-  tekst. `size="md"` (BTN_H 34) is de expliciete uitzondering, uitsluitend
-  voor de "+ Nieuw"-knop op de paginatoolbar naast het 34px-zoekchrome. Een
-  afwijkende knophoogte in een drilldown of instellingenscherm is een finding.
-- **DE KNOP IS `components/ui/Button` — een nieuwe inline knopstijl is een finding
+    `GroupLabel` (11/600 uppercase) · `Mono` (JetBrains). A standalone
+    fontSize/fontWeight for a heading/paragraph/caption is a finding, and so is a
+    LOCAL label/caption STYLE CONSTANT (r6: this is how copies arise) —
+    the atom takes layout via its style prop, identity never locally; whoever
+    really needs the style OBJECT (a style factory) imports the raw
+    identity (`sectionTitleStyle`/`captionStyle`/`groupLabelStyle`) from
+    the same module. Lint guards 15px, 11/muted and 13/600.
+  · Loading → `Spinner` (never a standalone Loader2+animate-spin again).
+  · Tokens → colours/tints via `--color-*` + `lib/tint` (house pair 10/33,
+    active 16/50); sizes via `BTN_H`; SPACING via `--space-1..8` (4px grid);
+    SHADOW via `--shadow-card/float/modal` (three levels, never a custom
+    boxShadow); STACKING via `--z-sticky/drawer/overlay/popover/toast`
+    (never a bare number — the lint rule catches numeric and string literals,
+    but NOT Tailwind classes: a `z-40`/`z-50` in a className is the same
+    mistake and you have to spot it yourself; report/sm drawers were swept on 27-08
+    (KPIDRILL-CHROME-1) — 0 remaining);
+    MOTION via `--motion-fast`.
+  Per-tenant configurability runs exclusively through the tokens that Settings →
+  Company → Branding stores in the backend DB — a component that
+  hardcodes a colour escapes that and is wrong. Popup sizes may differ;
+  the STYLE (chrome, buttons, headings, fields) always comes from this set.
+- **PRIMAIR-VLAK-1 + SM-STANDAARD (Danny 2026-08-19, series of directions on the
+  buttons themselves).** (1) Every accent action (buttons, sort/filter triggers,
+  selected pills/chips, count badges around them inverted) reads the
+  BUTTON TRIO `--button-fill` / `--button-ink` / `--button-border` — now the
+  full tenant colour; "alle knoppen lichter" (translated: "all buttons lighter") is one token swap in index.css
+  (never a new sweep). Tint remains the language of status/data chips,
+  of SELECTED LIST ROWS (menu options, search results) and of the ACTIVE
+  NAVIGATION (sidebar, resting tabs): those are place markers, not actions —
+  a menu full of solid fills shouts (decision at Opus review F, point 8).
+  (2) Destructive (delete/terminate), archived and data colours do
+  NOT take part — Danny's explicit exception. (2a) **CHIP-TINT-1 (Danny 20-08,
+  screenshot of the preferences chips: "het oranje is te krachtig — de chips doen we in
+  dat lichte rode, en dit geldt voor ALLE chips" (translated: "the orange is too strong — we do the chips in that light red, and this applies to ALL chips"); replaces the 19-08 rule
+  "geselecteerde pillen/chips = drietal" (translated: "selected pills/chips = trio")):** selected CHOICE CHIPS (days,
+  branches, contract forms, note type, day/weekday cells — everything where you choose from
+  options) carry the ACTIVE tint (16/50) + `chipInk` + 600 + checkmark —
+  never the solid fill. The trio remains for BUTTONS, action bars
+  ("Alles selecteren"), toolbar toggles (QuickViewToggle's bare-accent case),
+  import triggers and filter triggers. In short: pick-from-it = tint,
+  do-something-with-it = solid. (2b) Three edge rules from the
+  re-audits (20-08): an INVERTED fill on the trio swaps fill and
+  ink (bg=`--button-ink`, text=`--button-fill` — the shared `CountBadge`;
+  never a third token as ink, that measured 2,52:1); `var(--color-primary)` as a
+  background VALUE is always wrong in a component — the accent fill reads
+  `--button-fill`, the raw token belongs only in index.css and lib/tint; and a
+  dropdown/select TRIGGER is a FORM FIELD, not an action button — it inherits its
+  face from SearchSelect/fieldMetrics, never its own height per call site
+  (30/32px drift came exactly from there). A colour comment that justifies a fill
+  is no reason to bypass Button: the identity comes from
+  Button, the comment belongs with the variant in Button.tsx. (3) THE SIZE (Danny 19-08, closing law: "drill downs moeten ALLEMAAL zelfde
+  zijn — zelfde geldt voor de instellingen; boven elke tabel groot mag" (translated: "drill-downs must ALL be the same — the same applies to settings; above every table large is allowed")):
+  Button's DEFAULT is `sm` (28px · 12px · r6) — every button in drawers,
+  settings, cards and modals inherits that size automatically; width follows the
+  text. `size="md"` (BTN_H 34) is the explicit exception, exclusively
+  for the "+ Nieuw" button on the page toolbar next to the 34px search chrome. A
+  deviating button height in a drill-down or settings screen is a finding.
+- **THE BUTTON IS `components/ui/Button` — a new inline button style is a finding
   (HUISSTIJL-1, Danny 2026-08-18: "geen 427 objecten voor hetzelfde maar één
-  herbruikbaar element, per tenant instelbaar").** Gemeten vóór het traject: 1138
-  handgestylede `<button>`-tags in 427 bestanden, 565 verschillende handtekeningen,
-  géén gedeelde Button. Regels: (1) elke actie-/formulier-/modalknop rendert via
-  `Button` (varianten primary · secondary · ghost · soft · danger · dangerSoft;
-  maten md/sm; `iconOnly`); layout (breedte/marge/flex) mag via `style`, identiteit
-  (kleur/rand/typografie) NOOIT. (2) De modal-voetregel is `components/ui/ModalFooter`.
-  (3) Het sorticoon is `components/ui/SortCaret` — actief is gekleurd
-  (`--color-primary-text`), overal. (4) De §4-tint komt uit `lib/tint`
-  (`tintBg`/`tintBorder`, huispaar 10/33 · actief 16/50) — een ad-hoc
-  color-mix-percentage of `kleur+'1A'`-hex-concat is een finding (concat breekt stil
-  op `var(--…)`-tenanttokens). (5) Per-tenant instelbaarheid loopt ALLEEN via de
-  tokens (Instellingen → Bedrijf → Branding, opgeslagen in de backend-DB) — een
-  component dat een kleur hardcodeert, onttrekt zich aan de tenant-branding en is
-  daarmee per definitie fout. Bij het aanraken van een bestand: migreer de
-  handgerolde knoppen die je tegenkomt, ook als ze niet in je opdracht stonden.
+  herbruikbaar element, per tenant instelbaar" (translated: "no 427 objects for the same thing but one reusable element, configurable per tenant")).** Measured before the programme: 1138
+  hand-styled `<button>` tags in 427 files, 565 different signatures,
+  no shared Button. Rules: (1) every action/form/modal button renders via
+  `Button` (variants primary · secondary · ghost · soft · danger · dangerSoft;
+  sizes md/sm; `iconOnly`); layout (width/margin/flex) may go via `style`, identity
+  (colour/border/typography) NEVER. (2) The modal footer is `components/ui/ModalFooter`.
+  (3) The sort icon is `components/ui/SortCaret` — active is coloured
+  (`--color-primary-text`), everywhere. (4) The §4 tint comes from `lib/tint`
+  (`tintBg`/`tintBorder`, house pair 10/33 · active 16/50) — an ad-hoc
+  color-mix percentage or `kleur+'1A'` hex concat is a finding (concat silently breaks
+  on `var(--…)` tenant tokens). (5) Per-tenant configurability runs ONLY via the
+  tokens (Settings → Company → Branding, stored in the backend DB) — a
+  component that hardcodes a colour escapes the tenant branding and is
+  therefore wrong by definition. When touching a file: migrate the
+  hand-rolled buttons you come across, even if they were not in your brief.
 - **Soft-chip / toggle-button convention (one look on every entity).** Coloured chips,
   status pills and quick-view toggles (Blacklist / Archived / status / phase / …) are
   **always tinted in their own semantic colour, never a solid fill.** Background =
@@ -794,15 +795,15 @@ the code is worse than no rule, because the next reader builds on it. What is tr
   finding. And the general lesson: **whoever moves text onto a different fill re-checks
   the contrast pair** — `lib/tokenContrast.test.ts` gates the token pairs in CI, so a new
   fill/ink combination gets a line there in the same change.
-  **SUCCESS-BUTTON-INK-1 (Danny 10-09, op "Markeer afgerond": "groen snap ik van
-  goedkeuren maar tekst moet dan toch wit zijn?"):** a SOLID success button (`Button
+  **SUCCESS-BUTTON-INK-1 (Danny 10-09, on "Markeer afgerond": "groen snap ik van
+  goedkeuren maar tekst moet dan toch wit zijn?" (translated: "I understand green for approving, but surely the text should be white then?")):** a SOLID success button (`Button
   variant="success"`) paints `--color-success-fill` (green-700) with `--color-on-success-fill`
   (white, 5.02:1) — white on `--color-success` itself only reaches 3.3:1, and dark ink on
   green reads as a foreign button next to the tenant's own accent. The chip/border colour
   and the "aan/gelukt" pastel pair keep their exact values; only the solid button moved.
 - **IMPORT lives in the CREATE MODAL's header, never in the list toolbar (Danny
   2026-08-14, twice, with screenshots of the customers and the vacancies page: "Excel
-  importeren moet in de pop-up + nieuwe vacature, niet hier boven de tabel").** The
+  importeren moet in de pop-up + nieuwe vacature, niet hier boven de tabel" (translated: "importing Excel must be in the pop-up + new vacancy, not here above the table")).** The
   affordance is a button top-right in the modal header, next to the close control; while
   open, the import flow renders as the FIRST card in the modal body, so it is summoned
   deliberately and is never in the way of the form the user actually came for. Its tint
@@ -814,7 +815,7 @@ the code is worse than no rule, because the next reader builds on it. What is tr
   entity's own create permission, never on customers regardless of entity.
 - **EVERY filter lives in the RIGHT-HAND FILTER PANEL. The toolbar above a table holds
   no filter controls at all (Danny 2026-08-14, screenshot of the matches page: "rode
-  filters moeten naar rechts filter menu").** The row above a list carries exactly the
+  filters moeten naar rechts filter menu" (translated: "red filters must go to the right filter menu")).** The row above a list carries exactly the
   "+ Add" button, the shared `HeaderSearch`, and the clear-filters button. Never an
   inline "Kies fase…"/"Kies eigenaar…" picker, never a status/bucket tab bar, and never
   a "Meer filters" button next to them: if a dimension is filterable it registers as a
@@ -847,7 +848,7 @@ the code is worse than no rule, because the next reader builds on it. What is tr
   **never for data**. Colour only via tokens (`--text`, `--text-muted`, `--color-*`); no
   ad-hoc hex, no per-screen font sizes/weights. Header/meta labels ~11px, body ~12–13px.
 - **Button drift is a finding, not a style choice (HUISSTIJL slotaudit, 2026-08-20 — 20
-  vondsten, all closed).** Three rules, all enforced by `eslint.config.js`'s HUISSTIJL
+  findings, all closed).** Three rules, all enforced by `eslint.config.js`'s HUISSTIJL
   blocks (§ ESLint hardening) plus the pre-commit staged check: (1) **a raw `<button>`
   sitting beside a `<Button>` in the same action row is a finding** — the two heights
   always drift (`components/ui/Button`'s own sm/md are 28/34px; a hand-painted 34px is
@@ -858,52 +859,53 @@ the code is worse than no rule, because the next reader builds on it. What is tr
   inline-styled `<a>` — navigation stays a real link (§6) while still sharing the one
   visual identity. A `<button>`/`<a>` with its own fill/border/height needs a written
   eslint-disable reason (a calendar-grid cell, 34px search-chrome, …) or it is drift.
-  **HERAUDIT-CADANS (Danny akkoord 20-08):** de huisstijl-lus is formeel gesloten;
-  heraudit per milestone, niet continu — de slagbomen/plafond bewaken continu.
-  **SCOPE-UITZONDERING-LES (Danny 22-08, Koios-zijbalkknop: "hoe kan het dat jij
-  Koios AI gemist hebt toen jij de huisstijl controleerde"):** een gebied dat bij een
-  veegronde bewust WERD uitgezonderd (app-chroom in components/layout, "chroom is
-  geen Button-werk") blijft stil op de OUDE regels hangen wanneer er daarna nieuwe
-  conventies landen (PRIMAIR-VLAK-1, CHIP-TINT-1, tint=actieve-nav, ink-twins) — de
-  uitzondering is nooit herbeoordeeld en de gedocumenteerde disables passeren de
-  poorten per ontwerp. Regel: **elke nieuwe huisstijlconventie heropent expliciet de
-  lijst van eerder uitgezonderde gebieden** (chroom, e2e-chrome, popouts) met een
-  regel in de betreffende WORKLIST-rij: "uitzonderingsgebieden herbeoordeeld: ja/nee
-  + welke". Een gesloten lus + plafond bewijst "geen NIEUWE drift", nooit "overal
-  conform" — rapporteer hem ook zo.
-  **FACE-WISSEL-LES (20-08, StatusFilterSelect):** wie een component een nieuw
-  GEZICHT geeft (veld → pil), reviewt ook de WRAPPER-maten van het oude gezicht —
-  een minWidth die bij het oude face hoorde rendert bij een krimpend face als
-  spookruimte, en dat leest als inconsistente toolbar-spacing.
-  **BUTTON-GRENS-LES (27-08, chroomfixronde: 4 van 5 lanes REJECT op één briefzin):**
-  "elke knop is Button" geldt voor ACTIE-knoppen. Menu-/listbox-OPTIERIJEN,
-  KEUZEKAARTEN, token-CHIPS, boomrijen en dropdown-TRIGGERS zijn GEEN
-  Button-werk — hun taal is tint/hover/veldgezicht (§4 staande regels) en de
-  eerlijke lint-uitkomst daar is een noodzaak-disable, nooit een conversie.
-  Elke Button-conversiebrief benoemt bovendien de VOLLEDIGE identityStyle-erfenis
-  die de aanroeper meekrijgt: whiteSpace nowrap (breekt meerregelige teksten),
-  vaste height 28 (sm), het disabled-recept dat caller-style overschrijft, en
-  GEEN hover-state — drie schermbreuken kwamen precies daarvandaan. En:
-  een token via een ALIAS-constante buiten het bereik van een lint-selector
-  tillen is POORTVERBLINDING, geen fix — de gedocumenteerde disable
+  **HERAUDIT-CADANS (Danny's approval 20-08):** the house-style loop is formally closed;
+  re-audit per milestone, not continuously — the gates and the ceiling guard continuously.
+  **SCOPE-UITZONDERING-LES (Danny 22-08, Koios sidebar button: "hoe kan het dat jij
+  Koios AI gemist hebt toen jij de huisstijl controleerde"; translated: "how can it be that you
+  missed Koios AI when you checked the house style"):** an area that was deliberately EXCLUDED
+  in a sweep (app chrome in components/layout, "chrome is
+  not Button work") silently stays on the OLD rules when new
+  conventions land afterwards (PRIMAIR-VLAK-1, CHIP-TINT-1, tint=active-nav, ink-twins) — the
+  exclusion was never re-assessed and the documented disables pass the
+  gates by design. Rule: **every new house-style convention explicitly reopens the
+  list of previously excluded areas** (chrome, e2e chrome, popouts) with a
+  line in the relevant WORKLIST row: "excluded areas re-assessed: yes/no
+  + which". A closed loop + ceiling proves "no NEW drift", never "conform
+  everywhere" — report it that way too.
+  **FACE-WISSEL-LES (20-08, StatusFilterSelect):** whoever gives a component a new
+  FACE (field → pill) also reviews the WRAPPER sizes of the old face —
+  a minWidth that belonged to the old face renders as ghost space when the face
+  shrinks, and that reads as inconsistent toolbar spacing.
+  **BUTTON-GRENS-LES (27-08, chrome fix round: 4 of 5 lanes REJECT on one brief sentence):**
+  "every button is Button" applies to ACTION buttons. Menu/listbox OPTION ROWS,
+  CHOICE CARDS, token CHIPS, tree rows and dropdown TRIGGERS are NOT
+  Button work — their language is tint/hover/field face (§4 standing rules) and the
+  honest lint outcome there is a necessity-disable, never a conversion.
+  Every Button conversion brief also names the FULL identityStyle inheritance
+  the caller picks up: whiteSpace nowrap (breaks multi-line texts),
+  fixed height 28 (sm), the disabled recipe that overrides caller style, and
+  NO hover state — three screen breakages came from exactly that. And:
+  lifting a token out of a lint selector's reach via an ALIAS constant
+  is GATE-BLINDING, not a fix — the documented disable
   ("tintBg/tintBorder ARE the canonical §4 tint helpers; the primary token here
-  is only their argument") is het eerlijke antwoord.
-  **Een disable-reden is een NOODZAAK-reden (r7, 20-08):** een functionele
-  uitzondering (kalendercel, zoekchrome, kleurdragende tint-actie zonder
-  Button-tone) — nooit "buiten de scope van deze taak"; dan blijft de warning
-  gewoon staan en rijdt hij mee in het plafond. Het plafond telt de
-  huisstijl-disables zélf ook mee, dus een disable wast geen schuld meer weg.
+  is only their argument") is the honest answer.
+  **A disable reason is a NECESSITY reason (r7, 20-08):** a functional
+  exception (calendar cell, search chrome, colour-carrying tint action without
+  Button tone) — never "outside the scope of this task"; then the warning
+  simply stays and counts in the ceiling. The ceiling also counts the
+  house-style disables themselves, so a disable no longer washes away debt.
 
 ---
 
 ## 5. Internationalization (mandatory)
 
-- **Geen kastlijntje (—) in lopende gebruikerstekst (Danny 2026-08-13: "zie je
-  dat het AI-gegenereerd is").** Een — als zinsinterpunctie in copy is een finding:
-  herschrijf met punt, dubbele punt, komma of een nieuwe zin. WEL toegestaan als
-  puur SCHEIDINGSTEKEN tussen twee gegevenswaarden ("{naam} — {functie}",
-  paginatitels "Sectie — App") — daar is het opmaak, geen proza. Geldt voor alle
-  vijf locales tegelijk.
+- **No em dash (—) in running user-facing text (Danny 2026-08-13: "zie je
+  dat het AI-gegenereerd is"; translated: "you can see that it is AI-generated").** An — as sentence punctuation in copy is a finding:
+  rewrite with a period, colon, comma or a new sentence. ALLOWED as a
+  pure SEPARATOR between two data values ("{name} — {function}",
+  page titles "Section — App") — there it is formatting, not prose. Applies to all
+  five locales at once.
 - **Zero hardcoded user-facing strings.** Every label, message, tooltip, error,
   empty-state, and button text comes from `react-i18next` (`t('...')`).
 - Translation files live in `locales/nl/*.json` and `locales/en/*.json`, namespaced
@@ -911,7 +913,7 @@ the code is worse than no rule, because the next reader builds on it. What is tr
 - **Locale-aware formatting** for the Dutch market: dates, numbers, and currency
   via `Intl` (`nl-NL`) in `lib/formatters` — never manual string formatting.
 - **GETALLEN-1 (Danny 08-09, verbatim: "op FE waar er duizendtallen zijn wil ik een . er
-  tussen, moet ook een audit ding zijn en opnemen in claude.md").** Every user-visible
+  tussen, moet ook een audit ding zijn en opnemen in claude.md"; translated: "on FE wherever there are thousands I want a . in between, must also be an audit item and go into claude.md").** Every user-visible
   NUMBER — counts, limits, amounts, percentages, hours, token counts, averages,
   distances, file sizes — renders through `src/lib/formatters` on the ACTIVE locale:
   `useNumberFormat()` inside components (`formatNumber` / `formatCurrency` /
@@ -951,10 +953,10 @@ the code is worse than no rule, because the next reader builds on it. What is tr
 - **Full keyboard operability**: focus states visible, logical tab order, no
   keyboard traps. Drawers/modals trap focus _while open_ and restore it on close.
 - Every input has an associated `<label>`. Icon-only buttons have `aria-label` —
-  **afgedwongen door het typesysteem (r6, 20-08): `Button iconOnly` zonder
-  `aria-label` compileert niet.** Een `title` die alleen in een randgeval gevuld
-  is, is geen naam (drie verwijderknoppen scheepten zo naamloos in); `title`
-  blijft de tooltip, `aria-label` is de naam en is totaal.
+  **enforced by the type system (r6, 20-08): `Button iconOnly` without
+  `aria-label` does not compile.** A `title` that is only filled in an edge case
+  is not a name (three delete buttons shipped nameless that way); `title`
+  stays the tooltip, `aria-label` is the name and is always present.
 - Color is never the only signal (status uses icon + text, not just color).
 - Contrast ≥ 4.5:1 for text. Charts include accessible labels/legends.
 
@@ -1004,10 +1006,10 @@ the code is worse than no rule, because the next reader builds on it. What is tr
 - Memoize deliberately (`useMemo`/`useCallback`/`React.memo`) where it prevents
   expensive re-renders — not blindly.
 - Debounce expensive inputs (search/filter). Cancel in-flight axios requests on
-  unmount — **maar aborteer nooit een module-scope/sessie-gedeelde promise-cache**:
-  StrictMode's dubbele mount vergiftigde zo de preflight-cache app-breed
-  (2026-07-17); een gedeelde cache wil het RESULTAAT, de alive-guard beschermt de
-  state al.
+  unmount — **but never abort a module-scope/session-shared promise cache**:
+  StrictMode's double mount poisoned the preflight cache app-wide that way
+  (2026-07-17); a shared cache wants the RESULT, the alive guard already protects the
+  state.
 - **Every entity-keyed load effect carries an AbortController/alive guard** (a fast
   id switch must never let the previous entity's stale response win — audit 2026-07-23
   fixed four customer hooks missing it). **A boolean mount-ref MUST be re-armed in the
@@ -1051,20 +1053,20 @@ the code is worse than no rule, because the next reader builds on it. What is tr
   in a comment. This is a **gradual, opportunistic** adoption — do NOT mass-migrate existing
   files in one pass; adopt it when you touch a file for another reason, or when starting new
   API-touching code. Reference adoption: `src/pages/settings/sections/jobs/jobsApi.ts`.
-- **LABEL-NOOIT-TERUGPARSEN (WFB-01..05, CMBE contract-audit 09-09).** Een mapper
-  leidt een structureel veld NOOIT af uit een weergavelabel dat de API ernaast
-  meestuurt: `trigger` ("Wekelijks (ma, do) 08:00", "Bij gebeurtenis: …") is
-  display, `trigger_type` + `trigger_config` zijn de waarheid en reizen VERBATIM
-  terug (GET-shape == PUT-shape). De oude `parseTrigger` herschreef bij élke
-  status-toggle, mapverplaatsing en editor-save het type (event → scheduled) en
-  bouwde de config opnieuw uit het label (planning, `conditions`, `source`-lane
-  en per-stap `label` weg). Regel: de normalizer vertaalt type → editor-woord, de
-  denormalizer woord → type; wat de editor niet toont (conditions, source, label)
-  rijdt onzichtbaar mee. Een `toMatchObject` op een deelveld bewijst dit niet —
-  test `toEqual` op de hele config na normalize → denormalize.
-- **Een record = de per-id-route** (`DELETE /{entity}/{id}`, `POST /{entity}/{id}/restore`);
-  bulk-routes zijn uitsluitend voor echte massa-mutaties — nooit een bulk-call met een id
-  (enkelstuks-sweep 2026-07-18; elke soft-delete-entiteit heeft beide routes).
+- **LABEL-NOOIT-TERUGPARSEN (WFB-01..05, CMBE contract-audit 09-09).** A mapper
+  NEVER derives a structural field from a display label that the API sends
+  alongside it: `trigger` ("Wekelijks (ma, do) 08:00", "Bij gebeurtenis: …") is
+  display, `trigger_type` + `trigger_config` are the truth and travel back VERBATIM
+  (GET shape == PUT shape). The old `parseTrigger` rewrote the type (event → scheduled) on EVERY
+  status toggle, map move and editor save, and
+  rebuilt the config from the label (schedule, `conditions`, `source` lane
+  and per-step `label` gone). Rule: the normalizer translates type → editor word, the
+  denormalizer word → type; whatever the editor does not show (conditions, source, label)
+  rides along invisibly. A `toMatchObject` on a sub-field does not prove this —
+  test `toEqual` on the whole config after normalize → denormalize.
+- **A single record = the per-id route** (`DELETE /{entity}/{id}`, `POST /{entity}/{id}/restore`);
+  bulk routes are exclusively for real mass mutations — never a bulk call with one id
+  (single-record sweep 2026-07-18; every soft-delete entity has both routes).
 - **Endpoint naming — source prefix for external systems.** Native Koios resources use
   **clean, unprefixed** names (`/customers`, `/candidates`, `/locations`, `/departments`,
   `/contacts`, `/kpis`, `/reports`, …). Data that mirrors an **external system** carries that
@@ -1081,7 +1083,7 @@ the code is worse than no rule, because the next reader builds on it. What is tr
   backend CLAUDE.md.
 - **Workflow modules (automation graph).** Workflow nodes live in `src/modules/` as a
   registry; per-entity modules are built from one `makeEntityModule({...})` factory (one
-  **`action`** selector — Ophalen / Aanmaken / Bijwerken / … — whose `filters` / `sort` /
+  **`action`** selector — Ophalen (fetch) / Aanmaken (create) / Bijwerken (update) / … — whose `filters` / `sort` /
   `limit` / `fields` / `target` sections show via `showIf`). Rules: (1) **filter VALUES come
   from tenant lookups**, never hardcoded vocabularies — wire `status` / `pool` / `funnel` / …
   to `useX()` / `LookupsContext`; (2) the filter **`field` keys must match the backend filter
@@ -1098,22 +1100,22 @@ the code is worse than no rule, because the next reader builds on it. What is tr
   every workflow STARTS with a Koios entity node, the vertrekmodule, that names the run's
   subject: candidate · customer · location · department · contact · task · call list ·
   vacancy · application · conversation (the inbound WhatsApp thread; WORKLIST O17: the
-  binding list of INTERVIEW-WORKFLOW-1 Appendix D has ten). That first node carries the trigger (event = "dit record", one run
-  per record; schedule = "selectie", ONE run with N bundles, every step runs per bundle,
+  binding list of INTERVIEW-WORKFLOW-1 Appendix D has ten). That first node carries the trigger (event = "dit record" (translated: "this record"), one run
+  per record; schedule = "selectie" (translated: "selection"), ONE run with N bundles, every step runs per bundle,
   as the engine already does) and its FILTERS in the
-  right-hand panel ("kandidaten met status X"). A workflow whose first node is an action
+  right-hand panel ("kandidaten met status X" (translated: "candidates with status X")). A workflow whose first node is an action
   (notification, message, task) is a finding: there is nothing to notify about. Every later
   step and every router condition reads the subject's fields as variables; the trigger is
   never a hidden setting behind a clock icon. Design: koiosmatch-api/docs/plans/
-  INTERVIEW-WORKFLOW-1.md Appendix D. **Aanscherping (Danny 31-08, verbatim: "KAN NOOIT
+  INTERVIEW-WORKFLOW-1.md Appendix D. **Tightening (Danny 31-08, verbatim: "KAN NOOIT
     STARTEN MET AI AGENT OF IETS ANDERS SOM HET BEGIN BIJ MASTERDATA VAN
-    KOIOS!!!!"):** het begin van élk scenario is MASTERDATA van Koios — een
-    entiteitsnode of de inbound-webhook; nooit ai_agent, nooit een verzend- of
-    actiestap. En élk geseed scenario wordt GETEST (doorlopen/dry-run) vóór het
-    bij Danny op het scherm komt, met twee vaste uitzonderingen: nooit een echt
-    WhatsApp-bericht (Danny 31-08) en nooit een live AI-call (API-CREDITS-1:
-    AI-stappen gemockt). De FE-editor toont `editor.missingStartModule` zodra
-    de eerste stap geen geldige vertrekmodule is (START_MODULE_TYPES).
+    KOIOS!!!!" (translated: "CAN NEVER START WITH AI AGENT OR ANYTHING ELSE, THE START IS AT KOIOS MASTER DATA!!!!")):** the start of EVERY scenario is Koios MASTER DATA — an
+    entity node or the inbound webhook; never ai_agent, never a send or
+    action step. And EVERY seeded scenario is TESTED (walked through/dry-run) before it
+    reaches Danny's screen, with two fixed exceptions: never a real
+    WhatsApp message (Danny 31-08) and never a live AI call (API-CREDITS-1:
+    AI steps mocked). The FE editor shows `editor.missingStartModule` as soon as
+    the first step is not a valid vertrekmodule (START_MODULE_TYPES).
 
 ---
 
@@ -1122,15 +1124,15 @@ the code is worse than no rule, because the next reader builds on it. What is tr
 - Naming: `PascalCase` components, `camelCase` functions/vars, `useX` hooks,
   `UPPER_SNAKE` constants. Names describe intent, not implementation.
 - No dead code, no commented-out blocks, no `console.log` in committed code.
-- **JSX-COMMENTPOSITIE (les na vier identieke breuken op één dag, 19/20-08):**
-  een `{/* … */}`-comment mag UITSLUITEND tussen JSX-kinderen staan — nooit in
-  attribuutpositie, nooit direct binnen een `{cond && (…)}`/ternary-expressie.
-  De comment hoort op de regel BOVEN de expressie. Elke geautomatiseerde edit
-  die een comment toevoegt draait direct daarna `tsc --noEmit` vóór welke
-  vervolgstap dan ook; een patch-script assert eerst dat zijn doelregel bestaat.
-- **Een nieuwe gedeelde helper landt met adoptie op de bestaande kopieerplekken** —
-  een helper naast drie verse kopieen van het patroon dat hij vervangt
-  (extractApiError, 2026-07-17) is een finding, geen vooruitgang.
+- **JSX-COMMENTPOSITIE (lesson after four identical breakages in one day, 19/20-08):**
+  a `{/* … */}` comment may sit ONLY between JSX children — never in
+  attribute position, never directly inside a `{cond && (…)}`/ternary expression.
+  The comment belongs on the line ABOVE the expression. Every automated edit
+  that adds a comment runs `tsc --noEmit` immediately afterwards, before any
+  further step; a patch script first asserts that its target line exists.
+- **A new shared helper lands with adoption at the existing copy sites** —
+  a helper next to three fresh copies of the pattern it replaces
+  (extractApiError, 2026-07-17) is a finding, not progress.
 - Pure functions for transforms; side effects isolated in hooks/effects.
 - Consistent imports (absolute via alias, e.g. `@/features/...`). No deep
   relative `../../../` chains.
@@ -1170,9 +1172,9 @@ Be honest. If something is not done, say so — do not pretend.
   never "flaky". "Done" = clicked, not just compiled.**
 - Cover critical paths: forms, auth-gated UI, data tables, the four UI states.
 - **Mutation tests assert the REQUEST (method/route/body), never only that a callback
-  fired.** Audit-les 2026-07-17: bulk-ontkoppelen was volledig dood (verplichte
-  `reason`-body ontbrak) terwijl de unit-test groen was — hij bewees alleen dat de
-  callback vuurde. Een test die de naad niet raakt, bewijst niets over de naad.
+  fired.** Audit lesson 2026-07-17: bulk-unlink was completely dead (the required
+  `reason` body was missing) while the unit test was green — it only proved that the
+  callback fired. A test that does not touch the seam proves nothing about the seam.
 - Every bug fix ships with a regression test.
 
 ---
@@ -1187,147 +1189,150 @@ Be honest. If something is not done, say so — do not pretend.
 - Prefer small reusable components over large ones.
 - Use the candidate's own UUID `id` for internal references, never Shiftmanager's
   `external_id`.
-- **Controleketen (Danny 2026-08-19, "0% foutmarge" — bovenop het modelbeleid hieronder):**
-  FABLE 5 (manager) schrijft de instructie — met gemeten feiten, expliciete
-  bestandenlijst, referentie-implementatie en acceptatiecriteria; LOW-workers
-  (Sonnet/Haiku, effort low) voeren uit; **OPUS 5 (high) controleert elke
-  worker-oplevering** tegen die acceptatiecriteria vóórdat de manager hem ziet;
-  de manager controleert Opus' oordeel én draait zelf de poort (tsc/lint/vitest/
-  rooktest) en commit. Een worker-fout die de keten passeert is per definitie een
-  INSTRUCTIEFOUT van de manager: de les gaat dan in CLAUDE.md of in het
-  prompt-sjabloon, niet alleen in de fix. Danny bepaalt de prioriteiten; de
-  manager kiest nooit zelf een nieuw werkterrein terwijl er een opdracht loopt.
-  **Een SLAGBOOM landt alleen als de eigen levering er zelf doorheen kan
-  (Opus-review slotaudit 20-08):** wie een nieuwe poort bouwt (pre-commit-stap,
-  lint-error, CI-gate) draait die poort op zijn EIGEN diff vóór oplevering — de
-  staged-lint-stap blokkeerde de commit die hem introduceerde (70 warnings in de
-  eigen bestanden). Acceptatiecriterium bij elke nieuwe gate: "de gate passeert
-  op deze delivery", expliciet in de worker-brief én in de Opus-check.
-- **SCHERMWAARHEID-1 (Danny 24-08, na een middag "fout op fout op fout": "je zegt
+- **Controleketen (control chain) (Danny 2026-08-19, "0% foutmarge" (translated: "0% margin for error") — on top of the model policy below):**
+  FABLE 5 (manager) writes the instruction — with measured facts, an explicit
+  file list, a reference implementation and acceptance criteria; LOW workers
+  (Sonnet/Haiku, effort low) execute; **OPUS 5 (high) checks every
+  worker delivery** against those acceptance criteria before the manager sees it;
+  the manager checks Opus's verdict and runs the gate himself (tsc/lint/vitest/
+  smoke test) and commits. A worker error that passes the chain is by definition an
+  INSTRUCTION ERROR by the manager: the lesson then goes into CLAUDE.md or into the
+  prompt template, not only into the fix. Danny sets the priorities; the
+  manager never picks a new area of work himself while a brief is running.
+  **A hard GATE lands only if its own delivery can pass through it
+  (Opus review final audit 20-08):** whoever builds a new gate (pre-commit step,
+  lint error, CI gate) runs that gate on their OWN diff before delivery — the
+  staged-lint step blocked the commit that introduced it (70 warnings in its
+  own files). Acceptance criterion for every new gate: "the gate passes
+  on this delivery", explicit in the worker brief and in the Opus check.
+- **SCHERMWAARHEID-1 (Danny 24-08, after an afternoon of "fout op fout op fout": "je zegt
   klaar, je zegt alles goed, en ik zie fout op fout" + "jij moet beter controleren
-  en betere opdrachten maken").** Groene suites zijn een POORT, geen bewijs van
-  klaar. "Klaar" mag alleen gezegd worden over wat tegen de CANONS gecontroleerd
-  is op de aangeraakte SCHERMEN; al het andere heet "gebouwd, nog niet
-  schermgecontroleerd" — rapporteer dat onderscheid expliciet, elke keer. Drie
-  verplichtingen: (1) elke worker-brief bevat de CANON-CHECKLIST hieronder voor de
-  aangeraakte schermen, en de Opus-verifier loopt die checklist na op de RENDER
-  (test-render of gemeten JSX), niet alleen op de diff; (2) wie een scherm
-  aanraakt, checkt de staande canons op dat HELE scherm (de bestaande
-  raak-regel van §3/§4, veralgemeend); (3) elke nieuwe Danny-uitspraak over hoe
-  iets eruit moet zien landt DEZELFDE DAG in dit blok — de lijst is cumulatief
-  en bindend. CANON-CHECKLIST (24-08-stand):
-  · **Statistieken is in élke drilldown het LAATSTE tabje** (ook sub-drilldowns).
-  · **Geen chips in drilldown-veldkaarten** — waarden zijn platte tekst; chips
-    zijn een TABEL-gezicht (kleurinstellingen gelden de tabel).
-  · **Geen enkele knop buiten `Button`** — voor "gelukt/afronden"-acties bestaat
-    nu `variant="success"` (§4-paar als echte variant); nooit meer handgeschilderd.
-  · **Een tellerbadge rendert nooit "0"** — leeg = geen badge.
-  · **Geen decoratie-/caveat-stippen in tabellen** — een voorbehoud rijdt als
-    hover-title/aria, nooit als bolletje.
-  · **Een teller-cel en zijn doorklikdoel tonen dezelfde populatie** — 293 leads
-    die op 10 rijen landen is een bug, geen detail (kaartdrill-invariant, ook
-    voor cellen).
-  · **Zoekbalk vult de rij, de filterknop staat rechts** in drawer-toolbars.
-  · **Elke entiteit met berichten heeft een start-affordance** — een lege
-    conversatietab zonder startknop is een half scherm (kandidaat = referentie).
-  · **Een percentage van de server is een WAARDE, geen aandeel (EENHEID-LES,
-    25-08, Opus-vondst in golf C):** een `rate` 0..100 (fill rate, bezetting)
-    gaat nooit door een aandeel-van-de-som-modus (`BarChartCard percentValues`,
-    nooit `showPercent`; `PieChartCard showPercent` alléén voor telwaarden). Elke
-    worker-brief benoemt per numeriek veld de EENHEID (telling · percentage ·
-    ratio 0..1 · geld · dagen) en de verifier controleert de as/tooltip/voettekst
-    tegen de servereenheid, niet tegen de mock.
-  · Rapporten: KPI-rij = echte server-KPI's met semantische kleur; grafieken =
-    mix (donut/staaf/lijn/tabel naar datavorm); "Vergelijk met" en élk filter in
-    het rechterpaneel; drill-lade = SM-idioom met record-doorklik.
+  en betere opdrachten maken" (translated: "error after error after error": "you say
+  done, you say everything is right, and I see error after error" + "you must check better
+  and write better briefs")).** Green suites are a GATE, not proof of
+  done. "Done" may only be said about what has been checked against the CANONS
+  on the touched SCREENS; everything else is called "built, not
+  screen-checked" — report that distinction explicitly, every time. Three
+  obligations: (1) every worker brief contains the CANON CHECKLIST below for the
+  touched screens, and the Opus verifier walks that checklist on the RENDER
+  (test render or measured JSX), not only on the diff; (2) whoever touches a screen
+  checks the standing canons on that WHOLE screen (the existing
+  touch rule of §3/§4, generalised); (3) every new Danny statement about how
+  something must look lands THE SAME DAY in this block — the list is cumulative
+  and binding. CANON CHECKLIST (24-08 state):
+  · **Statistieken (Statistics) is the LAST tab in EVERY drill-down** (sub-drill-downs too).
+  · **No chips in drill-down field cards** — values are plain text; chips
+    are a TABLE face (colour settings apply to the table).
+  · **No button at all outside `Button`** — for "succeeded/complete" actions,
+    `variant="success"` now exists (the §4 pair as a real variant); never hand-painted again.
+  · **A counter badge never renders "0"** — empty = no badge.
+  · **No decoration/caveat dots in tables** — a caveat travels as
+    hover title/aria, never as a dot.
+  · **A counter cell and its click-through target show the same population** — 293 leads
+    that land on 10 rows is a bug, not a detail (card-drill invariant, for
+    cells too).
+  · **The search bar fills the row, the filter button sits on the right** in drawer toolbars.
+  · **Every entity with messages has a start affordance** — an empty
+    conversation tab without a start button is half a screen (candidate = reference).
+  · **A percentage from the server is a VALUE, not a share (EENHEID-LES,
+    25-08, Opus finding in wave C):** a `rate` 0..100 (fill rate, occupancy)
+    never goes through a share-of-the-sum mode (`BarChartCard percentValues`,
+    never `showPercent`; `PieChartCard showPercent` only for count values). Every
+    worker brief names the UNIT per numeric field (count · percentage ·
+    ratio 0..1 · money · days) and the verifier checks the axis/tooltip/footer
+    against the server unit, not against the mock.
+  · Reports: KPI row = real server KPIs with semantic colour; charts =
+    mix (donut/bar/line/table by data shape); "Vergelijk met" (Compare with) and EVERY filter in
+    the right-hand panel; drill drawer = SM idiom with record click-through.
   · **DEMO-TAAL (Danny 27-08, verbatim: "DEMO MOET IN ALLE TALEN GEGEVEN KUNNEN
-    WORDEN GELDT DUS VOOR ALLE DATA!!"):** alle GESEEDE demo-data rendert vertaald
-    in elke taal via de LOOKUP-I18N-1-machinerie (functies, documenttypen,
-    faselabels, kanalen) — tenant-hernoemde waarden blijven zoals getypt.
+    WORDEN GELDT DUS VOOR ALLE DATA!!" (translated: "DEMO MUST BE ABLE TO BE GIVEN IN ALL
+    LANGUAGES, SO THIS APPLIES TO ALL DATA!!")):** all SEEDED demo data renders translated
+    in every language via the LOOKUP-I18N-1 machinery (functions, document types,
+    phase labels, channels) — tenant-renamed values stay as typed.
   · **PLACEHOLDER-LOKAAL (Danny 27-08, screenshots +31/Amsterdam/de-van):**
-    voorbeeld-placeholders dragen per taal een passend marktvoorbeeld (telefoon-
-    prefix, stad, postcodeformaat, tussenvoegsel) en nooit zorg-framing als hét
-    voorbeeld (algemeen staffing) — en nooit een kastlijntje in het voorbeeldproza.
+    example placeholders carry a fitting market example per language (phone
+    prefix, city, postcode format, name particle) and never healthcare framing as THE
+    example (general staffing) — and never an em dash in the example prose.
     **PLACEHOLDER-GENERIEK-1 (Danny 08-09, verbatim: "we zouden generieke
-    placeholders hebben overal!!", op "Jansen Zorggroep B.V." in de klant-modal):**
-    de audit van 08-09 vond acht zorg-geframede placeholder-sleutels ×7 talen
-    (bedrijfsnaam, functie, afdeling, bellijst, assessmentgroep, matchprofiel,
-    vacaturegeneratie, WhatsApp-label) — alle naar algemeen-staffing-voorbeelden
-    (logistiek/techniek). De guard `src/i18n/placeholdersGeneric.houseStyle.test.js`
-    laat elke placeholder-/example-sleutel met zorgvocabulaire in welke taal dan ook
-    falen; een nieuw voorbeeld kiest een neutraal beroep of bedrijf.
-  · **NOTITIE-REFERENTIE (Danny 27-08: "Notities moeten zo zijn!"):** de
-    kandidaat-notitierij is de canon voor élke entiteit: typechip + auteur +
-    DD-MM-YYYY HH:mm + potlood + prullenbak + pop-out. Een notitietab zonder die
-    rij-affordances is een half scherm.
-  · **KANDIDAAT-EERST (Danny 27-08, matches-subtabellen):** in een drawer-subtabel
-    begint de rij met de kandidaatnaam, met ruimte voor de volledige naam; een
-    kolom die het drawer-onderwerp herhaalt vervalt daar.
-  · **GEEN USAGE IN DE CHAT (Danny 27-08: "Euro's moeten weg"; aangescherpt 09-09:
-    "Snel · 9.265 tokens nooit meer tonen, is intern iets"):** de Koios-chat toont
-    de eindgebruiker géén model, tokens of kosten — usage is intern (Instellingen →
-    Gebruik). De begroeting is persoonlijk en kort ("Hoi {naam}, wat kan ik voor je
-    doen?" + "Er zijn N aandachtspunten voor je."), nooit een feature-opsomming; de
-    componist draagt geen hint-/about-regels; "Koios stelt voor" is één compacte rij
-    per voorstel met op élke rij dezelfde twee acties, en een uitgevoerde actie toont
-    het aangemaakte record als deep-link-chip (§0B).
+    placeholders hebben overal!!" (translated: "we were supposed to have generic placeholders everywhere!!"), on "Jansen Zorggroep B.V." in the customer modal):**
+    the audit of 08-09 found eight healthcare-framed placeholder keys ×7 languages
+    (company name, function, department, call list, assessment group, match profile,
+    vacancy generation, WhatsApp label) — all moved to general-staffing examples
+    (logistics/engineering). The guard `src/i18n/placeholdersGeneric.houseStyle.test.js`
+    fails every placeholder/example key with healthcare vocabulary in any language;
+    a new example picks a neutral occupation or company.
+  · **NOTITIE-REFERENTIE (Danny 27-08: "Notities moeten zo zijn!" (translated: "Notes must be like this!")):**
+    the candidate note row is the canon for EVERY entity: type chip + author +
+    DD-MM-YYYY HH:mm + pencil + trash can + pop-out. A notes tab without those
+    row affordances is half a screen.
+  · **KANDIDAAT-EERST (Danny 27-08, matches sub-tables):** in a drawer sub-table
+    the row starts with the candidate name, with room for the full name; a
+    column that repeats the drawer subject is dropped there.
+  · **GEEN USAGE IN DE CHAT (Danny 27-08: "Euro's moeten weg" (translated: "Euros have to go"); sharpened 09-09:
+    "Snel · 9.265 tokens nooit meer tonen, is intern iets" (translated: "never show Fast · 9.265 tokens again, that is something internal")):** the Koios chat shows
+    the end user no model, tokens or costs — usage is internal (Settings →
+    Usage). The greeting is personal and short ("Hoi {naam}, wat kan ik voor je
+    doen?" + "Er zijn N aandachtspunten voor je." (translated: "Hi {name}, what can I do for you?" + "There are N points of attention for you.")), never a feature listing; the
+    composer carries no hint/about lines; "Koios stelt voor" (Koios proposes) is one compact row
+    per proposal with the same two actions on EVERY row, and an executed action shows
+    the created record as a deep-link chip (§0B).
   · **TIJDLIJN-OVERAL (Danny 27-08, verbatim: "Alles moet een tijdlijn en
     statsietieken hebben. We willen alles meeten en altijd een tijdlijn zien wat
-    er gebeurd is met een object"):** élke entiteit — klant, locatie, afdeling,
-    contactpersoon, match, vacature, sollicitatie, taak, bellijst, én de twee
-    bevroren drilldowns — draagt een TIJDLIJN (wat is er met dit object gebeurd)
-    en, waar logisch, STATISTIEKEN (laatste tab, bestaande canon). Op de
-    bevroren schermen is dit een PUUR ADDITIEVE tab — niets bestaands wijzigt.
+    er gebeurd is met een object" (translated: "Everything must have a timeline and statistics. We want to measure everything and always see a timeline of what has happened to an object")):** EVERY entity — customer, location, department,
+    contact, match, vacancy, application, task, call list, and the two
+    frozen drill-downs — carries a TIMELINE (what has happened to this object)
+    and, where logical, STATISTICS (last tab, existing canon). On the
+    frozen screens this is a PURELY ADDITIVE tab — nothing existing changes.
   · **AI-SCORE-LEIDEND (Danny 27-08: "AI score is leidend en kan handmatig
-    overruled worden"):** de score-kolom bij sollicitaties toont de AI-score als
-    dé waarde; een handmatige override wint en is zichtbaar als override —
-    nooit twee losse kolommen, nooit criteria in de cel (drilldown = detail).
-  · **ADRES-KOPIEER (Danny 27-08, screenshot kandidaat-ADRES-kaart: "overal waar
-    een adress staat moet zo'n subtiel klein kopieer knopje zitten"):** élke
-    adres-WEERGAVE (kandidaat, klant, vacature, locatie, afdeling, contactpersoon,
-    tabelcel én drawer-veldrij) draagt het gedeelde `components/ui/CopyIconButton`
-    naast de tekst — volledig samengesteld adres op het klembord, Check-flits +
-    toast; nooit in editors; nooit per scherm hergerold (ReferenceNumberChip
-    composeert hetzelfde atoom). Een nieuwe adresweergave zonder knopje is een
+    overruled worden" (translated: "AI score is leading and can be manually overruled")):** the score column on applications shows the AI score as
+    THE value; a manual override wins and is visible as an override —
+    never two separate columns, never criteria in the cell (drill-down = detail).
+  · **ADRES-KOPIEER (Danny 27-08, screenshot of the candidate ADDRESS card: "overal waar
+    een adress staat moet zo'n subtiel klein kopieer knopje zitten" (translated: "everywhere an address appears there must be such a subtle small copy button")):** EVERY
+    address DISPLAY (candidate, customer, vacancy, location, department, contact,
+    table cell and drawer field row) carries the shared `components/ui/CopyIconButton`
+    next to the text — fully composed address on the clipboard, Check flash +
+    toast; never in editors; never rebuilt per screen (ReferenceNumberChip
+    composes the same atom). A new address display without the button is a
     finding.
-  · **MODULE-FACE-BEVRIES (Danny 31-08, na uren verloren werk aan de
-    ai_agent-module: "de AI agent moet terug komen zoals het was ik vroeg
-    alleen om titel/popup/tabje" + "waarom snap jij het niet en vraag je het
-    dan ook niet?" + "zoiets mag nooit meer gebeuren"):** een module-/paneel-/
-    formulier-GEZICHT dat Danny kent verandert uitsluitend op de punten die
-    hij benoemde. Een plan- of BE-contractwijziging (nieuw veld, hernoemde
-    key, verplicht-markering) mag NOOIT als zichtbaar veld op zo'n surface
-    landen zonder zijn expliciete akkoord vooraf — contractvelden zonder
-    akkoord blijven onzichtbaar (dual-write/mapping) of horen op de entiteit
-    (agent-beheer, vacature-tab), niet in zijn paneel. Botst zijn opdracht
-    met een plan/contract: stel EERST één precieze vraag, nooit zelf
-    invullen. Gespiegeld met CMBE (engine-schemawijzigingen die FE-velden
-    zouden tonen wachten op hetzelfde akkoord); referentiecasus:
-    MODULE-TERUG-1, commit met die naam.
-  · **KOIOS-ROW-2 (Danny 10-09, live review van Kelly's paneel, 18 punten):** élk
-    record dat Koios noemt (chip in het paneel, resultaatkaart) opent bij klik de
-    drilldown rechts op de juiste pagina en tab; een voorstelrij zegt wat Uitvoeren
-    DOET (de knop draagt de toolnaam uit de registry, nooit een kaal "Uitvoeren" als
-    de naam bekend is) en doet het in één klik tenzij de tool-registry een bevestiging
-    eist; een tool die uit staat (organisatie/gebruiker) krijgt géén knop (Danny 10-09
-    15:30: een chip naast een dode knop "heeft geen toegevoegde waarde"), nooit
-    "Geweigerd" erna; het chat-icoon stelt een vraag die bij de rijsoort past (taak:
-    stand + keuzes, geen contact: bericht opstellen, vacature: kandidaten zoeken), nooit
-    "… Wat stel je voor?"; een uitgevoerde actie laat de gebruiker
-    landen op het record (zoek_kandidaten → vacature, tab Kandidaten zoeken); de chat
-    onthoudt de thread (history) en de records uit het vorige antwoord (context);
-    contact = bellen, mailen of WhatsApp (drie iconen), nooit alleen "bellen"; een
-    voorstelregel loopt over twee regels, wordt nooit afgekapt. Koios is geen
-    "super search": zoeken over álles binnen de rechten van de gebruiker, met
-    genormaliseerde telefoonnummers — een "nummer niet gevonden" op een bekend
-    nummer is een tool-gat (BE, KOIOS-PANEL-2).
-  · **TITELBALK-PILLS (Danny 27-08, twee screenshots: "in de title bar dus!! …
-    laten we 1 type chips aanhouden — zo moeten we de pop-ups doen"):** de korte
-    keuze bovenin een create-pop-up (Lead/Kandidaat-modus, vacaturestatus,
-    contractvorm bij + Match, activiteitstype bij + Taak) rendert als ÉÉN gedeelde
-    pill-rij in de titelbalk — het atoom `components/ui/TitleBarPills` (CHIP-TINT-1-
-    recept, optioneel kleurstipje, actief = tint 16/50 + 600) — nooit twee
-    varianten naast elkaar en nooit een dropdown voor zo'n korte moduskeuze.
+  · **MODULE-FACE-BEVRIES (Danny 31-08, after hours of lost work on the
+    ai_agent module: "de AI agent moet terug komen zoals het was ik vroeg
+    alleen om titel/popup/tabje" (translated: "the AI agent must come back as it was, I only asked for title/popup/tab") + "waarom snap jij het niet en vraag je het
+    dan ook niet?" (translated: "why don't you understand it and then also don't ask?") + "zoiets mag nooit meer gebeuren" (translated: "something like this must never happen again")):** a module/panel/
+    form FACE that Danny knows changes only on the points
+    he named. A plan or BE contract change (new field, renamed
+    key, required marking) must NEVER land as a visible field on such a surface
+    without his explicit prior approval — contract fields without
+    approval stay invisible (dual-write/mapping) or belong on the entity
+    (agent management, vacancy tab), not in his panel. If his brief collides
+    with a plan/contract: FIRST ask one precise question, never fill in
+    yourself. Mirrored with CMBE (engine schema changes that would show FE fields
+    wait for the same approval); reference case:
+    MODULE-TERUG-1, commit with that name.
+  · **KOIOS-ROW-2 (Danny 10-09, live review of Kelly's panel, 18 points):** EVERY
+    record Koios mentions (chip in the panel, result card) opens on click the
+    drill-down on the right on the correct page and tab; a proposal row says what Uitvoeren (Execute)
+    DOES (the button carries the tool name from the registry, never a bare "Uitvoeren" when
+    the name is known) and does it in one click unless the tool registry requires a confirmation;
+    a tool that is switched off (organisation/user) gets NO button (Danny 10-09
+    15:30: a chip next to a dead button "heeft geen toegevoegde waarde" (translated: "has no added value")), never
+    "Geweigerd" (Refused) afterwards; the chat icon asks a question that fits the row type (task:
+    current state + choices, no contact: draft a message, vacancy: search candidates), never
+    "… Wat stel je voor?" (What do you propose?); an executed action lets the user
+    land on the record (zoek_kandidaten → vacancy, tab Kandidaten zoeken (Search candidates)); the chat
+    remembers the thread (history) and the records from the previous answer (context);
+    contact = call, email or WhatsApp (three icons), never only "call"; a
+    proposal line runs over two lines, is never truncated. Koios is not a
+    "super search": search across EVERYTHING within the user's rights, with
+    normalised phone numbers — a "nummer niet gevonden" (number not found) on a known
+    number is a tool gap (BE, KOIOS-PANEL-2).
+  · **TITELBALK-PILLS (Danny 27-08, two screenshots: "in de title bar dus!! …
+    laten we 1 type chips aanhouden — zo moeten we de pop-ups doen" (translated: "in the title bar, so!! … let's keep 1 type of chips — that is how we must do the pop-ups")):** the short
+    choice at the top of a create pop-up (Lead/Candidate mode, vacancy status,
+    contract form in + Match, activity type in + Task) renders as ONE shared
+    pill row in the title bar — the atom `components/ui/TitleBarPills` (CHIP-TINT-1
+    recipe, optional colour dot, active = tint 16/50 + 600) — never two
+    variants side by side and never a dropdown for such a short mode choice.
 - **Subagent model policy (Danny 2026-07-22 — supersedes 2026-07-08/15/17; fallback updated 2026-07-24):**
   The MANAGER runs **Fable 5 at reasoning effort high**; when Fable's budget is
   exhausted, **Opus 5 (`claude-opus-5`) at high** takes over as the TEMPORARY
