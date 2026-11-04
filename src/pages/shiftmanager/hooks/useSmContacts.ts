@@ -6,7 +6,7 @@
  */
 import { useQuery } from '@tanstack/react-query'
 import { fetchAllPages } from '@/lib/fetchAllPages'
-import { SM_FETCH_ALL } from './smFetchAll'
+import { SM_FETCH_ALL } from '@/lib/smFetchAll'
 import type { SmContactRow } from '@/types/shiftmanager'
 
 interface RawContact {
