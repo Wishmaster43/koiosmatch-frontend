@@ -3747,6 +3747,23 @@
     "phoneLabel": "Numéro de téléphone (public)",
     "phoneHint": "Public, également dans le flux Werkzoeken",
     "phonePlaceholder": "+33 1 23 45 67 89",
+    "embedOrigins": {
+      "title": "Sites web autorisés à intégrer les pages d'offres",
+      "hint": "Seuls ces sites web peuvent afficher le site carrière dans un cadre. Adresses https sans chemin uniquement, {{max}} au maximum. Vide signifie : intégration non autorisée.",
+      "add": "Ajouter un site web",
+      "addAction": "Ajouter",
+      "placeholder": "https://www.exemple.fr",
+      "remove": "Supprimer {{origin}}",
+      "counter": "{{n}} sur {{max}}",
+      "empty": "Aucun site web pour le moment. L'intégration est désactivée.",
+      "errors": {
+        "invalid": "Saisissez une adresse valide, par exemple https://www.exemple.fr.",
+        "notHttps": "Seules les adresses https sont autorisées.",
+        "hasPath": "Uniquement le domaine, avec un port éventuel. Pas de chemin, de point d'interrogation ni de #.",
+        "duplicate": "Ce site web figure déjà dans la liste.",
+        "tooMany": "{{max}} sites web au maximum."
+      }
+    },
     "tabs": {
       "settings": "Paramètres"
     }

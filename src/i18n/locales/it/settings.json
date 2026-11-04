@@ -3748,6 +3748,23 @@
     "phoneLabel": "Numero di telefono (pubblico)",
     "phoneHint": "Pubblico, anche nel feed di Werkzoeken",
     "phonePlaceholder": "+39 02 1234 5678",
+    "embedOrigins": {
+      "title": "Siti web che possono incorporare le pagine delle offerte",
+      "hint": "Solo questi siti web possono mostrare il sito carriere in un frame. Solo indirizzi https senza percorso, al massimo {{max}}. Vuoto significa: incorporamento non consentito.",
+      "add": "Aggiungi sito web",
+      "addAction": "Aggiungi",
+      "placeholder": "https://www.esempio.it",
+      "remove": "Rimuovi {{origin}}",
+      "counter": "{{n}} di {{max}}",
+      "empty": "Ancora nessun sito web. L'incorporamento è disattivato.",
+      "errors": {
+        "invalid": "Inserisci un indirizzo valido, ad esempio https://www.esempio.it.",
+        "notHttps": "Sono consentiti solo indirizzi https.",
+        "hasPath": "Solo il dominio, eventualmente con porta. Nessun percorso, punto interrogativo o #.",
+        "duplicate": "Questo sito web è già nell'elenco.",
+        "tooMany": "Al massimo {{max}} siti web."
+      }
+    },
     "tabs": {
       "settings": "Impostazioni"
     }

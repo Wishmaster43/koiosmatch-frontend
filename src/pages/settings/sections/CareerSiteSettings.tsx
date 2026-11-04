@@ -25,6 +25,7 @@ import { useAllSettings, getBoolSetting, saveSettingsKeys, invalidateAllSettings
 import { notifyError } from '@/lib/notify'
 import { SettingRow, Toggle } from '../components/SettingsKit'
 import PublicUrlsCard from './careerSite/PublicUrlsCard'
+import EmbedOriginsCard from './careerSite/EmbedOriginsCard'
 import BlurSaveField from '../components/BlurSaveField'
 import SubTabBar from '@/components/drawer/SubTabBar'
 import { PageTitle } from '@/components/ui/typography'
@@ -94,6 +95,9 @@ export default function CareerSiteSettings() {
               description={t('careerSite.phoneHint')}
               placeholder={t('careerSite.phonePlaceholder')}
             />
+
+            {/* Websites allowed to embed the career site in a frame (CAREER-EMBED-FE-1). */}
+            <EmbedOriginsCard key={`embed:${JSON.stringify(values.career_site_embed_origins ?? null)}`} stored={values.career_site_embed_origins} />
           </div>
         )}
 

@@ -3747,6 +3747,23 @@
     "phoneLabel": "Número de teléfono (público)",
     "phoneHint": "Público, también en el feed de Werkzoeken",
     "phonePlaceholder": "+34 91 123 45 67",
+    "embedOrigins": {
+      "title": "Sitios web que pueden insertar las páginas de vacantes",
+      "hint": "Solo estos sitios web pueden mostrar el sitio de empleo en un marco. Solo direcciones https sin ruta, máximo {{max}}. Vacío significa: insertar no está permitido.",
+      "add": "Añadir sitio web",
+      "addAction": "Añadir",
+      "placeholder": "https://www.ejemplo.es",
+      "remove": "Eliminar {{origin}}",
+      "counter": "{{n}} de {{max}}",
+      "empty": "Todavía no hay sitios web. La inserción está desactivada.",
+      "errors": {
+        "invalid": "Introduce una dirección válida, por ejemplo https://www.ejemplo.es.",
+        "notHttps": "Solo se permiten direcciones https.",
+        "hasPath": "Solo el dominio, opcionalmente con puerto. Sin ruta, signo de interrogación ni #.",
+        "duplicate": "Este sitio web ya está en la lista.",
+        "tooMany": "Máximo {{max}} sitios web."
+      }
+    },
     "tabs": {
       "settings": "Configuración"
     }

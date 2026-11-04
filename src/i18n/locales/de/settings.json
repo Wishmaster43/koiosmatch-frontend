@@ -3747,6 +3747,23 @@
     "phoneLabel": "Telefonnummer (öffentlich)",
     "phoneHint": "Öffentlich, auch im Werkzoeken-Feed",
     "phonePlaceholder": "+49 30 123 4567",
+    "embedOrigins": {
+      "title": "Websites, die die Stellenseiten einbetten dürfen",
+      "hint": "Nur diese Websites dürfen die Karriereseite in einem Frame anzeigen. Nur https-Adressen ohne Pfad, höchstens {{max}}. Leer bedeutet: Einbetten nicht erlaubt.",
+      "add": "Website hinzufügen",
+      "addAction": "Hinzufügen",
+      "placeholder": "https://www.beispiel.de",
+      "remove": "{{origin}} entfernen",
+      "counter": "{{n}} von {{max}}",
+      "empty": "Noch keine Websites. Einbetten ist aus.",
+      "errors": {
+        "invalid": "Geben Sie eine gültige Adresse ein, zum Beispiel https://www.beispiel.de.",
+        "notHttps": "Nur https-Adressen sind erlaubt.",
+        "hasPath": "Nur die Domain, optional mit Port. Kein Pfad, Fragezeichen oder #.",
+        "duplicate": "Diese Website steht bereits in der Liste.",
+        "tooMany": "Höchstens {{max}} Websites."
+      }
+    },
     "tabs": {
       "settings": "Einstellungen"
     }

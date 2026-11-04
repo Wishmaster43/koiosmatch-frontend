@@ -3747,6 +3747,23 @@
     "phoneLabel": "Telefoonnummer (openbaar)",
     "phoneHint": "Openbaar, ook in de Werkzoeken-feed",
     "phonePlaceholder": "+31 20 123 4567",
+    "embedOrigins": {
+      "title": "Websites die de vacaturepagina's mogen insluiten",
+      "hint": "Alleen deze websites mogen de carrière-site in een frame tonen. Alleen https-adressen zonder pad, maximaal {{max}}. Leeg betekent: insluiten niet toegestaan.",
+      "add": "Website toevoegen",
+      "addAction": "Toevoegen",
+      "placeholder": "https://www.voorbeeld.nl",
+      "remove": "Verwijder {{origin}}",
+      "counter": "{{n}} van {{max}}",
+      "empty": "Nog geen websites. Insluiten staat uit.",
+      "errors": {
+        "invalid": "Vul een geldig adres in, bijvoorbeeld https://www.voorbeeld.nl.",
+        "notHttps": "Alleen https-adressen zijn toegestaan.",
+        "hasPath": "Alleen het domein, eventueel met poort. Geen pad, vraagteken of #.",
+        "duplicate": "Deze website staat al in de lijst.",
+        "tooMany": "Maximaal {{max}} websites."
+      }
+    },
     "tabs": {
       "settings": "Instellingen"
     }

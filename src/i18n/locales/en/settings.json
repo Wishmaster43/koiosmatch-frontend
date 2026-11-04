@@ -3747,6 +3747,23 @@
     "phoneLabel": "Phone number (public)",
     "phoneHint": "Public, also in the Werkzoeken feed",
     "phonePlaceholder": "+31 20 123 4567",
+    "embedOrigins": {
+      "title": "Websites allowed to embed the vacancy pages",
+      "hint": "Only these websites may show the career site in a frame. Https addresses without a path only, at most {{max}}. Empty means: embedding is not allowed.",
+      "add": "Add website",
+      "addAction": "Add",
+      "placeholder": "https://www.example.co.uk",
+      "remove": "Remove {{origin}}",
+      "counter": "{{n}} of {{max}}",
+      "empty": "No websites yet. Embedding is off.",
+      "errors": {
+        "invalid": "Enter a valid address, for example https://www.example.co.uk.",
+        "notHttps": "Only https addresses are allowed.",
+        "hasPath": "Only the domain, optionally with a port. No path, question mark or #.",
+        "duplicate": "This website is already in the list.",
+        "tooMany": "At most {{max}} websites."
+      }
+    },
     "tabs": {
       "settings": "Settings"
     }

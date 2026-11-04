@@ -3748,6 +3748,23 @@
     "phoneLabel": "Número de telefone (público)",
     "phoneHint": "Público, também no feed do Werkzoeken",
     "phonePlaceholder": "+351 21 123 4567",
+    "embedOrigins": {
+      "title": "Sites que podem incorporar as páginas de vagas",
+      "hint": "Apenas estes sites podem mostrar o site de carreiras num frame. Apenas endereços https sem caminho, no máximo {{max}}. Vazio significa: incorporação não permitida.",
+      "add": "Adicionar site",
+      "addAction": "Adicionar",
+      "placeholder": "https://www.exemplo.pt",
+      "remove": "Remover {{origin}}",
+      "counter": "{{n}} de {{max}}",
+      "empty": "Ainda sem sites. A incorporação está desligada.",
+      "errors": {
+        "invalid": "Introduza um endereço válido, por exemplo https://www.exemplo.pt.",
+        "notHttps": "Apenas endereços https são permitidos.",
+        "hasPath": "Apenas o domínio, opcionalmente com porta. Sem caminho, ponto de interrogação ou #.",
+        "duplicate": "Este site já está na lista.",
+        "tooMany": "No máximo {{max}} sites."
+      }
+    },
     "tabs": {
       "settings": "Definições"
     }

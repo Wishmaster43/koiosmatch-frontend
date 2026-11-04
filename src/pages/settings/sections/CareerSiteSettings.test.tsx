@@ -159,3 +159,12 @@ describe('CareerSiteSettings — company phone (Danny 9a = A)', () => {
     expect(postMock).toHaveBeenCalledWith('/settings', { company_phone_public: '020 123 4567' })
   })
 })
+
+describe('CareerSiteSettings — embed origins card', () => {
+  it('renders the embed-origins card with the stored list on the settings tab', () => {
+    blobRef.current = { career_site_embed_origins: '["https://a.nl"]' }
+    render(<CareerSiteSettings />)
+    expect(screen.getByText(t('careerSite.embedOrigins.title'))).toBeInTheDocument()
+    expect(screen.getByText('https://a.nl')).toBeInTheDocument()
+  })
+})
