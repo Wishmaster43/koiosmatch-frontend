@@ -12,14 +12,14 @@ export default {
   color:    'var(--color-secondary)',
   bg:       'var(--color-secondary-bg)',
   schema: [
-    { key: 'status',         label: 'Status (deployability)', type: 'multiselect', source: 'candidate_statuses', help: 'Leeg = alle statussen (blacklist is altijd uitgesloten).' },
-    { key: 'phase',          label: 'Phase',                   type: 'multiselect', source: 'candidate_phases',   help: 'Leeg = alle fases (lead / kandidaat / …).' },
-    { key: 'candidate_types', label: 'Contract form',          type: 'multiselect', source: 'candidate_types',    help: 'Bijv. alleen uitzendkrachten of ZZP\'ers. Leeg = alle contractvormen.' },
-    { key: 'city',           label: 'City',                 type: 'multiselect', help: 'Leeg = alle plaatsen.' },
+    { key: 'status',         label: 'Status (deployability)', type: 'multiselect', source: 'candidate_statuses', help: 'Empty = all statuses (blacklist is always excluded).' },
+    { key: 'phase',          label: 'Phase',                   type: 'multiselect', source: 'candidate_phases',   help: 'Empty = all phases (lead / candidate / …).' },
+    { key: 'candidate_types', label: 'Contract form',          type: 'multiselect', source: 'candidate_types',    help: 'E.g. only temp workers or freelancers. Empty = all contract forms.' },
+    { key: 'city',           label: 'City',                 type: 'multiselect', help: 'Empty = all cities.' },
     // No placeholder here (Danny 23-07): a grey example "6" reads as a set value,
     // while an EMPTY field is the real "all candidates" state the hint describes.
-    { key: 'last_contact_before_months', label: 'No contact since (months)', type: 'number', help: 'Leeg = geen contactfilter (alle kandidaten komen mee).' },
+    { key: 'last_contact_before_months', label: 'No contact since (months)', type: 'number', help: 'Empty = no contact filter (all candidates are included).' },
     { key: 'whatsapp_consent', label: 'Only with WhatsApp consent', type: 'boolean' },
-    { key: 'limit',          label: 'Max. number',            type: 'number', help: 'Leeg = veiligheidsplafond (10.000).' },
+    { key: 'limit',          label: 'Max. number',            type: 'number', help: 'Empty = safety ceiling (10,000).' },
   ],
 }

@@ -16,7 +16,7 @@ export default {
   color: 'var(--module-brown)',
   bg:    tintBg('var(--module-brown)'),
   schema: [
-    { key: 'subject',              label: 'Subject',              type: 'text',     placeholder: 'Dienst overzicht' },
+    { key: 'subject',              label: 'Subject',              type: 'text',     placeholder: 'Shift overview' },
     // Simple {{field}} substitution from the bundle row (EmailSendModule::execute) — the
     // textarea's variable-picker ("{ }") appears automatically once upstream modules
     // expose fields (fields.tsx), so this reuses the SAME picker as every other text/
@@ -35,10 +35,10 @@ export default {
     // P11-FASE4 (VERJAARDAG-XOR): skip this e-mail leg when the bundle's own value for
     // this field is truthy (the sibling WhatsApp leg already covers that candidate).
     { key: 'skip_if_consent_field', label: 'Skip on consent field (XOR)', type: 'text',
-      help: 'Optioneel. Bijv. whatsapp_consent: sla deze e-mail over als de kandidaat dat veld op waar heeft staan (voorkomt dubbele verzending naast een WhatsApp-stap).' },
+      help: 'Optional. E.g. whatsapp_consent: skip this e-mail when the candidate has that field set to true (prevents a double send alongside a WhatsApp step).' },
     // AVG-flow: set to mail every central user holding this role instead of the
     // candidate bundle (a backoffice notification with no candidate to loop over).
     { key: 'recipient_role',       label: 'Recipient role (backoffice)', type: 'text',
-      help: 'Optioneel. Zet een rolnaam (bv. backoffice) om deze stap naar iedereen met die rol te sturen in plaats van naar de kandidaat-bundel.' },
+      help: 'Optional. Set a role name (e.g. backoffice) to send this step to everyone with that role instead of the candidate bundle.' },
   ],
 }

@@ -56,6 +56,7 @@ describe('whatsapp_send · wa_web channel branch (fase 2b)', () => {
 
   it('message_type carries the wa_web-session-only help text', () => {
     const field = whatsappSend.schema.find(f => f.key === 'message_type')
-    expect(field?.help).toBe('Via WhatsApp Web kan alleen een sessiebericht (vrije tekst) worden verstuurd.')
+    // The registry string is the English source text (MODULES-EN-2); nl is a translation under this key.
+    expect(field?.help).toBe('Via WhatsApp Web only a session message (free text) can be sent.')
   })
 })

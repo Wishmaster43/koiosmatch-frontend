@@ -27,7 +27,7 @@ export default {
   schema: [
     SM_CONNECTION_FIELD,
     { key: 'dry_run', label: 'Dry run', type: 'boolean', default: true,
-      help: 'Eerst proefdraaien: rapporteert WIE er aangemaakt zou worden (incl. payload), schrijft niets. Zet expliciet uit om echt in Shiftmanager aan te maken.' },
+      help: 'Dry-run first: reports WHO would be created (incl. payload), writes nothing. Turn off explicitly to really create in Shiftmanager.' },
     smLimitField(500),
   ],
 }

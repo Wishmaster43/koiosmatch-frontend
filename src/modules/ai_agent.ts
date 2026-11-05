@@ -23,13 +23,13 @@ export default {
     // and its own schema offers pluck('name') (Opus-measured) — an id would match nobody.
     { key: 'agent', label: 'AI agent', type: 'lookup_select', endpoint: '/ai/agents', valueKey: 'name', tab: 'general' },
     { key: 'instruction', label: 'Instruction text (agent prompt)', type: 'textarea', tab: 'general', required: true,
-      hint: 'De volledige, tenant-bewerkbare instructie voor de AI-agent: persona, staps-state-machine, harde regels. Het runtime-antwoordcontract wordt automatisch toegevoegd.' },
+      hint: 'The full, tenant-editable instruction for the AI agent: persona, step state machine, hard rules. The runtime response contract is added automatically.' },
     // Knowledge toggles — Danny's own instruction (30-08: "2 toggles that stay
     // on the AI agent module", reconfirmed 31-08 after MODULE-TERUG-1): back on the module.
     { key: 'use_external_knowledge', label: 'Use the knowledge base in this step', type: 'boolean', tab: 'general', default: true,
-      hint: 'Laat de AI-agent tenant-documenten/kennisbank raadplegen tijdens het gesprek. Werkt alleen als de agent zelf kennis beschikbaar heeft.' },
+      hint: 'Lets the AI agent consult the tenant\'s documents/knowledge base during the conversation. Only works when the agent itself has knowledge available.' },
     { key: 'use_faq', label: 'Use FAQs', type: 'boolean', tab: 'general', default: true,
-      hint: 'Laat de AI-agent veelgestelde vragen (FAQ) raadplegen tijdens het gesprek.' },
+      hint: 'Lets the AI agent consult the FAQ during the conversation.' },
     // KANAAL-NAAR-SEND-1 (Danny 31-08: "CHANNEL IS THE NEXT STEP IN THE
 // WORKFLOW??? WHY IS THAT HERE?" + "Send number ... TEXT APPEARS
 // NOWHERE"): channel and phone_number_id are REMOVED from this module — the send
@@ -40,9 +40,9 @@ export default {
     // the text and AI instructions on a tab"): the module is this pre-P1 schema
     // again, plus ONLY the AI-instructions list below on its own panel tab.
     { key: 'instructions', label: 'AI instructions', type: 'instruction_list', tab: 'instructions',
-      hint: 'De genummerde stappen die de AI-agent doorloopt, elk met een optioneel outputveld en variabele-chips.' },
+      hint: 'The numbered steps the AI agent walks through, each with an optional output field and variable chips.' },
     { key: 'reply_timeout_hours', label: 'Fallback time without a reply (hours)', type: 'number', tab: 'advanced', default: 48,
-      hint: 'Reageert de kandidaat niet, dan valt de run na dit aantal uren terug (workflows:resume-due watchdog).' },
+      hint: 'If the candidate doesn\'t reply, the run falls back after this many hours (workflows:resume-due watchdog).' },
     { key: 'max_attempts', label: 'Max. attempts per turn (on a temporary API error)', type: 'number', tab: 'advanced', default: 3 },
   ],
 }

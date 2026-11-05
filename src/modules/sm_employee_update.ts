@@ -20,7 +20,7 @@ export default {
     { key: 'target_status', label: 'New status', type: 'select',
       options: ['actief', 'nietactief', 'nieuw', 'uitgeschreven', 'verwijderd', 'extern'] },
     { key: 'dry_run', label: 'Dry run', type: 'boolean', default: true,
-      help: 'Eerst proefdraaien — rapporteert wat er ZOU wijzigen zonder iets te schrijven.' },
+      help: 'Dry-run first. Reports what WOULD change without writing anything.' },
     smLimitField(10000),
   ],
 }

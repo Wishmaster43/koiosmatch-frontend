@@ -10,6 +10,6 @@ export default {
   color:    'var(--color-success)',
   bg:       'var(--color-success-bg)',
   schema: [
-    { key: 'fallback_value', label: 'Replacement value', type: 'text', placeholder: 'Waarde die de foutieve output vervangt', help: 'De uitvoering gaat door alsof de module deze waarde heeft teruggegeven.' },
+    { key: 'fallback_value', label: 'Replacement value', type: 'text', placeholder: 'Value that replaces the failing output', help: 'The run continues as if the module had returned this value.' },
   ],
 }

@@ -16,8 +16,8 @@ export default {
     SM_CONNECTION_FIELD,
     { key: 'date_from', label: 'Date from',  type: 'date' },
     { key: 'date_to',   label: 'Date to',  type: 'date' },
-    { key: 'offset_from_days', label: 'Window from (days)', type: 'number', placeholder: '-30', hint: 'Relatief venster ten opzichte van vandaag, negatief is terug in de tijd. Alleen gebruikt als geen datums zijn ingevuld.' },
-    { key: 'offset_to_days', label: 'Window to (days)', type: 'number', placeholder: '180', hint: 'Relatief venster ten opzichte van vandaag. Alleen gebruikt als geen datums zijn ingevuld.' },
+    { key: 'offset_from_days', label: 'Window from (days)', type: 'number', placeholder: '-30', hint: 'Relative window measured from today, negative means back in time. Only used when no dates are filled in.' },
+    { key: 'offset_to_days', label: 'Window to (days)', type: 'number', placeholder: '180', hint: 'Relative window measured from today. Only used when no dates are filled in.' },
     smLimitField(500),
   ],
 }

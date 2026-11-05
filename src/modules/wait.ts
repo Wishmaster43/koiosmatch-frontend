@@ -21,9 +21,9 @@ export default {
     // Additive with `days` (1 dag + 3 uur) — the former FE 'delay'/'sleep' nodes'
     // own duration field folds into this one.
     { key: 'hours',         label: 'Plus: number of hours', type: 'number', placeholder: '0',
-      hint: 'Opgeteld bij de dagen (bv. 1 dag + 3 uur).' },
+      hint: 'Added to the days (e.g. 1 day + 3 hours).' },
     // Only applies to the relative delay above, never to an explicit until_field date.
     { key: 'skip_weekends', label: 'Skip weekends', type: 'boolean', default: false,
-      hint: 'Valt het moment in het weekend, dan wordt het maandag op dezelfde tijd.' },
+      hint: 'If the moment falls on a weekend, it moves to Monday at the same time.' },
   ],
 }

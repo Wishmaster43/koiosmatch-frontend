@@ -26,7 +26,7 @@ export default {
     // uuid, not offered here — TaskCreateModule::resolveAssignee/ownerAssignee).
     { key: 'assignee', label: 'Assign to', type: 'select',
       options: ['candidate_owner', 'customer_owner', 'vacancy_owner'],
-      help: 'Leeg = geen toewijzing (bureau).' },
+      help: 'Empty = no assignment (agency).' },
     { key: 'due_offset_days', label: 'Deadline in (days)', type: 'number', placeholder: '0' },
   ],
 }

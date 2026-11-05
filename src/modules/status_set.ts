@@ -26,9 +26,9 @@ export default {
     { key: 'reason', label: 'Reason', type: 'text' },
     // Return date for deployability statuses that support it (Unavailable/Sick/Leave).
     // Lands on candidates.status_return_date server-side.
-    { key: 'return_date', label: 'Available again from', type: 'date', help: 'Alleen voor Niet beschikbaar, Ziek en Verlof.' },
+    { key: 'return_date', label: 'Available again from', type: 'date', help: 'Only for Unavailable, Sick and Leave.' },
     // Blacklist reason: lookup-backed dropdown from /candidate-blacklist-reasons.
     // Lands on candidates.blacklist_reason; required when status is Blacklist.
-    { key: 'blacklist_reason', label: 'Blacklist reason', type: 'lookup_select', endpoint: '/candidate-blacklist-reasons', help: 'Verplicht wanneer de status Blacklist is.' },
+    { key: 'blacklist_reason', label: 'Blacklist reason', type: 'lookup_select', endpoint: '/candidate-blacklist-reasons', help: 'Required when status is Blacklist.' },
   ],
 }

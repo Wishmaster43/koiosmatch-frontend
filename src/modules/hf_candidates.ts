@@ -11,7 +11,7 @@ export default {
   color: 'var(--module-helloflex)',
   bg:    'color-mix(in srgb, var(--module-helloflex) 12%, transparent)',
   schema: [
-    { key: 'search',   label: 'Search',           type: 'text',   placeholder: 'naam of e-mail' },
+    { key: 'search',   label: 'Search',           type: 'text',   placeholder: 'name or e-mail' },
     // OPEN (r2): no BE hf-filter equivalent was found for this option set — the
     // real HelloFlex vocabulary is unmeasured; awaiting BE truth before changing values.
     { key: 'status',   label: 'Status',           type: 'select', options: ['alle', 'actief', 'inactief', 'beschikbaar'] },

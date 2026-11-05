@@ -16,6 +16,6 @@ export default {
   bg:    'var(--color-warning-bg)',
   schema: [
     { key: 'reason', label: 'Archive reason', type: 'text',
-      hint: 'Tekst die op de kandidaat en in de audit-trail komt te staan.' },
+      hint: 'Text that is stamped on the candidate and in the audit trail.' },
   ],
 }

@@ -31,7 +31,7 @@ export default {
       label: 'Interview flow',
       type: 'lookup_select',
       endpoint: '/ai/interview-flows',
-      placeholder: 'Standaard van de vacature/sollicitatie',
+      placeholder: 'Default from the vacancy/application',
     },
   ],
 }

@@ -11,7 +11,7 @@ export default {
   color: 'var(--module-helloflex)',
   bg:    'color-mix(in srgb, var(--module-helloflex) 12%, transparent)',
   schema: [
-    { key: 'search', label: 'Search',        type: 'text',   placeholder: 'klantnaam' },
+    { key: 'search', label: 'Search',        type: 'text',   placeholder: 'customer name' },
     { key: 'status', label: 'Status',        type: 'select', options: ['alle', 'actief', 'inactief'] },
     { key: 'limit',  label: 'Max. customers',  type: 'number', placeholder: '100' },
   ],

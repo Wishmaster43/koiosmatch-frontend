@@ -30,7 +30,7 @@ export default {
     // fase 2b: WhatsApp Web can only ever send a session message — the builder
     // auto-sets this (never silently) when `channel` becomes 'wa_web' (ConfigPanel).
     { key: 'message_type',        label: 'Format',                type: 'select',  options: ['template','flow','session'],
-      help: 'Via WhatsApp Web kan alleen een sessiebericht (vrije tekst) worden verstuurd.' },
+      help: 'Via WhatsApp Web only a session message (free text) can be sent.' },
     // CMBE K-193 fase 0 contract: which WhatsApp channel this step sends over.
     // No `default` on purpose (Danny: no silent fallback to 'waba' in the
     // builder) — the blank placeholder forces an explicit choice, and it
@@ -42,7 +42,7 @@ export default {
     // the 'wa_web' channel; `phone_number_id` below is ignored server-side then.
     { key: 'whatsapp_number_id',  label: 'Linked number',       type: 'lookup_select', endpoint: '/whatsapp-web-numbers', required: true,
       showIf: { key: 'channel', value: 'wa_web' },
-      help: 'Alleen gekoppelde WhatsApp Web-nummers (eigen of vestiging).' },
+      help: 'Only connected WhatsApp Web numbers (personal or branch).' },
     // Live options from the tenant's WABA connection (Make parity): active sender
     // numbers + approved templates (the endpoint also returns each template's
     // components for the future per-{{n}} mapping UI). Filtered to Coexistence
@@ -55,15 +55,15 @@ export default {
     { key: 'phone_number_id',     label: 'Sender',               type: 'whatsapp_phone_number', endpoint: '/whatsapp-phone-numbers',
       showIf: { key: 'channel', value: ['waba', 'waba_coex', undefined] },
       // WA-SCOPE-2: an empty sender falls back automatically (branch first, then the tenant default).
-      help: 'Leeg laten betekent automatisch: eerst de vestiging, anders de standaard.' },
+      help: 'Leaving this empty means automatic: first the branch, otherwise the default.' },
     // Recipient override: empty = each bundle's own mobile; otherwise the NAME of
     // the source record's field that holds the number (mobile, phone, …). The
     // 2026-07-09 "own 06 = test mode" redirect is gone: the backend rejects a
     // literal number (WA-RECIPIENT-FIELD-1) and manual sending is its own route
     // (WA-SEND-1, rows 52/54). The picker inserts a bare field name ('path').
     { key: 'recipient_field',     label: 'Recipient',              type: 'text', insertMode: 'path' as const,
-      placeholder: 'leeg = mobiel van de kandidaat · anders de veldnaam, bijv. mobile',
-      help: 'Een veldnaam van het bronrecord (mobile, phone, …), nooit een telefoonnummer. Handmatig versturen doe je vanaf het record zelf.',
+      placeholder: 'empty = candidate\'s mobile · otherwise the field name, e.g. mobile',
+      help: 'A field name of the source record (mobile, phone, …), never a phone number. Manual sending happens from the record itself.',
       validate: looksLikePhoneNumber },
     // Template picker + per-{{n}} variable mapping + live preview (WhatsappTemplateField).
     // Persists template_name/header_variables/variables/language in the same shape as the
@@ -76,10 +76,10 @@ export default {
     // (mirrors the engine's `default: [{ value: '{{firstname}}' }]`).
     { key: 'body_parameters',     label: 'Body parameters',        type: 'ordered_list',
       showIf: { key: 'message_type', value: 'flow' },
-      help: 'bijv. {{firstname}} of extra bericht tekst' },
+      help: 'e.g. {{firstname}} or extra message text' },
     // Free-form session text — only shown (and sent) for the 'session' format.
     { key: 'session_text',        label: 'Message text (session)',  type: 'textarea',
-      placeholder: 'Hoi {{firstname}}, …', showIf: { key: 'message_type', value: 'session' } },
+      placeholder: 'Hi {{firstname}}, …', showIf: { key: 'message_type', value: 'session' } },
     // 02-09 (Danny: "the translation must live in the workflow"): per-language
     // overrides for the session text, on their own "Vertalingen" tab (MODULE-FACE-BEVRIES —
     // main tab stays untouched). Empty per-field = falls back to session_text (bureau language).
@@ -95,7 +95,7 @@ export default {
     // WF-BUILDER-VELDEN-1: idempotency window — the same template is not re-sent to the
     // same candidate inside this many hours (0 = always send).
     { key: 'dedup_hours',         label: 'Don\'t resend within (hours)', type: 'number', default: 24,
-      help: 'Idempotentie: dezelfde template gaat binnen dit venster niet nogmaals naar dezelfde kandidaat (0 = altijd sturen).' },
+      help: 'Idempotency: the same template is not sent to the same candidate again within this window (0 = always send).' },
     { key: 'throttle_per_minute', label: 'Max. per minute',        type: 'number',  placeholder: '30' },
   ],
 }

@@ -20,6 +20,6 @@ export default {
         { value: 'stale', label: 'Only changed (recommended)' },
         { value: 'all', label: 'All vacancies' },
       ],
-      hint: 'De voorwaarden volgen altijd de matchcriteria van de vacature zelf: wie ze wil wijzigen, wijzigt de matchcriteria of de wegingstemplates. Deze stap kiest alleen de set.' },
+      hint: 'The conditions always follow the vacancy\'s own match criteria: to change them, change the match criteria or the weighting templates. This step only picks the set.' },
   ],
 }

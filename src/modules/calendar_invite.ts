@@ -15,8 +15,8 @@ export default {
   bg:    tintBg('var(--module-teal-strong)'),
   schema: [
     { key: 'appointment_id', label: 'Appointment', type: 'text',
-      hint: 'Afspraak-id (bv. {{trigger.appointment_id}}).' },
+      hint: 'Appointment ID (e.g. {{trigger.appointment_id}}).' },
     { key: 'title', label: 'Title', type: 'text',
-      hint: 'Titel van de agenda-afspraak (standaard "Afspraak").' },
+      hint: 'Title of the calendar appointment (default "Appointment").' },
   ],
 }

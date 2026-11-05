@@ -49,6 +49,14 @@ describe('module registry placeholder/hint i18n coverage', () => {
     expect(wanted.length).toBeGreaterThan(50)
   })
 
+  // MODULES-EN-2 (FILES-EN-1, 05-11): a registry placeholder/hint is its own English source text, so its
+  // key is English too and nl is a translation like any other locale; a Dutch source string fails here.
+  it('every registry placeholder/hint equals its own en value (the string is the English source text)', () => {
+    const en = Object.entries(modules).find(([p]) => p.includes('/en/'))?.[1]
+    const off = wanted.filter(({ bucket, src }) => (en?.[bucket] ?? {})[i18nKey(src)] !== src).map(({ bucket, src }) => `${bucket}: ${JSON.stringify(src)}`)
+    expect([...new Set(off)], `registry string differs from its en value: ${[...new Set(off)].join(' | ')}`).toEqual([])
+  })
+
   for (const loc of LOCS) {
     it(`${loc}/workflows.json covers every registry placeholder/hint`, () => {
       const file = Object.entries(modules).find(([p]) => p.includes(`/${loc}/`))?.[1]

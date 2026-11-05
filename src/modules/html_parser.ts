@@ -10,7 +10,7 @@ export default {
   bg:       'var(--color-violet-bg)',
   schema: [
     { key: 'html', label: 'HTML content', type: 'textarea', placeholder: '<html>...</html>' },
-    { key: 'selector', label: 'CSS selector', type: 'text', placeholder: '.mijn-element of #id', help: 'Selecteer een specifiek element uit de HTML.' },
+    { key: 'selector', label: 'CSS selector', type: 'text', placeholder: '.my-element or #id', help: 'Select a specific element from the HTML.' },
     { key: 'continue_even_when_empty', label: 'Continue when empty', type: 'boolean' },
   ],
 }

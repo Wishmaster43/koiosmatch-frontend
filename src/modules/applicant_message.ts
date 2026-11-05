@@ -18,8 +18,8 @@ export default {
   hidden: true,
   schema: [
     { key: 'channel',             label: 'Channel',             type: 'select',   options: ['e-mail', 'whatsapp zakelijk', 'whatsapp privé (nummer eigenaar)'] },
-    { key: 'subject',             label: 'Subject (e-mail)', type: 'text',     placeholder: 'Je sollicitatie bij {vacature.titel}' },
-    { key: 'body',                label: 'Message',            type: 'textarea', placeholder: 'Beste {kandidaat.voornaam},\n\nDank voor je sollicitatie. Helaas … ({afwijsreden}).\n\nMet vriendelijke groet,\n{recruiter.naam}' },
+    { key: 'subject',             label: 'Subject (e-mail)', type: 'text',     placeholder: 'Your application for {vacature.titel}' },
+    { key: 'body',                label: 'Message',            type: 'textarea', placeholder: 'Dear {kandidaat.voornaam},\n\nThank you for your application. Unfortunately … ({afwijsreden}).\n\nKind regards,\n{recruiter.naam}' },
     { key: 'throttle_per_minute', label: 'Max. per minute',    type: 'number',   placeholder: '30' },
   ],
 }

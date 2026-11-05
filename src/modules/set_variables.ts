@@ -10,7 +10,7 @@ export default {
   color:    'var(--color-warning)',
   bg:       'var(--color-warning-bg)',
   schema: [
-    { key: 'variables', label: 'Variables', type: 'keyvalue', help: 'Naam → waarde paren om in te stellen.' },
+    { key: 'variables', label: 'Variables', type: 'keyvalue', help: 'Name → value pairs to set.' },
     { key: 'variable_lifetime', label: 'Lifetime', type: 'select', options: ['één cyclus', 'één uitvoering', 'twee uitvoeringen'] },
   ],
 }

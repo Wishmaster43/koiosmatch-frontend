@@ -14,7 +14,7 @@ export default {
   bg:    'var(--color-info-bg)',
   schema: [
     { key: 'webhook_id',  label: 'Webhook',         type: 'webhook_select',
-      hint: 'Kies of maak de inbound webhook die deze workflow start.' },
+      hint: 'Choose or create the inbound webhook that starts this workflow.' },
     { key: 'max_results', label: 'Max. results', type: 'number', placeholder: '1' },
   ],
 }

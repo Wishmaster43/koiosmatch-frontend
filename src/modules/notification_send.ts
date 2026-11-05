@@ -15,8 +15,8 @@ export default {
   color: 'var(--module-brown)',
   bg:    tintBg('var(--module-brown)'),
   schema: [
-    { key: 'title',      label: 'Title',      type: 'text',     placeholder: 'Nieuwe match' },
-    { key: 'body',       label: 'Message',    type: 'textarea', placeholder: 'Er is een nieuwe match aangemaakt.' },
+    { key: 'title',      label: 'Title',      type: 'text',     placeholder: 'New match' },
+    { key: 'body',       label: 'Message',    type: 'textarea', placeholder: 'A new match has been created.' },
     // Who receives the notification: everyone, one tenant role, explicit users, or
     // the owner of the record that triggered the workflow (engine RECIPIENTS const).
     // NO `default` on purpose (Opus, 23-08): a schema default is DISPLAY-ONLY — a
@@ -74,6 +74,6 @@ export default {
     // engine (BaseModule reads whatever slug is here against the run's own bundle
     // fields) — not a closed vocabulary, so a plain text field mirrors it exactly.
     { key: 'link_entity', label: 'Hyperlink entity', type: 'text', placeholder: 'conversation',
-      help: 'Optioneel. Bijvoorbeeld "conversation": de melding linkt dan naar het bijbehorende "conversation_id"-veld uit de trigger, zodat de melding doorklikbaar is.' },
+      help: 'Optional. E.g. "conversation": the notification then links to the matching "conversation_id" field from the trigger, so it becomes clickable.' },
   ],
 }

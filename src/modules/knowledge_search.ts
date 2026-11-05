@@ -10,7 +10,7 @@ export default {
   color: 'var(--module-teal-strong)',
   bg:    'color-mix(in srgb, var(--module-teal-strong) 10%, transparent)',
   schema: [
-    { key: 'query',       label: 'Search query',    type: 'text',   placeholder: '{{vraag van kandidaat}}' },
+    { key: 'query',       label: 'Search query',    type: 'text',   placeholder: '{{question from candidate}}' },
     { key: 'limit',       label: 'Max. results', type: 'number', placeholder: '50' },
     // 'files' (knowledge scoping) REMOVED (r2): the engine reads AiKnowledge::all()
     // — no id-filter exists server-side (CMBE-measured), so the multiselect was a

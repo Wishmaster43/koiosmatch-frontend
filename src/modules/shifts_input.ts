@@ -14,8 +14,8 @@ export default {
       key:         'shift_ids',
       label: 'Shift IDs',
       type:        'textarea',
-      placeholder: 'Plak hier dienst-IDs, één per regel of komma-gescheiden:\n12345\n12346\n12347',
-      help:        'Elke regel of komma-gescheiden waarde wordt als apart dienst-ID behandeld.',
+      placeholder: 'Paste shift IDs here, one per line or comma-separated:\n12345\n12346\n12347',
+      help:        'Each line or comma-separated value is treated as a separate shift ID.',
     },
     {
       key:   'id_field',
@@ -23,7 +23,7 @@ export default {
       type:  'select',
   app:   ['shiftmanager','intus','aelio','elanza'],
       options: ['id', 'external_id', 'shift_number'],
-      help:  'Welk veld wordt gebruikt als identifier in de volgende module.',
+      help:  'Which field is used as the identifier in the next module.',
     },
   ],
 }

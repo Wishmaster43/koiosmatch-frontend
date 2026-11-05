@@ -41,12 +41,12 @@ export default {
     // in the hint below it, not the untranslated enum value.
     { key: 'mode', label: 'Mode', type: 'select', default: 'subject',
       options: ['subject', 'list'],
-      hint: '"Eén record" = de trigger-/handmatige record; "Lijst (bulk)" = elke rij uit de vorige ophaal-stap.' },
+      hint: '"Single record" = the trigger/manual record; "List (bulk)" = every row from the previous fetch step.' },
     { key: 'force', label: 'Always refresh', type: 'boolean', default: false,
-      hint: 'Altijd een nieuwe AI-call, ook als er recent advies is' },
+      hint: 'Always make a new AI call, even if there is recent advice' },
     { key: 'max_age_hours', label: 'Refresh window (hours)', type: 'number', default: 24,
-      hint: 'Een advies jonger dan dit aantal uren wordt overgeslagen tenzij "Altijd vernieuwen" aan staat.' },
+      hint: 'Advice younger than this many hours is skipped unless "Always refresh" is on.' },
     { key: 'max_records', label: 'Maximum records per run', type: 'number', default: 100,
-      hint: 'Harde bovengrens op het aantal records dat één keer van deze stap advies krijgt (modus "list").' },
+      hint: 'Hard ceiling on the number of records this step advises in one run ("List (bulk)" mode).' },
   ],
 }

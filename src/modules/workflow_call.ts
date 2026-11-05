@@ -20,19 +20,19 @@ export default {
   bg:    tintBg('var(--module-purple)'),
   schema: [
     { key: 'workflow_id', label: 'Workflow', type: 'workflow',
-      hint: 'De workflow die als kind wordt gestart (async, via de wachtrij). Zelf-aanroep en kringlopen worden geweigerd; maximaal 5 niveaus diep.' },
+      hint: 'The workflow started as a child (async, via the queue). Self-calls and cycles are refused; maximum 5 levels deep.' },
     // mode: queue (default, fire-and-forget) vs sync (inline, outcome merges back).
     { key: 'mode', label: 'Execution', type: 'select', options: ['queue', 'sync'],
-      hint: 'queue (standaard) = wachtrij, deze stap wacht niet. sync = direct uitvoeren; de uitkomst van het kind komt terug in deze stap.' },
+      hint: 'queue (default) = queue, this step doesn\'t wait. sync = run directly; the child\'s outcome comes back into this step.' },
     // Only meaningful in sync mode — the backend's own description says so
     // ("Only for direct execution"), so the FE gates it on mode === 'sync'
     // even though BE configSchema carries no show_if field (no fake affordance, §3).
     { key: 'fail_on_child_error', label: 'Stop when the child fails (sync)', type: 'boolean', default: true,
-      hint: 'Alleen bij direct uitvoeren: een mislukte kind-workflow laat deze stap mislukken. Uit = doorgaan; de uitkomst staat in child_run_status.',
+      hint: 'Only for direct execution: a failed child workflow fails this step. Off = continue; the outcome is in child_run_status.',
       showIf: { key: 'mode', value: 'sync' } },
     { key: 'pass_bundle', label: 'Pass the current records along', type: 'boolean', default: true,
-      hint: 'Standaard aan: de kandidaten/records van deze stap reizen mee als context van het kind.' },
+      hint: 'On by default: this step\'s candidates/records travel along as the child\'s context.' },
     { key: 'payload', label: 'Extra data', type: 'keyvalue',
-      hint: 'Extra sleutel/waarde-paren voor het kind ({{trigger.*}} wordt hier al opgelost).' },
+      hint: 'Extra key/value pairs for the child ({{trigger.*}} is already resolved here).' },
   ],
 }

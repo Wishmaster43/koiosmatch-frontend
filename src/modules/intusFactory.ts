@@ -25,11 +25,11 @@ export function makeIntusModule(type: string, label: string, bg: string, urlPlac
       { key: 'authentication_type', label: 'Authentication', type: 'select', options: ['Geen', 'API Key', 'Basic Auth', 'OAuth'] },
       {
         key: 'headers', label: 'Headers', type: 'keyvalue',
-        help: 'Naam / Waarde paren',
+        help: 'Name / value pairs',
       },
       {
         key: 'query_params', label: 'Query parameters', type: 'keyvalue',
-        help: 'Naam / Waarde paren',
+        help: 'Name / value pairs',
       },
       { key: 'body_type', label: 'Body type', type: 'select', options: ['Geen', 'JSON', 'Form (urlencoded)', 'Multipart', 'Custom'] },
       { key: 'body', label: 'Body (JSON)', type: 'textarea', placeholder: '{"key": "value"}' },

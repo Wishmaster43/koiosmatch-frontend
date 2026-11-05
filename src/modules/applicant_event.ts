@@ -13,7 +13,7 @@ export default {
   bg:    'var(--color-info-bg)',
   schema: [
     { key: 'event',            label: 'Event',          type: 'select', options: ['afgewezen', 'aangenomen', 'nieuwe sollicitatie', 'fase gewijzigd'] },
-    { key: 'rejection_reason', label: 'Rejection reason (filter)', type: 'text',   placeholder: 'optioneel — leeg = alle redenen' },
+    { key: 'rejection_reason', label: 'Rejection reason (filter)', type: 'text',   placeholder: 'optional. Empty = all reasons' },
     { key: 'run_mode',         label: 'Run',            type: 'select', options: ['direct', 'in wachtrij'] },
   ],
 }

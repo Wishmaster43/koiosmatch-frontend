@@ -17,10 +17,10 @@ export default {
   schema: [
     { key: 'url', label: 'Endpoint URL (https)', type: 'text',
       placeholder: 'https://hook.example.com/koios',
-      hint: 'Directe https-URL voor deze stap. Laat leeg om de gedeelde instelling webhook_endpoint_<slug> hieronder te gebruiken. Geen inloggegevens in de URL.' },
+      hint: 'Direct https URL for this step. Leave blank to use the shared setting webhook_endpoint_<slug> below. No credentials in the URL.' },
     { key: 'endpoint', label: 'Endpoint slug (shared setting)', type: 'text',
-      hint: 'Alleen gebruikt als hierboven geen URL staat: de tenant-instelling webhook_endpoint_<slug> bepaalt dan de URL.' },
+      hint: 'Only used if no URL is set above: the tenant setting webhook_endpoint_<slug> then determines the URL.' },
     { key: 'direction', label: 'Direction/label for the receiver', type: 'text',
-      hint: 'Vrije tekst/label voor de ontvanger.' },
+      hint: 'Free text/label for the recipient.' },
   ],
 }

@@ -11,7 +11,7 @@ export default {
   color: 'var(--module-helloflex)',
   bg:    'color-mix(in srgb, var(--module-helloflex) 12%, transparent)',
   schema: [
-    { key: 'client',    label: 'Customer',         type: 'text',   placeholder: 'bijv. Yesway' },
+    { key: 'client',    label: 'Customer',         type: 'text',   placeholder: 'e.g. Yesway' },
     { key: 'status',    label: 'Status',        type: 'select', options: ['alle', 'open', 'bezet', 'geannuleerd', 'voltooid'] },
     // DATUM-1: native date input (mirrors the sm_shifts.ts Shiftmanager sibling) —
     // never a text field with an ISO placeholder shown to the user.

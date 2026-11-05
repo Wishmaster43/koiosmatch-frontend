@@ -19,7 +19,7 @@ export default {
     // Free text (Carbon::parse on the backend) so it also accepts a variable —
     // never a native date input, which would drop both the time and the token.
     { key: 'start', label: 'Start time', type: 'text',
-      hint: 'Datum en tijd (bv. 10-08-2026 14:00) of een variabele.' },
+      hint: 'Date and time (e.g. 10-08-2026 14:00) or a variable.' },
     { key: 'candidate_id', label: 'Candidate', type: 'text', placeholder: '{{trigger.candidate_id}}' },
     { key: 'location', label: 'Location', type: 'text' },
     { key: 'notes', label: 'Notes', type: 'textarea' },

@@ -26,9 +26,9 @@ export default {
     // multiselect (no source, no options) is MultiSelectField's own documented fallback
     // for exactly this case — type a value, press Enter to add it as a chip.
     { key: 'pools',     label: 'Pools',    type: 'multiselect',
-      help: 'Laat leeg voor alle pools' },
+      help: 'Leave empty for all pools' },
     { key: 'positions', label: 'Functions', type: 'multiselect',
-      help: 'Laat leeg voor alle functies' },
+      help: 'Leave empty for all functions' },
     // default 'actief' mirrors CandidateFilterModule::configSchema; since DEFAULT-PERSIST-1
     // a schema default is SEEDED into the node config (and the engine merges its own),
     // so the card shows exactly what the engine filters on. Like pools/positions above,

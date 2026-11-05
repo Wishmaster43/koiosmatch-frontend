@@ -13,8 +13,8 @@ export default {
       key:   'source_field',
       label: 'Array field',
       type:  'text',
-      placeholder: '{{1.output}} of leeg laten voor volledige output',
-      help:  'Welk veld uit de vorige module bevat de array om over te itereren.',
+      placeholder: '{{1.output}} or leave empty for the full output',
+      help:  'Which field from the previous module holds the array to iterate over.',
     },
   ],
 }

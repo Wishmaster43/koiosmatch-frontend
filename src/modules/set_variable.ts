@@ -10,7 +10,7 @@ export default {
   color:    'var(--color-warning)',
   bg:       'var(--color-warning-bg)',
   schema: [
-    { key: 'variable_name', label: 'Variable name', type: 'text', placeholder: 'mijn_variabele' },
+    { key: 'variable_name', label: 'Variable name', type: 'text', placeholder: 'my_variable' },
     { key: 'variable_lifetime', label: 'Lifetime', type: 'select', options: ['één cyclus', 'één uitvoering', 'twee uitvoeringen'] },
     { key: 'variable_value', label: 'Value', type: 'textarea', placeholder: '{{1.waarde}}' },
   ],

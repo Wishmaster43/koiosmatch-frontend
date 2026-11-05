@@ -10,7 +10,7 @@ export default {
   bg:       'var(--color-violet-bg)',
   schema: [
     { key: 'text', label: 'Text', type: 'textarea', placeholder: '{{1.inhoud}}' },
-    { key: 'pattern', label: 'Pattern (regex)', type: 'text', placeholder: '(?P<naam>\\w+)' },
+    { key: 'pattern', label: 'Pattern (regex)', type: 'text', placeholder: '(?P<name>\\w+)' },
     { key: 'global', label: 'All matches', type: 'boolean' },
     { key: 'case_insensitive', label: 'Case-insensitive', type: 'boolean' },
     { key: 'multiline', label: 'Multiple lines', type: 'boolean' },

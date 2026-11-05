@@ -19,7 +19,7 @@ export default {
   app:      ['hf', 'shiftmanager'],
   schema: [
     { key: 'system', label: 'System', type: 'select', options: ['helloflex', 'shiftmanager'] },
-    { key: 'include_children', label: 'Including child locations/departments/contacts', type: 'boolean', help: 'Alleen relevant wanneer de gekoppelde entiteit een klant is.' },
-    { key: 'only_unlinked', label: 'Only not yet linked', type: 'boolean', help: 'Sla records over die al een koppeling met dit systeem hebben — aan te raden bij bulk.' },
+    { key: 'include_children', label: 'Including child locations/departments/contacts', type: 'boolean', help: 'Only relevant when the linked entity is a customer.' },
+    { key: 'only_unlinked', label: 'Only not yet linked', type: 'boolean', help: 'Skip records that already have a link with this system. Recommended for bulk.' },
   ],
 }

@@ -16,7 +16,7 @@ export default {
   schema: [
     // Which Shiftmanager link to sync from (tenant-scoped options from the API).
     SM_CONNECTION_FIELD,
-    { key: 'search',   label: 'Search',           type: 'text',   placeholder: 'naam of e-mail' },
+    { key: 'search',   label: 'Search',           type: 'text',   placeholder: 'name or e-mail' },
     // Vocabulary measured against the BE sync module (CMBE c90a69ed): the raw SM
     // status column knows actief/nietactief — 'inactief'/'beschikbaar' never matched.
     { key: 'status',   label: 'Status',           type: 'select', options: ['alle', 'actief', 'nietactief'], default: 'alle' },

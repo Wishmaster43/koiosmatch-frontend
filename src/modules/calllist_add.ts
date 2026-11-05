@@ -16,6 +16,6 @@ export default {
     // campaign) — kept verbatim, never translated (mirrors {{…}} placeholders).
     { key: 'campaign_name', label: 'Call list name', type: 'text',
       default: 'Lang geen contact {maand}',
-      hint: 'Ondersteunt {maand} voor de huidige maandnaam.' },
+      hint: 'Supports {maand} for the current month name.' },
   ],
 }

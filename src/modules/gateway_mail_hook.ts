@@ -17,7 +17,7 @@ export default {
       key:         'hook',
       label:       'Mailhook',
       type:        'text',
-      placeholder: 'Hook ID of naam',
+      placeholder: 'Hook ID or name',
       required:    true,
     },
     {

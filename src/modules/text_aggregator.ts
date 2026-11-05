@@ -9,7 +9,7 @@ export default {
   color:    'var(--module-info)',
   bg:       'var(--color-info-bg)',
   schema: [
-    { key: 'source_module', label: 'Source module', type: 'text', placeholder: 'automatisch ingevuld' },
+    { key: 'source_module', label: 'Source module', type: 'text', placeholder: 'filled automatically' },
     { key: 'row_separator', label: 'Separator', type: 'select', options: ['Nieuwe regel', 'Komma', 'Puntkomma', 'Spatie', 'Geen'] },
     { key: 'text', label: 'Text', type: 'textarea', placeholder: '{{1.naam}}' },
   ],
