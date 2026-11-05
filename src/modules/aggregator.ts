@@ -26,7 +26,7 @@ export default {
       key:   'group_by',
       label: 'Group by',
       type:  'text',
-      placeholder: 'e.g. {{klant_id}}. Leave empty for one big group',
+      placeholder: 'e.g. {{customer_id}}. Leave empty for one big group',
     },
     {
       key:   'stop_processing_after_empty',

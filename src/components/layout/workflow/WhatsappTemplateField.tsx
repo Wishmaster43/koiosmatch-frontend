@@ -151,7 +151,7 @@ export default function WhatsappTemplateField({ value, onChange, config, variabl
       <span aria-hidden style={{ ...chipStyle, flexShrink: 0, background: 'var(--hover-bg)', color: 'var(--text-muted)' }}>{'{{'}{i + 1}{'}}'}</span>
       <div style={{ flex: 1, minWidth: 0 }}>
         <TextFieldWithVars
-          field={{ key: kind, label: t('wa.slotLabel', { n: i + 1 }), placeholder: '{{veldnaam}} or fixed text' }}
+          field={{ key: kind, label: t('wa.slotLabel', { n: i + 1 }), placeholder: '{{first_name}} or fixed text' }}
           value={lines[i] ?? ''} variables={variables}
           onChange={(_, v) => onChange(kind, setLine(lines, i, String(v ?? ''), slots))} />
       </div>
