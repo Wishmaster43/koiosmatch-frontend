@@ -9,7 +9,7 @@ import { render, screen, waitFor, fireEvent } from '@testing-library/react'
 import { describe, it, expect, vi, afterEach } from 'vitest'
 import { QueryClientProvider, QueryClient } from '@tanstack/react-query'
 import CandidatesDetailPage from './CandidatesDetailPage'
-import { RightPanelProvider } from '@/context/RightPanelContext'
+import { RightPanelProvider, useRightPanel } from '@/context/RightPanelContext'
 
 // Only 3 rows on both `/sm_candidates` fetches (list + filter-option source) —
 // far fewer than the stats bucket below, so KPI numbers can only match via stats.
@@ -55,6 +55,25 @@ function renderPage() {
     <QueryClientProvider client={client}>
       <RightPanelProvider>
         <CandidatesDetailPage />
+      </RightPanelProvider>
+    </QueryClientProvider>,
+  )
+}
+
+// Probe that prints the registered right-panel filter group keys.
+function GroupsProbe() {
+  const { filterGroups } = useRightPanel()
+  return <div data-testid="groups">{filterGroups.map(g => String(g.key)).join(',')}</div>
+}
+
+// Renders the page next to the probe inside the same providers.
+function renderPageWithProbe() {
+  const client = new QueryClient({ defaultOptions: { queries: { retry: false } } })
+  return render(
+    <QueryClientProvider client={client}>
+      <RightPanelProvider>
+        <CandidatesDetailPage />
+        <GroupsProbe />
       </RightPanelProvider>
     </QueryClientProvider>,
   )
@@ -156,5 +175,13 @@ describe('CandidatesDetailPage · SM employee ai_enabled switch (ONIX H-003)', (
     await openDrawer()
     expect(await screen.findByRole('switch', SWITCH)).toBeDisabled()
     expect(screen.getByText(/aiOptOut\.erasedHint|always off for an erased|altijd uit/i)).toBeInTheDocument()
+  })
+})
+
+describe('CandidatesDetailPage · right-panel filter groups', () => {
+  it('registers the year, status, position and features groups in order', async () => {
+    renderPageWithProbe()
+    const probe = await screen.findByTestId('groups')
+    await waitFor(() => expect(probe.textContent).toBe('year,status,position,features'))
   })
 })

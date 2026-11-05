@@ -151,6 +151,8 @@ describe('ImportWizardPage — mapping + editable preview', () => {
     await uploadAndReachPreview(user)
     ;(api.post as MockFn).mockRejectedValueOnce({ response: { status: 413 } })
     await user.click(screen.getByRole('button', { name: t('import.runPreview') }))
+    // REQUEST-ASSERT-1: the dry-run went to its route with the upload body.
+    expect(api.post).toHaveBeenCalledWith('/imports/customers/dry-run', expect.any(FormData))
     expect(await screen.findByText(i18n.t('upload.tooLarge', { ns: 'common' }))).toBeInTheDocument()
     expect(screen.queryByRole('button', { name: t('import.preview.confirm') })).not.toBeInTheDocument()
   })
@@ -163,6 +165,8 @@ describe('ImportWizardPage — mapping + editable preview', () => {
     await screen.findByRole('button', { name: t('import.preview.confirm') })
     ;(api.post as MockFn).mockRejectedValueOnce({ response: { status: 413 } })
     await user.click(screen.getByRole('button', { name: t('import.preview.confirm') }))
+    // REQUEST-ASSERT-1: the confirm went to the real import route with the upload body.
+    expect(api.post).toHaveBeenLastCalledWith('/imports/customers', expect.any(FormData))
     expect(await screen.findByText(i18n.t('upload.tooLarge', { ns: 'common' }))).toBeInTheDocument()
     expect(screen.queryByText(t('import.result.title'))).not.toBeInTheDocument()
   })

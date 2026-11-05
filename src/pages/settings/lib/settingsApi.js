@@ -4,7 +4,7 @@
  */
 import api from '@/lib/api'
 import { invalidateKpiCache } from '@/lib/useKpiSettings'
-import { invalidateAllSettingsCache } from '@/lib/settings/useAllSettings'
+import { invalidateAllSettingsCache, toSettingWireValue } from '@/lib/settings/useAllSettings'
 
 // Fetches the full flat settings bag for the tenant.
 export async function loadSettings() {
@@ -12,12 +12,12 @@ export async function loadSettings() {
   return res.data ?? {}
 }
 
-// Stringifies every value (the backend stores settings as strings) and merges the payload in, then invalidates the shared KPI/all-settings caches so live readers pick up the change.
+// Stringifies every value through the shared wire form toSettingWireValue (strings as-is, others JSON; the backend stores settings as strings) and merges the payload in, then invalidates the shared KPI/all-settings caches so live readers pick up the change.
 // BLANK-RESETS-1 (BE contract 02-10): null/undefined travel as '' — "not set", the BE drops the
 // typed row and the catalogue default applies — never the string "null".
 export async function saveSettings(payload) {
   const stringified = {}
-  Object.entries(payload).forEach(([k, v]) => (stringified[k] = v == null ? '' : String(v)))
+  Object.entries(payload).forEach(([k, v]) => (stringified[k] = toSettingWireValue(v)))
   await api.post('/settings', stringified)
   // Refresh both shared caches so live readers (dashboards, candidate table) update.
   invalidateKpiCache()

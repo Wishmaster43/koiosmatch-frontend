@@ -44,11 +44,11 @@ const numCell = numCellBase as CSSProperties
 const MAX_FAILED_NAMES = 5
 
 // Joins the first failed bureau names and appends a translated "+K more" suffix.
-function failedNames(tenants: unknown[], t: (key: string, opts?: Record<string, unknown>) => string): string {
+function failedNames(tenants: unknown[], t: (key: string, opts?: Record<string, unknown>) => string, formatNumber: (n: number) => string): string {
   const names = tenants.map(n => String(n))
   const head = names.slice(0, MAX_FAILED_NAMES).join(', ')
   const rest = names.length - MAX_FAILED_NAMES
-  return rest > 0 ? `${head} ${t('adminInvoices.generateMoreNames', { rest })}` : head
+  return rest > 0 ? `${head} ${t('adminInvoices.generateMoreNames', { rest: formatNumber(rest) })}` : head
 }
 
 // Stream a blob response to disk via a temporary object URL (never a bare <a
@@ -62,7 +62,7 @@ async function downloadBlob(route: string, params: Record<string, string>, filen
 // generate/finalize/re-send/download/export actions over the tenant invoice list.
 export default function AdminInvoicesSettings() {
   const { t } = useTranslation('settings')
-  const { formatCurrency } = useNumberFormat()
+  const { formatCurrency, formatNumber } = useNumberFormat()
   const locale = useLocale()
   // Rebuilds the 12-month picker options only when the active locale changes.
   const months = useMemo(() => buildLast12Months(locale), [locale])
@@ -108,16 +108,17 @@ export default function AdminInvoicesSettings() {
       const body = (res?.data?.data ?? res?.data ?? {}) as GenerateResult
       // Partial failure (BE B-007): name the bureaus that failed instead of a plain success.
       if (typeof body.failed === 'number' && body.failed > 0) {
+        // GETALLEN-1: every count in the toast renders through the locale formatter.
         notifyError(t('adminInvoices.generateResultFailed', {
-          generated: body.generated ?? 0,
-          alreadyFinal: body.already_final ?? 0,
-          failed: body.failed,
+          generated: formatNumber(body.generated ?? 0),
+          alreadyFinal: formatNumber(body.already_final ?? 0),
+          failed: formatNumber(body.failed),
           // Cap the named bureaus so many failures never build an unbounded toast line.
-          names: failedNames(body.failed_tenants ?? [], t),
+          names: failedNames(body.failed_tenants ?? [], t, formatNumber),
         }))
       } else {
         notifySuccess(body.generated != null
-          ? t('adminInvoices.generateResult', { generated: body.generated, alreadyFinal: body.already_final ?? 0 })
+          ? t('adminInvoices.generateResult', { generated: formatNumber(body.generated), alreadyFinal: formatNumber(body.already_final ?? 0) })
           : t('adminInvoices.generateSuccess'))
       }
       await reload()

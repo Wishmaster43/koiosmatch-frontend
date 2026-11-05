@@ -57,6 +57,17 @@ describe('useRunStepListPage', () => {
     expect(result.current.page?.meta.current_page).toBe(2)
   })
 
+  it('refetch repeats the same route and params', async () => {
+    vi.mocked(api.get).mockResolvedValue({ data: { list: { key: 'candidates', data: [], meta: { current_page: 2, last_page: 3, per_page: 50, total: 120 } } } } as never)
+    const params = { list: 'candidates', page: 2, per_page: 50 }
+    const { result } = renderHook(() => useRunStepListPage('run-1', 'step-1', params), { wrapper })
+    await waitFor(() => expect(result.current.loading).toBe(false))
+    await result.current.refetch()
+    expect(api.get).toHaveBeenCalledTimes(2)
+    expect(vi.mocked(api.get).mock.calls[1][0]).toBe('/workflow-runs/run-1/steps/step-1')
+    expect(vi.mocked(api.get).mock.calls[1][1]).toEqual(expect.objectContaining({ params }))
+  })
+
   it('stays disabled without a list key', () => {
     renderHook(() => useRunStepListPage('run-1', 'step-1', null), { wrapper })
     expect(api.get).not.toHaveBeenCalled()

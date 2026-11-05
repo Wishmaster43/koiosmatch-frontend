@@ -11,7 +11,6 @@
  */
 import { useEffect, useMemo, useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { useQueryClient } from '@tanstack/react-query'
 import { ChevronsDownUp, ChevronsUpDown } from 'lucide-react'
 import FloatingPanel from '@/components/ui/FloatingPanel'
 import SegmentedControl from '@/components/ui/SegmentedControl'
@@ -96,7 +95,6 @@ export default function RunStepInspectorPanel({ runId, stepId, moduleLabel, onCl
   // GETALLEN-1: every count the user sees (log rows, list totals, bytes) goes through the active locale.
   const { formatFileSize, formatNumber } = useNumberFormat()
   const { step, loading, error, forbidden, refetch } = useRunStepDetail(runId, stepId)
-  const queryClient = useQueryClient()
   const { catalog } = useModuleCatalog()
   const ownKeys = step?.module_type ? Object.keys(catalog[step.module_type]?.outputFields ?? {}) : null
   const [fields, setFields] = useState<'all' | 'own'>('all')
@@ -111,7 +109,7 @@ export default function RunStepInspectorPanel({ runId, stepId, moduleLabel, onCl
   // Per-key loaded pages (newest attempt only) — one pending fetch at a time.
   const [listPages, setListPages] = useState<Record<string, ListPageState>>({})
   const [pendingFetch, setPendingFetch] = useState<{ key: string; page: number } | null>(null)
-  const { page: listPageResult, loading: listLoading, errorObj: listErrorObj } = useRunStepListPage(
+  const { page: listPageResult, loading: listLoading, errorObj: listErrorObj, refetch: listRefetch } = useRunStepListPage(
     runId, stepId, pendingFetch ? { list: pendingFetch.key, page: pendingFetch.page, per_page: 50 } : null,
   )
   // Merge a resolved page into its key's state once (guards the effect against
@@ -227,9 +225,9 @@ export default function RunStepInspectorPanel({ runId, stepId, moduleLabel, onCl
                   return (
                     <Button key={key} variant="secondary" size="sm" disabled={listLoading && pendingFetch?.key === key}
                       onClick={() => {
-                        // Retry after a failed page: the same {key,page} would not change the query key, so refetch it explicitly.
+                        // Retry after a failed page: the same {key,page} would not change the query key, so refetch it through the hook.
                         if (listErrorObj && pendingFetch?.key === key && pendingFetch.page === nextPage) {
-                          void queryClient.invalidateQueries({ queryKey: ['workflow-run-step-list', runId, stepId, key, nextPage, 50] })
+                          void listRefetch()
                         } else setPendingFetch({ key, page: nextPage })
                       }}>
                       {t('inspector.loadMore', { shown: formatNumber(shown), total: formatNumber(total) })}

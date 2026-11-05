@@ -86,6 +86,26 @@ describe('AdminInvoicesSettings', () => {
     }
   })
 
+  it('formats the remainder count with the locale thousands separator', async () => {
+    const events: Array<{ type: string; message: string }> = []
+    const handler = (e: Event) => events.push((e as CustomEvent).detail)
+    window.addEventListener('km:toast', handler)
+    try {
+      const names = Array.from({ length: 1005 }, (_, i) => `B${i}`)
+      api.get.mockResolvedValue({ data: [] })
+      api.post.mockResolvedValueOnce({ data: { generated: 0, already_final: 0, failed: 1005, failed_tenants: names } })
+      renderScreen()
+      const btn = await screen.findByRole('button', { name: i18n.t('adminInvoices.generate', { ns: 'settings' }) })
+      await waitFor(() => expect(api.get).toHaveBeenCalledTimes(1))
+      await userEvent.click(btn)
+      const listed = `${names.slice(0, 5).join(', ')} ${i18n.t('adminInvoices.generateMoreNames', { ns: 'settings', rest: '1.000' })}`
+      const expected = i18n.t('adminInvoices.generateResultFailed', { ns: 'settings', generated: 0, alreadyFinal: 0, failed: '1.005', names: listed })
+      await waitFor(() => expect(events.some(ev => ev.message === expected)).toBe(true))
+    } finally {
+      window.removeEventListener('km:toast', handler)
+    }
+  })
+
   it('shows "Finaliseren" for a draft and posts the finalize route', async () => {
     api.get.mockResolvedValueOnce({ data: [
       { id: 'inv-d', tenant_id: 't1', tenant_name: 'Yesway', number: null, period: '2026-08', status: 'draft', total: 100, vat_amount: 21, finalized_at: null, sent_at: null },

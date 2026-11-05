@@ -55,7 +55,7 @@ export interface KoiosSearchResultGroup {
   skipped?: { reason: string } | null  // When entity was skipped
 }
 
-// Grouped search results per entity, extracted from a zoek_alles step.
+// Grouped search results per entity, extracted from a search_all step.
 export interface KoiosSearchResultsGrouped {
   groups: Array<KoiosSearchResultGroup & { refs: KoiosResultRef[] }>
   skipped: Array<{ entity: string; reason: string }>

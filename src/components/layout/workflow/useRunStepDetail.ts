@@ -42,7 +42,7 @@ export function useRunStepListPage(
   params: RunStepListParams | null,
 ) {
   const client = useQueryClient()
-  const { data, isLoading, isError, error: queryError } = useQuery({
+  const { data, isLoading, isError, error: queryError, refetch } = useQuery({
     queryKey: ['workflow-run-step-list', runId, stepId, params?.list, params?.page, params?.per_page],
     enabled: runId != null && stepId != null && !!params?.list,
     retry: retryUnless(isForbidden, clientRetry(client)),
@@ -56,5 +56,5 @@ export function useRunStepListPage(
   const forbidden = isForbidden(queryError)
   // The raw error object travels along so the caller can surface a 422's server
   // message (e.g. "not a paginated list for this caller") instead of swallowing it.
-  return { page: data?.list ?? null, loading: isLoading, error: isError && !forbidden, forbidden, errorObj: queryError }
+  return { page: data?.list ?? null, loading: isLoading, error: isError && !forbidden, forbidden, errorObj: queryError, refetch }
 }

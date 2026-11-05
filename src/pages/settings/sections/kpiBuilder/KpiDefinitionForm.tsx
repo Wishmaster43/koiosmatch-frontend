@@ -20,6 +20,7 @@ import { FieldRow, SelectField, TextField } from '@/components/forms/fields'
 import { useKpiDefinitionDraft } from './useKpiDefinitionDraft'
 import KpiDimensionValueField from './KpiDimensionValueField'
 import { unitOptionsFor, UNIT_LABEL_KEY, SURFACE_OPTIONS } from './kpiUnitOptions'
+import { KPI_LABEL_MAX } from './kpiDefinitionsApi'
 import type { KpiDefinition, KpiDefinitionCreate, KpiDefinitionPatch, KpiEntity, KpiEntityRegistry, KpiUnit } from './kpiDefinitionsApi'
 
 interface KpiDefinitionFormProps {
@@ -96,7 +97,7 @@ export default function KpiDefinitionForm({ entity, registry, editing, saving = 
         {/* Own name — empty means the metric's own label is shown. */}
         <FieldRow label={t('kpiBuilder.field.label')}>
           <HintedControl hint={t('kpiBuilder.hint.label')}>
-            <TextField value={draft.label} onChange={v => setField('label', v)} placeholder={t('kpiBuilder.placeholder.label')} />
+            <TextField value={draft.label} onChange={v => setField('label', v)} maxLength={KPI_LABEL_MAX} placeholder={t('kpiBuilder.placeholder.label')} />
           </HintedControl>
         </FieldRow>
         {/* Unit — locked to the metric's own default unless it offers real alternatives. */}
