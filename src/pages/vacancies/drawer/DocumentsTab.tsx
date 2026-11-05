@@ -9,7 +9,7 @@ import { useEntityDocuments, fmtSize } from '@/hooks/useEntityDocuments'
 import { useUploadPickFilter } from '@/lib/useUploadPickFilter'
 import { useDocumentTypes } from '@/lib/useDocumentTypes'
 import DrawerAddButton from '@/components/drawer/DrawerAddButton'
-import DrawerFilterMenu from '@/components/drawer/DrawerFilterMenu'
+import DocumentsFilterMenu from '@/components/documents/DocumentsFilterMenu'
 import type { DrawerFilterConfig } from '@/components/drawer/DrawerFilterMenu'
 import DocPreviewModal from '@/components/drawer/DocPreviewModal'
 import DocumentDeleteDialog from '@/components/drawer/DocumentDeleteDialog'
@@ -180,8 +180,7 @@ export default function DocumentsTab({ vacancy: v }: { vacancy: VacancyDetail })
           {/* eslint-disable-next-line huisstijlLegacy/no-restricted-syntax -- 11px inline clear glyph inside the search chrome, not a Button copy */}
           {docSearch && <button onClick={() => setDocSearch('')} aria-label={t('common:clear')} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-muted)', padding: 0, display: 'flex' }}><X size={11} /></button>}
         </div>
-        <DrawerFilterMenu filters={filterRows}
-          label={t('common:filters.button')} title={t('common:filters.title')} clearAllLabel={t('common:filters.clearAll')} />
+        <DocumentsFilterMenu filters={filterRows} />
         {/* PDF-VACATURES-26: bulk download/delete — same soft-tint pills the candidate
             documents section shows, only rendered once something is selected. */}
         {selected.size > 0 && (

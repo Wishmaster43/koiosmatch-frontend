@@ -90,7 +90,8 @@ describe('NotesTab · type/channel filter menu (NOTE-FILTERS-1)', () => {
     // The old inline placeholders are gone from the toolbar row entirely.
     expect(screen.queryByText('notes.allTypes')).toBeNull()
     expect(screen.queryByText('notes.allChannels')).toBeNull()
-    expect(screen.getByRole('button', { name: 'Filter' })).toBeInTheDocument()
+    // KEY-ECHO: no i18n instance here, so the Filter button is named by its key (its defaultValue is gone, §5 one source per label).
+    expect(screen.getByRole('button', { name: 'filters.button' })).toBeInTheDocument()
   })
 
   it('picking a TYPE in the menu narrows the visible notes exactly as the old inline dropdown did', async () => {
@@ -101,7 +102,7 @@ describe('NotesTab · type/channel filter menu (NOTE-FILTERS-1)', () => {
     expect(screen.getByText('Belnotitie')).toBeInTheDocument()
     expect(screen.getByText('Mailnotitie')).toBeInTheDocument()
 
-    await user.click(screen.getByRole('button', { name: 'Filter' }))
+    await user.click(screen.getByRole('button', { name: 'filters.button' }))
     await user.click(screen.getByRole('button', { name: 'notes.allTypes' }))
     await user.click(screen.getByRole('button', { name: 'Bellen' }))
 
@@ -115,7 +116,7 @@ describe('NotesTab · type/channel filter menu (NOTE-FILTERS-1)', () => {
       notes={[note({ channel: 'phone', text: '<p>Telefoonnotitie</p>' }), note({ channel: 'whatsapp', text: '<p>WA-notitie</p>' })]}
       labels={filterLabels} noteTypes={noteTypes} channels={channels} showTimeline={false} showConversations={false} />)
 
-    await user.click(screen.getByRole('button', { name: 'Filter' }))
+    await user.click(screen.getByRole('button', { name: 'filters.button' }))
     await user.click(screen.getByRole('button', { name: 'notes.allChannels' }))
     await user.click(screen.getByRole('button', { name: 'WhatsApp' }))
 
@@ -131,7 +132,7 @@ describe('NotesTab · type/channel filter menu (NOTE-FILTERS-1)', () => {
 
     // Picking a value keeps the panel OPEN (so a second filter can be set in the
     // same visit) — no need to re-click "Filter" between the two picks below.
-    await user.click(screen.getByRole('button', { name: 'Filter' }))
+    await user.click(screen.getByRole('button', { name: 'filters.button' }))
     await user.click(screen.getByRole('button', { name: 'notes.allTypes' }))
     await user.click(screen.getByRole('button', { name: 'Bellen' }))
     await user.click(screen.getByRole('button', { name: 'notes.allChannels' }))
@@ -152,7 +153,7 @@ describe('NotesTab · type/channel filter menu (NOTE-FILTERS-1)', () => {
     const user = userEvent.setup()
     render(<NotesTab notes={[note()]} labels={filterLabels} noteTypes={noteTypes} channels={channels}
       showTimeline={false} showConversations={false} />)
-    await user.click(screen.getByRole('button', { name: 'Filter' }))
+    await user.click(screen.getByRole('button', { name: 'filters.button' }))
     expect(screen.getByRole('dialog')).toBeInTheDocument()
     await user.keyboard('{Escape}')
     expect(screen.queryByRole('dialog')).toBeNull()
@@ -160,7 +161,7 @@ describe('NotesTab · type/channel filter menu (NOTE-FILTERS-1)', () => {
 
   it('renders no Filter button at all when the host offers neither vocabulary (no fake affordance)', () => {
     render(<NotesTab notes={[note()]} labels={filterLabels} showTimeline={false} showConversations={false} />)
-    expect(screen.queryByRole('button', { name: 'Filter' })).toBeNull()
+    expect(screen.queryByRole('button', { name: 'filters.button' })).toBeNull()
   })
 })
 

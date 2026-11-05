@@ -52,7 +52,7 @@ import DocPreviewModal from '@/components/drawer/DocPreviewModal'
 // DOC-FILTER-PARITY-1 (08-08): the shared search-box + searchable TYPE filter
 // combo the candidate documents section already has — reused here verbatim,
 // never forked, so every documents drill-down reads the same (§3A).
-import DrawerFilterMenu from '@/components/drawer/DrawerFilterMenu'
+import DocumentsFilterMenu from '@/components/documents/DocumentsFilterMenu'
 import type { DrawerFilterConfig } from '@/components/drawer/DrawerFilterMenu'
 // House "+ action" trigger (Danny 27-07 consistency sweep) — replaces the bare
 // text+Plus button below; same click target (opens the hidden file input).
@@ -176,8 +176,7 @@ export default function DocumentsTab({ customerId, locations = [], departments =
           {/* DOC-FILTER-PARITY-1: the type filter lives behind this one compact Filter
               button, mirroring the candidate documents section — self-hides when the
               tenant has no document types for this scope. */}
-          <DrawerFilterMenu filters={filterRows}
-            label={t('common:filters.button')} title={t('common:filters.title')} clearAllLabel={t('common:filters.clearAll')} />
+          <DocumentsFilterMenu filters={filterRows} />
           {/* Bulk-download + bulk-delete actions — herhaal-audit r4 finding 1: the
               §4 soft-tint identity now comes from Button (soft/dangerSoft), never a
               hand-painted color-mix pill — only shown once something is selected. */}

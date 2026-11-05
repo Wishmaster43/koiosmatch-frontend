@@ -231,7 +231,8 @@ describe('DocumentsSection · document-type filter menu (DOC-TYPE-FILTER-1)', ()
   it('the toolbar no longer renders the type dropdown inline — only ONE Filter button', () => {
     render(<DocumentsSection c={withTypedDocs()} />)
     expect(screen.queryByText('documents.allTypes')).toBeNull()
-    expect(screen.getByRole('button', { name: 'Filter' })).toBeInTheDocument()
+    // KEY-ECHO: no i18n instance here, so the Filter button is named by its key (its defaultValue is gone, §5 one source per label).
+    expect(screen.getByRole('button', { name: 'common:filters.button' })).toBeInTheDocument()
   })
 
   it('picking a TYPE in the menu narrows the visible documents exactly as the old inline dropdown did', async () => {
@@ -240,7 +241,7 @@ describe('DocumentsSection · document-type filter menu (DOC-TYPE-FILTER-1)', ()
     expect(screen.getByText('cv.pdf')).toBeInTheDocument()
     expect(screen.getByText('diploma.pdf')).toBeInTheDocument()
 
-    await user.click(screen.getByRole('button', { name: 'Filter' }))
+    await user.click(screen.getByRole('button', { name: 'common:filters.button' }))
     await user.click(screen.getByRole('button', { name: 'documents.allTypes' }))
     await user.click(screen.getByRole('button', { name: 'CV' }))
 
@@ -251,7 +252,7 @@ describe('DocumentsSection · document-type filter menu (DOC-TYPE-FILTER-1)', ()
   it('the badge counts the active filter, and clear-all resets it back to "all"', async () => {
     const user = userEvent.setup()
     render(<DocumentsSection c={withTypedDocs()} />)
-    await user.click(screen.getByRole('button', { name: 'Filter' }))
+    await user.click(screen.getByRole('button', { name: 'common:filters.button' }))
     await user.click(screen.getByRole('button', { name: 'documents.allTypes' }))
     await user.click(screen.getByRole('button', { name: 'CV' }))
     expect(screen.queryByText('diploma.pdf')).toBeNull()
@@ -266,7 +267,7 @@ describe('DocumentsSection · document-type filter menu (DOC-TYPE-FILTER-1)', ()
   it('Escape closes the filter panel', async () => {
     const user = userEvent.setup()
     render(<DocumentsSection c={withTypedDocs()} />)
-    await user.click(screen.getByRole('button', { name: 'Filter' }))
+    await user.click(screen.getByRole('button', { name: 'common:filters.button' }))
     expect(screen.getByRole('dialog')).toBeInTheDocument()
     await user.keyboard('{Escape}')
     expect(screen.queryByRole('dialog')).toBeNull()

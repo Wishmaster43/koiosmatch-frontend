@@ -257,7 +257,7 @@ export default function NotesTab({
         <NotesToolbar
           search={search} onSearchChange={setSearch} searchPlaceholder={labels.searchPlaceholder}
           filterRows={filterRows}
-          filterLabel={t('filters.button', { defaultValue: 'Filter' })}
+          filterLabel={t('filters.button')}
           filterTitle={t('filters.title')} filterClearAllLabel={t('filters.clearAll')}
           composerOpen={composerOpen} onAddNote={() => setAdding(true)} newNoteLabel={labels.newNote}
         />

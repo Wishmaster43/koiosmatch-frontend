@@ -19,7 +19,7 @@ import { useAuth } from '@/context/AuthContext'
 import { useBulkDocumentDelete } from '@/hooks/useBulkDocumentDelete'
 import { useDocumentSelection } from '@/hooks/useDocumentSelection'
 import DocPreviewModal from '@/components/drawer/DocPreviewModal'
-import DrawerFilterMenu from '@/components/drawer/DrawerFilterMenu'
+import DocumentsFilterMenu from '@/components/documents/DocumentsFilterMenu'
 import type { DrawerFilterConfig } from '@/components/drawer/DrawerFilterMenu'
 import DrawerAddButton from './DrawerAddButton'
 import PendingUploadQueue from './PendingUploadQueue'
@@ -134,9 +134,7 @@ export default function DocumentsSection({ c, onRefresh }: { c: Candidate; onRef
               this one compact Filter button instead of an inline dropdown — self-
               hides when the tenant has no document types (DrawerFilterMenu renders
               null on empty). */}
-          <DrawerFilterMenu filters={filterRows}
-            label={t('common:filters.button', { defaultValue: 'Filter' })}
-            title={t('common:filters.title')} clearAllLabel={t('common:filters.clearAll')} />
+          <DocumentsFilterMenu filters={filterRows} />
           {/* FROZEN DEBT (huisstijl ceiling entry 8, unchanged by this split): these
               two hand-painted buttons are the measured exception carried over from
               the pre-split file — see scripts/huisstijl-ceiling.json. Soft-tint
