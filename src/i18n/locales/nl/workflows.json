@@ -1313,7 +1313,7 @@
     "name_1 name_2": "naam_1\nnaam_2",
     "optional Empty = all reasons": "optioneel. Leeg = alle redenen",
     "{{1output}} or leave empty for the full output": "{{1.output}} of leeg laten voor volledige output",
-    "{{veldnaam}} of vaste tekst": "{{veldnaam}} of vaste tekst",
+    "{{veldnaam}} or fixed text": "{{veldnaam}} of vaste tekst",
     "{{question from candidate}}": "{{vraag van kandidaat}}",
     "Default from the vacancy/application": "Standaard van de vacature/sollicitatie",
     "-30": "-30",
@@ -1340,7 +1340,6 @@
     "Requires \"store incomplete runs\" to be enabled in the workflow settings": "Vereist dat \"onvolledige uitvoeringen opslaan\" is ingeschakeld in de workflow instellingen.",
     "Which field from the previous module holds the array to iterate over": "Welk veld uit de vorige module bevat de array om over te itereren.",
     "Which field is used as the identifier in the next module": "Welk veld wordt gebruikt als identifier in de volgende module.",
-    "Sla kandidaten over die al coördinaten hebben — aan te raden bij bulk": "Sla kandidaten over die al coördinaten hebben. Aan te raden bij bulk.",
     "Empty = all statuses (blacklist is always excluded)": "Leeg = alle statussen (blacklist is altijd uitgesloten).",
     "Empty = all phases (lead / candidate / …)": "Leeg = alle fases (lead / kandidaat / …).",
     "Eg only temp workers or freelancers Empty = all contract forms": "Bijv. alleen uitzendkrachten of ZZP'ers. Leeg = alle contractvormen.",
@@ -1349,11 +1348,9 @@
     "Only relevant when the linked entity is a customer": "Alleen relevant wanneer de gekoppelde entiteit een klant is.",
     "Skip records that already have a link with this system Recommended for bulk": "Sla records over die al een koppeling met dit systeem hebben. Aan te raden bij bulk.",
     "Empty = no contact filter (all candidates are included)": "Leeg = geen contactfilter (alle kandidaten komen mee).",
-    "{{kandidaatid}} = draait per kandidaat uit de vorige stap (bulk; leeg werkt ook) Voor één kandidaat {{triggercandidate_id}} (drill-down-knop of adreswijziging)": "{{kandidaat.id}} = draait per kandidaat uit de vorige stap (bulk; leeg werkt ook). Voor één kandidaat: {{trigger.candidate_id}} (drill-down-knop of adreswijziging).",
     "{{recordid}} = runs per record (of the chosen type) from the previous step (bulk; empty works too) For a single record {{trigger<type>_id}} (drill-down button or address change)": "{{record.id}} = draait per record (van het gekozen soort) uit de vorige stap (bulk; leeg werkt ook). Voor één record: {{trigger.<soort>_id}} (drill-down-knop of adreswijziging).",
     "Empty = no assignment (agency)": "Leeg = geen toewijzing (bureau).",
     "Supports {maand} for the current month name": "Ondersteunt {maand} voor de huidige maandnaam.",
-    "De tenant-instelling webhook_endpoint_<slug> bepaalt de URL": "De tenant-instelling webhook_endpoint_<slug> bepaalt de URL.",
     "Free text/label for the recipient": "Vrije tekst/label voor de ontvanger.",
     "Text that is stamped on the candidate and in the audit trail": "Tekst die op de kandidaat en in de audit-trail komt te staan.",
     "The workflow started as a child (async, via the queue) Self-calls and cycles are refused; maximum 5 levels deep": "De workflow die als kind wordt gestart (async, via de wachtrij). Zelf-aanroep en kringlopen worden geweigerd; maximaal 5 niveaus diep.",
@@ -1378,9 +1375,6 @@
     "eg {{firstname}} or extra message text": "bijv. {{firstname}} of extra bericht tekst",
     "Lets the AI agent consult the FAQ during the conversation": "Laat de AI-agent veelgestelde vragen (FAQ) raadplegen tijdens het gesprek.",
     "The numbered steps the AI agent walks through, each with an optional output field and variable chips": "De genummerde stappen die de AI-agent doorloopt, elk met een optioneel outputveld en variabele-chips.",
-    "Extra persona- en toonaanwijzingen voor de AI-agent, naast de instructies hierboven Het runtime-antwoordcontract wordt automatisch toegevoegd": "Extra persona- en toonaanwijzingen voor de AI-agent, naast de instructies hierboven. Het runtime-antwoordcontract wordt automatisch toegevoegd.",
-    "Volgt standaard de tenant-instelling; deze vacature kan dat hier overschrijven": "Volgt standaard de tenant-instelling; deze vacature kan dat hier overschrijven.",
-    "Verplicht als de gekozen agent geen intro-template heeft; een verse sollicitant zit buiten het 24-uursvenster, dus een sessietekst als intro faalt": "Verplicht als de gekozen agent geen intro-template heeft; een verse sollicitant zit buiten het 24-uursvenster, dus een sessietekst als intro faalt.",
     "queue (default) = queue, this step doesn't wait sync = run directly; the child's outcome comes back into this step": "queue (standaard) = wachtrij, deze stap wacht niet. sync = direct uitvoeren; de uitkomst van het kind komt terug in deze stap.",
     "Only for direct execution a failed child workflow fails this step Off = continue; the outcome is in child_run_status": "Alleen bij direct uitvoeren: een mislukte kind-workflow laat deze stap mislukken. Uit = doorgaan; de uitkomst staat in child_run_status.",
     "On by default this step's candidates/records travel along as the child's context": "Standaard aan: de kandidaten/records van deze stap reizen mee als context van het kind.",
@@ -1403,7 +1397,7 @@
     "Direct https URL for this step Leave blank to use the shared setting webhook_endpoint_<slug> below No credentials in the URL": "Directe https-URL voor deze stap. Laat leeg om de gedeelde instelling webhook_endpoint_<slug> hieronder te gebruiken. Geen inloggegevens in de URL.",
     "Only used if no URL is set above the tenant setting webhook_endpoint_<slug> then determines the URL": "Alleen gebruikt als hierboven geen URL staat: de tenant-instelling webhook_endpoint_<slug> bepaalt dan de URL.",
     "A field name of the source record (mobile, phone, …), never a phone number Manual sending happens from the record itself": "Een veldnaam van het bronrecord (mobile, phone, …), nooit een telefoonnummer. Handmatig versturen doe je vanaf het record zelf.",
-    "Dit lijkt een telefoonnummer Vul de veldnaam van het bronrecord in, bijv mobile": "Dit lijkt een telefoonnummer. Vul de veldnaam van het bronrecord in, bijv. mobile."
+    "This looks like a phone number Enter the source record’s field name, eg mobile": "Dit lijkt een telefoonnummer. Vul de veldnaam van het bronrecord in, bijv. mobile."
   },
   "triggers": {
     "events": {

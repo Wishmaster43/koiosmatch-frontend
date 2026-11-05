@@ -41,6 +41,11 @@ for (const schema of Object.values(MODULE_SCHEMAS)) {
       const v = field[k]
       if (typeof v === 'string' && v && !NEUTRAL.has(v)) wanted.push({ bucket: 'fieldHints', src: v })
     }
+    // Option-level hint/help (none today) rides the same bucket, so it joins the same guard.
+    if (Array.isArray(field.options)) for (const opt of field.options as Array<Record<string, unknown> | string>) {
+      if (!opt || typeof opt !== 'object') continue
+      for (const k of ['hint', 'help'] as const) { const v = opt[k]; if (typeof v === 'string' && v && !NEUTRAL.has(v)) wanted.push({ bucket: 'fieldHints', src: v }) }
+    }
   }
 }
 

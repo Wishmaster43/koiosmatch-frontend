@@ -1313,7 +1313,7 @@
     "name_1 name_2": "name_1\nname_2",
     "optional Empty = all reasons": "optional. Empty = all reasons",
     "{{1output}} or leave empty for the full output": "{{1.output}} or leave empty for the full output",
-    "{{veldnaam}} of vaste tekst": "{{veldnaam}} or fixed text",
+    "{{veldnaam}} or fixed text": "{{veldnaam}} or fixed text",
     "{{question from candidate}}": "{{question from candidate}}",
     "Default from the vacancy/application": "Default from the vacancy/application",
     "-30": "-30",
@@ -1340,7 +1340,6 @@
     "Requires \"store incomplete runs\" to be enabled in the workflow settings": "Requires \"store incomplete runs\" to be enabled in the workflow settings.",
     "Which field from the previous module holds the array to iterate over": "Which field from the previous module holds the array to iterate over.",
     "Which field is used as the identifier in the next module": "Which field is used as the identifier in the next module.",
-    "Sla kandidaten over die al coördinaten hebben — aan te raden bij bulk": "Skip candidates that already have coordinates. Recommended for bulk.",
     "Empty = all statuses (blacklist is always excluded)": "Empty = all statuses (blacklist is always excluded).",
     "Empty = all phases (lead / candidate / …)": "Empty = all phases (lead / candidate / …).",
     "Eg only temp workers or freelancers Empty = all contract forms": "E.g. only temp workers or freelancers. Empty = all contract forms.",
@@ -1349,11 +1348,9 @@
     "Only relevant when the linked entity is a customer": "Only relevant when the linked entity is a customer.",
     "Skip records that already have a link with this system Recommended for bulk": "Skip records that already have a link with this system. Recommended for bulk.",
     "Empty = no contact filter (all candidates are included)": "Empty = no contact filter (all candidates are included).",
-    "{{kandidaatid}} = draait per kandidaat uit de vorige stap (bulk; leeg werkt ook) Voor één kandidaat {{triggercandidate_id}} (drill-down-knop of adreswijziging)": "{{kandidaat.id}} = runs per candidate from the previous step (bulk; empty works too). For a single candidate: {{trigger.candidate_id}} (drill-down button or address change).",
     "{{recordid}} = runs per record (of the chosen type) from the previous step (bulk; empty works too) For a single record {{trigger<type>_id}} (drill-down button or address change)": "{{record.id}} = runs per record (of the chosen type) from the previous step (bulk; empty works too). For a single record: {{trigger.<type>_id}} (drill-down button or address change).",
     "Empty = no assignment (agency)": "Empty = no assignment (agency).",
     "Supports {maand} for the current month name": "Supports {maand} for the current month name.",
-    "De tenant-instelling webhook_endpoint_<slug> bepaalt de URL": "The tenant setting webhook_endpoint_<slug> determines the URL.",
     "Free text/label for the recipient": "Free text/label for the recipient.",
     "Text that is stamped on the candidate and in the audit trail": "Text that is stamped on the candidate and in the audit trail.",
     "The workflow started as a child (async, via the queue) Self-calls and cycles are refused; maximum 5 levels deep": "The workflow started as a child (async, via the queue). Self-calls and cycles are refused; maximum 5 levels deep.",
@@ -1378,9 +1375,6 @@
     "eg {{firstname}} or extra message text": "e.g. {{firstname}} or extra message text",
     "Lets the AI agent consult the FAQ during the conversation": "Lets the AI agent consult the FAQ during the conversation.",
     "The numbered steps the AI agent walks through, each with an optional output field and variable chips": "The numbered steps the AI agent walks through, each with an optional output field and variable chips.",
-    "Extra persona- en toonaanwijzingen voor de AI-agent, naast de instructies hierboven Het runtime-antwoordcontract wordt automatisch toegevoegd": "Extra persona and tone guidance for the AI agent, alongside the instructions above. The runtime reply contract is added automatically.",
-    "Volgt standaard de tenant-instelling; deze vacature kan dat hier overschrijven": "Follows the tenant setting by default; this vacancy can override it here.",
-    "Verplicht als de gekozen agent geen intro-template heeft; een verse sollicitant zit buiten het 24-uursvenster, dus een sessietekst als intro faalt": "Required if the chosen agent has no intro template; a fresh applicant sits outside the 24-hour window, so a session text as intro fails.",
     "queue (default) = queue, this step doesn't wait sync = run directly; the child's outcome comes back into this step": "queue (default) = queue, this step doesn't wait. sync = run directly; the child's outcome comes back into this step.",
     "Only for direct execution a failed child workflow fails this step Off = continue; the outcome is in child_run_status": "Only for direct execution: a failed child workflow fails this step. Off = continue; the outcome is in child_run_status.",
     "On by default this step's candidates/records travel along as the child's context": "On by default: this step's candidates/records travel along as the child's context.",
@@ -1403,7 +1397,7 @@
     "Direct https URL for this step Leave blank to use the shared setting webhook_endpoint_<slug> below No credentials in the URL": "Direct https URL for this step. Leave blank to use the shared setting webhook_endpoint_<slug> below. No credentials in the URL.",
     "Only used if no URL is set above the tenant setting webhook_endpoint_<slug> then determines the URL": "Only used if no URL is set above: the tenant setting webhook_endpoint_<slug> then determines the URL.",
     "A field name of the source record (mobile, phone, …), never a phone number Manual sending happens from the record itself": "A field name of the source record (mobile, phone, …), never a phone number. Manual sending happens from the record itself.",
-    "Dit lijkt een telefoonnummer Vul de veldnaam van het bronrecord in, bijv mobile": "This looks like a phone number. Enter the source record’s field name, e.g. mobile."
+    "This looks like a phone number Enter the source record’s field name, eg mobile": "This looks like a phone number. Enter the source record’s field name, e.g. mobile."
   },
   "triggers": {
     "events": {

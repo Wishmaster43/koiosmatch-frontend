@@ -171,9 +171,12 @@ describe('ConfigPanel · whatsapp_send recipient_field validation', () => {
     const { rerender } = render(
       <I18nextProvider i18n={i18n}><ConfigPanel node={node} onUpdate={vi.fn()} onDelete={vi.fn()} /></I18nextProvider>,
     )
-    expect(screen.getByText(/Dit lijkt een telefoonnummer/)).toBeInTheDocument()
+    // KEY-ECHO-TEST-1: the expected sentence is read through its fieldHints key, never pinned as nl copy.
+    const phoneHint = i18n.t('workflows:fieldHints.This looks like a phone number Enter the source record’s field name, eg mobile')
+    expect(phoneHint).not.toMatch(/fieldHints\./)
+    expect(screen.getByText(phoneHint)).toBeInTheDocument()
     const named: FlowNode = { ...node, data: { type: 'whatsapp_send', config: { recipient_field: 'mobile' } } }
     rerender(<I18nextProvider i18n={i18n}><ConfigPanel node={named} onUpdate={vi.fn()} onDelete={vi.fn()} /></I18nextProvider>)
-    expect(screen.queryByText(/Dit lijkt een telefoonnummer/)).toBeNull()
+    expect(screen.queryByText(phoneHint)).toBeNull()
   })
 })

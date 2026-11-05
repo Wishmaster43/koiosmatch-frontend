@@ -14,10 +14,11 @@ describe('whatsapp_send · recipient_field', () => {
     expect(field.insertMode).toBe('path')
   })
 
+  // The registry sentence is English source text (MODULES-EN-3); the nl translation lives under its fieldHints key.
   it('flags a literal phone number (national or international) with the registry message', () => {
-    expect(field.validate?.('0612345678')).toMatch(/telefoonnummer/)
-    expect(field.validate?.('+31 6 1234 5678')).toMatch(/telefoonnummer/)
-    expect(field.validate?.(' 06-12 34 56 78 ')).toMatch(/telefoonnummer/)
+    expect(field.validate?.('0612345678')).toMatch(/phone number/)
+    expect(field.validate?.('+31 6 1234 5678')).toMatch(/phone number/)
+    expect(field.validate?.(' 06-12 34 56 78 ')).toMatch(/phone number/)
   })
 
   it('accepts an empty value, a field name and a token', () => {

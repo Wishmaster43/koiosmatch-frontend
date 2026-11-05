@@ -9,7 +9,7 @@ import { MESSAGING_LANGUAGES } from './messagingLanguages'
 // recipient_field_not_a_field on a literal number; a value that reads as one
 // (digits, +, spaces, dashes, parentheses) is named here before the save.
 const looksLikePhoneNumber = (value: unknown): string | null =>
-  typeof value === 'string' && /^\s*\+?[0-9][0-9\s().-]{5,}\s*$/.test(value) ? 'Dit lijkt een telefoonnummer. Vul de veldnaam van het bronrecord in, bijv. mobile.' : null
+  typeof value === 'string' && /^\s*\+?[0-9][0-9\s().-]{5,}\s*$/.test(value) ? 'This looks like a phone number. Enter the source record’s field name, e.g. mobile.' : null
 
 export default {
   type:  'whatsapp_send',
