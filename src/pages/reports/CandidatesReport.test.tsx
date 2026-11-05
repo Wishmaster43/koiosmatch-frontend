@@ -1,12 +1,11 @@
-import { describe, it, expect, vi, afterEach, beforeEach } from 'vitest'
-import { render, screen, waitFor, within } from '@testing-library/react'
+import { describe, it, expect, vi, afterEach } from 'vitest'
+import { render, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import CandidatesReport from './CandidatesReport'
-import type { CandidatesReportData } from '@/types/analytics'
 import i18n from '@/i18n'
-import { EMPTY_REPORT_FILTERS } from './reportFilterParams'
 import { getReportKpiCatalog } from './kpiCatalog'
+import { data, suiteCards } from './CandidatesReport.testKit'
 
 // Data layer under test control (loading/error/empty/success — the four UI states).
 const mockUseCandidatesReport = vi.fn()
@@ -43,16 +42,6 @@ vi.mock('@/lib/settings/useAllSettings', async () => {
   return { ...actual, useAllSettings: () => mockSettings() }
 })
 
-const data: CandidatesReportData = {
-  period: 'month', from: '2026-08-01', to: '2026-08-31', total: 12,
-  timeseries: { bucket: 'week', series: [{ date: '2026-08-03', label: 'Wk 32', value: 5 }, { date: '2026-08-10', label: 'Wk 33', value: 7 }] },
-  // eslint-disable-next-line no-restricted-syntax -- NECESSITY: fixture seed data, not a component style
-  by_status:  [{ value: 'available', label: 'Beschikbaar', color: '#16a34a', count: 8 }, { value: 'placed', label: 'Geplaatst', color: '#2563eb', count: 4 }],
-  by_phase:   [{ value: 'lead', label: 'Lead', color: null, count: 3 }, { value: 'candidate', label: 'Kandidaat', color: null, count: 9 }],
-  by_source:  [{ value: 'referral', label: 'Referral', color: null, count: 6 }],
-  by_owner:   [{ owner_id: 'u1', name: 'Anna de Vries', count: 8 }, { owner_id: 'none', name: 'Niet toegewezen', count: 4 }],
-  by_branch:  [{ value: 'utrecht', label: 'Utrecht', color: null, count: 12 }, { value: 'none', label: 'Geen vestiging', color: null, count: 2 }],
-}
 function renderReport() {
   const qc = new QueryClient()
   return render(
@@ -86,13 +75,6 @@ vi.mock('@/components/charts/BarChartCard', () => ({
   ),
 }))
 
-// The real nine-key suite (GET /reports/candidates/kpis) — status_stale 0 pins
-// the calm-zero case, and dropping a key pins the honest dash.
-const suiteCards = [
-  { key: 'inflow', count: 12 }, { key: 'outflow', count: 2 }, { key: 'no_followup', count: 5 },
-  { key: 'status_stale', count: 0 }, { key: 'no_cv', count: 3 }, { key: 'document_expiring', count: 1 },
-  { key: 'availability_due', count: 2 }, { key: 'no_contact', count: 4 }, { key: 'active_conversations', count: 6 },
-]
 const mockSuiteResponse = (cards = suiteCards, kpiOrder?: string[]) => {
   getSpy.mockImplementation((url: unknown) =>
     Promise.resolve(
@@ -362,156 +344,5 @@ describe('CandidatesReport (RAPPORTEN-SUITE-1 inflow report)', () => {
     getSpy.mockClear()
     await user.click(retryBtn)
     await waitFor(() => expect(getSpy).toHaveBeenCalledWith('/reports/candidates/compare', expect.anything()))
-  })
-})
-
-// RAPPORTEN-CONSOLIDATIE-1: the Kandidaten/Leads switch — a real server-side
-// filter (never a client-side slice), nine cards on BOTH positions, and the
-// drill list following whichever position is active.
-describe('CandidatesReport — Kandidaten/Leads switch (RAPPORTEN-CONSOLIDATIE-1)', () => {
-  afterEach(() => { getSpy.mockClear(); mockSettings.mockReturnValue({}) })
-  beforeEach(() => { window.history.replaceState(null, '', '#reports.candidates') })
-
-  it('clicking Leads re-fetches with the flag-resolved `phase` filter — the SERVER narrows, never a client-side slice', async () => {
-    const user = userEvent.setup()
-    mockUseCandidatesReport.mockReturnValue({ data, loading: false, error: false })
-    renderReport()
-    mockUseCandidatesReport.mockClear()
-    await user.click(screen.getByRole('radio', { name: 'Leads' }))
-    expect(mockUseCandidatesReport).toHaveBeenCalledWith('month', EMPTY_REPORT_FILTERS, 'lead')
-  })
-
-  it('renders exactly nine KPI cards on the Leads position too, with its own "Total leads" card 1', () => {
-    mockUseCandidatesReport.mockReturnValue({ data, loading: false, error: false })
-    render(
-      <QueryClientProvider client={new QueryClient()}>
-        <CandidatesReport period="month" initialView="leads" />
-      </QueryClientProvider>,
-    )
-    expect(screen.getByText('Totaal leads')).toBeInTheDocument()
-    expect(screen.getByText('Status: Beschikbaar')).toBeInTheDocument()
-    expect(screen.getByText('Vestiging: Utrecht')).toBeInTheDocument()
-  })
-
-  it('a drill list opened on the Leads position carries the `phase` filter — bar, list and switch position never disagree', async () => {
-    const user = userEvent.setup()
-    mockUseCandidatesReport.mockReturnValue({ data, loading: false, error: false })
-    render(
-      <QueryClientProvider client={new QueryClient()}>
-        <CandidatesReport period="month" initialView="leads" />
-      </QueryClientProvider>,
-    )
-    getSpy.mockClear()
-    // Clicking a status bar opens the shared drawer fresh — a genuinely new request.
-    await user.click(screen.getByText('Geplaatst'))
-    expect(getSpy).toHaveBeenCalledWith('/reports/candidates/drill',
-      expect.objectContaining({ params: { status: 'placed', period: 'month', phase_filter: ['lead'] } }))
-  })
-
-  it('the active position lives in the URL — a link to Leads opens on Leads and survives a switch flip', async () => {
-    const user = userEvent.setup()
-    mockUseCandidatesReport.mockReturnValue({ data, loading: false, error: false })
-    renderReport()
-    await user.click(screen.getByRole('radio', { name: 'Leads' }))
-    expect(window.location.hash).toBe('#reports.candidates?view=leads')
-  })
-
-  // The Leads position keeps its OWN, independently-configurable spare catalogue
-  // (owner_none/branch_none/source_none) — but deliberately withOUT phase_lead
-  // (every row here already IS the lead phase, so that card would always ≈ total).
-  it('offers owner_none/branch_none/source_none but not phase_lead on the Leads catalogue', () => {
-    const keys = getReportKpiCatalog('leads').map(c => c.key)
-    expect(keys).toEqual(expect.arrayContaining(['owner_none', 'branch_none', 'source_none']))
-    expect(keys).not.toContain('phase_lead')
-  })
-
-  it('swapping in the owner_none spare on Leads renders the real count too, nine cards total', () => {
-    mockSettings.mockReturnValue({ report_kpis_leads: JSON.stringify(['owner_none', 'phase', 'source', 'status', 'branch']) })
-    mockUseCandidatesReport.mockReturnValue({ data, loading: false, error: false })
-    render(
-      <QueryClientProvider client={new QueryClient()}>
-        <CandidatesReport period="month" initialView="leads" />
-      </QueryClientProvider>,
-    )
-    expect(screen.getByText('Eigenaar: Niet toegewezen')).toBeInTheDocument()
-    expect(screen.getByText('Totaal leads')).toBeInTheDocument()
-  })
-
-  it('a legacy reports.leads deep link (initialView="leads") opens directly on the Leads position', () => {
-    mockUseCandidatesReport.mockReturnValue({ data, loading: false, error: false })
-    render(
-      <QueryClientProvider client={new QueryClient()}>
-        <CandidatesReport period="month" initialView="leads" />
-      </QueryClientProvider>,
-    )
-    expect(screen.getByRole('radio', { name: 'Leads' })).toHaveAttribute('aria-checked', 'true')
-  })
-})
-
-// KPI-BUILDER-FE-1 §3.9/§3.11: tenant-defined KPI cards ride a second band row,
-// customBase strips phase_filter (the definition drill route doesn't know it),
-// and a click hits the definition route with only the accepted params.
-describe('CandidatesReport — tenant-defined KPI cards (KPI-BUILDER-1)', () => {
-  afterEach(() => {
-    getSpy.mockReset()
-    getSpy.mockResolvedValue({ data: { data: [], meta: { total: 0 } } })
-    mockSettings.mockReturnValue({})
-    mockUseReportKpiSelection.mockReset()
-    mockUseReportKpiSelection.mockImplementation(() => ({ data: suiteCards.map(c => c.key), isLoading: false }))
-  })
-
-  const customKpiData: CandidatesReportData = {
-    ...data,
-    custom_kpis: [{
-      id: 'kd-1', entity: 'candidate', metric_key: 'new_in_period', label: 'Nieuwe kandidaten',
-      dimension: 'all', dimension_value: null, dimension_label: null,
-      value: 14, unit: 'count', target: 15, warn: null, comparison: 'gte', status: 'alert',
-    }],
-  }
-
-  it('renders the tenant card in a second band row with a formatted value, target caption and band title', () => {
-    mockUseCandidatesReport.mockReturnValue({ data: customKpiData, loading: false, error: false })
-    renderReport()
-    expect(screen.getByText("Eigen KPI's")).toBeInTheDocument()
-    expect(screen.getByText('Nieuwe kandidaten')).toBeInTheDocument()
-    expect(screen.getByText('14')).toBeInTheDocument()
-    expect(screen.getByText('buiten doel · doel 15')).toBeInTheDocument()
-  })
-
-  it('clicking the tenant card hits the definition drill route with only the accepted params (never phase_filter/kpi/date)', async () => {
-    const user = userEvent.setup()
-    mockUseCandidatesReport.mockReturnValue({ data: customKpiData, loading: false, error: false })
-    renderReport()
-    await user.click(screen.getByText('Nieuwe kandidaten'))
-    const call = getSpy.mock.calls.find(c => c[0] === '/reports/kpi-definitions/kd-1/drill')
-    expect(call).toBeDefined()
-    const params = call?.[1]?.params as Record<string, unknown>
-    expect(params.period).toBe('month')
-    expect(params.kpi).toBeUndefined()
-    expect(params.date).toBeUndefined()
-    expect(params.phase_filter).toBeUndefined()
-  })
-
-  it('a null value renders a dash and stays unclickable (no request)', async () => {
-    const nullValueData: CandidatesReportData = {
-      ...data,
-      custom_kpis: [{ ...customKpiData.custom_kpis![0], value: null }],
-    }
-    mockUseCandidatesReport.mockReturnValue({ data: nullValueData, loading: false, error: false })
-    renderReport()
-    const label = screen.getByText('Nieuwe kandidaten')
-    const card = label.parentElement as HTMLElement
-    expect(within(card).getByText('—')).toBeInTheDocument()
-    await userEvent.click(card)
-    expect(getSpy.mock.calls.find(c => c[0] === '/reports/kpi-definitions/kd-1/drill')).toBeUndefined()
-  })
-
-  it('an envelope without custom_kpis renders exactly as today (no extra band, no console.error)', () => {
-    const errorSpy = vi.spyOn(console, 'error').mockImplementation(() => {})
-    mockUseCandidatesReport.mockReturnValue({ data, loading: false, error: false })
-    renderReport()
-    expect(screen.queryByText("Eigen KPI's")).not.toBeInTheDocument()
-    expect(errorSpy).not.toHaveBeenCalled()
-    errorSpy.mockRestore()
   })
 })

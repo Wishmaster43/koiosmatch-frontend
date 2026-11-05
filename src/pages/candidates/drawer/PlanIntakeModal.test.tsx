@@ -13,7 +13,7 @@
  * disables the submit button.
  */
 import { describe, it, expect, vi, beforeEach } from 'vitest'
-import { fireEvent, render, screen, waitFor } from '@testing-library/react'
+import { fireEvent, render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import PlanIntakeModal from './PlanIntakeModal'
 import { endTimeOf } from './planIntake/helpers'
@@ -60,7 +60,7 @@ vi.mock('@/lib/api', () => ({
   unwrap: (r: { data?: { data?: unknown } }) => r?.data?.data,
 }))
 // Only the network-backed hook is stubbed (defaults to "no decision") — the real
-// ActionRuleBanner renders, so the AXIS-MATRIX-2 tests below exercise the actual component.
+// ActionRuleBanner renders, so the AXIS-MATRIX-2 tests (PlanIntakeModal.preflight.test.tsx) exercise the actual component.
 vi.mock('@/components/actionrules', async (importOriginal) => ({
   ...(await importOriginal<typeof import('@/components/actionrules')>()),
   useActionRulePreflight: vi.fn(() => ({ decision: null, loading: false, error: false })),
@@ -77,12 +77,9 @@ beforeEach(() => {
   vi.mocked(api.post).mockClear()
   vi.mocked(api.get).mockClear()
   vi.mocked(api.patch).mockClear()
-  // Reset the action-rule preflight mock back to "no decision" (§13 test hygiene
-  // fix, found by the MODALITY-PHONE-CLEAR-1 tests below): a test inside the
-  // AXIS-MATRIX-2 describe block sets a persistent `mockReturnValue` (warn/block)
-  // that otherwise LEAKS into every CREATE-mode test that runs after it in this
-  // file — a leaked 'block' decision silently disables the submit button, so a
-  // later test's click does nothing and its POST assertion sees zero calls.
+  // Reset the action-rule preflight mock back to "no decision" (§13 test hygiene). The reset
+  // mirrors PlanIntakeModal.preflight.test.tsx, where the AXIS-MATRIX-2 tests set a persistent
+  // `mockReturnValue` (warn/block); here it is defensive, since vitest isolates modules per file.
   vi.mocked(useActionRulePreflight).mockReturnValue({ decision: null, loading: false, error: false })
 })
 
@@ -242,265 +239,5 @@ describe('PlanIntakeModal · INTAKE-VACANCY-ID-1 (vacancy_id on the create paylo
     await user.click(screen.getByRole('button', { name: 'work.createIntake' }))
     const body = vi.mocked(api.post).mock.calls[0][1] as Record<string, unknown>
     expect(body).not.toHaveProperty('vacancy_id')
-  })
-})
-
-// BUG FIX (S24a-c): `duration`/`modality` used to prefill from `typeOptions[0]` —
-// the FIRST option in the list — while `type` itself already prefilled from the
-// resolved DEFAULT option. For a tenant whose default type isn't first, the modal
-// opened showing the right type next to another type's duration/modality, and the
-// type resync effect never caught it (the type itself was already a valid pick).
-describe('PlanIntakeModal · default type/duration/modality come from the SAME option', () => {
-  it('prefills duration + modality from the tenant DEFAULT type even when it is not first in the list', async () => {
-    vi.mocked(useAppointmentTypes).mockReturnValue({
-      types: [
-        { value: 'quick_call', label: 'Quick call', default_duration_min: 15, default_modality: 'phone', is_intake: true, is_default: false },
-        { value: 'intake_flex', label: 'Intake Flex', default_duration_min: 45, default_modality: 'remote', is_intake: true, is_default: true },
-      ],
-      intakeTypes: [
-        { value: 'quick_call', label: 'Quick call', default_duration_min: 15, default_modality: 'phone', is_intake: true, is_default: false },
-        { value: 'intake_flex', label: 'Intake Flex', default_duration_min: 45, default_modality: 'remote', is_intake: true, is_default: true },
-      ],
-      metaOf: () => undefined,
-      defaultType: { value: 'intake_flex', label: 'Intake Flex', default_duration_min: 45, default_modality: 'remote', is_intake: true, is_default: true },
-    } as AppointmentTypesResult)
-    vi.mocked(api.post).mockResolvedValueOnce({ data: {} })
-    const user = userEvent.setup()
-    render(<PlanIntakeModal candidateId="cand-1" onClose={noop} onCreated={noop} />)
-    await user.click(screen.getByRole('button', { name: 'work.createIntake' }))
-    // The default type ('intake_flex', 45min/remote) must reach the POST body —
-    // not the first list entry's ('quick_call', 15min/phone) duration/modality.
-    expect(api.post).toHaveBeenCalledWith('/candidates/cand-1/appointments', expect.objectContaining({
-      type: 'intake_flex', duration_min: 45, modality: 'remote',
-    }))
-  })
-})
-
-// BUG FIX: the submit body used to fall back to the hardcoded slug `type: type ||
-// 'intake'` — not a real tenant vocabulary entry (appointment types are tenant-
-// configurable, §3B) and never guaranteed to exist. When a tenant has zero
-// appointment types configured, there is nothing honest to submit — the form now
-// refuses (disabled submit button, no POST) instead of guessing a slug.
-describe('PlanIntakeModal · no hardcoded type fallback', () => {
-  it('disables submit and never calls the API when the tenant has no appointment types configured', () => {
-    vi.mocked(useAppointmentTypes).mockReturnValue({
-      types: [], intakeTypes: [], metaOf: () => undefined, defaultType: undefined,
-    } as unknown as AppointmentTypesResult)
-    render(<PlanIntakeModal candidateId="cand-1" onClose={noop} onCreated={noop} />)
-    const submitBtn = screen.getByRole('button', { name: 'work.createIntake' })
-    expect(submitBtn).toBeDisabled()
-    fireEvent.click(submitBtn)
-    expect(api.post).not.toHaveBeenCalled()
-  })
-})
-
-describe('PlanIntakeModal · AXIS-MATRIX-2 preflight (CMFE audit R1)', () => {
-  it('warn: shows the banner but leaves the submit button enabled', () => {
-    vi.mocked(useActionRulePreflight).mockReturnValue({
-      decision: { effect: 'warn', popup_code: 'P1', message: 'Piet is tijdelijk niet inzetbaar (ziek).' }, loading: false, error: false,
-    })
-    render(<PlanIntakeModal candidateId="cand-1" onClose={noop} onCreated={noop} />)
-    expect(screen.getByTestId('action-rule-banner')).toHaveAttribute('data-effect', 'warn')
-    expect(screen.getByRole('button', { name: 'work.createIntake' })).toBeEnabled()
-  })
-
-  it('block: shows the banner and disables the submit button', () => {
-    vi.mocked(useActionRulePreflight).mockReturnValue({
-      decision: { effect: 'block', popup_code: 'P3', message: 'Piet staat op de blacklist.' }, loading: false, error: false,
-    })
-    render(<PlanIntakeModal candidateId="cand-1" onClose={noop} onCreated={noop} />)
-    expect(screen.getByTestId('action-rule-banner')).toHaveAttribute('data-effect', 'block')
-    expect(screen.getByRole('button', { name: 'work.createIntake' })).toBeDisabled()
-  })
-
-  it('never gates the EDIT path — the backend guard only runs on create, so a block decision is not even shown', () => {
-    vi.mocked(useActionRulePreflight).mockReturnValue({
-      decision: { effect: 'block', popup_code: 'P3', message: 'Piet staat op de blacklist.' }, loading: false, error: false,
-    })
-    render(<PlanIntakeModal candidateId="cand-1" onClose={noop} onCreated={noop}
-      existing={{ id: 'appt-1', scheduled_at: '2026-07-20T10:00:00Z', type: 'intake_flex' }} />)
-    expect(screen.queryByTestId('action-rule-banner')).not.toBeInTheDocument()
-    expect(screen.getByRole('button', { name: 'common:save' })).toBeEnabled()
-  })
-})
-
-// VAC-CLEAR in the intake modal (Danny 13-08): the hint says 'laat leeg', so a
-// picked vacancy must be releasable — the clear cross resets to no-vacancy.
-it('clears a picked vacancy back to an intake without vacancy', async () => {
-  render(<PlanIntakeModal candidateId="cand-1" defaultVacancyId="v1" onClose={noop} onCreated={noop} />)
-  // The VAC-CLEAR cross carries the field name in its accessible name.
-  const clear = await screen.findByTitle(/clearField/i)
-  fireEvent.click(clear)
-  // The picker shows its placeholder again — nothing selected.
-  expect(await screen.findByText(/work\.noVacancy/i)).toBeInTheDocument()
-})
-
-// KOIOS-VOORSTEL-1: the suggested vacancy renders the Koios badge — and the badge
-// dissolves the moment the recruiter clears the proposal (then it is their choice).
-it('shows the Koios badge on a SUGGESTED vacancy and dissolves it on clear', async () => {
-  render(<PlanIntakeModal candidateId="cand-1" suggestedVacancyId="v1" onClose={noop} onCreated={noop} />)
-  expect(await screen.findByTestId('koios-suggestion')).toBeInTheDocument()
-  fireEvent.click(await screen.findByTitle(/clearField/i))
-  expect(screen.queryByTestId('koios-suggestion')).toBeNull()
-})
-
-it('shows NO badge for an explicit defaultVacancyId (context, not a proposal)', async () => {
-  render(<PlanIntakeModal candidateId="cand-1" defaultVacancyId="v1" onClose={noop} onCreated={noop} />)
-  fireEvent.click(await screen.findByTitle(/clearField/i)) // sanity: field seeded
-  expect(screen.queryByTestId('koios-suggestion')).toBeNull()
-})
-
-// CLEAR-SWEEP seam test (control round 13-08: placeholder-asserts let a dead edit
-// path ship green). Editing an appointment, clearing the vacancy and saving must
-// PATCH vacancy_id: null — an omitted key means 'unchanged' server-side.
-it('edit + clear + save PATCHes vacancy_id: null (the request, not the placeholder)', async () => {
-  render(<PlanIntakeModal candidateId="cand-1"
-    existing={{ id: 'appt-1', scheduled_at: '2026-08-14T10:00', vacancy_id: 'v1' }}
-    onClose={noop} onCreated={noop} />)
-  fireEvent.click(await screen.findByTitle(/clearField/i))
-  fireEvent.click(screen.getByRole('button', { name: /work\.saveAppointment|common:save|save/i }))
-  await waitFor(() => {
-    const patch = vi.mocked(api.patch).mock.calls.at(-1)
-    expect(patch?.[1]).toMatchObject({ vacancy_id: null })
-  })
-})
-
-// Afspraak-as (C.14, Danny 31-08 — Opus verifier round, fixed 02-09): `modality`
-// (office/remote/phone, proposed by the appointment type) is a fixed AXIS, shown
-// read-only right after Type; the "where" combobox below it is its DETAIL. The
-// verifier found the ORIGINAL slice faked an address-vs-link distinction the
-// backend cannot honour (StoreAppointmentRequest::lookupRules validates
-// `appointment_location` against the tenant's configured lookup slugs whenever one
-// exists — free text 422s for any tenant with a configured lookup, i.e. virtually
-// every live tenant), so the detail field is now ONE neutral picker for both
-// office and remote, and a stale pick must never survive a switch to phone.
-describe('PlanIntakeModal · Afspraak-as (modality axis + its detail field)', () => {
-  const typeFixture = (modality: 'office' | 'remote' | 'phone') => ({
-    types: [{ value: 't1', label: 'Type 1', default_duration_min: 30, default_modality: modality, is_intake: true, is_default: true }],
-    intakeTypes: [{ value: 't1', label: 'Type 1', default_duration_min: 30, default_modality: modality, is_intake: true, is_default: true }],
-    metaOf: () => ({ default_duration_min: 30, default_modality: modality }),
-    defaultType: { value: 't1', label: 'Type 1', default_duration_min: 30, default_modality: modality, is_intake: true, is_default: true },
-  } as AppointmentTypesResult)
-
-  it('shows the resolved modality read-only, visible before saving (office)', () => {
-    vi.mocked(useAppointmentTypes).mockReturnValue(typeFixture('office'))
-    render(<PlanIntakeModal candidateId="cand-1" onClose={noop} onCreated={noop} />)
-    expect(screen.getByText('work.modality')).toBeInTheDocument()
-    expect(screen.getByText('work.modalityOffice')).toBeInTheDocument()
-  })
-
-  it('shows the resolved modality read-only, visible before saving (remote)', () => {
-    vi.mocked(useAppointmentTypes).mockReturnValue(typeFixture('remote'))
-    render(<PlanIntakeModal candidateId="cand-1" onClose={noop} onCreated={noop} />)
-    expect(screen.getByText('work.modality')).toBeInTheDocument()
-    expect(screen.getByText('work.modalityRemote')).toBeInTheDocument()
-  })
-
-  it('shows the resolved modality read-only, visible before saving (phone)', () => {
-    vi.mocked(useAppointmentTypes).mockReturnValue(typeFixture('phone'))
-    render(<PlanIntakeModal candidateId="cand-1" onClose={noop} onCreated={noop} />)
-    expect(screen.getByText('work.modality')).toBeInTheDocument()
-    expect(screen.getByText('work.modalityPhone')).toBeInTheDocument()
-  })
-
-  it('shows the SAME neutral location picker for an on-location (office) appointment — no address-only wording', () => {
-    vi.mocked(useAppointmentTypes).mockReturnValue(typeFixture('office'))
-    render(<PlanIntakeModal candidateId="cand-1" onClose={noop} onCreated={noop} />)
-    expect(screen.getByText('work.modalityWhere')).toBeInTheDocument()
-    // Accessible name is composed from the row label (verifier point 5) — never
-    // just the placeholder text — proving the label id is actually wired in.
-    // DROPDOWN-CLEAR-1: filter to the trigger button (has aria-haspopup), not the clear X.
-    const modalityButtons = screen.getAllByRole('button', { name: /work\.modalityWhere/ })
-    expect(modalityButtons.find(btn => btn.hasAttribute('aria-haspopup'))).toBeInTheDocument()
-  })
-
-  it('shows the SAME neutral location picker for a remote (video) appointment — BE only accepts configured lookup slugs, never free text', () => {
-    vi.mocked(useAppointmentTypes).mockReturnValue(typeFixture('remote'))
-    render(<PlanIntakeModal candidateId="cand-1" onClose={noop} onCreated={noop} />)
-    expect(screen.getByText('work.modalityWhere')).toBeInTheDocument()
-    // DROPDOWN-CLEAR-1: filter to the trigger button (has aria-haspopup), not the clear X.
-    const modalityButtons = screen.getAllByRole('button', { name: /work\.modalityWhere/ })
-    expect(modalityButtons.find(btn => btn.hasAttribute('aria-haspopup'))).toBeInTheDocument()
-  })
-
-  it('hides the detail field entirely for a phone appointment', () => {
-    vi.mocked(useAppointmentTypes).mockReturnValue(typeFixture('phone'))
-    render(<PlanIntakeModal candidateId="cand-1" onClose={noop} onCreated={noop} />)
-    expect(screen.queryByText('work.modalityWhere')).not.toBeInTheDocument()
-    expect(document.getElementById('intake-where')).not.toBeInTheDocument()
-  })
-})
-
-// MODALITY-PHONE-CLEAR-1 (Opus verifier, HIGH): a phone appointment hides the
-// detail row, but the OLD form state still carried whatever office/remote value
-// was seeded or picked earlier — proven live by the verifier: submitting after
-// switching to a phone type sent the stale appointment_location/location_id.
-// Asserting the REQUEST (§13), not just the hidden UI.
-describe('PlanIntakeModal · MODALITY-PHONE-CLEAR-1 (phone never submits a stale location)', () => {
-  const phoneFixture = {
-    types: [{ value: 't1', label: 'Bel-intake', default_duration_min: 15, default_modality: 'phone', is_intake: true, is_default: true }],
-    intakeTypes: [{ value: 't1', label: 'Bel-intake', default_duration_min: 15, default_modality: 'phone', is_intake: true, is_default: true }],
-    metaOf: () => ({ default_duration_min: 15, default_modality: 'phone' }),
-    defaultType: { value: 't1', label: 'Bel-intake', default_duration_min: 15, default_modality: 'phone', is_intake: true, is_default: true },
-  } as AppointmentTypesResult
-
-  it('sends location_id and appointment_location as null when the (default) type is a phone appointment', async () => {
-    vi.mocked(useAppointmentTypes).mockReturnValue(phoneFixture)
-    vi.mocked(api.post).mockResolvedValueOnce({ data: {} })
-    const user = userEvent.setup()
-    render(<PlanIntakeModal candidateId="cand-1" onClose={noop} onCreated={noop} />)
-    await user.click(screen.getByRole('button', { name: 'work.createIntake' }))
-    expect(api.post).toHaveBeenCalledWith('/candidates/cand-1/appointments', expect.objectContaining({
-      modality: 'phone', location_id: null, appointment_location: null,
-    }))
-  })
-
-  it('clears a picked location when the recruiter switches TO a phone type, before submit', async () => {
-    vi.mocked(useAppointmentTypes).mockReturnValue({
-      types: [
-        { value: 'office_type', label: 'Intake kantoor', default_duration_min: 30, default_modality: 'office', is_intake: true, is_default: true },
-        { value: 'phone_type', label: 'Bel-intake', default_duration_min: 15, default_modality: 'phone', is_intake: true, is_default: false },
-      ],
-      intakeTypes: [
-        { value: 'office_type', label: 'Intake kantoor', default_duration_min: 30, default_modality: 'office', is_intake: true, is_default: true },
-        { value: 'phone_type', label: 'Bel-intake', default_duration_min: 15, default_modality: 'phone', is_intake: true, is_default: false },
-      ],
-      metaOf: (v: string) => v === 'phone_type'
-        ? { default_duration_min: 15, default_modality: 'phone' }
-        : { default_duration_min: 30, default_modality: 'office' },
-      defaultType: { value: 'office_type', label: 'Intake kantoor', default_duration_min: 30, default_modality: 'office', is_intake: true, is_default: true },
-    } as AppointmentTypesResult)
-    vi.mocked(api.post).mockResolvedValueOnce({ data: {} })
-    const user = userEvent.setup()
-    render(<PlanIntakeModal candidateId="cand-1" onClose={noop} onCreated={noop} />)
-    // Starts on the office type — the tenant default location ('kantoor') is seeded.
-    expect(await screen.findByText('work.modalityWhere')).toBeInTheDocument()
-
-    // Switch to the phone type via the Type picker.
-    await user.click(screen.getByRole('button', { name: 'Intake kantoor' }))
-    await user.click(await screen.findByRole('button', { name: 'Bel-intake' }))
-
-    // The detail row disappears — nothing left to submit.
-    expect(screen.queryByText('work.modalityWhere')).not.toBeInTheDocument()
-
-    await user.click(screen.getByRole('button', { name: 'work.createIntake' }))
-    expect(api.post).toHaveBeenCalledWith('/candidates/cand-1/appointments', expect.objectContaining({
-      modality: 'phone', location_id: null, appointment_location: null,
-    }))
-  })
-
-  it('still shows a location-related 422 error even though the detail row is hidden for a phone appointment', async () => {
-    vi.mocked(useAppointmentTypes).mockReturnValue(phoneFixture)
-    vi.mocked(api.post).mockRejectedValueOnce({ response: { data: { errors: { appointment_location: ['invalid'] } } } })
-    const user = userEvent.setup()
-    render(<PlanIntakeModal candidateId="cand-1" onClose={noop} onCreated={noop} />)
-    expect(screen.queryByText('work.modalityWhere')).not.toBeInTheDocument()
-
-    await user.click(screen.getByRole('button', { name: 'work.createIntake' }))
-    // The picker itself stays hidden (nothing to fill in for phone) but the error
-    // still surfaces (verifier point 4) — a hidden field must not swallow its 422.
-    expect(await screen.findByText('common:required')).toBeInTheDocument()
-    expect(screen.getByText('work.modalityWhere')).toBeInTheDocument()
-    expect(document.getElementById('intake-where')).not.toBeInTheDocument()
   })
 })

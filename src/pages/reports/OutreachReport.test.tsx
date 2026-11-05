@@ -1,11 +1,11 @@
 import { describe, it, expect, vi, afterEach } from 'vitest'
-import { render, screen, within } from '@testing-library/react'
+import { render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import OutreachReport from './OutreachReport'
 import i18n from '@/i18n'
-import { EMPTY_REPORT_FILTERS } from './reportFilterParams'
-import type { OutreachReportData } from '@/types/analytics'
+import { data, dataWithSuite } from './OutreachReport.testKit'
+
 
 // Data layer under test control (loading/error/empty/success — the four UI states).
 const mockUseOutreachReport = vi.fn()
@@ -32,59 +32,6 @@ vi.mock('@/lib/settings/useAllSettings', async () => {
   const actual = await vi.importActual('@/lib/settings/useAllSettings')
   return { ...actual, useAllSettings: () => mockSettings() }
 })
-
-// Portie-6 payload: the fase-1 fields (total_targets/reached/reach_rate + legacy
-// status/outcome keys) are still present; every new axis sums to `total`. The
-// series has NO ghost zero-bucket — series[0].date === from.
-const data: OutreachReportData = {
-  period: 'month', from: '2026-05-14', to: '2026-08-14',
-  total_targets: 40, reached: 25, reach_rate: 0.63, total: 40,
-  timeseries: { bucket: 'week', series: [
-    { date: '2026-05-14', label: 'Wk 20', value: 18 },
-    { date: '2026-08-10', label: 'Wk 33', value: 22 },
-  ] },
-  by_status: [
-    { status: 'contacted', value: 'contacted', label: 'Benaderd', count: 25 },
-    { status: 'new', value: 'new', label: 'Nieuw', count: 11 },
-    // Orphan-string status: its own "Onbekend" bar, drillable on the RAW value.
-    { status: 'weird-legacy-status', value: 'weird-legacy-status', label: 'Onbekend', count: 4 },
-  ],
-  by_outcome: [
-    { outcome: 'interested', value: 'interested', label: 'Interested', count: 10, share_of_reached: 0.4 },
-    { outcome: 'not_interested', value: 'not_interested', label: 'Geen interesse', count: 15, share_of_reached: 0.6 },
-    // The sentinel that makes the axis sum to total (targets without any outcome).
-    { outcome: 'none', value: 'none', label: 'Geen uitkomst', count: 15, share_of_reached: null },
-  ],
-  by_campaign: [
-    { value: 'camp-1', label: 'Bellijst Q3 wondzorg', count: 20 },
-    // An archived campaign keeps its real name and stays drillable on its uuid.
-    { value: 'camp-archived-uuid', label: 'Voorjaarsactie 2026', count: 12 },
-    { value: 'others', label: 'Overige bellijsten', count: 8 },
-  ],
-  by_assignee: [
-    { owner_id: 'u1', name: 'Anna de Vries', count: 30 },
-    { owner_id: 'none', name: 'Niet toegewezen', count: 10 },
-  ],
-  channel_funnel: [
-    { channel: 'call', total: 12, reached: 8, applied: 3, placed: 1 },
-  ],
-  by_channel: [
-    { value: 'phone', label: 'Telefoon', count: 26 },
-    { value: 'whatsapp', label: 'WhatsApp', count: 9 },
-    { value: 'none', label: 'Geen kanaal', count: 5 },
-  ],
-}
-
-// KPI-OUTREACH-1: the server suite the strip renders verbatim — one entry per
-// drill-enum key, value and drawer sharing one backend predicate.
-const suiteKpis = [
-  { key: 'total_targets', count: 40 }, { key: 'open_todo', count: 12 },
-  { key: 'called_in_period', count: 28 }, { key: 'reached', count: 25 },
-  { key: 'not_reached', count: 15 }, { key: 'conversion_pct', count: 62.5 },
-  { key: 'campaigns_active', count: 3 }, { key: 'campaigns_done_in_period', count: 1 },
-  { key: 'due_today', count: 4 },
-]
-const dataWithSuite: OutreachReportData = { ...data, kpis: suiteKpis }
 
 function renderReport() {
   const qc = new QueryClient()
@@ -129,22 +76,6 @@ vi.mock('@/components/charts/WeeklyBarChartCard', () => ({
     )))}</>
   ),
 }))
-
-
-// RAPPORT-FILTERS-2: the panel filters reach the hook AND every drill (kpi card here).
-describe('OutreachReport · panel filters reach hook and drill', () => {
-  it('sends the active panel filters to BOTH the report hook and a kpi drill click', async () => {
-    const user = userEvent.setup()
-    const filters = { ...EMPTY_REPORT_FILTERS, status: ['todo'], ownerId: ['u1'], locationId: ['l1'] }
-    mockUseOutreachReport.mockReturnValue({ data: { ...data, kpis: suiteKpis }, loading: false, error: false })
-    render(<QueryClientProvider client={new QueryClient()}><OutreachReport period="month" filters={filters} /></QueryClientProvider>)
-    expect(mockUseOutreachReport).toHaveBeenCalledWith('month', filters)
-    await user.click(screen.getByText(i18n.t('outreach.kpi.conversionPct', { ns: 'analytics' })))
-    expect(getSpy).toHaveBeenCalledWith('/reports/outreach/kpis/drill', expect.objectContaining({
-      params: expect.objectContaining({ kpi: 'conversion_pct', period: 'month', status: ['todo'], owner_id: ['u1'], location_id: ['l1'] }),
-    }))
-  })
-})
 
 describe('OutreachReport (RAPPORTEN-SUITE-1 portie 6, bellijsten report)', () => {
   // Every section now defaults its own list on mount, firing extra drill/advice
@@ -457,64 +388,5 @@ describe('OutreachReport (RAPPORTEN-SUITE-1 portie 6, bellijsten report)', () =>
     await user.click(screen.getAllByText('Interested').at(-1)!)
     expect(getSpy).toHaveBeenCalledWith('/reports/outreach/drill',
       expect.objectContaining({ params: { outcome: 'interested', period: 'month' } }))
-  })
-})
-
-// KPI-BUILDER-FE-1: tenant-defined KPI cards ride a second band row, opening
-// the shared /reports/kpi-definitions/{id}/drill route.
-describe('OutreachReport (custom KPI band, KPI-BUILDER-FE-1)', () => {
-  it('renders a tenant-defined card with label, formatted value, target caption and band title', () => {
-    mockUseOutreachReport.mockReturnValue({
-      data: { ...data, custom_kpis: [
-        { id: 'kd-1', entity: 'outreach', metric_key: 'reached_count', label: 'Tenant bereikt', dimension: 'all', dimension_value: null, dimension_label: null, value: 40, unit: 'count', target: 60, warn: null, comparison: 'gte', status: 'alert' },
-      ] },
-      loading: false, error: false,
-    })
-    renderReport()
-    expect(screen.getByText('Eigen KPI\'s')).toBeInTheDocument()
-    expect(screen.getByText('Tenant bereikt')).toBeInTheDocument()
-    expect(screen.getByText('40')).toBeInTheDocument()
-    expect(screen.getByText(/doel 60/)).toBeInTheDocument()
-  })
-
-  it('opens the definition drill route with only the accepted params on click', async () => {
-    const user = userEvent.setup()
-    mockUseOutreachReport.mockReturnValue({
-      data: { ...data, custom_kpis: [
-        { id: 'kd-1', entity: 'outreach', metric_key: 'reached_count', label: 'Tenant bereikt', dimension: 'all', dimension_value: null, dimension_label: null, value: 40, unit: 'count', target: 60, warn: null, comparison: 'gte', status: 'alert' },
-      ] },
-      loading: false, error: false,
-    })
-    renderReport()
-    await user.click(screen.getByText('Tenant bereikt'))
-    expect(getSpy).toHaveBeenCalledWith('/reports/kpi-definitions/kd-1/drill', expect.anything())
-    const [, opts] = getSpy.mock.calls.find(c => c[0] === '/reports/kpi-definitions/kd-1/drill')!
-    const params = (opts as { params: Record<string, unknown> }).params
-    expect(params.period).toBe('month')
-    expect(params.kpi).toBeUndefined()
-    expect(params.date).toBeUndefined()
-    expect(params.phase_filter).toBeUndefined()
-  })
-
-  it('renders a dash and no request for a null-value card', async () => {
-    mockUseOutreachReport.mockReturnValue({
-      data: { ...data, custom_kpis: [
-        { id: 'kd-2', entity: 'outreach', metric_key: 'idle', label: 'Leeg', dimension: 'all', dimension_value: null, dimension_label: null, value: null, unit: 'count', target: null, warn: null, comparison: 'none', status: 'ok' },
-      ] },
-      loading: false, error: false,
-    })
-    renderReport()
-    expect(screen.getByText('Leeg')).toBeInTheDocument()
-    const card = screen.getByText('Leeg').parentElement!
-    expect(within(card).getByText('—')).toBeInTheDocument()
-    const user = userEvent.setup()
-    await user.click(screen.getByText('Leeg'))
-    expect(getSpy).not.toHaveBeenCalledWith('/reports/kpi-definitions/kd-2/drill', expect.anything())
-  })
-
-  it('renders exactly as today when the envelope carries no custom_kpis', () => {
-    mockUseOutreachReport.mockReturnValue({ data, loading: false, error: false })
-    renderReport()
-    expect(screen.queryByText('Eigen KPI\'s')).not.toBeInTheDocument()
   })
 })

@@ -4,9 +4,9 @@ import userEvent from '@testing-library/user-event'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import ApplicationsReport from './ApplicationsReport'
 import i18n from '@/i18n'
-import type { ApplicationsReportData } from '@/types/analytics'
 import { getReportKpiCatalog } from './kpiCatalog'
 import { EMPTY_REPORT_FILTERS } from './reportFilterParams'
+import { data } from './ApplicationsReport.testKit'
 
 // Data layer under test control (loading/error/empty/success — the four UI states).
 const mockUseApplicationsReport = vi.fn()
@@ -33,53 +33,6 @@ vi.mock('@/lib/settings/useAllSettings', async () => {
   const actual = await vi.importActual('@/lib/settings/useAllSettings')
   return { ...actual, useAllSettings: () => mockSettings() }
 })
-
-const data: ApplicationsReportData = {
-  period: 'month', from: '2026-08-01', to: '2026-08-31', total: 20,
-  timeseries: { bucket: 'week', series: [{ date: '2026-08-03', label: 'Wk 32', value: 8 }, { date: '2026-08-10', label: 'Wk 33', value: 12 }] },
-  by_bucket: { active: 10, matched: 4, rejected: 3, placed: 3 },
-  by_stage: [
-    // eslint-disable-next-line no-restricted-syntax -- DATA: server lookup colour in a test fixture, not UI styling
-    { value: 'applied', label: 'Applied', color: '#16a34a', count: 10, direct_entries: 4 },
-    { value: 'none', label: 'Geen fase', color: null, count: 2, direct_entries: 0 },
-  ],
-  by_source: [{ value: 'referral', label: 'Referral', color: null, count: 6 }],
-  by_owner: [
-    { owner_id: 'u1', name: 'Anna de Vries', count: 12 },
-    { owner_id: 'none', name: 'Niet toegewezen', count: 8 },
-  ],
-  by_customer: [
-    { value: 'c1', label: 'Yesway Flex', count: 15 },
-    { value: 'none', label: 'Geen klant', count: 3 },
-    { value: 'others', label: 'Overig', count: 2 },
-  ],
-  by_vacancy: [
-    { value: 'v1', label: 'Verpleegkundige (gearchiveerd)', count: 9 },
-    { value: 'others', label: 'Overig', count: 1 },
-  ],
-  by_stage_duration: [
-    { value: 'applied', label: 'Applied (duration)', count: 5, avg_days_in_phase: 12.5 },
-    { value: 'intake', label: 'Intake (duration)', count: 3, avg_days_in_phase: 4 },
-  ],
-  // RAPPORT-APPS-VERDIEPING-1: the nine server-card envelope, ignored server
-  // `label` (§5 — labels come from i18n, mirrors WhatsappReportData fixture).
-  kpis: [
-    { key: 'total', label: 'ignored', count: 20 },
-    { key: 'new', label: 'ignored', count: 5 },
-    { key: 'active', label: 'ignored', count: 10 },
-    { key: 'matched', label: 'ignored', count: 4 },
-    { key: 'rejected', label: 'ignored', count: 3 },
-    { key: 'conversion_pct', label: 'ignored', count: 20 },
-    { key: 'avg_days_to_match', label: 'ignored', count: 6 },
-    { key: 'too_long_in_stage', label: 'ignored', count: 2 },
-    { key: 'missing_appointment', label: 'ignored', count: 1 },
-  ],
-  intakes: {
-    planned: 13, done_in_period: 11,
-    by_recruiter: [{ owner_id: 'u2', name: 'Bram Smit', count: 3 }],
-    by_branch: [{ value: 'b1', label: 'Amsterdam', count: 4 }],
-  },
-}
 
 function renderReport() {
   const qc = new QueryClient()
@@ -479,46 +432,5 @@ describe('ApplicationsReport (RAPPORTEN-SUITE-1 portie 2)', () => {
   // panel (ReportsPage) — the page itself renders NO inline compare control.
   it('renders no inline compare control (moved to the right filter panel)', () => {
     expect(screen.queryByText('Vergelijk met')).not.toBeInTheDocument()
-  })
-})
-
-// KPI-BUILDER-FE-1 slice 3: tenant-defined KPI cards ride a second band row.
-describe('ApplicationsReport · tenant custom KPI cards (KPI-BUILDER-FE-1)', () => {
-  afterEach(() => { getSpy.mockClear() })
-
-  const customKpi = {
-    id: 'kd-1', entity: 'application' as const, metric_key: 'new_in_period', label: 'Nieuwe sollicitaties',
-    dimension: 'all', dimension_value: null, dimension_label: null, value: 14, unit: 'count' as const,
-    target: 15, warn: null, comparison: 'gte' as const, status: 'alert' as const,
-  }
-
-  it('renders the tenant card with its label/value/target caption and the band title', () => {
-    mockUseApplicationsReport.mockReturnValue({ data: { ...data, custom_kpis: [customKpi] }, loading: false, error: false })
-    renderReport()
-    expect(screen.getByText("Eigen KPI's")).toBeInTheDocument()
-    expect(screen.getByText('Nieuwe sollicitaties')).toBeInTheDocument()
-    expect(screen.getByText('14')).toBeInTheDocument()
-    expect(screen.getByText(/doel 15/)).toBeInTheDocument()
-  })
-
-  it('clicking the tenant card opens the definition drill with the accepted params only', async () => {
-    const user = userEvent.setup()
-    mockUseApplicationsReport.mockReturnValue({ data: { ...data, custom_kpis: [customKpi] }, loading: false, error: false })
-    renderReport()
-    await user.click(screen.getByTitle('Nieuwe sollicitaties'))
-    expect(getSpy).toHaveBeenCalledWith('/reports/kpi-definitions/kd-1/drill', expect.objectContaining({ params: expect.objectContaining({ period: 'month' }) }))
-    const call = getSpy.mock.calls.find(c => c[0] === '/reports/kpi-definitions/kd-1/drill')
-    expect(call?.[1].params).not.toHaveProperty('kpi')
-    expect(call?.[1].params).not.toHaveProperty('date')
-    expect(call?.[1].params).not.toHaveProperty('phase_filter')
-  })
-
-  it('renders a dash with no click for a null-value tenant card', async () => {
-    const user = userEvent.setup()
-    mockUseApplicationsReport.mockReturnValue({ data: { ...data, custom_kpis: [{ ...customKpi, value: null }] }, loading: false, error: false })
-    renderReport()
-    expect(screen.getByText('Nieuwe sollicitaties')).toBeInTheDocument()
-    await user.click(screen.getByTitle('Nieuwe sollicitaties'))
-    expect(getSpy.mock.calls.some(c => c[0] === '/reports/kpi-definitions/kd-1/drill')).toBe(false)
   })
 })
