@@ -3,6 +3,7 @@ import { render, screen, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import VacanciesReport from './VacanciesReport'
+import { row, data, dataWithKpis } from './VacanciesReport.testKit'
 import type { VacanciesReportData } from '@/types/analytics'
 import i18n from '@/i18n'
 
@@ -30,48 +31,6 @@ vi.mock('@/lib/settings/useAllSettings', async () => {
   const actual = await vi.importActual('@/lib/settings/useAllSettings')
   return { ...actual, useAllSettings: () => mockSettings() }
 })
-
-const row = {
-  key: 'v1', label: 'Verpleegkundige IC', code: 'VAC-1',
-  status: { value: 'open', label: 'Open' },
-  customer: { id: 'c1', name: 'Rivas Zorggroep' },
-  applications: 4, applications_by_phase: [], matched: 2, filled: false, time_to_fill_days: null,
-}
-const data: VacanciesReportData = {
-  period: 'month', from: '2026-05-14', to: '2026-08-14',
-  summary: {
-    total: 12, open: 8, filled: 4, fill_rate: 0.33, avg_time_to_fill_days: 11.4, stale_online: 2, long_concept: 1, no_matches: 3,
-    advice_stale: 2, advice_stale_days: 14, closing_soon: 1, closing_soon_days: 7,
-  },
-  vacancies: [row],
-  total: 12,
-  timeseries: { bucket: 'week', series: [
-    { date: '2026-08-03', label: 'Wk 32', value: 5 },
-    { date: '2026-08-10', label: 'Wk 33', value: 7 },
-  ] },
-  by_status: [
-    // eslint-disable-next-line no-restricted-syntax -- API fixture colour (DATA, mirrors the live row)
-    { value: 'st-uuid-1', label: 'Gepubliceerd', color: '#16a34a', count: 6 },
-    { value: 'none', label: 'Geen status', color: null, count: 3 },
-    { value: '9c1d-deleted-status-uuid', label: 'Onbekend (verwijderde status)', color: null, count: 3 },
-  ],
-  by_customer: [
-    { value: 'cust-1', label: 'Careyn', count: 7 },
-    { value: 'none', label: 'Geen klant', count: 3 },
-    { value: 'others', label: 'Overig', count: 2 },
-  ],
-  by_function: [
-    { value: 'Verzorgende IG', label: 'Verzorgende IG', count: 9 },
-    { value: 'none', label: 'Geen functie', count: 2 },
-    { value: 'others', label: 'Overig', count: 1 },
-  ],
-  by_industry: [{ value: 'Zorg', label: 'Zorg', color: null, count: 12 }],
-  by_owner: [
-    { owner_id: 'u1', name: 'Anna de Vries', count: 9 },
-    { owner_id: 'none', name: 'Niet toegewezen', count: 3 },
-  ],
-  by_branch: [{ value: 'utrecht', label: 'Utrecht', color: null, count: 12 }],
-}
 
 function renderReport() {
   const qc = new QueryClient()
@@ -361,153 +320,6 @@ describe('VacanciesReport (RAPPORTEN-SUITE-1 portie 4, additive on C-34)', () =>
     expect(within(dialog).getByText(i18n.t('vacancies.cols.applications', { ns: 'analytics' }), { exact: false })).toBeInTheDocument()
   })
 
-  // KPI-VAC-1 (CMBE 28-08, BuildsVacancyKpis): the strip now reads the server's
-  // own nine-card kpis[] suite verbatim — supersedes the old summary/top-segment
-  // KPI tests above (topIndustry/topOwner/topFunction/topBranch/adviceStale/ttf
-  // left the strip; their data keeps a surface below — see VacanciesReport.tsx's
-  // KPI-VAC-1 comment). Distinct numeric values per card so each is an
-  // unambiguous text node against the rest of the page.
-  const vacancyKpis: NonNullable<VacanciesReportData['kpis']> = [
-    { key: 'total', count: 84 },
-    { key: 'open', count: 51 },
-    { key: 'filled', count: 29 },
-    { key: 'fill_rate', count: 0.345, unit: 'ratio' },
-    { key: 'stale_online', count: 17 },
-    { key: 'long_concept', count: 13 },
-    { key: 'no_matches', count: 19 },
-    { key: 'closing_soon', count: 23 },
-    { key: 'customers_count', count: 37 },
-  ]
-  const dataWithKpis: VacanciesReportData = { ...data, kpis: vacancyKpis }
-
-  // Asserts (or denies) a rendered element's semantic ink token — the token lives
-  // in the assertion argument, not in a style literal (mirrors MatchesReport.test.tsx).
-  function expectInk(el: HTMLElement, token: string, opts?: { absent?: boolean }) {
-    const m = expect(el)
-    if (opts?.absent) m.not.toHaveInlineStyle({ color: token })
-    else m.toHaveInlineStyle({ color: token })
-  }
-
-  describe('VacanciesReport (nine-card server-suite KPI strip, KPI-VAC-1)', () => {
-    beforeEach(() => { getSpy.mockClear() })
-
-    // Each plain-count card renders its own server value; fill_rate (unit
-    // 'ratio') renders ×100 with the shared UNIT-CANON formatter.
-    it('renders every suite card with its own value, fill_rate formatted via kpiUnitFormat', () => {
-      mockUseVacanciesReport.mockReturnValue({ data: dataWithKpis, loading: false, error: false })
-      renderReport()
-      for (const value of ['84', '51', '29', '17', '13', '19', '23', '37']) {
-        expect(screen.getByText(value)).toBeInTheDocument()
-      }
-      // fill_rate: 0.345 → formatRatio → "34,5%" (FMT-PROCENT-1: ≤1 decimal).
-      expect(screen.getByText('34,5%')).toBeInTheDocument()
-    })
-
-    // Semantic colour only on the four signal keys, only when non-zero (§4).
-    it('colours filled/stale_online/no_matches/closing_soon only, all non-zero in the fixture', () => {
-      mockUseVacanciesReport.mockReturnValue({ data: dataWithKpis, loading: false, error: false })
-      renderReport()
-      expectInk(screen.getByText('29'), 'var(--color-success)') // filled
-      expectInk(screen.getByText('17'), 'var(--color-warning)') // stale_online
-      expectInk(screen.getByText('19'), 'var(--color-danger)') // no_matches
-      expectInk(screen.getByText('23'), 'var(--color-warning)') // closing_soon
-      // A plain count key carries no signal colour (falls back to the house text token).
-      expectInk(screen.getByText('51'), 'var(--color-success)', { absent: true })
-    })
-
-    // Value and drill share ONE backend predicate per key: clicking any suite
-    // card requests /reports/vacancies/kpis/drill?kpi=<its own key> (§13 mutation test).
-    it('clicking a suite card drills via its own kpi key', async () => {
-      const user = userEvent.setup()
-      mockUseVacanciesReport.mockReturnValue({ data: dataWithKpis, loading: false, error: false })
-      renderReport()
-      getSpy.mockClear()
-      await user.click(screen.getByText('13')) // long_concept
-      expect(getSpy).toHaveBeenCalledWith('/reports/vacancies/kpis/drill',
-        expect.objectContaining({ params: expect.objectContaining({ kpi: 'long_concept', period: 'month' }) }))
-      getSpy.mockClear()
-      await user.click(screen.getByText('34,5%')) // fill_rate
-      expect(getSpy).toHaveBeenCalledWith('/reports/vacancies/kpis/drill',
-        expect.objectContaining({ params: expect.objectContaining({ kpi: 'fill_rate', period: 'month' }) }))
-    })
-
-    // PARITY EXCEPTION (KPI-VAC-1, documented BE-side): customers_count counts
-    // DISTINCT customers while its drill lists those customers' VACANCIES (rows
-    // ≥ card value) — the card wires an explicit subtitle naming the exception
-    // instead of the default window text.
-    it('the customers_count card drills with its documented parity-exception subtitle', async () => {
-      const user = userEvent.setup()
-      mockUseVacanciesReport.mockReturnValue({ data: dataWithKpis, loading: false, error: false })
-      renderReport()
-      await user.click(screen.getByText('37')) // customers_count
-      expect(getSpy).toHaveBeenCalledWith('/reports/vacancies/kpis/drill',
-        expect.objectContaining({ params: expect.objectContaining({ kpi: 'customers_count', period: 'month' }) }))
-      const dialog = await screen.findByRole('dialog')
-      expect(within(dialog).getByText(i18n.t('vacancies.kpi.customersCountDrillSub', { ns: 'analytics' }))).toBeInTheDocument()
-    })
-
-    // Honest fallback (UNIT-CANON): with no kpis[] at all (a pre-suite cached
-    // envelope), every card renders the house dash with no drill affordance —
-    // never a value from another population.
-    it('renders dashes with no drill when kpis[] is absent from the envelope', async () => {
-      const user = userEvent.setup()
-      mockUseVacanciesReport.mockReturnValue({ data, loading: false, error: false })
-      renderReport()
-      expect(screen.getAllByText('—').length).toBeGreaterThanOrEqual(9)
-      getSpy.mockClear()
-      await user.click(screen.getAllByText('—')[0])
-      expect(getSpy).not.toHaveBeenCalledWith('/reports/vacancies/kpis/drill', expect.anything())
-    })
-
-    // RAPPORT-KPI-INSTELBAAR: which nine keys render, and in what order, is the
-    // tenant's stored Settings → Reports choice, not the hardcoded default order.
-    it('renders the KPI strip in the tenant-chosen stored order', () => {
-      const reorderedKeys = [
-        'customers_count', 'closing_soon', 'no_matches', 'long_concept', 'stale_online', 'fill_rate', 'filled', 'open', 'total',
-      ]
-      mockUseReportKpiSelection.mockReturnValue({ data: reorderedKeys, isLoading: false })
-      mockUseVacanciesReport.mockReturnValue({ data: dataWithKpis, loading: false, error: false })
-      const { container } = renderReport()
-      const totalLabel = i18n.t('vacancies.kpi.total', { ns: 'analytics' })
-      const customersCountLabel = i18n.t('vacancies.kpi.customersCount', { ns: 'analytics' })
-      const text = container.textContent ?? ''
-      // The stored order puts customers_count FIRST and total LAST — the strip
-      // must render in that exact order, not today's hardcoded sequence.
-      expect(text.indexOf(customersCountLabel)).toBeGreaterThanOrEqual(0)
-      expect(text.indexOf(customersCountLabel)).toBeLessThan(text.indexOf(totalLabel))
-    })
-
-    // A vanished stored key falls back silently on the report itself (never a
-    // crash or a blank slot) but surfaces a visible notice via ReportKpiBand.
-    it('falls back a vanished stored key to the default and shows a notice, never crashing', () => {
-      mockUseReportKpiSelection.mockReturnValue({
-        data: [
-          'ghost_key', 'open', 'filled', 'fill_rate', 'stale_online', 'long_concept', 'no_matches', 'closing_soon', 'customers_count',
-        ],
-        isLoading: false,
-      })
-      mockUseVacanciesReport.mockReturnValue({ data: dataWithKpis, loading: false, error: false })
-      renderReport()
-      expect(screen.getByText(i18n.t('vacancies.kpi.total', { ns: 'analytics' }))).toBeInTheDocument() // backfilled default
-      expect(screen.getByText(i18n.t('vacancies.kpiOrderFellBack', { ns: 'analytics' }))).toBeInTheDocument()
-    })
-  })
-
-  // KPI-VAC-1: the catalogue is now the server suite's own nine keys — no
-  // spares (supersedes the old REPORTS-KPI-SPARE-1 six-spare block).
-  describe('VacanciesReport (kpi catalogue, KPI-VAC-1)', () => {
-    it('offers exactly the nine server-suite keys, in suite order, no spares', async () => {
-      const { getReportKpiCatalog, getReportKpiDefaultOrder, reportHasSpareKpiCards } = await import('./kpiCatalog')
-      const keys = getReportKpiCatalog('vacancies').map(c => c.key)
-      expect(keys).toEqual([
-        'total', 'open', 'filled', 'fill_rate', 'stale_online',
-        'long_concept', 'no_matches', 'closing_soon', 'customers_count',
-      ])
-      expect(getReportKpiDefaultOrder('vacancies')).toEqual(keys)
-      expect(reportHasSpareKpiCards('vacancies')).toBe(false)
-    })
-  })
-
   // PDF notification signal: vacancies with zero applications get their own honest
   // section, counted from the report's own complete row set (no fabricated number).
   it('lists vacancies with zero applications in their own section, and omits it when none exist', async () => {
@@ -526,7 +338,7 @@ describe('VacanciesReport (RAPPORTEN-SUITE-1 portie 4, additive on C-34)', () =>
 
   // KPI-VAC-1: the stale_online KPI card now drills via its own kpis/drill route
   // (superseded REPORTS-DRILL-2's plain-drill `stale_online=1` XOR param — see
-  // the KPI-VAC-1 suite describe block above for the shared kpi-key mechanism).
+  // the KPI-VAC-1 suite describe block in VacanciesReport.kpiStrip.test.tsx for the shared kpi-key mechanism).
   // The zero-applicants SECTION HEADER (a different, table-driven affordance)
   // still opens the backend's own `zero_applications=1` plain drill, a DIFFERENT
   // endpoint+param than the KPI card, so the two signals never collapse onto the
@@ -587,43 +399,5 @@ describe('VacanciesReport (RAPPORTEN-SUITE-1 portie 4, additive on C-34)', () =>
   // panel (ReportsPage) — the page itself renders NO inline compare control.
   it('renders no inline compare control (moved to the right filter panel)', () => {
     expect(screen.queryByText('Vergelijk met')).not.toBeInTheDocument()
-  })
-})
-
-// KPI-BUILDER-FE-1 slice 3: tenant-defined KPI cards ride a second band row.
-describe('VacanciesReport · tenant custom KPI cards (KPI-BUILDER-FE-1)', () => {
-  beforeEach(() => { getSpy.mockClear() })
-  const customKpi = {
-    id: 'kd-2', entity: 'vacancy' as const, metric_key: 'fill_rate', label: 'Eigen bezettingsgraad',
-    dimension: 'all', dimension_value: null, dimension_label: null, value: 62, unit: 'percent' as const,
-    target: 70, warn: null, comparison: 'gte' as const, status: 'warn' as const,
-  }
-
-  it('renders the tenant card with its label/value/target caption and the band title', () => {
-    mockUseVacanciesReport.mockReturnValue({ data: { ...data, custom_kpis: [customKpi] }, loading: false, error: false })
-    renderReport()
-    expect(screen.getByText("Eigen KPI's")).toBeInTheDocument()
-    expect(screen.getByText('Eigen bezettingsgraad')).toBeInTheDocument()
-    expect(screen.getByText(/doel 70/)).toBeInTheDocument()
-  })
-
-  it('clicking the tenant card opens the definition drill with the accepted params only', async () => {
-    const user = userEvent.setup()
-    mockUseVacanciesReport.mockReturnValue({ data: { ...data, custom_kpis: [customKpi] }, loading: false, error: false })
-    renderReport()
-    await user.click(screen.getByTitle('Eigen bezettingsgraad'))
-    expect(getSpy).toHaveBeenCalledWith('/reports/kpi-definitions/kd-2/drill', expect.objectContaining({ params: expect.objectContaining({ period: 'month' }) }))
-    const call = getSpy.mock.calls.find(c => c[0] === '/reports/kpi-definitions/kd-2/drill')
-    expect(call?.[1].params).not.toHaveProperty('kpi')
-    expect(call?.[1].params).not.toHaveProperty('date')
-  })
-
-  it('renders a dash with no click for a null-value tenant card', async () => {
-    const user = userEvent.setup()
-    mockUseVacanciesReport.mockReturnValue({ data: { ...data, custom_kpis: [{ ...customKpi, value: null }] }, loading: false, error: false })
-    renderReport()
-    expect(screen.getByText('Eigen bezettingsgraad')).toBeInTheDocument()
-    await user.click(screen.getByTitle('Eigen bezettingsgraad'))
-    expect(getSpy.mock.calls.some(c => c[0] === '/reports/kpi-definitions/kd-2/drill')).toBe(false)
   })
 })
