@@ -75,6 +75,26 @@ const base = {
 
 beforeEach(() => vi.clearAllMocks())
 
+describe('ContactsPanel · "no contact" lens (S014-FE-CHIP-1)', () => {
+  // The lens keeps only the rows the server flagged as out of touch; a second click lifts it again.
+  it('narrows the list to the contacts the server flags as no_contact_due and restores it on the second click', async () => {
+    const user = userEvent.setup()
+    const rows = [contact(), contact({ id: 'c2', name: 'Noor Smit', firstName: 'Noor', lastName: 'Smit', noContactDue: true })]
+    render(<ContactsPanel {...base} openId={null} onOpenChange={vi.fn()} scope="customer" contacts={rows} />)
+    expect(screen.getByText('Eva Bos')).toBeInTheDocument()
+    expect(screen.getByText('Noor Smit')).toBeInTheDocument()
+    const lens = screen.getByRole('button', { name: ct('contacts.noContactDue') })
+    await user.click(lens)
+    expect(lens).toHaveAttribute('aria-pressed', 'true')
+    expect(screen.queryByText('Eva Bos')).toBeNull()
+    expect(screen.getByText('Noor Smit')).toBeInTheDocument()
+    await user.click(lens)
+    expect(lens).toHaveAttribute('aria-pressed', 'false')
+    expect(screen.getByText('Eva Bos')).toBeInTheDocument()
+    expect(screen.getByText('Noor Smit')).toBeInTheDocument()
+  })
+})
+
 describe('ContactsPanel · the drill-in never leaves the host', () => {
   it('swaps its own body for the contact detail and reports the change to the host', async () => {
     const user = userEvent.setup()

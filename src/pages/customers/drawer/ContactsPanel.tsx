@@ -21,7 +21,7 @@
  */
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Link2, Archive } from 'lucide-react'
+import { Link2, Archive, Clock } from 'lucide-react'
 import { useAuth } from '@/context/AuthContext'
 import DataTable from '@/components/ui/DataTable'
 import DrawerAddButton from '@/components/drawer/DrawerAddButton'
@@ -103,6 +103,9 @@ export default function ContactsPanel({
   const [showArchived, setShowArchived] = useState(false)
   const { contacts: archivedContacts } = useArchivedCustomerContacts(effectiveCustomerId, showArchived)
   const baseContacts = showArchived ? archivedContacts : contacts
+  // S014-FE-CHIP-1 (Danny 05-11 = yes): the "no contact" lens narrows the list to the rows the
+  // server flags as out of touch (the same `no_contact_due` window the row chip reads).
+  const [noContactOnly, setNoContactOnly] = useState(false)
   // Tenant-configured default status filter (TENANT-DEFAULT-1, Danny 02-08) — replaces
   // the old "active only" guess when Settings → Customers → Table view → Contact persons
   // has one saved; absent (null) falls back to that original guess unchanged. `settingsLoaded`
@@ -134,8 +137,10 @@ export default function ContactsPanel({
   }
   const scoped = baseContacts.filter(inScope)
   // Status filter (Danny 28-07) — same component and same defaulting rule on all three lists.
-  const { value: statusFilter, toggle: toggleStatus, filtered: rows } =
+  const { value: statusFilter, toggle: toggleStatus, filtered: statusRows } =
     useStatusFilter(scoped, statuses, undefined, defaultStatusFilter, settingsLoaded)
+  // The lens applies after the status filter and before search, so the pager and the table share one set.
+  const rows = noContactOnly ? statusRows.filter(c => c.noContactDue) : statusRows
   // Resolved against `baseContacts` (live OR archived, whichever view is active), never
   // the scoped rows: editing a contact's location moves it out of this scope, and the
   // open detail must not vanish mid-edit.
@@ -194,6 +199,9 @@ export default function ContactsPanel({
         {/* ARCHIVE-SUBENTITY-1: the shared quick-view toggle (§4) — never hand-rolled. */}
         <QuickViewToggle iconOnly active={showArchived} onToggle={() => setShowArchived(v => !v)}
           label={t('contacts.archivedView')} color="var(--color-archive)" icon={Archive} />
+        {/* S014-FE-CHIP-1: the "no contact" lens, in the row chip's own warning colour. */}
+        <QuickViewToggle iconOnly active={noContactOnly} onToggle={() => setNoContactOnly(v => !v)}
+          label={t('contacts.noContactDue')} title={t('contacts.noContactDueTitle')} color="var(--color-warning)" icon={Clock} />
         {/* Coupling only exists inside a scope; at customer level a contact is already "here".
             Icon-only (Danny 03-08): with search + filter + two buttons the scoped row
             overflowed and clipped the primary add button — the SECONDARY action gives up
