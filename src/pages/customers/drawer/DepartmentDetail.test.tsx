@@ -14,17 +14,14 @@
  * i18n instance — so (like LocationDetail.test.tsx) this file resolves assertions
  * through the ACTIVE locale's own copy instead of guessing/hardcoding a language.
  */
-import type { ReactElement } from 'react'
-import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
-import { render, screen, within, waitFor } from '@testing-library/react'
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
+import { describe, it, expect, vi, beforeEach } from 'vitest'
+import { render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import i18n from '@/i18n'
-import api from '@/lib/api'
 import DepartmentDetail from './DepartmentDetail'
 import { chipInk } from '@/lib/tint'
 import type { Department } from '@/types/customer'
-import type { LookupOption } from '@/types/common'
+import { statuses } from './DepartmentDetail.testKit'
 
 // useCustomFields hits the API in an effect — stub it so the Extra sub-tab stays
 // hidden (no custom fields defined) and no network call happens under test.
@@ -33,7 +30,7 @@ vi.mock('@/lib/useCustomFields', () => ({
 }))
 vi.mock('@/lib/notify', () => ({ notifySuccess: vi.fn(), notifyError: vi.fn() }))
 // ARCHIVE-SUBENTITY-1/AFDELING-SAMENVOEGEN-1: both are gated on customers.update —
-// granted here so the new tests below can reach the archive/merge buttons.
+// granted here so the archive/merge tests (DepartmentDetail.actions / .misc) can reach the buttons.
 vi.mock('@/context/AuthContext', () => ({
   useAuth: () => ({ hasPermission: () => true, hasModule: () => false }),
 }))
@@ -93,22 +90,13 @@ vi.mock('./ScopedDocumentsTab', () => ({
     <div data-testid="scoped-documents">{scope}:{id}:{customerId}</div>,
 }))
 
-// SOLLICITATIES-SCOPE-1: opening the new Sollicitaties sub-tab mounts
-// DepartmentSollicitatiesTab, which calls a REAL react-query hook
-// (useScopedVacancyIds) — only THOSE tests need a QueryClient in context, so
-// this wrapper is used just there (see that describe block below); every other
-// test in this file still uses plain `render`, unaffected by this feature.
-const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } })
-const renderDepartmentDetail = (ui: ReactElement) =>
-  render(<QueryClientProvider client={queryClient}>{ui}</QueryClientProvider>)
-// CustomerApplicationsList (mounted, unstubbed, by that same sub-tab) reads the
-// tenant funnel lookup via the global LookupsContext — mocked here the same way
-// CustomerApplicationsList.test.tsx itself does, rather than mounting a real provider.
+// The funnel lookup the Sollicitaties tests need (see DepartmentDetail.subtabs.test.tsx) —
+// mocked identically in every split file so all render under the same lookups.
 vi.mock('@/context/LookupsContext', () => ({
   useLookups: () => ({ funnelTypes: [{ value: 'applied', label: 'Aangemeld', color: 'var(--color-info)' }], funnelMeta: () => ({ label: '', color: 'var(--text-muted)' }) }),
 }))
 
-beforeEach(() => { vi.clearAllMocks(); mockPost.mockResolvedValue({ data: {} }); queryClient.clear(); mockUseApps.mockReturnValue({ isAppEnabled: () => false }) })
+beforeEach(() => { vi.clearAllMocks(); mockPost.mockResolvedValue({ data: {} }); mockUseApps.mockReturnValue({ isAppEnabled: () => false }) })
 
 // Resolve the active locale's own copy so assertions never guess/hardcode a language.
 const ct = (key: string, opts?: Record<string, unknown>) => i18n.t(key, { ns: 'customers', ...opts })
@@ -121,16 +109,6 @@ const department = (over: Partial<Department> = {}): Department => ({
   customFields: {},
   ...over,
 } as Department)
-
-// Hex values here are DATA — fixture colours for a tenant lookup, not UI styling.
-// Lowercase (jsdom lowercases hex inside a color-mix() string on serialization, so
-// a mixed-case fixture would never match chipInk's own computed output).
-const statuses: LookupOption[] = [
-  // eslint-disable-next-line no-restricted-syntax -- DATA fixture, mirrors a tenant lookup colour
-  { value: 'status-active', label: 'Actief', color: '#22c55e', id: 'status-active' },
-  // eslint-disable-next-line no-restricted-syntax -- DATA fixture, mirrors a tenant lookup colour
-  { value: 'status-inactive', label: 'Inactief', color: '#9ca3af', id: 'status-inactive' },
-]
 
 // Every required prop the component reads — kept minimal, only onSave is asserted.
 const baseProps = {
@@ -243,419 +221,5 @@ describe('DepartmentDetail · section order mirrors the customer Bedrijf tab', (
     // Exactly ONE "Gegevens"/"Details" on screen — the sub-tab button — not a
     // second one from a card title that would repeat the same text.
     expect(screen.getAllByText(ct('overview.details'))).toHaveLength(1)
-  })
-})
-
-/**
- * SCOPED-LIST-TAB-1 / TAKEN-OP-AFDELING-1 — the three new read-only sub-tabs
- * pass this department's own id + the right scope token through to the shared
- * children (stubbed above; their own fetch/columns are covered elsewhere).
- */
-describe('DepartmentDetail · Vacatures/Matches/Taken sub-tabs', () => {
-  it('wires the department scope + id into ScopedVacanciesTab', async () => {
-    const user = userEvent.setup()
-    render(<DepartmentDetail department={department()} onSave={vi.fn()} {...baseProps} />)
-    await user.click(screen.getByRole('tab', { name: ct('drawer.tabs.vacancies') }))
-    expect(screen.getByTestId('scoped-vacancies')).toHaveTextContent('department:d1')
-  })
-
-  // Point 1 (Danny's ten-point round): "+ Vacature" needs the customer LOCK +
-  // this department's own name (ScopedVacanciesTab's AddVacancyModal has no
-  // cascade picker of its own — see that file's docblock).
-  it('also threads customerId/customerName/scopeName into ScopedVacanciesTab (point 1)', async () => {
-    const user = userEvent.setup()
-    render(<DepartmentDetail department={department()} onSave={vi.fn()} {...baseProps} />)
-    await user.click(screen.getByRole('tab', { name: ct('drawer.tabs.vacancies') }))
-    expect(screen.getByTestId('scoped-vacancies')).toHaveTextContent('department:d1:cust-1:Zorggroep A:Zorg')
-  })
-
-  it('wires the department scope + id into ScopedMatchesTab', async () => {
-    const user = userEvent.setup()
-    render(<DepartmentDetail department={department()} onSave={vi.fn()} {...baseProps} />)
-    await user.click(screen.getByRole('tab', { name: ct('drawer.tabs.matches') }))
-    expect(screen.getByTestId('scoped-matches')).toHaveTextContent('department:d1')
-  })
-
-  // Point 1: "+ Match" needs the customer id to prefill MatchModal's cascade.
-  it('also threads customerId into ScopedMatchesTab (point 1)', async () => {
-    const user = userEvent.setup()
-    render(<DepartmentDetail department={department()} onSave={vi.fn()} {...baseProps} />)
-    await user.click(screen.getByRole('tab', { name: ct('drawer.tabs.matches') }))
-    expect(screen.getByTestId('scoped-matches')).toHaveTextContent('department:d1:cust-1')
-  })
-
-  it('wires linkType="department" + this department\'s id into EntityTasksTab', async () => {
-    const user = userEvent.setup()
-    render(<DepartmentDetail department={department()} onSave={vi.fn()} {...baseProps} />)
-    await user.click(screen.getByRole('tab', { name: ct('drawer.tabs.tasks') }))
-    expect(screen.getByTestId('entity-tasks')).toHaveTextContent('department:d1')
-  })
-})
-
-/**
- * NOTES-LOC-DEPT-1/DOCS-LOC-DEPT-1 — this department's own Notities/Documenten
- * sub-tabs, right after Sollicitaties, wired with the "department" scope + this
- * department's own id + the customer id (stubbed above).
- */
-describe('DepartmentDetail · Notities/Documenten sub-tabs (NOTES-LOC-DEPT-1/DOCS-LOC-DEPT-1)', () => {
-  it('wires the department scope + id into ScopedNotesTab', async () => {
-    const user = userEvent.setup()
-    render(<DepartmentDetail department={department()} onSave={vi.fn()} {...baseProps} />)
-    await user.click(screen.getByRole('tab', { name: ct('drawer.tabs.notes') }))
-    expect(screen.getByTestId('scoped-notes')).toHaveTextContent('department:d1:cust-1')
-  })
-
-  it('wires the department scope + id into ScopedDocumentsTab', async () => {
-    const user = userEvent.setup()
-    render(<DepartmentDetail department={department()} onSave={vi.fn()} {...baseProps} />)
-    await user.click(screen.getByRole('tab', { name: ct('drawer.tabs.documents') }))
-    expect(screen.getByTestId('scoped-documents')).toHaveTextContent('department:d1:cust-1')
-  })
-})
-
-/** K-288: the linked-notes feed (NOTITIE-DOORLINK-1) moved out of ScopedNotesTab
- *  into its own sub-tab, right after Notities — wired with the customer id +
- *  the "departments" sub kind + this department's own id. */
-describe('DepartmentDetail · linkedNotes sub-tab (K-288)', () => {
-  it('wires entity/id/sub into LinkedNotesTab', async () => {
-    const user = userEvent.setup()
-    render(<DepartmentDetail department={department()} onSave={vi.fn()} {...baseProps} />)
-    await user.click(screen.getByRole('tab', { name: ct('notes.linkedNotes') }))
-    expect(screen.getByTestId('linked-notes-tab')).toHaveTextContent('customers:cust-1:departments:d1')
-  })
-})
-
-/**
- * SOLLICITATIES-SCOPE-1 (Danny asked 3x at customer level, then again for
- * location/department) — the real two-step chain, unlike Vacatures/Matches/
- * Taken above (which stub the whole sub-component): CustomerApplicationsList
- * is NOT stubbed here, so this proves the actual honest data path end to end —
- * useScopedVacancyIds (step 1) resolves this department's own vacancies, THEN
- * useApplicationsByVacancyIds (step 2) filters by exactly those ids.
- */
-describe('DepartmentDetail · Sollicitaties sub-tab (SOLLICITATIES-SCOPE-1)', () => {
-  it('is lazy: no /vacancies or /applications request fires before the sub-tab is opened', () => {
-    // Plain `render` here (not `renderDepartmentDetail`) is a deliberate part of
-    // the proof: DepartmentSollicitatiesTab (and its react-query hook) never
-    // mounts unless this sub-tab opens, so no QueryClientProvider is even needed yet.
-    render(<DepartmentDetail department={department()} onSave={vi.fn()} {...baseProps} />)
-    const calls = vi.mocked(api.get).mock.calls.map(([url]) => url)
-    expect(calls).not.toContain('/vacancies')
-    expect(calls).not.toContain('/applications')
-  })
-
-  it('opening it resolves this department\'s own vacancies, then filters applications by EXACTLY those vacancy ids', async () => {
-    const user = userEvent.setup()
-    vi.mocked(api.get).mockImplementation((url: string) => {
-      if (url === '/vacancies') return Promise.resolve({ data: { data: [{ id: 'vac-1' }, { id: 'vac-2' }] } })
-      if (url === '/applications') {
-        return Promise.resolve({
-          data: {
-            data: [{
-              id: 'app-1', candidate: { id: 'cand-1', name: 'Jane Doe' }, vacancy: { id: 'vac-1', title: 'Verpleegkundige' },
-              phase_key: 'applied', score: 82, created_at: '2026-07-01',
-            }],
-          },
-        })
-      }
-      return Promise.resolve({ data: [] })
-    })
-    // Opening this sub-tab mounts DepartmentSollicitatiesTab's real react-query
-    // hook, so THIS test (only) needs the QueryClientProvider-wrapped render.
-    renderDepartmentDetail(<DepartmentDetail department={department()} onSave={vi.fn()} {...baseProps} />)
-
-    await user.click(screen.getByRole('tab', { name: i18n.t('applications:title') }))
-    // The real row rendering proves the WHOLE chain resolved, not just a callback.
-    expect(await screen.findByText('Jane Doe')).toBeInTheDocument()
-
-    const applicationsCall = vi.mocked(api.get).mock.calls.find(([url]) => url === '/applications')
-    expect(applicationsCall?.[1]?.params).toMatchObject({ vacancy_id: ['vac-1', 'vac-2'] })
-  })
-
-  it('zero vacancies at this department: the empty state renders and /applications is never called', async () => {
-    const user = userEvent.setup()
-    vi.mocked(api.get).mockImplementation((url: string) => {
-      if (url === '/vacancies') return Promise.resolve({ data: { data: [] } })
-      return Promise.resolve({ data: [] })
-    })
-    renderDepartmentDetail(<DepartmentDetail department={department()} onSave={vi.fn()} {...baseProps} />)
-
-    await user.click(screen.getByRole('tab', { name: i18n.t('applications:title') }))
-    expect(await screen.findByText(i18n.t('applications:empty'))).toBeInTheDocument()
-    expect(vi.mocked(api.get).mock.calls.some(([url]) => url === '/applications')).toBe(false)
-  })
-
-  // Restore the file's own default GET response — the two tests above override
-  // it per-URL, and vi.clearAllMocks() (the global beforeEach) clears CALLS but
-  // not a mocked implementation.
-  afterEach(() => { vi.mocked(api.get).mockResolvedValue({ data: [] }) })
-})
-
-/**
- * SUBENTITEIT-DELETE-1 — the honest disabled-trash (no fake affordance, §3) and
- * the shared counts dialog for a 409 RACE (the row's own `in_use` was stale).
- */
-describe('DepartmentDetail · honest delete (SUBENTITEIT-DELETE-1)', () => {
-  it('disables the trash and names the reason when the department is still in use', () => {
-    render(<DepartmentDetail department={department({ inUse: true })} onSave={vi.fn()} {...baseProps} />)
-    const trash = screen.getByTitle(ct('departments.deleteInUse'))
-    expect(trash).toBeDisabled()
-  })
-
-  it('keeps the trash enabled with the normal label when nothing blocks it', () => {
-    render(<DepartmentDetail department={department({ inUse: false })} onSave={vi.fn()} {...baseProps} />)
-    const trash = screen.getByTitle(cm('delete'))
-    expect(trash).not.toBeDisabled()
-  })
-
-  it('closes the panel on a real delete success', async () => {
-    const user = userEvent.setup()
-    const close = vi.fn()
-    const onDelete = vi.fn().mockResolvedValue({ ok: true })
-    render(<DepartmentDetail department={department()} onSave={vi.fn()} {...baseProps} onDelete={onDelete} close={close} />)
-
-    await user.click(screen.getByTitle(cm('delete')))
-    await user.click(screen.getByRole('button', { name: cm('confirm') }))
-    expect(onDelete).toHaveBeenCalledWith('d1')
-    await waitFor(() => expect(close).toHaveBeenCalled())
-  })
-
-  it('opens the shared counts dialog on a 409 race instead of closing', async () => {
-    const user = userEvent.setup()
-    const close = vi.fn()
-    const onDelete = vi.fn().mockResolvedValue({ ok: false, blocked: { counts: { vacancies: 2, tasks: 1 } } })
-    render(<DepartmentDetail department={department()} onSave={vi.fn()} {...baseProps} onDelete={onDelete} close={close} />)
-
-    await user.click(screen.getByTitle(cm('delete')))
-    await user.click(screen.getByRole('button', { name: cm('confirm') }))
-
-    // Scoped to the dialog: "Vacatures"/"Taken" also label the (unrelated) sub-tab
-    // strip underneath, so an unscoped query would match twice.
-    const dialog = await screen.findByRole('dialog', { name: ct('inUse.title') })
-    expect(within(dialog).getByText(ct('drawer.tabs.vacancies'))).toBeInTheDocument()
-    expect(within(dialog).getByText('2')).toBeInTheDocument()
-    expect(within(dialog).getByText(ct('drawer.tabs.tasks'))).toBeInTheDocument()
-    expect(within(dialog).getByText('1')).toBeInTheDocument()
-    // The panel itself never closed — the delete did not actually go through.
-    expect(close).not.toHaveBeenCalled()
-
-    await user.click(within(dialog).getAllByRole('button', { name: ct('inUse.close') }).at(-1)!)
-    expect(screen.queryByRole('dialog', { name: ct('inUse.title') })).not.toBeInTheDocument()
-  })
-
-  /**
-   * ARCHIVE-SUBENTITY-1: the dead end now has a way out — the 409-race dialog
-   * offers "Archiveren" beside Close, no second confirm.
-   */
-  it('offers Archiveren inside the 409 dialog, and clicking it archives without a second confirm', async () => {
-    const user = userEvent.setup()
-    const close = vi.fn()
-    const onDelete = vi.fn().mockResolvedValue({ ok: false, blocked: { counts: { contacts: 1 } } })
-    render(<DepartmentDetail department={department()} onSave={vi.fn()} {...baseProps} onDelete={onDelete} close={close} />)
-
-    await user.click(screen.getByTitle(cm('delete')))
-    await user.click(screen.getByRole('button', { name: cm('confirm') }))
-    const dialog = await screen.findByRole('dialog', { name: ct('inUse.title') })
-
-    await user.click(within(dialog).getByRole('button', { name: ct('inUse.archive') }))
-
-    expect(mockPost).toHaveBeenCalledWith('/customers/cust-1/departments/d1/archive', undefined, expect.objectContaining({ headers: expect.objectContaining({ 'Idempotency-Key': expect.any(String) }) }))
-    await waitFor(() => expect(close).toHaveBeenCalled())
-  })
-})
-
-/**
- * ARCHIVE-SUBENTITY-1 — mirrors LocationDetail's identical wiring: own action
- * button + the in-body ArchivedBanner + restore. Assert the REQUEST (§13).
- */
-describe('DepartmentDetail · archive/restore (ARCHIVE-SUBENTITY-1)', () => {
-  it('confirms, then POSTs the archive route and closes the panel on success', async () => {
-    const user = userEvent.setup()
-    const close = vi.fn()
-    render(<DepartmentDetail department={department()} onSave={vi.fn()} {...baseProps} close={close} />)
-
-    await user.click(screen.getByTitle(ct('departments.detail.archiveDepartment')))
-    await user.click(screen.getByRole('button', { name: cm('confirm') }))
-
-    expect(mockPost).toHaveBeenCalledWith('/customers/cust-1/departments/d1/archive', undefined, expect.objectContaining({ headers: expect.objectContaining({ 'Idempotency-Key': expect.any(String) }) }))
-    await waitFor(() => expect(close).toHaveBeenCalled())
-  })
-
-  it('renders no archive button once the department is already archived — the ArchivedBanner offers restore instead', () => {
-    render(<DepartmentDetail department={department({ archived: true })} onSave={vi.fn()} {...baseProps} />)
-    expect(screen.queryByTitle(ct('departments.detail.archiveDepartment'))).toBeNull()
-    expect(screen.getByText(ct('departments.archivedBanner.flag'))).toBeInTheDocument()
-  })
-
-  it('restore round-trip: the banner\'s restore button POSTs the restore route and closes the panel', async () => {
-    const user = userEvent.setup()
-    const close = vi.fn()
-    render(<DepartmentDetail department={department({ archived: true })} onSave={vi.fn()} {...baseProps} close={close} />)
-
-    await user.click(screen.getByRole('button', { name: ct('departments.archivedBanner.restore') }))
-
-    expect(mockPost).toHaveBeenCalledWith('/customers/cust-1/departments/d1/restore', undefined, expect.objectContaining({ headers: expect.objectContaining({ 'Idempotency-Key': expect.any(String) }) }))
-    await waitFor(() => expect(close).toHaveBeenCalled())
-  })
-})
-
-/** LOC-DEPT-CHANGELOG-1 — mirrors LocationDetail: proves the actual GET. */
-describe('DepartmentDetail · changelog (LOC-DEPT-CHANGELOG-1)', () => {
-  it('fetches this department\'s own activity endpoint once the popover opens', async () => {
-    const user = userEvent.setup()
-    render(<DepartmentDetail department={department()} onSave={vi.fn()} {...baseProps} />)
-
-    await user.click(screen.getByRole('button', { name: cm('changelog') }))
-    await waitFor(() => expect(vi.mocked(api.get)).toHaveBeenCalledWith('/customers/cust-1/departments/d1/activity', expect.anything()))
-  })
-})
-
-/**
- * TIJDLIJN-SUBDRILL-1 — the timeline tab shows this department's own activity log
- * (LOC-DEPT-CHANGELOG-1). Proves the tab renders and GETs the correct endpoint.
- */
-describe('DepartmentDetail · timeline tab (TIJDLIJN-SUBDRILL-1)', () => {
-  it('renders the timeline tab and opens it via the sub-tab bar', async () => {
-    const user = userEvent.setup()
-    render(<DepartmentDetail department={department()} onSave={vi.fn()} {...baseProps} />)
-
-    // Find and click the timeline tab.
-    const timelineTab = screen.getByRole('tab', { name: ct('drawer.tabs.timeline') })
-    expect(timelineTab).toBeInTheDocument()
-    await user.click(timelineTab)
-
-    // Verify the endpoint is called when the tab opens.
-    await waitFor(() => expect(vi.mocked(api.get)).toHaveBeenCalledWith('/customers/cust-1/departments/d1/activity', expect.anything()))
-  })
-})
-
-/**
- * AFDELING-SAMENVOEGEN-1 — mirrors LocationDetail's merge contract: DUPLICATE
- * in the path, SURVIVOR as `target_id` in the body.
- */
-describe('DepartmentDetail · merge (AFDELING-SAMENVOEGEN-1)', () => {
-  const others: Department[] = [department(), department({ id: 'd2', name: 'Dagbesteding' })]
-
-  it('hides the merge icon with only one department at this customer', () => {
-    render(<DepartmentDetail department={department()} onSave={vi.fn()} {...baseProps} departments={[department()]} />)
-    expect(screen.queryByTitle(ct('departments.detail.mergeDepartment'))).toBeNull()
-  })
-
-  it('posts target_id with the SURVIVOR and calls onMerged with it (keeping the open record)', async () => {
-    const user = userEvent.setup()
-    const onMerged = vi.fn()
-    render(<DepartmentDetail department={department()} onSave={vi.fn()} {...baseProps} departments={others} onMerged={onMerged} />)
-
-    await user.click(screen.getByTitle(ct('departments.detail.mergeDepartment')))
-    await user.type(screen.getByPlaceholderText(ct('departments.merge.searchPlaceholder')), 'Dagbesteding')
-    await user.click(screen.getByRole('button', { name: /Dagbesteding/ }))
-    // Default survivor = the currently open record ('d1') — confirm the merge as-is.
-    await user.click(screen.getByRole('button', { name: ct('departments.merge.confirm') }))
-
-    expect(mockPost).toHaveBeenCalledWith('/customers/cust-1/departments/d2/merge', { target_id: 'd1' })
-    await waitFor(() => expect(onMerged).toHaveBeenCalledWith('d1'))
-  })
-})
-
-/**
- * CONTACT-DEPARTMENT-PRIMARY-1 — the department half of the primary-contact flow (the
- * location half already works via ContactsPanel/ContactsPanelColumns). Verifies
- * DepartmentDetail actually renders the real ContactsPanel in `scope="department"` on
- * its Contacts sub-tab, so the "make primary here" star shows and PUTs the verified
- * route (routes/api/tenant/customers.php:181, CustomerContactController::primaryDepartment
- * — the exact mirror of the location route this component already exercised at :178).
- */
-describe('DepartmentDetail · Contacts sub-tab renders the department-scoped primary control (CONTACT-DEPARTMENT-PRIMARY-1)', () => {
-  // A contact linked to this department, carrying the shape useCustomerContacts'
-  // mapContactRow produces (locations/departments arrays; the id passthrough is what
-  // ContactsPanel's `inScope` and the star column key off).
-  const deptContact = {
-    id: 'c1', helloflexLink: null, shiftmanagerLink: null,
-    firstName: 'Eva', middleName: '', lastName: 'Bos', name: 'Eva Bos', role: 'HR Manager',
-    email: 'eva@klant.test', phone: '', mobile: '', isPrimary: false,
-    locationId: null, locationName: '', departmentId: 'd1', departmentName: 'Zorg',
-    locations: [], departments: [{ id: 'd1', name: 'Zorg' }], statusId: null, status: '', statusLabel: '', statusColor: '',
-    customerId: 'cust-1', gender: '',
-    lastContactAt: null, lastContactType: null, customFields: {},
-  }
-
-  it('shows the "Contacts" sub-tab with the primary-here star for a contact in this department', async () => {
-    const user = userEvent.setup()
-    render(<DepartmentDetail department={department()} onSave={vi.fn()} {...baseProps} contacts={[deptContact] as never} />)
-
-    await user.click(screen.getByRole('tab', { name: ct('drawer.tabs.contacts') }))
-
-    expect(screen.getByText('Eva Bos')).toBeInTheDocument()
-    expect(screen.getByRole('button', { name: ct('departments.detail.setPrimaryContact') })).toBeInTheDocument()
-  })
-
-  it('PUTs the measured per-department route when the star is clicked', async () => {
-    const user = userEvent.setup()
-    vi.mocked(api.put).mockResolvedValue({ data: { id: 'c1', departments: [{ id: 'd1', name: 'Zorg', is_primary: true }] } })
-    render(<DepartmentDetail department={department()} onSave={vi.fn()} {...baseProps} contacts={[deptContact] as never} />)
-
-    await user.click(screen.getByRole('tab', { name: ct('drawer.tabs.contacts') }))
-    await user.click(screen.getByRole('button', { name: ct('departments.detail.setPrimaryContact') }))
-
-    expect(api.put).toHaveBeenCalledTimes(1)
-    expect(api.put).toHaveBeenCalledWith('/customers/cust-1/contacts/c1/departments/d1/primary')
-  })
-
-  it('marks the department primary and offers no un-set once the flag is set', async () => {
-    const user = userEvent.setup()
-    render(<DepartmentDetail department={department()} onSave={vi.fn()} {...baseProps}
-      contacts={[{ ...deptContact, primaryDepartmentIds: ['d1'] }] as never} />)
-
-    await user.click(screen.getByRole('tab', { name: ct('drawer.tabs.contacts') }))
-
-    expect(screen.getByLabelText(ct('departments.detail.isPrimaryContact'))).toBeInTheDocument()
-    expect(screen.queryByRole('button', { name: ct('departments.detail.setPrimaryContact') })).toBeNull()
-  })
-})
-
-/**
- * DD-FE-6 ("no empty tabs" — 08-08): this file passes no extra children into
- * the shared BackofficeLinksTab, so with both connector apps off its body
- * would render nothing (no card, no "Koppelen" button) — the sub-tab must not
- * even be listed. useBackofficeLinksVisible drives the gate.
- */
-describe('DepartmentDetail · Koppelingen sub-tab hidden when empty (DD-FE-6)', () => {
-  it('drops the Koppelingen sub-tab when no connector app is enabled', () => {
-    render(<DepartmentDetail department={department()} onSave={vi.fn()} {...baseProps} />)
-    expect(screen.queryByRole('tab', { name: cm('backofficeLinks.tabLabel') })).not.toBeInTheDocument()
-  })
-
-  it('lists Koppelingen once a connector app (Shiftmanager) is enabled', () => {
-    mockUseApps.mockReturnValue({ isAppEnabled: (id: string) => id === 'shiftmanager' })
-    render(<DepartmentDetail department={department()} onSave={vi.fn()} {...baseProps} />)
-    expect(screen.getByRole('tab', { name: cm('backofficeLinks.tabLabel') })).toBeInTheDocument()
-  })
-})
-
-// K-249 C.4 (31-08): billingEmail joins costCenter as the middle cascade level's
-// own editable fields — the match billing resolver (department → location →
-// customer) reads a department's own billing_email too.
-describe('DepartmentDetail · billing email field (K-249 C.4)', () => {
-  it('renders a billingEmail field row in the field table', () => {
-    render(<DepartmentDetail department={department()} onSave={vi.fn()} {...baseProps} />)
-    expect(screen.getByText(ct('departments.detail.billingEmail'))).toBeInTheDocument()
-  })
-
-  it('edits and saves billingEmail through the same PATCH onSave as costCenter/name', async () => {
-    const user = userEvent.setup()
-    const onSave = vi.fn()
-    render(<DepartmentDetail department={department()} onSave={onSave} {...baseProps} />)
-    // The field-table card's own pencil renders FIRST (DepartmentDataTab: field
-    // table, THEN description, THEN Koios advice — K5a, 02-08).
-    const editButtons = screen.getAllByTitle(cm('edit'))
-    await user.click(editButtons[0])
-    // Locate the input via its own label sibling — EditableFieldTable rows have
-    // no real <label>/htmlFor, mirrors OverviewTab.test.tsx's own convention.
-    const label = screen.getByText(ct('departments.detail.billingEmail'))
-    const input = label.nextElementSibling?.querySelector('input') as HTMLInputElement
-    expect(input).toBeTruthy()
-    await user.type(input, 'facturen@zorg.nl')
-    await user.click(screen.getByTitle(cm('save')))
-    expect(onSave).toHaveBeenCalledWith('d1', expect.objectContaining({ billingEmail: 'facturen@zorg.nl' }))
   })
 })
