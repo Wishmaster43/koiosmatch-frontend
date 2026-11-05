@@ -21,7 +21,7 @@
  *   PUT .../reorder request assertion).
  */
 import { describe, it, expect, vi, beforeEach } from 'vitest'
-import { render, screen, waitFor, fireEvent } from '@testing-library/react'
+import { render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { ExperienceTab, EducationTab, CertificationsTab, SkillsTab } from './SectionTabs'
 import ReferencesTab from './ReferencesTab'
@@ -32,7 +32,7 @@ import ReferencesTab from './ReferencesTab'
 const { getMock, putMock, authState } = vi.hoisted(() => ({
   getMock: vi.fn(() => Promise.resolve({ data: { data: [] } })),
   // Explicit call signature (mirrors ReportKpiSettings.test.tsx's saveSettingsKeys
-  // mock) — the own-order persistence-separation test below reads `call[1]` (the
+  // mock) — the own-order persistence-separation test in SectionTabsSort.ownOrder.test.tsx reads `call[1]` (the
   // request body) off `putMock.mock.calls`, which needs a real parameter tuple.
   putMock: vi.fn<(url: string, body: Record<string, unknown>) => Promise<{ data: object }>>(() => Promise.resolve({ data: {} })),
   authState: { user: null as { ui_preferences?: Record<string, unknown> } | null, refreshUser: vi.fn() },
@@ -151,118 +151,6 @@ describe('ExperienceTab sort menu', () => {
   })
 })
 
-/**
- * DRAG-SORT-1 — own order: display, drag handles gated to that ONE mode, the
- * real reorder gesture bubbling up as `onReorder`, and keyboard operability.
- * BackgroundTab.test.tsx separately asserts the REAL PUT .../reorder request +
- * revert-on-failure — this layer only proves the presentation/gesture contract
- * (§13: a mutation test asserts the request; a display test asserts the DOM).
- */
-describe('ExperienceTab own order (DRAG-SORT-1)', () => {
-  const items = [
-    { id: 'a', title: 'Verpleegkundige', company: 'Zorg B.V.', start: '2020-01-01' },
-    { id: 'b', title: 'Arts',            company: 'Kliniek',   start: '2022-06-15' },
-    { id: 'c', title: 'Coördinator',     company: 'Huis',      start: '2018-03-10' },
-  ]
-  const names = () => screen.getAllByText(/Verpleegkundige|Arts|Coördinator/).map(el => el.textContent)
-
-  it('renders no drag handles while a date/function axis is active (the default)', () => {
-    const { container } = render(<ExperienceTab items={items} onAdd={() => {}} onEdit={() => {}} onRemove={() => {}} onReorder={() => {}} />)
-    expect(container.querySelectorAll('[draggable="true"]')).toHaveLength(0)
-    expect(screen.queryByRole('button', { name: 'Omhoog verplaatsen' })).toBeNull()
-  })
-
-  it('picking "own order" shows the RECEIVED order (not the date-sorted one) and renders a handle per row', async () => {
-    const user = userEvent.setup()
-    const { container } = render(<ExperienceTab items={items} onAdd={() => {}} onEdit={() => {}} onRemove={() => {}} onReorder={() => {}} />)
-    await pick(user, 'Eigen volgorde')
-    // Identity order — items as given, NOT newest-start-first (that would be Arts first).
-    expect(names()).toEqual(['Verpleegkundige', 'Arts', 'Coördinator'])
-    expect(container.querySelectorAll('[draggable="true"]')).toHaveLength(3)
-    expect(screen.getAllByRole('button', { name: 'Omhoog verplaatsen' })).toHaveLength(3)
-    expect(screen.getAllByRole('button', { name: 'Omlaag verplaatsen' })).toHaveLength(3)
-  })
-
-  it('switching back to a date axis hides the handles again — sorting by date and then dragging would be meaningless (the next render re-sorts it away)', async () => {
-    const user = userEvent.setup()
-    const { container } = render(<ExperienceTab items={items} onAdd={() => {}} onEdit={() => {}} onRemove={() => {}} onReorder={() => {}} />)
-    await pick(user, 'Eigen volgorde')
-    expect(container.querySelectorAll('[draggable="true"]')).toHaveLength(3)
-    await pick(user, 'Begindatum')
-    expect(container.querySelectorAll('[draggable="true"]')).toHaveLength(0)
-  })
-
-  it('a drag reports the FULL item list in its new order to onReorder', async () => {
-    const user = userEvent.setup()
-    const onReorder = vi.fn()
-    const { container } = render(<ExperienceTab items={items} onAdd={() => {}} onEdit={() => {}} onRemove={() => {}} onReorder={onReorder} />)
-    await pick(user, 'Eigen volgorde')
-    const rows = container.querySelectorAll('[draggable="true"]')
-    expect(rows).toHaveLength(3)
-
-    // Drag row 0 (Verpleegkundige) onto row 1 (Arts) — Verpleegkundige moves after Arts.
-    fireEvent.dragStart(rows[0])
-    fireEvent.dragOver(rows[1])
-    fireEvent.drop(rows[1])
-
-    expect(onReorder).toHaveBeenCalledTimes(1)
-    const next = onReorder.mock.calls[0][0] as { id: string }[]
-    expect(next.map(x => x.id)).toEqual(['b', 'a', 'c'])
-  })
-
-  it('the keyboard path (focused move-down button, real Enter keypress) reorders and calls onReorder — no mouse involved', async () => {
-    const user = userEvent.setup()
-    const onReorder = vi.fn()
-    render(<ExperienceTab items={items} onAdd={() => {}} onEdit={() => {}} onRemove={() => {}} onReorder={onReorder} />)
-    await pick(user, 'Eigen volgorde')
-
-    const moveDown = screen.getAllByRole('button', { name: 'Omlaag verplaatsen' })[0]
-    moveDown.focus()
-    await user.keyboard('{Enter}')
-
-    expect(onReorder).toHaveBeenCalledTimes(1)
-    const next = onReorder.mock.calls[0][0] as { id: string }[]
-    expect(next.map(x => x.id)).toEqual(['b', 'a', 'c'])
-  })
-
-  it('the move-up button on the FIRST row and move-down on the LAST row are disabled — no dead reorder past either end', async () => {
-    const user = userEvent.setup()
-    render(<ExperienceTab items={items} onAdd={() => {}} onEdit={() => {}} onRemove={() => {}} onReorder={() => {}} />)
-    await pick(user, 'Eigen volgorde')
-    expect(screen.getAllByRole('button', { name: 'Omhoog verplaatsen' })[0]).toBeDisabled()
-    expect(screen.getAllByRole('button', { name: 'Omlaag verplaatsen' }).at(-1)).toBeDisabled()
-  })
-
-  it('picking "own order" persists ONLY the chosen axis to ui_preferences — the manual order/ids never ride along in that same body', async () => {
-    authState.user = { ui_preferences: {} }
-    const user = userEvent.setup()
-    const onReorder = vi.fn()
-    const { container } = render(<ExperienceTab items={items} onAdd={() => {}} onEdit={() => {}} onRemove={() => {}} onReorder={onReorder} />)
-    await pick(user, 'Eigen volgorde')
-    await waitFor(() => expect(putMock).toHaveBeenCalledWith('/auth/me', {
-      ui_preferences: { candidate_background_sort: { experience: { field: 'own', dir: 'asc' } } },
-    }))
-    const callsAfterPick = putMock.mock.calls.length
-
-    // Now drag — the ORDER itself is record data (BackgroundTab persists it
-    // through the candidate's own reorder route), never this preference blob.
-    const rows = container.querySelectorAll('[draggable="true"]')
-    fireEvent.dragStart(rows[0])
-    fireEvent.dragOver(rows[1])
-    fireEvent.drop(rows[1])
-    expect(onReorder).toHaveBeenCalled()
-
-    // No additional /auth/me write happened — the drag never touched this route,
-    // and every earlier call already only ever carried {field, dir}, never an
-    // items/ids array.
-    expect(putMock.mock.calls.length).toBe(callsAfterPick)
-    for (const call of putMock.mock.calls) {
-      const body = call[1] as { ui_preferences: { candidate_background_sort: Record<string, unknown> } }
-      expect(body.ui_preferences.candidate_background_sort.experience).toEqual({ field: 'own', dir: 'asc' })
-    }
-  })
-})
-
 describe('EducationTab sort menu', () => {
   // Start EARLY/end LATE vs. start LATE/end EARLY — proves the two axes are
   // independent, not both reading the same underlying date.
@@ -369,46 +257,5 @@ describe('ReferencesTab sort menu', () => {
     render(<ReferencesTab items={items} onAdd={() => {}} onEdit={() => {}} onRemove={() => {}} onVerify={() => {}} />)
     await pick(user, 'Functie')
     expect(names()).toEqual(['Piet Pietersen', 'Jan Jansen']) // Manager before Teamleider
-  })
-})
-
-describe('Sort preference persistence (ui_preferences via PUT /auth/me)', () => {
-  const items = [
-    { id: 'a', title: 'Verpleegkundige', start: '2020-01-01' },
-    { id: 'b', title: 'Arts', start: '2022-06-15' },
-  ]
-  const names = () => screen.getAllByText(/Verpleegkundige|Arts/).map(el => el.textContent)
-
-  it('reads a previously saved sort back on mount, from the already-loaded user — no extra fetch', () => {
-    authState.user = { ui_preferences: { candidate_background_sort: { experience: { field: 'function', dir: 'asc' } } } }
-    render(<ExperienceTab items={items} onAdd={() => {}} onEdit={() => {}} onRemove={() => {}} />)
-    expect(names()).toEqual(['Arts', 'Verpleegkundige']) // A→Z by title, applied immediately
-    expect(putMock).not.toHaveBeenCalled()
-  })
-
-  it('writes the picked sort to the real route with the real, MERGED body — another feature\'s ui_preferences key survives', async () => {
-    authState.user = { ui_preferences: { some_other_feature: 'keep-me' } }
-    const user = userEvent.setup()
-    render(<ExperienceTab items={items} onAdd={() => {}} onEdit={() => {}} onRemove={() => {}} />)
-    await pick(user, 'Functietitel')
-    await waitFor(() => expect(putMock).toHaveBeenCalledWith('/auth/me', {
-      ui_preferences: {
-        some_other_feature: 'keep-me',
-        candidate_background_sort: { experience: { field: 'function', dir: 'asc' } },
-      },
-    }))
-    expect(authState.refreshUser).toHaveBeenCalled()
-  })
-
-  it('keeps the chosen sort applied even when the background save fails — a preference write never costs the user their view', async () => {
-    authState.user = { ui_preferences: {} }
-    putMock.mockImplementation(() => Promise.reject(new Error('network')))
-    const user = userEvent.setup()
-    render(<ExperienceTab items={items} onAdd={() => {}} onEdit={() => {}} onRemove={() => {}} />)
-    await pick(user, 'Functietitel')
-    expect(names()).toEqual(['Arts', 'Verpleegkundige'])
-    await waitFor(() => expect(putMock).toHaveBeenCalled())
-    // The rejection has now resolved — the sort must still stand, not revert.
-    expect(names()).toEqual(['Arts', 'Verpleegkundige'])
   })
 })
