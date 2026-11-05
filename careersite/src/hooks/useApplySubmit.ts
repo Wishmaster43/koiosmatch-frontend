@@ -29,6 +29,9 @@ export interface ApplyFormValues {
   interviewConsent?: boolean
   // K-012: true only when the privacy notice was shown and the AVG box ticked; else undefined.
   privacyConsent?: boolean
+  // K-008: optional opt-ins; true only when ticked, else undefined.
+  whatsappConsent?: boolean
+  emailConsent?: boolean
 }
 
 interface ApplySubmitState {
@@ -65,6 +68,8 @@ export function useApplySubmit(tenant: string | undefined, reference: string | u
         // the api layer decides the wire format ('1'/'0'), this hook just forwards it.
         interview_consent: values.interviewConsent,
         privacy_consent: values.privacyConsent,
+        whatsapp_consent: values.whatsappConsent,
+        email_consent: values.emailConsent,
       })
       setState({ status: 'success', errorMessage: null })
     } catch (err) {

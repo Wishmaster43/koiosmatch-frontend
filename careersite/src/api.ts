@@ -132,6 +132,9 @@ function buildApplyFormData(payload: ApplyPayload): FormData {
   }
   // K-012: only a true tick is sent ('1'), never '0' and never when undefined.
   if (payload.privacy_consent === true) formData.set('privacy_consent', '1')
+  // K-008: opt-ins send '1' only on a tick, never '0', never when undefined (like privacy_consent).
+  if (payload.whatsapp_consent === true) formData.set('whatsapp_consent', '1')
+  if (payload.email_consent === true) formData.set('email_consent', '1')
   appendEntries(formData, 'experiences', payload.experiences ?? [])
   appendEntries(formData, 'educations', payload.educations ?? [])
   formData.set('website', payload.website)

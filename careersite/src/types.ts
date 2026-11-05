@@ -141,6 +141,9 @@ export interface ApplyPayload {
   // K-012: sent (as true) ONLY when the privacy notice text was rendered and the AVG
   // box is ticked; otherwise left undefined so the field never reaches the request.
   privacy_consent?: boolean
+  // K-008 opt-ins: sent (as true) only when ticked.
+  whatsapp_consent?: boolean
+  email_consent?: boolean
   experiences?: ExperienceEntry[]
   educations?: EducationEntry[]
   // Honeypot — must stay empty; a filled value marks the submission as a bot to the backend.

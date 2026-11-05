@@ -128,6 +128,10 @@ export const strings = {
     interviewConsent: {
       label: 'Ik ga akkoord dat Koios AI mij mag interviewen als onderdeel van deze sollicitatie.',
     },
+    optIn: {
+      whatsapp: 'Ik wil updates over deze sollicitatie en passende vacatures via WhatsApp ontvangen.',
+      email: 'Ik wil updates over deze sollicitatie en passende vacatures via e-mail ontvangen.',
+    },
     consentLabel:
       'Ik ga akkoord dat mijn gegevens worden gebruikt om mijn sollicitatie te behandelen. Zie de privacyverklaring van deze werkgever.',
     privacyNotice: {

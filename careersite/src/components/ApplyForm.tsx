@@ -68,6 +68,9 @@ export function ApplyForm({ tenant, reference, applicationSettings }: ApplyFormP
   const [educations, setEducations] = useState<EducationEntry[]>([])
   const [interviewConsent, setInterviewConsent] = useState(false)
   const [consent, setConsent] = useState(false)
+  // K-008: optional channel opt-ins, unchecked by default.
+  const [whatsappOptIn, setWhatsappOptIn] = useState(false)
+  const [emailOptIn, setEmailOptIn] = useState(false)
   // K-012: true only while the privacy notice text is really rendered.
   const [noticeShown, setNoticeShown] = useState(false)
   // Honeypot — invisible to real visitors; a bot filling this in tells the backend to reject.
@@ -168,6 +171,9 @@ export function ApplyForm({ tenant, reference, applicationSettings }: ApplyFormP
       interviewConsent: applicationSettings.interview_consent !== 'hidden' ? interviewConsent : undefined,
       // K-012: the tick counts as privacy consent only when the notice was really shown.
       privacyConsent: noticeShown && consent ? true : undefined,
+      // K-008: optional opt-ins, unchecked by default; a tick travels as true, nothing otherwise.
+      whatsappConsent: whatsappOptIn ? true : undefined,
+      emailConsent: emailOptIn ? true : undefined,
     })
   }
 
@@ -267,6 +273,15 @@ export function ApplyForm({ tenant, reference, applicationSettings }: ApplyFormP
         <span>{strings.apply.consentLabel}</span>
       </label>
       {errors.consent ? <span className="field-error" role="alert">{errors.consent}</span> : null}
+
+      <label className="apply-form__consent">
+        <input type="checkbox" checked={whatsappOptIn} onChange={(event) => setWhatsappOptIn(event.target.checked)} />
+        <span>{strings.apply.optIn.whatsapp}</span>
+      </label>
+      <label className="apply-form__consent">
+        <input type="checkbox" checked={emailOptIn} onChange={(event) => setEmailOptIn(event.target.checked)} />
+        <span>{strings.apply.optIn.email}</span>
+      </label>
 
       {status === 'error' && errorMessage ? (
         <p className="field-error" role="alert">{errorMessage}</p>

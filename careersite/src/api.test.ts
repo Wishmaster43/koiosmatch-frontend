@@ -204,6 +204,26 @@ describe('api client — request construction', () => {
     expect((await bodyFor(undefined)).get('privacy_consent')).toBeNull()
   })
 
+  // K-008: the opt-ins follow the privacy_consent rule, '1' only for a real true tick.
+  it('sends whatsapp_consent and email_consent as "1" when true, omits them when false or undefined', async () => {
+    const mockFetch = vi.mocked(fetch)
+    const base = { first_name: 'Jane', last_name: 'Doe', email: 'jane@example.com', phone: '0612345678', website: '' }
+    const bodyFor = async (value?: boolean) => {
+      mockFetch.mockReset()
+      mockFetch.mockResolvedValue(mockJsonResponse({ status: 'applied' }, 201))
+      await applyToVacancy('acme', 'REF-1', { ...base, whatsapp_consent: value, email_consent: value })
+      return mockFetch.mock.calls[0][1]?.body as FormData
+    }
+    const ticked = await bodyFor(true)
+    expect(ticked.get('whatsapp_consent')).toBe('1')
+    expect(ticked.get('email_consent')).toBe('1')
+    for (const value of [false, undefined]) {
+      const body = await bodyFor(value)
+      expect(body.get('whatsapp_consent')).toBeNull()
+      expect(body.get('email_consent')).toBeNull()
+    }
+  })
+
   it('throws ApiError carrying the status, never the raw response body', async () => {
     const mockFetch = vi.mocked(fetch)
     mockFetch.mockResolvedValue(mockJsonResponse('secret internal error trace', 500))

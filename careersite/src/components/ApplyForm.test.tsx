@@ -18,8 +18,9 @@ const mockedNotice = vi.mocked(api.fetchPrivacyNotice)
 const NOTICE_TEXT = 'Wij verwerken je gegevens voor deze sollicitatie.'
 
 // Baseline settings mirror the pre-formulier-v2 form shape (photo/remarks/interview
-// consent off) so the original consent-gate/motivation tests keep asserting a single
-// checkbox — tests that exercise the new fields override the relevant key.
+// consent off) so the original consent-gate/motivation tests stay minimal; the form now
+// has three checkboxes, so the AVG box is always found by its label. Tests that
+// exercise the new fields override the relevant key.
 const BASE_SETTINGS: ApplicationSettings = {
   cv: 'optional',
   cover_letter: 'optional',
@@ -59,7 +60,7 @@ describe('ApplyForm — consent gate + honeypot', () => {
     const user = userEvent.setup()
     render(<ApplyForm tenant="acme" reference="REF-1" applicationSettings={BASE_SETTINGS} />)
     await fillRequiredFields(user)
-    await user.click(screen.getByRole('checkbox'))
+    await user.click(screen.getByRole('checkbox', { name: strings.apply.consentLabel }))
     await user.click(screen.getByRole('button', { name: strings.apply.submit }))
 
     expect(await screen.findByText(strings.apply.success)).toBeTruthy()
@@ -82,7 +83,7 @@ describe('ApplyForm — consent gate + honeypot', () => {
     const user = userEvent.setup()
     render(<ApplyForm tenant="acme" reference="REF-1" applicationSettings={BASE_SETTINGS} />)
     await fillRequiredFields(user)
-    await user.click(screen.getByRole('checkbox'))
+    await user.click(screen.getByRole('checkbox', { name: strings.apply.consentLabel }))
 
     const editor = screen.getByRole('textbox', { name: strings.apply.motivation })
     editor.innerHTML = '<p><strong>Zeer</strong> gemotiveerd</p>'
@@ -101,7 +102,7 @@ describe('ApplyForm — consent gate + honeypot', () => {
     const user = userEvent.setup()
     render(<ApplyForm tenant="acme" reference="REF-1" applicationSettings={BASE_SETTINGS} />)
     await fillRequiredFields(user)
-    await user.click(screen.getByRole('checkbox'))
+    await user.click(screen.getByRole('checkbox', { name: strings.apply.consentLabel }))
 
     const editor = screen.getByRole('textbox', { name: strings.apply.motivation })
     editor.innerHTML = `<p>${'a'.repeat(5001)}</p>`
@@ -124,7 +125,7 @@ describe('ApplyForm — settings-driven field visibility (formulier-v2)', () => 
     const user = userEvent.setup()
     render(<ApplyForm tenant="acme" reference="REF-1" applicationSettings={{ ...BASE_SETTINGS, cv: 'required' }} />)
     await fillRequiredFields(user)
-    await user.click(screen.getByRole('checkbox'))
+    await user.click(screen.getByRole('checkbox', { name: strings.apply.consentLabel }))
     await user.click(screen.getByRole('button', { name: strings.apply.submit }))
 
     expect(mockedApply).not.toHaveBeenCalled()
@@ -142,7 +143,7 @@ describe('ApplyForm — settings-driven field visibility (formulier-v2)', () => 
     expect(screen.queryByRole('textbox', { name: strings.apply.motivation })).toBeNull()
 
     await fillRequiredFields(user)
-    await user.click(screen.getByRole('checkbox'))
+    await user.click(screen.getByRole('checkbox', { name: strings.apply.consentLabel }))
     await user.click(screen.getByRole('button', { name: strings.apply.submit }))
 
     expect(await screen.findByText(strings.apply.success)).toBeTruthy()
@@ -261,7 +262,7 @@ describe('ApplyForm — payload assembly (address, remarks, phone, repeatable en
     await user.type(screen.getByLabelText(strings.apply.education.name), 'Verpleegkunde diploma')
     await user.click(screen.getByRole('button', { name: strings.apply.education.saveButton }))
 
-    await user.click(screen.getByRole('checkbox'))
+    await user.click(screen.getByRole('checkbox', { name: strings.apply.consentLabel }))
     await user.click(screen.getByRole('button', { name: strings.apply.submit }))
 
     expect(await screen.findByText(strings.apply.success)).toBeTruthy()
@@ -300,7 +301,7 @@ describe('ApplyForm — privacy notice + privacy_consent (K-012)', () => {
     render(<ApplyForm tenant="acme" reference="REF-1" applicationSettings={BASE_SETTINGS} />)
     await screen.findByText(NOTICE_TEXT)
     await fillRequiredFields(user)
-    await user.click(screen.getByRole('checkbox'))
+    await user.click(screen.getByRole('checkbox', { name: strings.apply.consentLabel }))
     await user.click(screen.getByRole('button', { name: strings.apply.submit }))
     expect(await screen.findByText(strings.apply.success)).toBeTruthy()
     expect(mockedApply.mock.calls[0][2].privacy_consent).toBe(true)
@@ -313,7 +314,7 @@ describe('ApplyForm — privacy notice + privacy_consent (K-012)', () => {
     expect(await screen.findByText(strings.apply.privacyNotice.error)).toBeTruthy()
     expect(screen.getByRole('button', { name: strings.apply.privacyNotice.retry })).toBeTruthy()
     await fillRequiredFields(user)
-    await user.click(screen.getByRole('checkbox'))
+    await user.click(screen.getByRole('checkbox', { name: strings.apply.consentLabel }))
     await user.click(screen.getByRole('button', { name: strings.apply.submit }))
     expect(await screen.findByText(strings.apply.success)).toBeTruthy()
     expect(mockedApply.mock.calls[0][2].privacy_consent).toBeUndefined()
@@ -326,5 +327,39 @@ describe('ApplyForm — privacy notice + privacy_consent (K-012)', () => {
     await user.click(await screen.findByRole('button', { name: strings.apply.privacyNotice.retry }))
     expect(await screen.findByText(NOTICE_TEXT)).toBeTruthy()
     expect(mockedNotice).toHaveBeenCalledTimes(2)
+  })
+})
+
+describe('ApplyForm — channel opt-ins (K-008)', () => {
+  // Submits with the AVG box (found by its label) plus the given opt-in labels ticked; returns the payload handed to the request.
+  async function submitWith(optIns: string[]) {
+    const user = userEvent.setup()
+    render(<ApplyForm tenant="acme" reference="REF-1" applicationSettings={BASE_SETTINGS} />)
+    await fillRequiredFields(user)
+    expect(screen.getByLabelText<HTMLInputElement>(strings.apply.optIn.whatsapp).checked).toBe(false)
+    expect(screen.getByLabelText<HTMLInputElement>(strings.apply.optIn.email).checked).toBe(false)
+    await user.click(screen.getByLabelText(strings.apply.consentLabel))
+    for (const label of optIns) await user.click(screen.getByLabelText(label))
+    await user.click(screen.getByRole('button', { name: strings.apply.submit }))
+    await screen.findByText(strings.apply.success)
+    return mockedApply.mock.calls[0][2]
+  }
+
+  it('renders both opt-ins unchecked and submits without either field', async () => {
+    const payload = await submitWith([])
+    expect(payload.whatsapp_consent).toBeUndefined()
+    expect(payload.email_consent).toBeUndefined()
+  })
+
+  it('sends only whatsapp_consent when the WhatsApp box is ticked', async () => {
+    const payload = await submitWith([strings.apply.optIn.whatsapp])
+    expect(payload.whatsapp_consent).toBe(true)
+    expect(payload.email_consent).toBeUndefined()
+  })
+
+  it('sends both opt-ins when both boxes are ticked', async () => {
+    const payload = await submitWith([strings.apply.optIn.whatsapp, strings.apply.optIn.email])
+    expect(payload.whatsapp_consent).toBe(true)
+    expect(payload.email_consent).toBe(true)
   })
 })
