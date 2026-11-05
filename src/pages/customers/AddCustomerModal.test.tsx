@@ -13,17 +13,15 @@
  * contract), the establishment picker actually filtering by typing, and the
  * name validation still blocking an incomplete submit.
  */
-import { describe, it, expect, vi, beforeEach, type Mock } from 'vitest'
-import type { CustomerForm } from './AddCustomerModal'
-import { render, screen, waitFor, fireEvent, within } from '@testing-library/react'
+import { describe, it, expect, vi, beforeEach } from 'vitest'
+import { render, screen, waitFor, fireEvent } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import i18n from '@/i18n'
-import { NavigationProvider } from '@/context/NavigationContext'
 import AddCustomerModal from './AddCustomerModal'
 // CUSTOMER-IMPORT-1: only the NETWORK calls are mocked — useImportWizard, UploadStep,
 // PreviewStep and ResultStep all run for REAL, so these tests prove the actual wizard
 // wiring (dry-run-before-real-run, xlsx rejection, close-on-success), not a stub of it.
-import { dryRunImport, runImport, type ImportRunResult } from '@/pages/settings/sections/import/importApi'
+import { dryRunImport, runImport } from '@/pages/settings/sections/import/importApi'
 
 vi.mock('@/pages/settings/sections/import/importApi', async (importOriginal) => {
   const actual = await importOriginal<typeof import('@/pages/settings/sections/import/importApi')>()
@@ -44,20 +42,18 @@ vi.mock('@/lib/useLocations', () => ({
 }))
 // KLANT-FASE-1: TENANT-RENAMED phases — the is_default row is NOT first and is NOT
 // called 'prospect', so a slug/index-based default would pick the wrong one.
-/* eslint-disable no-restricted-syntax -- DATA: fixture colours as the API returns them, not UI styling */
-vi.mock('@/lib/useCustomerPhases', () => ({
-  useCustomerPhases: () => ({
-    phases: [
-      { value: 'vaste_klant', label: 'Vaste klant', color: '#16A34A', isCustomer: true, isDefault: false },
-      { value: 'interesse', label: 'Interesse', color: '#1B60A9', isCustomer: false, isDefault: true },
-    ],
-    phaseMeta: (v?: string | null) => ({ value: v ?? '', label: v ?? '', color: '#9CA3AF', isCustomer: false, isDefault: false }),
-    defaultPhase: 'interesse',
-    isCustomerPhase: (v?: string | null) => v === 'vaste_klant',
-    loading: false,
-  }),
-}))
-/* eslint-enable no-restricted-syntax */
+vi.mock('@/lib/useCustomerPhases', async () => {
+  const { customerPhases, phaseFallbackColor } = await import('./AddCustomerModal.testKit')
+  return {
+    useCustomerPhases: () => ({
+      phases: customerPhases,
+      phaseMeta: (v?: string | null) => ({ value: v ?? '', label: v ?? '', color: phaseFallbackColor, isCustomer: false, isDefault: false }),
+      defaultPhase: 'interesse',
+      isCustomerPhase: (v?: string | null) => v === 'vaste_klant',
+      loading: false,
+    }),
+  }
+})
 // COUNTRY/PROVINCE cascade — mirrors the candidate modal's own province mock.
 vi.mock('@/hooks/useProvinces', () => ({ useProvinces: () => ({ provinces: ['Utrecht', 'Zuid-Holland'] }) }))
 // COLLAPSIBLE-TEXT-1: Tiptap needs a real browser to mount — stubbed with a plain
@@ -77,8 +73,7 @@ vi.mock('@/components/ui/RichTextEditor', () => ({
 const { authState } = vi.hoisted(() => ({
   authState: {
     user: { id: 'u1', name: 'Piet Recruiter' } as { id: string; name: string } | null,
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars -- the default mock allows every permission; the param exists only to match hasPermission's real signature (tsc's noUnusedParameters already exempts the leading underscore)
-    hasPermission: ((_perm: string) => true) as (perm: string) => boolean,
+    hasPermission: (() => true) as (perm: string) => boolean,
   },
 }))
 vi.mock('@/context/AuthContext', () => ({ useAuth: () => ({ user: authState.user, hasPermission: authState.hasPermission }) }))
@@ -94,7 +89,6 @@ vi.mock('@/lib/notify', () => ({ notifyError: vi.fn(), notifySuccess: vi.fn() })
 const ct = (key: string, opts?: Record<string, unknown>) => i18n.t(key, { ns: 'customers', ...opts })
 const cm = (key: string) => i18n.t(key, { ns: 'common' })
 // The reused import-wizard steps (PreviewStep/ResultStep) are in the 'settings' bundle.
-const st = (key: string, opts?: Record<string, unknown>) => i18n.t(key, { ns: 'settings', ...opts })
 
 const users = [{ id: 'u1', name: 'Piet Recruiter' }]
 const statuses = [{ value: 'actief', label: 'Actief' }]
@@ -333,406 +327,5 @@ describe('AddCustomerModal · own address block (Danny 02-08: mirrors AddCandida
       street: 'Kerkstraat', houseNumber: '12', houseNumberSuffix: 'A',
       postalCode: '4201 AB', city: 'Gorinchem', province: 'Utrecht', country: 'NL',
     }))
-  })
-})
-
-// CLEAR-SWEEP (Danny 13-08): industry/province/country/owner are optional pickers —
-// each carries a real clear cross once picked, and clearing must reach the create
-// body as "left out" (CONSIST-2, verified in useCustomerRecord.test.ts), not just
-// reset the on-screen trigger. Mirrors OpportunityGeneralCard's own clear test.
-describe('AddCustomerModal · CLEAR-SWEEP optional pickers clear back to placeholder', () => {
-  it('pick then clear the industry picker', async () => {
-    const user = userEvent.setup()
-    render(<AddCustomerModal onClose={() => {}} users={users} statuses={statuses} />)
-    await user.click(screen.getByRole('button', { name: new RegExp(ct('modal.fields.industry')) }))
-    await user.click(await screen.findByRole('button', { name: 'Zorg' }))
-    expect(screen.getByText('Zorg')).toBeInTheDocument()
-
-    const clear = within(screen.getByText(ct('modal.fields.industry')).parentElement as HTMLElement).getByTitle(i18n.t('clearField', { ns: 'common', field: ct('modal.fields.industry') }))
-    await user.click(clear)
-    expect(screen.getByText(ct('modal.fields.selectIndustry'))).toBeInTheDocument()
-  })
-
-  it('pick then clear the account manager picker', async () => {
-    authState.user = { id: 'super-admin-1', name: 'Super Admin' } // not auto-proposed, stays empty until picked
-    const user = userEvent.setup()
-    render(<AddCustomerModal onClose={() => {}} users={users} statuses={statuses} />)
-    await user.click(screen.getByRole('button', { name: new RegExp(ct('modal.fields.accountManager')) }))
-    await user.click(await screen.findByRole('button', { name: 'Piet Recruiter' }))
-    expect(screen.getByText('Piet Recruiter')).toBeInTheDocument()
-
-    const clear = within(screen.getByText(ct('modal.fields.accountManager')).parentElement as HTMLElement).getByTitle(i18n.t('clearField', { ns: 'common', field: ct('modal.fields.accountManager') }))
-    await user.click(clear)
-    expect(screen.getByText(ct('modal.fields.selectOwner'))).toBeInTheDocument()
-  })
-
-  it('pick then clear the province/country pickers, and the create body omits both when left empty', async () => {
-    const onCreate = vi.fn().mockResolvedValue(undefined)
-    const user = userEvent.setup()
-    render(<AddCustomerModal onClose={() => {}} onCreate={onCreate} users={users} statuses={statuses} />)
-    await user.type(screen.getByLabelText(ct('modal.fields.name'), { exact: false }), 'Rivas Zorggroep')
-
-    await user.click(screen.getByRole('button', { name: new RegExp(ct('locations.detail.country')) }))
-    await user.click(await screen.findByRole('button', { name: 'Nederland' }))
-    await user.click(screen.getByRole('button', { name: new RegExp(ct('locations.detail.state')) }))
-    await user.click(await screen.findByRole('button', { name: 'Utrecht' }))
-
-    const clearProvince = within(screen.getByText(ct('locations.detail.state')).parentElement as HTMLElement).getByTitle(i18n.t('clearField', { ns: 'common', field: ct('locations.detail.state') }))
-    await user.click(clearProvince)
-    expect(screen.getByText(cm('select'))).toBeInTheDocument()
-    const clearCountry = within(screen.getByText(ct('locations.detail.country')).parentElement as HTMLElement).getByTitle(i18n.t('clearField', { ns: 'common', field: ct('locations.detail.country') }))
-    await user.click(clearCountry)
-
-    await user.click(screen.getByRole('button', { name: ct('modal.create') }))
-    expect(onCreate).toHaveBeenCalledWith(expect.objectContaining({ province: '', country: '' }))
-  })
-})
-
-describe('AddCustomerModal · account manager defaults to the creator (Danny 02-08)', () => {
-  // ACCOUNTMANAGER-DEFAULT-1: "Accountmanager moet voorstel waarde zijn van de
-  // gebruiker die hem aanmaakt" — but only a PROPOSAL, and only when the logged-in
-  // user is actually assignable (present in the tenant's `users` list); otherwise
-  // the create would 422 (owner_id validated against tenant users).
-  it('pre-selects the current user as owner when they are in the assignable users list', () => {
-    authState.user = { id: 'u1', name: 'Piet Recruiter' }
-    render(<AddCustomerModal onClose={() => {}} users={users} statuses={statuses} />)
-    expect(screen.getByText('Piet Recruiter')).toBeInTheDocument()
-  })
-
-  it('leaves the owner empty when the current user is not in the assignable users list', () => {
-    authState.user = { id: 'super-admin-1', name: 'Super Admin' }
-    render(<AddCustomerModal onClose={() => {}} users={users} statuses={statuses} />)
-    expect(screen.queryByText('Super Admin')).not.toBeInTheDocument()
-    // The picker still renders — just unfilled, showing its own placeholder.
-    expect(screen.getByText(ct('modal.fields.selectOwner'))).toBeInTheDocument()
-  })
-
-  it('never overwrites an owner the recruiter already picked, even once assignability resolves afterwards', async () => {
-    // Starts NOT assignable ('u1' is not yet in the list — e.g. the users list is
-    // still loading) so nothing gets auto-proposed; the recruiter picks someone
-    // (a DIFFERENT user, 'u2') by hand while the effect stays dormant.
-    authState.user = { id: 'u1', name: 'Danny Superadmin' }
-    const user = userEvent.setup()
-    const otherUser = [{ id: 'u2', name: 'Piet Recruiter' }]
-    const { rerender } = render(<AddCustomerModal onClose={() => {}} users={otherUser} statuses={statuses} />)
-    await user.click(screen.getByRole('button', { name: new RegExp(ct('modal.fields.accountManager')) }))
-    await user.click(await screen.findByRole('button', { name: 'Piet Recruiter' }))
-    expect(screen.getByText('Piet Recruiter')).toBeInTheDocument()
-
-    // The tenant users list resolves and NOW includes 'u1' too — meIsAssignable
-    // flips true, but the functional "only while still empty" update must not
-    // clobber the recruiter's own pick.
-    rerender(<AddCustomerModal onClose={() => {}} users={[...otherUser, { id: 'u1', name: 'Danny Superadmin' }]} statuses={statuses} />)
-    expect(screen.getByText('Piet Recruiter')).toBeInTheDocument()
-  })
-})
-
-describe('AddCustomerModal · lifecycle phase (KLANT-FASE-1)', () => {
-  // Danny 02-08: "die fase moet zijn zoals + nieuwe kandidaat" — two pills top right, and
-  // the title names the choice, instead of a dropdown buried in a card he walked past twice.
-  it('pre-selects the is_default phase — read off the flag, not the "prospect" slug', () => {
-    render(<AddCustomerModal onClose={() => {}} users={users} statuses={statuses} />)
-    // The pill is pressed…
-    expect(screen.getByRole('button', { name: 'Interesse' })).toHaveAttribute('aria-pressed', 'true')
-    // …and the title says which kind of record you are creating.
-    expect(screen.getByText(`${ct('modal.title')} — Interesse`)).toBeInTheDocument()
-  })
-
-  it('hands the picked phase to onCreate in the same whole-form object', async () => {
-    const onCreate = vi.fn().mockResolvedValue(undefined)
-    const user = userEvent.setup()
-    render(<AddCustomerModal onClose={() => {}} onCreate={onCreate} users={users} statuses={statuses} />)
-
-    await user.type(screen.getByLabelText(ct('modal.fields.name'), { exact: false }), 'Zorgpartners')
-    await user.click(screen.getByRole('button', { name: 'Vaste klant' }))
-    expect(screen.getByRole('button', { name: 'Vaste klant' })).toHaveAttribute('aria-pressed', 'true')
-    await user.click(screen.getByRole('button', { name: ct('modal.create') }))
-
-    expect(onCreate).toHaveBeenCalledWith(expect.objectContaining({ phase: 'vaste_klant' }))
-  })
-})
-
-describe('AddCustomerModal · import card (Danny 02-08: replaces the italic import hint with a real importer)', () => {
-  // KLANT-LAYOUT-2 (Danny 03-08): the card now lives inside a CollapsedCard, closed
-  // by default — every test below must open it before it can query the card's contents.
-  const importCardTitle = ct('modal.import.title')
-  const csvFile = new File(['klant_naam,straat\nAcme,Kerkstraat 1'], 'acme.csv', { type: 'text/csv' })
-  const xlsxFile = new File(['binary'], 'acme.xlsx', {
-    type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-  })
-  // A dry run that would land one row — enough to unlock the real-import confirm.
-  const cleanResult: ImportRunResult = {
-    entity: 'customer_tree', dry_run: true,
-    summary: { rows: 1, create: 1, update: 0, skip: 0, error: 0 },
-    unknown_columns: [],
-    rows: [{ row: 1, action: 'create', reference: 'Acme', id: null, messages: [] }],
-  }
-
-  it('the upload input advertises .csv, .txt AND .xlsx (backend: ImportUploadRequest mimes:csv,txt,xlsx)', () => {
-    render(<AddCustomerModal onClose={() => {}} users={users} statuses={statuses} />)
-    fireEvent.click(screen.getByRole('button', { name: importCardTitle }))
-    const input = screen.getByLabelText(st('import.selectCsv')) as HTMLInputElement
-    expect(input.accept).toBe('.csv,.txt,.xlsx')
-  })
-
-  it('accepts an .xlsx file dropped in — this card only forwards the raw File, never parses it client-side', () => {
-    render(<AddCustomerModal onClose={() => {}} users={users} statuses={statuses} />)
-    fireEvent.click(screen.getByRole('button', { name: importCardTitle }))
-
-    // Dropped rather than picked via the file dialog: drag-and-drop bypasses the
-    // input's `accept` filter entirely, so this exercises the component's OWN
-    // extension check, not just the OS picker.
-    const dropZone = screen.getByText(ct('modal.import.intro')).parentElement as HTMLElement
-    fireEvent.drop(dropZone, { dataTransfer: { files: [xlsxFile] } })
-
-    expect(screen.queryByText(st('common:upload.typeNotAllowed', { allowed: 'csv, txt, xlsx' }))).not.toBeInTheDocument()
-    expect(screen.getByText(st('import.fileSelected', { name: 'acme.xlsx' }))).toBeInTheDocument()
-  })
-
-  it('refuses a genuinely unsupported file type client-side, and never calls the dry run', () => {
-    const pdfFile = new File(['binary'], 'acme.pdf', { type: 'application/pdf' })
-    render(<AddCustomerModal onClose={() => {}} users={users} statuses={statuses} />)
-    fireEvent.click(screen.getByRole('button', { name: importCardTitle }))
-
-    const dropZone = screen.getByText(ct('modal.import.intro')).parentElement as HTMLElement
-    fireEvent.drop(dropZone, { dataTransfer: { files: [pdfFile] } })
-
-    // The refusal now speaks the shared upload policy (type refusal lists the allowed extensions).
-    expect(screen.getByText(st('common:upload.typeNotAllowed', { allowed: 'csv, txt, xlsx' }))).toBeInTheDocument()
-    expect(dryRunImport).not.toHaveBeenCalled()
-  })
-
-  it('never reaches the real import before the mandatory dry run succeeds', async () => {
-    const user = userEvent.setup()
-    vi.mocked(dryRunImport).mockResolvedValue(cleanResult)
-    render(<AddCustomerModal onClose={() => {}} users={users} statuses={statuses} />)
-    await user.click(screen.getByRole('button', { name: importCardTitle }))
-
-    // Before any file is picked, no confirm/real-import control exists at all —
-    // there is no shortcut straight to runImport.
-    expect(screen.queryByRole('button', { name: st('import.preview.confirm') })).not.toBeInTheDocument()
-
-    const input = screen.getByLabelText(st('import.selectCsv'))
-    await user.upload(input, csvFile)
-    await user.click(screen.getByRole('button', { name: st('import.runPreview') }))
-
-    expect(dryRunImport).toHaveBeenCalledTimes(1)
-    expect(runImport).not.toHaveBeenCalled()
-    // ONLY once the dry run has resolved does the real-import control appear.
-    expect(await screen.findByRole('button', { name: st('import.preview.confirm') })).toBeInTheDocument()
-  })
-
-  it('closes the modal and refreshes the list once a real import lands something', async () => {
-    const user = userEvent.setup()
-    const onClose = vi.fn()
-    const onImported = vi.fn()
-    vi.mocked(dryRunImport).mockResolvedValue(cleanResult)
-    vi.mocked(runImport).mockResolvedValue({
-      ...cleanResult, dry_run: false, rows: [{ ...cleanResult.rows[0], id: 'c1' }],
-    })
-
-    render(<AddCustomerModal onClose={onClose} onImported={onImported} users={users} statuses={statuses} />)
-    await user.click(screen.getByRole('button', { name: importCardTitle }))
-
-    const input = screen.getByLabelText(st('import.selectCsv'))
-    await user.upload(input, csvFile)
-    await user.click(screen.getByRole('button', { name: st('import.runPreview') }))
-    await user.click(await screen.findByRole('button', { name: st('import.preview.confirm') }))
-
-    // The auto-close effect fires once the run RESULT lands something — never
-    // leaving the untouched manual form open behind a customer that now exists.
-    await waitFor(() => expect(onClose).toHaveBeenCalledTimes(1))
-    expect(onImported).toHaveBeenCalledTimes(1)
-    expect(runImport).toHaveBeenCalledTimes(1)
-  })
-
-  it('gates the picker on customers.create: disabled, with the honest notice, not a button that would 403', () => {
-    authState.hasPermission = (perm: string) => perm !== 'customers.create'
-    render(<AddCustomerModal onClose={() => {}} users={users} statuses={statuses} />)
-    fireEvent.click(screen.getByRole('button', { name: importCardTitle }))
-
-    expect(screen.getByLabelText(st('import.selectCsv'))).toBeDisabled()
-    expect(screen.getByText(st('import.noImportPermission'))).toBeInTheDocument()
-  })
-
-  // KLANT-LAYOUT-2 (Danny 03-08): the import card is secondary/optional, so it
-  // starts collapsed — verifies the CollapsedCard wiring itself, not just the
-  // open-then-assert pattern the other tests above now use.
-  it('the import card starts collapsed', () => {
-    render(<AddCustomerModal onClose={() => {}} users={users} statuses={statuses} />)
-    expect(screen.queryByLabelText(st('import.selectCsv'))).not.toBeInTheDocument()
-    expect(screen.getByRole('button', { name: importCardTitle })).toHaveAttribute('aria-expanded', 'false')
-  })
-})
-
-// CUST-DUP-FE-1 (22-08): the duplicate-check regime AddCandidateModal already had —
-// probe endpoint + create-409 + restore — extended to customers 1:1 (backend contract
-// live, commit e4f4bb1c).
-describe('AddCustomerModal · KvK number field (CUST-DUP-FE-1)', () => {
-  it('renders an optional KvK/CoC number field and hands it to onCreate', async () => {
-    const onCreate = vi.fn().mockResolvedValue(undefined)
-    const user = userEvent.setup()
-    render(<AddCustomerModal onClose={() => {}} onCreate={onCreate} users={users} statuses={statuses} />)
-    await user.type(screen.getByLabelText(ct('modal.fields.name'), { exact: false }), 'Rivas Zorggroep')
-    await user.type(screen.getByLabelText(ct('overview.coc'), { exact: false }), '12345678')
-    await user.click(screen.getByRole('button', { name: ct('modal.create') }))
-    expect(onCreate).toHaveBeenCalledWith(expect.objectContaining({ cocNumber: '12345678' }))
-  })
-})
-
-// CUST-SOURCE-FE-1: acquisition source is a searchable/creatable picker like
-// industry — picking one hands it to onCreate; leaving it untouched sends the
-// empty default (filtered out of the real POST body downstream, useCustomerRecord.test.ts).
-describe('AddCustomerModal · acquisition source field (CUST-SOURCE-FE-1)', () => {
-  it('picking a source hands it to onCreate', async () => {
-    const onCreate = vi.fn().mockResolvedValue(undefined)
-    const user = userEvent.setup()
-    render(<AddCustomerModal onClose={() => {}} onCreate={onCreate} users={users} statuses={statuses} />)
-    await user.type(screen.getByLabelText(ct('modal.fields.name'), { exact: false }), 'Rivas Zorggroep')
-    await user.click(screen.getByRole('button', { name: new RegExp(ct('modal.fields.source')) }))
-    await user.click(await screen.findByRole('button', { name: 'LinkedIn' }))
-    await user.click(screen.getByRole('button', { name: ct('modal.create') }))
-    expect(onCreate).toHaveBeenCalledWith(expect.objectContaining({ source: 'LinkedIn' }))
-  })
-
-  it('leaves source empty when never touched', async () => {
-    const onCreate = vi.fn().mockResolvedValue(undefined)
-    const user = userEvent.setup()
-    render(<AddCustomerModal onClose={() => {}} onCreate={onCreate} users={users} statuses={statuses} />)
-    await user.type(screen.getByLabelText(ct('modal.fields.name'), { exact: false }), 'Rivas Zorggroep')
-    await user.click(screen.getByRole('button', { name: ct('modal.create') }))
-    expect(onCreate).toHaveBeenCalledWith(expect.objectContaining({ source: '' }))
-  })
-})
-
-describe('AddCustomerModal · duplicate probe (CUST-DUP-FE-1)', () => {
-  it('probes POST /customers/check-duplicate with the exact debounced body', async () => {
-    const user = userEvent.setup()
-    render(<AddCustomerModal onClose={() => {}} users={users} statuses={statuses} />)
-    await user.type(screen.getByLabelText(ct('modal.fields.name'), { exact: false }), 'Rivas Zorggroep')
-    await user.type(screen.getByLabelText(ct('overview.coc'), { exact: false }), '12345678')
-    // Real debounce (500ms) — wait past it rather than faking timers, mirrors
-    // AddCandidateModal.test.tsx's own probe test technique.
-    await new Promise(r => setTimeout(r, 700))
-    await waitFor(() => expect(postMock).toHaveBeenCalledWith(
-      '/customers/check-duplicate',
-      { name: 'Rivas Zorggroep', coc_number: '12345678', billing_email: undefined },
-      expect.objectContaining({ signal: expect.anything() }),
-    ))
-  })
-
-  // PII-REGRESSIE (mirrors the candidate guard): coc/billing details must never
-  // travel as a query string (§7) — the probe only ever calls the POST variant.
-  it('never probes over the GET route', async () => {
-    const user = userEvent.setup()
-    render(<AddCustomerModal onClose={() => {}} users={users} statuses={statuses} />)
-    await user.type(screen.getByLabelText(ct('modal.fields.name'), { exact: false }), 'Rivas Zorggroep')
-    await new Promise(r => setTimeout(r, 700))
-    const probedViaGet = getMock.mock.calls.some(([url]) => String(url).includes('check-duplicate'))
-    expect(probedViaGet).toBe(false)
-  })
-})
-
-// C-29-equivalent: the 409 used to dump the server's Dutch sentence into the error
-// banner and throw the `existing` payload away. It must now render a translated
-// panel with real actions built from that payload — mirrors AddCandidateModal 1:1.
-describe('AddCustomerModal · duplicate 409 panel (CUST-DUP-FE-1)', () => {
-  const mountWithNav = (onCreate: Mock<(form: CustomerForm) => unknown>, onClose = vi.fn()) => {
-    const goTo = vi.fn()
-    render(
-      <NavigationProvider goTo={goTo}>
-        <AddCustomerModal onClose={onClose} onCreate={onCreate} users={users} statuses={statuses} />
-      </NavigationProvider>
-    )
-    return { goTo, onClose }
-  }
-
-  // Fill the one required field and submit.
-  const submit = async (user: ReturnType<typeof userEvent.setup>) => {
-    await user.type(screen.getByLabelText(ct('modal.fields.name'), { exact: false }), 'Zorg Almere B.V.')
-    await user.click(screen.getByRole('button', { name: ct('modal.create') }))
-  }
-
-  const reject409 = (existing: Record<string, unknown> | undefined) =>
-    vi.fn().mockRejectedValue({ response: { status: 409, data: { message: 'Klant bestaat al', existing } } })
-
-  it('renders the translated panel with the duplicate name — never the raw server sentence', async () => {
-    const onCreate = reject409({ id: 'dup-1', name: 'Zorg Gorinchem', archived: false })
-    const user = userEvent.setup()
-    mountWithNav(onCreate)
-    await submit(user)
-    expect(await screen.findByText(ct('duplicate.blockedTitle'))).toBeInTheDocument()
-    expect(screen.getByText('Zorg Gorinchem')).toBeInTheDocument()
-    expect(screen.getByText(ct('duplicate.stateActive'))).toBeInTheDocument()
-    // The regression that matters: the untranslated server message is gone.
-    expect(screen.queryByText('Klant bestaat al')).not.toBeInTheDocument()
-  })
-
-  it('"open existing" navigates to that customer and closes the create form', async () => {
-    const onCreate = reject409({ id: 'dup-1', name: 'Zorg Gorinchem', archived: false })
-    const user = userEvent.setup()
-    const { goTo, onClose } = mountWithNav(onCreate)
-    await submit(user)
-    await user.click(await screen.findByRole('button', { name: ct('duplicate.open') }))
-    expect(goTo).toHaveBeenCalledWith('customers', { open: 'dup-1' })
-    expect(onClose).toHaveBeenCalled()
-  })
-
-  it('an archived duplicate says so and restores via POST /customers/{id}/restore', async () => {
-    const onCreate = reject409({ id: 'dup-2', name: 'Zorg Woerden', archived: true })
-    const user = userEvent.setup()
-    const { goTo } = mountWithNav(onCreate)
-    await submit(user)
-    expect(await screen.findByText(ct('duplicate.stateArchived'))).toBeInTheDocument()
-    await user.click(screen.getByRole('button', { name: ct('duplicate.restoreAndOpen') }))
-    // Assert the REQUEST (method + route), then the follow-up navigation.
-    await waitFor(() => expect(postMock).toHaveBeenCalledWith('/customers/dup-2/restore', undefined,
-      expect.objectContaining({ headers: expect.objectContaining({ 'Idempotency-Key': expect.any(String) }) })))
-    await waitFor(() => expect(goTo).toHaveBeenCalledWith('customers', { open: 'dup-2' }))
-  })
-
-  it('hides restore (but keeps open) without the customers.update permission', async () => {
-    authState.hasPermission = (perm: string) => perm !== 'customers.update'
-    const onCreate = reject409({ id: 'dup-2', name: 'Zorg Woerden', archived: true })
-    const user = userEvent.setup()
-    mountWithNav(onCreate)
-    await submit(user)
-    expect(await screen.findByRole('button', { name: ct('duplicate.open') })).toBeInTheDocument()
-    expect(screen.queryByRole('button', { name: ct('duplicate.restoreAndOpen') })).not.toBeInTheDocument()
-    // Assert the RESTORE seam specifically — this submit fills `name`, a probe
-    // field, so a blanket not-called would race the 500ms probe debounce.
-    expect(postMock.mock.calls.some(([url]) => String(url).includes('/restore'))).toBe(false)
-  })
-
-  it('a 409 without an `existing` payload still shows our own translated line', async () => {
-    const onCreate = reject409(undefined)
-    const user = userEvent.setup()
-    mountWithNav(onCreate)
-    await submit(user)
-    expect(await screen.findByText(ct('duplicate.blockedTitle'))).toBeInTheDocument()
-    expect(screen.queryByText('Klant bestaat al')).not.toBeInTheDocument()
-  })
-
-  it('a non-409 rejection still takes the generic error path', async () => {
-    const onCreate = vi.fn().mockRejectedValue({ response: { data: { message: 'Er ging iets mis op de server' } } })
-    const user = userEvent.setup()
-    mountWithNav(onCreate)
-    await submit(user)
-    expect(await screen.findByRole('alert')).toHaveTextContent('Er ging iets mis op de server')
-    expect(screen.queryByText(ct('duplicate.blockedTitle'))).not.toBeInTheDocument()
-  })
-
-  // ONIX N-005: a 422 bag key no form field maps to (a required tenant custom
-  // field) must still surface as a banner, never a silent failed submit.
-  it('shows a banner for a 422 key no field renders (unmapped custom field)', async () => {
-    const onCreate = vi.fn().mockRejectedValue({
-      response: { data: { errors: { 'custom_fields.vog': ['The custom_fields.vog field is required.'] } } },
-    })
-    const user = userEvent.setup()
-    mountWithNav(onCreate)
-    await submit(user)
-    expect(await screen.findByRole('alert')).toHaveTextContent("vog")
-    // ONIX N-005 verifier: no field renders the dotted key as a red-bordered input.
-    expect(document.querySelector('[aria-invalid="true"]')).toBeNull()
   })
 })

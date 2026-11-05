@@ -18,11 +18,10 @@ import { render, screen, waitFor, fireEvent, within } from '@testing-library/rea
 import userEvent from '@testing-library/user-event'
 import i18n from '@/i18n'
 import AddLocationModal from './AddLocationModal'
-import type { Location, Contact } from '@/types/customer'
 // SUBENTITY-IMPORT-1: only the NETWORK calls are mocked — useImportWizard, UploadStep,
 // PreviewStep and ResultStep all run for REAL, so these tests prove the actual wizard
 // wiring (dry-run-before-real-run, xlsx rejection, close-on-success), not a stub of it.
-import { dryRunImport, runImport, type ImportRunResult } from '@/pages/settings/sections/import/importApi'
+import { dryRunImport, runImport } from '@/pages/settings/sections/import/importApi'
 import { setLocationPrimaryContact } from './hooks/useCustomerContacts'
 import { notifyError } from '@/lib/notify'
 
@@ -57,8 +56,7 @@ vi.mock('@/components/ui/RichTextEditor', () => ({
 // which touch the import card) keep behaving as before; the import describe block below
 // overrides it per test to exercise the gate itself.
 const { authState, settingsState } = vi.hoisted(() => ({
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars -- the default mock allows every permission; the param exists only to match hasPermission's real signature
-  authState: { hasPermission: ((_perm: string) => true) as (perm: string) => boolean },
+  authState: { hasPermission: (() => true) as (perm: string) => boolean },
   // STATUS-HIDDEN-1: the settings blob a test can flip per-case (e.g. tenant marks
   // status_id required) — defaults to empty (nothing required).
   settingsState: { settings: {} as Record<string, unknown> },
@@ -77,17 +75,8 @@ vi.mock('@/lib/settings/useAllSettings', async importOriginal => {
 // Resolve the active locale's own copy so assertions never guess/hardcode a language.
 const ct = (key: string, opts?: Record<string, unknown>) => i18n.t(key, { ns: 'customers', ...opts })
 // The reused import-wizard steps (PreviewStep/ResultStep) are in the 'settings' bundle.
-const st = (key: string, opts?: Record<string, unknown>) => i18n.t(key, { ns: 'settings', ...opts })
 
 const statuses = [{ value: 'st-1', label: 'Actief' }, { value: 'st-2', label: 'Inactief' }]
-const contact = (overrides: Partial<Contact>): Contact => ({
-  id: 'c-1', helloflexLink: null, shiftmanagerLink: null, firstName: 'Joost', middleName: '', lastName: 'de Boer', name: 'Joost de Boer',
-  customerId: 'cust-1', gender: '', role: '', email: '', phone: '', mobile: '', isPrimary: false,
-  locationId: null, locationName: '', departmentId: null, departmentName: '',
-  locations: [], departments: [], statusId: null, status: '', statusLabel: '', statusColor: '', customFields: {},
-  lastContactAt: null, lastContactType: null,
-  ...overrides,
-})
 
 beforeEach(() => {
   authState.hasPermission = () => true
@@ -301,55 +290,6 @@ describe('AddLocationModal · status picker hidden by default (STATUS-HIDDEN-1)'
   })
 })
 
-describe('AddLocationModal · contact ter plaatse (Danny: "je typt Joost de Boer in en Joost weet er niets van")', () => {
-  const existingContacts = [contact({ id: 'c-1', name: 'Joost de Boer' }), contact({ id: 'c-2', name: 'Marieke Jansen' })]
-
-  it('picking an existing contact couples it as primary once the location is created', async () => {
-    const onCreate = vi.fn().mockResolvedValue({ id: 'loc-99', name: 'Hoofdlocatie' } as unknown as Location)
-    vi.mocked(setLocationPrimaryContact).mockResolvedValue(true)
-    const user = userEvent.setup()
-    render(<AddLocationModal onClose={() => {}} onCreate={onCreate} customerId="cust-1" statuses={statuses} existingContacts={existingContacts} />)
-
-    await user.type(screen.getByLabelText(ct('subModal.locationName'), { exact: false }), 'Hoofdlocatie')
-    await user.click(screen.getByRole('button', { name: new RegExp(ct('subModal.contactName')) }))
-    await user.click(await screen.findByRole('button', { name: 'Joost de Boer' }))
-    await user.click(screen.getByRole('button', { name: ct('subModal.create') }))
-
-    // The free-text column still carries the resolved name (unchanged column)…
-    await waitFor(() => expect(onCreate).toHaveBeenCalledWith(expect.objectContaining({ contactName: 'Joost de Boer' })))
-    // …AND the real coupling fires against the just-created location's id.
-    await waitFor(() => expect(setLocationPrimaryContact).toHaveBeenCalledWith('cust-1', 'c-1', 'loc-99'))
-  })
-
-  it('shows "name — function" for an existing contact that has one (CONTACT-LABEL-1)', async () => {
-    const withRole = [contact({ id: 'c-3', name: 'Sanne Bakker', role: 'Teamleider' })]
-    const user = userEvent.setup()
-    render(<AddLocationModal onClose={() => {}} statuses={statuses} existingContacts={withRole} />)
-
-    await user.click(screen.getByRole('button', { name: new RegExp(ct('subModal.contactName')) }))
-    expect(await screen.findByRole('button', { name: 'Sanne Bakker — Teamleider' })).toBeInTheDocument()
-  })
-
-  it('reports a failed coupling honestly instead of pretending it worked — the location stays created', async () => {
-    const onClose = vi.fn()
-    const onCreate = vi.fn().mockResolvedValue({ id: 'loc-99', name: 'Hoofdlocatie' } as unknown as Location)
-    vi.mocked(setLocationPrimaryContact).mockRejectedValue(new Error('network'))
-    const user = userEvent.setup()
-    render(<AddLocationModal onClose={onClose} onCreate={onCreate} customerId="cust-1" statuses={statuses} existingContacts={existingContacts} />)
-
-    await user.type(screen.getByLabelText(ct('subModal.locationName'), { exact: false }), 'Hoofdlocatie')
-    await user.click(screen.getByRole('button', { name: new RegExp(ct('subModal.contactName')) }))
-    await user.click(await screen.findByRole('button', { name: 'Joost de Boer' }))
-    await user.click(screen.getByRole('button', { name: ct('subModal.create') }))
-
-    // The location was created and the modal still closes — a coupling failure never
-    // rolls back a location that may already hold other data (see this file's report).
-    await waitFor(() => expect(onClose).toHaveBeenCalledTimes(1))
-    // But the failure is surfaced, never silently swallowed as a bare success.
-    expect(notifyError).toHaveBeenCalledWith(ct('subModal.contactCouplingFailed', { name: 'Hoofdlocatie' }))
-  })
-})
-
 // VALIDATIE-LIVE-1-rest (2026-08-08): email ("contact ter plaatse") is the one
 // field the backend validates with a shape rule (CustomerLocationController::
 // rules `email` => Laravel's `email` rule) — a malformed value now shows a live,
@@ -384,292 +324,6 @@ describe('AddLocationModal · live e-mail format validation (VALIDATIE-LIVE-1-re
 
     await user.click(screen.getByRole('button', { name: ct('subModal.create') }))
     await waitFor(() => expect(onCreate).toHaveBeenCalled())
-  })
-})
-
-// CONTACT-PRIMAIR-LOCATIE-2: the last gap — typing a NEW name (matching no existing
-// contact) used to only write the location's free-text column, never a real record.
-describe('AddLocationModal · typing a brand-new contact now creates + couples it (CONTACT-PRIMAIR-LOCATIE-2)', () => {
-  const existingContacts = [contact({ id: 'c-1', name: 'Joost de Boer' })]
-
-  it('the request order: location, THEN the new contact, THEN the primary coupling — with the split name and carried-over email/phone', async () => {
-    // Each mock records its own call into `calls` so the ORDER (not just the fact
-    // each fired) is asserted — a contact must never be coupled before either the
-    // location or itself exists.
-    const calls: string[] = []
-    const onCreate = vi.fn(async (v: unknown) => { calls.push('location'); return { id: 'loc-99', name: 'Hoofdlocatie', ...(v as object) } as unknown as Location })
-    const onAddContact = vi.fn(async (v: unknown) => { calls.push('contact'); return contact({ id: 'c-new', name: 'Piet Nieuwkomer', ...(v as object) }) })
-    vi.mocked(setLocationPrimaryContact).mockImplementation(async () => { calls.push('couple'); return true })
-    const user = userEvent.setup()
-    render(<AddLocationModal onClose={() => {}} onCreate={onCreate} onAddContact={onAddContact}
-      customerId="cust-1" statuses={statuses} existingContacts={existingContacts} />)
-
-    await user.type(screen.getByLabelText(ct('subModal.locationName'), { exact: false }), 'Hoofdlocatie')
-    await user.click(screen.getByRole('button', { name: new RegExp(ct('subModal.contactName')) }))
-    const search = screen.getByPlaceholderText(ct('subModal.contactName'))
-    await user.type(search, 'Piet Nieuwkomer')
-    await user.click(screen.getByRole('button', { name: /Piet Nieuwkomer/ }))
-    await user.type(screen.getByLabelText(ct('subModal.email')), 'piet@klant.nl')
-    await user.type(screen.getByLabelText(ct('subModal.phone')), '0612345678')
-    await user.click(screen.getByRole('button', { name: ct('subModal.create') }))
-
-    // The free-text column on the location still carries the resolved name (legacy fallback, unchanged).
-    await waitFor(() => expect(onCreate).toHaveBeenCalledWith(expect.objectContaining({ contactName: 'Piet Nieuwkomer' })))
-    // The new contact record: first word -> firstName, rest -> lastName, email/phone ride along.
-    expect(onAddContact).toHaveBeenCalledWith(expect.objectContaining({
-      firstName: 'Piet', lastName: 'Nieuwkomer', email: 'piet@klant.nl', phone: '0612345678',
-    }))
-    // The coupling fires against the just-created location AND the just-created contact's real id.
-    expect(setLocationPrimaryContact).toHaveBeenCalledWith('cust-1', 'c-new', 'loc-99')
-    // Order matters: the contact cannot be coupled before either the location or itself exists.
-    expect(calls).toEqual(['location', 'contact', 'couple'])
-  })
-
-  it('a lone single word goes wholly into lastName (never a fabricated firstName)', async () => {
-    const onCreate = vi.fn().mockResolvedValue({ id: 'loc-99', name: 'Hoofdlocatie' } as unknown as Location)
-    const onAddContact = vi.fn().mockResolvedValue(contact({ id: 'c-new', name: 'Receptie' }))
-    const user = userEvent.setup()
-    render(<AddLocationModal onClose={() => {}} onCreate={onCreate} onAddContact={onAddContact}
-      customerId="cust-1" statuses={statuses} existingContacts={existingContacts} />)
-
-    await user.type(screen.getByLabelText(ct('subModal.locationName'), { exact: false }), 'Hoofdlocatie')
-    await user.click(screen.getByRole('button', { name: new RegExp(ct('subModal.contactName')) }))
-    const search = screen.getByPlaceholderText(ct('subModal.contactName'))
-    await user.type(search, 'Receptie')
-    await user.click(screen.getByRole('button', { name: /Receptie/ }))
-    await user.click(screen.getByRole('button', { name: ct('subModal.create') }))
-
-    await waitFor(() => expect(onAddContact).toHaveBeenCalledWith(expect.objectContaining({ firstName: '', lastName: 'Receptie' })))
-  })
-
-  it('picking an existing contact never re-attempts a create (pick-existing path stays untouched)', async () => {
-    const onCreate = vi.fn().mockResolvedValue({ id: 'loc-99', name: 'Hoofdlocatie' } as unknown as Location)
-    const onAddContact = vi.fn()
-    vi.mocked(setLocationPrimaryContact).mockResolvedValue(true)
-    const user = userEvent.setup()
-    render(<AddLocationModal onClose={() => {}} onCreate={onCreate} onAddContact={onAddContact}
-      customerId="cust-1" statuses={statuses} existingContacts={existingContacts} />)
-
-    await user.type(screen.getByLabelText(ct('subModal.locationName'), { exact: false }), 'Hoofdlocatie')
-    await user.click(screen.getByRole('button', { name: new RegExp(ct('subModal.contactName')) }))
-    await user.click(await screen.findByRole('button', { name: 'Joost de Boer' }))
-    await user.click(screen.getByRole('button', { name: ct('subModal.create') }))
-
-    await waitFor(() => expect(setLocationPrimaryContact).toHaveBeenCalledWith('cust-1', 'c-1', 'loc-99'))
-    expect(onAddContact).not.toHaveBeenCalled()
-  })
-
-  it('contact-create failure: the location AND its free text stay, one honest toast, no coupling attempted', async () => {
-    const onClose = vi.fn()
-    const onCreate = vi.fn().mockResolvedValue({ id: 'loc-99', name: 'Hoofdlocatie' } as unknown as Location)
-    const onAddContact = vi.fn().mockRejectedValue(new Error('422 required first_name'))
-    const user = userEvent.setup()
-    render(<AddLocationModal onClose={onClose} onCreate={onCreate} onAddContact={onAddContact}
-      customerId="cust-1" statuses={statuses} existingContacts={existingContacts} />)
-
-    await user.type(screen.getByLabelText(ct('subModal.locationName'), { exact: false }), 'Hoofdlocatie')
-    await user.click(screen.getByRole('button', { name: new RegExp(ct('subModal.contactName')) }))
-    const search = screen.getByPlaceholderText(ct('subModal.contactName'))
-    await user.type(search, 'Piet Nieuwkomer')
-    await user.click(screen.getByRole('button', { name: /Piet Nieuwkomer/ }))
-    await user.click(screen.getByRole('button', { name: ct('subModal.create') }))
-
-    // The location was created (and the free-text column sent) regardless of what follows.
-    await waitFor(() => expect(onCreate).toHaveBeenCalledWith(expect.objectContaining({ contactName: 'Piet Nieuwkomer' })))
-    await waitFor(() => expect(onClose).toHaveBeenCalledTimes(1))
-    expect(notifyError).toHaveBeenCalledWith(ct('subModal.contactCreateFailed', { name: 'Hoofdlocatie' }))
-    expect(setLocationPrimaryContact).not.toHaveBeenCalled()
-  })
-
-  it('contact created but the coupling PUT fails: the contact stays created, one honest toast', async () => {
-    const onClose = vi.fn()
-    const onCreate = vi.fn().mockResolvedValue({ id: 'loc-99', name: 'Hoofdlocatie' } as unknown as Location)
-    const onAddContact = vi.fn().mockResolvedValue(contact({ id: 'c-new', name: 'Piet Nieuwkomer' }))
-    vi.mocked(setLocationPrimaryContact).mockRejectedValue(new Error('network'))
-    const user = userEvent.setup()
-    render(<AddLocationModal onClose={onClose} onCreate={onCreate} onAddContact={onAddContact}
-      customerId="cust-1" statuses={statuses} existingContacts={existingContacts} />)
-
-    await user.type(screen.getByLabelText(ct('subModal.locationName'), { exact: false }), 'Hoofdlocatie')
-    await user.click(screen.getByRole('button', { name: new RegExp(ct('subModal.contactName')) }))
-    const search = screen.getByPlaceholderText(ct('subModal.contactName'))
-    await user.type(search, 'Piet Nieuwkomer')
-    await user.click(screen.getByRole('button', { name: /Piet Nieuwkomer/ }))
-    await user.click(screen.getByRole('button', { name: ct('subModal.create') }))
-
-    await waitFor(() => expect(onAddContact).toHaveBeenCalled())
-    await waitFor(() => expect(setLocationPrimaryContact).toHaveBeenCalledWith('cust-1', 'c-new', 'loc-99'))
-    await waitFor(() => expect(onClose).toHaveBeenCalledTimes(1))
-    expect(notifyError).toHaveBeenCalledWith(ct('subModal.contactCouplingFailed', { name: 'Hoofdlocatie' }))
-  })
-
-  it('no onAddContact wired at all: a typed-new name never throws, location still creates (graceful degradation)', async () => {
-    const onCreate = vi.fn().mockResolvedValue({ id: 'loc-99', name: 'Hoofdlocatie' } as unknown as Location)
-    const user = userEvent.setup()
-    render(<AddLocationModal onClose={() => {}} onCreate={onCreate}
-      customerId="cust-1" statuses={statuses} existingContacts={existingContacts} />)
-
-    await user.type(screen.getByLabelText(ct('subModal.locationName'), { exact: false }), 'Hoofdlocatie')
-    await user.click(screen.getByRole('button', { name: new RegExp(ct('subModal.contactName')) }))
-    const search = screen.getByPlaceholderText(ct('subModal.contactName'))
-    await user.type(search, 'Piet Nieuwkomer')
-    await user.click(screen.getByRole('button', { name: /Piet Nieuwkomer/ }))
-    await user.click(screen.getByRole('button', { name: ct('subModal.create') }))
-
-    await waitFor(() => expect(onCreate).toHaveBeenCalled())
-    expect(setLocationPrimaryContact).not.toHaveBeenCalled()
-    expect(notifyError).not.toHaveBeenCalled()
-  })
-})
-
-describe('AddLocationModal · import card (Danny 02-08: "+ nieuwe locatie ... moeten ook een CSV-upload hebben")', () => {
-  const csvFile = new File(['klant_naam,naam\nZorggroep Middenland,Locatie Noord'], 'locaties.csv', { type: 'text/csv' })
-  const xlsxFile = new File(['binary'], 'locaties.xlsx', {
-    type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-  })
-  // A dry run that would land one row, resolved against the SAME customer as the
-  // modal is scoped to — the clean, no-mismatch case.
-  const cleanResult: ImportRunResult = {
-    entity: 'locations', dry_run: true,
-    summary: { rows: 1, create: 1, update: 0, skip: 0, error: 0 },
-    unknown_columns: [],
-    rows: [{ row: 1, action: 'create', reference: 'Zorggroep Middenland / Locatie Noord', id: null, messages: [] }],
-  }
-  // Same shape, but the row resolved to a DIFFERENT real customer than the one open here.
-  const mismatchResult: ImportRunResult = {
-    ...cleanResult,
-    rows: [{ row: 1, action: 'create', reference: 'Thuiszorg De Brug / Locatie Noord', id: null, messages: [] }],
-  }
-  // COLLAPSED-CARD-1 (03-08 A+D): the import card now lives behind a CollapsedCard
-  // whose accessible button name is exactly this title text — every test below that
-  // touches the card's contents must open it first.
-  const importCardTitle = ct('subModal.import.title', { entity: st('import.entities.locations.label') })
-
-  it('the upload input advertises .csv, .txt AND .xlsx (backend: ImportUploadRequest mimes:csv,txt,xlsx)', () => {
-    render(<AddLocationModal onClose={() => {}} statuses={statuses} customerName="Zorggroep Middenland" />)
-    fireEvent.click(screen.getByRole('button', { name: importCardTitle }))
-    const input = screen.getByLabelText(st('import.selectCsv')) as HTMLInputElement
-    expect(input.accept).toBe('.csv,.txt,.xlsx')
-  })
-
-  it('accepts an .xlsx file dropped in — this card only forwards the raw File, never parses it client-side', () => {
-    render(<AddLocationModal onClose={() => {}} statuses={statuses} customerName="Zorggroep Middenland" />)
-    fireEvent.click(screen.getByRole('button', { name: importCardTitle }))
-
-    // COMPACT-IMPORT-1: the compact card has no dedicated dropzone element — the
-    // whole card body accepts a drop, so its own intro line (a direct child of the
-    // onDrop-bearing div) is the stable anchor to its parent.
-    const dropZone = screen.getByText(ct('subModal.import.intro', { entity: st('import.entities.locations.label') })).parentElement as HTMLElement
-    fireEvent.drop(dropZone, { dataTransfer: { files: [xlsxFile] } })
-
-    expect(screen.queryByText(st('common:upload.typeNotAllowed', { allowed: 'csv, txt, xlsx' }))).not.toBeInTheDocument()
-    expect(screen.getByText(st('import.fileSelected', { name: 'locaties.xlsx' }))).toBeInTheDocument()
-  })
-
-  it('refuses a genuinely unsupported file type client-side, and never calls the dry run', () => {
-    const pdfFile = new File(['binary'], 'locaties.pdf', { type: 'application/pdf' })
-    render(<AddLocationModal onClose={() => {}} statuses={statuses} customerName="Zorggroep Middenland" />)
-    fireEvent.click(screen.getByRole('button', { name: importCardTitle }))
-
-    const dropZone = screen.getByText(ct('subModal.import.intro', { entity: st('import.entities.locations.label') })).parentElement as HTMLElement
-    fireEvent.drop(dropZone, { dataTransfer: { files: [pdfFile] } })
-
-    // The refusal speaks the shared upload policy (a type refusal lists the allowed extensions).
-    expect(screen.getByText(st('common:upload.typeNotAllowed', { allowed: 'csv, txt, xlsx' }))).toBeInTheDocument()
-    expect(dryRunImport).not.toHaveBeenCalled()
-  })
-
-  it('never reaches the real import before the mandatory dry run succeeds', async () => {
-    const user = userEvent.setup()
-    vi.mocked(dryRunImport).mockResolvedValue(cleanResult)
-    render(<AddLocationModal onClose={() => {}} statuses={statuses} customerName="Zorggroep Middenland" />)
-    await user.click(screen.getByRole('button', { name: importCardTitle }))
-
-    expect(screen.queryByRole('button', { name: st('import.preview.confirm') })).not.toBeInTheDocument()
-
-    const input = screen.getByLabelText(st('import.selectCsv'))
-    await user.upload(input, csvFile)
-    await user.click(screen.getByRole('button', { name: st('import.runPreview') }))
-
-    expect(dryRunImport).toHaveBeenCalledTimes(1)
-    expect(runImport).not.toHaveBeenCalled()
-    expect(await screen.findByRole('button', { name: st('import.preview.confirm') })).toBeInTheDocument()
-  })
-
-  it('closes the modal and calls onImported once a real import lands something', async () => {
-    const user = userEvent.setup()
-    const onClose = vi.fn()
-    const onImported = vi.fn()
-    vi.mocked(dryRunImport).mockResolvedValue(cleanResult)
-    vi.mocked(runImport).mockResolvedValue({ ...cleanResult, dry_run: false, rows: [{ ...cleanResult.rows[0], id: 'loc-1' }] })
-
-    render(<AddLocationModal onClose={onClose} onImported={onImported} statuses={statuses} customerName="Zorggroep Middenland" />)
-    await user.click(screen.getByRole('button', { name: importCardTitle }))
-
-    const input = screen.getByLabelText(st('import.selectCsv'))
-    await user.upload(input, csvFile)
-    await user.click(screen.getByRole('button', { name: st('import.runPreview') }))
-    await user.click(await screen.findByRole('button', { name: st('import.preview.confirm') }))
-
-    await waitFor(() => expect(onClose).toHaveBeenCalledTimes(1))
-    expect(onImported).toHaveBeenCalledTimes(1)
-    expect(runImport).toHaveBeenCalledTimes(1)
-  })
-
-  it('gates the picker on customers.create: disabled, with the honest notice, not a button that would 403', () => {
-    authState.hasPermission = (perm: string) => perm !== 'customers.create'
-    render(<AddLocationModal onClose={() => {}} statuses={statuses} customerName="Zorggroep Middenland" />)
-    fireEvent.click(screen.getByRole('button', { name: importCardTitle }))
-
-    expect(screen.getByLabelText(st('import.selectCsv'))).toBeDisabled()
-    expect(screen.getByText(st('import.noImportPermission'))).toBeInTheDocument()
-  })
-
-  it('THE CRITICAL CARE CASE: warns before the real import when a dry-run row resolves to a customer other than the one open here', async () => {
-    const user = userEvent.setup()
-    vi.mocked(dryRunImport).mockResolvedValue(mismatchResult)
-    vi.mocked(runImport).mockResolvedValue({ ...mismatchResult, dry_run: false })
-    render(<AddLocationModal onClose={() => {}} statuses={statuses} customerName="Zorggroep Middenland" />)
-    await user.click(screen.getByRole('button', { name: importCardTitle }))
-
-    const input = screen.getByLabelText(st('import.selectCsv'))
-    await user.upload(input, csvFile)
-    await user.click(screen.getByRole('button', { name: st('import.runPreview') }))
-    await screen.findByRole('button', { name: st('import.preview.confirm') })
-
-    // Clicking the plain Confirm button must NOT fire the real import yet — a
-    // parent mismatch intercepts it with an explicit acknowledgement dialog first.
-    await user.click(screen.getByRole('button', { name: st('import.preview.confirm') }))
-    expect(runImport).not.toHaveBeenCalled()
-    expect(screen.getByText(ct('subModal.import.mismatchConfirm', { count: 1, names: 'Thuiszorg De Brug' }))).toBeInTheDocument()
-
-    // Only the explicit "proceed anyway" button in that dialog fires the real run.
-    await user.click(screen.getByRole('button', { name: ct('subModal.import.mismatchProceed') }))
-    await waitFor(() => expect(runImport).toHaveBeenCalledTimes(1))
-  })
-
-  it('does NOT warn when every resolved row matches the customer this modal is scoped to', async () => {
-    const user = userEvent.setup()
-    vi.mocked(dryRunImport).mockResolvedValue(cleanResult)
-    vi.mocked(runImport).mockResolvedValue({ ...cleanResult, dry_run: false })
-    render(<AddLocationModal onClose={() => {}} statuses={statuses} customerName="Zorggroep Middenland" />)
-    await user.click(screen.getByRole('button', { name: importCardTitle }))
-
-    const input = screen.getByLabelText(st('import.selectCsv'))
-    await user.upload(input, csvFile)
-    await user.click(screen.getByRole('button', { name: st('import.runPreview') }))
-    await user.click(await screen.findByRole('button', { name: st('import.preview.confirm') }))
-
-    // No acknowledgement dialog stands between a clean preview and the real run.
-    await waitFor(() => expect(runImport).toHaveBeenCalledTimes(1))
-  })
-
-  // COLLAPSED-CARD-1 (03-08 A+D): proves the card is genuinely collapsed by
-  // default — its contents are absent from the DOM until opened.
-  it('the import card starts collapsed', () => {
-    render(<AddLocationModal onClose={() => {}} statuses={statuses} customerName="Zorggroep Middenland" />)
-    expect(screen.queryByLabelText(st('import.selectCsv'))).not.toBeInTheDocument()
-    expect(screen.getByRole('button', { name: importCardTitle })).toHaveAttribute('aria-expanded', 'false')
   })
 })
 

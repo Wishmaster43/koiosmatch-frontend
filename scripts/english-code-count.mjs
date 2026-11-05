@@ -16,7 +16,8 @@ const SKIP = [/\/i18n\/locales\//, /api-generated\.ts$/, /node_modules/, /\/dist
 // Text catalogues (seeded demo copy, lookup seed labels) and the word-list tooling are
 // values, not code: their string hits are reported apart and never ratcheted.
 const TEXT_VALUES = [/\/demoSeedTexts\//, /lookupSeedCatalogue/, /comment-audit\.mjs$/, /dutchCopies\.houseStyle/, /placeholdersGeneric\.houseStyle/]
-const isTest = (f) => /\.test\.[jt]sx?$/.test(f) || /^e2e\//.test(f)
+// A *.testKit.* file holds test fixtures shared by split suites (TEST-SPLIT-1/2): its strings follow the test bucket.
+const isTest = (f) => /\.test\.[jt]sx?$/.test(f) || /\.testKit\.[jt]sx?$/.test(f) || /^e2e\//.test(f)
 
 // Dutch tokens that never occur as English words (lowercased; matched per identifier token
 // and as whole words inside string literals). Product names (werkzoeken, helloflex) are

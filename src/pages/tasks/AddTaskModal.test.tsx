@@ -1,3 +1,4 @@
+/** AddTaskModal · edit mode, create POST, smart defaults and validation (the other concerns live in AddTaskModal.*.test.tsx; the header below documents the shared mock set). */
 /**
  * AddTaskModal — EDIT mode (Danny 20-07: pencil on a candidate task row) + create
  * mode. TASKTYPE-ID-1: BOTH now POST/PATCH the real update-request keys —
@@ -25,9 +26,10 @@
  * effect, whose deps compare `types`/`statuses`/`priorities` by reference).
  */
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
-import { render, screen, waitFor, fireEvent } from '@testing-library/react'
+import { render, waitFor, fireEvent, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import AddTaskModal from './AddTaskModal'
+import { EDIT_ID, FAIL_ID, TASK_DETAIL_RAW, TYPE_ROWS, STATUS_ROWS, PRIORITY_ROWS, CANDIDATE_ROWS, DEPARTMENT_ROWS, REFERENCE_ROWS, LK_SEED, FLAGGED_DEFAULT_TYPES } from './AddTaskModal.testKit'
 
 /**
  * i18n is STUBBED so every assertion below reads the KEY, which is what this
@@ -50,53 +52,6 @@ vi.mock('react-i18next', async (importOriginal) => {
   return { ...actual, useTranslation: () => ({ t: (k: string) => k, i18n: { language: 'nl' } }) }
 })
 
-const EDIT_ID = 'task-1'
-const FAIL_ID = 'task-fail'
-
-// The full task detail as GET /tasks/{id} returns it (description/links only
-// live here, not on the list row) — one pre-existing link ('opportunity') this
-// form's pickers don't expose, to prove edit-mode carries it over on save.
-const TASK_DETAIL_RAW = {
-  id: EDIT_ID,
-  title: 'Bel kandidaat terug',
-  // eslint-disable-next-line no-restricted-syntax -- test fixture hex, not a UI colour
-  type: { value: 'call', label: 'Belafspraak', color: '#5FB0AC' },
-  // eslint-disable-next-line no-restricted-syntax -- test fixture hex, not a UI colour
-  status: { value: 'todo', label: 'Te doen', color: '#D98A8A', is_done: false },
-  // eslint-disable-next-line no-restricted-syntax -- test fixture hex, not a UI colour
-  priority: { value: 'normal', label: 'Normaal', color: '#DDA071' },
-  assignee: { id: 'user-9', name: 'Danny' },
-  // TEAM-1: the task ALSO waits at an internal department — the two axes coexist
-  // on one record, which is precisely what the edit path must not flatten.
-  // eslint-disable-next-line no-restricted-syntax -- API fixture colour (DATA, mirrors the live row)
-  assignee_team: { id: 'team-1', name: 'Backoffice', color: '#2563EB' },
-  due_date: '2026-07-25',
-  due_time: '14:00',
-  description: '<p>Bespreek beschikbaarheid</p>',
-  links: [
-    { type: 'opportunity', id: 'opp-9', label: 'Deal X' },
-    { type: 'candidate', id: 'cand-1', label: 'Piet Jansen' },
-  ],
-}
-// Raw lookup rows (id = uuid FK, value = tenant-facing slug) — what BOTH the
-// create and update requests actually need (TASKTYPE-ID-1), distinct from the
-// slug-only options the form's pickers render. 'email' is included so the
-// is_default-flag test below (a non-first default) can resolve its type_id too.
-const TYPE_ROWS     = [{ id: 'type-uuid-1', value: 'call', label: 'Belafspraak' }, { id: 'type-uuid-2', value: 'email', label: 'E-mail' }]
-const STATUS_ROWS   = [{ id: 'status-uuid-1', value: 'todo', label: 'Te doen' }]
-const PRIORITY_ROWS = [{ id: 'prio-uuid-1', value: 'normal', label: 'Normaal' }]
-// Two candidates so the link picker's search box has something to filter
-// (JOB B coverage: "a searchable picker filters its options").
-const CANDIDATE_ROWS = [
-  { id: 'cand-1', name: 'Piet Jansen' },
-  { id: 'cand-2', name: 'Klaas de Vries' },
-]
-// PUNT 15: a customer department, so the create form's shared link picker (the
-// drawer's own AddLinkRow, one vocabulary) has a real row to couple the task to.
-const DEPARTMENT_ROWS = [{ id: 'dep-1', name: 'Backoffice Zorg' }]
-// REFERENCE-LINK-1: cand-1's own references (GET /candidates/cand-1/references).
-const REFERENCE_ROWS = [{ id: 'ref-1', name: 'Karim El Amrani', relation: { label: 'Partner' } }]
-
 // STABLE references, like the real provider (statuses/types/priorities are useState
 // values, unchanged across renders). Fresh array literals per call would make the
 // "seed defaults" effect's [statuses,types,priorities] deps change every render →
@@ -107,15 +62,16 @@ const REFERENCE_ROWS = [{ id: 'ref-1', name: 'Karim El Amrani', relation: { labe
 // stable array it always has.
 const { lk } = vi.hoisted(() => ({
   lk: {
-    // eslint-disable-next-line no-restricted-syntax -- test fixture hex, not a UI colour
-    statuses: [{ value: 'todo', label: 'Te doen', color: '#D98A8A' }],
-    // eslint-disable-next-line no-restricted-syntax -- test fixture hex, not a UI colour
-    types: [{ value: 'call', label: 'Belafspraak', color: '#5FB0AC' }] as Array<{ value: string; label: string; color: string; is_default?: boolean }>,
-    // eslint-disable-next-line no-restricted-syntax -- test fixture hex, not a UI colour
-    priorities: [{ value: 'normal', label: 'Normaal', color: '#DDA071' }],
+    statuses: [] as Array<{ value: string; label: string; color: string }>,
+    types: [] as Array<{ value: string; label: string; color: string; is_default?: boolean }>,
+    priorities: [] as Array<{ value: string; label: string; color: string }>,
     defaultPriority: 'normal',
   },
 }))
+// Seeded from the kit once imports are live (a hoisted block cannot import).
+lk.statuses = LK_SEED.statuses
+lk.types = LK_SEED.types
+lk.priorities = LK_SEED.priorities
 const ORIGINAL_TYPES = lk.types
 vi.mock('@/context/TaskLookupsContext', () => ({
   useTaskLookups: () => ({ statuses: lk.statuses, types: lk.types, priorities: lk.priorities, defaultPriority: lk.defaultPriority }),
@@ -360,251 +316,11 @@ describe('AddTaskModal · due date/time smart default (TASK-SMART-DEFAULTS-1, Da
   })
 })
 
-describe('AddTaskModal · assignee defaults to the logged-in user (TASK-ASSIGNEE-DEFAULT-1, mirrors AddApplicationModal/AddCustomerModal)', () => {
-  it('proposes me as assignee when I am an assignable tenant user (present in the /users list)', async () => {
-    authState.user = { id: 'user-9', name: 'Danny' } // matches the useUsers() mock fixture
-    const user = userEvent.setup()
-    render(<AddTaskModal onClose={noop} onCreated={noop} />)
-    expect(screen.getByRole('button', { name: /modal\.assignee/ })).toHaveTextContent('Danny')
-
-    await user.type(screen.getByPlaceholderText('modal.titlePlaceholder'), 'Nieuwe taak')
-    await user.click(screen.getByRole('button', { name: 'modal.create' }))
-    const api = (await import('@/lib/api')).default
-    expect(api.post).toHaveBeenCalledWith('/tasks', expect.objectContaining({ assignee_id: 'user-9' }))
-  })
-
-  it('leaves the assignee unassigned (bureau) when the current user is NOT an assignable tenant user', () => {
-    authState.user = { id: 'super-admin-1', name: 'Super Admin' } // absent from the useUsers() mock fixture
-    render(<AddTaskModal onClose={noop} onCreated={noop} />)
-    // The picker still renders — just unfilled, showing its own placeholder option
-    // (note: "Super Admin" DOES appear elsewhere, on the read-only "Aangemaakt
-    // door" creator line — that always shows the logged-in user regardless of
-    // assignability, a separate concern from the assignee proposal under test).
-    expect(screen.getByRole('button', { name: /modal\.assignee/ })).toHaveTextContent('modal.assigneeUnassigned')
-    expect(screen.getByRole('button', { name: /modal\.assignee/ })).not.toHaveTextContent('Super Admin')
-  })
-})
-
-/**
- * The PERSON axis. `assignee_id` is one tenant USER uuid (a role id answers 422),
- * so this list contains only real colleagues — the internal DEPARTMENT lives in
- * its own picker and its own describe block below (TEAM-1), never as a smuggled
- * row in here. "Bureau" is a real, choosable option that lands as
- * `assignee_id: null` — a measured 201, not a silent empty value.
- */
-describe('AddTaskModal · assigning to a colleague, with "Bureau" as a real choice', () => {
-  it('offers exactly the bureau row plus one row per colleague — never a department row in the PERSON list', async () => {
-    usersState.rows = [{ id: 'u-1', name: 'Laura Yesway' }, { id: 'u-2', name: 'Kelly Yesway' }]
-    const user = userEvent.setup()
-    render(<AddTaskModal onClose={noop} onCreated={noop} />)
-
-    await user.click(screen.getByRole('button', { name: /modal\.assignee/ }))
-    const bureau = screen.getByRole('button', { name: 'modal.assigneeUnassigned' })
-    expect(screen.getByRole('button', { name: 'Laura Yesway' })).toBeInTheDocument()
-    expect(screen.getByRole('button', { name: 'Kelly Yesway' })).toBeInTheDocument()
-    // Structural count, not an absence-of-a-string check: a department row
-    // smuggled into the PERSON list would show up here as a fourth option.
-    expect(bureau.parentElement!.querySelectorAll('button')).toHaveLength(3)
-  })
-
-  it('assigns to the chosen colleague and POSTs their user id', async () => {
-    usersState.rows = [{ id: 'u-backoffice', name: 'Laura Yesway' }]
-    const user = userEvent.setup()
-    render(<AddTaskModal onClose={noop} onCreated={noop} />)
-
-    await user.click(screen.getByRole('button', { name: /modal\.assignee/ }))
-    await user.click(screen.getByRole('button', { name: 'Laura Yesway' }))
-    await user.type(screen.getByPlaceholderText('modal.titlePlaceholder'), 'Contract controleren')
-    await user.click(screen.getByRole('button', { name: 'modal.create' }))
-
-    // §13 — assert the REQUEST, not that a callback fired.
-    const api = (await import('@/lib/api')).default
-    expect(api.post).toHaveBeenCalledWith('/tasks', expect.objectContaining({ assignee_id: 'u-backoffice' }))
-  })
-
-  it('lets the recruiter deliberately pick the bureau, clearing a proposed assignee and POSTing assignee_id null', async () => {
-    // Start from the proposed logged-in assignee, so this proves the bureau row
-    // CLEARS a filled field — not merely that an untouched form stays empty.
-    authState.user = { id: 'user-9', name: 'Danny' }
-    const user = userEvent.setup()
-    render(<AddTaskModal onClose={noop} onCreated={noop} />)
-    expect(screen.getByRole('button', { name: /modal\.assignee/ })).toHaveTextContent('Danny')
-
-    await user.click(screen.getByRole('button', { name: /modal\.assignee/ }))
-    await user.click(screen.getByRole('button', { name: 'modal.assigneeUnassigned' }))
-    // The choice explains itself in plain language instead of reading as "empty".
-    expect(screen.getByText('modal.assigneeUnassignedHint')).toBeInTheDocument()
-
-    await user.type(screen.getByPlaceholderText('modal.titlePlaceholder'), 'Uitzoeken wie dit oppakt')
-    await user.click(screen.getByRole('button', { name: 'modal.create' }))
-
-    const api = (await import('@/lib/api')).default
-    expect(api.post).toHaveBeenCalledWith('/tasks', expect.objectContaining({ assignee_id: null }))
-  })
-
-  it('filters the colleague list from the picker\'s own search box (every dropdown is searchable)', async () => {
-    usersState.rows = [{ id: 'u-1', name: 'Laura Yesway' }, { id: 'u-2', name: 'Kelly Yesway' }]
-    const user = userEvent.setup()
-    render(<AddTaskModal onClose={noop} onCreated={noop} />)
-
-    await user.click(screen.getByRole('button', { name: /modal\.assignee/ }))
-    // The search input carries the field's own label (no placeholder of its own).
-    await user.type(screen.getByRole('textbox', { name: 'modal.assignee' }), 'Laura')
-
-    expect(screen.getByRole('button', { name: 'Laura Yesway' })).toBeInTheDocument()
-    expect(screen.queryByRole('button', { name: 'Kelly Yesway' })).toBeNull()
-  })
-
-  it('says so honestly when the tenant has no assignable colleagues — the bureau stays a valid choice', () => {
-    usersState.rows = []
-    render(<AddTaskModal onClose={noop} onCreated={noop} />)
-
-    expect(screen.getByText('modal.assigneeEmpty')).toBeInTheDocument()
-    expect(screen.getByRole('button', { name: /modal\.assignee/ })).toHaveTextContent('modal.assigneeUnassigned')
-  })
-
-  it('surfaces a failed colleague load with a retry, instead of an unexplained one-option picker', async () => {
-    usersState.isError = true
-    usersState.rows = []
-    const user = userEvent.setup()
-    render(<AddTaskModal onClose={noop} onCreated={noop} />)
-
-    expect(screen.getByRole('alert')).toHaveTextContent('modal.assigneeLoadError')
-    await user.click(screen.getByRole('button', { name: 'common:error.retry' }))
-    expect(usersState.refetch).toHaveBeenCalled()
-  })
-})
-
-/**
- * TEAM-1 (Danny 09-08: "een nieuwe taak moet ook op een afdeling zoals Backoffice
- * kunnen"). The internal DEPARTMENT is a second axis NEXT TO the person, and the
- * agreement that breaks most quietly is the non-exclusivity: `assignee_team_id`
- * says where the task waits, `assignee_id` says who picked it up, and setting the
- * person must LEAVE the department standing (measured 09-08 — a PATCH carrying
- * only `assignee_id` comes back with the same `assignee_team`). These tests assert
- * the REQUEST on both submit paths (§13), because that is the seam where a
- * "helpful" clear-the-other-field would land.
- */
-describe('AddTaskModal · internal department (TEAM-1), non-exclusive with the assignee', () => {
-  it('POSTs the picked department alongside the assignee — both axes on one create', async () => {
-    authState.user = { id: 'user-9', name: 'Danny' }
-    usersState.rows = [{ id: 'user-9', name: 'Danny' }]
-    const user = userEvent.setup()
-    render(<AddTaskModal onClose={noop} onCreated={noop} />)
-
-    await user.click(screen.getByRole('button', { name: /modal\.team/ }))
-    await user.click(screen.getByRole('button', { name: 'Backoffice' }))
-    await user.type(screen.getByPlaceholderText('modal.titlePlaceholder'), 'Contract verwerken')
-    await user.click(screen.getByRole('button', { name: 'modal.create' }))
-
-    const api = (await import('@/lib/api')).default
-    expect(api.post).toHaveBeenCalledWith('/tasks', expect.objectContaining({
-      assignee_team_id: 'team-1', assignee_id: 'user-9',
-    }))
-  })
-
-  it('creates "openstaand bij Backoffice" — department set, person deliberately on the bureau', async () => {
-    authState.user = { id: 'user-9', name: 'Danny' }
-    usersState.rows = [{ id: 'user-9', name: 'Danny' }]
-    const user = userEvent.setup()
-    render(<AddTaskModal onClose={noop} onCreated={noop} />)
-
-    await user.click(screen.getByRole('button', { name: /modal\.team/ }))
-    await user.click(screen.getByRole('button', { name: 'Backoffice' }))
-    await user.click(screen.getByRole('button', { name: /modal\.assignee/ }))
-    await user.click(screen.getByRole('button', { name: 'modal.assigneeUnassigned' }))
-    await user.type(screen.getByPlaceholderText('modal.titlePlaceholder'), 'Wacht op backoffice')
-    await user.click(screen.getByRole('button', { name: 'modal.create' }))
-
-    const api = (await import('@/lib/api')).default
-    expect(api.post).toHaveBeenCalledWith('/tasks', expect.objectContaining({
-      assignee_team_id: 'team-1', assignee_id: null,
-    }))
-  })
-
-  // THE regression this feature exists for: a colleague picking up a queued task
-  // must not erase where it came from. Edit mode, department already set, only the
-  // person is changed — the PATCH must still carry the ORIGINAL department.
-  it('assigning a person to an existing task LEAVES the department standing', async () => {
-    usersState.rows = [{ id: 'user-9', name: 'Danny' }, { id: 'u-kelly', name: 'Kelly Yesway' }]
-    const user = userEvent.setup()
-    render(<AddTaskModal editId={EDIT_ID} onClose={noop} onSaved={noop} />)
-
-    await screen.findByDisplayValue('Bel kandidaat terug')
-    await user.click(screen.getByRole('button', { name: /modal\.assignee/ }))
-    await user.click(screen.getByRole('button', { name: 'Kelly Yesway' }))
-    await user.click(screen.getByRole('button', { name: 'modal.save' }))
-
-    const api = (await import('@/lib/api')).default
-    expect(api.patch).toHaveBeenCalledWith(`/tasks/${EDIT_ID}`, expect.objectContaining({
-      assignee_id: 'u-kelly', assignee_team_id: 'team-1',
-    }))
-  })
-
-  it('clearing the department PATCHes an explicit null — an omitted key could never clear it', async () => {
-    const user = userEvent.setup()
-    render(<AddTaskModal editId={EDIT_ID} onClose={noop} onSaved={noop} />)
-
-    await screen.findByDisplayValue('Bel kandidaat terug')
-    // The clear affordance is CreatableSelect's opt-in X, rendered next to the
-    // trigger whose id ends in -clear (mirrors DetailsTab's own branch-clear test).
-    // CLEAR-SWEEP (Danny 13-08): priority is now ALSO clearable and pre-filled, so a
-    // bare `container.querySelector` would grab priority's clear cross first — scope
-    // to the team field specifically via its own trigger container.
-    const teamTrigger = screen.getByRole('button', { name: /modal\.team/ })
-    const clearBtn = teamTrigger.parentElement!.querySelector('button[id$="-clear"]')
-    expect(clearBtn).toBeTruthy()
-    await user.click(clearBtn!)
-    await user.click(screen.getByRole('button', { name: 'modal.save' }))
-
-    const api = (await import('@/lib/api')).default
-    expect(api.patch).toHaveBeenCalledWith(`/tasks/${EDIT_ID}`, expect.objectContaining({
-      assignee_team_id: null, assignee_id: 'user-9',
-    }))
-  })
-
-  it('filters the department list from the picker\'s own search box (never a native select)', async () => {
-    const user = userEvent.setup()
-    render(<AddTaskModal onClose={noop} onCreated={noop} />)
-
-    await user.click(screen.getByRole('button', { name: /modal\.team/ }))
-    // With a placeholder set, CreatableSelect names its search box after it
-    // (shared component behaviour) — hence the placeholder key, not the label key.
-    await user.type(screen.getByRole('textbox', { name: 'modal.teamPlaceholder' }), 'Plan')
-
-    expect(screen.getByRole('button', { name: 'Planning' })).toBeInTheDocument()
-    expect(screen.queryByRole('button', { name: 'Backoffice' })).toBeNull()
-  })
-
-  it('says so honestly when the tenant configured no departments yet', () => {
-    teamsState.rows = []
-    render(<AddTaskModal onClose={noop} onCreated={noop} />)
-
-    expect(screen.getByText('modal.teamEmpty')).toBeInTheDocument()
-  })
-
-  it('surfaces a failed department load with a retry, instead of a silently empty picker', async () => {
-    teamsState.isError = true
-    teamsState.rows = []
-    const user = userEvent.setup()
-    render(<AddTaskModal onClose={noop} onCreated={noop} />)
-
-    expect(screen.getByRole('alert')).toHaveTextContent('modal.teamLoadError')
-    await user.click(screen.getByRole('button', { name: 'common:error.retry' }))
-    expect(teamsState.retry).toHaveBeenCalled()
-  })
-})
-
 describe('AddTaskModal · Soort activiteit defaults from the lookup\'s is_default flag, never array position (§3B lesson)', () => {
   it('defaults type to the FLAGGED option even though it is not first in the list', async () => {
     // 'call' registers first but 'email' carries is_default — proves the fix reads
     // the flag instead of guessing index 0.
-    lk.types = [
-      // eslint-disable-next-line no-restricted-syntax -- test fixture hex, not a UI colour
-      { value: 'call', label: 'Belafspraak', color: '#5FB0AC', is_default: false },
-      // eslint-disable-next-line no-restricted-syntax -- test fixture hex, not a UI colour
-      { value: 'email', label: 'E-mail', color: '#A98AD1', is_default: true },
-    ]
+    lk.types = FLAGGED_DEFAULT_TYPES
     const user = userEvent.setup()
     render(<AddTaskModal onClose={noop} onCreated={noop} />)
     expect(screen.getByRole('button', { name: /E-mail/, pressed: true })).toBeInTheDocument()
@@ -629,209 +345,11 @@ describe('AddTaskModal · validation (Danny 27-07: the redesigned popup still bl
   })
 })
 
-describe('AddTaskModal · the three relational pickers report a failed load (§3 four states)', () => {
-  it('shows an error + retry instead of an empty picker indistinguishable from "geen kandidaten"', async () => {
-    // The load used to end in `.catch(() => {})`, so a dead /candidates left the
-    // picker at zero options with no explanation at all.
-    apiState.candidatesFail = true
-    const user = userEvent.setup()
-    render(<AddTaskModal onClose={noop} onCreated={noop} />)
-
-    expect(await screen.findByText('links.loadError')).toBeInTheDocument()
-
-    // Retry really re-fetches: heal the endpoint, press it, the line disappears.
-    apiState.candidatesFail = false
-    await user.click(screen.getByRole('button', { name: 'common:error.retry' }))
-    await waitFor(() => expect(screen.queryByText('links.loadError')).toBeNull())
-  })
-
-  it('keeps the two healthy pickers usable when only one endpoint dies (allSettled, not all)', async () => {
-    apiState.candidatesFail = true
-    render(<AddTaskModal onClose={noop} onCreated={noop} />)
-
-    await screen.findByText('links.loadError')
-    // /departments still answered — its rows reach the shared link adder.
-    const api = (await import('@/lib/api')).default
-    expect(api.get).toHaveBeenCalledWith('/contacts', { params: { per_page: 100 } })
-  })
-})
-
-describe('AddTaskModal · searchable pickers (Danny 27-07 popup redesign, JOB B)', () => {
-  it('the candidate link picker is a typeable searchable combobox that filters its options', async () => {
-    const user = userEvent.setup()
-    render(<AddTaskModal onClose={noop} onCreated={noop} />)
-
-    // Trigger's name is the field label now, not its empty-state placeholder text.
-    await user.click(screen.getByRole('button', { name: /modal\.candidate/ }))
-    await user.type(screen.getByPlaceholderText('modal.candidatePlaceholder'), 'Piet')
-
-    // Typing filters down to the matching option only.
-    expect(screen.getByRole('button', { name: 'Piet Jansen' })).toBeInTheDocument()
-    expect(screen.queryByRole('button', { name: 'Klaas de Vries' })).toBeNull()
-  })
-
-  // CONTACT-PICKER-FUNCTION-1: the seam test — proves the RENDERED option carries
-  // the function, not just the pure helper (a re-pointed endpoint or a dropped
-  // label argument would still pass a helper-only test but fail this one).
-  it('shows a contact option as "Name — Function" when the row carries a function', async () => {
-    contactState.rows = [{ id: 'c1', name: 'Jan Jansen', function: 'HR Manager' }, { id: 'c2', name: 'Klaas de Vries' }]
-    const user = userEvent.setup()
-    render(<AddTaskModal onClose={noop} onCreated={noop} />)
-
-    await user.click(screen.getByRole('button', { name: /modal\.contact/ }))
-    expect(await screen.findByRole('button', { name: 'Jan Jansen — HR Manager' })).toBeInTheDocument()
-    expect(screen.getByRole('button', { name: 'Klaas de Vries' })).toBeInTheDocument()
-  })
-})
-
-describe('AddTaskModal · card-structure regression (MODAL-CANON: FieldRow label-left, mirrors AddCustomerModal/MatchModal)', () => {
-  it('renders every card title and each field as a label-LEFT row (a <label> before its field)', () => {
-    render(<AddTaskModal onClose={noop} onCreated={noop} />)
-    expect(screen.getByText('modal.cardTask')).toBeInTheDocument()
-    expect(screen.getByText('modal.cardPlanning')).toBeInTheDocument()
-    expect(screen.getByText('modal.cardAssignment')).toBeInTheDocument()
-    expect(screen.getByText('modal.cardLink')).toBeInTheDocument()
-    expect(screen.getByText('modal.description')).toBeInTheDocument()
-
-    // FieldRow renders <label>{text}</label> as the FIRST child of the row, the
-    // field itself as a sibling — proves the swap from the old label-above `Field`
-    // landed, not just a visual coincidence.
-    const titleLabel = screen.getByText('modal.titleLabel')
-    expect(titleLabel.tagName).toBe('LABEL')
-    const row = titleLabel.parentElement as HTMLElement
-    expect(row.children[0]).toBe(titleLabel)
-    expect(row.children).toHaveLength(2)
-  })
-})
-
-describe('AddTaskModal · PUNT 14 — the description sits BELOW every other field', () => {
-  it('renders the Omschrijving card after the Koppeling card in document order', () => {
-    render(<AddTaskModal onClose={noop} onCreated={noop} />)
-    const linkHead = screen.getByText('modal.cardLink')
-    const descHead = screen.getByText('modal.description')
-    // Bitmask compare: DOCUMENT_POSITION_FOLLOWING means descHead comes AFTER
-    // linkHead — the whole point of the reorder (it used to be the first card).
-    expect(linkHead.compareDocumentPosition(descHead) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy()
-  })
-})
-
-describe('AddTaskModal · PUNT 15 — a new task couples to the full shared link vocabulary', () => {
-  it('POSTs a department coupling picked through the drawer\'s own link picker', async () => {
-    const user = userEvent.setup()
-    render(<AddTaskModal onClose={noop} onCreated={noop} />)
-
-    // Open the coupling row (a real button, never coloured text).
-    await user.click(screen.getByRole('button', { name: 'links.add' }))
-    // Switch the link TYPE to "afdeling" — the type trigger shows the current
-    // token's translated label; the option list is the shared vocabulary minus
-    // the three tokens that already have their own dedicated field.
-    await user.click(screen.getByRole('button', { name: 'links.application' }))
-    await user.click(screen.getByRole('button', { name: 'links.department' }))
-    // The picker searches the department endpoint server-side (capped page).
-    const api = (await import('@/lib/api')).default
-    // An empty query sends neither q nor search (contract audit ENT2-01: the empty string turns into null and 422s).
-    await waitFor(() => expect(api.get).toHaveBeenCalledWith('/departments', { params: { per_page: 25 } }))
-
-    await user.click(screen.getByRole('button', { name: 'links.selectEntity' }))
-    await user.click(await screen.findByRole('button', { name: 'Backoffice Zorg' }))
-    // The staged coupling is visible (and removable) before saving.
-    expect(screen.getByText('Backoffice Zorg')).toBeInTheDocument()
-
-    await user.type(screen.getByPlaceholderText('modal.titlePlaceholder'), 'Vraag contract op')
-    await user.click(screen.getByRole('button', { name: 'modal.create' }))
-
-    // §13 — assert the REQUEST: the coupling must actually ride into the body.
-    expect(api.post).toHaveBeenCalledWith('/tasks', expect.objectContaining({
-      links: [{ type: 'department', id: 'dep-1' }],
-    }))
-  })
-
-  it('removes a staged coupling again, so it never reaches the request', async () => {
-    const user = userEvent.setup()
-    render(<AddTaskModal onClose={noop} onCreated={noop} />)
-
-    await user.click(screen.getByRole('button', { name: 'links.add' }))
-    await user.click(screen.getByRole('button', { name: 'links.application' }))
-    await user.click(screen.getByRole('button', { name: 'links.department' }))
-    await user.click(screen.getByRole('button', { name: 'links.selectEntity' }))
-    await user.click(await screen.findByRole('button', { name: 'Backoffice Zorg' }))
-    await user.click(screen.getByRole('button', { name: 'links.remove' }))
-
-    await user.type(screen.getByPlaceholderText('modal.titlePlaceholder'), 'Vraag contract op')
-    await user.click(screen.getByRole('button', { name: 'modal.create' }))
-
-    const api = (await import('@/lib/api')).default
-    expect(api.post).toHaveBeenCalledWith('/tasks', expect.objectContaining({ links: [] }))
-  })
-
-})
-
-describe('AddTaskModal · REFERENCE-LINK-1 — a task can couple to one of the linked candidate\'s references', () => {
-  it('POSTs a reference coupling once a candidate is linked and the light route answers', async () => {
-    const user = userEvent.setup()
-    render(<AddTaskModal onClose={noop} onCreated={noop} />)
-
-    // Link the candidate first — `reference` is dependent on it (taskLinkTypes).
-    await user.click(screen.getByRole('button', { name: /modal\.candidate/ }))
-    await user.click(await screen.findByRole('button', { name: 'Piet Jansen' }))
-
-    await user.click(screen.getByRole('button', { name: 'links.add' }))
-    await user.click(screen.getByRole('button', { name: 'links.application' }))
-    await user.click(await screen.findByRole('button', { name: 'links.reference' }))
-    await user.click(screen.getByRole('button', { name: 'links.selectEntity' }))
-    await user.click(await screen.findByRole('button', { name: 'Karim El Amrani · Partner' }))
-    expect(screen.getByText('Karim El Amrani · Partner')).toBeInTheDocument()
-
-    await user.type(screen.getByPlaceholderText('modal.titlePlaceholder'), 'Bel referentie')
-    await user.click(screen.getByRole('button', { name: 'modal.create' }))
-
-    const api = (await import('@/lib/api')).default
-    expect(api.post).toHaveBeenCalledWith('/tasks', expect.objectContaining({
-      links: [{ type: 'reference', id: 'ref-1' }, { type: 'candidate', id: 'cand-1' }],
-    }))
-  })
-
-  it('offers no reference token when no candidate is linked yet', async () => {
-    const user = userEvent.setup()
-    render(<AddTaskModal onClose={noop} onCreated={noop} />)
-
-    await user.click(screen.getByRole('button', { name: 'links.add' }))
-    await user.click(screen.getByRole('button', { name: 'links.application' }))
-    expect(screen.queryByRole('button', { name: 'links.reference' })).toBeNull()
-  })
-})
-
 describe('AddTaskModal · edit mode carries an unmanaged link', () => {
   it('edit mode shows the loaded task\'s unmanaged link instead of silently carrying it', async () => {
     render(<AddTaskModal editId={EDIT_ID} onClose={noop} onSaved={noop} />)
     // TASK_DETAIL_RAW carries an 'opportunity' link with the label "Deal X" — it
     // used to be invisible carry-over state; now it is a listed, removable row.
     expect(await screen.findByText('Deal X')).toBeInTheDocument()
-  })
-})
-
-describe('AddTaskModal · PUNT 16 — the shared dictation mic (same component notes use)', () => {
-  // jsdom ships no SpeechRecognition; the component's HONEST GATE hides the mic
-  // without one, so the constructor is stubbed exactly like KoiosVoiceButton's
-  // own test does (never a second mic implementation to assert against).
-  class MockSpeechRecognition {
-    continuous = false
-    interimResults = false
-    lang = ''
-    onresult: (() => void) | null = null
-    onerror: (() => void) | null = null
-    onend: (() => void) | null = null
-    start = vi.fn()
-    stop = vi.fn()
-  }
-  beforeEach(() => { (window as unknown as { SpeechRecognition: unknown }).SpeechRecognition = MockSpeechRecognition })
-  afterEach(() => { delete (window as { SpeechRecognition?: unknown }).SpeechRecognition })
-
-  it('renders exactly ONE mic on the description editor — the shared editor bar\'s, never a second local copy', () => {
-    render(<AddTaskModal onClose={noop} onCreated={noop} />)
-    // RichTextEditor mounts the shared RichTextAssistBar (same KoiosVoiceButton
-    // the note composer uses) on every editor, so the task description has its
-    // mic for free. A local `toolbarExtra` mic here would make this two (§11).
-    expect(screen.getAllByRole('button', { name: 'voice.start' })).toHaveLength(1)
   })
 })
