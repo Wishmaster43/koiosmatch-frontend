@@ -16,6 +16,7 @@ import DrawerAddButton from './DrawerAddButton'
 import { downloadFilesSequentially } from '@/lib/downloadFiles'
 import { docScanState, docUrl } from './documentHelpers'
 import type { DocItem } from './documentHelpers'
+import { rowGlyphButtonStyle } from '@/components/ui/rowGlyphButton'
 
 // One shared render-prop: the "+ Toevoegen" trigger for every Achtergrond
 // sub-tab, styled like the WorkTab "+ Match" reference (2026-07 sweep) instead
@@ -86,7 +87,7 @@ export function resolveLinkedDocument(
  */
 export function DocEntryLinks({ doc, onPreview, onJump }: { doc: RelItem; onPreview: () => void; onJump?: () => void }) {
   const { t } = useTranslation('candidates')
-  const iconBtn = { background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-muted)', padding: '2px 3px', display: 'flex' } as const
+  const iconBtn = rowGlyphButtonStyle()
   // Same download mechanics as DocumentsSection's own row action (one shared helper); docUrl puts the signed
   // download_url first and yields nothing for a pending/rejected scan (F-001), so such a file is never offered live.
   const scan = docScanState(doc as unknown as DocItem)

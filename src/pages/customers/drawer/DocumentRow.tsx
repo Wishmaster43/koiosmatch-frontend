@@ -9,6 +9,7 @@ import type { EntityDoc } from '@/hooks/useEntityDocuments'
 import SoftChip from '@/components/ui/SoftChip'
 import { DOC_GRID_COLUMNS, docKey, docUrl, docScanState, splitExt } from '../hooks/documentsTabUtils'
 import { useEscapeLayer } from '@/hooks/useEscapeLayer'
+import { rowGlyphButtonStyle } from '@/components/ui/rowGlyphButton'
 
 interface DocumentRowProps {
   doc: EntityDoc
@@ -38,8 +39,6 @@ export default function DocumentRow({
   const downloadable = Boolean(docUrl(d))
   // UPLOADS-SCAN-1: pending/rejected rows show a state chip and lock preview.
   const scan = docScanState(d)
-  // Preview control face: dimmed and not-allowed while the scan blocks it.
-  const previewBtnStyle = { display: 'flex', padding: '2px 3px', background: 'none', border: 'none', color: 'var(--text-muted)', cursor: scan ? 'not-allowed' : 'pointer', opacity: scan ? 0.5 : undefined } as const
   const scanText = scan ? t(scan === 'pending' ? 'common:upload.scanPending' : 'common:upload.scanRejected') : undefined
 
   // Escape layer: cancels inline rename (one-stage).
@@ -101,11 +100,11 @@ export default function DocumentRow({
             pending Danny's call. */}
         <div style={{ display: 'flex' }}>
           {/* eslint-disable-next-line huisstijlLegacy/no-restricted-syntax -- see comment above */}
-          <button aria-label={t('common:edit')} onClick={() => { setRenamingId(d.id ?? null); setRenameValue(splitExt(String(d.name ?? d.file_name ?? '')).base) }} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-muted)', padding: '2px 3px', display: 'flex' }}><Pencil size={12} /></button>
+          <button aria-label={t('common:edit')} onClick={() => { setRenamingId(d.id ?? null); setRenameValue(splitExt(String(d.name ?? d.file_name ?? '')).base) }} style={rowGlyphButtonStyle()}><Pencil size={12} /></button>
           {/* eslint-disable-next-line huisstijlLegacy/no-restricted-syntax -- see comment above */}
-          <button aria-label={t('documents.preview')} onClick={scan ? undefined : () => preview(d)} aria-disabled={scan ? true : undefined} title={scanText} style={previewBtnStyle}><Eye size={12} /></button>
+          <button aria-label={t('documents.preview')} onClick={scan ? undefined : () => preview(d)} aria-disabled={scan ? true : undefined} title={scanText} style={rowGlyphButtonStyle(!!scan)}><Eye size={12} /></button>
           {/* eslint-disable-next-line huisstijlLegacy/no-restricted-syntax -- see comment above */}
-          <button aria-label={t('common:remove')} onClick={() => onDelete(d, i)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-muted)', padding: '2px 3px', display: 'flex' }}><X size={12} /></button>
+          <button aria-label={t('common:remove')} onClick={() => onDelete(d, i)} style={rowGlyphButtonStyle()}><X size={12} /></button>
         </div>
       </div>
     </div>

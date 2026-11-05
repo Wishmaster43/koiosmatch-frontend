@@ -10,6 +10,7 @@ import type { DocItem, DocumentLinkSources } from './documentHelpers'
 import { Caption } from '@/components/ui/typography'
 import type { Id } from '@/types/common'
 import { tintBg, chipInk } from '@/lib/tint'
+import { rowGlyphButtonStyle } from '@/components/ui/rowGlyphButton'
 import { useEscapeLayer } from '@/hooks/useEscapeLayer'
 
 // DOC-LIST-LINK-1: the five kinds a document can be linked to — mirrors the reverse-FK
@@ -171,7 +172,7 @@ export default function DocumentRow({
       <div style={{ display: 'flex', alignItems: 'center', gap: 2, justifySelf: 'end' }}>
         <div style={{ display: 'flex' }}>
           {/* Point 4: rename/replace/delete are MANAGE actions — never offered without it. */}
-          {canManage && <button aria-label={t('common:edit')} onClick={onRenameStart} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-muted)', padding: '2px 3px', display: 'flex' }}><Pencil size={12} /></button>}
+          {canManage && <button aria-label={t('common:edit')} onClick={onRenameStart} style={rowGlyphButtonStyle()}><Pencil size={12} /></button>}
           {/* DOC-LIST-LINK-1: change/clear the link — a MANAGE action, only offered once
               the doc is persisted (a temp upload row has no id a PATCH could reference)
               and the candidate actually has something to link to (no fake affordance). */}
@@ -183,9 +184,9 @@ export default function DocumentRow({
           )}
           {canManage && canReplace && isPersisted(d.id) && (
             <button aria-label={t('documents.replace')} title={t('documents.replace')} onClick={onReplace}
-              style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-muted)', padding: '2px 3px', display: 'flex' }}><RefreshCw size={12} /></button>
+              style={rowGlyphButtonStyle()}><RefreshCw size={12} /></button>
           )}
-          <button aria-label={t('documents.preview')} onClick={scan ? undefined : onPreview} aria-disabled={scan ? true : undefined} title={scanText} style={{ background: 'none', border: 'none', cursor: scan ? 'not-allowed' : 'pointer', opacity: scan ? 0.5 : undefined, color: 'var(--text-muted)', padding: '2px 3px', display: 'flex' }}><Eye size={12} /></button>
+          <button aria-label={t('documents.preview')} onClick={scan ? undefined : onPreview} aria-disabled={scan ? true : undefined} title={scanText} style={rowGlyphButtonStyle(!!scan)}><Eye size={12} /></button>
           {/* PDF-VACATURES-26: a real per-row download (read action, no permission
               gate — mirrors the preview button above), next to the bulk "download
               selected" action in the toolbar. Renders only once the row actually
@@ -195,8 +196,8 @@ export default function DocumentRow({
           {scan && <span role="link" aria-disabled="true" aria-label={t('documents.download')} title={scanText}
             style={{ color: 'var(--text-muted)', opacity: 0.5, padding: '2px 3px', display: 'flex', cursor: 'not-allowed' }}><Download size={12} /></span>}
           {downloadable && !scan && <a href={docUrl(d)} download={displayName} aria-label={t('documents.download')} title={t('documents.download')}
-            style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-muted)', padding: '2px 3px', display: 'flex' }}><Download size={12} /></a>}
-          {canManage && <button aria-label={t('common:remove')} onClick={onDeleteRequest} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-muted)', padding: '2px 3px', display: 'flex' }}><X size={12} /></button>}
+            style={rowGlyphButtonStyle()}><Download size={12} /></a>}
+          {canManage && <button aria-label={t('common:remove')} onClick={onDeleteRequest} style={rowGlyphButtonStyle()}><X size={12} /></button>}
         </div>
       </div>
       {/* eslint-enable huisstijlLegacy/no-restricted-syntax */}
