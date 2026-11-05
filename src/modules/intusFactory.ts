@@ -22,7 +22,7 @@ export function makeIntusModule(type: string, label: string, bg: string, urlPlac
     schema: [
       { key: 'url', label: 'URL', type: 'text', placeholder: urlPlaceholder, required: true },
       { key: 'method', label: 'Method', type: 'select', options: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'HEAD', 'OPTIONS'], required: true },
-      { key: 'authentication_type', label: 'Authenticatie', type: 'select', options: ['Geen', 'API Key', 'Basic Auth', 'OAuth'] },
+      { key: 'authentication_type', label: 'Authentication', type: 'select', options: ['Geen', 'API Key', 'Basic Auth', 'OAuth'] },
       {
         key: 'headers', label: 'Headers', type: 'keyvalue',
         help: 'Naam / Waarde paren',
@@ -33,9 +33,9 @@ export function makeIntusModule(type: string, label: string, bg: string, urlPlac
       },
       { key: 'body_type', label: 'Body type', type: 'select', options: ['Geen', 'JSON', 'Form (urlencoded)', 'Multipart', 'Custom'] },
       { key: 'body', label: 'Body (JSON)', type: 'textarea', placeholder: '{"key": "value"}' },
-      { key: 'parse_response', label: 'Response parsen', type: 'boolean' },
-      { key: 'allow_redirects', label: 'Redirects volgen', type: 'boolean' },
-      { key: 'stop_on_http_error', label: 'Stop bij HTTP fout', type: 'boolean' },
+      { key: 'parse_response', label: 'Parse response', type: 'boolean' },
+      { key: 'allow_redirects', label: 'Follow redirects', type: 'boolean' },
+      { key: 'stop_on_http_error', label: 'Stop on HTTP error', type: 'boolean' },
       { key: 'timeout', label: 'Timeout (sec)', type: 'number', placeholder: '30' },
     ],
   }

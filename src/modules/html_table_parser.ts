@@ -9,7 +9,7 @@ export default {
   color:    'var(--color-violet)',
   bg:       'var(--color-violet-bg)',
   schema: [
-    { key: 'html', label: 'HTML-inhoud', type: 'textarea', placeholder: '<table>...</table>' },
-    { key: 'row_selector', label: 'Rij-selector (optioneel)', type: 'text', placeholder: 'tr' },
+    { key: 'html', label: 'HTML content', type: 'textarea', placeholder: '<table>...</table>' },
+    { key: 'row_selector', label: 'Row selector (optional)', type: 'text', placeholder: 'tr' },
   ],
 }

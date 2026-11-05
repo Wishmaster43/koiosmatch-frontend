@@ -17,9 +17,9 @@ export default {
   schema: [
     SM_CONNECTION_FIELD,
     // BE whitelist for the target status (contract 2026-07-09; being widened BE-side).
-    { key: 'target_status', label: 'Nieuwe status', type: 'select',
+    { key: 'target_status', label: 'New status', type: 'select',
       options: ['actief', 'nietactief', 'nieuw', 'uitgeschreven', 'verwijderd', 'extern'] },
-    { key: 'dry_run', label: 'Proefdraaien (dry-run)', type: 'boolean', default: true,
+    { key: 'dry_run', label: 'Dry run', type: 'boolean', default: true,
       help: 'Eerst proefdraaien — rapporteert wat er ZOU wijzigen zonder iets te schrijven.' },
     smLimitField(10000),
   ],

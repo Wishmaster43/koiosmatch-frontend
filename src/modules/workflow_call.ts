@@ -22,17 +22,17 @@ export default {
     { key: 'workflow_id', label: 'Workflow', type: 'workflow',
       hint: 'De workflow die als kind wordt gestart (async, via de wachtrij). Zelf-aanroep en kringlopen worden geweigerd; maximaal 5 niveaus diep.' },
     // mode: queue (default, fire-and-forget) vs sync (inline, outcome merges back).
-    { key: 'mode', label: 'Uitvoering', type: 'select', options: ['queue', 'sync'],
+    { key: 'mode', label: 'Execution', type: 'select', options: ['queue', 'sync'],
       hint: 'queue (standaard) = wachtrij, deze stap wacht niet. sync = direct uitvoeren; de uitkomst van het kind komt terug in deze stap.' },
     // Only meaningful in sync mode — the backend's own description says so
     // ("Only for direct execution"), so the FE gates it on mode === 'sync'
     // even though BE configSchema carries no show_if field (no fake affordance, §3).
-    { key: 'fail_on_child_error', label: 'Stop bij mislukt kind (sync)', type: 'boolean', default: true,
+    { key: 'fail_on_child_error', label: 'Stop when the child fails (sync)', type: 'boolean', default: true,
       hint: 'Alleen bij direct uitvoeren: een mislukte kind-workflow laat deze stap mislukken. Uit = doorgaan; de uitkomst staat in child_run_status.',
       showIf: { key: 'mode', value: 'sync' } },
-    { key: 'pass_bundle', label: 'Huidige records meesturen', type: 'boolean', default: true,
+    { key: 'pass_bundle', label: 'Pass the current records along', type: 'boolean', default: true,
       hint: 'Standaard aan: de kandidaten/records van deze stap reizen mee als context van het kind.' },
-    { key: 'payload', label: 'Extra gegevens', type: 'keyvalue',
+    { key: 'payload', label: 'Extra data', type: 'keyvalue',
       hint: 'Extra sleutel/waarde-paren voor het kind ({{trigger.*}} wordt hier al opgelost).' },
   ],
 }

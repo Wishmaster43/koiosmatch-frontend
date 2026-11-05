@@ -14,13 +14,13 @@ export default makeEntityModule({
   bg:       'color-mix(in srgb, var(--color-warning) 9%, transparent)',
   filterFields: [
     { value: 'status',   label: 'Status' },
-    { value: 'customer', label: 'Klant' },
-    { value: 'owner',    label: 'Eigenaar' },
-    { value: 'value',    label: 'Waarde' },
+    { value: 'customer', label: 'Customer' },
+    { value: 'owner',    label: 'Owner' },
+    { value: 'value',    label: 'Value' },
   ],
   sortOptions: [
-    { value: 'created_at', label: 'Datum' },
-    { value: 'value',      label: 'Waarde' },
+    { value: 'created_at', label: 'Date' },
+    { value: 'value',      label: 'Value' },
     { value: 'status',     label: 'Status' },
   ],
 })

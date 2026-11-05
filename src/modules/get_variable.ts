@@ -9,6 +9,6 @@ export default {
   color:    'var(--module-info)',
   bg:       'var(--color-info-bg)',
   schema: [
-    { key: 'variable_name', label: 'Variabelenaam', type: 'text', placeholder: 'mijn_variabele' },
+    { key: 'variable_name', label: 'Variable name', type: 'text', placeholder: 'mijn_variabele' },
   ],
 }

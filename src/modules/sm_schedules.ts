@@ -17,8 +17,8 @@ export default {
   schema: [
     SM_CONNECTION_FIELD,
     // Window in days relative to the run day: 0 = today, 1 = tomorrow, etc.
-    { key: 'offset_from', label: 'Vanaf (dagen vanaf vandaag)', type: 'number', default: 0, placeholder: '0' },
-    { key: 'offset_to',   label: 'T/m (dagen vanaf vandaag)',   type: 'number', default: 0, placeholder: '0' },
+    { key: 'offset_from', label: 'From (days from today)', type: 'number', default: 0, placeholder: '0' },
+    { key: 'offset_to',   label: 'To (days from today)',   type: 'number', default: 0, placeholder: '0' },
     smLimitField(500),
   ],
 }

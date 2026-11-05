@@ -17,16 +17,16 @@ export default {
   // Active-strength tint (16%, matches the flagship `tasks` module's own bg).
   bg:    tintBg('var(--module-periwinkle)', true),
   schema: [
-    { key: 'title', label: 'Titel', type: 'text' },
+    { key: 'title', label: 'Title', type: 'text' },
     // Tenant lookups (§10): the stored value is the lookup's immutable slug,
     // matching TaskType::where('value', …) / TaskPriority::where('value', …).
-    { key: 'type', label: 'Soort', type: 'lookup_select', endpoint: '/task-types?active=1' },
-    { key: 'priority', label: 'Prioriteit', type: 'lookup_select', endpoint: '/task-priorities' },
+    { key: 'type', label: 'Kind', type: 'lookup_select', endpoint: '/task-types?active=1' },
+    { key: 'priority', label: 'Priority', type: 'lookup_select', endpoint: '/task-priorities' },
     // BE resolves the owner strategy from this exact string set (or a raw user
     // uuid, not offered here — TaskCreateModule::resolveAssignee/ownerAssignee).
-    { key: 'assignee', label: 'Toewijzen aan', type: 'select',
+    { key: 'assignee', label: 'Assign to', type: 'select',
       options: ['candidate_owner', 'customer_owner', 'vacancy_owner'],
       help: 'Leeg = geen toewijzing (bureau).' },
-    { key: 'due_offset_days', label: 'Deadline over (dagen)', type: 'number', placeholder: '0' },
+    { key: 'due_offset_days', label: 'Deadline in (days)', type: 'number', placeholder: '0' },
   ],
 }

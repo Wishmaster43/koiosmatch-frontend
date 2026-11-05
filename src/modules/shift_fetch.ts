@@ -12,6 +12,6 @@ export default {
   color: 'var(--module-shiftmanager)',
   bg:    'color-mix(in srgb, var(--module-shiftmanager) 8%, transparent)',
   schema: [
-    { key: 'max_distance', label: 'Maximale afstand (km)', type: 'number', default: 35, placeholder: '35' },
+    { key: 'max_distance', label: 'Maximum distance (km)', type: 'number', default: 35, placeholder: '35' },
   ],
 }

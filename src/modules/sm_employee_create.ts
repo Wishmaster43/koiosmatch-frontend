@@ -26,7 +26,7 @@ export default {
   bg:    tintBg('var(--module-shiftmanager)'),
   schema: [
     SM_CONNECTION_FIELD,
-    { key: 'dry_run', label: 'Proefdraaien (dry-run)', type: 'boolean', default: true,
+    { key: 'dry_run', label: 'Dry run', type: 'boolean', default: true,
       help: 'Eerst proefdraaien: rapporteert WIE er aangemaakt zou worden (incl. payload), schrijft niets. Zet expliciet uit om echt in Shiftmanager aan te maken.' },
     smLimitField(500),
   ],

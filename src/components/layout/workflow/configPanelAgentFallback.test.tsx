@@ -33,7 +33,8 @@ vi.mock('@/lib/api', () => ({
 }))
 
 function openAgentSelect() {
-  const wrapper = screen.getByText('AI-agent', { selector: 'label' }).closest('div')!
+  // The t mock echoes the defaultValue, i.e. the registry's English source label (MODULES-EN-1).
+  const wrapper = screen.getByText('AI agent', { selector: 'label' }).closest('div')!
   const trigger = wrapper.querySelector('[aria-haspopup="listbox"]') as HTMLElement
   fireEvent.click(trigger)
 }

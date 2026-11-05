@@ -9,8 +9,8 @@ export default {
   color: 'var(--module-teal)',
   bg:    'color-mix(in srgb, var(--module-teal) 15%, transparent)',
   schema: [
-    { key: 'field',    label: 'Veld',     type: 'text',   placeholder: 'status' },
+    { key: 'field',    label: 'Field',     type: 'text',   placeholder: 'status' },
     { key: 'operator', label: 'Operator', type: 'select', options: ['eq', 'neq', 'gt', 'lt', 'in'] },
-    { key: 'value',    label: 'Waarde',   type: 'text' },
+    { key: 'value',    label: 'Value',   type: 'text' },
   ],
 }

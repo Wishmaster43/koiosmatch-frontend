@@ -12,12 +12,12 @@ export default makeEntityModule({
   bg:       'color-mix(in srgb, var(--module-pink) 10%, transparent)',
   filterFields: [
     { value: 'status',    label: 'Status' },
-    { value: 'candidate', label: 'Kandidaat' },
-    { value: 'vacancy',   label: 'Vacature' },
-    { value: 'owner',     label: 'Eigenaar / recruiter' },
+    { value: 'candidate', label: 'Candidate' },
+    { value: 'vacancy',   label: 'Vacancy' },
+    { value: 'owner',     label: 'Owner / recruiter' },
   ],
   sortOptions: [
-    { value: 'created_at', label: 'Datum' },
+    { value: 'created_at', label: 'Date' },
     { value: 'status',     label: 'Status' },
   ],
 })

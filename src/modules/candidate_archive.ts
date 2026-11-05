@@ -15,7 +15,7 @@ export default {
   color: 'var(--color-archive)',
   bg:    'var(--color-warning-bg)',
   schema: [
-    { key: 'reason', label: 'Archiefreden', type: 'text',
+    { key: 'reason', label: 'Archive reason', type: 'text',
       hint: 'Tekst die op de kandidaat en in de audit-trail komt te staan.' },
   ],
 }

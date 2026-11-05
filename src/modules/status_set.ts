@@ -20,15 +20,15 @@ export default {
     // Candidate statuses are served ONLY inside GET /settings/candidate-lookups
     // (an object of four collections) — no flat /candidate-statuses route exists;
     // the old endpoint 404'd into an empty picker (Opus-measured).
-    { key: 'status', label: 'Nieuwe status', type: 'lookup_select', endpoint: '/settings/candidate-lookups', responseKey: 'statuses' },
+    { key: 'status', label: 'New status', type: 'lookup_select', endpoint: '/settings/candidate-lookups', responseKey: 'statuses' },
     // Lands on candidates.status_reason (the drawer shows it) AND in the audit
     // trail (StatusSetModule::execute, backend 23-08).
-    { key: 'reason', label: 'Reden', type: 'text' },
+    { key: 'reason', label: 'Reason', type: 'text' },
     // Return date for deployability statuses that support it (Unavailable/Sick/Leave).
     // Lands on candidates.status_return_date server-side.
-    { key: 'return_date', label: 'Weer beschikbaar vanaf', type: 'date', help: 'Alleen voor Niet beschikbaar, Ziek en Verlof.' },
+    { key: 'return_date', label: 'Available again from', type: 'date', help: 'Alleen voor Niet beschikbaar, Ziek en Verlof.' },
     // Blacklist reason: lookup-backed dropdown from /candidate-blacklist-reasons.
     // Lands on candidates.blacklist_reason; required when status is Blacklist.
-    { key: 'blacklist_reason', label: 'Blacklist-reden', type: 'lookup_select', endpoint: '/candidate-blacklist-reasons', help: 'Verplicht wanneer de status Blacklist is.' },
+    { key: 'blacklist_reason', label: 'Blacklist reason', type: 'lookup_select', endpoint: '/candidate-blacklist-reasons', help: 'Verplicht wanneer de status Blacklist is.' },
   ],
 }

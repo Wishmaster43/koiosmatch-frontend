@@ -22,7 +22,7 @@ export default {
     },
     {
       key:         'maxResults',
-      label:       'Max. resultaten',
+      label: 'Max. results',
       type:        'number',
       placeholder: '1',
     },

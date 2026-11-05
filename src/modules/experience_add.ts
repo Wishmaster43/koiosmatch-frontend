@@ -18,7 +18,7 @@ export default {
   color: 'var(--color-secondary)',
   bg:    'var(--color-secondary-bg)',
   schema: [
-    { key: 'source', label: 'Bron', type: 'select', options: ['match'], default: 'match' },
-    { key: 'position', label: 'Positie in CV', type: 'select', options: ['top'], default: 'top' },
+    { key: 'source', label: 'Source', type: 'select', options: ['match'], default: 'match' },
+    { key: 'position', label: 'Position in CV', type: 'select', options: ['top'], default: 'top' },
   ],
 }

@@ -12,12 +12,12 @@ export default makeEntityModule({
   bg:       'color-mix(in srgb, var(--module-slate) 8%, transparent)',
   filterFields: [
     { value: 'status',   label: 'Status' },
-    { value: 'industry', label: 'Branche' },
-    { value: 'owner',    label: 'Eigenaar' },
-    { value: 'city',     label: 'Plaats' },
+    { value: 'industry', label: 'Industry' },
+    { value: 'owner',    label: 'Owner' },
+    { value: 'city',     label: 'City' },
   ],
   sortOptions: [
-    { value: 'name',       label: 'Naam' },
-    { value: 'created_at', label: 'Aangemaakt' },
+    { value: 'name',       label: 'Name' },
+    { value: 'created_at', label: 'Created' },
   ],
 })

@@ -6,7 +6,7 @@ describe('_smFields', () => {
   it('defines the connection_id lookup field with the planning-connections endpoint', () => {
     expect(SM_CONNECTION_FIELD).toEqual({
       key: 'connection_id',
-      label: 'Shiftmanager-account',
+      label: 'Shiftmanager account',
       type: 'lookup_select',
       endpoint: '/planning-connections',
     })

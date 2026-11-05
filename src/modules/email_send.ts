@@ -16,29 +16,29 @@ export default {
   color: 'var(--module-brown)',
   bg:    tintBg('var(--module-brown)'),
   schema: [
-    { key: 'subject',              label: 'Onderwerp',              type: 'text',     placeholder: 'Dienst overzicht' },
+    { key: 'subject',              label: 'Subject',              type: 'text',     placeholder: 'Dienst overzicht' },
     // Simple {{field}} substitution from the bundle row (EmailSendModule::execute) — the
     // textarea's variable-picker ("{ }") appears automatically once upstream modules
     // expose fields (fields.tsx), so this reuses the SAME picker as every other text/
     // textarea field rather than a second variable-mapping UI.
-    { key: 'body',                 label: 'Bericht',                type: 'textarea' },
+    { key: 'body',                 label: 'Message',                type: 'textarea' },
     // 02-09 (Danny: "the translation must live in the workflow"): per-language
     // overrides for subject + body, on their own "Vertalingen" tab (MODULE-FACE-BEVRIES —
     // main tab stays untouched). Empty per-field = falls back to subject/body (bureau language).
-    { key: 'translations', label: 'Vertalingen', type: 'translations', tab: 'translations',
+    { key: 'translations', label: 'Translations', type: 'translations', tab: 'translations',
       fields: ['subject', 'body'], languages: MESSAGING_LANGUAGES, mainFields: { subject: 'subject', body: 'body' } },
     // Which mail sender/context this send uses (Settings → Communicatie contexts).
-    { key: 'sender_context',       label: 'Afzender-context',       type: 'select', options: ['kandidaten','algemeen'], default: 'kandidaten' },
+    { key: 'sender_context',       label: 'Sender context',       type: 'select', options: ['kandidaten','algemeen'], default: 'kandidaten' },
     // Tenant-lookup message purpose (message_purposes) — same lookup as whatsapp_send's
     // `purpose`, so the two channels share one badge/filter vocabulary on the timeline.
-    { key: 'purpose',              label: 'Berichtdoel',            type: 'lookup_select', endpoint: '/message-purposes', default: 'manual' },
+    { key: 'purpose',              label: 'Message purpose',            type: 'lookup_select', endpoint: '/message-purposes', default: 'manual' },
     // P11-FASE4 (VERJAARDAG-XOR): skip this e-mail leg when the bundle's own value for
     // this field is truthy (the sibling WhatsApp leg already covers that candidate).
-    { key: 'skip_if_consent_field', label: 'Overslaan bij toestemmingsveld (XOR)', type: 'text',
+    { key: 'skip_if_consent_field', label: 'Skip on consent field (XOR)', type: 'text',
       help: 'Optioneel. Bijv. whatsapp_consent: sla deze e-mail over als de kandidaat dat veld op waar heeft staan (voorkomt dubbele verzending naast een WhatsApp-stap).' },
     // AVG-flow: set to mail every central user holding this role instead of the
     // candidate bundle (a backoffice notification with no candidate to loop over).
-    { key: 'recipient_role',       label: 'Ontvanger-rol (backoffice)', type: 'text',
+    { key: 'recipient_role',       label: 'Recipient role (backoffice)', type: 'text',
       help: 'Optioneel. Zet een rolnaam (bv. backoffice) om deze stap naar iedereen met die rol te sturen in plaats van naar de kandidaat-bundel.' },
   ],
 }

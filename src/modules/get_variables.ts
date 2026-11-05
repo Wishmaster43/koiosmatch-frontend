@@ -9,6 +9,6 @@ export default {
   color:    'var(--module-info)',
   bg:       'var(--color-info-bg)',
   schema: [
-    { key: 'variable_names', label: 'Variabelenamen', type: 'textarea', placeholder: 'naam_1\nnaam_2', help: 'Eén naam per regel.' },
+    { key: 'variable_names', label: 'Variable names', type: 'textarea', placeholder: 'naam_1\nnaam_2', help: 'Eén naam per regel.' },
   ],
 }

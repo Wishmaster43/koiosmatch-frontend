@@ -9,6 +9,6 @@ export default {
   color:    'var(--module-neutral)',
   bg:       'color-mix(in srgb, var(--module-neutral) 8%, transparent)',
   schema: [
-    { key: 'info', label: 'Werking', type: 'textarea', placeholder: 'De fout wordt genegeerd en de uitvoering gaat door met de volgende bundle.' },
+    { key: 'info', label: 'Behaviour', type: 'textarea', placeholder: 'De fout wordt genegeerd en de uitvoering gaat door met de volgende bundle.' },
   ],
 }

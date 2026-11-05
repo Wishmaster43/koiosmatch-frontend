@@ -18,7 +18,7 @@ export default {
     },
     {
       key:   'output_type',
-      label: 'Uitvoer als',
+      label: 'Output as',
       type:  'select',
       options: ['Array (meerdere bundles)', 'Enkel object'],
       help:  'Array stuurt elk item apart door naar de volgende module (zoals een Iterator).',

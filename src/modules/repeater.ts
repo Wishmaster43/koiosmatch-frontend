@@ -11,21 +11,21 @@ export default {
   schema: [
     {
       key:         'repeats',
-      label:       'Aantal herhalingen',
+      label: 'Number of repeats',
       type:        'number',
       placeholder: '5',
       help:        'Hoe vaak de volgende modules worden uitgevoerd.',
     },
     {
       key:         'initial_value',
-      label:       'Beginwaarde',
+      label: 'Start value',
       type:        'number',
       placeholder: '1',
       help:        'Startwaarde van de teller ({{i}}) bij de eerste herhaling.',
     },
     {
       key:         'step',
-      label:       'Stapgrootte',
+      label: 'Step size',
       type:        'number',
       placeholder: '1',
       help:        'Met hoeveel de teller per herhaling ophoogt.',

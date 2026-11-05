@@ -11,12 +11,12 @@ export default {
   color: 'var(--module-helloflex)',
   bg:    'color-mix(in srgb, var(--module-helloflex) 12%, transparent)',
   schema: [
-    { key: 'client',    label: 'Klant',         type: 'text',   placeholder: 'bijv. Yesway' },
+    { key: 'client',    label: 'Customer',         type: 'text',   placeholder: 'bijv. Yesway' },
     { key: 'status',    label: 'Status',        type: 'select', options: ['alle', 'open', 'bezet', 'geannuleerd', 'voltooid'] },
     // DATUM-1: native date input (mirrors the sm_shifts.ts Shiftmanager sibling) —
     // never a text field with an ISO placeholder shown to the user.
-    { key: 'date_from', label: 'Datum van',     type: 'date' },
-    { key: 'date_to',   label: 'Datum t/m',     type: 'date' },
-    { key: 'limit',     label: 'Max. diensten', type: 'number', placeholder: '500' },
+    { key: 'date_from', label: 'Date from',     type: 'date' },
+    { key: 'date_to',   label: 'Date to',     type: 'date' },
+    { key: 'limit',     label: 'Max. shifts', type: 'number', placeholder: '500' },
   ],
 }

@@ -10,6 +10,6 @@ export default {
   color:    'var(--color-warning)',
   bg:       'var(--color-warning-bg)',
   schema: [
-    { key: 'info', label: 'Werking', type: 'textarea', placeholder: 'Alle in deze uitvoering verwerkte bundles worden teruggedraaid. De hele uitvoering mislukt.' },
+    { key: 'info', label: 'Behaviour', type: 'textarea', placeholder: 'Alle in deze uitvoering verwerkte bundles worden teruggedraaid. De hele uitvoering mislukt.' },
   ],
 }

@@ -18,7 +18,7 @@ export default {
   bg:    'var(--color-secondary-bg)',
   schema: [
     {
-      key: 'event_name', label: 'Terug te melden gebeurtenis', type: 'select', default: 'Lead',
+      key: 'event_name', label: 'Event to report back', type: 'select', default: 'Lead',
       // Meta's own Conversions API event-name constants — DATA, not translated
       // (only the field LABEL above goes through i18n; see moduleI18n.optionLabel's
       // raw-value fallback, same treatment as e.g. intus_candidates' HTTP methods).

@@ -15,6 +15,6 @@ export default {
   schema: [
     { key: 'webhook_id',  label: 'Webhook',         type: 'webhook_select',
       hint: 'Kies of maak de inbound webhook die deze workflow start.' },
-    { key: 'max_results', label: 'Max. resultaten', type: 'number', placeholder: '1' },
+    { key: 'max_results', label: 'Max. results', type: 'number', placeholder: '1' },
   ],
 }

@@ -15,13 +15,13 @@ export default makeEntityModule({
   bg:       tintBg('var(--module-teal-strong)'),
   actions:  ['Ophalen'],
   filterFields: [
-    { value: 'candidate', label: 'Kandidaat' },
+    { value: 'candidate', label: 'Candidate' },
     { value: 'status',    label: 'Status' },
     { value: 'type',      label: 'Type' },
-    { value: 'owner',     label: 'Eigenaar' },
+    { value: 'owner',     label: 'Owner' },
   ],
   sortOptions: [
-    { value: 'scheduled_at', label: 'Geplande datum/tijd' },
-    { value: 'created_at',   label: 'Aangemaakt' },
+    { value: 'scheduled_at', label: 'Scheduled date/time' },
+    { value: 'created_at',   label: 'Created' },
   ],
 })

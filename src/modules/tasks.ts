@@ -12,14 +12,14 @@ export default makeEntityModule({
   bg:       'color-mix(in srgb, var(--module-periwinkle) 16%, transparent)',
   filterFields: [
     { value: 'status',   label: 'Status' },
-    { value: 'type',     label: 'Soort' },
-    { value: 'assignee', label: 'Toegewezen aan' },
-    { value: 'priority', label: 'Prioriteit' },
+    { value: 'type',     label: 'Kind' },
+    { value: 'assignee', label: 'Assigned to' },
+    { value: 'priority', label: 'Priority' },
     { value: 'due_at',   label: 'Deadline' },
   ],
   sortOptions: [
     { value: 'due_at',     label: 'Deadline' },
-    { value: 'priority',   label: 'Prioriteit' },
-    { value: 'created_at', label: 'Aangemaakt' },
+    { value: 'priority',   label: 'Priority' },
+    { value: 'created_at', label: 'Created' },
   ],
 })

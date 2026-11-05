@@ -32,19 +32,19 @@ export default {
   // tab, which filters OUT fields carrying a `tab` property. Tagging these
   // fields would silently make them unreachable in the panel.
   schema: [
-    { key: 'entity', label: 'Entiteit', type: 'select', default: 'candidate',
+    { key: 'entity', label: 'Entity', type: 'select', default: 'candidate',
       options: ['candidate', 'application', 'vacancy', 'customer', 'match'] },
     // REPAIR N8: the hint spells out what the DISPLAYED option labels mean
     // ("Eén record" / "Lijst (bulk)" — the fieldOptions translations of
     // 'subject'/'list'), never the raw stored token: a non-NL reader sees
     // "Single record" in the dropdown and must find that exact phrase again
     // in the hint below it, not the untranslated enum value.
-    { key: 'mode', label: 'Modus', type: 'select', default: 'subject',
+    { key: 'mode', label: 'Mode', type: 'select', default: 'subject',
       options: ['subject', 'list'],
       hint: '"Eén record" = de trigger-/handmatige record; "Lijst (bulk)" = elke rij uit de vorige ophaal-stap.' },
-    { key: 'force', label: 'Altijd vernieuwen', type: 'boolean', default: false,
+    { key: 'force', label: 'Always refresh', type: 'boolean', default: false,
       hint: 'Altijd een nieuwe AI-call, ook als er recent advies is' },
-    { key: 'max_age_hours', label: 'Verversingstermijn (uren)', type: 'number', default: 24,
+    { key: 'max_age_hours', label: 'Refresh window (hours)', type: 'number', default: 24,
       hint: 'Een advies jonger dan dit aantal uren wordt overgeslagen tenzij "Altijd vernieuwen" aan staat.' },
     { key: 'max_records', label: 'Maximum records per run', type: 'number', default: 100,
       hint: 'Harde bovengrens op het aantal records dat één keer van deze stap advies krijgt (modus "list").' },

@@ -9,6 +9,6 @@ export default {
   color:    'var(--color-violet)',
   bg:       'var(--color-violet-bg)',
   schema: [
-    { key: 'html', label: 'HTML-inhoud', type: 'textarea', placeholder: '<p>Tekst hier</p>' },
+    { key: 'html', label: 'HTML content', type: 'textarea', placeholder: '<p>Tekst hier</p>' },
   ],
 }

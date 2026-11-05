@@ -9,9 +9,9 @@ export default {
   color:    'var(--module-info)',
   bg:       'var(--color-info-bg)',
   schema: [
-    { key: 'source_module', label: 'Bronmodule', type: 'text', placeholder: 'automatisch ingevuld' },
-    { key: 'aggregate_function', label: 'Functie', type: 'select', options: ['SUM', 'COUNT', 'AVG', 'MAX', 'MIN'] },
-    { key: 'value', label: 'Waarde', type: 'text', placeholder: '{{1.bedrag}}' },
-    { key: 'group_by', label: 'Groeperen op', type: 'text', placeholder: 'leeg = één groep' },
+    { key: 'source_module', label: 'Source module', type: 'text', placeholder: 'automatisch ingevuld' },
+    { key: 'aggregate_function', label: 'Function', type: 'select', options: ['SUM', 'COUNT', 'AVG', 'MAX', 'MIN'] },
+    { key: 'value', label: 'Value', type: 'text', placeholder: '{{1.bedrag}}' },
+    { key: 'group_by', label: 'Group by', type: 'text', placeholder: 'leeg = één groep' },
   ],
 }

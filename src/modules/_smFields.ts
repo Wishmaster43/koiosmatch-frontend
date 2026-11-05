@@ -7,7 +7,7 @@ import type { SchemaField } from './types'
 // Which Shiftmanager link to sync from (tenant-scoped options from the API).
 export const SM_CONNECTION_FIELD: SchemaField = {
   key: 'connection_id',
-  label: 'Shiftmanager-account',
+  label: 'Shiftmanager account',
   type: 'lookup_select',
   endpoint: '/planning-connections',
 }

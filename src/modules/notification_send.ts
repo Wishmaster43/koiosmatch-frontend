@@ -15,8 +15,8 @@ export default {
   color: 'var(--module-brown)',
   bg:    tintBg('var(--module-brown)'),
   schema: [
-    { key: 'title',      label: 'Titel',      type: 'text',     placeholder: 'Nieuwe match' },
-    { key: 'body',       label: 'Bericht',    type: 'textarea', placeholder: 'Er is een nieuwe match aangemaakt.' },
+    { key: 'title',      label: 'Title',      type: 'text',     placeholder: 'Nieuwe match' },
+    { key: 'body',       label: 'Message',    type: 'textarea', placeholder: 'Er is een nieuwe match aangemaakt.' },
     // Who receives the notification: everyone, one tenant role, explicit users, or
     // the owner of the record that triggered the workflow (engine RECIPIENTS const).
     // NO `default` on purpose (Opus, 23-08): a schema default is DISPLAY-ONLY — a
@@ -30,21 +30,21 @@ export default {
     // reachable showIf and would be a fake affordance (§3, no dead-end controls).
     // K-245 (CMBE): 'match_and_candidate_owner' = union of the match owner and the
     // candidate owner, de-duplicated — the seeded "Match loopt af" template uses it.
-    { key: 'recipients', label: 'Ontvangers', type: 'select',   options: ['all', 'role', 'users', 'candidate_owner', 'customer_owner', 'vacancy_owner', 'match_and_candidate_owner'] },
+    { key: 'recipients', label: 'Recipients', type: 'select',   options: ['all', 'role', 'users', 'candidate_owner', 'customer_owner', 'vacancy_owner', 'match_and_candidate_owner'] },
     // Only relevant when recipients === 'role'. Roles are tenant-real, resolved by the
     // backend via `roles.name` (resolveRecipients: whereHas('roles', name = config.role)),
     // so this is NOT a static list — it is a live GET /roles lookup, same dynamic-options
     // mechanism status_set.ts uses for the candidate statuses (`lookup_select` + `endpoint`,
     // rendered by the shared LookupSelectField in fieldControls/). GET /roles already
     // excludes the platform-only super_admin role server-side (RoleController::index).
-    { key: 'role',       label: 'Rol',        type: 'lookup_select', endpoint: '/roles', valueKey: 'name',
+    { key: 'role',       label: 'Role',        type: 'lookup_select', endpoint: '/roles', valueKey: 'name',
       showIf: { key: 'recipients', value: 'role' } },
     // WF-BUILDER-VELDEN-1: explicit user picks — only reachable when recipients==='users'
     // (resolveRecipients' default branch). DL-08/WFB-11: the builder runs on settings.view,
     // which a genuinely settings-only role lacks alongside users.view — GET /users/options
     // (id+name only, gated users.view OR settings.view) resolves the same picker without
     // requiring the full staff-list permission GET /users needs.
-    { key: 'user_ids',   label: 'Gebruikers', type: 'multiselect', endpoint: '/users/options',
+    { key: 'user_ids',   label: 'Users', type: 'multiselect', endpoint: '/users/options',
       showIf: { key: 'recipients', value: 'users' } },
     // NOTIF-TYPE-WHITELIST-1/NOTIF-TYPES-FE-1: closed vocabulary, now mirroring
     // NotificationSendModule::VALID_TYPES exactly (measured 27-08, 37 values) —
@@ -73,7 +73,7 @@ export default {
     // (e.g. "conversation" resolves against input.conversation_id). Free text in the
     // engine (BaseModule reads whatever slug is here against the run's own bundle
     // fields) — not a closed vocabulary, so a plain text field mirrors it exactly.
-    { key: 'link_entity', label: 'Hyperlink-entiteit', type: 'text', placeholder: 'conversation',
+    { key: 'link_entity', label: 'Hyperlink entity', type: 'text', placeholder: 'conversation',
       help: 'Optioneel. Bijvoorbeeld "conversation": de melding linkt dan naar het bijbehorende "conversation_id"-veld uit de trigger, zodat de melding doorklikbaar is.' },
   ],
 }

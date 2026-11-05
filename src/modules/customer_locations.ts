@@ -15,13 +15,13 @@ export default makeEntityModule({
   bg:       tint('var(--module-cyan)', 16),
   actions:  ['Ophalen'],
   filterFields: [
-    { value: 'customer', label: 'Klant' },
-    { value: 'city', label: 'Plaats' },
+    { value: 'customer', label: 'Customer' },
+    { value: 'city', label: 'City' },
     { value: 'status', label: 'Status' },
   ],
   sortOptions: [
-    { value: 'name', label: 'Naam' },
-    { value: 'city', label: 'Plaats' },
-    { value: 'created_at', label: 'Aangemaakt' },
+    { value: 'name', label: 'Name' },
+    { value: 'city', label: 'City' },
+    { value: 'created_at', label: 'Created' },
   ],
 })

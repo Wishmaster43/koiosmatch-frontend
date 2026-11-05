@@ -100,7 +100,8 @@ const ALLOWLIST: string[] = [
   'de/shiftmanager:shiftsDrawer.fields.date',
   'de/whatsapp:messages.date',
   'de/workflows:fieldLabels.Datum',
-  'de/workflows:fieldOptions.Datum',
+  'de/workflows:fieldLabels.Date',
+  'de/workflows:fieldOptions.Date',
 
   // German "Datum" = "date"; the parenthesised part is a literal date-format example, not prose
   'de/workflows:fieldLabels.Datum (08-07-2026)',
@@ -140,6 +141,7 @@ const ALLOWLIST: string[] = [
   'es/settings:nav.candidate_phases',
   'es/vacancies:applicants.phase',
   'es/workflows:fieldLabels.Fase',
+  'es/workflows:fieldLabels.Phase',
 
   // Italian/Portuguese "fase" = "phase"/"stage" (identical spelling, shared Latin root — same
   // cognate reasoning as the es/ block above)
@@ -183,6 +185,7 @@ const ALLOWLIST: string[] = [
   'it/vacancies:applicants.phase',
   'it/vacancies:applicants.byPhase',
   'it/workflows:fieldLabels.Fase',
+  'it/workflows:fieldLabels.Phase',
   'pt/analytics:candidates.axes.phase',
   'pt/analytics:applications.axes.stage',
   'pt/analytics:customers.axes.phase',
@@ -222,6 +225,7 @@ const ALLOWLIST: string[] = [
   'pt/settings:opportunityDisplay.fields.opportunity_table_color_stage.label',
   'pt/vacancies:applicants.phase',
   'pt/workflows:fieldLabels.Fase',
+  'pt/workflows:fieldLabels.Phase',
 
   // German "Ja" = "yes"
   'de/common:yes',

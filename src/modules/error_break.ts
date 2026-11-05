@@ -10,6 +10,6 @@ export default {
   color:    'var(--color-danger)',
   bg:       'var(--color-danger-bg)',
   schema: [
-    { key: 'store_incomplete', label: 'Sla incomplete uitvoering op', type: 'boolean', help: 'Vereist dat "onvolledige uitvoeringen opslaan" is ingeschakeld in de workflow instellingen.' },
+    { key: 'store_incomplete', label: 'Store incomplete run', type: 'boolean', help: 'Vereist dat "onvolledige uitvoeringen opslaan" is ingeschakeld in de workflow instellingen.' },
   ],
 }

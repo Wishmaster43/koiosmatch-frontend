@@ -23,24 +23,24 @@ export default {
     // WF-BUILDER-VELDEN-1: WhatsAppSendModule::configSchema()'s tenant-lookup-driven
     // message purpose (message_purposes, same lookup as email_send's `purpose`) — the
     // badge/filter label on the sent message, never a hardcoded option list.
-    { key: 'purpose',              label: 'Berichtdoel',           type: 'lookup_select', endpoint: '/message-purposes', default: 'manual' },
+    { key: 'purpose',              label: 'Message purpose',           type: 'lookup_select', endpoint: '/message-purposes', default: 'manual' },
     // WhatsApp send FORMAT; key stays as the BE contract expects.
     // 'session' = free-form text, only delivered inside Meta's 24h customer-service
     // window (the BE gates on the conversation's last inbound message). CMBE K-193
     // fase 2b: WhatsApp Web can only ever send a session message — the builder
     // auto-sets this (never silently) when `channel` becomes 'wa_web' (ConfigPanel).
-    { key: 'message_type',        label: 'Formaat',                type: 'select',  options: ['template','flow','session'],
+    { key: 'message_type',        label: 'Format',                type: 'select',  options: ['template','flow','session'],
       help: 'Via WhatsApp Web kan alleen een sessiebericht (vrije tekst) worden verstuurd.' },
     // CMBE K-193 fase 0 contract: which WhatsApp channel this step sends over.
     // No `default` on purpose (Danny: no silent fallback to 'waba' in the
     // builder) — the blank placeholder forces an explicit choice, and it
     // filters the sender-number list below when Coexistence is picked.
-    { key: 'channel',             label: 'Kanaal',                 type: 'select',  required: true,
+    { key: 'channel',             label: 'Channel',                 type: 'select',  required: true,
       options: ['waba', 'waba_coex', 'wa_web'] },
     // CMBE K-193 fase 2b: which connected WhatsApp Web device sends this step's
     // message — a tenant/user's own device or a branch-shared one. Only shown for
     // the 'wa_web' channel; `phone_number_id` below is ignored server-side then.
-    { key: 'whatsapp_number_id',  label: 'Gekoppeld nummer',       type: 'lookup_select', endpoint: '/whatsapp-web-numbers', required: true,
+    { key: 'whatsapp_number_id',  label: 'Linked number',       type: 'lookup_select', endpoint: '/whatsapp-web-numbers', required: true,
       showIf: { key: 'channel', value: 'wa_web' },
       help: 'Alleen gekoppelde WhatsApp Web-nummers (eigen of vestiging).' },
     // Live options from the tenant's WABA connection (Make parity): active sender
@@ -52,7 +52,7 @@ export default {
     // deliberately carries no builder default (no silent 'waba' fallback), but the
     // BACKEND defaults a missing/legacy channel to 'waba' and still requires this
     // field there — an unset channel must not hide an already-stored sender.
-    { key: 'phone_number_id',     label: 'Afzender',               type: 'whatsapp_phone_number', endpoint: '/whatsapp-phone-numbers',
+    { key: 'phone_number_id',     label: 'Sender',               type: 'whatsapp_phone_number', endpoint: '/whatsapp-phone-numbers',
       showIf: { key: 'channel', value: ['waba', 'waba_coex', undefined] },
       // WA-SCOPE-2: an empty sender falls back automatically (branch first, then the tenant default).
       help: 'Leeg laten betekent automatisch: eerst de vestiging, anders de standaard.' },
@@ -61,7 +61,7 @@ export default {
     // 2026-07-09 "own 06 = test mode" redirect is gone: the backend rejects a
     // literal number (WA-RECIPIENT-FIELD-1) and manual sending is its own route
     // (WA-SEND-1, rows 52/54). The picker inserts a bare field name ('path').
-    { key: 'recipient_field',     label: 'Ontvanger',              type: 'text', insertMode: 'path' as const,
+    { key: 'recipient_field',     label: 'Recipient',              type: 'text', insertMode: 'path' as const,
       placeholder: 'leeg = mobiel van de kandidaat · anders de veldnaam, bijv. mobile',
       help: 'Een veldnaam van het bronrecord (mobile, phone, …), nooit een telefoonnummer. Handmatig versturen doe je vanaf het record zelf.',
       validate: looksLikePhoneNumber },
@@ -78,7 +78,7 @@ export default {
       showIf: { key: 'message_type', value: 'flow' },
       help: 'bijv. {{firstname}} of extra bericht tekst' },
     // Free-form session text — only shown (and sent) for the 'session' format.
-    { key: 'session_text',        label: 'Berichttekst (sessie)',  type: 'textarea',
+    { key: 'session_text',        label: 'Message text (session)',  type: 'textarea',
       placeholder: 'Hoi {{firstname}}, …', showIf: { key: 'message_type', value: 'session' } },
     // 02-09 (Danny: "the translation must live in the workflow"): per-language
     // overrides for the session text, on their own "Vertalingen" tab (MODULE-FACE-BEVRIES —
@@ -86,16 +86,16 @@ export default {
     // Only shown for the free-text session format (Danny 02-09: "Translation is
     // only for the free-text module. It can't apply to a template.") — a
     // template's variables come from Meta's approved template, not free text.
-    { key: 'translations', label: 'Vertalingen', type: 'translations', tab: 'translations',
+    { key: 'translations', label: 'Translations', type: 'translations', tab: 'translations',
       fields: ['text'], languages: MESSAGING_LANGUAGES, mainFields: { text: 'session_text' },
       showIf: { key: 'message_type', value: 'session' } },
     // Danny's own message classification (NOT the send format above) — drives queue
     // order in the WABA batch (Wachtrij tab). Tenant lookup, CRUD'd via Settings.
-    { key: 'priority_type',       label: 'Berichttype (classificatie)', type: 'lookup_select', endpoint: '/whatsapp-message-types' },
+    { key: 'priority_type',       label: 'Message type (classification)', type: 'lookup_select', endpoint: '/whatsapp-message-types' },
     // WF-BUILDER-VELDEN-1: idempotency window — the same template is not re-sent to the
     // same candidate inside this many hours (0 = always send).
-    { key: 'dedup_hours',         label: 'Niet opnieuw sturen binnen (uren)', type: 'number', default: 24,
+    { key: 'dedup_hours',         label: 'Don\'t resend within (hours)', type: 'number', default: 24,
       help: 'Idempotentie: dezelfde template gaat binnen dit venster niet nogmaals naar dezelfde kandidaat (0 = altijd sturen).' },
-    { key: 'throttle_per_minute', label: 'Max. per minuut',        type: 'number',  placeholder: '30' },
+    { key: 'throttle_per_minute', label: 'Max. per minute',        type: 'number',  placeholder: '30' },
   ],
 }

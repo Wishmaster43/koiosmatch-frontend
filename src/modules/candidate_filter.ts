@@ -17,7 +17,7 @@ export default {
   schema: [
     // default false = the engine's own reading of an ABSENT key (`! empty(...)`): a
     // fresh node persists no config, so the toggle must paint what the engine does.
-    { key: 'ai_enabled', label: 'Alleen AI-enabled kandidaten', type: 'boolean', default: false },
+    { key: 'ai_enabled', label: 'Only AI-enabled candidates', type: 'boolean', default: false },
     // WF-BUILDER-VELDEN-1: `pools`/`positions` filter the SHIFTMANAGER mirror table
     // (SmCandidate.pools is a raw JSON array, SmCandidate.position a plain string column) —
     // there is NO tenant-CRUD lookup behind either one (unlike the native candidate's own
@@ -27,7 +27,7 @@ export default {
     // for exactly this case — type a value, press Enter to add it as a chip.
     { key: 'pools',     label: 'Pools',    type: 'multiselect',
       help: 'Laat leeg voor alle pools' },
-    { key: 'positions', label: 'Functies', type: 'multiselect',
+    { key: 'positions', label: 'Functions', type: 'multiselect',
       help: 'Laat leeg voor alle functies' },
     // default 'actief' mirrors CandidateFilterModule::configSchema; since DEFAULT-PERSIST-1
     // a schema default is SEEDED into the node config (and the engine merges its own),
@@ -40,8 +40,8 @@ export default {
     // Shiftmanager/HelloFlex mirror module (sm_candidates, hf_candidates, hf_customers,
     // hf_shifts) hardcodes its status options for the same reason.
     { key: 'status', label: 'Status', type: 'select', options: ['actief', 'nietactief'], default: 'actief' },
-    { key: 'last_contact_days', label: 'Niet gecontacteerd in (dagen)', type: 'number' },
-    { key: 'last_worked_days',  label: 'Laatste dienst minstens X dagen geleden', type: 'number', placeholder: '30' },
-    { key: 'no_show_max',       label: 'Maximaal aantal no-shows', type: 'number', placeholder: '3' },
+    { key: 'last_contact_days', label: 'Not contacted in (days)', type: 'number' },
+    { key: 'last_worked_days',  label: 'Last shift at least X days ago', type: 'number', placeholder: '30' },
+    { key: 'no_show_max',       label: 'Maximum number of no-shows', type: 'number', placeholder: '3' },
   ],
 }

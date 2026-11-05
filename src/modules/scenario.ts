@@ -11,6 +11,6 @@ export default {
   color: 'var(--module-green)',
   bg:    'color-mix(in srgb, var(--module-green) 12%, transparent)',
   schema: [
-    { key: 'conditions', label: 'Condities', type: 'filters' },
+    { key: 'conditions', label: 'Conditions', type: 'filters' },
   ],
 }

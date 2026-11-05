@@ -10,7 +10,7 @@ export default {
   color: 'var(--module-mauve)',
   bg:    'color-mix(in srgb, var(--module-mauve) 16%, transparent)',
   schema: [
-    { key: 'source',         label: 'Bron',           type: 'select', options: ['vacancy'] },
-    { key: 'max_candidates', label: 'Max. kandidaten', type: 'number', placeholder: '10' },
+    { key: 'source',         label: 'Source',           type: 'select', options: ['vacancy'] },
+    { key: 'max_candidates', label: 'Max. candidates', type: 'number', placeholder: '10' },
   ],
 }

@@ -11,26 +11,26 @@ export default {
   schema: [
     {
       key:   'source_module',
-      label: 'Bronmodule',
+      label: 'Source module',
       type:  'text',
       placeholder: 'bijv. Iterator (automatisch ingevuld)',
       help:  'De module waarvan de items worden samengevoegd. Normaal de Iterator die voor deze module staat.',
     },
     {
       key:   'aggregated_fields',
-      label: 'Samen te voegen velden',
+      label: 'Fields to merge',
       type:  'keyvalue',
       help:  'Velden die per item worden verzameld in de output-array.',
     },
     {
       key:   'group_by',
-      label: 'Groeperen op',
+      label: 'Group by',
       type:  'text',
       placeholder: 'bijv. {{klant_id}} — leeg laten voor één grote groep',
     },
     {
       key:   'stop_processing_after_empty',
-      label: 'Stop als resultaat leeg is',
+      label: 'Stop when the result is empty',
       type:  'boolean',
     },
   ],

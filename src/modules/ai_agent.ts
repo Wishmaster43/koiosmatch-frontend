@@ -21,14 +21,14 @@ export default {
   schema: [
     // Stored value = the agent NAME: AiAgentModule resolves `AiAgent::where('name', …)`
     // and its own schema offers pluck('name') (Opus-measured) — an id would match nobody.
-    { key: 'agent', label: 'AI-agent', type: 'lookup_select', endpoint: '/ai/agents', valueKey: 'name', tab: 'general' },
-    { key: 'instruction', label: 'Instructietekst (agent-prompt)', type: 'textarea', tab: 'general', required: true,
+    { key: 'agent', label: 'AI agent', type: 'lookup_select', endpoint: '/ai/agents', valueKey: 'name', tab: 'general' },
+    { key: 'instruction', label: 'Instruction text (agent prompt)', type: 'textarea', tab: 'general', required: true,
       hint: 'De volledige, tenant-bewerkbare instructie voor de AI-agent: persona, staps-state-machine, harde regels. Het runtime-antwoordcontract wordt automatisch toegevoegd.' },
     // Knowledge toggles — Danny's own instruction (30-08: "2 toggles that stay
     // on the AI agent module", reconfirmed 31-08 after MODULE-TERUG-1): back on the module.
-    { key: 'use_external_knowledge', label: 'Kennisbank in deze stap gebruiken', type: 'boolean', tab: 'general', default: true,
+    { key: 'use_external_knowledge', label: 'Use the knowledge base in this step', type: 'boolean', tab: 'general', default: true,
       hint: 'Laat de AI-agent tenant-documenten/kennisbank raadplegen tijdens het gesprek. Werkt alleen als de agent zelf kennis beschikbaar heeft.' },
-    { key: 'use_faq', label: "FAQ's gebruiken", type: 'boolean', tab: 'general', default: true,
+    { key: 'use_faq', label: 'Use FAQs', type: 'boolean', tab: 'general', default: true,
       hint: 'Laat de AI-agent veelgestelde vragen (FAQ) raadplegen tijdens het gesprek.' },
     // KANAAL-NAAR-SEND-1 (Danny 31-08: "CHANNEL IS THE NEXT STEP IN THE
 // WORKFLOW??? WHY IS THAT HERE?" + "Send number ... TEXT APPEARS
@@ -39,10 +39,10 @@ export default {
     // was — I only asked for the title, AI instruction, pop-out or popup for
     // the text and AI instructions on a tab"): the module is this pre-P1 schema
     // again, plus ONLY the AI-instructions list below on its own panel tab.
-    { key: 'instructions', label: 'AI-instructies', type: 'instruction_list', tab: 'instructions',
+    { key: 'instructions', label: 'AI instructions', type: 'instruction_list', tab: 'instructions',
       hint: 'De genummerde stappen die de AI-agent doorloopt, elk met een optioneel outputveld en variabele-chips.' },
-    { key: 'reply_timeout_hours', label: 'Terugvaltijd zonder reactie (uren)', type: 'number', tab: 'advanced', default: 48,
+    { key: 'reply_timeout_hours', label: 'Fallback time without a reply (hours)', type: 'number', tab: 'advanced', default: 48,
       hint: 'Reageert de kandidaat niet, dan valt de run na dit aantal uren terug (workflows:resume-due watchdog).' },
-    { key: 'max_attempts', label: 'Max. pogingen per beurt (bij een tijdelijke API-fout)', type: 'number', tab: 'advanced', default: 3 },
+    { key: 'max_attempts', label: 'Max. attempts per turn (on a temporary API error)', type: 'number', tab: 'advanced', default: 3 },
   ],
 }

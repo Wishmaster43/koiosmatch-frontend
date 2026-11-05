@@ -11,7 +11,7 @@ export default {
   schema: [
     {
       key:   'source_field',
-      label: 'Array veld',
+      label: 'Array field',
       type:  'text',
       placeholder: '{{1.output}} of leeg laten voor volledige output',
       help:  'Welk veld uit de vorige module bevat de array om over te itereren.',

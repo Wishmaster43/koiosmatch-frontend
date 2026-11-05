@@ -15,14 +15,14 @@ export default makeEntityModule({
   bg:       tint('var(--module-mauve)', 16),
   actions:  ['Ophalen'],
   filterFields: [
-    { value: 'customer', label: 'Klant' },
-    { value: 'location', label: 'Vestiging' },
-    { value: 'department', label: 'Afdeling' },
-    { value: 'function', label: 'Functie' },
-    { value: 'is_primary', label: 'Primair contact' },
+    { value: 'customer', label: 'Customer' },
+    { value: 'location', label: 'Branch' },
+    { value: 'department', label: 'Department' },
+    { value: 'function', label: 'Function' },
+    { value: 'is_primary', label: 'Primary contact' },
   ],
   sortOptions: [
-    { value: 'last_name', label: 'Achternaam' },
-    { value: 'created_at', label: 'Aangemaakt' },
+    { value: 'last_name', label: 'Last name' },
+    { value: 'created_at', label: 'Created' },
   ],
 })

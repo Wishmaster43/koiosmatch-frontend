@@ -10,6 +10,6 @@ export default {
   bg:       'var(--color-secondary-bg)',
   schema: [
     // D8: read-only behaviour note (no effect on the run) — renders via the 'help_text' field type, never an editable control.
-    { key: 'info', label: 'Werking', type: 'help_text', placeholder: 'Alle tot nu toe verwerkte bundles worden als succesvol gemarkeerd. De foutieve bundle en alles daarna wordt overgeslagen.' },
+    { key: 'info', label: 'Behaviour', type: 'help_text', placeholder: 'Alle tot nu toe verwerkte bundles worden als succesvol gemarkeerd. De foutieve bundle en alles daarna wordt overgeslagen.' },
   ],
 }

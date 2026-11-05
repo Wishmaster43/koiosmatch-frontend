@@ -16,11 +16,11 @@ export default makeEntityModule({
   actions:  ['Ophalen'],
   filterFields: [
     { value: 'status', label: 'Status' },
-    { value: 'channel', label: 'Kanaal' },
-    { value: 'owner', label: 'Eigenaar' },
+    { value: 'channel', label: 'Channel' },
+    { value: 'owner', label: 'Owner' },
   ],
   sortOptions: [
-    { value: 'name', label: 'Naam' },
-    { value: 'created_at', label: 'Aangemaakt' },
+    { value: 'name', label: 'Name' },
+    { value: 'created_at', label: 'Created' },
   ],
 })

@@ -15,14 +15,14 @@ export default makeEntityModule({
   bg:       'color-mix(in srgb, var(--module-teal-strong) 10%, transparent)',
   filterFields: [
     { value: 'status',     label: 'Status' },
-    { value: 'client',     label: 'Klant' },
-    { value: 'location',   label: 'Locatie' },
-    { value: 'department', label: 'Afdeling' },
-    { value: 'function',   label: 'Functie' },
-    { value: 'date',       label: 'Datum' },
+    { value: 'client',     label: 'Customer' },
+    { value: 'location',   label: 'Location' },
+    { value: 'department', label: 'Department' },
+    { value: 'function',   label: 'Function' },
+    { value: 'date',       label: 'Date' },
   ],
   sortOptions: [
-    { value: 'date',   label: 'Datum' },
+    { value: 'date',   label: 'Date' },
     { value: 'status', label: 'Status' },
   ],
 })

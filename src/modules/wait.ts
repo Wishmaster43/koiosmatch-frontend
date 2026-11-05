@@ -16,14 +16,14 @@ export default {
   color: 'var(--module-warmgrey)',
   bg:    tintBg('var(--module-warmgrey)'),
   schema: [
-    { key: 'until_field',   label: 'Wachten tot veld', type: 'text',    placeholder: 'available_again_date' },
-    { key: 'days',          label: 'Of: aantal dagen', type: 'number',  placeholder: '0' },
+    { key: 'until_field',   label: 'Wait until field', type: 'text',    placeholder: 'available_again_date' },
+    { key: 'days',          label: 'Or: number of days', type: 'number',  placeholder: '0' },
     // Additive with `days` (1 dag + 3 uur) — the former FE 'delay'/'sleep' nodes'
     // own duration field folds into this one.
-    { key: 'hours',         label: 'Plus: aantal uren', type: 'number', placeholder: '0',
+    { key: 'hours',         label: 'Plus: number of hours', type: 'number', placeholder: '0',
       hint: 'Opgeteld bij de dagen (bv. 1 dag + 3 uur).' },
     // Only applies to the relative delay above, never to an explicit until_field date.
-    { key: 'skip_weekends', label: 'Weekend overslaan', type: 'boolean', default: false,
+    { key: 'skip_weekends', label: 'Skip weekends', type: 'boolean', default: false,
       hint: 'Valt het moment in het weekend, dan wordt het maandag op dezelfde tijd.' },
   ],
 }

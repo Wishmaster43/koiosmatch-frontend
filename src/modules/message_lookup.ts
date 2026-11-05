@@ -15,6 +15,6 @@ export default {
   // Own tint % (lighter than --color-success-bg) so the module keeps its own soft-green swatch.
   bg:    'color-mix(in srgb, var(--color-success) 9%, transparent)',
   schema: [
-    { key: 'message_category', label: 'Berichtcategorie', type: 'text', placeholder: 'shifts_offered' },
+    { key: 'message_category', label: 'Message category', type: 'text', placeholder: 'shifts_offered' },
   ],
 }

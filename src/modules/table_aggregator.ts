@@ -9,9 +9,9 @@ export default {
   color:    'var(--module-info)',
   bg:       'var(--color-info-bg)',
   schema: [
-    { key: 'source_module', label: 'Bronmodule', type: 'text', placeholder: 'automatisch ingevuld' },
-    { key: 'columns', label: 'Kolommen (kommagescheiden)', type: 'text', placeholder: 'naam, email, telefoon' },
-    { key: 'column_separator', label: 'Kolomscheidingsteken', type: 'select', options: ['Tab', 'Komma', 'Puntkomma'] },
-    { key: 'row_separator', label: 'Rijscheidingsteken', type: 'select', options: ['Nieuwe regel', 'Puntkomma'] },
+    { key: 'source_module', label: 'Source module', type: 'text', placeholder: 'automatisch ingevuld' },
+    { key: 'columns', label: 'Columns (comma-separated)', type: 'text', placeholder: 'naam, email, telefoon' },
+    { key: 'column_separator', label: 'Column separator', type: 'select', options: ['Tab', 'Komma', 'Puntkomma'] },
+    { key: 'row_separator', label: 'Row separator', type: 'select', options: ['Nieuwe regel', 'Puntkomma'] },
   ],
 }

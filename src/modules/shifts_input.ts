@@ -12,14 +12,14 @@ export default {
   schema: [
     {
       key:         'shift_ids',
-      label:       'Dienst IDs',
+      label: 'Shift IDs',
       type:        'textarea',
       placeholder: 'Plak hier dienst-IDs, één per regel of komma-gescheiden:\n12345\n12346\n12347',
       help:        'Elke regel of komma-gescheiden waarde wordt als apart dienst-ID behandeld.',
     },
     {
       key:   'id_field',
-      label: 'ID veld naam',
+      label: 'ID field name',
       type:  'select',
   app:   ['shiftmanager','intus','aelio','elanza'],
       options: ['id', 'external_id', 'shift_number'],

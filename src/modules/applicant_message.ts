@@ -17,9 +17,9 @@ export default {
   // nodes of this type keep rendering — only the picker's new-node offer hides.
   hidden: true,
   schema: [
-    { key: 'channel',             label: 'Kanaal',             type: 'select',   options: ['e-mail', 'whatsapp zakelijk', 'whatsapp privé (nummer eigenaar)'] },
-    { key: 'subject',             label: 'Onderwerp (e-mail)', type: 'text',     placeholder: 'Je sollicitatie bij {vacature.titel}' },
-    { key: 'body',                label: 'Bericht',            type: 'textarea', placeholder: 'Beste {kandidaat.voornaam},\n\nDank voor je sollicitatie. Helaas … ({afwijsreden}).\n\nMet vriendelijke groet,\n{recruiter.naam}' },
-    { key: 'throttle_per_minute', label: 'Max. per minuut',    type: 'number',   placeholder: '30' },
+    { key: 'channel',             label: 'Channel',             type: 'select',   options: ['e-mail', 'whatsapp zakelijk', 'whatsapp privé (nummer eigenaar)'] },
+    { key: 'subject',             label: 'Subject (e-mail)', type: 'text',     placeholder: 'Je sollicitatie bij {vacature.titel}' },
+    { key: 'body',                label: 'Message',            type: 'textarea', placeholder: 'Beste {kandidaat.voornaam},\n\nDank voor je sollicitatie. Helaas … ({afwijsreden}).\n\nMet vriendelijke groet,\n{recruiter.naam}' },
+    { key: 'throttle_per_minute', label: 'Max. per minute',    type: 'number',   placeholder: '30' },
   ],
 }

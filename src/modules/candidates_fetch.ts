@@ -12,14 +12,14 @@ export default {
   color:    'var(--color-secondary)',
   bg:       'var(--color-secondary-bg)',
   schema: [
-    { key: 'status',         label: 'Status (inzetbaarheid)', type: 'multiselect', source: 'candidate_statuses', help: 'Leeg = alle statussen (blacklist is altijd uitgesloten).' },
-    { key: 'phase',          label: 'Fase',                   type: 'multiselect', source: 'candidate_phases',   help: 'Leeg = alle fases (lead / kandidaat / …).' },
-    { key: 'candidate_types', label: 'Contractvorm',          type: 'multiselect', source: 'candidate_types',    help: 'Bijv. alleen uitzendkrachten of ZZP\'ers. Leeg = alle contractvormen.' },
-    { key: 'city',           label: 'Plaats',                 type: 'multiselect', help: 'Leeg = alle plaatsen.' },
+    { key: 'status',         label: 'Status (deployability)', type: 'multiselect', source: 'candidate_statuses', help: 'Leeg = alle statussen (blacklist is altijd uitgesloten).' },
+    { key: 'phase',          label: 'Phase',                   type: 'multiselect', source: 'candidate_phases',   help: 'Leeg = alle fases (lead / kandidaat / …).' },
+    { key: 'candidate_types', label: 'Contract form',          type: 'multiselect', source: 'candidate_types',    help: 'Bijv. alleen uitzendkrachten of ZZP\'ers. Leeg = alle contractvormen.' },
+    { key: 'city',           label: 'City',                 type: 'multiselect', help: 'Leeg = alle plaatsen.' },
     // No placeholder here (Danny 23-07): a grey example "6" reads as a set value,
     // while an EMPTY field is the real "all candidates" state the hint describes.
-    { key: 'last_contact_before_months', label: 'Geen contact sinds (maanden)', type: 'number', help: 'Leeg = geen contactfilter (alle kandidaten komen mee).' },
-    { key: 'whatsapp_consent', label: 'Alleen met WhatsApp-toestemming', type: 'boolean' },
-    { key: 'limit',          label: 'Max. aantal',            type: 'number', help: 'Leeg = veiligheidsplafond (10.000).' },
+    { key: 'last_contact_before_months', label: 'No contact since (months)', type: 'number', help: 'Leeg = geen contactfilter (alle kandidaten komen mee).' },
+    { key: 'whatsapp_consent', label: 'Only with WhatsApp consent', type: 'boolean' },
+    { key: 'limit',          label: 'Max. number',            type: 'number', help: 'Leeg = veiligheidsplafond (10.000).' },
   ],
 }

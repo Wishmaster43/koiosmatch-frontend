@@ -22,19 +22,19 @@ export default {
     // GEO-GEOCODE-ENTITY-1: which master-data record this step geocodes.
     // Defaults to 'candidate' so existing single-candidate scenarios (no `entity` key)
     // behave exactly as before.
-    { key: 'entity', label: 'Soort record', type: 'select', options: ['candidate', 'customer', 'customer_location', 'vacancy'], default: 'candidate',
+    { key: 'entity', label: 'Record type', type: 'select', options: ['candidate', 'customer', 'customer_location', 'vacancy'], default: 'candidate',
       help: 'candidate = kandidaat, customer = klant, customer_location = klantlocatie, vacancy = vacature.' },
     // Single-record path: the trigger supplies the entity; bulk leaves this
     // empty. NO placeholder (Danny 23-07 ×2): grey example text reads as a set
     // value — the empty field is the real "all records from the previous step".
     // D9: label/help are entity-agnostic — this same field carries a candidate,
     // customer, customer_location or vacancy id depending on the 'entity' select above.
-    { key: 'candidate_id', label: 'Record-ID', type: 'text', help: '{{record.id}} = draait per record (van het gekozen soort) uit de vorige stap (bulk; leeg werkt ook). Voor één record: {{trigger.<soort>_id}} (drill-down-knop of adreswijziging).' },
+    { key: 'candidate_id', label: 'Record ID', type: 'text', help: '{{record.id}} = draait per record (van het gekozen soort) uit de vorige stap (bulk; leeg werkt ook). Voor één record: {{trigger.<soort>_id}} (drill-down-knop of adreswijziging).' },
     // Bulk safety: skip records that already carry coordinates (protects OpenCage quota).
-    { key: 'only_missing', label: 'Alleen zonder coördinaten', type: 'boolean', help: 'Sla records over die al coördinaten hebben; aan te raden bij bulk.' },
+    { key: 'only_missing', label: 'Only without coordinates', type: 'boolean', help: 'Sla records over die al coördinaten hebben; aan te raden bij bulk.' },
     // GEO-GEOCODE-ENTITY-1: the bulk source set for customer/location/vacancy
     // (never candidates — those come from the "Kandidaten ophalen" step instead).
-    { key: 'all_records', label: 'Alle records van dit soort', type: 'boolean',
+    { key: 'all_records', label: 'All records of this type', type: 'boolean',
       help: 'Selecteert alle klanten / klantlocaties / vacatures (max. 10.000, gearchiveerde niet). Werkt niet voor kandidaten: die selecteer je met de stap "Kandidaten ophalen".' },
   ],
 }

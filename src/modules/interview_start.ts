@@ -28,7 +28,7 @@ export default {
     // from the application, then the vacancy, then the agent default.
     {
       key: 'interview_flow_id',
-      label: 'Interviewflow',
+      label: 'Interview flow',
       type: 'lookup_select',
       endpoint: '/ai/interview-flows',
       placeholder: 'Standaard van de vacature/sollicitatie',

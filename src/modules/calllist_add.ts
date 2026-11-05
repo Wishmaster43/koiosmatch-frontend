@@ -14,7 +14,7 @@ export default {
   schema: [
     // {maand} is a backend template token (idempotent per-month rolling
     // campaign) — kept verbatim, never translated (mirrors {{…}} placeholders).
-    { key: 'campaign_name', label: 'Bellijst-naam', type: 'text',
+    { key: 'campaign_name', label: 'Call list name', type: 'text',
       default: 'Lang geen contact {maand}',
       hint: 'Ondersteunt {maand} voor de huidige maandnaam.' },
   ],

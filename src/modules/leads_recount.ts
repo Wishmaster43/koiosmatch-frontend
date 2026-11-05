@@ -15,10 +15,10 @@ export default {
   color:    'var(--color-violet)',
   bg:       tintBg('var(--color-violet)'),
   schema: [
-    { key: 'scope', label: 'Welke vacatures', type: 'select', default: 'stale',
+    { key: 'scope', label: 'Which vacancies', type: 'select', default: 'stale',
       options: [
-        { value: 'stale', label: 'Alleen gewijzigde (aanbevolen)' },
-        { value: 'all', label: 'Alle vacatures' },
+        { value: 'stale', label: 'Only changed (recommended)' },
+        { value: 'all', label: 'All vacancies' },
       ],
       hint: 'De voorwaarden volgen altijd de matchcriteria van de vacature zelf: wie ze wil wijzigen, wijzigt de matchcriteria of de wegingstemplates. Deze stap kiest alleen de set.' },
   ],

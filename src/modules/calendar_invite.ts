@@ -14,9 +14,9 @@ export default {
   color: 'var(--module-teal-strong)',
   bg:    tintBg('var(--module-teal-strong)'),
   schema: [
-    { key: 'appointment_id', label: 'Afspraak', type: 'text',
+    { key: 'appointment_id', label: 'Appointment', type: 'text',
       hint: 'Afspraak-id (bv. {{trigger.appointment_id}}).' },
-    { key: 'title', label: 'Titel', type: 'text',
+    { key: 'title', label: 'Title', type: 'text',
       hint: 'Titel van de agenda-afspraak (standaard "Afspraak").' },
   ],
 }
