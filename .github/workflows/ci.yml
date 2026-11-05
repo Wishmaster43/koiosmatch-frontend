@@ -24,7 +24,7 @@ jobs:
         with:
           # The engines floor (package.json, DEPS-AUDIT-FE-1) under engine-strict: a bare 22
           # resolves to the runner's cached 22.23.3, which npm ci refuses (EBADENGINE).
-          node-version: 22.23.4
+          node-version: 24
           cache: npm
       - run: npm ci
       - name: typecheck
@@ -54,7 +54,7 @@ jobs:
         with:
           # The engines floor (package.json, DEPS-AUDIT-FE-1) under engine-strict: a bare 22
           # resolves to the runner's cached 22.23.3, which npm ci refuses (EBADENGINE).
-          node-version: 22.23.4
+          node-version: 24
           cache: npm
       - run: npm ci
       # The full suite is load-sensitive (finding -6): CI runs it alone on a fresh
