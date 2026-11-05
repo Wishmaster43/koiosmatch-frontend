@@ -52,4 +52,20 @@ describe('api · bureau resolution refusals (TENANT-PICKER-FE-1)', () => {
     expect(sessionStorage.getItem('km_tenant_pick')).toBeNull()
     window.removeEventListener('km:tenant-required', seen)
   })
+
+  // ONIX-RECHECK gap #115: a lost session (401 on a bureau route) re-arms the once-per-boot signal, so a
+  // refusal in the NEXT session raises the picker again instead of staying quiet behind a stale flag.
+  it('a 401 session loss re-arms the refusal signal: refusal → 401 → refusal dispatches twice', async () => {
+    const seen = vi.fn()
+    window.addEventListener('km:tenant-required', seen)
+    const refusal = () => ({ response: { status: 400, data: { code: 'tenant_required' } }, config: { url: '/candidates', method: 'get' } })
+    await expect(rejected()(refusal())).rejects.toBeDefined()
+    expect(sessionStorage.getItem('km_tenant_pick')).toBe('1')
+    const lost = { response: { status: 401 }, config: { url: '/candidates', method: 'get' } }
+    await expect(rejected()(lost)).rejects.toBe(lost)
+    expect(sessionStorage.getItem('km_tenant_pick')).toBeNull()
+    await expect(rejected()(refusal())).rejects.toBeDefined()
+    expect(seen).toHaveBeenCalledTimes(2)
+    window.removeEventListener('km:tenant-required', seen)
+  })
 })

@@ -24,7 +24,7 @@ import { CSRF_COOKIE_URL } from './authMode'
 import { clearDeviceCaches } from './deviceCaches'
 import { isMfaEnrollmentError } from './mfaGate'
 import { isNoOrganisationError, NO_ORGANISATION_FLAG } from './orphanAccount'
-import { isTenantResolutionError, tenantResolutionCode, TENANT_PICK_FLAG, TENANT_PICK_CODE_KEY, TENANT_REQUIRED_EVENT } from './tenantResolution'
+import { isTenantResolutionError, tenantResolutionCode, clearTenantPickSignal, TENANT_PICK_FLAG, TENANT_PICK_CODE_KEY, TENANT_REQUIRED_EVENT } from './tenantResolution'
 import { isSessionRevokedError, SESSION_REVOKED_FLAG } from './sessionCodes'
 import { notifyError } from './notify'
 import { requestKey, dedupeInFlight } from './inFlightDedupe'
@@ -261,6 +261,10 @@ api.interceptors.response.use(
     const sessionGone = status === 401 || (status === 419 && config._retried419 === true) || orphaned
     if (sessionGone && !isAuthCall) {
       clearDeviceCaches()
+      // ONIX-RECHECK gap #115: the once-per-boot bureau-refusal signal belongs to the session that raised it;
+      // a lost session re-arms it so the next login's refusal can raise the picker again (AuthContext's
+      // explicit logout does the same).
+      clearTenantPickSignal()
       if (window.location.pathname !== '/login') {
         if (!orphaned) sessionStorage.setItem('km_session_expired', '1')
         // ONIX C-005 (BE c5bf84fb): a 401 session_revoked means a credential event ended this
