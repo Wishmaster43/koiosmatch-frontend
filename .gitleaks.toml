@@ -1,0 +1,17 @@
+# Q-009 (FE twin of the API repo's .gitleaks.toml) — gitleaks configuration. Starts from the default
+# ruleset; every allow-list entry below is keyed by PATH AND the exact value (never a directory
+# wildcard) and carries its reason. Add a new entry only after a human has confirmed the match is a
+# fixture, not a credential. Vite envs are public by design (§7) and no .env file is tracked here
+# except .env.example, which carries no values.
+title = "KoiosMatch frontend gitleaks"
+
+[extend]
+useDefault = true
+
+[[allowlists]]
+description = "Vitest fixture: the one-time signing-secret reveal of the webhook regenerate flow uses a fake sk_live_ value"
+condition = "AND"
+# regexTarget = "line": the fixture is matched on the whole source line, not only on the extracted value.
+regexTarget = "line"
+paths = ['''^src/pages/settings/sections/webhooks/WebhookDetail\.test\.tsx$''']
+regexes = ['''sk_live_rotated_xyz123''']

@@ -1,0 +1,9 @@
+# Q-009 (FE twin) — files the semgrep scan never reads (third-party, generated or runtime output).
+node_modules/
+dist/
+coverage/
+playwright-report/
+test-results/
+careersite/node_modules/
+careersite/dist/
+src/types/api-generated.ts

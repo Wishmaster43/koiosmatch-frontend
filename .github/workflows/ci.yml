@@ -60,3 +60,21 @@ jobs:
       # The full suite is load-sensitive (finding -6): CI runs it alone on a fresh
       # runner, which is the condition it is expected to be green under.
       - run: npm test
+
+  # Q-009 (FE twin of the API repo's semgrep job): SAST over the TypeScript/React tree. Fails on ERROR
+  # severity only; node_modules/dist/coverage and the generated API types are excluded through
+  # .semgrepignore. Rulesets are fetched from the Semgrep registry at run time. The secret scan lives
+  # in its own workflow (.github/workflows/secret-scan.yml), as in the API repo.
+  semgrep:
+    name: Static security scan (semgrep)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+
+      - name: semgrep scan
+        run: |
+          docker run --rm -v "$PWD:/src" -w /src \
+            -e GIT_CONFIG_COUNT=1 -e GIT_CONFIG_KEY_0=safe.directory -e GIT_CONFIG_VALUE_0=/src \
+            semgrep/semgrep:1.131.0@sha256:6bd07d7b166b097e1384f41b94a62d8c8a26a4fff8713992c296e053310da01f \
+            semgrep scan --error --severity ERROR \
+            --config p/javascript --config p/typescript --config p/react --config p/security-audit --config p/secrets /src
