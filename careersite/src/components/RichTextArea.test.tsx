@@ -7,12 +7,13 @@ import { strings } from '../strings'
 // browser, where they exist and mutate the DOM) — these tests stub them so the component's
 // feature-detection guard still calls through, and assert the REAL command name/behavior
 // the toolbar wires to, mirroring CLAUDE.md §13: assert the actual mechanism, not a callback.
-let execCommandSpy: ReturnType<typeof vi.fn>
-let queryCommandStateSpy: ReturnType<typeof vi.fn>
+// Typed to the DOM signatures so the assignment below type-checks under vitest 5's generic Mock type.
+let execCommandSpy: ReturnType<typeof vi.fn<Document['execCommand']>>
+let queryCommandStateSpy: ReturnType<typeof vi.fn<Document['queryCommandState']>>
 
 beforeEach(() => {
-  execCommandSpy = vi.fn().mockReturnValue(true)
-  queryCommandStateSpy = vi.fn().mockReturnValue(false)
+  execCommandSpy = vi.fn<Document['execCommand']>().mockReturnValue(true)
+  queryCommandStateSpy = vi.fn<Document['queryCommandState']>().mockReturnValue(false)
   document.execCommand = execCommandSpy
   document.queryCommandState = queryCommandStateSpy
 })
