@@ -10,9 +10,10 @@ import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { renderHook, act, waitFor } from '@testing-library/react'
 import { useState } from 'react'
 import { useApplicationDrawerActions } from './useApplicationDrawerActions'
-import type { Application, ApplicationDetail } from '@/types/application'
+import type { Application } from '@/types/application'
 import type { LookupItem } from '@/context/LookupsContext'
 import type { Id } from '@/types/common'
+import { FUNNEL, app, t } from './useApplicationDrawerActions.testKit'
 
 vi.mock('@/lib/api', async () => {
   const actual = await vi.importActual<typeof import('@/lib/api')>('@/lib/api')
@@ -25,25 +26,6 @@ import { notifyError, notifySuccess } from '@/lib/notify'
 const post = api.post as unknown as ReturnType<typeof vi.fn>
 const apiPatch = api.patch as unknown as ReturnType<typeof vi.fn>
 const apiGet = api.get as unknown as ReturnType<typeof vi.fn>
-const t = ((k: string) => k) as unknown as import('i18next').TFunction
-
-const FUNNEL: LookupItem[] = [
-  { value: 'applied',  label: 'Gesolliciteerd', color: 'slate' },
-  { value: 'rejected', label: 'Afgewezen',      color: 'red', is_rejected: true },
-]
-
-const app = (overrides: Partial<Application> = {}): Application => ({
-  id: 1, candidateId: 9, candidateName: 'Test kandidaat', candidateInitials: 'TK',
-  vacancyId: 1, vacancyTitle: 'Verpleegkundige', client: 'Acme', customerId: 1, referenceNumber: 'S-1',
-  score: null, task: '', phaseKey: 'applied', bucket: 'active', source: '', sourceKey: null,
-  owner: { id: null, name: '', initials: '', color: null },
-  candidateStatusLabel: '', candidateStatusColor: '', candidateStatus: '', candidatePhase: '',
-  created: '2026-07-01', isNew: false, archived: false, deletedAt: null,
-  ...overrides,
-} as Application)
-
-// Recruiter list for handleOwner tests.
-const USERS: Array<{ id: Id; name: string }> = [{ id: 'u2', name: 'Nieuwe Recruiter' }]
 
 // Harness with real state so the optimistic update → reconcile/revert is observable.
 // `opts.users` is only needed by the handleOwner tests; every other suite keeps the
@@ -60,12 +42,6 @@ function harness(initial: Application[], opts: { users?: Array<{ id: Id; name: s
     return { applications, actions }
   })
 }
-
-// Minimal ApplicationDetail fixture — mirrors VacancyTab.test.tsx's own `app` helper
-// (`as unknown as ApplicationDetail`), since the full interface needs many fields no
-// handler under test here actually reads.
-const detail = (overrides: Partial<ApplicationDetail> = {}): ApplicationDetail =>
-  ({ ...app(), customFields: {}, matchCriteria: [], matchSource: 'ai', ...overrides } as unknown as ApplicationDetail)
 
 describe('useApplicationDrawerActions · handleReject', () => {
   beforeEach(() => { vi.clearAllMocks() })
@@ -179,239 +155,5 @@ describe('useApplicationDrawerActions · handleMove (V-appdetail-2 appointment w
     expect(result.current.applications[0].phaseKey).toBe('invited')
     expect(apiPatch).toHaveBeenCalledWith('/applications/1', { phase_key: 'invited' })
     expect(result.current.actions.pendingMove).toBeNull()
-  })
-})
-
-// OPTIMISTIC-REVERT-1 (audit 2026-07-27): handleOwner/handleAdjustScore/handleUpdateCustomFields
-// used to end in a bare toast on failure, leaving the optimistic write on screen as if it had
-// saved. These tests assert the SEAM (request body) and the revert of BOTH state slices.
-describe('useApplicationDrawerActions · handleOwner', () => {
-  beforeEach(() => { vi.clearAllMocks() })
-
-  it('sends owner_id as the request body', async () => {
-    apiPatch.mockResolvedValue({ data: {} })
-    const { result } = harness([app()], { users: USERS })
-    act(() => { result.current.actions.handleOwner(1, 'u2') })
-    await waitFor(() => expect(apiPatch).toHaveBeenCalled())
-    expect(apiPatch).toHaveBeenCalledWith('/applications/1', { owner_id: 'u2' })
-  })
-
-  it('keeps the new owner when the server accepts', async () => {
-    apiPatch.mockResolvedValue({ data: {} })
-    const { result } = harness([app()], { users: USERS })
-    act(() => { result.current.actions.handleOwner(1, 'u2') })
-    await waitFor(() => expect(result.current.applications[0].owner.id).toBe('u2'))
-    expect(notifyError).not.toHaveBeenCalled()
-  })
-
-  it('reverts the owner in both the row and the open drawer, and reports the server message, when the PATCH FAILS', async () => {
-    apiPatch.mockRejectedValue({ response: { status: 422, data: { message: 'Geen rechten' } } })
-    const initial = app()
-    const { result } = harness([initial], { users: USERS })
-    // Preload the open drawer with the SAME pre-edit owner, to prove BOTH slices revert.
-    act(() => { result.current.actions.setSelected(detail({ id: 1, owner: initial.owner })) })
-    act(() => { result.current.actions.handleOwner(1, 'u2') })
-    await waitFor(() => expect(notifyError).toHaveBeenCalled())
-    expect(result.current.applications[0].owner).toEqual(initial.owner)
-    expect(result.current.actions.selected?.owner).toEqual(initial.owner)
-    expect(notifyError).toHaveBeenCalledWith('Geen rechten')
-  })
-
-  it('clears the owner when called with null, sending { owner_id: null } as the request body', async () => {
-    apiPatch.mockResolvedValue({ data: {} })
-    const withOwner = app({ owner: { id: 'u2', name: 'Nieuwe Recruiter', initials: 'NR', color: null } })
-    const { result } = harness([withOwner], { users: USERS })
-    act(() => { result.current.actions.handleOwner(1, null) })
-    await waitFor(() => expect(apiPatch).toHaveBeenCalled())
-    expect(apiPatch).toHaveBeenCalledWith('/applications/1', { owner_id: null })
-    // The UI model shows an unassigned owner (empty object with all null/empty fields)
-    expect(result.current.applications[0].owner).toEqual({ id: null, name: '', initials: '', color: null })
-  })
-
-  it('reverts the owner when clearing fails, restoring the previous owner in both slices', async () => {
-    apiPatch.mockRejectedValue({ response: { status: 422, data: { message: 'Koppeling bezet' } } })
-    const withOwner = app({ owner: { id: 'u2', name: 'Nieuwe Recruiter', initials: 'NR', color: null } })
-    const { result } = harness([withOwner], { users: USERS })
-    act(() => { result.current.actions.setSelected(detail({ id: 1, owner: withOwner.owner })) })
-    act(() => { result.current.actions.handleOwner(1, null) })
-    await waitFor(() => expect(notifyError).toHaveBeenCalled())
-    // Both slices revert to the original owner
-    expect(result.current.applications[0].owner).toEqual(withOwner.owner)
-    expect(result.current.actions.selected?.owner).toEqual(withOwner.owner)
-    expect(notifyError).toHaveBeenCalledWith('Koppeling bezet')
-  })
-})
-
-describe('useApplicationDrawerActions · handleAdjustScore', () => {
-  beforeEach(() => { vi.clearAllMocks() })
-
-  it('sends match_score and match_criteria as the request body', async () => {
-    apiPatch.mockResolvedValue({ data: {} })
-    const { result } = harness([app({ score: 40 })])
-    act(() => { result.current.actions.handleAdjustScore(1, { score: 90, criteria: [] }) })
-    await waitFor(() => expect(apiPatch).toHaveBeenCalled())
-    expect(apiPatch).toHaveBeenCalledWith('/applications/1', { match_score: 90, match_criteria: [] })
-  })
-
-  it('keeps the new score when the server accepts', async () => {
-    apiPatch.mockResolvedValue({ data: {} })
-    const { result } = harness([app({ score: 40 })])
-    act(() => { result.current.actions.handleAdjustScore(1, { score: 90, criteria: [] }) })
-    await waitFor(() => expect(result.current.applications[0].score).toBe(90))
-    expect(notifyError).not.toHaveBeenCalled()
-  })
-
-  it('reverts the score in both the row and the open drawer, and reports the server message, when the PATCH FAILS', async () => {
-    apiPatch.mockRejectedValue({ response: { status: 422, data: { message: 'Ongeldige score' } } })
-    const { result } = harness([app({ score: 40 })])
-    act(() => { result.current.actions.setSelected(detail({ id: 1, score: 40 })) })
-    act(() => { result.current.actions.handleAdjustScore(1, { score: 90, criteria: [] }) })
-    await waitFor(() => expect(notifyError).toHaveBeenCalled())
-    expect(result.current.applications[0].score).toBe(40)
-    expect(result.current.actions.selected?.score).toBe(40)
-    expect(notifyError).toHaveBeenCalledWith('Ongeldige score')
-  })
-})
-
-describe('useApplicationDrawerActions · handleUpdateCustomFields', () => {
-  beforeEach(() => { vi.clearAllMocks() })
-
-  it('merges the patch into customFields and sends the WHOLE map as the request body', async () => {
-    apiPatch.mockResolvedValue({ data: {} })
-    const { result } = harness([app()])
-    act(() => { result.current.actions.setSelected(detail({ id: 1, customFields: { shift: 'day' } })) })
-    act(() => { result.current.actions.handleUpdateCustomFields(1, { region: 'noord' }) })
-    await waitFor(() => expect(apiPatch).toHaveBeenCalled())
-    expect(apiPatch).toHaveBeenCalledWith('/applications/1', { custom_fields: { shift: 'day', region: 'noord' } })
-  })
-
-  it('keeps the new custom fields when the server accepts', async () => {
-    apiPatch.mockResolvedValue({ data: {} })
-    const { result } = harness([app()])
-    act(() => { result.current.actions.setSelected(detail({ id: 1, customFields: { shift: 'day' } })) })
-    act(() => { result.current.actions.handleUpdateCustomFields(1, { region: 'noord' }) })
-    await waitFor(() => expect(result.current.actions.selected?.customFields).toEqual({ shift: 'day', region: 'noord' }))
-    expect(notifyError).not.toHaveBeenCalled()
-  })
-
-  it("reverts the open drawer's custom fields and reports the server message, when the PATCH FAILS", async () => {
-    apiPatch.mockRejectedValue({ response: { status: 422, data: { message: 'Veld ongeldig' } } })
-    const { result } = harness([app()])
-    act(() => { result.current.actions.setSelected(detail({ id: 1, customFields: { shift: 'day' } })) })
-    act(() => { result.current.actions.handleUpdateCustomFields(1, { region: 'noord' }) })
-    await waitFor(() => expect(notifyError).toHaveBeenCalled())
-    expect(result.current.actions.selected?.customFields).toEqual({ shift: 'day' })
-    expect(notifyError).toHaveBeenCalledWith('Veld ongeldig')
-  })
-})
-
-/**
- * MOTIVATIE-ZICHTBAAR-1 — the seam that actually carries the motivation letter.
- * ApplicationListResource omits `cover_letter` entirely, so the row the table already
- * holds can NEVER supply it: the drawer's own detail GET is the only delivery path.
- * These assert the request itself (route + params) and that the response's field lands
- * on the open drawer — not merely that some handler ran.
- */
-describe('useApplicationDrawerActions · selectApplication (motivation delivery)', () => {
-  beforeEach(() => { vi.clearAllMocks() })
-
-  it('GETs /applications/{id} with include_archived=1 and lands cover_letter on the drawer', async () => {
-    apiGet.mockResolvedValue({ data: { data: { id: 1, cover_letter: '<p>Waarom ik solliciteer</p>' } } })
-    const { result } = harness([app()])
-    act(() => { result.current.actions.selectApplication(app()) })
-    // include_archived=1 is load-bearing: show() 404s on a soft-deleted row without it,
-    // so an archived application would lose its motivation (and its whole detail).
-    expect(apiGet).toHaveBeenCalledWith('/applications/1', { params: { include_archived: 1 } })
-    await waitFor(() => expect(result.current.actions.selected?.coverLetter).toBe('<p>Waarom ik solliciteer</p>'))
-  })
-
-  it('leaves coverLetter null when the detail response carries no cover_letter', async () => {
-    apiGet.mockResolvedValue({ data: { data: { id: 1 } } })
-    const { result } = harness([app()])
-    act(() => { result.current.actions.selectApplication(app()) })
-    // Wait for the MAPPED detail (customFields only exists after mapApplicationDetail),
-    // not the light row selectApplication shows synchronously first.
-    await waitFor(() => expect(result.current.actions.selected?.customFields).toEqual({}))
-    expect(result.current.actions.selected?.coverLetter).toBeNull()
-  })
-})
-
-/**
- * INTERVIEW-CONSENT-PERSIST-1 — the AVG evidence seam, end to end. The mapper test
- * proves raw→model and the tab test proves model→render, but nothing asserted the
- * REQUEST in between: that opening a drawer really GETs the detail route (the only
- * resource carrying this field — the list resource omits it) and that the timestamp
- * survives unwrap+map onto the model the tab reads.
- */
-describe('useApplicationDrawerActions · selectApplication (INTERVIEW-CONSENT-PERSIST-1)', () => {
-  beforeEach(() => { vi.clearAllMocks() })
-
-  it('GETs the detail route and carries interview_consent_given_at onto the drawer model', async () => {
-    apiGet.mockResolvedValue({ data: { data: { id: 1, interview_consent_given_at: '2026-07-20T10:00:00+00:00' } } })
-    const { result } = harness([app()])
-    act(() => { result.current.actions.selectApplication(app({ id: 1 })) })
-    await waitFor(() => expect(result.current.actions.selected?.interviewConsentGivenAt).toBe('2026-07-20T10:00:00+00:00'))
-    // The exact seam: method, route and params (include_archived so an archived row resolves too).
-    expect(apiGet).toHaveBeenCalledWith('/applications/1', { params: { include_archived: 1 } })
-  })
-
-  it('leaves the model null when the detail response omits the field (the non-careersite norm)', async () => {
-    apiGet.mockResolvedValue({ data: { data: { id: 1 } } })
-    const { result } = harness([app()])
-    act(() => { result.current.actions.selectApplication(app({ id: 1 })) })
-    await waitFor(() => expect(apiGet).toHaveBeenCalled())
-    await waitFor(() => expect(result.current.actions.selected?.interviewConsentGivenAt).toBeNull())
-  })
-})
-
-// S7: Bron (source) editable picker — the seam for KEY-ADOPTION source_key.
-describe('useApplicationDrawerActions · handleUpdateSource', () => {
-  beforeEach(() => { vi.clearAllMocks() })
-
-  it('sends source and source_key as the request body (KEY-ADOPTION)', async () => {
-    apiPatch.mockResolvedValue({ data: {} })
-    const { result } = harness([app({ source: 'Manual' })])
-    act(() => { result.current.actions.handleUpdateSource(1, 'LinkedIn', 'linkedin') })
-    await waitFor(() => expect(apiPatch).toHaveBeenCalled())
-    expect(apiPatch).toHaveBeenCalledWith('/applications/1', { source: 'LinkedIn', source_key: 'linkedin' })
-  })
-
-  it('keeps the new source when the server accepts', async () => {
-    apiPatch.mockResolvedValue({ data: {} })
-    const { result } = harness([app({ source: 'Manual' })])
-    act(() => { result.current.actions.handleUpdateSource(1, 'LinkedIn', 'linkedin') })
-    await waitFor(() => expect(result.current.applications[0].source).toBe('LinkedIn'))
-    expect(result.current.applications[0].sourceKey).toBe('linkedin')
-    expect(notifyError).not.toHaveBeenCalled()
-  })
-
-  it('reverts the source in both the row and the open drawer when the PATCH FAILS', async () => {
-    apiPatch.mockRejectedValue({ response: { status: 422, data: { message: 'Bron ongeldig' } } })
-    const initial = app({ source: 'Manual', sourceKey: null })
-    const { result } = harness([initial])
-    // Preload the open drawer with the SAME pre-edit source, to prove BOTH slices revert.
-    act(() => { result.current.actions.setSelected(detail({ id: 1, source: initial.source, sourceKey: initial.sourceKey })) })
-    act(() => { result.current.actions.handleUpdateSource(1, 'LinkedIn', 'linkedin') })
-    await waitFor(() => expect(notifyError).toHaveBeenCalled())
-    expect(result.current.applications[0].source).toBe('Manual')
-    expect(result.current.applications[0].sourceKey).toBeNull()
-    expect(result.current.actions.selected?.source).toBe('Manual')
-    expect(result.current.actions.selected?.sourceKey).toBeNull()
-  })
-})
-
-// IDEMP-KEY-BODYLESS-1: handleRestore's POST has no body, so a sibling-tab/retry
-// double click must still carry a per-click Idempotency-Key for the server to dedupe on.
-describe('useApplicationDrawerActions · handleRestore', () => {
-  beforeEach(() => { vi.clearAllMocks() })
-
-  it('POSTs restore with a fresh Idempotency-Key header', async () => {
-    post.mockResolvedValue({ data: {} })
-    const { result } = harness([app({ archived: true })])
-    act(() => { result.current.actions.handleRestore(1) })
-    await waitFor(() => expect(post).toHaveBeenCalled())
-    expect(post).toHaveBeenCalledWith('/applications/1/restore', undefined, expect.objectContaining({
-      headers: expect.objectContaining({ 'Idempotency-Key': expect.any(String) }),
-    }))
   })
 })
