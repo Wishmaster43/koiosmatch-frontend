@@ -33,6 +33,14 @@ describe('Button', () => {
     expect(b.style.height).toBe('28px')
   })
 
+  it('round renders the circle with the surface ring on top of the variant (ROUND-BUTTON-1, #267)', () => {
+    render(<Button variant="success" iconOnly round aria-label="Open">x</Button>)
+    const b = screen.getByRole('button', { name: 'Open' })
+    expect(b.style.borderRadius).toBe('50%')
+    expect(b.style.border).toBe('2px solid var(--surface)')
+    expect(b.style.width).toBe(b.style.height)
+  })
+
   it('size="md" is the explicit toolbar exception at BTN_H', () => {
     render(<Button variant="primary" size="md">Nieuw</Button>)
     expect(screen.getByRole('button').style.height).toBe(`${BTN_H}px`)
@@ -57,11 +65,14 @@ describe('Button', () => {
 
   it('never contains a hardcoded hex or white in its own inline style', () => {
     for (const variant of ['primary', 'secondary', 'ghost', 'soft', 'danger', 'dangerSoft'] as const) {
-      const { unmount } = render(<Button variant={variant}>x</Button>)
-      const style = screen.getByRole('button').getAttribute('style') ?? ''
-      // `: white` as a VALUE — `white-space: nowrap` is a property name and fine.
-      expect(style).not.toMatch(/#[0-9a-fA-F]{3,8}|rgb\(|:\s*white\b/)
-      unmount()
+      // round rides along: its ring is a token too (ROUND-BUTTON-1).
+      for (const round of [false, true]) {
+        const { unmount } = render(<Button variant={variant} round={round}>x</Button>)
+        const style = screen.getByRole('button').getAttribute('style') ?? ''
+        // `: white` as a VALUE — `white-space: nowrap` is a property name and fine.
+        expect(style).not.toMatch(/#[0-9a-fA-F]{3,8}|rgb\(|:\s*white\b/)
+        unmount()
+      }
     }
   })
 

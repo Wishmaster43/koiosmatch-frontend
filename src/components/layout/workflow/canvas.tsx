@@ -261,18 +261,14 @@ function ModuleNode({ id, data, selected }: { id: string; data: FlowNodeData; se
         {(badgeCount == null || !!data.onInspect) && (done || failed || !!data.output) && (
           data.onInspect ? (
             // Button's danger/success variants already carry the right fixed-fill +
-            // on-fill ink pair and iconOnly already zeroes padding. The style overrides POSITION
-            // plus the circle radius and the surface ring (a status badge on a node corner; a Button
-            // `round` prop is a follow-up in Button.tsx). The atom keeps its own sm size (MAATWET:
-            // a <Button> never carries a height in its style).
+            // on-fill ink pair, iconOnly zeroes the padding and `round` (#267) gives the circle
+            // and the surface ring, so the style carries POSITION only. The atom keeps its own
+            // sm size (MAATWET: a <Button> never carries a height in its style).
             <Button
-              variant={failed ? 'danger' : 'success'} size="sm" iconOnly
+              variant={failed ? 'danger' : 'success'} size="sm" iconOnly round
               onClick={(e) => { e.stopPropagation(); (data.onInspect as () => void)() }}
               title={t('inspector.open')} aria-label={t('inspector.open')}
-              style={{
-                position: 'absolute', top: -10, right: -10, borderRadius: '50%',
-                border: '2px solid var(--surface)',
-              }}>
+              style={{ position: 'absolute', top: -10, right: -10 }}>
               {failed ? <X size={12} /> : <CheckCircle size={12} />}
             </Button>
           ) : (

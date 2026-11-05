@@ -42,6 +42,9 @@ type IconOnlyNaming =
 interface ButtonIdentityBase {
   variant?: ButtonVariant
   size?: ButtonSize
+  // A circular badge on a node/avatar corner (ROUND-BUTTON-1, #267): 50% radius plus the
+  // 2px surface ring that lifts it off what it sits on; identity, so never via `style`.
+  round?: boolean
   // Shared across both the <button> and <a> renders — AnchorHTMLAttributes has
   // no native `disabled`, so the <a> branch honours it manually (see below).
   disabled?: boolean
@@ -106,7 +109,7 @@ const Button = forwardRef<HTMLButtonElement | HTMLAnchorElement, ButtonProps | B
   // same goes for settings"): ONE height everywhere, width follows the text.
   // md is the explicit exception for the page toolbar's "+ New" beside 34px
   // search chrome ("bigger is allowed above every table").
-  { variant = 'secondary', size = 'sm', iconOnly = false, disabled, style, children, ...rest }, ref,
+  { variant = 'secondary', size = 'sm', iconOnly = false, round = false, disabled, style, children, ...rest }, ref,
 ) {
   const s = SIZES[size]
   const identityStyle: CSSProperties = {
@@ -115,6 +118,8 @@ const Button = forwardRef<HTMLButtonElement | HTMLAnchorElement, ButtonProps | B
     height: s.height, padding: iconOnly ? 0 : s.padding, fontSize: s.fontSize, borderRadius: s.borderRadius,
     ...(iconOnly ? { width: s.height } : {}),
     ...VARIANTS[variant],
+    // round (#267): the circle and its surface ring replace the variant's radius and border.
+    ...(round ? { borderRadius: '50%', border: '2px solid var(--surface)' } : {}),
     // Caller layout (width/margin/flex) may extend the identity; the §4 lint rule
     // flags callers that repeat identity props.
     ...style,
