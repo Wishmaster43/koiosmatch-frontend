@@ -1,9 +1,9 @@
 /**
- * MatchModal · create/edit flows (the create/edit part of the split; pickers and proposals live in their own files): inline new contact, billing-email button, edit mode, remarks pop-out, no work-experience post, card-stack layout.
+ * MatchModal · create/edit flows (the create/edit part of the split; pickers and proposals live in their own files; the remarks pop-out, no work-experience post and card-stack layout tests live in MatchModal.layout.test.tsx): inline new contact, billing-email button, edit mode.
  * Shared fixtures and mocks are duplicated per file (vi.mock must sit in each test file).
  */
 import { describe, it, expect, vi, beforeEach } from 'vitest'
-import { render, screen, within, waitFor } from '@testing-library/react'
+import { render, screen, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import MatchModal from './MatchModal'
 import api from '@/lib/api'
@@ -67,7 +67,7 @@ vi.mock('@/lib/useFunctions', () => ({ useFunctions: () => ({ functions: ['Verzo
 // options carries a default_duration_days (7.1) so the end-date proposal has
 // something to compute from; types stays the plain label list other callers use.
 // A second type (ZZP Flex) enables a search/filter test on the now-searchable
-// Contractsoort picker without disturbing the end-date-proposal tests below.
+// Contractsoort picker without disturbing the end-date-proposal tests (MatchModal.proposals.test.tsx).
 vi.mock('@/lib/useContractTypes', () => ({ useContractTypes: useContractTypesMock }))
 // Clears call history (api.post, notify*, …) between tests — several new tests
 // below assert `.not.toHaveBeenCalledWith(...)`, which needs a clean slate per
@@ -294,132 +294,5 @@ describe('MatchModal · edit mode (point 2, Danny live P1)', () => {
     expect(body).not.toHaveProperty('candidate_id')
     expect(body).not.toHaveProperty('vacancy_id')
     expect(api.post).not.toHaveBeenCalledWith('/matches', expect.anything())
-  })
-})
-
-// MODAL34-REPAIR (control round): MatchModal wires MATCH-REMARKS-POPOUT onto its
-// Opmerkingen card — pins the card heading and that the pop-out affordance really
-// depends on a KNOWN candidate id (fixed prop OR a candidate picked through the
-// on-page picker), never rendered before one exists (the sync channel has nothing
-// to key on otherwise — see MatchModal.tsx's own docblock on `remarksCandidateId`).
-describe('MatchModal · Match opmerkingen card + pop-out wiring (MODAL34-REPAIR)', () => {
-  it('renders the "Match opmerkingen" card heading', async () => {
-    render(<MatchModal candidateId="cand-1" onClose={noop} onCreated={noop} />)
-    await screen.findByRole('dialog')
-    expect(screen.getByText('placement.matchRemarks')).toBeInTheDocument()
-  })
-
-  it('shows the pop-out button once the fixed candidate id is known, after opening the editor', async () => {
-    const user = userEvent.setup()
-    render(<MatchModal candidateId="cand-1" onClose={noop} onCreated={noop} />)
-    await screen.findByRole('dialog')
-    await user.click(screen.getByRole('button', { name: 'placement.remarksAdd' }))
-    expect(screen.getByTitle('common:openSecondScreen')).toBeInTheDocument()
-  })
-
-  it('renders NO pop-out button while no candidate is known yet (no fixed id, none picked)', async () => {
-    const user = userEvent.setup()
-    // The Matches page opens this SAME form without a fixed candidateId — a
-    // picker appears at the top of Relaties instead (see useMatchForm).
-    render(<MatchModal onClose={noop} onCreated={noop} />)
-    await screen.findByRole('dialog')
-    await user.click(screen.getByRole('button', { name: 'placement.remarksAdd' }))
-    expect(screen.queryByTitle('common:openSecondScreen')).not.toBeInTheDocument()
-  })
-
-  it('the pop-out button appears the moment a candidate is picked through the on-page picker', async () => {
-    // GET /candidates (the un-fixed candidate picker's own option source) — the
-    // shared api.get mock reads this fixture for that ONE url, mirroring
-    // editMatchFixture's pattern (never a one-off mockImplementation override,
-    // which would leak into every later test in this file). PRIV-1: the picker no
-    // longer fetches on mount (data minimisation, §8) — it only fetches once the
-    // recruiter has typed >= CANDIDATE_SEARCH_MIN_CHARS, so the fixture is read
-    // regardless of when it is set, but the test must actually type first.
-    candidateListFixture.current = [{ id: 'cand-9', name: 'Piet Kandidaat' }]
-    const user = userEvent.setup()
-    render(<MatchModal onClose={noop} onCreated={noop} />)
-    await screen.findByRole('dialog')
-    await user.click(screen.getByRole('button', { name: 'placement.remarksAdd' }))
-    expect(screen.queryByTitle('common:openSecondScreen')).not.toBeInTheDocument()
-
-    const candidateField = screen.getByText('placement.candidate').parentElement as HTMLElement
-    await user.click(within(candidateField).getByRole('button'))
-    // The popover's own search input carries the hint as its OWN placeholder/
-    // aria-label (RelationsSection.tsx: `t('candidates:merge.searchHint', …)`) —
-    // type >= 2 chars (PRIV-1's CANDIDATE_SEARCH_MIN_CHARS) to trigger the
-    // debounced fetch. The popover is portalled to document.body (not inside
-    // candidateField's own subtree), so scope by its distinct accessible name
-    // instead of by container.
-    const searchInput = screen.getByRole('textbox', { name: /searchHint/ })
-    await user.type(searchInput, 'Pi')
-    await user.click(await screen.findByRole('button', { name: 'Piet Kandidaat' }))
-
-    expect(await screen.findByTitle('common:openSecondScreen')).toBeInTheDocument()
-  })
-})
-
-// MATCH-EXPERIENCE-AUTO-1 (CMBE, 2026-07-25): the backend's MatchMaker now writes
-// the work-experience entry itself on every match create — with and without a
-// vacancy, idempotent on employer+start date — so the frontend must NEVER post
-// one. Replaces the old interim-bridge tests (which asserted the FE posted it).
-describe('MatchModal · never posts a work-experience entry (backend owns it, MATCH-EXPERIENCE-AUTO-1)', () => {
-  const pickCustomerAndFunction = async (user: ReturnType<typeof userEvent.setup>) => {
-    await user.click(screen.getByRole('button', { name: /placement\.pickCustomer$/ }))
-    await user.click(await screen.findByRole('button', { name: 'Zorggroep A' }))
-    await user.click(screen.getByRole('button', { name: /placement\.pickFunction$/ }))
-    await user.click(await screen.findByRole('button', { name: 'Verzorgende IG' }))
-  }
-
-  it('never posts /candidates/{id}/experiences when creating a match (no vacancy picked)', async () => {
-    const user = userEvent.setup()
-    render(<MatchModal candidateId="cand-1" onClose={noop} onCreated={noop} />)
-    await screen.findByRole('dialog')
-    await pickCustomerAndFunction(user)
-
-    await user.click(screen.getByRole('button', { name: 'placement.create' }))
-    await waitFor(() => expect(api.post).toHaveBeenCalledWith('/matches', expect.anything()))
-    expect(api.post).not.toHaveBeenCalledWith('/candidates/cand-1/experiences', expect.anything())
-  })
-
-  it('never posts /candidates/{id}/experiences when editing a match either', async () => {
-    editMatchFixture.current = {
-      customer_id: 'cust-1', customer_location_id: null, customer_department_id: null,
-      contact_id: null, branch_id: null, vacancy_id: null, owner: null,
-      function_title: 'Verzorgende IG', contract_type: null, start_date: null, end_date: null,
-      hours_per_week: null, cao: null, scale: null, step: null, purchase_rate: null, sell_rate: null,
-      cost_center: null, billing_emails: [], remarks: null,
-    }
-    const user = userEvent.setup()
-    render(<MatchModal candidateId="cand-1" editMatchId="match-1" onClose={noop} onCreated={noop} />)
-    await screen.findByRole('button', { name: /Zorggroep A$/ })
-    await user.click(screen.getByRole('button', { name: 'common:save' }))
-    await waitFor(() => expect(api.patch).toHaveBeenCalledWith('/matches/match-1', expect.anything()))
-    expect(api.post).not.toHaveBeenCalledWith('/candidates/cand-1/experiences', expect.anything())
-  })
-})
-
-// CARD-STACK-LABEL-LEFT regression (Danny 13-08): pins the rebuilt structure —
-// four titled cards, single column, and every field its own label-LEFT row
-// (the label element precedes its field in the DOM, both inside one row).
-describe('MatchModal · card-stack layout (Danny 13-08)', () => {
-  it('renders all four titled cards — Relaties, Contract, Financieel, Opmerkingen', async () => {
-    render(<MatchModal candidateId="cand-1" onClose={noop} onCreated={noop} />)
-    await screen.findByRole('dialog')
-    for (const key of ['placement.relations', 'placement.contract', 'placement.financial', 'placement.matchRemarks']) {
-      expect(screen.getByText(key)).toBeInTheDocument()
-    }
-  })
-
-  it('renders the customer field as a label-left row — label precedes the field in the same row', async () => {
-    render(<MatchModal candidateId="cand-1" onClose={noop} onCreated={noop} />)
-    await screen.findByRole('dialog')
-    const label = screen.getByText('placement.customer')
-    const field = screen.getByRole('button', { name: /placement\.pickCustomer$/ })
-    // Label and field share one row container (the label-left row), with the
-    // label appearing FIRST in DOM order (left-to-right reading order).
-    const row = label.closest('div')?.parentElement
-    expect(row).toContainElement(field)
-    const position = label.compareDocumentPosition(field)
-    expect(position & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy()
   })
 })
