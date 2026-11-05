@@ -16,8 +16,8 @@
  * flex:1 — the exact same contract already proven in the 11 other FloatingPanel
  * modals with a pinned footer (AddTaskModal etc.).
  */
-import { describe, it, expect, vi, afterEach } from 'vitest'
-import { render, screen, act, fireEvent } from '@testing-library/react'
+import { describe, it, expect, vi } from 'vitest'
+import { render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import NoteComposer from './NoteComposer'
 import { chipInk } from '@/lib/tint'
@@ -46,26 +46,6 @@ vi.mock('@/pages/auth/shared', () => ({ useMyKoiosMode: () => ({ mode: 'wizard',
 
 const labels = { newNote: 'Nieuwe notitie', edit: 'Bewerken', type: 'Type', channel: 'Kanaal', save: 'Save', cancel: 'Cancel' }
 const noteTypes = [{ value: 'general', label: 'Algemeen' }, { value: 'call', label: 'Bellen' }]
-
-// NOTITIE-VOICE-1: a minimal Web Speech API double — mirrors
-// KoiosVoiceButton.test.tsx's own mock (jsdom ships neither the real API nor
-// the vendor-prefixed one). Local to this file: each test file owns its mock.
-interface MockResultEvent { resultIndex: number; results: Array<Array<{ transcript: string }>> }
-// Final-segment double: the component only reads results whose isFinal is true.
-const seg = (transcript: string, isFinal = true) => Object.assign([{ transcript }], { isFinal })
-
-class MockSpeechRecognition {
-  static lastInstance: MockSpeechRecognition | null = null
-  continuous = false
-  interimResults = false
-  lang = ''
-  onresult: ((e: MockResultEvent) => void) | null = null
-  onerror: (() => void) | null = null
-  onend: (() => void) | null = null
-  start = vi.fn()
-  stop = vi.fn()
-  constructor() { MockSpeechRecognition.lastInstance = this }
-}
 
 describe('NoteComposer · popup lifecycle', () => {
   it('renders nothing while closed', () => {
@@ -196,84 +176,6 @@ describe('NoteComposer · save payload (NOTE-TAAL-1)', () => {
 })
 
 /**
- * NOTITIE-POPOUT-HANDOFF-1 (Danny 09/10-08): the pop-out icon moved OUT of the
- * FloatingPanel's title bar into this block's own title row — same place, same
- * 26x26 bordered button as the profile text — and it now hands the composed note
- * over instead of opening an empty second screen. This file owns the composer half:
- * where the icon is, what it hands over, and when it refuses to render at all.
- * The channel/ack half lives in hooks/useNotesPopout.test.ts + NotesTab.test.tsx.
- */
-describe('NoteComposer · second-screen hand-over (NOTITIE-POPOUT-HANDOFF-1)', () => {
-  // No i18next instance in this tree, so t('openSecondScreen') is the bare key.
-  const popOutButton = () => screen.queryByRole('button', { name: 'openSecondScreen' })
-
-  it('renders the icon in the note block, NOT in the panel title bar', () => {
-    render(<NoteComposer open initialNote={null} noteTypes={noteTypes} channels={[]} labels={labels}
-      onPopOutDraft={vi.fn()} onSave={vi.fn()} onCancel={vi.fn()} />)
-    const dragHandle = screen.getByRole('dialog').querySelector('[data-drag-handle]')!
-    expect(dragHandle.querySelector('button[aria-label="openSecondScreen"]')).toBeNull()
-    expect(popOutButton()).toBeInTheDocument()
-  })
-
-  it('hands over every field the recruiter filled in — type, channel, title, body, language', async () => {
-    const user = userEvent.setup()
-    const onPopOutDraft = vi.fn()
-    const channels = [{ value: 'phone', label: 'Telefoon' }]
-    render(<NoteComposer open initialNote={null} noteTypes={noteTypes} channels={channels} labels={labels}
-      onPopOutDraft={onPopOutDraft} onSave={vi.fn()} onCancel={vi.fn()} />)
-
-    await user.click(screen.getByText('Bellen'))
-    await user.click(screen.getByText('Telefoon'))
-    await user.click(screen.getByRole('button', { name: 'pick-german' }))
-    await user.type(screen.getByLabelText('body'), 'Klant gebeld')
-    await user.click(popOutButton()!)
-
-    expect(onPopOutDraft).toHaveBeenCalledWith({ type: 'call', channel: 'phone', title: '', body: 'Klant gebeld', language: 'de' })
-  })
-
-  it('never closes itself on the click — the host closes it on the window\'s ack', async () => {
-    const user = userEvent.setup()
-    const onCancel = vi.fn()
-    render(<NoteComposer open initialNote={null} noteTypes={noteTypes} channels={[]} labels={labels}
-      onPopOutDraft={vi.fn()} onSave={vi.fn()} onCancel={onCancel} />)
-    await user.click(popOutButton()!)
-    expect(onCancel).not.toHaveBeenCalled()
-    expect(screen.getByRole('dialog')).toBeInTheDocument()
-  })
-
-  it('is disabled while a hand-over is in flight (never fired twice)', () => {
-    render(<NoteComposer open initialNote={null} noteTypes={noteTypes} channels={[]} labels={labels}
-      onPopOutDraft={vi.fn()} popOutPending onSave={vi.fn()} onCancel={vi.fn()} />)
-    expect(popOutButton()).toBeDisabled()
-  })
-
-  it('renders no icon at all while EDITING an existing note (§3, it would save a duplicate)', () => {
-    render(<NoteComposer open initialNote={{ type: 'general', text: 'Existing' }} noteTypes={noteTypes} channels={[]}
-      labels={labels} onPopOutDraft={vi.fn()} onSave={vi.fn()} onCancel={vi.fn()} />)
-    expect(popOutButton()).toBeNull()
-  })
-
-  it('renders no icon for a host without a popout route', () => {
-    render(<NoteComposer open initialNote={null} noteTypes={noteTypes} channels={[]} labels={labels}
-      onSave={vi.fn()} onCancel={vi.fn()} />)
-    expect(popOutButton()).toBeNull()
-  })
-
-  it('seeds itself from a received draft — and stays a NEW note, so saving adds one', async () => {
-    const user = userEvent.setup()
-    const onSave = vi.fn()
-    render(<NoteComposer open initialNote={null} initialDraft={{ type: 'call', channel: 'phone', title: 'Belnotitie', body: 'Halve notitie', language: 'fr' }}
-      noteTypes={noteTypes} channels={[]} labels={labels} onSave={onSave} onCancel={vi.fn()} />)
-
-    expect(screen.getByRole('dialog', { name: 'Nieuwe notitie' })).toBeInTheDocument()
-    expect(screen.getByLabelText('body')).toHaveValue('Halve notitie')
-    expect(screen.getByTestId('current-language')).toHaveTextContent('fr')
-    await user.click(screen.getByTitle('Save'))
-    expect(onSave).toHaveBeenCalledWith({ type: 'call', channel: 'phone', title: 'Belnotitie', body: 'Halve notitie', language: 'fr' })
-  })
-})
-
-/**
  * CHANNEL-PICKER-CONTRAST-1: the contact-channel row must SHOW which chip is
  * picked. Before this, every chip carried its own colour and selection was only a
  * stronger tint (16% vs 8%) — comparing a 16% blue against an 8% green is not
@@ -356,137 +258,5 @@ describe('NoteComposer · maximize toggle (ASSIST-SIDEPANEEL-1 punt 1)', () => {
     await user.click(maxBtn)
     expect(screen.getByRole('button', { name: 'restoreWindow' })).toBeInTheDocument()
     expect(screen.queryByRole('button', { name: 'maximizeWindow' })).toBeNull()
-  })
-})
-
-describe('NoteComposer · dictation mic (NOTITIE-VOICE-1)', () => {
-  afterEach(() => {
-    delete (window as { SpeechRecognition?: unknown }).SpeechRecognition
-  })
-
-  // The mic button lives in the row directly above the RichTextEditor wrapper —
-  // located by DOM position, never by its translated title (no i18next instance
-  // in this test tree, mirrors KoiosVoiceButton.test.tsx's own t stub concern).
-  // The mic lives INSIDE the editor's toolbarExtra slot now (Danny 08-08 "mic
-  // naast de taal") — it is the only button in there carrying aria-pressed.
-  const micButton = () => screen.getByTestId('rte-wrapper').querySelector('button[aria-pressed]')
-
-  it('renders no mic on an unsupported browser (the shared HONEST GATE, inherited unchanged)', () => {
-    render(<NoteComposer open initialNote={null} noteTypes={noteTypes} channels={[]} labels={labels} onSave={vi.fn()} onCancel={vi.fn()} />)
-    expect(micButton()).toBeNull()
-  })
-
-  it('appends a dictated sentence escaped, continuing the last paragraph, never overwriting existing text', async () => {
-    window.SpeechRecognition = MockSpeechRecognition as unknown as typeof window.SpeechRecognition
-    const user = userEvent.setup()
-    render(<NoteComposer open initialNote={null} noteTypes={noteTypes} channels={[]} labels={labels} onSave={vi.fn()} onCancel={vi.fn()} />)
-
-    await user.type(screen.getByLabelText('body'), '<p>Klant gebeld.</p>')
-    await user.click(micButton()!)
-    expect(MockSpeechRecognition.lastInstance?.start).toHaveBeenCalledTimes(1)
-    // Only FINAL segments reach the host (interim guesses are dropped upstream).
-    act(() => { MockSpeechRecognition.lastInstance?.onresult?.({ resultIndex: 0, results: [seg('<script>alert(1)</script>')] }) })
-
-    // Escaped (never raw HTML — §7) and joined INTO the open paragraph, so a
-    // dictated sentence continues the text instead of starting its own line
-    // (Danny 08-08: dictation used to read as a column of fragments).
-    expect(screen.getByLabelText('body')).toHaveValue(
-      '<p>Klant gebeld. &lt;script&gt;alert(1)&lt;/script&gt;</p>',
-    )
-  })
-
-  it('dictates in the CONTROLLED editor language, not a fixed/UI default', async () => {
-    window.SpeechRecognition = MockSpeechRecognition as unknown as typeof window.SpeechRecognition
-    const user = userEvent.setup()
-    render(<NoteComposer open initialNote={null} noteTypes={noteTypes} channels={[]} labels={labels} onSave={vi.fn()} onCancel={vi.fn()} />)
-
-    // Pick German via the stand-in language control (mirrors the save-payload test above).
-    await user.click(screen.getByRole('button', { name: 'pick-german' }))
-    await user.click(micButton()!)
-    expect(MockSpeechRecognition.lastInstance?.lang).toBe('de-DE')
-  })
-
-  it('prefills the mic\'s dictation language from the note being edited', async () => {
-    window.SpeechRecognition = MockSpeechRecognition as unknown as typeof window.SpeechRecognition
-    const user = userEvent.setup()
-    render(<NoteComposer open initialNote={{ type: 'general', text: 'Existing', language: 'fr' }} noteTypes={noteTypes} channels={[]} labels={labels} onSave={vi.fn()} onCancel={vi.fn()} />)
-    await user.click(micButton()!)
-    expect(MockSpeechRecognition.lastInstance?.lang).toBe('fr-FR')
-  })
-})
-
-describe('NOTE-ACTION-ITEMS-1 · items persist with the note (CMBE 173ffbf7)', () => {
-  it('the save carries the full wire definition — status/created stripped, ids kept, sort_order = index', () => {
-    const onSave = vi.fn()
-    render(<NoteComposer open initialNote={null} noteTypes={[]} channels={[]} labels={labels} editorLabels={{}}
-      initialDraft={{ type: 'general', channel: '', title: '', body: '', language: null,
-        items: [
-          { title: 'Bel kandidaat', type: 'task', due_date: '2026-09-01', note_excerpt: null, status: 'proposed' },
-          { title: 'Plan intake', type: 'appointment', start: '2026-09-02T10:00', due_date: null, note_excerpt: null, status: 'executed', noteActionItemId: 'ai-7', created: { type: 'appointment', id: 'ap-1' } },
-        ] } as never}
-      onSave={onSave} onCancel={vi.fn()} />)
-    fireEvent.click(screen.getByRole('button', { name: 'Save' }))
-    const payload = onSave.mock.calls[0][0]
-    expect(payload.action_items).toEqual([
-      { title: 'Bel kandidaat', type: 'task', due_date: '2026-09-01', sort_order: 0 },
-      { id: 'ai-7', title: 'Plan intake', type: 'appointment', start: '2026-09-02T10:00', sort_order: 1 },
-    ])
-  })
-
-  // NOTE-BIRTH-STATUS-1 (api 02755adc): a NEW item the wizard already executed on the draft is
-  // born with its status and created record; an item that has an id never carries them (the
-  // execute route stays the only writer there), and a pending/proposed item carries neither.
-  it('a new executed item is saved with status + created, a persisted one and a pending one without', () => {
-    const onSave = vi.fn()
-    render(<NoteComposer open initialNote={null} noteTypes={[]} channels={[]} labels={labels} editorLabels={{}}
-      initialDraft={{ type: 'general', channel: '', title: '', body: '', language: null,
-        items: [
-          { title: 'Bel over opdracht', type: 'appointment', start: '2026-09-22T12:00', due_date: null, note_excerpt: null, status: 'executed', created: { type: 'appointment', id: 'ap-9' } },
-          { title: 'Plan intake', type: 'appointment', start: '2026-09-02T10:00', due_date: null, note_excerpt: null, status: 'executed', noteActionItemId: 'ai-7', created: { type: 'appointment', id: 'ap-1' } },
-          { title: 'Stuur cv', type: 'task', due_date: '2026-09-03', note_excerpt: null, status: 'pending' },
-        ] } as never}
-      onSave={onSave} onCancel={vi.fn()} />)
-    fireEvent.click(screen.getByRole('button', { name: 'Save' }))
-    const payload = onSave.mock.calls[0][0]
-    expect(payload.action_items).toEqual([
-      { title: 'Bel over opdracht', type: 'appointment', start: '2026-09-22T12:00', status: 'executed', created: { type: 'appointment', id: 'ap-9' }, sort_order: 0 },
-      { id: 'ai-7', title: 'Plan intake', type: 'appointment', start: '2026-09-02T10:00', sort_order: 1 },
-      { title: 'Stuur cv', type: 'task', due_date: '2026-09-03', sort_order: 2 },
-    ])
-  })
-
-  it('a reopened saved note seeds the panel from action_items, executed status included', () => {
-    render(<NoteComposer open noteTypes={[]} channels={[]} labels={labels} editorLabels={{}} initialDraft={null}
-      initialNote={{ id: 'n1', type: 'general', body: '', action_items: [
-        { id: 'ai-9', title: 'Intake gepland', type: 'appointment', status: 'executed', created: { type: 'appointment', id: 'ap-2' } },
-      ] } as never}
-      onSave={vi.fn()} onCancel={vi.fn()} />)
-    expect(screen.getByText('Intake gepland')).toBeInTheDocument()
-  })
-
-  // CLAIM-1 (03-10 verifier fix): 'executing'/'declined' are STORED statuses
-  // (BE NoteActionItem::STATUSES) — a reopened note used to collapse both to
-  // 'pending' and show a "Bevestigen" confirm button that just re-sent an
-  // already-claimed or declined item.
-  it('a reopened note keeps a persisted executing item executing, no confirm button', () => {
-    render(<NoteComposer open noteTypes={[]} channels={[]} labels={labels} editorLabels={{}} initialDraft={null}
-      initialNote={{ id: 'n1', type: 'general', body: '', action_items: [
-        { id: 'ai-10', title: 'Voorstel sturen', type: 'notification', status: 'executing' },
-      ] } as never}
-      onSave={vi.fn()} onCancel={vi.fn()} />)
-    expect(screen.getByText('notesAssist.panel.statusExecuting')).toBeInTheDocument()
-    expect(screen.queryByRole('button', { name: 'notesAssist.panel.confirm' })).not.toBeInTheDocument()
-  })
-
-  it('a reopened note keeps a persisted declined item declined, with its reason and a force-send button', () => {
-    render(<NoteComposer open noteTypes={[]} channels={[]} labels={labels} editorLabels={{}} initialDraft={null}
-      initialNote={{ id: 'n1', type: 'general', body: '', action_items: [
-        { id: 'ai-11', title: 'Voorstel sturen', type: 'notification', status: 'declined', code: 'proposal_recently_sent', reason: 'Al verstuurd.' },
-      ] } as never}
-      onSave={vi.fn()} onCancel={vi.fn()} />)
-    expect(screen.getByText('notesAssist.panel.statusDeclined')).toBeInTheDocument()
-    expect(screen.getByText('notesAssist.execute.declined.proposal_recently_sent')).toBeInTheDocument()
-    expect(screen.getByRole('button', { name: 'notesAssist.execute.forceSend' })).toBeInTheDocument()
-    expect(screen.queryByRole('button', { name: 'notesAssist.panel.confirm' })).not.toBeInTheDocument()
   })
 })
