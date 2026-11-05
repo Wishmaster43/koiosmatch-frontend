@@ -4,7 +4,7 @@
 import {
   Briefcase, UserCheck, Target, BarChart2, BookOpen, Store, ClipboardList, Sparkles, Users,
   SlidersHorizontal, Palette, Clock, ListChecks, Tags, Flag, FileText, XCircle, Percent,
-  EyeOff, Phone, CheckCircle, AlertTriangle,
+  EyeOff, Phone, CheckCircle, AlertTriangle, ShieldCheck,
 } from 'lucide-react'
 import type { NavGroup } from './types'
 
@@ -16,6 +16,7 @@ import MatchTemplatesSettings from '../sections/MatchTemplatesSettings'
 import CatalogSection from '../sections/CatalogSection'
 import { TaskStatusSettings, TaskTypeSettings, TaskPrioritySettings } from '../sections/TaskSettings'
 import { MatchStatusSettings, ContractTypesSettings, MatchStopReasonSettings } from '../sections/MatchSettings'
+import MatchApprovalSettings from '../sections/MatchApprovalSettings'
 import MatchRatesSettings from '../sections/MatchRatesSettings'
 import MatchContractLineRateSideSettings from '../sections/MatchContractLineRateSideSettings'
 import { OutreachStatusSettings, OutreachOutcomeSettings } from '../sections/OutreachSettings'
@@ -90,6 +91,8 @@ export const vacancyGroups: NavGroup[] = [
       // mandatory reason recorded on POST /matches/{id}/terminate (MATCH-TERMINATE-1)
       // had no settings screen at all.
       { id: 'match_stop_reasons', icon: XCircle, component: MatchStopReasonSettings, logName: 'match_stop_reasons' },
+      // DECISIONS §23 MATCH-APPROVAL-2 (Danny 05-11): approval mode lives under Matches.
+      { id: 'match_approval', icon: ShieldCheck, component: MatchApprovalSettings },
       // Appointment types/locations moved OUT to their own top-level `appointments`
       // group below (Danny 2026-08-04) — appointments span every entity, not just
       // matches, mirrors note_types/document_types.

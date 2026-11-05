@@ -242,6 +242,7 @@
     "nt_task": "Taken",
     "customer_blacklist_reasons": "Blacklistredenen",
     "match_stop_reasons": "Beëindigingsredenen",
+    "match_approval": "Goedkeuring",
     "outreach_outcomes": "Uitkomsten",
     "workflow_run_history": "Rungeschiedenis",
     "candidate_education_levels": "Opleidingsniveaus",

@@ -242,6 +242,7 @@
     "nt_task": "Tarefas",
     "customer_blacklist_reasons": "Motivos de lista negra",
     "match_stop_reasons": "Motivos de encerramento",
+    "match_approval": "Aprovação",
     "outreach_outcomes": "Resultados",
     "workflow_run_history": "Histórico de execuções",
     "candidate_education_levels": "Níveis de escolaridade",

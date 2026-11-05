@@ -52,7 +52,7 @@ const st = (key: string, opts?: Record<string, unknown>) => i18n.t(key, { ns: 's
 
 // The two GETs the screen makes, in their measured shapes: the matching object under
 // the usual {data} envelope, the flat settings map with the matching row as a STRING.
-function mockGets({ matching = { strictness: 'balanced', approval_mode: 'on_deviation' }, flat = {} }: { matching?: { strictness: string; approval_mode: string }; flat?: Record<string, unknown> } = {}) {
+function mockGets({ matching = { strictness: 'balanced' }, flat = {} }: { matching?: { strictness: string }; flat?: Record<string, unknown> } = {}) {
   api.get.mockImplementation((url: string) => {
     if (url === '/settings/matching') return Promise.resolve({ data: { data: matching } })
     if (url === '/settings') return Promise.resolve({ data: { matching: JSON.stringify(matching), ...flat } })
@@ -66,7 +66,7 @@ afterEach(() => vi.clearAllMocks())
 
 describe('VacancyMatchingSettings', () => {
   it('shows the concrete level number + % alongside the word label for the loaded strictness', async () => {
-    mockGets({ matching: { strictness: 'strict', approval_mode: 'on_deviation' } })
+    mockGets({ matching: { strictness: 'strict' } })
     render(<VacancyMatchingSettings />)
     await waitFor(() => expect(screen.getByText('3/3 · 100%')).toBeInTheDocument())
   })
@@ -104,33 +104,6 @@ describe('VacancyMatchingSettings', () => {
 
     await waitFor(() => expect(api.put).toHaveBeenCalledWith('/settings/matching', { strictness: 'strict' }))
     await waitFor(() => expect(api.post).toHaveBeenCalledWith('/settings', { vacancy_leads_notify_mode: 'owner', vacancy_leads_notify_role: 'recruiter' }))
-  })
-
-  // Approval mode is a partial PUT fired straight from the radio click (no Save
-  // button) — assert the exact route + body, not just that the UI re-renders.
-  it('PUTs /settings/matching with only the picked approval_mode', async () => {
-    const user = userEvent.setup()
-    mockGets()
-    render(<VacancyMatchingSettings />)
-    await waitFor(() => expect(screen.getByText(st('matching.approval.title'))).toBeInTheDocument())
-
-    await user.click(screen.getByText(st('matching.approval.always')))
-
-    await waitFor(() => expect(api.put).toHaveBeenCalledWith('/settings/matching', { approval_mode: 'always' }))
-  })
-
-  // SETTINGS-INCON-B1b: the chosen approval mode reads as chosen via the §4
-  // "aan/gelukt" success pair, same green as the super-admin package picker.
-  it('paints the chosen approval mode in the success pair', async () => {
-    mockGets({ matching: { strictness: 'balanced', approval_mode: 'always' } })
-    render(<VacancyMatchingSettings />)
-    await waitFor(() => expect(screen.getByText(st('matching.approval.title'))).toBeInTheDocument())
-
-    const active = screen.getByText(st('matching.approval.always')).closest('[role="radio"]') as HTMLElement
-    const inactive = screen.getByText(st('matching.approval.off')).closest('[role="radio"]') as HTMLElement
-    expect(active.style.background).toBe('var(--color-success-bg)')
-    expect(active.style.border).toBe('1px solid var(--color-success)')
-    expect(inactive.style.background).toBe('var(--surface)')
   })
 
   // SMZ-03: the notify keys are read TOP-LEVEL from the flat map — the matching row

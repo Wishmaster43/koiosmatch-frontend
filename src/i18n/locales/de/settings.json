@@ -242,6 +242,7 @@
     "nt_task": "Aufgaben",
     "customer_blacklist_reasons": "Blacklist-Gründe",
     "match_stop_reasons": "Beendigungsgründe",
+    "match_approval": "Freigabe",
     "outreach_outcomes": "Ergebnisse",
     "workflow_run_history": "Laufverlauf",
     "candidate_education_levels": "Bildungsniveaus",

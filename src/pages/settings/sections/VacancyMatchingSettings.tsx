@@ -1,12 +1,12 @@
 /**
  * VacancyMatchingSettings — the GLOBAL matching strictness (how critical the AI
- * matcher is overall), the match APPROVAL mode (per-tenant: off = every match is
- * always OK), and vacancy leads notification settings (who gets alerted when AI
+ * matcher is overall) and vacancy leads notification settings (who gets alerted when AI
  * suggests new candidates for a vacancy). The per-vacancy dimension importance
  * (qualifications, location, …) lives on each vacancy itself, not here.
+ * The match APPROVAL mode moved to Settings › Matches › Approval (MatchApprovalSettings).
  *
  * Wire contract (measured, FE-BE contract audit 09-09, SMZ-01/02/03/04):
- * · strictness + approval_mode are the `matching` object: GET/PUT /settings/matching.
+ * · strictness is part of the `matching` object: GET/PUT /settings/matching.
  *   The flat GET /settings serialises that row as a JSON STRING — never read it there.
  * · vacancy_leads_notify_mode/_role are TOP-LEVEL tenant settings owned by
  *   POST /settings (SettingController rules incl. the role existence check) and read
@@ -22,7 +22,6 @@ import { mapRoles } from './vacancyMatchingRoles'
 import { saveSettingsKeys } from '@/lib/settings/useAllSettings'
 import { notifyError } from '@/lib/notify'
 import Slider from '@/components/ui/Slider'
-import SegmentedControl from '@/components/ui/SegmentedControl'
 import SaveableSectionHeader from '@/components/ui/SaveableSectionHeader'
 import SelectMenu from '@/components/ui/SelectMenu'
 import { PageTitle, SectionTitle, Mono } from '@/components/ui/typography'
@@ -32,21 +31,12 @@ import { SETTINGS_MAX_W_WIDE } from '@/pages/settings/components/settingsMetrics
 
 // The backend strictness is an enum; the slider is a 3-step index onto it.
 const LEVELS = ['lenient', 'balanced', 'strict']
-// Approval-mode enum — English wire values since CMBE ab661e0d (legacy Dutch
-// aliases still accepted server-side during the transition).
-const MODES = [
-  { value: 'off', key: 'off' },
-  { value: 'on_deviation', key: 'deviation' },
-  { value: 'always', key: 'always' },
-]
-
-// Settings screen for the global matching strictness slider, the match-approval
-// mode, and vacancy leads notification settings; per-vacancy dimension weights
+// Settings screen for the global matching strictness slider
+// and vacancy leads notification settings; per-vacancy dimension weights
 // live elsewhere (see the module doc comment above).
 export default function VacancyMatchingSettings() {
   const { t } = useTranslation('settings')
   const [level, setLevel] = useState(1) // index into LEVELS (1 = balanced default)
-  const [approval, setApproval] = useState('on_deviation') // backend default
   const [leadsNotifyMode, setLeadsNotifyMode] = useState('owner') // owner | team
   const [leadsNotifyRole, setLeadsNotifyRole] = useState('recruiter') // role name
   const [saving, setSaving] = useState(false)
@@ -67,7 +57,7 @@ export default function VacancyMatchingSettings() {
     staleTime: 1000 * 60 * 5, // 5 minutes
   })
 
-  // Load both halves: the matching object (strictness + approval mode) and the flat
+  // Load both halves: the matching object (strictness) and the flat
   // settings map (the two top-level notify keys). The purchase→sale conversion
   // factor moved to Settings → Matches → MatchRatesSettings (Danny 22-07).
   useEffect(() => {
@@ -86,10 +76,9 @@ export default function VacancyMatchingSettings() {
           notifyError(t('statusList.loadError'))
           return
         }
-        const matchingObj = matching as { strictness?: string; approval_mode?: string }
+        const matchingObj = matching as { strictness?: string }
         const flatObj = flat as Record<string, unknown>
         const i = LEVELS.indexOf(matchingObj.strictness ?? ''); if (i >= 0) setLevel(i)
-        if (MODES.some(m => m.value === matchingObj.approval_mode)) setApproval(matchingObj.approval_mode as string)
         if (flatObj.vacancy_leads_notify_mode) setLeadsNotifyMode(String(flatObj.vacancy_leads_notify_mode))
         if (flatObj.vacancy_leads_notify_role) setLeadsNotifyRole(String(flatObj.vacancy_leads_notify_role))
       })
@@ -109,16 +98,6 @@ export default function VacancyMatchingSettings() {
       setSaved(true)
       setTimeout(() => setSaved(false), 2000)
     } catch { notifyError(t('statusList.saveFailed')) } finally { setSaving(false) }
-  }
-
-  // Approval mode saves on click (partial PUT) — optimistic, revert + toast on failure.
-  const setApprovalMode = async (mode: string) => {
-    if (loadError) return
-    const prev = approval
-    if (mode === prev) return
-    setApproval(mode)
-    try { await api.put('/settings/matching', { approval_mode: mode }) }
-    catch { setApproval(prev); notifyError(t('matching.approval.saveFailed')) }
   }
 
   // Vacancy leads notification mode saves on pick (POST /settings, the key's owner) —
@@ -149,7 +128,7 @@ export default function VacancyMatchingSettings() {
 
   return (
     // SETTINGS-INCON-B1b: house-wide container (matches the widest settings screen,
-    // CvTemplateSettings) — 560 was the narrowest in the group and cramped the slider/approval/leads blocks.
+    // CvTemplateSettings) — 560 was the narrowest in the group and cramped the slider/leads blocks.
     <div style={{ maxWidth: SETTINGS_MAX_W_WIDE }}>
       {/* SaveButton — the ONE saved-state save action (§4 success token pair). Disabled
           while the load failed so a guessed default can never overwrite the real setting. */}
@@ -176,28 +155,6 @@ export default function VacancyMatchingSettings() {
       </div>
 
       <p style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 22 }}>{t('matching.perVacancyHint')}</p>
-
-      {/* Match approval — three-option segmented control (house idiom for option cards). */}
-      <div style={{ marginTop: 28, paddingTop: 20, borderTop: '1px solid var(--border)', opacity: loading || loadError ? 0.5 : 1, pointerEvents: loading || loadError ? 'none' : 'auto' }}>
-        <SectionTitle>{t('matching.approval.title')}</SectionTitle>
-        <p style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 2, marginBottom: 12 }}>{t('matching.approval.subtitle')}</p>
-        {/* SETTINGS-INCON-B1b: the chosen mode reads as chosen via the §4 "aan/gelukt"
-            success pair (activeFill + activeOnly), same green as the super-admin
-            package picker. Nothing else on this screen changes. */}
-        <SegmentedControl
-          ariaLabel={t('matching.approval.title')}
-          color="var(--color-success)"
-          activeOnly
-          activeFill="var(--color-success-bg)"
-          value={approval}
-          onChange={setApprovalMode}
-          options={MODES.map(({ value, key }) => ({
-            value,
-            label: t(`matching.approval.${key}`),
-            description: t(`matching.approval.${key}Desc`),
-          }))}
-        />
-      </div>
 
       {/* Vacancy leads notification settings — who gets alerted when AI suggests new candidates. */}
       <div style={{ marginTop: 28, paddingTop: 20, borderTop: '1px solid var(--border)', opacity: loading || loadError ? 0.5 : 1, pointerEvents: loading || loadError ? 'none' : 'auto' }}>
