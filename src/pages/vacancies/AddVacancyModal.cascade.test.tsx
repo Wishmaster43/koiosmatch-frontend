@@ -2,8 +2,8 @@
  * AddVacancyModal — klant-cascade + Inzet/Functie-eisen/Voorwaarden/Beschrijving
  * slice (split from AddVacancyModal.test.tsx, §3 1000-line hard-cap, Opus
  * fixAdvies): the location/department/contact cascade (V3-6), the vestiging
- * branch-prediction (VAC-VESTIGING-1), and the Inzet/Functie-eisen/Voorwaarden/
- * Beschrijving field cards. Titled-cards chrome and the byte-identical base
+ * branch-prediction (VAC-VESTIGING-1); the Inzet/Functie-eisen/Voorwaarden/
+ * Beschrijving field cards live in .fields.test.tsx since TEST-SPLIT-11. Titled-cards chrome and the byte-identical base
  * body live in .layout.test.tsx; Matchprofiel/AI-agent/Publicatie/attachments/
  * Excel live in .slice2.test.tsx.
  *
@@ -11,10 +11,10 @@
  * AddCandidateModal.test.tsx); i18next is uninitialised so t() returns raw keys.
  */
 import { describe, it, expect, vi, beforeEach } from 'vitest'
-import { render, screen, within } from '@testing-library/react'
+import { render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import AddVacancyModal from './AddVacancyModal'
-import { users, customers, noop, makeDefaultStatuses, fillTitleAndSubmit, openTab } from './AddVacancyModal.testFixtures'
+import { users, customers, noop, makeDefaultStatuses, fillTitleAndSubmit } from './AddVacancyModal.testFixtures'
 import { dryRunImport, runImport } from '@/pages/settings/sections/import/importApi'
 
 vi.mock('@/pages/settings/sections/import/importApi', async (importOriginal) => {
@@ -46,10 +46,10 @@ vi.mock('@/context/VacancyLookupsContext', () => ({
     channels: lookupState.channels,
   }),
 }))
-vi.mock('@/context/LookupsContext', () => ({
-  // eslint-disable-next-line no-restricted-syntax -- test fixture lookup colour (DATA, not UI styling)
-  useLookups: () => ({ candidateTypes: [{ value: 'flex', label: 'Flex', color: '#6E8FD6' }, { value: 'zzp', label: 'ZZP', color: '#79B58E' }] }),
-}))
+vi.mock('@/context/LookupsContext', async () => {
+  const { CANDIDATE_TYPES } = await import('./AddVacancyModal.cascade.testKit')
+  return { useLookups: () => ({ candidateTypes: CANDIDATE_TYPES }) }
+})
 vi.mock('@/lib/useIndustries', () => ({ useIndustries: () => ({ industries: ['Zorg', 'IT'], industryOptions: ['Zorg', 'IT'].map(n => ({ value: n, label: n })) }) }))
 vi.mock('@/lib/useFunctions', () => ({ useFunctions: () => ({ functions: ['Verzorgende IG', 'Helpende'], functionOptions: ['Verzorgende IG', 'Helpende'].map(n => ({ value: n, label: n })), allowFreeEntry: false }) }))
 vi.mock('@/lib/useLocations', () => ({
@@ -94,10 +94,8 @@ const { authState } = vi.hoisted(() => ({
     branchIds: ['user-branch-1', 'user-branch-2'] as string[],
     // K-284: user's default branch (preferred); null by default for tests.
     defaultBranchId: null as string | null,
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars -- the default mock grants neither; the param exists only to match hasModule's real signature
-    hasModule: (_k: string): boolean => false,
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars -- the default mock grants neither; the param exists only to match hasPermission's real signature
-    hasPermission: (_p: string): boolean => false,
+    hasModule: (() => false) as (module: string) => boolean,
+    hasPermission: (() => false) as (perm: string) => boolean,
   },
 }))
 vi.mock('@/context/AuthContext', () => ({
@@ -125,8 +123,7 @@ vi.mock('./addmodal/useGenerateDescription', () => ({
   }),
 }))
 const { attachmentsState } = vi.hoisted(() => ({
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars -- the default no-op mock ignores it; the param exists only to match runSequence's real signature
-  attachmentsState: { hasPending: false, runSequence: (async (_id: unknown) => {}) as (id: unknown) => Promise<void> },
+  attachmentsState: { hasPending: false, runSequence: (async () => {}) as (id: unknown) => Promise<void> },
 }))
 vi.mock('./addmodal/usePostCreateAttachments', () => ({
   usePostCreateAttachments: () => ({
@@ -342,130 +339,5 @@ describe('AddVacancyModal · vestiging cosmetic prediction (VAC-VESTIGING-1)', (
     await pickCustomer(user, 'Yesway Zorg')
     await fillTitleAndSubmit(user)
     expect(mockPost).toHaveBeenCalledWith('/vacancies', expect.objectContaining({ location_id: 'user-branch-1' }))
-  })
-})
-
-describe('AddVacancyModal · Inzet card — contractvorm, adres, vestiging (punt 10/12/13)', () => {
-  it('carries a toggled contract type and the structured address, absent when untouched', async () => {
-    const user = userEvent.setup()
-    render(<AddVacancyModal onClose={noop} users={users} customers={customers} />)
-    await user.click(screen.getByRole('button', { name: 'Flex' }))
-    await user.type(screen.getByLabelText('details.street'), 'Kerkstraat')
-    await user.type(screen.getByLabelText('details.city'), 'Den Haag')
-    await fillTitleAndSubmit(user)
-    expect(mockPost).toHaveBeenCalledWith('/vacancies', expect.objectContaining({
-      contract_types: ['flex'], street: 'Kerkstraat', city: 'Den Haag',
-      // The single free-text `location` column is DERIVED from the structured address.
-      location: 'Kerkstraat, Den Haag',
-    }))
-  })
-
-  it('picks a vestiging (bureau) via the searchable picker and sends location_id', async () => {
-    const user = userEvent.setup()
-    render(<AddVacancyModal onClose={noop} users={users} customers={customers} />)
-    await user.click(screen.getByRole('button', { name: 'modal.fields.branch' }))
-    await user.click(screen.getByRole('button', { name: 'Vestiging Noord' }))
-    await fillTitleAndSubmit(user)
-    expect(mockPost).toHaveBeenCalledWith('/vacancies', expect.objectContaining({ location_id: 'branch-1' }))
-  })
-
-  // VAC-VESTIGING-1: optional at create — clearing it (or never picking it)
-  // must send NO `location_id` key at all, so the server can apply its own
-  // default (never a stray `location_id: ''`/`null` on the base create).
-  it('sends no location_id key at all when the vestiging is never picked and the recruiter has no branch', async () => {
-    // WL:L104: with a recruiter branch the form proposes it (see the fallback test); without one nothing is sent.
-    authState.branchIds = []
-    const user = userEvent.setup()
-    render(<AddVacancyModal onClose={noop} users={users} customers={customers} />)
-    await fillTitleAndSubmit(user)
-    const [, body] = mockPost.mock.calls[0] as [string, Record<string, unknown>]
-    expect(body).not.toHaveProperty('location_id')
-  })
-
-  it('sends no location_id key when a picked vestiging is cleared again', async () => {
-    const user = userEvent.setup()
-    render(<AddVacancyModal onClose={noop} users={users} customers={customers} />)
-    await user.click(screen.getByRole('button', { name: 'modal.fields.branch' }))
-    await user.click(screen.getByRole('button', { name: 'Vestiging Noord' }))
-    // The shared CreatableSelect's own clear-X (VAC-CLEAR-1) — scoped to the
-    // branch FieldRow specifically (other fields elsewhere in the form may
-    // also carry a value + their own clear-X).
-    const branchLabel = screen.getByText('modal.fields.branch')
-    await user.click(within(branchLabel.parentElement as HTMLElement).getByRole('button', { name: 'clearField' }))
-    await fillTitleAndSubmit(user)
-    const [, body] = mockPost.mock.calls[0] as [string, Record<string, unknown>]
-    expect(body).not.toHaveProperty('location_id')
-  })
-})
-
-describe('AddVacancyModal · Functie-eisen — senioriteit/opleiding + skills (punt 14/15)', () => {
-  it('picks a seniority level and adds a required skill', async () => {
-    const user = userEvent.setup()
-    render(<AddVacancyModal onClose={noop} users={users} customers={customers} />)
-    await openTab(user, 'requirements')
-    await user.click(screen.getByRole('button', { name: 'details.seniority' }))
-    await user.click(screen.getByRole('button', { name: 'Senior' }))
-    // K6e: AdditionalSkillsSection's add/edit/remove list — the "+" trigger opens
-    // an inline AddForm (placeholder = the field label), saved via the diskette icon.
-    await user.click(screen.getByRole('button', { name: /details\.addSkill/ }))
-    await user.type(screen.getByPlaceholderText('details.addSkill'), 'BIG-registratie')
-    await user.click(screen.getByTitle('save'))
-    await fillTitleAndSubmit(user)
-    expect(mockPost).toHaveBeenCalledWith('/vacancies', expect.objectContaining({
-      seniority: 'senior', skills: ['BIG-registratie'],
-    }))
-  })
-
-  it('edits a staged required skill in place (K6e)', async () => {
-    const user = userEvent.setup()
-    render(<AddVacancyModal onClose={noop} users={users} customers={customers} />)
-    await openTab(user, 'requirements')
-    await user.click(screen.getByRole('button', { name: /details\.addSkill/ }))
-    await user.type(screen.getByPlaceholderText('details.addSkill'), 'BIG-registratie')
-    await user.click(screen.getByTitle('save'))
-    // The saved row now carries an edit pencil (AdditionalSkillsSection/AddableSection).
-    await user.click(screen.getByTitle('edit'))
-    const input = screen.getByPlaceholderText('details.addSkill')
-    await user.clear(input)
-    await user.type(input, 'VCA-certificaat')
-    await user.click(screen.getByTitle('save'))
-    await fillTitleAndSubmit(user)
-    expect(mockPost).toHaveBeenCalledWith('/vacancies', expect.objectContaining({
-      skills: ['VCA-certificaat'],
-    }))
-  })
-
-  it('never adds experience_min_years/experience_max_years — not accepted by the backend', () => {
-    render(<AddVacancyModal onClose={noop} users={users} customers={customers} />)
-    expect(screen.queryByText('details.experience')).not.toBeInTheDocument()
-  })
-})
-
-describe('AddVacancyModal · Voorwaarden — salaris + uren (punt 16)', () => {
-  it('carries salary min/max/period and hours min/max', async () => {
-    const user = userEvent.setup()
-    render(<AddVacancyModal onClose={noop} users={users} customers={customers} />)
-    // Salary and hours live on the requirements pane, hidden until its tab is open.
-    await openTab(user, 'requirements')
-    const salaryInputs = screen.getAllByPlaceholderText('common:placeholders.min')
-    await user.type(salaryInputs[0], '2500')
-    await user.type(screen.getByPlaceholderText('modal.fields.salaryPeriodPlaceholder'), 'per maand')
-    await user.type(screen.getAllByPlaceholderText('common:placeholders.max')[1], '32')
-    await fillTitleAndSubmit(user)
-    expect(mockPost).toHaveBeenCalledWith('/vacancies', expect.objectContaining({
-      salary_min: '2500', salary_period: 'per maand', hours_max: '32',
-    }))
-  })
-})
-
-describe('AddVacancyModal · Beschrijving (punt 9)', () => {
-  it('reveals the rich-text editor on click and carries the typed description', async () => {
-    const user = userEvent.setup()
-    render(<AddVacancyModal onClose={noop} users={users} customers={customers} />)
-    await openTab(user, 'description')
-    await user.click(screen.getByRole('button', { name: /details.description/ }))
-    await user.type(screen.getByLabelText('rich-text-editor'), 'Dienst op de IC-afdeling.')
-    await fillTitleAndSubmit(user)
-    expect(mockPost).toHaveBeenCalledWith('/vacancies', expect.objectContaining({ description: 'Dienst op de IC-afdeling.' }))
   })
 })

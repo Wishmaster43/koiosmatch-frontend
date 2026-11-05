@@ -1,0 +1,283 @@
+/** AddVacancyModal · field cards (split from AddVacancyModal.cascade.test.tsx; Inzet, Functie-eisen, Voorwaarden and Beschrijving, the cascade tests live in the sibling). */
+import { describe, it, expect, vi, beforeEach } from 'vitest'
+import { render, screen, within } from '@testing-library/react'
+import userEvent from '@testing-library/user-event'
+import AddVacancyModal from './AddVacancyModal'
+import { users, customers, noop, makeDefaultStatuses, fillTitleAndSubmit, openTab } from './AddVacancyModal.testFixtures'
+import { dryRunImport, runImport } from '@/pages/settings/sections/import/importApi'
+
+vi.mock('@/pages/settings/sections/import/importApi', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('@/pages/settings/sections/import/importApi')>()
+  return { ...actual, dryRunImport: vi.fn(), runImport: vi.fn(), downloadImportTemplate: vi.fn() }
+})
+
+// useAddVacancyForm reuses composeAddress from useVacancyDetailsForm.ts, which
+// (for the DRAWER's own date formatting) imports lib/datetime -> src/i18n's real
+// instance -> react-i18next's initReactI18next — so the mock below must still
+// export a usable stub for it, or that eager import chain throws at module load.
+vi.mock('react-i18next', () => ({
+  useTranslation: () => ({ t: (k: string) => k, i18n: { language: 'nl' } }),
+  initReactI18next: { type: '3rdParty', init: () => {} },
+}))
+
+const { lookupState } = vi.hoisted(() => ({
+  lookupState: {
+    statuses: [] as Array<{ value: string; label: string; color?: string }>,
+    channels: [] as Array<{ value: string; label: string }>,
+  },
+}))
+vi.mock('@/context/VacancyLookupsContext', () => ({
+  useVacancyLookups: () => ({
+    statuses: lookupState.statuses,
+    seniorityLevels: [{ value: 'senior', label: 'Senior' }, { value: 'medior', label: 'Medior' }],
+    educationLevels: [{ value: 'hbo', label: 'HBO' }],
+    defaultSeniority: '', defaultEducation: '',
+    channels: lookupState.channels,
+  }),
+}))
+vi.mock('@/context/LookupsContext', async () => {
+  const { CANDIDATE_TYPES } = await import('./AddVacancyModal.cascade.testKit')
+  return { useLookups: () => ({ candidateTypes: CANDIDATE_TYPES }) }
+})
+vi.mock('@/lib/useIndustries', () => ({ useIndustries: () => ({ industries: ['Zorg', 'IT'], industryOptions: ['Zorg', 'IT'].map(n => ({ value: n, label: n })) }) }))
+vi.mock('@/lib/useFunctions', () => ({ useFunctions: () => ({ functions: ['Verzorgende IG', 'Helpende'], functionOptions: ['Verzorgende IG', 'Helpende'].map(n => ({ value: n, label: n })), allowFreeEntry: false }) }))
+vi.mock('@/lib/useLocations', () => ({
+  useLocations: () => [{ value: 'branch-1', label: 'Vestiging Noord' }, { value: 'branch-2', label: 'Vestiging Zuid' }],
+}))
+vi.mock('@/hooks/useProvinces', () => ({ useProvinces: () => ({ provinces: ['Zuid-Holland', 'Utrecht'] }) }))
+// The cascade fetch itself — stubbed so only useCascadePickers' own pick/reset
+// logic is under test (no live fetch, mirrors useCascadePickers.test.tsx).
+// V3-6: keyed by customer id (default empty per id) — the narrowing describe
+// block in AddVacancyModal.cascade.test.tsx fills `cascadeState.byCustomer` per test so a customer SWITCH can
+// be proven to actually change what the location/department pickers offer; every
+// OTHER test keeps the previous always-empty behaviour untouched.
+const { cascadeState } = vi.hoisted(() => ({
+  cascadeState: {
+    byCustomer: {} as Record<string, {
+      locations: Array<{ id: string; name: string; departments?: Array<{ id: string; name: string }> }>
+      contacts: Array<{ id: string; name: string }>
+      // VAC-VESTIGING-1: the customer's own mirrored branch — feeds the create
+      // form's branch-proposal prediction (useVacancyBranchDefault).
+      branch_id?: string
+    }>,
+  },
+}))
+// A STABLE `detail` object per customer id (not a fresh literal every render) —
+// the real hook only replaces its `detail` state once per resolved fetch, so a
+// mock that hands out a new object identity on every render would fire any
+// `useEffect([detail, ...])` reader on every render too (an infinite loop this
+// exact mock shape once produced, VAC-VESTIGING-1).
+const detailByCustomer = new Map<string, { branch_id: string | null } | null>()
+vi.mock('@/hooks/useCustomerCascade', () => ({
+  useCustomerCascade: (customerId: string) => {
+    const data = cascadeState.byCustomer[customerId] ?? { locations: [], contacts: [] }
+    if (!detailByCustomer.has(customerId)) {
+      detailByCustomer.set(customerId, customerId ? { branch_id: data.branch_id ?? null } : null)
+    }
+    return { detail: detailByCustomer.get(customerId) ?? null, locations: data.locations, contacts: data.contacts, refetch: vi.fn() }
+  },
+}))
+const { authState } = vi.hoisted(() => ({
+  authState: {
+    // WL:L104: the recruiter's own branches — the create form falls back to the first one.
+    branchIds: ['user-branch-1', 'user-branch-2'] as string[],
+    // K-284: user's default branch (preferred); null by default for tests.
+    defaultBranchId: null as string | null,
+    hasModule: (() => false) as (module: string) => boolean,
+    hasPermission: (() => false) as (perm: string) => boolean,
+  },
+}))
+vi.mock('@/context/AuthContext', () => ({
+  useAuth: () => ({ user: { id: 'u1', name: 'Piet Recruiter', default_branch_id: authState.defaultBranchId, branch_ids: authState.branchIds }, hasModule: authState.hasModule, hasPermission: authState.hasPermission }),
+}))
+const { matchTemplatesState } = vi.hoisted(() => ({
+  matchTemplatesState: { templates: [] as Array<{ id: string; name: string; weights: Record<string, number>; linkedVacanciesCount: number }> },
+}))
+vi.mock('./hooks/useMatchWeightTemplates', () => ({ useMatchWeightTemplates: () => ({ templates: matchTemplatesState.templates, loading: false, error: false }) }))
+const { aiAgentsState } = vi.hoisted(() => ({
+  aiAgentsState: {
+    options: [] as Array<{ value: string; label: string }>,
+    agents: [] as Array<{ id: string; name: string; user?: { id: string; name?: string } | null }>,
+  },
+}))
+vi.mock('./hooks/useAiAgents', () => ({ useAiAgents: () => ({ options: aiAgentsState.options, agents: aiAgentsState.agents, loading: false, error: false }) }))
+vi.mock('@/lib/settings/useAllSettings', () => ({
+  useAllSettings: () => ({}),
+  getJsonSetting: (_values: unknown, _key: string, fallback: unknown) => fallback,
+}))
+vi.mock('./addmodal/useGenerateDescription', () => ({
+  useGenerateDescription: () => ({
+    open: false, openFlow: vi.fn(), closeFlow: vi.fn(), profile: null, resolving: false, resolveFailed: false,
+    noProfileConfigured: false, status: 'idle', concept: '', generate: vi.fn(), discard: vi.fn(),
+  }),
+}))
+const { attachmentsState } = vi.hoisted(() => ({
+  attachmentsState: { hasPending: false, runSequence: (async () => {}) as (id: unknown) => Promise<void> },
+}))
+vi.mock('./addmodal/usePostCreateAttachments', () => ({
+  usePostCreateAttachments: () => ({
+    files: [], addFile: vi.fn(), removeFile: vi.fn(),
+    noteText: '', setNoteText: vi.fn(), noteStatus: 'idle', noteError: '',
+    running: false, hasPending: attachmentsState.hasPending, runSequence: attachmentsState.runSequence,
+    retryFile: vi.fn(), retryNote: vi.fn(),
+  }),
+}))
+// Tiptap needs a real browser to mount — stubbed with a plain controlled
+// textarea (mirrors AddCandidateModal.test.tsx / AddLocationModal.test.tsx);
+// CollapsibleRichText itself runs for real around it.
+vi.mock('@/components/ui/RichTextEditor', () => ({
+  default: ({ value, onChange }: { value: string; onChange: (v: string) => void }) => (
+    <textarea aria-label="rich-text-editor" value={value} onChange={e => onChange(e.target.value)} />
+  ),
+}))
+
+const mockPost = vi.fn()
+vi.mock('@/lib/api', async () => {
+  const actual = await vi.importActual('@/lib/api')
+  return { ...actual, default: { get: vi.fn(), post: (...args: unknown[]) => mockPost(...args), patch: vi.fn(), delete: vi.fn() } }
+})
+
+beforeEach(() => {
+  authState.branchIds = ['user-branch-1', 'user-branch-2']
+  authState.defaultBranchId = null
+  detailByCustomer.clear()
+  lookupState.statuses = makeDefaultStatuses()
+  lookupState.channels = []
+  authState.hasModule = () => false
+  authState.hasPermission = () => false
+  aiAgentsState.options = []
+  aiAgentsState.agents = []
+  matchTemplatesState.templates = []
+  attachmentsState.hasPending = false
+  attachmentsState.runSequence = async () => {}
+  cascadeState.byCustomer = {}
+  mockPost.mockReset()
+  mockPost.mockResolvedValue({ data: { data: { id: 'v-new', title: 'Verpleegkundige' } } })
+  vi.mocked(dryRunImport).mockReset()
+  vi.mocked(runImport).mockReset()
+})
+
+describe('AddVacancyModal · Inzet card — contractvorm, adres, vestiging (punt 10/12/13)', () => {
+  it('carries a toggled contract type and the structured address, absent when untouched', async () => {
+    const user = userEvent.setup()
+    render(<AddVacancyModal onClose={noop} users={users} customers={customers} />)
+    await user.click(screen.getByRole('button', { name: 'Flex' }))
+    await user.type(screen.getByLabelText('details.street'), 'Kerkstraat')
+    await user.type(screen.getByLabelText('details.city'), 'Den Haag')
+    await fillTitleAndSubmit(user)
+    expect(mockPost).toHaveBeenCalledWith('/vacancies', expect.objectContaining({
+      contract_types: ['flex'], street: 'Kerkstraat', city: 'Den Haag',
+      // The single free-text `location` column is DERIVED from the structured address.
+      location: 'Kerkstraat, Den Haag',
+    }))
+  })
+
+  it('picks a vestiging (bureau) via the searchable picker and sends location_id', async () => {
+    const user = userEvent.setup()
+    render(<AddVacancyModal onClose={noop} users={users} customers={customers} />)
+    await user.click(screen.getByRole('button', { name: 'modal.fields.branch' }))
+    await user.click(screen.getByRole('button', { name: 'Vestiging Noord' }))
+    await fillTitleAndSubmit(user)
+    expect(mockPost).toHaveBeenCalledWith('/vacancies', expect.objectContaining({ location_id: 'branch-1' }))
+  })
+
+  // VAC-VESTIGING-1: optional at create — clearing it (or never picking it)
+  // must send NO `location_id` key at all, so the server can apply its own
+  // default (never a stray `location_id: ''`/`null` on the base create).
+  it('sends no location_id key at all when the vestiging is never picked and the recruiter has no branch', async () => {
+    // WL:L104: with a recruiter branch the form proposes it (see the fallback test); without one nothing is sent.
+    authState.branchIds = []
+    const user = userEvent.setup()
+    render(<AddVacancyModal onClose={noop} users={users} customers={customers} />)
+    await fillTitleAndSubmit(user)
+    const [, body] = mockPost.mock.calls[0] as [string, Record<string, unknown>]
+    expect(body).not.toHaveProperty('location_id')
+  })
+
+  it('sends no location_id key when a picked vestiging is cleared again', async () => {
+    const user = userEvent.setup()
+    render(<AddVacancyModal onClose={noop} users={users} customers={customers} />)
+    await user.click(screen.getByRole('button', { name: 'modal.fields.branch' }))
+    await user.click(screen.getByRole('button', { name: 'Vestiging Noord' }))
+    // The shared CreatableSelect's own clear-X (VAC-CLEAR-1) — scoped to the
+    // branch FieldRow specifically (other fields elsewhere in the form may
+    // also carry a value + their own clear-X).
+    const branchLabel = screen.getByText('modal.fields.branch')
+    await user.click(within(branchLabel.parentElement as HTMLElement).getByRole('button', { name: 'clearField' }))
+    await fillTitleAndSubmit(user)
+    const [, body] = mockPost.mock.calls[0] as [string, Record<string, unknown>]
+    expect(body).not.toHaveProperty('location_id')
+  })
+})
+
+describe('AddVacancyModal · Functie-eisen — senioriteit/opleiding + skills (punt 14/15)', () => {
+  it('picks a seniority level and adds a required skill', async () => {
+    const user = userEvent.setup()
+    render(<AddVacancyModal onClose={noop} users={users} customers={customers} />)
+    await openTab(user, 'requirements')
+    await user.click(screen.getByRole('button', { name: 'details.seniority' }))
+    await user.click(screen.getByRole('button', { name: 'Senior' }))
+    // K6e: AdditionalSkillsSection's add/edit/remove list — the "+" trigger opens
+    // an inline AddForm (placeholder = the field label), saved via the diskette icon.
+    await user.click(screen.getByRole('button', { name: /details\.addSkill/ }))
+    await user.type(screen.getByPlaceholderText('details.addSkill'), 'BIG-registratie')
+    await user.click(screen.getByTitle('save'))
+    await fillTitleAndSubmit(user)
+    expect(mockPost).toHaveBeenCalledWith('/vacancies', expect.objectContaining({
+      seniority: 'senior', skills: ['BIG-registratie'],
+    }))
+  })
+
+  it('edits a staged required skill in place (K6e)', async () => {
+    const user = userEvent.setup()
+    render(<AddVacancyModal onClose={noop} users={users} customers={customers} />)
+    await openTab(user, 'requirements')
+    await user.click(screen.getByRole('button', { name: /details\.addSkill/ }))
+    await user.type(screen.getByPlaceholderText('details.addSkill'), 'BIG-registratie')
+    await user.click(screen.getByTitle('save'))
+    // The saved row now carries an edit pencil (AdditionalSkillsSection/AddableSection).
+    await user.click(screen.getByTitle('edit'))
+    const input = screen.getByPlaceholderText('details.addSkill')
+    await user.clear(input)
+    await user.type(input, 'VCA-certificaat')
+    await user.click(screen.getByTitle('save'))
+    await fillTitleAndSubmit(user)
+    expect(mockPost).toHaveBeenCalledWith('/vacancies', expect.objectContaining({
+      skills: ['VCA-certificaat'],
+    }))
+  })
+
+  it('never adds experience_min_years/experience_max_years — not accepted by the backend', () => {
+    render(<AddVacancyModal onClose={noop} users={users} customers={customers} />)
+    expect(screen.queryByText('details.experience')).not.toBeInTheDocument()
+  })
+})
+
+describe('AddVacancyModal · Voorwaarden — salaris + uren (punt 16)', () => {
+  it('carries salary min/max/period and hours min/max', async () => {
+    const user = userEvent.setup()
+    render(<AddVacancyModal onClose={noop} users={users} customers={customers} />)
+    // Salary and hours live on the requirements pane, hidden until its tab is open.
+    await openTab(user, 'requirements')
+    const salaryInputs = screen.getAllByPlaceholderText('common:placeholders.min')
+    await user.type(salaryInputs[0], '2500')
+    await user.type(screen.getByPlaceholderText('modal.fields.salaryPeriodPlaceholder'), 'per maand')
+    await user.type(screen.getAllByPlaceholderText('common:placeholders.max')[1], '32')
+    await fillTitleAndSubmit(user)
+    expect(mockPost).toHaveBeenCalledWith('/vacancies', expect.objectContaining({
+      salary_min: '2500', salary_period: 'per maand', hours_max: '32',
+    }))
+  })
+})
+
+describe('AddVacancyModal · Beschrijving (punt 9)', () => {
+  it('reveals the rich-text editor on click and carries the typed description', async () => {
+    const user = userEvent.setup()
+    render(<AddVacancyModal onClose={noop} users={users} customers={customers} />)
+    await openTab(user, 'description')
+    await user.click(screen.getByRole('button', { name: /details.description/ }))
+    await user.type(screen.getByLabelText('rich-text-editor'), 'Dienst op de IC-afdeling.')
+    await fillTitleAndSubmit(user)
+    expect(mockPost).toHaveBeenCalledWith('/vacancies', expect.objectContaining({ description: 'Dienst op de IC-afdeling.' }))
+  })
+})
