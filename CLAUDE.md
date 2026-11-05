@@ -1620,3 +1620,76 @@ every lane, verifier and manager from now on.
 - **TEST-EDIT-TSC-1 — the per-file vitest run is not the type gate for a test edit.** A `vi.mock` block inserted into
   a test that never imported `vi` passed vitest (the mock hoister injects the import) and failed the landing on tsc
   (10 × TS2304). An edit that adds `vi.` / `expect.` / `it.` usage runs `tsc --noEmit` before the landing.
+
+## 20. Lessons from the Tailwind switch, the CI reads and the night of 04/05-11-2026 (fourteen landings in one night beside five BE lanes; each rule was paid for with a measured breakage)
+
+- **DEV-SERVER-STALE-2 — a CSS-toolchain swap needs a process restart of the running dev server** (extends §16
+  DEV-SERVER-STALE-1). Vite keeps its PostCSS plugins in the Node module cache: after tailwindcss 3 → 4 in node_modules
+  the config reloaded but the old plugin kept running ("`@layer base` is used but no matching `@tailwind base`"),
+  measured twice on 29-10. The switch script verifies that `/src/index.css` returns CSS before any screenshot; the
+  restart is Danny's action on his server.
+- **BASELINE-STATE-1 — a screenshot baseline is only valid against a backend state frozen for both runs.** The Tailwind
+  baseline was taken while the peer's `dev:reset` was seeding (empty tables, "Laden…"), so 18 of 18 pixel diffs were
+  data, not CSS. Check the peer's reset window first; verify a toolchain switch by computed-style measurements of the
+  properties it changed.
+- **FULL-SUITE-FOR-SHARED-MODULES-1, re-applied (30-10, CI red on 1d6567bb) — the §17 rule holds for a shared
+  HOOK too, and two rules join it.** The landing's one-hop importer list missed two config-panel tests three hops down; CI's full
+  suite caught "default.get is not a function". (1) A client call inside an effect is deferred into the promise chain
+  (`Promise.resolve().then(() => api.get(...))`) so a synchronous throw becomes the error state, never an
+  uncaught effect error. (2) A test mock of the client is never an empty object: its `get` rejects explicitly.
+- **CI-TIMING-1 — a red CI run that is a 1 s findBy/waitFor default on a saturated runner is fixed ONCE**, with
+  `configure({ asyncUtilTimeout })` in `src/test/setup.js`, never with per-test timeouts (three red runs after
+  MAJORS-1 were all this class).
+- **TEARDOWN-LOG-2 — the class of §19 TEARDOWN-LOG-1 is closed by construction:** the API client's dev log is silent
+  under vitest (`import.meta.env.MODE !== 'test'` in `src/lib/api.ts`), so a forgotten offline stub can no longer turn
+  into an unhandled teardown error; the per-file stubs stay because they also keep requests from being attempted.
+- **SMOKE-QUIET-1 — the smoke runs with nothing else of mine on the machine, and a solo re-run is the measurement
+  (sharpens §13: a flow that is red ALONE is the finding, never "flaky").** 11/14 under parallel vitest gates + the
+  peer's chain on 30-10 while every page rendered without errors; the three red flows passed re-run alone. The fixed
+  waits that made the flows load-sensitive became condition waits (E2E-WAITS-1, 495e4d2d: 54 → 3, all three deliberate;
+  14/14 in one run on 05-11). The smoke runs on `SMOKE_APP=http://127.0.0.1:5173`: Herd's own Vite for the API repo
+  listens on `[::1]:5173` and answers `localhost:5173` with a 404.
+- **DOCS-ANCHOR-1 — a docs script fails loudly on an empty anchor and anchors on a row that cannot disappear.**
+  `sed -i "${n}r file"` with an empty `$n` inserted a row after every line (374 copies pushed in b00ddfae6, repaired in
+  dfb2469a4); the previous landing's row CAN disappear (the peer's regeneration dropped HOTFIX-CI-2). Rules:
+  `[ -n "$anchor" ] || exit 1`, and verify the copy count AND the line delta before pushing.
+- **DOCS-ARGS-1 — zsh does not word-split an unquoted `$pair`.** `set -- $pair` kept "hash id" as ONE word, the helper
+  received an empty third argument and `cat $TXT` read stdin for ten minutes. Pass explicit arguments (or `read -r h id
+  <<< "$pair"`), redirect `</dev/null` into every helper, and let a per-row script tolerate a dirty tree (rebase only
+  when `git status --short` is empty) so a batch of rows forms one commit.
+- **PGREP-SELF-MATCH-2 — the wait loop and the vitest invocation are two separate shell commands** (sharpens §16
+  LANE-PROTOCOL-1). The bracket pattern `pgrep -f "vites[t] run"` protects the pattern, but the waiting shell's own
+  command line still carries the literal `vitest run` of the invocation that follows the loop in the same string, and
+  the loop deadlocks on itself.
+- **VALIDATOR-ADVERSARIAL-1 — a validator built on `new URL()` is run over an adversarial list, not the brief's
+  examples.** `new URL('https://a.nl:0').origin` keeps port 0; the parser rejects only > 65535, so a contract range
+  (1-65535) needs its own check (CAREER-EMBED-FE-1, Opus round 1). Verifiers probe port 0, IPv6 literals, IDN hosts,
+  hex hosts and `https:a.nl`.
+- **CEILING-DISABLES-1 — the house-style ceiling counts eslint disables as drift in a NEW file (ceiling 0).** A
+  documented `eslint-disable-next-line no-restricted-imports` is therefore not a way past the deep-relative rule;
+  placing the career-site component one folder up (single-level imports) was the honest fix. The `@/` alias is
+  unusable inside `careersite/` because CI runs its tests under the root vitest config, whose alias points at the
+  admin `src`.
+- **RAW-IMPORT-DEPTH-1 — a test that must read a repo-root file uses the tokenContrast idiom** (`declare const
+  require` + `require('fs').readFileSync('vite.config.js', 'utf8')`, cwd-relative): `import x from
+  '../../vite.config.js?raw'` is a deep-relative import for the lint rule and this tsconfig carries no `@types/node`.
+- **SEAM-CLAIM-FILE-LINE-1 — a contract claim that changes FE behaviour is accepted with a file:line on the OTHER
+  side of the seam, never from a field-name grep.** "title_key is stamped only by workflow steps" was wrong: the BE
+  stamps through `catalogueKeys()` on every localized send (Notifier.php:153-155) and leaves the keys null by design
+  for tenant-authored texts (NotificationSendModule:358); the verifier read both and stopped a type-derived fallback
+  that would have overwritten what a tenant deliberately worded. Stamped key wins, null means the server text, no
+  derivation.
+- **AUDIT-FIX-SCOPE-1 — a transitive advisory is fixed with a TARGETED `npm update <package>`, and an audit fix is
+  judged on its lock diff, not its summary.** `npm audit fix --audit-level=high` also applied every non-breaking
+  moderate fix and bumped the lint toolchain (eslint 10.4.1 → 10.14.0, typescript-eslint 8.61.1 → 8.72.1) in one
+  lock change; that is a toolchain bucket with a whole-repo lint comparison, not a CI hotfix. `node_modules` is shared
+  with the landing worktrees through a symlink: never swap toolchain packages while a landing runs.
+- **SHARED-MACHINE-LOAD-1 — two managers share sixteen cores.** Twelve vitest workers beside five BE lanes measured
+  load 33. Agreed with CMBE: every FE vitest run (lanes, verifiers, gate-wt, `land.sh`) passes `--maxWorkers=4` while
+  BE lanes run; a full run is announced with "suite gestart" before it starts and is held back between the peer's
+  "keten gestart" and "keten klaar" (small landings, one at a time, continue); the peer announces "dev:reset start" /
+  "dev:reset klaar" around its landing (the FE repeats the smoke after "klaar") and stays at ≤ 5 lanes.
+- **LANDING-GATE-CAREERSITE-TSC-1 — a bucket that touches `careersite/**` also type-checks that app** (`tsc -p
+  careersite/tsconfig.json`; sharpens §16 LANDING-GATES-1's gate list; source 581b0d66): the root tsconfig includes
+  only `src`, so two TS2322 errors from vitest 5's generic mock type sat unseen in a career-site test until the K-012
+  lane tripped over them.
