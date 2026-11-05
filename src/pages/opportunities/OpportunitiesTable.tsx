@@ -138,7 +138,7 @@ export default function OpportunitiesTable({ rows, loading, error, onRowClick, s
       render: r => <span style={{ color: 'var(--text-muted)', fontSize: 12 }}>{formatDate(r.date)}</span> },
     // Shared Koios column factory (Danny 05-08 consistency pass) — same header,
     // sort and cell as every other entity table; sits right before owner (§3A).
-    makeKoiosColumn({ adviceOf, colored: colorKoios, label: t('common:koios.column', { defaultValue: 'Koios' }) }),
+    makeKoiosColumn({ adviceOf, colored: colorKoios, label: t('common:koios.column') }),
     // Owner — avatar + name. LAST column (§3A convention). The /opportunities
     // resource's owner is `{id, name}` only, no per-user colour field yet (verified
     // against OpportunityResource.php — BE gap, not a frontend bug), so `colorOwner`

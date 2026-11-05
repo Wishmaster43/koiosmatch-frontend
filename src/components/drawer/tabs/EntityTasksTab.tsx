@@ -183,7 +183,7 @@ function EntityTasksTabBody({ linkType, id, labels, extraLinks = [] }: Props) {
             style={{ flex: 1, border: 'none', background: 'transparent', outline: 'none', fontSize: 12, color: 'var(--text)' }} />
         </div>
         <DrawerFilterMenu filters={filterRows}
-          label={t('common:filters.button', { defaultValue: 'Filter' })}
+          label={t('common:filters.button')}
           title={t('common:filters.title')} clearAllLabel={t('common:filters.clearAll')} />
         {/* DRAWER-ADD-SHORT-1 (Danny 05-08): short — this tab always lives inside a
             drawer sub-tab, never a full page. */}

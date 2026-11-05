@@ -90,7 +90,7 @@ export default function Toaster() {
               </Button>
             )}
             <Button onClick={e => { e.stopPropagation(); remove(toast.id) }}
-              variant="ghost" iconOnly size="sm" aria-label={t('close', { defaultValue: 'Close' })}
+              variant="ghost" iconOnly size="sm" aria-label={t('close')}
               style={{ flexShrink: 0 }}>
               <X size={14} />
             </Button>

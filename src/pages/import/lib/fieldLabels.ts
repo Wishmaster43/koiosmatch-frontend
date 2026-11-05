@@ -35,7 +35,7 @@ const DEFAULT_LABELS: Record<string, FieldLabelRef> = {
   straat: { ns: 'customers', key: 'subModal.street' },
   huisnummer: { ns: 'customers', key: 'subModal.houseNumber' },
   toevoeging: { ns: 'customers', key: 'subModal.houseNumberSuffix' },
-  adresregel_2: { ns: 'settings', key: 'import.wizard.fields.addressLine2', defaultValue: 'Address line 2' },
+  adresregel_2: { ns: 'settings', key: 'import.wizard.fields.addressLine2' },
   postcode: { ns: 'customers', key: 'subModal.postalCode' },
   land: { ns: 'customers', key: 'subModal.country' },
   kostenplaats: { ns: 'customers', key: 'subModal.costCenter' },
@@ -51,15 +51,15 @@ const DEFAULT_LABELS: Record<string, FieldLabelRef> = {
   // NEW — no create modal exposes "which customer" as its own field (a modal is
   // always already scoped to one customer), so this cross-entity link column needs
   // its own label.
-  klant_naam: { ns: 'settings', key: 'import.wizard.fields.customerName', defaultValue: 'Customer name' },
+  klant_naam: { ns: 'settings', key: 'import.wizard.fields.customerName' },
   // NEW — no consent toggle for these two channels exists anywhere in the app yet.
-  whatsapp_toestemming: { ns: 'settings', key: 'import.wizard.fields.whatsappConsent', defaultValue: 'WhatsApp consent' },
-  email_toestemming: { ns: 'settings', key: 'import.wizard.fields.emailConsent', defaultValue: 'Email consent' },
+  whatsapp_toestemming: { ns: 'settings', key: 'import.wizard.fields.whatsappConsent' },
+  email_toestemming: { ns: 'settings', key: 'import.wizard.fields.emailConsent' },
   // English column names (new exports ship English headers).
   first_name: { ns: 'customers', key: 'subModal.firstName' },
   last_name: { ns: 'customers', key: 'subModal.lastName' },
   house_number_suffix: { ns: 'customers', key: 'subModal.houseNumberSuffix' },
-  address_line_2: { ns: 'settings', key: 'import.wizard.fields.addressLine2', defaultValue: 'Address line 2' },
+  address_line_2: { ns: 'settings', key: 'import.wizard.fields.addressLine2' },
   postal_code: { ns: 'customers', key: 'subModal.postalCode' },
   city: { ns: 'customers', key: 'modal.fields.city' },
   country: { ns: 'customers', key: 'subModal.country' },
@@ -67,13 +67,13 @@ const DEFAULT_LABELS: Record<string, FieldLabelRef> = {
   location_name: { ns: 'customers', key: 'subModal.locationName' },
   department_name: { ns: 'customers', key: 'subModal.departmentName' },
   mobile: { ns: 'customers', key: 'subModal.mobile' },
-  email_consent: { ns: 'settings', key: 'import.wizard.fields.emailConsent', defaultValue: 'Email consent' },
-  whatsapp_consent: { ns: 'settings', key: 'import.wizard.fields.whatsappConsent', defaultValue: 'WhatsApp consent' },
+  email_consent: { ns: 'settings', key: 'import.wizard.fields.emailConsent' },
+  whatsapp_consent: { ns: 'settings', key: 'import.wizard.fields.whatsappConsent' },
   vat_number: { ns: 'customers', key: 'overview.vat' },
   industry: { ns: 'customers', key: 'modal.fields.industry' },
   street: { ns: 'customers', key: 'subModal.street' },
   house_number: { ns: 'customers', key: 'subModal.houseNumber' },
-  billing_province: { ns: 'settings', key: 'import.wizard.fields.billingProvince', defaultValue: 'Billing province' },
+  billing_province: { ns: 'settings', key: 'import.wizard.fields.billingProvince' },
 }
 
 // Where the LINK meaning ("which location does this belong to") reads better than

@@ -100,13 +100,12 @@ describe('OutreachCreate · close without creating', () => {
     expect(createCampaign).not.toHaveBeenCalled()
   })
 
-  it('Annuleren closes the modal and never calls createCampaign', async () => {
+  it('the cancel button closes the modal and never calls createCampaign', async () => {
     const onClose = vi.fn()
     const user = userEvent.setup()
     render(<OutreachCreate onClose={onClose} onCreated={vi.fn()} />)
-    // t('common:cancel', { defaultValue: 'Cancel' }) resolves to its default
-    // when i18next has no loaded instance (no init in the test environment).
-    await user.click(screen.getByRole('button', { name: 'Cancel' }))
+    // No i18next instance is initialised here, so t('common:cancel') renders its key (the defaultValue is gone, §5 one source per label).
+    await user.click(screen.getByRole('button', { name: 'common:cancel' }))
     expect(onClose).toHaveBeenCalled()
     expect(createCampaign).not.toHaveBeenCalled()
   })

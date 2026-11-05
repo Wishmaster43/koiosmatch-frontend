@@ -73,7 +73,7 @@ export default function KoiosHeader({ connected, expanded, onNewChat, onToggleEx
       <Button variant="ghost" size="sm" iconOnly onClick={onToggleExpanded} aria-label={t(expanded ? 'collapse' : 'expand')} aria-expanded={expanded}>
         {expanded ? <Minimize2 size={15} /> : <Maximize2 size={15} />}
       </Button>
-      <Button variant="ghost" size="sm" iconOnly onClick={onClose} aria-label={t('common:close', { defaultValue: 'Sluiten' })}>
+      <Button variant="ghost" size="sm" iconOnly onClick={onClose} aria-label={t('common:close')}>
         <X size={15} />
       </Button>
     </div>

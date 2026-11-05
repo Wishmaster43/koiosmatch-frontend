@@ -167,7 +167,7 @@ export default function MatchesTable({
       cellStyle: { color: 'var(--text-muted)', fontSize: 12 }, render: r => r.date ? formatDate(r.date) : '—' },
     // Shared Koios column factory (Danny 05-08 consistency pass) — same header,
     // sort and cell as every other entity table; sits right before coupling/owner (§3A).
-    makeKoiosColumn({ adviceOf, colored: colorKoios, label: t('common:koios.column', { defaultValue: 'Koios' }) }),
+    makeKoiosColumn({ adviceOf, colored: colorKoios, label: t('common:koios.column') }),
     {
       // Backoffice coupling scanning aid (JOB2) — not sortable: a compound
       // two-system state has no single clean sort order, it's a glance aid.

@@ -24,12 +24,9 @@ interface AiGeneratedLabelProps {
 // text to the existing heading's mark instead (see KoiosAdviceBlock).
 export default function AiGeneratedLabel({ size = 11 }: AiGeneratedLabelProps) {
   const { t } = useTranslation('common')
-  // Both keys ship with a Dutch defaultValue so the label never shows a raw
-  // i18n key while the real translations land in the locale files (§5 — the
-  // keys still need translating in all five locales; this is only the
-  // fallback for the interim).
-  const hint = t('aiGeneratedHint', { defaultValue: 'Door Koios AI gegenereerd. Controleer voor gebruik.' })
-  const label = t('aiGenerated', { defaultValue: 'AI-gegenereerd' })
+  // Both labels come straight from the common namespace (present in every locale).
+  const hint = t('aiGeneratedHint')
+  const label = t('aiGenerated')
 
   return (
     <span title={hint} style={{ display: 'inline-flex', alignItems: 'center', gap: 4,

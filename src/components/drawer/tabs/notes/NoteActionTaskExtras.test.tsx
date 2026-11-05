@@ -9,7 +9,7 @@ import userEvent from '@testing-library/user-event'
 import NoteActionTaskExtras from './NoteActionTaskExtras'
 import type { NoteActionPanelItem } from './NoteActionsPanel'
 
-vi.mock('react-i18next', () => ({ useTranslation: () => ({ t: (k: string, o?: { defaultValue?: string }) => o?.defaultValue ?? k }) }))
+vi.mock('react-i18next', () => ({ useTranslation: () => ({ t: (k: string) => k }) }))
 vi.mock('@/i18n', () => ({ LOCALE_BY_LANG: { nl: 'nl-NL', en: 'en-GB' } }))
 vi.mock('@/lib/queries', () => ({ useUsers: () => ({ data: [
   { id: 'u1', name: 'Kelly Manager' },
@@ -32,7 +32,7 @@ describe('NoteActionTaskExtras', () => {
     const user = userEvent.setup()
     const onEdit = vi.fn()
     render(<NoteActionTaskExtras item={item()} index={2} onEdit={onEdit} />)
-    await user.click(screen.getByRole('button', { name: /Ikzelf \(standaard\)/ }))
+    await user.click(screen.getByRole('button', { name: /notesAssist.panel.assigneeSelf/ }))
     await user.click(await screen.findByText('Kelly Manager'))
     expect(onEdit).toHaveBeenCalledWith(2, { assignee_user_id: 'u1', assignee_label: 'Kelly Manager' })
   })
@@ -41,7 +41,7 @@ describe('NoteActionTaskExtras', () => {
     const user = userEvent.setup()
     const onEdit = vi.fn()
     render(<NoteActionTaskExtras item={item({ assignee_user_id: 'u1', assignee_label: 'Kelly Manager' })} index={0} onEdit={onEdit} />)
-    await user.click(screen.getByRole('button', { name: 'Terug naar mijzelf' }))
+    await user.click(screen.getByRole('button', { name: 'notesAssist.panel.assigneeClear' }))
     expect(onEdit).toHaveBeenCalledWith(0, { assignee_user_id: undefined, assignee_label: undefined })
   })
 
@@ -49,7 +49,7 @@ describe('NoteActionTaskExtras', () => {
     const user = userEvent.setup()
     const onEdit = vi.fn()
     const { rerender } = render(<NoteActionTaskExtras item={item()} index={1} onEdit={onEdit} />)
-    await user.click(screen.getByRole('button', { name: /Koppelen aan/ }))
+    await user.click(screen.getByRole('button', { name: 'notesAssist.panel.linkAdd' }))
     await user.click(screen.getByRole('button', { name: 'stub-pick-link' }))
     expect(onEdit).toHaveBeenCalledWith(1, { link_type: 'vacancy', link_id: 'v9', link_label: 'Verzorgende IG' })
 

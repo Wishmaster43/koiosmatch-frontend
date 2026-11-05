@@ -22,7 +22,7 @@ import userEvent from '@testing-library/user-event'
 import NoteComposer from './NoteComposer'
 import { chipInk } from '@/lib/tint'
 
-vi.mock('react-i18next', () => ({ useTranslation: () => ({ t: (k: string, opts?: { defaultValue?: string }) => opts?.defaultValue ?? k, i18n: { language: 'nl' } }) }))
+vi.mock('react-i18next', () => ({ useTranslation: () => ({ t: (k: string) => k, i18n: { language: 'nl' } }) }))
 vi.mock('@/lib/datetime', () => ({ useLocale: () => 'nl-NL' }))
 vi.mock('@/components/ui/RichTextEditor', () => ({
   // Renders `toolbarExtra` like the real editor does — the dictation mic lives in
@@ -116,11 +116,11 @@ describe('NoteComposer · popup lifecycle', () => {
     const { rerender } = render(<NoteComposer open initialNote={null}
       initialDraft={{ type: 'general', channel: '', title: 'x', body: '<p>y</p>' }} conceptRestored
       noteTypes={noteTypes} channels={[]} labels={labels} onSave={vi.fn()} onCancel={vi.fn()} />)
-    expect(screen.getByText('Concept hersteld. Nog niet opgeslagen.')).toBeInTheDocument()
+    expect(screen.getByText('noteConcept.restored')).toBeInTheDocument()
     rerender(<NoteComposer open initialNote={null}
       initialDraft={{ type: 'general', channel: '', title: 'x', body: '<p>y</p>' }}
       noteTypes={noteTypes} channels={[]} labels={labels} onSave={vi.fn()} onCancel={vi.fn()} />)
-    expect(screen.queryByText('Concept hersteld. Nog niet opgeslagen.')).toBeNull()
+    expect(screen.queryByText('noteConcept.restored')).toBeNull()
   })
 })
 

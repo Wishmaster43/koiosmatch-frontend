@@ -80,7 +80,7 @@ export default function NoteRow({
                 meta text, no icon — a pencil here read as a second edit BUTTON. */}
             {noteEdited(n) && (
               <span style={{ fontStyle: 'italic' }}>
-                · {t('notes.editedBy', { name: noteEditor(n), defaultValue: 'bewerkt door {{name}}' })}
+                · {t('notes.editedBy', { name: noteEditor(n) })}
               </span>
             )}
           </Caption>

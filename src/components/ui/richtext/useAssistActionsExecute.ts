@@ -88,7 +88,7 @@ export function useAssistActionsExecute(source: ExecuteSource = {}) {
       setStatus('success')
     } catch (err) {
       if (!aliveRef.current) return
-      setErrorMessage(extractApiError(err, t('notesAssist.execute.error', { defaultValue: 'Koios kon de acties niet starten.' })))
+      setErrorMessage(extractApiError(err, t('notesAssist.execute.error')))
       setStatus('error')
     }
     // source is a plain object the caller rebuilds each render from a

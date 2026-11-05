@@ -34,7 +34,7 @@ export function useMatchAdvice(): (m: MatchRow) => KoiosAdvice | null {
     return {
       action: rule.action,
       label: t('common:koios.actions.renew'),
-      reason: t(rule.reasonKey, { ...rule.reasonParams, defaultValue: 'The contract end date is approaching.' }),
+      reason: t(rule.reasonKey, { ...rule.reasonParams }),
       source: 'rules',
     }
   }, [t, statusMeta, renewWithinDays, renewUnit])

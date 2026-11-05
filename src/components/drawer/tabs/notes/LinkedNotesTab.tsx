@@ -101,7 +101,7 @@ export default function LinkedNotesTab({ entity, id, sub }: LinkedNotesTabProps)
             style={{ border: 'none', outline: 'none', fontSize: 12, color: 'var(--text)', background: 'none', flex: 1, minWidth: 0 }} />
         </div>
         <DrawerFilterMenu filters={filterRows}
-          label={t('filters.button', { defaultValue: 'Filter' })}
+          label={t('filters.button')}
           title={t('filters.title')} clearAllLabel={t('filters.clearAll')} />
       </div>
       {/* "Alleen directe notities" ON: this feed only ever carries is_direct:false

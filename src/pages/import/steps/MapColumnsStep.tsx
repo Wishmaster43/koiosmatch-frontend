@@ -103,7 +103,6 @@ export default function MapColumnsStep({ entity, headers, targetColumns, mapping
         <div style={{ marginTop: 16 }}>
           <CalloutBox variant="warning">
             {t('import.wizard.mapping.missingRequired', {
-              defaultValue: `Still required: ${missingRequired.map((column) => fieldLabel(t, entity, column)).join(', ')}`,
               fields: missingRequired.map((column) => fieldLabel(t, entity, column)).join(', '),
             })}
           </CalloutBox>
@@ -115,7 +114,7 @@ export default function MapColumnsStep({ entity, headers, targetColumns, mapping
           {t('back', { ns: 'common' })}
         </Button>
         <Button variant="primary" onClick={onNext} disabled={missingRequired.length > 0 || headers.length === 0}>
-          {t('import.wizard.next', { ns: 'settings', defaultValue: 'Next' })}
+          {t('import.wizard.next', { ns: 'settings' })}
         </Button>
       </div>
     </div>

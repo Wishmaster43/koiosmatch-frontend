@@ -72,11 +72,10 @@ export default function TenantUsageSettings() {
         <p style={{ fontSize: 12, color: 'var(--text-muted)', margin: 0 }}>
           {t('usage.subtitleTenant', {
             name: activeTenant?.name ?? '—',
-            defaultValue: 'Verbruik van {{name}} — alleen hoeveelheden voor je facturatie.',
           })}
         </p>
         <label style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-          <span style={{ fontSize: 12, color: 'var(--text-muted)' }}>{t('usage.month', { defaultValue: 'Maand' })}</span>
+          <span style={{ fontSize: 12, color: 'var(--text-muted)' }}>{t('usage.month')}</span>
           <SearchSelect
             options={months.map(m => ({ value: m.value, label: m.label }))}
             selected={[month]}
@@ -113,7 +112,7 @@ export default function TenantUsageSettings() {
         {/* KPI strip renders through the load too — its own skeleton state keeps
             the layout stable instead of popping in after the fetch. */}
         {phase !== 'error' && <TenantUsageKpiRow usage={usage} loading={phase === 'loading'} />}
-        {phase === 'loading' && <p style={{ fontSize: 13, color: 'var(--text-muted)', padding: 8 }}>{t('common.loadingShort', { defaultValue: 'Laden…' })}</p>}
+        {phase === 'loading' && <p style={{ fontSize: 13, color: 'var(--text-muted)', padding: 8 }}>{t('common.loadingShort')}</p>}
         {phase === 'error'   && <p style={{ fontSize: 13, color: 'var(--text-muted)', padding: 8 }}>{t('usage.loadError')}</p>}
 
         {phase === 'ready' && (
@@ -155,7 +154,7 @@ export default function TenantUsageSettings() {
         // breakdowns (§ usage details, 14-08). Same four-state handling as the
         // kpis tab: an error must never render as an innocent empty table (§3).
         <>
-          {phase === 'loading' && <p style={{ fontSize: 13, color: 'var(--text-muted)', padding: 8 }}>{t('common.loadingShort', { defaultValue: 'Laden…' })}</p>}
+          {phase === 'loading' && <p style={{ fontSize: 13, color: 'var(--text-muted)', padding: 8 }}>{t('common.loadingShort')}</p>}
           {phase === 'error'   && <p style={{ fontSize: 13, color: 'var(--text-muted)', padding: 8 }}>{t('usage.loadError')}</p>}
           {phase === 'ready' && (
             <>

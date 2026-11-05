@@ -49,6 +49,11 @@
     "notAsked": "Nog niet gevraagd",
     "unconfirmed": "Niet bevestigd"
   },
+  "documents": {
+    "name": "Naam",
+    "type": "Type",
+    "size": "Grootte"
+  },
   "upload": {
     "tooLarge": "Dit bestand is te groot voor de server. Kies een kleiner bestand.",
     "storageUnavailable": "Opslag is tijdelijk niet beschikbaar. Probeer het opnieuw.",
@@ -805,6 +810,8 @@
     "contractSent": "Voor deze match is onlangs al een contract verstuurd.",
     "twoWayOff": "De HelloFlex-koppeling werkt maar één kant op, dus contracten kunnen hier niet worden verstuurd.",
     "idempotencyKeyReused": "Deze actie is al met andere gegevens verstuurd. Probeer het opnieuw.",
+    "cvScanUnavailable": "De virusscanner is niet bereikbaar. Het cv is niet opgeslagen en er is niets verstuurd. Probeer het later opnieuw.",
+    "cvInfected": "Het cv is afgekeurd door de virusscanner en verwijderd. Er is niets verstuurd.",
     "documentNotAvailable": "Dit document is nog niet beschikbaar: de virusscan is niet afgerond of heeft het bestand geweigerd.",
     "tenantNotReady": "Dit bureau wordt nog ingericht of de inrichting is mislukt. Probeer het later opnieuw of kies een ander bureau.",
     "aiDisclosureMissing": "De interview-intro mist de verplichte AI-vermelding; pas de template aan voordat je dit activeert.",

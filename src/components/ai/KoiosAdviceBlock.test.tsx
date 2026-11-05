@@ -14,10 +14,6 @@ vi.mock('react-i18next', async () => {
         if (key === 'common:koios.adviceAskTemplate' && opts?.advice) {
           return `Wij adviseren: ${opts.advice}. Waarmee kan ik je helpen, welke actie(s) kan ik ondernemen?`
         }
-        // Specific keys return their known values
-        if (key === 'common:aiGeneratedHint' && opts?.defaultValue) {
-          return opts.defaultValue as string
-        }
         // For other keys, return the key as-is (matching the existing test pattern)
         return key
       },
@@ -39,7 +35,7 @@ describe('KoiosAdviceBlock', () => {
     // (defaultValue fallback, §5) instead of the generic "Koios AI" default —
     // the heading text already names "Koios AI adviseert" (ai.title), so the
     // mark's tooltip is the one place left to add without a double badge.
-    expect(screen.getByTitle('Door Koios AI gegenereerd. Controleer voor gebruik.')).toBeInTheDocument()
+    expect(screen.getByTitle('common:aiGeneratedHint')).toBeInTheDocument()
     expect(screen.getByText('Completeness')).toBeInTheDocument()
     expect(screen.getByText('Engagement')).toBeInTheDocument()
     expect(screen.queryByText('Profile is 40% complete.')).toBeNull()

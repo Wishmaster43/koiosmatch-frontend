@@ -11,8 +11,7 @@
  * checklist (useTaskLookups, stubbed below with controllable refs so a test can
  * pick a value without a real /task-* fetch). No i18n instance is bootstrapped
  * here (mirrors OpportunitiesTab.test.tsx's own documented convention), so t()
- * echoes the raw key except where the component passes an explicit defaultValue
- * (the Filter button label falls back to 'Filter').
+ * echoes the raw key (KEY-ECHO-TEST-1), so the Filter button is found by its key.
  */
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { render, screen, fireEvent } from '@testing-library/react'
@@ -130,7 +129,7 @@ describe('EntityTasksTab · filter menu (status/type/priority)', () => {
     mockTasks({ items: [task()] })
     render(<EntityTasksTab linkType="contact" id="c-1" labels={labels} />)
     expect(screen.queryByRole('button', { name: 'filters.allStatuses' })).toBeNull()
-    expect(screen.getByRole('button', { name: 'Filter' })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'common:filters.button' })).toBeInTheDocument()
   })
 
   it('narrows to the picked STATUS only', async () => {
@@ -140,7 +139,7 @@ describe('EntityTasksTab · filter menu (status/type/priority)', () => {
       task({ id: 2, title: 'Done Task', status: 'done', completed_at: '2026-07-01' }),
     ] })
     render(<EntityTasksTab linkType="contact" id="c-1" labels={labels} />)
-    await user.click(screen.getByRole('button', { name: 'Filter' }))
+    await user.click(screen.getByRole('button', { name: 'common:filters.button' }))
     await user.click(screen.getByRole('checkbox', { name: 'Afgerond' }))
     expect(screen.getByText('Done Task')).toBeInTheDocument()
     expect(screen.queryByText('Open Task')).toBeNull()
@@ -153,7 +152,7 @@ describe('EntityTasksTab · filter menu (status/type/priority)', () => {
       task({ id: 2, title: 'Gewone taak', type: 'task' }),
     ] })
     render(<EntityTasksTab linkType="contact" id="c-1" labels={labels} />)
-    await user.click(screen.getByRole('button', { name: 'Filter' }))
+    await user.click(screen.getByRole('button', { name: 'common:filters.button' }))
     await user.click(screen.getByRole('checkbox', { name: 'Belafspraak' }))
     expect(screen.getByText('Bel taak')).toBeInTheDocument()
     expect(screen.queryByText('Gewone taak')).toBeNull()
@@ -166,7 +165,7 @@ describe('EntityTasksTab · filter menu (status/type/priority)', () => {
       task({ id: 2, title: 'Rustige taak', priority: 'low' }),
     ] })
     render(<EntityTasksTab linkType="contact" id="c-1" labels={labels} />)
-    await user.click(screen.getByRole('button', { name: 'Filter' }))
+    await user.click(screen.getByRole('button', { name: 'common:filters.button' }))
     await user.click(screen.getByRole('checkbox', { name: 'Hoog' }))
     expect(screen.getByText('Urgente taak')).toBeInTheDocument()
     expect(screen.queryByText('Rustige taak')).toBeNull()
@@ -181,7 +180,7 @@ describe('EntityTasksTab · filter menu (status/type/priority)', () => {
     ] })
     /* eslint-enable no-restricted-syntax */
     render(<EntityTasksTab linkType="contact" id="c-1" labels={labels} />)
-    await user.click(screen.getByRole('button', { name: 'Filter' }))
+    await user.click(screen.getByRole('button', { name: 'common:filters.button' }))
     await user.click(screen.getByRole('checkbox', { name: 'Belafspraak' }))
     expect(screen.getByText('Bel taak')).toBeInTheDocument()
     expect(screen.queryByText('Gewone taak')).toBeNull()
@@ -191,7 +190,7 @@ describe('EntityTasksTab · filter menu (status/type/priority)', () => {
     const user = userEvent.setup()
     mockTasks({ items: [task()] })
     render(<EntityTasksTab linkType="contact" id="c-1" labels={labels} />)
-    await user.click(screen.getByRole('button', { name: 'Filter' }))
+    await user.click(screen.getByRole('button', { name: 'common:filters.button' }))
     await user.click(screen.getByRole('checkbox', { name: 'Afgerond' }))
     await user.click(screen.getByRole('checkbox', { name: 'Belafspraak' }))
     expect(screen.getByText('2')).toBeInTheDocument()
@@ -204,7 +203,7 @@ describe('EntityTasksTab · filter menu (status/type/priority)', () => {
       task({ id: 2, title: 'Done Task', status: 'done' }),
     ] })
     render(<EntityTasksTab linkType="contact" id="c-1" labels={labels} />)
-    await user.click(screen.getByRole('button', { name: 'Filter' }))
+    await user.click(screen.getByRole('button', { name: 'common:filters.button' }))
     await user.click(screen.getByRole('checkbox', { name: 'Afgerond' }))
     expect(screen.queryByText('Open Task')).toBeNull()
     await user.click(screen.getByRole('button', { name: 'common:filters.clearAll' }))
@@ -216,7 +215,7 @@ describe('EntityTasksTab · filter menu (status/type/priority)', () => {
     const user = userEvent.setup()
     mockTasks({ items: [task()] })
     render(<EntityTasksTab linkType="contact" id="c-1" labels={labels} />)
-    await user.click(screen.getByRole('button', { name: 'Filter' }))
+    await user.click(screen.getByRole('button', { name: 'common:filters.button' }))
     expect(screen.getByRole('dialog')).toBeInTheDocument()
     await user.keyboard('{Escape}')
     expect(screen.queryByRole('dialog')).toBeNull()
@@ -228,7 +227,7 @@ describe('EntityTasksTab · filter menu (status/type/priority)', () => {
     prioritiesRef.current = []
     mockTasks({ items: [task()] })
     render(<EntityTasksTab linkType="contact" id="c-1" labels={labels} />)
-    await user.click(screen.getByRole('button', { name: 'Filter' }))
+    await user.click(screen.getByRole('button', { name: 'common:filters.button' }))
     expect(screen.queryByRole('checkbox', { name: 'Belafspraak' })).toBeNull()
     expect(screen.queryByRole('checkbox', { name: 'Hoog' })).toBeNull()
     // The status row is unaffected — the seed lookup always carries entries.

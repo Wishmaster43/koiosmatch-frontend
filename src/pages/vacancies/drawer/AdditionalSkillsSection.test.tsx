@@ -28,7 +28,7 @@ describe('AdditionalSkillsSection · list rendering (§3B: vertical list, never 
 
   it('shows the empty-state text and the add trigger when there are no skills yet', () => {
     render(<AdditionalSkillsSection skills={[]} onAddSkill={vi.fn()} onEditSkill={vi.fn()} onRemoveSkill={vi.fn()} />)
-    expect(screen.getByText('No required skills yet.')).toBeInTheDocument()
+    expect(screen.getByText('details.skillsEmpty')).toBeInTheDocument()
     expect(screen.getByRole('button', { name: /details\.addSkill/ })).toBeInTheDocument()
   })
 })

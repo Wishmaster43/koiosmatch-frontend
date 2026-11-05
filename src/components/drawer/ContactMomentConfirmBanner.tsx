@@ -35,7 +35,7 @@ export default function ContactMomentConfirmBanner({ channel, saving, onConfirm,
       {/* Text on its own tint reads chipInk, never the raw colour (§4/§6, measured 2.4-3.0:1 in lib/tint.ts). */}
       <Button variant="ghost" size="sm" onClick={onConfirm} disabled={saving} data-testid={`contact-moment-confirm-${channel}`}
         style={{ color: chipInk('var(--color-info)'), fontWeight: 600 }}>
-        {t('common:confirm', { defaultValue: 'OK' })}
+        {t('common:confirm')}
       </Button>
       <Button variant="ghost" size="sm" onClick={onDismiss} disabled={saving}>
         {t('profile.contactMomentDismiss')}

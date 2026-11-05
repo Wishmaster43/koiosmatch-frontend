@@ -72,7 +72,7 @@ export function EventCombobox({ value, onChange, label }: {
                    background: 'var(--surface)', boxShadow: 'var(--shadow-float)' }}>
           {filtered.length === 0 ? (
             <div style={{ padding: '9px 12px', fontSize: 12, color: 'var(--text-muted)' }}>
-              {t('fields.multiselectNoResults', { defaultValue: 'Geen resultaten.' })}
+              {t('fields.multiselectNoResults')}
             </div>
           ) : filtered.map(key => {
             const active = key === value

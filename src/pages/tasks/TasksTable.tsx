@@ -145,7 +145,7 @@ export default function TasksTable({
       render: r => (r.team ? <SoftChip label={r.team.name} color={r.team.color} /> : dash) },
     // Shared Koios column factory (Danny 05-08 consistency pass) — same header,
     // sort and cell as every other entity table; sits right before assignee (§3A).
-    makeKoiosColumn({ adviceOf, colored: colorKoios, label: t('common:koios.column', { defaultValue: 'Koios' }) }),
+    makeKoiosColumn({ adviceOf, colored: colorKoios, label: t('common:koios.column') }),
     // Assignee — avatar + name (neutral grey fallback when uncoloured), or a
     // building-icon bubble + "Bureau" when nobody is assigned (same avatar-shaped
     // footprint either way — BE gap: the task resource carries no branch/location

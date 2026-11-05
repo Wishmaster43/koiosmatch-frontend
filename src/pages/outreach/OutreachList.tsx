@@ -84,7 +84,7 @@ export default function OutreachList({ campaigns, loading, error, onReload, onOp
       sortValue: (r: Campaign) => r.created_at ?? '', render: (r: Campaign) => formatDate(r.created_at) },
     // Shared Koios column factory (Danny 05-08 consistency pass) — same header,
     // sort and cell as every other entity table; sits right before owner (§3A).
-    makeKoiosColumn<Campaign>({ adviceOf, colored: colorKoios, label: t('common:koios.column', { defaultValue: 'Koios' }) }),
+    makeKoiosColumn<Campaign>({ adviceOf, colored: colorKoios, label: t('common:koios.column') }),
     // Owner — avatar + name. LAST column (§3A convention). The campaign resource's
     // owner is `{id, name}` only, no per-user colour field yet (verified against
     // OutreachCampaignResource.php — BE gap), so `colorOwner` toggles between
@@ -116,7 +116,7 @@ export default function OutreachList({ campaigns, loading, error, onReload, onOp
       rows={campaigns}
       onRowClick={onOpen ? (r: Campaign) => onOpen(r.id) : undefined}
       loading={loading}
-      loadingText={t('common:loadingShort', { defaultValue: '…' })}
+      loadingText={t('common:loadingShort')}
       emptyText={emptyText ?? t('empty')}
       selectable={selectable}
       selectedIds={selectedIds as Set<string | number> | undefined}

@@ -34,6 +34,7 @@
  * document row to DocumentRow, and the tiny pure helpers to hooks/documentsTabUtils
  * — this file now only wires them together and owns selection/rename/delete/preview.
  */
+import DocumentsListHeader from '@/components/documents/DocumentsListHeader'
 import { useState, useRef, useId } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Search, X, Download, Trash2, AlertTriangle } from 'lucide-react'
@@ -217,13 +218,8 @@ export default function DocumentsTab({ customerId, locations = [], departments =
         )}
         {!loading && !error && docs.length === 0 && pending.length === 0 && <div style={{ fontSize: 12, color: 'var(--text-muted)' }}>{t('documents.empty')}</div>}
         {!loading && !error && docs.length > 0 && (
-          <div style={{ display: 'grid', gridTemplateColumns: DOC_GRID_COLUMNS, alignItems: 'center', padding: '4px 10px', fontSize: 11, fontWeight: 600, color: 'var(--text-muted)', marginBottom: 4 }}>
-            {/* Select-all operates on the currently filtered, downloadable rows only. */}
-            <input type="checkbox" aria-label={t('documents.selectAll')} checked={allFilteredSelected} onChange={toggleSelectAll}
-              ref={el => { if (el) el.indeterminate = !allFilteredSelected && filteredDownloadableKeys.some(k => selected.has(k)) }}
-              style={{ accentColor: 'var(--color-primary)' }} />
-            <span>{t('documents.name')}</span><span>{t('documents.type')}</span><span>{t('documents.size')}</span>
-          </div>
+          <DocumentsListHeader gridTemplateColumns={DOC_GRID_COLUMNS} selectAllLabel={t('documents.selectAll')} allSelected={allFilteredSelected}
+            indeterminate={!allFilteredSelected && filteredDownloadableKeys.some(k => selected.has(k))} onToggleAll={toggleSelectAll} />
         )}
         {filteredDocs.map(d => (
           <DocumentRow key={String(d.id ?? d._i)} doc={d} index={d._i}

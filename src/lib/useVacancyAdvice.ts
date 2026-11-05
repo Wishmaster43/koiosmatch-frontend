@@ -31,8 +31,8 @@ export function useVacancyAdvice(): (v: Vacancy) => KoiosAdvice | null {
     if (rule.action === 'none') return null
     return {
       action: rule.action,
-      label: t('common:koios.actions.attention', { defaultValue: 'Attention' }),
-      reason: t(rule.reasonKey, { ...rule.reasonParams, defaultValue: 'No applications yet, posted {{days}} days ago.' }),
+      label: t('common:koios.actions.attention'),
+      reason: t(rule.reasonKey, { ...rule.reasonParams }),
       source: 'rules',
     }
   }, [t, staleDays, staleUnit])

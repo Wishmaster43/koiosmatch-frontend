@@ -43,7 +43,7 @@ export default function AdditionalSkillsSection({ skills, onAddSkill, onEditSkil
   return (
     <AddableSection
       title={t('details.skills')}
-      emptyText={t('details.skillsEmpty', { defaultValue: 'No required skills yet.' })}
+      emptyText={t('details.skillsEmpty')}
       addLabel={t('details.addSkill')}
       items={skills}
       fields={fields}

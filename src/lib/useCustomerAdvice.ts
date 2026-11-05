@@ -31,7 +31,7 @@ export function useCustomerAdvice(): (c: Customer) => KoiosAdvice | null {
     return {
       action: rule.action,
       label: t('common:koios.actions.follow_up'),
-      reason: t(rule.reasonKey, { defaultValue: 'No open vacancies — follow up with this customer.' }),
+      reason: t(rule.reasonKey),
       source: 'rules',
     }
   }, [t])

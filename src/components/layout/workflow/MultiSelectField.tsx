@@ -142,7 +142,7 @@ export default function MultiSelectField({ field, value, onChange }: {
           )}
           {endpoint && remoteLoading ? (
             <div style={{ padding: '9px 12px', fontSize: 12, color: 'var(--text-muted)' }}>
-              {t('fields.multiselectLoading', { defaultValue: 'Opties laden…' })}
+              {t('fields.multiselectLoading')}
             </div>
           ) : endpoint && remoteError ? (
             <div style={{ padding: '9px 12px', fontSize: 12, color: 'var(--color-danger-text)' }}>
@@ -150,11 +150,11 @@ export default function MultiSelectField({ field, value, onChange }: {
             </div>
           ) : freeEntry ? (
             <div style={{ padding: '9px 12px', fontSize: 12, color: 'var(--text-muted)' }}>
-              {t('fields.multiselectFreeEntry', { defaultValue: 'Typ een waarde en druk op Enter om toe te voegen.' })}
+              {t('fields.multiselectFreeEntry')}
             </div>
           ) : filtered.length === 0 ? (
             <div style={{ padding: '9px 12px', fontSize: 12, color: 'var(--text-muted)' }}>
-              {t('fields.multiselectNoResults', { defaultValue: 'Geen resultaten.' })}
+              {t('fields.multiselectNoResults')}
             </div>
           ) : filtered.map(o => {
             const active = selected.includes(o.value)

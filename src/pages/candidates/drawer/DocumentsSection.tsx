@@ -7,6 +7,7 @@
  * the search/filter/selection UI state and renders DocumentRow (§3 size
  * discipline: dumb row renderer + a thin container).
  */
+import DocumentsListHeader from '@/components/documents/DocumentsListHeader'
 import { useState, useRef } from 'react'
 import type { ChangeEvent } from 'react'
 import { useTranslation } from 'react-i18next'
@@ -177,13 +178,8 @@ export default function DocumentsSection({ c, onRefresh }: { c: Candidate; onRef
         onUploadAll={uploadAll} onCancel={cancelPending} />
       {docs.length === 0 && pending.length === 0 && <div style={{ fontSize: 12, color: 'var(--text-muted)' }}>{t('sections.documentsEmpty')}</div>}
       {docs.length > 0 && (
-        <div style={{ display: 'grid', gridTemplateColumns: DOC_GRID_COLUMNS, alignItems: 'center', padding: '4px 10px', fontSize: 11, fontWeight: 600, color: 'var(--text-muted)', marginBottom: 4 }}>
-          {/* Select-all operates on the currently filtered, downloadable rows only. */}
-          <input type="checkbox" aria-label={t('documents.selectAll')} checked={allFilteredSelected} onChange={toggleSelectAll}
-            ref={el => { if (el) el.indeterminate = !allFilteredSelected && filteredDownloadableKeys.some(k => selected.has(k)) }}
-            style={{ accentColor: 'var(--color-primary)' }} />
-          <span>{t('documents.name')}</span><span>{t('documents.type')}</span><span>{t('documents.size')}</span>
-        </div>
+        <DocumentsListHeader gridTemplateColumns={DOC_GRID_COLUMNS} selectAllLabel={t('documents.selectAll')} allSelected={allFilteredSelected}
+          indeterminate={!allFilteredSelected && filteredDownloadableKeys.some(k => selected.has(k))} onToggleAll={toggleSelectAll} />
       )}
       {filteredDocs.map(d => {
           const i = d._i

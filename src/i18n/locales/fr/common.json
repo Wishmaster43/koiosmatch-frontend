@@ -49,6 +49,11 @@
     "notAsked": "Pas encore demandé",
     "unconfirmed": "Non confirmé"
   },
+  "documents": {
+    "name": "Nom",
+    "type": "Type",
+    "size": "Taille"
+  },
   "upload": {
     "tooLarge": "Ce fichier est trop volumineux pour le serveur. Veuillez choisir un fichier plus petit.",
     "storageUnavailable": "Le stockage est temporairement indisponible. Veuillez réessayer.",
@@ -805,6 +810,8 @@
     "contractSent": "Un contrat a déjà été envoyé récemment pour ce match.",
     "twoWayOff": "La liaison HelloFlex est à sens unique, les contrats ne peuvent donc pas être envoyés d'ici.",
     "idempotencyKeyReused": "Cette action a déjà été envoyée avec d'autres données. Veuillez réessayer.",
+    "cvScanUnavailable": "L'antivirus est injoignable. Le CV n'a pas été enregistré et rien n'a été envoyé. Réessayez plus tard.",
+    "cvInfected": "Le CV a été refusé par l'antivirus et supprimé. Rien n'a été envoyé.",
     "documentNotAvailable": "Ce document n'est pas encore disponible : l'analyse antivirus n'est pas terminée ou a rejeté le fichier.",
     "tenantNotReady": "Cette agence est en cours de configuration ou sa configuration a échoué. Réessayez plus tard ou choisissez une autre agence.",
     "aiDisclosureMissing": "L'introduction de l'entretien ne contient pas la mention IA obligatoire ; modifiez le modèle avant de l'activer.",

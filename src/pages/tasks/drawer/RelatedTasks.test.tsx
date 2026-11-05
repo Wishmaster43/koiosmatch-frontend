@@ -143,7 +143,7 @@ describe('RelatedTasks (task drawer, T5: generalised beyond candidate-only)', ()
     render(<RelatedTasks task={task()} />)
     await waitFor(() => expect(mockGet).toHaveBeenCalledWith('/tasks', { params: { candidate: 'c1' } }))
     // TASK-FILTER-MENU-1: the status picker now lives behind the shared Filter button.
-    await user.click(screen.getByRole('button', { name: 'Filter' }))
+    await user.click(screen.getByRole('button', { name: 'common:filters.button' }))
     await user.click(screen.getByRole('checkbox', { name: 'Te doen' }))
     await waitFor(() => expect(mockGet).toHaveBeenLastCalledWith('/tasks', { params: { candidate: 'c1', status: ['uuid-todo'] } }))
     // Unchecking the same box clears the filter and re-fetches without `status`.
@@ -162,7 +162,7 @@ describe('RelatedTasks · type/priority filter menu (TASK-FILTER-MENU-1)', () =>
     const user = userEvent.setup()
     render(<RelatedTasks task={task()} />)
     await waitFor(() => expect(mockGet).toHaveBeenCalledWith('/tasks', { params: { candidate: 'c1' } }))
-    await user.click(screen.getByRole('button', { name: 'Filter' }))
+    await user.click(screen.getByRole('button', { name: 'common:filters.button' }))
     await user.click(screen.getByRole('checkbox', { name: 'Belafspraak' }))
     await waitFor(() => expect(mockGet).toHaveBeenLastCalledWith('/tasks', { params: { candidate: 'c1', type: ['uuid-call'] } }))
   })
@@ -172,7 +172,7 @@ describe('RelatedTasks · type/priority filter menu (TASK-FILTER-MENU-1)', () =>
     const user = userEvent.setup()
     render(<RelatedTasks task={task()} />)
     await waitFor(() => expect(mockGet).toHaveBeenCalledWith('/tasks', { params: { candidate: 'c1' } }))
-    await user.click(screen.getByRole('button', { name: 'Filter' }))
+    await user.click(screen.getByRole('button', { name: 'common:filters.button' }))
     await user.click(screen.getByRole('checkbox', { name: 'Hoog' }))
     await waitFor(() => expect(mockGet).toHaveBeenLastCalledWith('/tasks', { params: { candidate: 'c1', priority: ['uuid-high'] } }))
   })
@@ -180,7 +180,7 @@ describe('RelatedTasks · type/priority filter menu (TASK-FILTER-MENU-1)', () =>
   it('the toolbar no longer renders a standing status dropdown — only ONE Filter button', async () => {
     render(<RelatedTasks task={task()} />)
     expect(screen.queryByRole('button', { name: /filters\.choose|filters\.selectedCount/ })).toBeNull()
-    expect(await screen.findByRole('button', { name: 'Filter' })).toBeInTheDocument()
+    expect(await screen.findByRole('button', { name: 'common:filters.button' })).toBeInTheDocument()
   })
 
   it('the badge counts every active selection, and clear-all resets the fetch to no filters', async () => {
@@ -188,7 +188,7 @@ describe('RelatedTasks · type/priority filter menu (TASK-FILTER-MENU-1)', () =>
     const user = userEvent.setup()
     render(<RelatedTasks task={task()} />)
     await waitFor(() => expect(mockGet).toHaveBeenCalledWith('/tasks', { params: { candidate: 'c1' } }))
-    await user.click(screen.getByRole('button', { name: 'Filter' }))
+    await user.click(screen.getByRole('button', { name: 'common:filters.button' }))
     await user.click(screen.getByRole('checkbox', { name: 'Te doen' }))
     await user.click(screen.getByRole('checkbox', { name: 'Hoog' }))
     expect(screen.getByText('2')).toBeInTheDocument()
@@ -201,7 +201,7 @@ describe('RelatedTasks · type/priority filter menu (TASK-FILTER-MENU-1)', () =>
   it('Escape closes the filter panel', async () => {
     const user = userEvent.setup()
     render(<RelatedTasks task={task()} />)
-    await user.click(await screen.findByRole('button', { name: 'Filter' }))
+    await user.click(await screen.findByRole('button', { name: 'common:filters.button' }))
     expect(screen.getByRole('dialog')).toBeInTheDocument()
     await user.keyboard('{Escape}')
     expect(screen.queryByRole('dialog')).toBeNull()

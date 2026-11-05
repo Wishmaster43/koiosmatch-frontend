@@ -22,7 +22,7 @@ export function useTaskAdvice(): (r: Task) => KoiosAdvice | null {
     if (!isTaskOverdue(r)) return null
     return {
       action: 'overdue',
-      label: t('common:koios.actions.overdue', { defaultValue: 'Overdue' }),
+      label: t('common:koios.actions.overdue'),
       reason: t('koios.reasons.overdue'),
       source: 'rules',
     }

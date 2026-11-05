@@ -21,8 +21,8 @@ export function useCampaignAdvice(): (c: Campaign) => KoiosAdvice | null {
     if (rule.action === 'none') return null
     return {
       action: rule.action,
-      label: t('common:koios.actions.attention', { defaultValue: 'Attention' }),
-      reason: t(rule.reasonKey, { defaultValue: 'This campaign needs a look.' }),
+      label: t('common:koios.actions.attention'),
+      reason: t(rule.reasonKey),
       source: 'rules',
     }
   }, [t])

@@ -63,8 +63,8 @@ const PERMISSION_LABEL: Record<string, { key: string }> = {
 // Per-permission tooltip overrides — a hint that explains WHAT gets synced when
 // the action name alone doesn't (candidates.sync mirrors Shiftmanager). Every
 // other toggle keeps the raw permission name as its title.
-const PERMISSION_HINT: Record<string, { key: string; defaultValue: string }> = {
-  'candidates.sync': { key: 'roles.hints.candidatesSync', defaultValue: 'SM-spiegel' },
+const PERMISSION_HINT: Record<string, { key: string }> = {
+  'candidates.sync': { key: 'roles.hints.candidatesSync' },
 }
 
 // One card per group row, mirroring the settings expand-card convention
@@ -134,14 +134,14 @@ export function PermissionMatrix({ groups, hasPermission, onToggle, onSetMany }:
     const label = override
       ? t(override.key)
       : CRUD_ACTIONS.includes(action) ? actionLabel(action) : otherLabel(action)
-    return group === 'page' ? t('roles.pageAccess', { label, defaultValue: `Pagina: ${label}` }) : label
+    return group === 'page' ? t('roles.pageAccess', { label }) : label
   }
   // A toggle's tooltip: PERMISSION_HINT override when the raw permission name
   // alone doesn't explain the effect, else the raw name (useful when reporting
   // a bug against a specific permission).
   const permissionTitle = (perm: Permission): string => {
     const hint = PERMISSION_HINT[perm.name]
-    return hint ? t(hint.key, { defaultValue: hint.defaultValue }) : perm.name
+    return hint ? t(hint.key) : perm.name
   }
 
   // Every permission across every currently-visible group (module-gated groups
@@ -169,7 +169,7 @@ export function PermissionMatrix({ groups, hasPermission, onToggle, onSetMany }:
         // Computed once so the same string drives both the visible chip AND the
         // row button's accessible name (explicit aria-label, not DOM-flattening —
         // deterministic for AT and for tests alike).
-        const chipLabel = t('roles.matrixAllowed', { active: activeCount, total: perms.length, defaultValue: `${activeCount}/${perms.length} toegestaan` })
+        const chipLabel = t('roles.matrixAllowed', { active: activeCount, total: perms.length })
         return (
           <div key={group} style={rowCardStyle}>
             <button type="button" onClick={() => toggleExpanded(group)} aria-expanded={isOpen}

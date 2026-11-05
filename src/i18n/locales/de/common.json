@@ -49,6 +49,11 @@
     "notAsked": "Noch nicht gefragt",
     "unconfirmed": "Nicht bestätigt"
   },
+  "documents": {
+    "name": "Name",
+    "type": "Typ",
+    "size": "Größe"
+  },
   "upload": {
     "tooLarge": "Diese Datei ist für den Server zu groß. Bitte wählen Sie eine kleinere Datei.",
     "storageUnavailable": "Der Speicher ist vorübergehend nicht verfügbar. Bitte versuchen Sie es erneut.",
@@ -805,6 +810,8 @@
     "contractSent": "Für dieses Match wurde kürzlich bereits ein Vertrag gesendet.",
     "twoWayOff": "Die HelloFlex-Anbindung ist einseitig, daher können hier keine Verträge gesendet werden.",
     "idempotencyKeyReused": "Diese Aktion wurde bereits mit anderen Daten gesendet. Bitte versuchen Sie es erneut.",
+    "cvScanUnavailable": "Der Virenscanner ist nicht erreichbar. Der Lebenslauf wurde nicht gespeichert und nichts wurde gesendet. Versuchen Sie es später erneut.",
+    "cvInfected": "Der Lebenslauf wurde vom Virenscanner abgelehnt und verworfen. Es wurde nichts gesendet.",
     "documentNotAvailable": "Dieses Dokument ist noch nicht verfügbar: Die Virenprüfung ist nicht abgeschlossen oder hat die Datei abgelehnt.",
     "tenantNotReady": "Diese Agentur wird noch eingerichtet oder die Einrichtung ist fehlgeschlagen. Versuchen Sie es später erneut oder wählen Sie eine andere Agentur.",
     "aiDisclosureMissing": "Im Interview-Intro fehlt der verpflichtende KI-Hinweis; passen Sie die Vorlage an, bevor Sie dies aktivieren.",

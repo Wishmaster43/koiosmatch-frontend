@@ -289,7 +289,7 @@ export default function VacanciesTable({ rows, loading, selectedId, onSelect, on
     },
     // Shared Koios column factory (Danny 05-08 consistency pass) — same header,
     // sort and cell as every other entity table; sits right before owner (§3A).
-    makeKoiosColumn({ adviceOf, colored: colorKoios, label: t('common:koios.column', { defaultValue: 'Koios' }) }),
+    makeKoiosColumn({ adviceOf, colored: colorKoios, label: t('common:koios.column') }),
     {
       key: 'owner', header: t('columns.owner'), sortable: true, sortValue: r => r.owner?.name ?? '',
       render: r => (

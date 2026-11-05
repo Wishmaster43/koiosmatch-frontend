@@ -177,7 +177,7 @@ export default function RelatedTasks({ task }: { task: TaskDetail }) {
           <HeaderSearch onSearch={setQuery} placeholder={t('related.searchPlaceholder')} width="100%" />
         </div>
         <DrawerFilterMenu filters={filterRows}
-          label={t('common:filters.button', { defaultValue: 'Filter' })}
+          label={t('common:filters.button')}
           title={t('common:filters.title')} clearAllLabel={t('common:filters.clearAll')} />
       </div>
 

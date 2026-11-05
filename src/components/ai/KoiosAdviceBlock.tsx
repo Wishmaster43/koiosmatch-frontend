@@ -112,7 +112,7 @@ export default function KoiosAdviceBlock({
           NOT a bare icon (§6) — the mark only gains the AI-Act disclosure hint as a tooltip,
           never a second stacked label next to an already-explicit heading. */}
       <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 6 }}>
-        <KoiosAiMark size={16} title={t('common:aiGeneratedHint', { defaultValue: 'Door Koios AI gegenereerd. Controleer voor gebruik.' })} />
+        <KoiosAiMark size={16} title={t('common:aiGeneratedHint')} />
         <GroupLabel as="span" style={{ flex: 1 }}>{t('ai.title')}</GroupLabel>
         <span style={{ fontSize: 10, padding: '2px 7px', borderRadius: 99, background: 'var(--button-fill)', color: 'var(--button-ink)', fontWeight: 600 }}>{t('ai.beta')}</span>
         {onRefresh && (

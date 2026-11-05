@@ -212,8 +212,8 @@ export default function RichTextEditor({ value, onChange, expanded, onToggleExpa
             `display: contents` keeps the sr-only label out of the toolbar's flex
             flow so the trigger's own footprint/gap is unchanged. */}
         {showLanguage && (
-          <span style={{ display: 'contents' }} title={t('editor.language', { defaultValue: 'Taal' })}>
-            <span id={langLabelId} className="sr-only">{t('editor.language', { defaultValue: 'Taal' })}</span>
+          <span style={{ display: 'contents' }} title={t('editor.language')}>
+            <span id={langLabelId} className="sr-only">{t('editor.language')}</span>
             {/* DROPDOWN-CLEAR-1: language is required for spellcheck; clearing to '' breaks editor locale logic */}
             <SelectMenu aria-labelledby={langLabelId} value={lang} onChange={pickLang}
               clearable={false}

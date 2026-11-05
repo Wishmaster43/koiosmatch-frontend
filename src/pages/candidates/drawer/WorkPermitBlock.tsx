@@ -131,7 +131,7 @@ export default function WorkPermitBlock({ c, onSave, autoEditSignal }: Candidate
     // in this file) — once picked, a work-permit type must be releasable back to none.
     return (
       <CreatableSelect value={form.workPermitType || null} onChange={(v: string) => setF('workPermitType', v)} allowCreate={false}
-        clearable clearLabel={t('profile.workPermitType', { defaultValue: 'Type werkvergunning' })}
+        clearable clearLabel={t('profile.workPermitType')}
         placeholder={t('common:select')} style={inputStyle}
         options={workPermitTypes.map(w => ({ value: w.value, label: w.label }))} />
     )
@@ -156,16 +156,15 @@ export default function WorkPermitBlock({ c, onSave, autoEditSignal }: Candidate
   )
 
   // KAND-WERKVERGUNNING-2: these three keys now exist in all five locales
-  // (candidates.json — nl/en/de/fr/es); `defaultValue` is kept as a harmless
-  // safety net (mirrors BackgroundTab.tsx's identical KAND-REFERENTIES-1 pattern).
+  // (candidates.json, all seven locales); no literal fallback is kept.
   return (
     <div>
-      <GroupHeader title={t('profile.groupWorkPermit', { defaultValue: 'Werkvergunning' })}>
+      <GroupHeader title={t('profile.groupWorkPermit')}>
         <EditControls editing={editing} onSave={save} onCancel={cancel} onStart={() => setEditing(true)} />
       </GroupHeader>
       <GroupCard>
-        {field('workPermitType', t('profile.workPermitType', { defaultValue: 'Type werkvergunning' }))}
-        {field('workPermitValidUntil', t('profile.workPermitValidUntil', { defaultValue: 'Geldig tot' }))}
+        {field('workPermitType', t('profile.workPermitType'))}
+        {field('workPermitValidUntil', t('profile.workPermitValidUntil'))}
       </GroupCard>
     </div>
   )

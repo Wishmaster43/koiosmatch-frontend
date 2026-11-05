@@ -166,7 +166,7 @@ export default function TenantUsageBreakdownTable({ tenantId, month }: Props) {
         )}
       </div>
 
-      {phase === 'loading' && <p style={{ fontSize: 13, color: 'var(--text-muted)', padding: 8 }}>{t('common.loadingShort', { defaultValue: 'Laden…' })}</p>}
+      {phase === 'loading' && <p style={{ fontSize: 13, color: 'var(--text-muted)', padding: 8 }}>{t('common.loadingShort')}</p>}
       {phase === 'error' && <p style={{ fontSize: 13, color: 'var(--text-muted)', padding: 8 }}>{t('usage.breakdown.loadError')}</p>}
       {phase === 'ready' && (
         // Table left, its own picture right (Danny 17-08).

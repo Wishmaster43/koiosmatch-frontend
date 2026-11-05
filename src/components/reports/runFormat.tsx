@@ -76,7 +76,7 @@ export function StatusBadge({ status, reason }: { status?: string; reason?: stri
 export function StepStatusBadge({ status, ok }: { status?: string; ok?: boolean }) {
   const { t } = useTranslation('reports')
   if (status === 'skipped') {
-    return <SoftChip label={t('runs.status.skipped', { defaultValue: 'Skipped' })} color="var(--color-info)" round size={11} />
+    return <SoftChip label={t('runs.status.skipped')} color="var(--color-info)" round size={11} />
   }
   return <StatusBadge status={status ?? (ok ? 'success' : 'failed')} />
 }
@@ -88,7 +88,7 @@ export function DryRunBanner() {
   const { t } = useTranslation('reports')
   return (
     <CalloutBox variant="info">
-      {t('runs.dryRun.banner', { defaultValue: 'Dry run: send steps skipped' })}
+      {t('runs.dryRun.banner')}
     </CalloutBox>
   )
 }

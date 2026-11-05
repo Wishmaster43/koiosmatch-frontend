@@ -13,7 +13,7 @@ import userEvent from '@testing-library/user-event'
 import AssistActionsResultsPanel from './AssistActionsResultsPanel'
 import { executeRichTextActions, fetchWorkflowRun } from './assistActionsExecuteApi'
 
-vi.mock('react-i18next', () => ({ useTranslation: () => ({ t: (k: string, opts?: { defaultValue?: string }) => opts?.defaultValue ?? k }) }))
+vi.mock('react-i18next', () => ({ useTranslation: () => ({ t: (k: string) => k }) }))
 // AssistActionItemCard (rendered by this panel) now calls useDateFormat for the
 // appointment start preview. useDateFormat (@/lib/datetime) imports `@/i18n`,
 // which needs a REAL react-i18next (initReactI18next) to initialise — stub
@@ -60,7 +60,7 @@ describe('AssistActionsResultsPanel · before Uitvoeren', () => {
     const onApplyAsText = vi.fn()
     vi.mocked(executeRichTextActions).mockResolvedValue([])
     render(<AssistActionsResultsPanel items={items} onApplyAsText={onApplyAsText} onDiscard={vi.fn()} />)
-    await user.click(screen.getByRole('button', { name: /uitvoeren/i }))
+    await user.click(screen.getByRole('button', { name: /notesAssist.execute.run/i }))
     expect(onApplyAsText).toHaveBeenCalledTimes(1)
     expect(executeRichTextActions).toHaveBeenCalled()
   })
@@ -69,7 +69,7 @@ describe('AssistActionsResultsPanel · before Uitvoeren', () => {
     const user = userEvent.setup()
     const onDiscard = vi.fn()
     render(<AssistActionsResultsPanel items={items} source={source} onApplyAsText={vi.fn()} onDiscard={onDiscard} />)
-    await user.click(screen.getByText('Verwerpen'))
+    await user.click(screen.getByText('notesAssist.discard'))
     expect(onDiscard).toHaveBeenCalledTimes(1)
     expect(executeRichTextActions).not.toHaveBeenCalled()
   })
@@ -84,7 +84,7 @@ describe('AssistActionsResultsPanel · Uitvoeren', () => {
     const user = userEvent.setup()
     render(<AssistActionsResultsPanel items={items} source={source} onApplyAsText={vi.fn()} onDiscard={vi.fn()} />)
 
-    await user.click(screen.getByText('Uitvoeren'))
+    await user.click(screen.getByText('notesAssist.execute.run'))
 
     expect(executeRichTextActions).toHaveBeenCalledWith(
       [
@@ -101,7 +101,7 @@ describe('AssistActionsResultsPanel · Uitvoeren', () => {
     vi.mocked(executeRichTextActions).mockResolvedValueOnce([{ title: 'Bel terug', type: 'task', status: 'pending' }])
     const user = userEvent.setup()
     render(<AssistActionsResultsPanel items={[items[0]]} source={source} onApplyAsText={vi.fn()} onDiscard={vi.fn()} />)
-    await user.click(screen.getByText('Uitvoeren'))
+    await user.click(screen.getByText('notesAssist.execute.run'))
     await screen.findByText('notesAssist.execute.confirm')
 
     vi.mocked(executeRichTextActions).mockResolvedValueOnce([{ title: 'Bel terug', type: 'task', status: 'executed', run_id: 'r9' }])
@@ -118,9 +118,9 @@ describe('AssistActionsResultsPanel · Uitvoeren', () => {
     vi.mocked(executeRichTextActions).mockResolvedValue([{ title: 'Stuur bevestiging', type: 'whatsapp', status: 'forbidden' }])
     const user = userEvent.setup()
     render(<AssistActionsResultsPanel items={[items[1]]} source={source} onApplyAsText={vi.fn()} onDiscard={vi.fn()} />)
-    await user.click(screen.getByText('Uitvoeren'))
+    await user.click(screen.getByText('notesAssist.execute.run'))
 
-    const forbidden = await screen.findByText('Geen rechten')
+    const forbidden = await screen.findByText('notesAssist.execute.forbidden')
     expect(forbidden.closest('span')).toHaveAttribute('title', 'notesAssist.execute.forbiddenReason.whatsapp')
     expect(screen.queryByText('notesAssist.execute.confirm')).not.toBeInTheDocument()
   })
@@ -132,9 +132,9 @@ describe('AssistActionsResultsPanel · Uitvoeren', () => {
     ])
     const user = userEvent.setup()
     render(<AssistActionsResultsPanel items={[items[1]]} source={source} onApplyAsText={vi.fn()} onDiscard={vi.fn()} />)
-    await user.click(screen.getByText('Uitvoeren'))
+    await user.click(screen.getByText('notesAssist.execute.run'))
 
-    const forbidden = await screen.findByText('Geen rechten')
+    const forbidden = await screen.findByText('notesAssist.execute.forbidden')
     expect(forbidden.closest('span')).toHaveAttribute('title', 'Deze actie is uitgeschakeld voor jouw rol.')
   })
 
@@ -148,14 +148,14 @@ describe('AssistActionsResultsPanel · Uitvoeren', () => {
     }])
     const user = userEvent.setup()
     render(<AssistActionsResultsPanel items={[items[0]]} source={source} onApplyAsText={vi.fn()} onDiscard={vi.fn()} />)
-    await user.click(screen.getByText('Uitvoeren'))
+    await user.click(screen.getByText('notesAssist.execute.run'))
 
     expect(await screen.findByText('Workflow-staffel is vol.')).toBeInTheDocument()
     // The test's i18n stub doesn't interpolate {{}} placeholders — it renders
     // the raw defaultValue, which still proves the budget line and upgrade
     // hint blocks are wired to item.budget rather than silently dropped.
-    expect(screen.getByText('{{used}}/{{allowance}} {{unit}}')).toBeInTheDocument()
-    expect(screen.getByText('Upgrade naar {{tier}}')).toBeInTheDocument()
+    expect(screen.getByText('notesAssist.execute.budgetLine')).toBeInTheDocument()
+    expect(screen.getByText('notesAssist.execute.upgradeHint')).toBeInTheDocument()
     expect(screen.queryByText('notesAssist.execute.confirm')).not.toBeInTheDocument()
   })
 
@@ -168,7 +168,7 @@ describe('AssistActionsResultsPanel · Uitvoeren', () => {
     ])
     const user = userEvent.setup()
     render(<AssistActionsResultsPanel items={[items[0]]} source={source} onApplyAsText={vi.fn()} onDiscard={vi.fn()} />)
-    await user.click(screen.getByText('Uitvoeren'))
+    await user.click(screen.getByText('notesAssist.execute.run'))
 
     const confirmBtn = await screen.findByText('notesAssist.execute.confirm')
     expect(confirmBtn.closest('span')).toHaveAttribute('title', expect.stringContaining('Selectiebeslissing'))
@@ -181,7 +181,7 @@ describe('AssistActionsResultsPanel · Uitvoeren', () => {
     vi.mocked(executeRichTextActions).mockResolvedValue([{ ...draftItem, status: 'pending' }])
     const user = userEvent.setup()
     render(<AssistActionsResultsPanel items={[draftItem]} source={source} onApplyAsText={vi.fn()} onDiscard={vi.fn()} />)
-    await user.click(screen.getByText('Uitvoeren'))
+    await user.click(screen.getByText('notesAssist.execute.run'))
 
     const draft = await screen.findByText('Hoi, hierbij een korte update over je sollicitatie.')
     expect(draft).toHaveAttribute('title', 'Hoi, hierbij een korte update over je sollicitatie.')
@@ -191,8 +191,8 @@ describe('AssistActionsResultsPanel · Uitvoeren', () => {
     vi.mocked(executeRichTextActions).mockResolvedValue([{ title: 'Bel terug', type: 'task', status: 'unsupported' }])
     const user = userEvent.setup()
     render(<AssistActionsResultsPanel items={[items[0]]} source={source} onApplyAsText={vi.fn()} onDiscard={vi.fn()} />)
-    await user.click(screen.getByText('Uitvoeren'))
-    expect(await screen.findByText('Nog niet ondersteund')).toBeInTheDocument()
+    await user.click(screen.getByText('notesAssist.execute.run'))
+    expect(await screen.findByText('notesAssist.execute.unsupported')).toBeInTheDocument()
     expect(screen.queryByText('notesAssist.execute.confirm')).not.toBeInTheDocument()
   })
 
@@ -201,7 +201,7 @@ describe('AssistActionsResultsPanel · Uitvoeren', () => {
     vi.mocked(fetchWorkflowRun).mockResolvedValue({ id: 'r1', workflow_id: 'w1', workflow_name: 'Koios: maak taak', status: 'running' })
     const user = userEvent.setup()
     render(<AssistActionsResultsPanel items={[items[0]]} source={source} onApplyAsText={vi.fn()} onDiscard={vi.fn()} />)
-    await user.click(screen.getByText('Uitvoeren'))
+    await user.click(screen.getByText('notesAssist.execute.run'))
     await user.click(await screen.findByText('notesAssist.execute.executed'))
 
     expect(fetchWorkflowRun).toHaveBeenCalledWith('r1')
@@ -213,11 +213,11 @@ describe('AssistActionsResultsPanel · Uitvoeren', () => {
     vi.mocked(executeRichTextActions).mockResolvedValue([{ title: 'Bel terug', type: 'task', status: 'pending' }])
     const user = userEvent.setup()
     render(<AssistActionsResultsPanel items={[items[0]]} source={source} onApplyAsText={vi.fn()} onDiscard={vi.fn()} />)
-    await user.click(screen.getByText('Uitvoeren'))
+    await user.click(screen.getByText('notesAssist.execute.run'))
     await screen.findByText('notesAssist.execute.confirm')
 
-    await user.click(screen.getByText('Klaar'))
-    expect(screen.getByText('Uitvoeren')).toBeInTheDocument()
+    await user.click(screen.getByText('notesAssist.execute.done'))
+    expect(screen.getByText('notesAssist.execute.run')).toBeInTheDocument()
     expect(screen.queryByText('notesAssist.execute.confirm')).not.toBeInTheDocument()
   })
 

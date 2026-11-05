@@ -93,7 +93,7 @@ export function buildFieldDiff(entry: AuditEntry | null | undefined, t: TFunctio
   if (!attrs || typeof attrs !== 'object' || Array.isArray(attrs)) return []
   const before = (changes?.old && typeof changes.old === 'object') ? changes.old : {}
   const isCreate = entry?.event === 'created'
-  const empty = t('audit.emptyValue', { defaultValue: 'Empty' })
+  const empty = t('audit.emptyValue')
   // Renders one changed value for display: null/empty become the empty label, booleans/arrays get readable text, and a nested object falls back to compact JSON rather than '[object Object]'.
   const fmt = (v: unknown): string => {
     if (v === null || v === undefined || v === '') return empty

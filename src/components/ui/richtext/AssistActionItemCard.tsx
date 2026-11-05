@@ -68,8 +68,8 @@ export default function AssistActionItemCard({ item, onConfirm, onViewRun }: Ass
   // Only whatsapp/email items carry a draft message; only appointment items
   // carry a proposed start — both optional (older/synthetic items lack them).
   const isMessageType = item.type === 'whatsapp' || item.type === 'email'
-  const draftLabel = t('notesAssist.execute.draftMessage', { defaultValue: 'Draft message' })
-  const proposedTimeLabel = t('notesAssist.execute.proposedTime', { defaultValue: 'Proposed time' })
+  const draftLabel = t('notesAssist.execute.draftMessage')
+  const proposedTimeLabel = t('notesAssist.execute.proposedTime')
 
   return (
     <div style={cardStyle}>
@@ -94,7 +94,7 @@ export default function AssistActionItemCard({ item, onConfirm, onViewRun }: Ass
         onViewRun ? (
           // Success-coloured STATUS text (state colour, not button identity) with
           // the run link on the whole affordance.
-          <button type="button" onClick={onViewRun} title={t('notesAssist.execute.viewRun', { defaultValue: 'Bekijk workflow-run' })}
+          <button type="button" onClick={onViewRun} title={t('notesAssist.execute.viewRun')}
             // eslint-disable-next-line huisstijlLegacy/no-restricted-syntax -- status-coloured inline link-chip: success ink is the state signal (§4), Button's tones have no success ink variant
             style={{ display: 'inline-flex', alignItems: 'center', gap: 4, fontSize: 11, fontWeight: 500,
               color: 'var(--color-success-text)', background: 'none', border: 'none', cursor: 'pointer', padding: 0 }}>
@@ -121,7 +121,7 @@ export default function AssistActionItemCard({ item, onConfirm, onViewRun }: Ass
               {item.confirmErrorKind === 'sessionExpired'
                 ? t('notesAssist.execute.confirmSessionExpired')
                 : item.confirmErrorKind === 'notApplied'
-                  ? t('notesAssist.execute.confirmNotApplied', { defaultValue: 'De server nam de bevestiging niet aan, probeer het nogmaals' })
+                  ? t('notesAssist.execute.confirmNotApplied')
                   : t('notesAssist.execute.confirmFailed')}
             </span>
           )}
@@ -161,7 +161,7 @@ export default function AssistActionItemCard({ item, onConfirm, onViewRun }: Ass
       {item.status === 'forbidden' && (
         <span title={item.reason ?? t(`notesAssist.execute.forbiddenReason.${item.type}`)}
           style={{ display: 'inline-flex', alignItems: 'center', gap: 4, fontSize: 11, color: 'var(--color-danger-text)', cursor: 'help' }}>
-          <ShieldAlert size={13} /> {t('notesAssist.execute.forbidden', { defaultValue: 'Geen rechten' })}
+          <ShieldAlert size={13} /> {t('notesAssist.execute.forbidden')}
         </span>
       )}
 
@@ -171,7 +171,7 @@ export default function AssistActionItemCard({ item, onConfirm, onViewRun }: Ass
       {item.status === 'budget_exceeded' && (
         <span style={{ display: 'inline-flex', flexDirection: 'column', alignItems: 'flex-end', gap: 2 }}>
           <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4, fontSize: 11, color: 'var(--color-warning-text)' }}>
-            <AlertTriangle size={13} /> {item.reason ?? t('notesAssist.execute.budgetExceeded', { defaultValue: 'Workflow-staffel vol' })}
+            <AlertTriangle size={13} /> {item.reason ?? t('notesAssist.execute.budgetExceeded')}
           </span>
           {item.budget?.used != null && item.budget?.allowance != null && (
             <Caption as="span">
@@ -182,13 +182,12 @@ export default function AssistActionItemCard({ item, onConfirm, onViewRun }: Ass
                 unit: item.budget.unit
                   ? t(`notesAssist.execute.budgetUnits.${item.budget.unit}`, { defaultValue: item.budget.unit })
                   : '',
-                defaultValue: '{{used}}/{{allowance}} {{unit}}',
               })}
             </Caption>
           )}
           {item.budget?.upgrade_hint?.next_tier_label && (
             <Caption as="span">
-              {t('notesAssist.execute.upgradeHint', { tier: item.budget.upgrade_hint.next_tier_label, defaultValue: 'Upgrade naar {{tier}}' })}
+              {t('notesAssist.execute.upgradeHint', { tier: item.budget.upgrade_hint.next_tier_label })}
             </Caption>
           )}
         </span>
@@ -202,7 +201,7 @@ export default function AssistActionItemCard({ item, onConfirm, onViewRun }: Ass
       {item.status === 'unsupported' && (
         <Caption as="span" title={item.reason}
           style={{ display: 'inline-flex', alignItems: 'center', gap: 4, fontStyle: 'italic' }}>
-          <HelpCircle size={13} /> {t('notesAssist.execute.unsupported', { defaultValue: 'Nog niet ondersteund' })}
+          <HelpCircle size={13} /> {t('notesAssist.execute.unsupported')}
         </Caption>
       )}
     </div>

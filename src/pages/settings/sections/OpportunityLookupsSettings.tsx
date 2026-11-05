@@ -53,13 +53,10 @@ export default function OpportunityLookupsSettings() {
           <StatusListEditor withColor withIcon withValueSlug
             title={t('opportunityLookups.stages.title')} subtitle={t('opportunityLookups.stages.subtitle')}
             endpoint="/opportunity-stages" addLabel={t('opportunityLookups.add')}
-            // defaultValue: the ns/key pair is reported to the owning lane for the
-            // five locale bundles (§5) rather than hand-edited here (out of scope
-            // for this task) — the fallback keeps the UI in real English meanwhile.
             flagFields={[
-              { key: 'is_won', label: t('opportunityLookups.stages.isWon', { defaultValue: 'Won stage' }),
+              { key: 'is_won', label: t('opportunityLookups.stages.isWon'),
                 description: t('opportunityLookups.stages.isWonHint') },
-              { key: 'is_lost', label: t('opportunityLookups.stages.isLost', { defaultValue: 'Lost stage' }),
+              { key: 'is_lost', label: t('opportunityLookups.stages.isLost'),
                 description: t('opportunityLookups.stages.isLostHint') },
             ]} />
         )}

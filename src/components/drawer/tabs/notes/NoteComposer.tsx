@@ -239,7 +239,7 @@ export default function NoteComposer({ open, initialNote, noteTypes, channels, l
           {/* CONCEPT-NOTE-1: an earlier cancelled draft came back — say so
               honestly (it is restored, not saved). */}
           {conceptRestored && (
-            <Caption as="div">{t('noteConcept.restored', { defaultValue: 'Concept hersteld. Nog niet opgeslagen.' })}</Caption>
+            <Caption as="div">{t('noteConcept.restored')}</Caption>
           )}
           {/* The five shared fields (type · channel · title · editor · assist) — the
               SAME NoteFields the per-note popout window renders. The pop-out icon

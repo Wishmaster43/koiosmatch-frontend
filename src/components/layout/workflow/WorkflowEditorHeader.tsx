@@ -235,7 +235,6 @@ export default function WorkflowEditorHeader({
             <Caption>
               {t('runControl.budgetLine', {
                 used: runBudget.used, allowance: runBudget.allowance, unit: runBudget.unit ?? '',
-                defaultValue: '{{used}}/{{allowance}} {{unit}}',
               })}
             </Caption>
             {upgradeHref && (

@@ -164,7 +164,7 @@ export default function OutreachCreate({ onClose, onCreated }: Props) {
         {error && <div role="alert" style={{ fontSize: 12, color: 'var(--color-danger-text)', marginTop: 12 }}>{t('create.error')}</div>}
       </div>
 
-      <ModalFooter onCancel={onClose} cancelLabel={t('common:cancel', { defaultValue: 'Cancel' })}
+      <ModalFooter onCancel={onClose} cancelLabel={t('common:cancel')}
         onSubmit={submit} submitLabel={saving ? t('create.saving') : t('create.submit')} disabled={saving || !canSubmit} />
     </FloatingPanel>
   )

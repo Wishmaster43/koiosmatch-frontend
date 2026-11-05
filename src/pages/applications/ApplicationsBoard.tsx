@@ -69,7 +69,7 @@ function BoardCard({ app, onDragStart, onClick, selected }: {
       {app.task && (
         <div style={{ display: 'flex', alignItems: 'flex-start', gap: 6, background: 'var(--color-primary-bg)',
           borderRadius: 6, padding: '5px 8px', marginBottom: 8 }}>
-          <KoiosAiMark size={16} title={t('aiGeneratedHint', { defaultValue: 'Door Koios AI gegenereerd — controleer voor gebruik.' })} />
+          <KoiosAiMark size={16} title={t('aiGeneratedHint')} />
           <span style={{ fontSize: 11, color: 'var(--color-primary-text)', fontWeight: 500,
             display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>
             {app.task}

@@ -36,9 +36,8 @@ export function EducationTab({ items = [], onAdd, onEdit, onRemove, documents = 
     { key: 'school',    label: t('addFields.institution'), half: true },
     // KAND-NIVEAU-1: a pick-only dropdown (own row, full width) — AddForm's `options`
     // field now renders the house CreatableSelect (ALWAYS-SEARCHABLE-1, Danny 08-08,
-    // AddForm.tsx), never a native <select>. `defaultValue` stays as a harmless belt-
-    // and-braces fallback (the key already exists in every locale).
-    { key: 'level_id',  label: t('addFields.educationLevel', { defaultValue: 'Niveau' }), options: levelOptions },
+    // AddForm.tsx), never a native <select>.
+    { key: 'level_id',  label: t('addFields.educationLevel'), options: levelOptions },
     { key: 'start',     label: t('addFields.startDate'), half: true, date: true },
     { key: 'end',       label: t('addFields.endDate'),   half: true, date: true,
       altLabel: t('addFields.expectedEnd'), altLabelWhen: 'inProgress' },

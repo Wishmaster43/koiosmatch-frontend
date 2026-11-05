@@ -17,7 +17,7 @@ import type { TFunction } from 'i18next'
 import { notify } from '@/lib/notify'
 import type { NotePreviousVersion } from '../NotesTab'
 
-const unavailable = (t: TFunction) => t('notes.restoreUnavailable', { defaultValue: 'There is no previous version to restore.' })
+const unavailable = (t: TFunction) => t('notes.restoreUnavailable')
 
 interface Options {
   onFetchPreviousVersion?: (i: number) => Promise<NotePreviousVersion | null>
@@ -51,12 +51,12 @@ export function useNoteRestorePrevious({ onFetchPreviousVersion, onRestorePrevio
           : ''
         confirm(
           savedAt
-            ? t('notes.restoreConfirm', { date: savedAt, defaultValue: 'Restore the version from {{date}}?' })
-            : t('notes.restoreConfirmNoDate', { defaultValue: 'Restore the previous version?' }),
+            ? t('notes.restoreConfirm', { date: savedAt })
+            : t('notes.restoreConfirmNoDate'),
           () => {
             onRestorePreviousNote?.(i)
               .then(landed => notify('info', landed
-                ? t('notes.restoreNotice', { defaultValue: 'Restored. You can undo this once more.' })
+                ? t('notes.restoreNotice')
                 : unavailable(t)))
               .catch(() => notify('info', unavailable(t)))
           },

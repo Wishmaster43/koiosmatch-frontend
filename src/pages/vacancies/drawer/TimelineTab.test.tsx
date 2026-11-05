@@ -101,12 +101,13 @@ describe('TimelineTab', () => {
 describe('TimelineTab · AI-generated disclosure (AI-ACT-1)', () => {
   it('shows the AI-generated label on an ai-flagged event', () => {
     renderTab([event({ id: `note-${UUID}`, ai: true })])
-    expect(screen.getByText('AI-gegenereerd')).toBeInTheDocument()
+    // KEY-ECHO: i18n is not initialised here, so the AI label renders its key (its defaultValue is gone, §5 one source per label).
+    expect(screen.getByText('aiGenerated')).toBeInTheDocument()
   })
 
   it('shows nothing extra on a human-authored event', () => {
     renderTab([event({ id: `note-${UUID}`, ai: false })])
-    expect(screen.queryByText('AI-gegenereerd')).toBeNull()
+    expect(screen.queryByText('aiGenerated')).toBeNull()
   })
 })
 

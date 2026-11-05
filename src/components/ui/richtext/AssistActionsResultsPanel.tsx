@@ -99,10 +99,10 @@ export default function AssistActionsResultsPanel({ items, source, onApplyAsText
               exec.preview(items)
             }}>
             {exec.status === 'loading' ? <Spinner size={13} /> : <Play size={13} />}
-            {t('notesAssist.execute.run', { defaultValue: 'Uitvoeren' })}
+            {t('notesAssist.execute.run')}
           </Button>
           <Button variant="secondary" size="sm" onClick={onDiscard}>
-            <X size={13} /> {t('notesAssist.discard', { defaultValue: 'Verwerpen' })}
+            <X size={13} /> {t('notesAssist.discard')}
           </Button>
         </div>
       </div>
@@ -117,10 +117,10 @@ export default function AssistActionsResultsPanel({ items, source, onApplyAsText
           onConfirm={(force) => exec.confirm(i, undefined, force)}
           onViewRun={it.status === 'executed' && it.run_id ? () => viewRun(it.run_id as string) : undefined} />
       ))}
-      {runLoading && <Caption as="div">{t('notesAssist.execute.loadingRun', { defaultValue: 'Run laden…' })}</Caption>}
+      {runLoading && <Caption as="div">{t('notesAssist.execute.loadingRun')}</Caption>}
       <div>
         <Button variant="secondary" size="sm" onClick={exec.reset}>
-          <X size={13} /> {t('notesAssist.execute.done', { defaultValue: 'Klaar' })}
+          <X size={13} /> {t('notesAssist.execute.done')}
         </Button>
       </div>
       {/* HUISSTIJL-1: RunDetailDrawer (src/components/reports, out of scope) types

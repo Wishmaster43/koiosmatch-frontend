@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
+import DocumentsListHeader from '@/components/documents/DocumentsListHeader'
 import type { ChangeEvent } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Search, X, Download, Trash2 } from 'lucide-react'
@@ -188,10 +189,10 @@ export default function DocumentsTab({ vacancy: v }: { vacancy: VacancyDetail })
             {/* r4 finding 1's twin (customers DocumentsTab converted the same round):
                 the bulk pills are house Buttons, never hand-rolled tints. */}
             <Button variant="soft" size="sm" onClick={downloadSelected} style={{ flexShrink: 0 }}>
-              <Download size={11} /> {t('documents.downloadSelected', { count: selected.size, defaultValue: 'Download ({{count}})' })}
+              <Download size={11} /> {t('documents.downloadSelected', { count: selected.size })}
             </Button>
             <Button variant="dangerSoft" size="sm" onClick={() => setConfirmDelete({ kind: 'many' })} style={{ flexShrink: 0 }}>
-              <Trash2 size={11} /> {t('documents.deleteSelected', { count: selected.size, defaultValue: 'Delete ({{count}})' })}
+              <Trash2 size={11} /> {t('documents.deleteSelected', { count: selected.size })}
             </Button>
           </>
         )}
@@ -238,13 +239,8 @@ export default function DocumentsTab({ vacancy: v }: { vacancy: VacancyDetail })
         <div style={{ fontSize: 12, color: 'var(--text-muted)' }}>{t('documents.noResults')}</div>
       ) : (
         <>
-          <div style={{ display: 'grid', gridTemplateColumns: DOC_GRID_COLUMNS, alignItems: 'center', padding: '4px 10px', fontSize: 11, fontWeight: 600, color: 'var(--text-muted)', marginBottom: 4 }}>
-            {/* Select-all operates on the currently filtered, downloadable rows only. */}
-            <input type="checkbox" aria-label={t('common:selectAll', { defaultValue: 'Select all' })} checked={allFilteredSelected} onChange={toggleSelectAll}
-              ref={el => { if (el) el.indeterminate = !allFilteredSelected && filteredDownloadableKeys.some(k => selected.has(k)) }}
-              style={{ accentColor: 'var(--color-primary)' }} />
-            <span>{t('documents.name', { defaultValue: 'Name' })}</span><span>{t('documents.type')}</span><span>{t('documents.size', { defaultValue: 'Size' })}</span>
-          </div>
+          <DocumentsListHeader gridTemplateColumns={DOC_GRID_COLUMNS} selectAllLabel={t('common:selectAll')} allSelected={allFilteredSelected}
+            indeterminate={!allFilteredSelected && filteredDownloadableKeys.some(k => selected.has(k))} onToggleAll={toggleSelectAll} />
           {filteredDocs.map(d => {
             const i = d._i
             const key = docKey(d, i)

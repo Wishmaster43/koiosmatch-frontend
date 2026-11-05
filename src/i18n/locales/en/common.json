@@ -49,6 +49,11 @@
     "notAsked": "Not asked yet",
     "unconfirmed": "Not confirmed"
   },
+  "documents": {
+    "name": "Name",
+    "type": "Type",
+    "size": "Size"
+  },
   "upload": {
     "tooLarge": "This file is too large for the server. Please choose a smaller file.",
     "storageUnavailable": "Storage is temporarily unavailable. Please try again.",
@@ -805,6 +810,8 @@
     "contractSent": "A contract was already sent for this match recently.",
     "twoWayOff": "The HelloFlex link is one-way, so contracts cannot be sent from here.",
     "idempotencyKeyReused": "This action was already sent with different data. Please try again.",
+    "cvScanUnavailable": "The virus scanner is unreachable. The CV was not stored and nothing was sent. Try again later.",
+    "cvInfected": "The CV was rejected by the virus scanner and discarded. Nothing was sent.",
     "documentNotAvailable": "This document is not available yet: the virus scan has not finished or has rejected the file.",
     "tenantNotReady": "This agency is still being set up, or its setup failed. Try again later or choose another agency.",
     "aiDisclosureMissing": "The interview intro is missing the mandatory AI disclosure; adjust the template before you activate this.",

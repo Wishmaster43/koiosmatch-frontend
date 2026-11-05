@@ -56,8 +56,8 @@ describe('RunStepList · WF-DRYRUN-FE-1 skipped rows', () => {
     ]
     render(<RunStepList steps={skipped} />)
     // No real i18next instance runs in this file (mirrors the rest of this
-    // suite) — t()'s own `defaultValue` option resolves instead of the raw key.
-    expect(screen.getByText('Skipped')).toBeInTheDocument()
+    // suite), so the row renders the key itself (its defaultValue is gone, §5).
+    expect(screen.getByText('runs.status.skipped')).toBeInTheDocument()
     expect(screen.getByText('Dry-run: niet verzonden')).toBeInTheDocument()
     // The real outcome next to it still reads as a normal success badge.
     expect(screen.getByText('success')).toBeInTheDocument()

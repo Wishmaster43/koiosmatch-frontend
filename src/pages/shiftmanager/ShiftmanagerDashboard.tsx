@@ -155,7 +155,7 @@ export default function ShiftmanagerDashboard() {
         <div className="overflow-hidden bg-(--surface) rounded-xl" style={{ border: '1px solid var(--border)' }}>
           <DashboardCardHeader title={t('dashboard.recentRuns')} viewAllLabel={t('dashboard.viewAll')} />
           {runs.length === 0 && (
-            <div className="px-4 py-6 text-xs text-center text-(--text-muted)">{t('charts.empty', { defaultValue: '—' })}</div>
+            <div className="px-4 py-6 text-xs text-center text-(--text-muted)">{t('charts.empty')}</div>
           )}
           {runs.map((r, i) => (
             <div key={i} className="flex items-center gap-3 px-4 py-3"
@@ -181,7 +181,7 @@ export default function ShiftmanagerDashboard() {
         <div className="overflow-hidden bg-(--surface) rounded-xl" style={{ border: '1px solid var(--border)' }}>
           <DashboardCardHeader title={t('dashboard.recentConversations')} viewAllLabel={t('dashboard.viewAll')} />
           {conversations.length === 0 && (
-            <div className="px-4 py-6 text-xs text-center text-(--text-muted)">{t('charts.empty', { defaultValue: '—' })}</div>
+            <div className="px-4 py-6 text-xs text-center text-(--text-muted)">{t('charts.empty')}</div>
           )}
           {conversations.map((c, i) => (
             <div key={i} className="flex items-start gap-3 px-4 py-3"

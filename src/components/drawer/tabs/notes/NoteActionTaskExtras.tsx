@@ -44,7 +44,7 @@ export default function NoteActionTaskExtras({ item, index, onEdit }: {
           honestly says so instead of pretending a value was chosen. */}
       <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
         <SearchSelect
-          triggerLabel={item.assignee_label ?? t('notesAssist.panel.assigneeSelf', { defaultValue: 'Ikzelf (standaard)' })}
+          triggerLabel={item.assignee_label ?? t('notesAssist.panel.assigneeSelf')}
           options={userOptions} selected={item.assignee_user_id ? [item.assignee_user_id] : []} selectAll={false}
           onToggle={(v: string) => {
             const u = users.find(x => String(x.id) === v)
@@ -52,8 +52,8 @@ export default function NoteActionTaskExtras({ item, index, onEdit }: {
           }} />
         {item.assignee_user_id && (
           <Button variant="ghost" size="sm" iconOnly onClick={() => onEdit(index, { assignee_user_id: undefined, assignee_label: undefined })}
-            aria-label={t('notesAssist.panel.assigneeClear', { defaultValue: 'Terug naar mijzelf' })}
-            title={t('notesAssist.panel.assigneeClear', { defaultValue: 'Terug naar mijzelf' })}>
+            aria-label={t('notesAssist.panel.assigneeClear')}
+            title={t('notesAssist.panel.assigneeClear')}>
             <X size={12} />
           </Button>
         )}
@@ -78,7 +78,7 @@ export default function NoteActionTaskExtras({ item, index, onEdit }: {
       ) : (
         <div>
           <Button variant="ghost" size="sm" onClick={() => setLinking(true)}>
-            <Link2 size={12} /> {t('notesAssist.panel.linkAdd', { defaultValue: 'Koppelen aan…' })}
+            <Link2 size={12} /> {t('notesAssist.panel.linkAdd')}
           </Button>
         </div>
       )}

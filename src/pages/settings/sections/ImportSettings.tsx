@@ -155,7 +155,6 @@ export default function ImportSettings() {
           <span style={{ flex: 1, color: 'var(--text)' }}>
             {t('import.wizard.linkFromSettings', {
               ns: 'settings',
-              defaultValue: 'Prefer a guided, step-by-step import with column matching and an editable preview?',
             })}
           </span>
           <span style={{ display: 'flex', alignItems: 'center', gap: 4, fontWeight: 600, flexShrink: 0 }}>
