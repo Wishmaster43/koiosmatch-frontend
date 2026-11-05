@@ -45,6 +45,10 @@
     },
     "expiring": {
       "title": "Match a punto de vencer"
+    },
+    "contract_unconfirmed": {
+      "title": "Envío del contrato sin confirmar",
+      "body": "El envío anterior del contrato de este match nunca se confirmó. Compruebe su estado manualmente."
     }
   },
   "customer": {
@@ -76,11 +80,16 @@
     "retention_due_escalation": {
       "title": "ESCALADA: expediente archivado demasiado tiempo (RGPD)",
       "body": "Este expediente de candidato está archivado y lleva abierto más tiempo del plazo de escalada configurado. Evalúe si puede eliminarse definitivamente. Eso siempre sigue siendo una acción manual."
+    },
+    "retention_ask_undelivered": {
+      "title": "Pregunta sobre el plazo de conservación no entregada",
+      "body": "No se pudo entregar la pregunta de si podemos conservar los datos de este candidato (bounce o mensaje fallido). Contacte usted mismo con el candidato antes de que termine el plazo de conservación."
     }
   },
   "retention": {
     "entity_erase_blocked": {
-      "title": "Eliminación omitida: aún en uso"
+      "title": "Eliminación omitida: aún en uso",
+      "body": "{{entity}} no se pudo eliminar definitivamente ({{labels}}). Compruebe el vínculo."
     }
   },
   "workflow": {
@@ -161,6 +170,25 @@
     },
     "lead_archived_candidate": {
       "title": "Lead de Facebook vinculado a un candidato archivado"
+    }
+  }
+,
+  "whatsapp_web": {
+    "repair_required": {
+      "title": "Vuelva a vincular su dispositivo de WhatsApp Web",
+      "body": "Abra Perfil > WhatsApp Web, desvincule el dispositivo y escanee de nuevo el código QR. Solo es necesario una vez para que se reconozcan los mensajes entrantes de números ocultos."
+    }
+  },
+  "invoice": {
+    "unconfirmed": {
+      "title": "Envío de la factura sin confirmar",
+      "body": "La factura {{number}} lleva más de 15 minutos en «enviando». Compruébela manualmente."
+    }
+  },
+  "email": {
+    "mailbox_needs_reconnect": {
+      "title": "Hay que volver a conectar el buzón",
+      "body": "Un buzón conectado ha dejado de funcionar. Vuelva a conectarlo en los ajustes de correo; hasta entonces el correo sale por otro remitente."
     }
   }
 }

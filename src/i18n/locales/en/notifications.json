@@ -45,6 +45,10 @@
     },
     "expiring": {
       "title": "Match expiring soon"
+    },
+    "contract_unconfirmed": {
+      "title": "Contract send unconfirmed",
+      "body": "The previous contract send for this match never confirmed. Check its status manually."
     }
   },
   "customer": {
@@ -76,11 +80,16 @@
     "retention_due_escalation": {
       "title": "ESCALATION: dossier archived too long (AVG)",
       "body": "This candidate dossier is archived and has been open longer than the configured escalation term. Review whether it can be permanently deleted. That always stays a manual action."
+    },
+    "retention_ask_undelivered": {
+      "title": "Retention question not delivered",
+      "body": "The question whether we may keep the details of this candidate could not be delivered (bounce or failed message). Reach out to the candidate yourself before the retention period ends."
     }
   },
   "retention": {
     "entity_erase_blocked": {
-      "title": "Deletion skipped: still in use"
+      "title": "Deletion skipped: still in use",
+      "body": "{{entity}} could not be permanently deleted ({{labels}}). Check the link."
     }
   },
   "workflow": {
@@ -161,6 +170,25 @@
     },
     "lead_archived_candidate": {
       "title": "Facebook lead linked to an archived candidate"
+    }
+  }
+,
+  "whatsapp_web": {
+    "repair_required": {
+      "title": "Re-pair your WhatsApp Web device",
+      "body": "Open Profile > WhatsApp Web, unlink the device and scan the QR code again. This is needed once so incoming messages from hidden numbers can be matched."
+    }
+  },
+  "invoice": {
+    "unconfirmed": {
+      "title": "Invoice send unconfirmed",
+      "body": "Invoice {{number}} has been stuck on 'sending' for over 15 minutes. Check it manually."
+    }
+  },
+  "email": {
+    "mailbox_needs_reconnect": {
+      "title": "Mailbox needs to be reconnected",
+      "body": "A connected mailbox stopped working. Reconnect it in the e-mail settings; until then mail leaves via another sender."
     }
   }
 }

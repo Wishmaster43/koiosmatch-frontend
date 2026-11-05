@@ -45,6 +45,10 @@
     },
     "expiring": {
       "title": "Match a expirar em breve"
+    },
+    "contract_unconfirmed": {
+      "title": "Envio do contrato por confirmar",
+      "body": "O envio anterior do contrato deste match nunca foi confirmado. Verifique o estado manualmente."
     }
   },
   "customer": {
@@ -76,11 +80,16 @@
     "retention_due_escalation": {
       "title": "ESCALADA: dossiê arquivado há demasiado tempo (RGPD)",
       "body": "Este dossiê de candidato está arquivado e aberto há mais tempo do que o prazo de escalada configurado. Avalie se pode ser eliminado definitivamente. Isso permanece sempre uma ação manual."
+    },
+    "retention_ask_undelivered": {
+      "title": "Pergunta sobre o prazo de conservação não entregue",
+      "body": "A pergunta sobre se podemos conservar os dados deste candidato não foi entregue (bounce ou mensagem falhada). Contacte o candidato pessoalmente antes de terminar o prazo de conservação."
     }
   },
   "retention": {
     "entity_erase_blocked": {
-      "title": "Eliminação ignorada: ainda em uso"
+      "title": "Eliminação ignorada: ainda em uso",
+      "body": "{{entity}} não pôde ser eliminado definitivamente ({{labels}}). Verifique a ligação."
     }
   },
   "workflow": {
@@ -161,6 +170,25 @@
     },
     "lead_archived_candidate": {
       "title": "Lead do Facebook associado a um candidato arquivado"
+    }
+  }
+,
+  "whatsapp_web": {
+    "repair_required": {
+      "title": "Volte a associar o seu dispositivo WhatsApp Web",
+      "body": "Abra Perfil > WhatsApp Web, desassocie o dispositivo e leia novamente o código QR. É necessário apenas uma vez, para que as mensagens recebidas de números ocultos sejam reconhecidas."
+    }
+  },
+  "invoice": {
+    "unconfirmed": {
+      "title": "Envio da fatura por confirmar",
+      "body": "A fatura {{number}} está há mais de 15 minutos em «a enviar». Verifique-a manualmente."
+    }
+  },
+  "email": {
+    "mailbox_needs_reconnect": {
+      "title": "A caixa de correio tem de ser ligada novamente",
+      "body": "Uma caixa de correio ligada deixou de funcionar. Ligue-a novamente nas definições de e-mail; até lá, o e-mail sai por outro remetente."
     }
   }
 }

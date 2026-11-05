@@ -9,31 +9,27 @@ import snapshot from './notificationsCatalogueKeys.json'
 const LANGS = ['nl', 'en', 'de', 'fr', 'es', 'it', 'pt'] as const
 const mods = import.meta.glob('./locales/*/notifications.json', { eager: true, import: 'default' }) as Record<string, unknown>
 
-// Known gaps: BE types the FE has not mirrored yet. Shrink this list, never grow it.
-const KNOWN_MISSING = new Set([
-  'whatsapp_web.repair_required.title', 'whatsapp_web.repair_required.body',
-  'match.contract_unconfirmed.title', 'match.contract_unconfirmed.body',
-  'invoice.unconfirmed.title', 'invoice.unconfirmed.body',
-  'candidate.retention_ask_undelivered.title', 'candidate.retention_ask_undelivered.body',
-  'workflow.not_informed.body', 'workflow.not_informed_whatsapp.body',
-  'workflow.stale_digest.title', 'workflow.stale_digest.body',
-  'retention_entity_erase_blocked.title', 'retention_entity_erase_blocked.body',
-  'email.mailbox_needs_reconnect.title', 'email.mailbox_needs_reconnect.body',
-])
-
+// A leaf is present as a string, or as a key_one + key_other plural pair.
 const has = (root: unknown, key: string): boolean => {
   let cur: unknown = root
-  for (const part of key.split('.')) {
-    if (!cur || typeof cur !== 'object' || !(part in (cur as object))) return false
+  const parts = key.split('.')
+  for (const [i, part] of parts.entries()) {
+    const isLast = i === parts.length - 1
+    if (!cur || typeof cur !== 'object') return false
+    if (!(part in (cur as object))) {
+      if (!isLast) return false
+      const o = cur as Record<string, unknown>
+      return typeof o[`${part}_one`] === 'string' && typeof o[`${part}_other`] === 'string'
+    }
     cur = (cur as Record<string, unknown>)[part]
   }
   return typeof cur === 'string'
 }
 
 describe('notification catalogue parity', () => {
-  it.each(LANGS)('%s carries every non-allowlisted backend leaf key', l => {
+  it.each(LANGS)('%s carries every backend leaf key', l => {
     const root = mods[`./locales/${l}/notifications.json`]
-    const missing = (snapshot as string[]).filter(k => !KNOWN_MISSING.has(k) && !has(root, k))
+    const missing = (snapshot as string[]).filter(k => !has(root, k))
     expect(missing).toEqual([])
   })
 })

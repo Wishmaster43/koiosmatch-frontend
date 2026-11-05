@@ -45,6 +45,10 @@
     },
     "expiring": {
       "title": "Match in scadenza a breve"
+    },
+    "contract_unconfirmed": {
+      "title": "Invio del contratto non confermato",
+      "body": "Il precedente invio del contratto per questo match non è mai stato confermato. Controlla lo stato manualmente."
     }
   },
   "customer": {
@@ -76,11 +80,16 @@
     "retention_due_escalation": {
       "title": "ESCALATION: fascicolo archiviato troppo a lungo (GDPR)",
       "body": "Questo fascicolo candidato è archiviato ed è aperto da più tempo del termine di escalation configurato. Valutare se può essere eliminato definitivamente. Resta sempre un'azione manuale."
+    },
+    "retention_ask_undelivered": {
+      "title": "Domanda sul periodo di conservazione non recapitata",
+      "body": "La domanda se possiamo conservare i dati di questo candidato non è stata recapitata (bounce o messaggio fallito). Contatta tu stesso il candidato prima che scada il periodo di conservazione."
     }
   },
   "retention": {
     "entity_erase_blocked": {
-      "title": "Eliminazione saltata: ancora in uso"
+      "title": "Eliminazione saltata: ancora in uso",
+      "body": "Non è stato possibile eliminare definitivamente {{entity}} ({{labels}}). Controlla il collegamento."
     }
   },
   "workflow": {
@@ -161,6 +170,25 @@
     },
     "lead_archived_candidate": {
       "title": "Lead Facebook collegato a un candidato archiviato"
+    }
+  }
+,
+  "whatsapp_web": {
+    "repair_required": {
+      "title": "Riassocia il tuo dispositivo WhatsApp Web",
+      "body": "Apri Profilo > WhatsApp Web, scollega il dispositivo e scansiona di nuovo il codice QR. Serve una sola volta, così i messaggi in arrivo da numeri nascosti vengono riconosciuti."
+    }
+  },
+  "invoice": {
+    "unconfirmed": {
+      "title": "Invio della fattura non confermato",
+      "body": "La fattura {{number}} è ferma su «invio in corso» da più di 15 minuti. Controllala manualmente."
+    }
+  },
+  "email": {
+    "mailbox_needs_reconnect": {
+      "title": "La casella di posta va ricollegata",
+      "body": "Una casella di posta collegata ha smesso di funzionare. Ricollegala nelle impostazioni e-mail; fino ad allora l'e-mail parte da un altro mittente."
     }
   }
 }

@@ -45,6 +45,10 @@
     },
     "expiring": {
       "title": "Match expire bientôt"
+    },
+    "contract_unconfirmed": {
+      "title": "Envoi du contrat non confirmé",
+      "body": "L'envoi précédent du contrat pour ce match n'a jamais été confirmé. Vérifiez son statut manuellement."
     }
   },
   "customer": {
@@ -76,11 +80,16 @@
     "retention_due_escalation": {
       "title": "ESCALADE : dossier archivé trop longtemps (RGPD)",
       "body": "Ce dossier candidat est archivé et ouvert depuis plus longtemps que le délai d'escalade configuré. Vérifiez s'il peut être définitivement supprimé. Cela reste toujours une action manuelle."
+    },
+    "retention_ask_undelivered": {
+      "title": "Question sur la durée de conservation non remise",
+      "body": "La question de savoir si nous pouvons conserver les données de ce candidat n'a pas pu être remise (bounce ou message échoué). Contactez vous-même le candidat avant la fin de la durée de conservation."
     }
   },
   "retention": {
     "entity_erase_blocked": {
-      "title": "Suppression ignorée : encore utilisé"
+      "title": "Suppression ignorée : encore utilisé",
+      "body": "{{entity}} n'a pas pu être supprimé définitivement ({{labels}}). Vérifiez le lien."
     }
   },
   "workflow": {
@@ -161,6 +170,25 @@
     },
     "lead_archived_candidate": {
       "title": "Lead Facebook lié à un candidat archivé"
+    }
+  }
+,
+  "whatsapp_web": {
+    "repair_required": {
+      "title": "Reconnectez votre appareil WhatsApp Web",
+      "body": "Ouvrez Profil > WhatsApp Web, déconnectez l'appareil et scannez à nouveau le code QR. Cette opération n'est nécessaire qu'une fois, afin que les messages entrants de numéros masqués soient reconnus."
+    }
+  },
+  "invoice": {
+    "unconfirmed": {
+      "title": "Envoi de la facture non confirmé",
+      "body": "La facture {{number}} est bloquée sur « envoi en cours » depuis plus de 15 minutes. Vérifiez-la manuellement."
+    }
+  },
+  "email": {
+    "mailbox_needs_reconnect": {
+      "title": "La boîte mail doit être reconnectée",
+      "body": "Une boîte mail connectée ne fonctionne plus. Reconnectez-la dans les paramètres e-mail ; en attendant, un autre expéditeur envoie le message."
     }
   }
 }

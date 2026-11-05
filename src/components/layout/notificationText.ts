@@ -33,7 +33,10 @@ function resolveHalf(key: string | null | undefined, serverText: string | undefi
   if (!parsed) return serverText ?? ''
   const opts = { ns: parsed.ns, ...(params ?? {}) }
   if (!i18n.exists(parsed.path, opts)) return serverText ?? ''
-  return t(parsed.path, opts)
+  const rendered = t(parsed.path, opts)
+  // INTERPOLATION guard: a missing param must never show as "{{count}}", so the server text wins.
+  if (/\{\{[^}]*\}\}/.test(rendered)) return serverText ?? ''
+  return rendered
 }
 
 // The row's title/body, resolved to the viewing user's language.

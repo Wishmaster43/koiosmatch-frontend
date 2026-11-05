@@ -106,4 +106,48 @@ describe('notificationText · kpi.below_target period', () => {
     const { body } = notificationText(row('2026-09'), i18n.t.bind(i18n))
     expect(body).toContain('Gesprekken')
   })
+
+  // Builds a keyed row for the NOTIF-COPY-1 cases.
+  const keyed = (type: string, params?: Record<string, unknown>) => ({
+    id: 9, seen: false, title: 'SERVER TITLE', body: 'SERVER BODY',
+    title_key: `notifications.${type}.title`, body_key: `notifications.${type}.body`, params: params ?? {},
+  } as unknown as AppNotification)
+
+  it('renders retention.entity_erase_blocked when the BE stamps the catalogue keys and params', () => {
+    const { body } = notificationText(keyed('retention.entity_erase_blocked', { entity: 'Klant A', labels: 'vacatures' }), i18n.t.bind(i18n))
+    expect(body).toBe(i18n.t('notifications:retention.entity_erase_blocked.body', { entity: 'Klant A', labels: 'vacatures', lng: 'nl' }))
+  })
+
+  it('falls back to the server text when a param is missing, never showing {{entity}}', () => {
+    const { body } = notificationText(keyed('retention.entity_erase_blocked'), i18n.t.bind(i18n))
+    expect(body).toBe('SERVER BODY')
+    expect(body).not.toContain('{{')
+  })
+
+  it('picks the singular and plural stale_digest title on count', () => {
+    const t = i18n.t.bind(i18n)
+    expect(notificationText(keyed('workflow.stale_digest', { count: 1 }), t).title).toBe(i18n.t('notifications:workflow.stale_digest.title', { count: 1, lng: 'nl' }))
+    expect(notificationText(keyed('workflow.stale_digest', { count: 3 }), t).title).toBe(i18n.t('notifications:workflow.stale_digest.title', { count: 3, lng: 'nl' }))
+  })
+
+  it('renders invoice.unconfirmed with the invoice number', () => {
+    const { body } = notificationText(keyed('invoice.unconfirmed', { number: 'F-2026-7' }), i18n.t.bind(i18n))
+    expect(body).toBe(i18n.t('notifications:invoice.unconfirmed.body', { number: 'F-2026-7', lng: 'nl' }))
+  })
+
+  it('null keys show the server text even when the FE carries copy for the type', () => {
+    const n = { id: 10, seen: false, title: 'SERVER TITLE', body: 'SERVER BODY', type: 'email.mailbox_needs_reconnect', title_key: null, body_key: null } as unknown as AppNotification
+    expect(notificationText(n, i18n.t.bind(i18n))).toEqual({ title: 'SERVER TITLE', body: 'SERVER BODY' })
+  })
+
+  it('keeps the server text for an unknown type with null keys', () => {
+    const n = { id: 11, seen: false, title: 'SERVER TITLE', body: 'SERVER BODY', type: 'made.up_type', title_key: null, body_key: null } as unknown as AppNotification
+    const r = notificationText(n, i18n.t.bind(i18n))
+    expect(r).toEqual({ title: 'SERVER TITLE', body: 'SERVER BODY' })
+  })
+
+  it('lets a stamped title_key win', () => {
+    const n = { id: 12, seen: false, title: 'SERVER TITLE', body: 'SERVER BODY', type: 'email.mailbox_needs_reconnect', title_key: 'notifications.candidate.phase_stale.title', body_key: null } as unknown as AppNotification
+    expect(notificationText(n, i18n.t.bind(i18n)).title).toBe(i18n.t('notifications:candidate.phase_stale.title', { lng: 'nl' }))
+  })
 })

@@ -45,6 +45,10 @@
     },
     "expiring": {
       "title": "Match verloopt binnenkort"
+    },
+    "contract_unconfirmed": {
+      "title": "Contractverzending onbevestigd",
+      "body": "De vorige contractverzending voor deze match is nooit bevestigd. Controleer de status handmatig."
     }
   },
   "customer": {
@@ -76,11 +80,16 @@
     "retention_due_escalation": {
       "title": "ESCALATIE: dossier staat te lang gearchiveerd (AVG)",
       "body": "Dit kandidaatdossier is gearchiveerd en staat langer open dan de ingestelde escalatietermijn. Beoordeel of het definitief verwijderd kan worden. Dat blijft altijd een handmatige actie."
+    },
+    "retention_ask_undelivered": {
+      "title": "Bewaartermijn-vraag niet afgeleverd",
+      "body": "De vraag of we de gegevens van deze kandidaat mogen bewaren is niet afgeleverd (bounce of mislukt bericht). Benader de kandidaat zelf voordat de bewaartermijn afloopt."
     }
   },
   "retention": {
     "entity_erase_blocked": {
-      "title": "Verwijdering overgeslagen: nog in gebruik"
+      "title": "Verwijdering overgeslagen: nog in gebruik",
+      "body": "{{entity}} kon niet definitief verwijderd worden ({{labels}}). Controleer de koppeling."
     }
   },
   "workflow": {
@@ -161,6 +170,25 @@
     },
     "lead_archived_candidate": {
       "title": "Facebook-lead gekoppeld aan gearchiveerde kandidaat"
+    }
+  }
+,
+  "whatsapp_web": {
+    "repair_required": {
+      "title": "Koppel je WhatsApp Web-apparaat opnieuw",
+      "body": "Open Profiel > WhatsApp Web, ontkoppel het apparaat en scan de QR-code opnieuw. Dit is eenmalig nodig zodat binnenkomende berichten van verborgen nummers herkend worden."
+    }
+  },
+  "invoice": {
+    "unconfirmed": {
+      "title": "Factuurverzending onbevestigd",
+      "body": "Factuur {{number}} staat al langer dan 15 minuten op 'wordt verzonden'. Controleer handmatig."
+    }
+  },
+  "email": {
+    "mailbox_needs_reconnect": {
+      "title": "Mailbox moet opnieuw worden gekoppeld",
+      "body": "Een gekoppelde mailbox werkt niet meer. Koppel hem opnieuw bij de e-mailinstellingen; tot die tijd verstuurt een andere afzender de mail."
     }
   }
 }

@@ -45,6 +45,10 @@
     },
     "expiring": {
       "title": "Match läuft bald ab"
+    },
+    "contract_unconfirmed": {
+      "title": "Vertragsversand unbestätigt",
+      "body": "Der vorherige Vertragsversand für diesen Match wurde nie bestätigt. Prüfen Sie den Status manuell."
     }
   },
   "customer": {
@@ -76,11 +80,16 @@
     "retention_due_escalation": {
       "title": "ESKALATION: Dossier zu lange archiviert (DSGVO)",
       "body": "Dieses Kandidatendossier ist archiviert und seit länger als die eingestellte Eskalationsfrist offen. Prüfen Sie, ob es dauerhaft gelöscht werden kann. Das bleibt immer eine manuelle Aktion."
+    },
+    "retention_ask_undelivered": {
+      "title": "Frage zur Aufbewahrungsfrist nicht zugestellt",
+      "body": "Die Frage, ob wir die Daten dieses Kandidaten aufbewahren dürfen, konnte nicht zugestellt werden (Bounce oder fehlgeschlagene Nachricht). Kontaktieren Sie den Kandidaten selbst, bevor die Aufbewahrungsfrist endet."
     }
   },
   "retention": {
     "entity_erase_blocked": {
-      "title": "Löschung übersprungen: noch in Verwendung"
+      "title": "Löschung übersprungen: noch in Verwendung",
+      "body": "{{entity}} konnte nicht endgültig gelöscht werden ({{labels}}). Prüfen Sie die Verknüpfung."
     }
   },
   "workflow": {
@@ -161,6 +170,25 @@
     },
     "lead_archived_candidate": {
       "title": "Facebook-Lead mit archiviertem Kandidaten verknüpft"
+    }
+  }
+,
+  "whatsapp_web": {
+    "repair_required": {
+      "title": "WhatsApp-Web-Gerät erneut koppeln",
+      "body": "Öffnen Sie Profil > WhatsApp Web, trennen Sie das Gerät und scannen Sie den QR-Code erneut. Das ist einmalig nötig, damit eingehende Nachrichten von versteckten Nummern zugeordnet werden können."
+    }
+  },
+  "invoice": {
+    "unconfirmed": {
+      "title": "Rechnungsversand unbestätigt",
+      "body": "Rechnung {{number}} steht seit über 15 Minuten auf 'wird gesendet'. Prüfen Sie sie manuell."
+    }
+  },
+  "email": {
+    "mailbox_needs_reconnect": {
+      "title": "Postfach muss erneut verbunden werden",
+      "body": "Ein verbundenes Postfach funktioniert nicht mehr. Verbinden Sie es erneut in den E-Mail-Einstellungen; bis dahin versendet ein anderer Absender die E-Mail."
     }
   }
 }
