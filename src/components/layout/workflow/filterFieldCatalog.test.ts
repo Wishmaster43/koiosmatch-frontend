@@ -116,4 +116,15 @@ describe('toFilterFieldOptions', () => {
       { value: 'shifts_count', label: '2. Open diensten per kandidaat · Aantal beschikbare diensten' },
     ])
   })
+
+  it('runs the catalog field label through the injected translator (KOIOS-EN-1: English source text, nl copy via fieldLabel)', () => {
+    const groups = collectUpstreamFilterFields(
+      'b',
+      [{ id: 'a', type: 'candidate_filter' }, { id: 'b', type: 'router' }],
+      [{ source: 'a', target: 'b' }],
+      catalog,
+    )
+    const options = toFilterFieldOptions(groups, () => 'Candidates', label => `T:${label}`)
+    expect(options.map(o => o.label)).toEqual(['1. Candidates · T:Kandidaat-ID', '1. Candidates · T:Voornaam'])
+  })
 })

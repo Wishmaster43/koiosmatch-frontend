@@ -20,6 +20,7 @@ import FloatingPanel from '@/components/ui/FloatingPanel'
 import { parseEdgeFilterGroups, edgeFilterGroupsToFilters } from './serialization'
 import { VALUELESS_OPERATORS } from './constants'
 import { collectUpstreamFilterFields, toFilterFieldOptions, type ModuleCatalog } from './filterFieldCatalog'
+import { fieldLabel } from './moduleI18n'
 import { filterFieldGroupsToVarGroups } from './filterFieldGroupsToVarGroups'
 import { splitFieldFormat } from './fieldFormat'
 import { FilterFieldPicker } from './FilterFieldPicker'
@@ -69,8 +70,9 @@ export function EdgeFilterPanel({ filters, label, sourceNodeId, nodes = [], edge
     return collectUpstreamFilterFields(sourceNodeId, graphNodes, graphEdges, catalog)
   }, [sourceNodeId, nodes, edges, catalog])
 
-  // Flattened "N. <module label> · <field>" options for the field picker.
-  const fieldOptions = useMemo(() => toFilterFieldOptions(groupsUpstream, moduleLabel), [groupsUpstream, moduleLabel])
+  // Flattened "N. <module label> · <field>" options for the field picker; the catalog field
+  // label is English source text (KOIOS-EN-1) and translates through the shared fieldLabel.
+  const fieldOptions = useMemo(() => toFilterFieldOptions(groupsUpstream, moduleLabel, label => fieldLabel(t, label)), [groupsUpstream, moduleLabel, t])
 
   // The same chain, reshaped as the numbered mapping groups the value
   // control's "{ }" button offers (FILTER-MAPPING-1).

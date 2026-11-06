@@ -99,12 +99,11 @@ const ALLOWLIST: string[] = [
   'de/shiftmanager:orders.drawer.date',
   'de/shiftmanager:shiftsDrawer.fields.date',
   'de/whatsapp:messages.date',
-  'de/workflows:fieldLabels.Datum',
   'de/workflows:fieldLabels.Date',
   'de/workflows:fieldOptions.Date',
 
   // German "Datum" = "date"; the parenthesised part is a literal date-format example, not prose
-  'de/workflows:fieldLabels.Datum (08-07-2026)',
+  'de/workflows:fieldLabels.Date (08-07-2026)',
 
   // German "Datum" = "date"; "(d-m-Y)" is a format-token example, not prose
   'de/workflows:canvas.displayAsDate',
@@ -114,7 +113,7 @@ const ALLOWLIST: string[] = [
   'de/reports:candidates.title',
 
   // German "Dienst" = "service" (identical spelling); "-ID" is the same abbreviation in both languages
-  'de/workflows:fieldLabels.Dienst-ID',
+  'de/workflows:fieldLabels.Shift ID',
 
   // Spanish "fase" = "phase" (identical spelling, shared Greek/Latin root)
   'es/analytics:candidates.axes.phase',
@@ -140,7 +139,6 @@ const ALLOWLIST: string[] = [
   'es/settings:lookups.phases.title',
   'es/settings:nav.candidate_phases',
   'es/vacancies:applicants.phase',
-  'es/workflows:fieldLabels.Fase',
   'es/workflows:fieldLabels.Phase',
 
   // Italian/Portuguese "fase" = "phase"/"stage" (identical spelling, shared Latin root — same
@@ -184,7 +182,6 @@ const ALLOWLIST: string[] = [
   'it/settings:opportunityDisplay.fields.opportunity_table_color_stage.label',
   'it/vacancies:applicants.phase',
   'it/vacancies:applicants.byPhase',
-  'it/workflows:fieldLabels.Fase',
   'it/workflows:fieldLabels.Phase',
   'pt/analytics:candidates.axes.phase',
   'pt/analytics:applications.axes.stage',
@@ -224,7 +221,6 @@ const ALLOWLIST: string[] = [
   'pt/settings:audit.field.phase',
   'pt/settings:opportunityDisplay.fields.opportunity_table_color_stage.label',
   'pt/vacancies:applicants.phase',
-  'pt/workflows:fieldLabels.Fase',
   'pt/workflows:fieldLabels.Phase',
 
   // German "Ja" = "yes"
@@ -261,7 +257,6 @@ const ALLOWLIST: string[] = [
   'de/shiftmanager:dashboard.stats.totalCandidates',
   'de/shiftmanager:orders.drawer.candidates',
   'de/workflows:categories.candidates',
-  'de/workflows:fieldLabels.Kandidaten',
   'de/workflows:modules.candidates',
   'de/workflows:modules.hf_candidates',
   'de/workflows:modules.intus_candidates',

@@ -147,13 +147,16 @@ export function collectUpstreamFilterFields(
 /**
  * Flatten the walked groups into Make-style numbered options for a flat combo
  * (CreatableSelect): "N. <module label> · <field label>" → the field's dot-path
- * expression. `moduleLabel` is injected so this stays translation-agnostic.
+ * expression. `moduleLabel` and `fieldLabelOf` are injected so this stays translation-agnostic:
+ * the backend catalog label is English source text since KOIOS-EN-1, so the caller passes the
+ * shared fieldLabel(t, …) translator and nl keeps reading its own copy (defaults to identity).
  */
 export function toFilterFieldOptions(
   groups: FilterFieldGroup[],
   moduleLabel: (type: string) => string,
+  fieldLabelOf: (label: string) => string = label => label,
 ): Array<{ value: string; label: string; source?: string }> {
   return groups.flatMap(g =>
-    g.fields.map(f => ({ value: f.key, label: `${g.number}. ${moduleLabel(g.moduleType)} · ${f.label}`, source: f.source }))
+    g.fields.map(f => ({ value: f.key, label: `${g.number}. ${moduleLabel(g.moduleType)} · ${fieldLabelOf(f.label)}`, source: f.source }))
   )
 }
