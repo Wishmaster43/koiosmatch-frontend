@@ -2120,6 +2120,21 @@
     "zipTooLarge": "The ZIP file is larger than {{max}} MB. Split the files across multiple ZIPs."
   },
   "facebookLeads": {
+    "formOwners": {
+      "title": "Owner per lead form",
+      "desc": "New leads from this form go to this owner. Without an owner the 24-hour escalation goes to the administrators.",
+      "formId": "Form ID",
+      "formIdPlaceholder": "123456789012345",
+      "owner": "Owner",
+      "noOwner": "No owner (administrators)",
+      "add": "Add form",
+      "remove": "Remove form",
+      "invalidFormId": "A form ID holds digits only and appears once.",
+      "unknownUser": "Unknown user",
+      "empty": "No forms with an owner yet.",
+      "loadError": "Owners could not be loaded.",
+      "saveError": "Owners could not be saved."
+    },
     "title": "Facebook Leads",
     "subtitle": "Connect this customer's Facebook Leads app. Incoming leads arrive automatically as a candidate.",
     "verifyToken": "Verify token",

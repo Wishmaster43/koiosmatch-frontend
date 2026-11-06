@@ -2120,6 +2120,21 @@
     "zipTooLarge": "Het ZIP-bestand is groter dan {{max}} MB. Splits de bestanden over meerdere ZIP’s."
   },
   "facebookLeads": {
+    "formOwners": {
+      "title": "Eigenaar per leadformulier",
+      "desc": "Nieuwe leads van dit formulier gaan naar deze eigenaar. Zonder eigenaar gaat de escalatie na 24 uur naar de beheerders.",
+      "formId": "Formulier-ID",
+      "formIdPlaceholder": "123456789012345",
+      "owner": "Eigenaar",
+      "noOwner": "Geen eigenaar (beheerders)",
+      "add": "Formulier toevoegen",
+      "remove": "Formulier verwijderen",
+      "invalidFormId": "Een formulier-ID bestaat alleen uit cijfers en komt maar één keer voor.",
+      "unknownUser": "Onbekende gebruiker",
+      "empty": "Nog geen formulieren met een eigenaar.",
+      "loadError": "Eigenaren konden niet geladen worden.",
+      "saveError": "Eigenaren konden niet opgeslagen worden."
+    },
     "title": "Facebook Leads",
     "subtitle": "Koppel de Facebook Leads-app van deze klant. Inkomende leads komen automatisch binnen als kandidaat.",
     "verifyToken": "Verify token",

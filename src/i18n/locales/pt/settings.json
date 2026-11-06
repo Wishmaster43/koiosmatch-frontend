@@ -2120,6 +2120,21 @@
     "zipTooLarge": "O ficheiro ZIP é maior do que {{max}} MB. Divida os ficheiros em vários ZIPs."
   },
   "facebookLeads": {
+    "formOwners": {
+      "title": "Responsável por formulário de leads",
+      "desc": "Os novos leads deste formulário vão para este responsável. Sem responsável, a escalação após 24 horas vai para os administradores.",
+      "formId": "ID do formulário",
+      "formIdPlaceholder": "123456789012345",
+      "owner": "Responsável",
+      "noOwner": "Sem responsável (administradores)",
+      "add": "Adicionar formulário",
+      "remove": "Remover formulário",
+      "invalidFormId": "Um ID de formulário contém apenas dígitos e aparece uma só vez.",
+      "unknownUser": "Utilizador desconhecido",
+      "empty": "Ainda não há formulários com responsável.",
+      "loadError": "Não foi possível carregar os responsáveis.",
+      "saveError": "Não foi possível guardar os responsáveis."
+    },
     "title": "Facebook Leads",
     "subtitle": "Ligue a app Facebook Leads deste cliente. Os leads recebidos chegam automaticamente como candidato.",
     "verifyToken": "Verify token",

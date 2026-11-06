@@ -2120,6 +2120,21 @@
     "zipTooLarge": "Il file ZIP supera {{max}} MB. Suddividi i file in più ZIP."
   },
   "facebookLeads": {
+    "formOwners": {
+      "title": "Responsabile per modulo lead",
+      "desc": "I nuovi lead di questo modulo vanno a questo responsabile. Senza responsabile, l’escalation dopo 24 ore va agli amministratori.",
+      "formId": "ID modulo",
+      "formIdPlaceholder": "123456789012345",
+      "owner": "Responsabile",
+      "noOwner": "Nessun responsabile (amministratori)",
+      "add": "Aggiungi modulo",
+      "remove": "Rimuovi modulo",
+      "invalidFormId": "Un ID modulo contiene solo cifre e compare una sola volta.",
+      "unknownUser": "Utente sconosciuto",
+      "empty": "Ancora nessun modulo con responsabile.",
+      "loadError": "Impossibile caricare i responsabili.",
+      "saveError": "Impossibile salvare i responsabili."
+    },
     "title": "Facebook Leads",
     "subtitle": "Collega l'app Facebook Leads di questo cliente. I lead in arrivo vengono acquisiti automaticamente come candidato.",
     "verifyToken": "Verify token",

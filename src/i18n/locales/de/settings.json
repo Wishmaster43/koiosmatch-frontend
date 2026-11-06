@@ -1860,6 +1860,21 @@
     "zipTooLarge": "Die ZIP-Datei ist größer als {{max}} MB. Verteilen Sie die Dateien auf mehrere ZIPs."
   },
   "facebookLeads": {
+    "formOwners": {
+      "title": "Verantwortlicher je Lead-Formular",
+      "desc": "Neue Leads aus diesem Formular gehen an diesen Verantwortlichen. Ohne Verantwortlichen geht die 24-Stunden-Eskalation an die Administratoren.",
+      "formId": "Formular-ID",
+      "formIdPlaceholder": "123456789012345",
+      "owner": "Verantwortlicher",
+      "noOwner": "Kein Verantwortlicher (Administratoren)",
+      "add": "Formular hinzufügen",
+      "remove": "Formular entfernen",
+      "invalidFormId": "Eine Formular-ID besteht nur aus Ziffern und kommt nur einmal vor.",
+      "unknownUser": "Unbekannter Benutzer",
+      "empty": "Noch keine Formulare mit Verantwortlichem.",
+      "loadError": "Verantwortliche konnten nicht geladen werden.",
+      "saveError": "Verantwortliche konnten nicht gespeichert werden."
+    },
     "title": "Facebook Leads",
     "subtitle": "Verbinden Sie die Facebook-Leads-App dieses Kunden. Eingehende Leads landen automatisch als Kandidat.",
     "verifyToken": "Verify-Token",
