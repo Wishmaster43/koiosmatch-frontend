@@ -22,19 +22,22 @@ import Button from '../Button'
 import { Caption } from '../typography'
 import { humanizeIsoDates } from '@/lib/localDate'
 import { useTranslation } from 'react-i18next'
-import { CheckSquare, MessageCircle, Mail, CalendarClock, Bell, Check, Clock, ShieldAlert, HelpCircle, ExternalLink, AlertTriangle } from 'lucide-react'
+import { CheckSquare, MessageCircle, Mail, CalendarClock, Bell, Check, Clock, ShieldAlert, HelpCircle, ExternalLink, AlertTriangle, Send } from 'lucide-react'
 import { useDateFormat } from '@/lib/datetime'
 import { useNumberFormat } from '@/lib/formatters'
 import type { RichTextAssistActionType } from './richTextAssistApi'
 import type { ExecItem } from './useAssistActionsExecute'
 import Spinner from '../Spinner'
 import AssistDeclinedFace from './AssistDeclinedFace'
+import ProposalCvPicker from './ProposalCvPicker'
 
 // Icon per action-item type — its own small map (distinct concern from
 // channelIcons.ts's contact-channel chip: 'appointment'/'notification' here
 // have no channel equivalent, and the icon choice is presentational only).
 const TYPE_ICON: Record<RichTextAssistActionType, typeof CheckSquare> = {
   task: CheckSquare, whatsapp: MessageCircle, email: Mail, appointment: CalendarClock, notification: Bell,
+  // Y-002: a proposal item (the saved CV picker renders on its pending row).
+  application_propose: Send,
 }
 
 const cardStyle: CSSProperties = {
@@ -56,10 +59,12 @@ interface AssistActionItemCardProps {
   // Present only for an 'executed' item with a run_id — opens the shared
   // workflow-run view (RunDetailDrawer); omitted items render no link.
   onViewRun?: () => void
+  // Y-002: picks the proposal CV of a pending application_propose row; omitted = no picker.
+  onCvChange?: (id: string | null) => void
 }
 
 // Renders one action item's execute outcome (executed/pending/wizard_required/forbidden/unsupported) with its own icon, reason tooltip and draft/appointment preview (see the module doc above for why this isn't KoiosPendingActionCard).
-export default function AssistActionItemCard({ item, onConfirm, onViewRun }: AssistActionItemCardProps) {
+export default function AssistActionItemCard({ item, onConfirm, onViewRun, onCvChange }: AssistActionItemCardProps) {
   const { t } = useTranslation('common')
   const { formatDateTime } = useDateFormat()
   const { formatNumber } = useNumberFormat()
@@ -113,6 +118,10 @@ export default function AssistActionItemCard({ item, onConfirm, onViewRun }: Ass
           forward compat). wizard_required's server reason ("Selectiebeslissing
           — …") rides on the wrapper as a title tooltip; plain pending has no
           extra reason surfaced — the button itself already says what to do. */}
+      {(item.status === 'pending' || item.status === 'wizard_required') && onCvChange && item.type === 'application_propose' && (
+        <ProposalCvPicker applicationId={item.link_type === 'application' ? item.link_id : undefined}
+          value={item.cv_document_id ?? null} onChange={onCvChange} />
+      )}
       {(item.status === 'pending' || item.status === 'wizard_required') && (
         <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}
           title={item.status === 'wizard_required' ? item.reason : undefined}>

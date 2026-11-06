@@ -643,7 +643,14 @@
       "whatsapp": "WhatsApp",
       "email": "E-mail",
       "appointment": "Marcação",
-      "notification": "Notificação"
+      "notification": "Notificação",
+      "application_propose": "Proposta"
+    },
+    "proposeCv": {
+      "label": "CV para a proposta",
+      "placeholder": "Escolha um CV guardado",
+      "none": "Ainda não há um CV guardado para esta candidatura. Faça primeiro uma proposta com CV a partir da candidatura; depois o Koios poderá escolher esse CV.",
+      "loadError": "Não foi possível carregar os CV."
     },
     "execute": {
       "run": "Executar",

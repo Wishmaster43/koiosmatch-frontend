@@ -16,6 +16,14 @@ vi.mock('@/lib/api', () => ({ default: { post: vi.fn(), get: vi.fn() } }))
 afterEach(() => vi.clearAllMocks())
 
 describe('toExecuteItem', () => {
+  // Y-002: cv_document_id is sent only when chosen.
+  it('sends cv_document_id for an application_propose item and omits the key otherwise', () => {
+    const base = { title: 'Stel voor', type: 'application_propose' as unknown as 'task', due_date: null, note_excerpt: null }
+    expect(toExecuteItem({ ...base, cv_document_id: 'd1' }).cv_document_id).toBe('d1')
+    expect('cv_document_id' in toExecuteItem(base)).toBe(false)
+    expect('cv_document_id' in toExecuteItem({ ...base, cv_document_id: null })).toBe(false)
+  })
+
   it('narrows a RichTextAssistActionItem down to the execute fields, confirmed omitted by default', () => {
     const item = { title: 'Bel terug', type: 'task' as const, due_date: '2026-08-10', note_excerpt: 'call me' }
     expect(toExecuteItem(item)).toEqual({
@@ -141,5 +149,14 @@ describe('toExecuteItem · K-159 task fields', () => {
     expect('assignee_user_id' in body).toBe(false)
     expect('link_type' in body).toBe(false)
   })
+  it('sends application_id for an application_propose item linked to an application, never for other types', () => {
+    const base = { title: 'Voorstel', type: 'application_propose', due_date: null, note_excerpt: null, message: null, start: null } as Parameters<typeof toExecuteItem>[0]
+    const linked = toExecuteItem({ ...base, link_type: 'application', link_id: 'app-1' } as Parameters<typeof toExecuteItem>[0])
+    expect(linked.application_id).toBe('app-1')
+    expect(linked.link_type).toBe('application')
+    const task = toExecuteItem({ ...base, type: 'task', link_type: 'application', link_id: 'app-1' } as Parameters<typeof toExecuteItem>[0])
+    expect('application_id' in task).toBe(false)
+    const unlinked = toExecuteItem(base)
+    expect('application_id' in unlinked).toBe(false)
+  })
 })
-

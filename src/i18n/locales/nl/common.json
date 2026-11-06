@@ -643,7 +643,14 @@
       "whatsapp": "WhatsApp",
       "email": "E-mail",
       "appointment": "Afspraak",
-      "notification": "Melding"
+      "notification": "Melding",
+      "application_propose": "Voorstel"
+    },
+    "proposeCv": {
+      "label": "Cv voor het voorstel",
+      "placeholder": "Kies een opgeslagen cv",
+      "none": "Nog geen opgeslagen cv voor deze sollicitatie. Stel eerst één keer voor via de sollicitatie met cv; daarna kan Koios dat cv kiezen.",
+      "loadError": "Cv’s konden niet geladen worden."
     },
     "execute": {
       "run": "Uitvoeren",

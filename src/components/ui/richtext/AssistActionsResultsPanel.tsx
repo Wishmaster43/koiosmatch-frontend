@@ -115,6 +115,7 @@ export default function AssistActionsResultsPanel({ items, source, onApplyAsText
       {exec.items.map((it, i) => (
         <AssistActionItemCard key={i} item={it}
           onConfirm={(force) => exec.confirm(i, undefined, force)}
+          onCvChange={(id) => exec.patchItem(i, { cv_document_id: id })}
           onViewRun={it.status === 'executed' && it.run_id ? () => viewRun(it.run_id as string) : undefined} />
       ))}
       {runLoading && <Caption as="div">{t('notesAssist.execute.loadingRun')}</Caption>}

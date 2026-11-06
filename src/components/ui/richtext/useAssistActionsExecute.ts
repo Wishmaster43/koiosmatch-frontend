@@ -84,6 +84,7 @@ export function useAssistActionsExecute(source: ExecuteSource = {}) {
         // a server row echoing them empty must never clobber the edit.
         assignee_user_id: it.assignee_user_id, assignee_label: it.assignee_label,
         link_type: it.link_type, link_id: it.link_id, link_label: it.link_label,
+        cv_document_id: it.cv_document_id,
       })))
       setStatus('success')
     } catch (err) {
@@ -128,9 +129,14 @@ export function useAssistActionsExecute(source: ExecuteSource = {}) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [items, source.note_id, source.candidate_id])
 
+  // Y-002: the user picks a proposal CV on a pending row; confirm() reads it from the list.
+  const patchItem = useCallback((index: number, patch: Partial<ExecItem>) => {
+    setItems(prev => prev ? prev.map((it, k) => k === index ? { ...it, ...patch } : it) : prev)
+  }, [])
+
   // Back to idle — the "Klaar" close on the results panel; a fresh "Uitvoeren"
   // click starts a new preview from scratch.
   const reset = useCallback(() => { setItems(null); setStatus('idle'); setErrorMessage('') }, [])
 
-  return { items, status, errorMessage, preview, confirm, reset }
+  return { items, status, errorMessage, preview, confirm, patchItem, reset }
 }

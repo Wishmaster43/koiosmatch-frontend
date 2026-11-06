@@ -68,6 +68,11 @@ export interface ExecuteRequestItem {
   assignee_user_id?: string
   link_type?: string
   link_id?: string
+  // Y-002 contract: items.*.cv_document_id = a scan-clean proposal_cv document of THAT application, and the
+  // bridge validates items.*.application_id for an application_propose item BEFORE it reads the CV
+  // (KoiosActionBridge.php:419); contact_id (:835) has no FE source yet (asked CMBE 06-11).
+  cv_document_id?: string
+  application_id?: string
   type: RichTextAssistActionType
   due_date: string | null
   note_excerpt: string | null
@@ -134,6 +139,10 @@ export function toExecuteItem(item: RichTextAssistActionItem, confirmed?: boolea
     // server-side, and an absent link simply links nothing.
     ...(item.assignee_user_id ? { assignee_user_id: item.assignee_user_id } : null),
     ...(item.link_type && item.link_id ? { link_type: item.link_type, link_id: item.link_id } : null),
+    // Y-002: a proposal item names its application for the bridge's own check, and the CV only when chosen
+    // (the server's decline is the honest state without it).
+    ...(item.type === 'application_propose' && item.link_type === 'application' && item.link_id ? { application_id: String(item.link_id) } : null),
+    ...(item.cv_document_id ? { cv_document_id: item.cv_document_id } : null),
     // NOTE-ACTION-ITEMS-1: with the persisted row id (plus source.note_id) the
     // server stamps status/created onto the stored item — IDOR-safe pair.
     ...((item as { noteActionItemId?: string }).noteActionItemId

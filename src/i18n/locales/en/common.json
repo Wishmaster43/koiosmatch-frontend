@@ -643,7 +643,14 @@
       "whatsapp": "WhatsApp",
       "email": "Email",
       "appointment": "Appointment",
-      "notification": "Notification"
+      "notification": "Notification",
+      "application_propose": "Proposal"
+    },
+    "proposeCv": {
+      "label": "CV for the proposal",
+      "placeholder": "Choose a saved CV",
+      "none": "No saved CV for this application yet. First make one proposal from the application with a CV; after that Koios can pick that CV.",
+      "loadError": "CVs could not be loaded."
     },
     "execute": {
       "run": "Run",

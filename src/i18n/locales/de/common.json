@@ -643,7 +643,14 @@
       "whatsapp": "WhatsApp",
       "email": "E-Mail",
       "appointment": "Termin",
-      "notification": "Benachrichtigung"
+      "notification": "Benachrichtigung",
+      "application_propose": "Vorschlag"
+    },
+    "proposeCv": {
+      "label": "Lebenslauf für den Vorschlag",
+      "placeholder": "Gespeicherten Lebenslauf wählen",
+      "none": "Für diese Bewerbung gibt es noch keinen gespeicherten Lebenslauf. Senden Sie zuerst einmal einen Vorschlag mit Lebenslauf aus der Bewerbung; danach kann Koios diesen Lebenslauf wählen.",
+      "loadError": "Lebensläufe konnten nicht geladen werden."
     },
     "execute": {
       "run": "Ausführen",

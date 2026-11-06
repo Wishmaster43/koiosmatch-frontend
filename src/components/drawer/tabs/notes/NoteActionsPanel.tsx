@@ -15,8 +15,9 @@
  */
 import { useEffect, useRef, useState } from 'react'
 import NoteActionTaskExtras from './NoteActionTaskExtras'
+import ProposalCvPicker from '@/components/ui/richtext/ProposalCvPicker'
 import { useTranslation } from 'react-i18next'
-import { Bell, Calendar, ExternalLink, ListChecks, Mail, MessageCircle, Pencil, Play, AlertTriangle } from 'lucide-react'
+import { Bell, Calendar, ExternalLink, ListChecks, Mail, MessageCircle, Pencil, Play, AlertTriangle, Send } from 'lucide-react'
 import Button from '@/components/ui/Button'
 import Spinner from '@/components/ui/Spinner'
 import { GroupLabel, Caption } from '@/components/ui/typography'
@@ -77,6 +78,8 @@ export interface NoteActionPanelItem {
   link_type?: string
   link_id?: string
   link_label?: string
+  // Y-002: the saved proposal CV an application_propose row sends.
+  cv_document_id?: string | null
 }
 
 interface NoteActionsPanelProps {
@@ -97,7 +100,7 @@ interface NoteActionsPanelProps {
 
 // One icon per action-item type — mirrors the common:notesAssist.actionTypes.* vocabulary.
 const TYPE_ICON: Record<AssistActionType, typeof ListChecks> = {
-  task: ListChecks, whatsapp: MessageCircle, email: Mail, appointment: Calendar, notification: Bell,
+  task: ListChecks, whatsapp: MessageCircle, email: Mail, appointment: Calendar, notification: Bell, application_propose: Send,
 }
 
 // Where an EXECUTED item's own record lives, by its `created.type` — task and
@@ -199,6 +202,11 @@ function ActionItemCard({ item, index, onEdit, onConfirm, candidateId, formatNum
               other types), and only while editing keeps the card calm. */}
           {editing && item.type === 'task' && (
             <NoteActionTaskExtras item={item} index={index} onEdit={onEdit} />
+          )}
+          {/* Y-002: proposal CV picker, shown while the row is still editable. */}
+          {editing && item.type === 'application_propose' && (
+            <ProposalCvPicker applicationId={item.link_type === 'application' ? item.link_id : undefined}
+              value={item.cv_document_id ?? null} onChange={id => onEdit(index, { cv_document_id: id })} />
           )}
           {!editing && item.type === 'task' && (item.assignee_label || item.link_label) && (
             <Caption as="div">

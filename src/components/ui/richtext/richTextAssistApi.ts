@@ -61,7 +61,7 @@ export type RichTextAssistCombinedMode = 'process' | 'summarize_process'
 
 // The action-item types the backend can extract (NoteAssistPrompt::ACTION_TYPES) —
 // anything else is dropped server-side before it ever reaches the FE.
-export type RichTextAssistActionType = 'task' | 'whatsapp' | 'email' | 'appointment' | 'notification'
+export type RichTextAssistActionType = 'task' | 'whatsapp' | 'email' | 'appointment' | 'notification' | 'application_propose'
 export interface RichTextAssistActionItem {
   title: string
   type: RichTextAssistActionType
@@ -80,6 +80,8 @@ export interface RichTextAssistActionItem {
   link_type?: string
   link_id?: string
   link_label?: string
+  // Y-002 PROPOSAL-CV-ATTACH-1: the saved proposal CV an application_propose item sends.
+  cv_document_id?: string | null
 }
 // improve/summarize return prose; actions returns structured items; the two
 // combined modes return BOTH in one response — one discriminated result so
