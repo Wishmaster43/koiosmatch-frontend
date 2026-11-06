@@ -23,6 +23,7 @@ import SectionCard from '@/components/ui/SectionCard'
 import SoftChip from '@/components/ui/SoftChip'
 import { useConfirm } from '@/hooks/useConfirm'
 import { useDateFormat } from '@/lib/datetime'
+import { useNumberFormat } from '@/lib/formatters'
 import { notifyError, notifySuccess } from '@/lib/notify'
 import { extractApiError } from '@/lib/extractApiError'
 import { Caption } from '@/components/ui/typography'
@@ -78,6 +79,7 @@ function sendStatusChip(p: Proposal, t: TFunction) {
 export default function ProposalsBlock({ application }: ProposalsBlockProps) {
   const { t } = useTranslation(['applications', 'common'])
   const { formatDate } = useDateFormat()
+  const { formatFileSize } = useNumberFormat()
   const { proposals, loading, error, revoke, revoking } = useProposals(application.id)
   const { confirm, dialog } = useConfirm()
 
@@ -124,6 +126,15 @@ export default function ProposalsBlock({ application }: ProposalsBlockProps) {
               <div style={{ flex: '1 1 auto', minWidth: 160 }}>
                 <div style={{ fontSize: 12, fontWeight: 600, color: 'var(--text)' }}>{p.recipient_name || '—'}</div>
                 {p.recipient_email && <Caption as="div">{p.recipient_email}</Caption>}
+                {/* PROPOSAL-CV-ATTACH-1: the attached CV snapshot; a download link only when the API sends cv_url. */}
+                {p.cv_snapshot?.name && (
+                  <Caption as="div">
+                    {p.cv_url
+                      ? <Button href={p.cv_url} variant="ghost" size="sm" aria-label={t('propose.downloadCv', { name: p.cv_snapshot.name })}>{p.cv_snapshot.name}</Button>
+                      : p.cv_snapshot.name}
+                    {` · ${formatFileSize(p.cv_snapshot.bytes)}`}
+                  </Caption>
+                )}
               </div>
               <SoftChip label={p.cv_variant === 'full' ? t('propose.variantChipFull') : t('propose.variantChipProposal')} color="var(--color-primary)" />
               {/* K-248 PROPOSE-SEND-1: the delivery-truth chip — sent/failed/no_consent/

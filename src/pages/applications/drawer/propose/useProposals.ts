@@ -43,6 +43,11 @@ export interface Proposal {
   // `name => sender_name ?? null`, so a sender row with no stored name resolves
   // to an id-only object here — ProposalsBlock must not render a blank "sent by ".
   sender: { id: string; name: string | null } | null
+  // PROPOSAL-CV-ATTACH-1: additive CV attachment fields (hand-written: the OpenAPI spec carries no 2xx schema).
+  cv_attached?: boolean
+  cv_document_id?: string | null
+  cv_snapshot?: { name: string; bytes: number } | null
+  cv_url?: string | null
 }
 
 // Poll backoff while a send is queued: 15 s, 30 s, then 60 s up to an honest cap (≈ 30 min in all).

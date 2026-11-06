@@ -16,8 +16,6 @@ import { useEffect, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useQueryClient } from '@tanstack/react-query'
 import api, { unwrap } from '@/lib/api'
-// DOUBLE-SUBMIT-FE-1 point 2: one Idempotency-Key per click on an irreversible action (BE IDEMP-1 replays).
-import { withIdempotencyKey } from '@/lib/idempotency'
 import { notifyError, notifySuccess } from '@/lib/notify'
 import { apiErrorMessage } from '@/lib/extractApiError'
 import { useLookups } from '@/context/LookupsContext'
@@ -27,6 +25,9 @@ import { useLocale } from '@/lib/datetime'
 import { useUsers } from '@/lib/queries'
 import { mapCandidate } from '@/pages/candidates/shared'
 import { buildProposalCvBlob } from '@/lib/proposalCv'
+import { triggerBlobDownload } from '@/lib/downloadBlob'
+import { formatFileSizeMb } from '@/lib/numberFormat'
+import { assertProposalCvSize, postPropose, PROPOSAL_CV_MAX_BYTES, ProposalCvTooLargeError } from './proposeRequest'
 import type { CvCandidate } from '@/pages/candidates/shared'
 import type { ApplicationDetail } from '@/types/application'
 import type { Candidate } from '@/types/candidate'
@@ -282,24 +283,31 @@ export function useProposeForm(application: ApplicationDetail) {
     }
   }
 
-  // submit(): RECORD the proposal via the real backend endpoint FIRST, only
-  // then download the CV, and (only when the tenant setting is on) move the
+  // submit(): render the CV first, then RECORD the proposal via the real backend
+  // endpoint, then download the CV, and (only when the tenant setting is on) move the
   // funnel phase. Any failing step surfaces the server message and returns
   // false — never a false "sent"/"recorded" claim.
   // CLAIM-1: `force` re-sends after a 409 conflict ("Toch versturen") — a NEW
-  // Idempotency-Key (withIdempotencyKey() is called fresh below), a new click.
+  // Idempotency-Key (postPropose() mints a fresh key per call), a new click.
   const submit = async (force?: boolean): Promise<boolean> => {
     if (disabledReason || !candidate || submitting) return false
     setSubmitting(true)
     setConflict(null)
     try {
-      // 1. Record the proposal via the real endpoint (gate applications.update)
-      // BEFORE anything leaves the app (DEFECT 3, §8): recipient, cv variant and
-      // the drafted subject/body. With `send` on the backend also SENDS the e-mail
-      // (K-248); a failed record (403/422) sends nothing, so no CV full of
-      // special-category data has left the recruiter's browser — the AVG trail
-      // never has a gap.
-      const res = await api.post(`/applications/${application.id}/propose`, {
+      // 0. Y-002: render the CV FIRST (reused for upload + download); a failure or oversize refuses before any request.
+      let blob: Blob
+      try {
+        blob = await buildProposalCvBlob({ candidate: candidate as unknown as CvCandidate, settings: cvSettings as never, locale, t, variant: cvVariant })
+        assertProposalCvSize(blob)
+      } catch (cvErr) {
+        notifyError(cvErr instanceof ProposalCvTooLargeError ? t('common:upload.tooLargeMax', { max: formatFileSizeMb(PROPOSAL_CV_MAX_BYTES, locale) }) : t('propose.cvBuildFailed'))
+        return false
+      }
+      // 1. Record the proposal (multipart, CV attached) via the real endpoint (gate
+      // applications.update) BEFORE anything is downloaded (DEFECT 3, §8). With `send` on
+      // the backend also SENDS the e-mail (K-248); a failed record (403/422) leaves no
+      // CV in the browser's downloads, so the AVG trail never has a gap.
+      const res = await postPropose(application.id as string | number, {
         contact_id: recipientContactId,
         cv_variant: cvVariant,
         subject,
@@ -308,11 +316,11 @@ export function useProposeForm(application: ApplicationDetail) {
         body: composedBody(),
         send: sendEmail,
         // VOORSTEL-AFZENDER-FE-1: null means "resolve server-side" (tenant default,
-        // then the proposer) — never send an empty string for "no explicit pick".
+        // then the proposer) — omitted from the form, never an empty string.
         sender_user_id: senderUserId || null,
         // CLAIM-1: only sent when true — a plain submit never carries force:false.
         ...(force ? { force: true } : null),
-      }, withIdempotencyKey({ quietStatuses: [409] }))
+      }, blob)
       // V-appdetail-5: PROPOSE-SHARE-LINK-1 shipped — the response's own record
       // carries the same recipient-facing share_url ProposalsBlock renders (never
       // logged, §8 — only handed into component state for the copy affordance).
@@ -322,18 +330,8 @@ export function useProposeForm(application: ApplicationDetail) {
       // key) so the freshly recorded proposal appears without a manual reload.
       queryClient.invalidateQueries({ queryKey: ['applications', application.id, 'proposals'] })
 
-      // 2. Only once the record succeeded, generate + download the CV PDF
-      // client-side — same blob → object-URL → <a download> pattern as
-      // CandidateHeaderBits' downloadCv, no server round-trip.
-      const blob = await buildProposalCvBlob({ candidate: candidate as unknown as CvCandidate, settings: cvSettings as never, locale, t, variant: cvVariant })
-      const url = URL.createObjectURL(blob)
-      const link = document.createElement('a')
-      link.href = url; link.download = `CV - ${candidate.name ?? 'candidate'}.pdf`
-      document.body.appendChild(link); link.click(); document.body.removeChild(link)
-      // Defer the revoke — revoking the object URL synchronously right after
-      // click() can cancel the download in some browsers (DEFECT 3).
-      setTimeout(() => URL.revokeObjectURL(url), 0)
-
+      // 2. Once the record succeeded, download the SAME blob so the recruiter keeps a copy.
+      triggerBlobDownload(blob, `CV - ${candidate.name ?? 'candidate'}.pdf`)
       // 3. Move the funnel phase to the is_proposal stage — only when the tenant
       // opted in via Settings (application_proposal.sets_phase).
       if (proposalSettings.sets_phase) {

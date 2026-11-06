@@ -11,6 +11,7 @@ import type { ReactNode } from 'react'
 import { renderHook, act, waitFor } from '@testing-library/react'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { useProposeForm } from './useProposeForm'
+import { PROPOSAL_CV_MAX_BYTES } from './proposeRequest'
 import type { ApplicationDetail } from '@/types/application'
 
 // react-query needs a client in the tree (useQueryClient invalidates the
@@ -27,6 +28,8 @@ const { notifyError, notifySuccess } = vi.hoisted(() => ({ notifyError: vi.fn(),
 vi.mock('@/lib/notify', () => ({ notifyError, notifySuccess }))
 
 const { buildProposalCvBlob } = vi.hoisted(() => ({ buildProposalCvBlob: vi.fn(() => Promise.resolve(new Blob(['pdf']))) }))
+const { triggerBlobDownload } = vi.hoisted(() => ({ triggerBlobDownload: vi.fn() }))
+vi.mock('@/lib/downloadBlob', () => ({ triggerBlobDownload }))
 vi.mock('@/lib/proposalCv', () => ({ buildProposalCvBlob }))
 
 vi.mock('@/lib/useCvSettings', () => ({ useCvSettings: () => ({ settings: {} }) }))
@@ -81,6 +84,9 @@ const app = (over: Partial<ApplicationDetail> = {}): ApplicationDetail => ({
   contact: { id: 'ct1', name: 'Piet Klaassen', email: 'piet@zorggroep.nl', phone: '' },
   coverLetter: null, bucket: 'active', archived: false, ...over,
 } as unknown as ApplicationDetail)
+
+// Reads the multipart body of the Nth propose call (FormData) as a plain string map.
+const formOf = (n = -1) => (apiPost.mock.calls.at(n) as unknown as [string, FormData])[1]
 
 describe('useProposeForm', () => {
   beforeEach(() => {
@@ -171,7 +177,9 @@ describe('useProposeForm', () => {
     await waitFor(() => expect(result.current.disabledReason).toBeNull())
     await act(async () => { await result.current.submit() })
     expect(apiPatch).not.toHaveBeenCalled()
-    expect(apiPost).toHaveBeenCalledWith('/applications/1/propose', expect.objectContaining({ contact_id: 'ct1' }), expect.objectContaining({ headers: expect.objectContaining({ 'Idempotency-Key': expect.any(String) }) }))
+    expect(apiPost).toHaveBeenCalledWith('/applications/1/propose', expect.any(FormData), expect.objectContaining({ headers: expect.objectContaining({ 'Idempotency-Key': expect.any(String) }) }))
+    expect(formOf().get('contact_id')).toBe('ct1')
+    expect(formOf().get('cv_pdf')).toBeInstanceOf(File)
     expect(apiPost).not.toHaveBeenCalledWith('/applications/1/notes', expect.anything())
   })
 
@@ -192,14 +200,14 @@ describe('useProposeForm', () => {
     act(() => { result.current.setConsentConfirmed(true); result.current.setCvVariant('full') })
     await waitFor(() => expect(result.current.disabledReason).toBeNull())
     await act(async () => { await result.current.submit() })
-    expect(apiPost).toHaveBeenCalledWith('/applications/1/propose', {
-      contact_id: 'ct1',
-      cv_variant: 'full',
-      subject: result.current.subject,
-      body: result.current.body,
-      send: true,
-      sender_user_id: null,
-    }, expect.objectContaining({ headers: expect.objectContaining({ 'Idempotency-Key': expect.any(String) }) }))
+    expect(apiPost).toHaveBeenCalledWith('/applications/1/propose', expect.any(FormData), expect.objectContaining({ headers: expect.objectContaining({ 'Idempotency-Key': expect.any(String) }) }))
+    const form = formOf()
+    expect(form.get('contact_id')).toBe('ct1')
+    expect(form.get('cv_variant')).toBe('full')
+    expect(form.get('subject')).toBe(result.current.subject)
+    expect(form.get('body')).toBe(result.current.body)
+    expect(form.get('send')).toBe('1')
+    expect(form.has('sender_user_id')).toBe(false)
   })
 
   // VOORSTEL-AFZENDER-FE-1: the picked sender travels as sender_user_id; the tenant
@@ -212,7 +220,8 @@ describe('useProposeForm', () => {
     act(() => { result.current.setConsentConfirmed(true); result.current.setSenderUserId('u2') })
     await waitFor(() => expect(result.current.disabledReason).toBeNull())
     await act(async () => { await result.current.submit() })
-    expect(apiPost).toHaveBeenCalledWith('/applications/1/propose', expect.objectContaining({ sender_user_id: 'u2' }), expect.objectContaining({ headers: expect.objectContaining({ 'Idempotency-Key': expect.any(String) }) }))
+    expect(apiPost).toHaveBeenCalledWith('/applications/1/propose', expect.any(FormData), expect.objectContaining({ headers: expect.objectContaining({ 'Idempotency-Key': expect.any(String) }) }))
+    expect(formOf().get('sender_user_id')).toBe('u2')
   })
 
   it('preselects the tenant default sender and renders it in the {recruiter} token', async () => {
@@ -225,7 +234,8 @@ describe('useProposeForm', () => {
     act(() => { result.current.setConsentConfirmed(true) })
     await waitFor(() => expect(result.current.disabledReason).toBeNull())
     await act(async () => { await result.current.submit() })
-    expect(apiPost).toHaveBeenCalledWith('/applications/1/propose', expect.objectContaining({ sender_user_id: 'u2' }), expect.objectContaining({ headers: expect.objectContaining({ 'Idempotency-Key': expect.any(String) }) }))
+    expect(apiPost).toHaveBeenCalledWith('/applications/1/propose', expect.any(FormData), expect.objectContaining({ headers: expect.objectContaining({ 'Idempotency-Key': expect.any(String) }) }))
+    expect(formOf().get('sender_user_id')).toBe('u2')
   })
 
   it('keeps an explicit pick when the settings re-fetch would otherwise reapply the default', async () => {
@@ -250,11 +260,11 @@ describe('useProposeForm', () => {
     expect(result.current.sendEmail).toBe(true)
 
     await act(async () => { await result.current.submit() })
-    expect(apiPost).toHaveBeenCalledWith('/applications/1/propose', expect.objectContaining({ send: true }), expect.objectContaining({ headers: expect.objectContaining({ 'Idempotency-Key': expect.any(String) }) }))
+    expect(formOf().get('send')).toBe('1')
 
     act(() => { result.current.setSendEmail(false) })
     await act(async () => { await result.current.submit() })
-    expect(apiPost).toHaveBeenLastCalledWith('/applications/1/propose', expect.objectContaining({ send: false }), expect.objectContaining({ headers: expect.objectContaining({ 'Idempotency-Key': expect.any(String) }) }))
+    expect(formOf().get('send')).toBe('0')
   })
 
   // Regression (25-07): the "motivatiebrief meesturen" checkbox changed nothing —
@@ -269,7 +279,7 @@ describe('useProposeForm', () => {
     await waitFor(() => expect(result.current.disabledReason).toBeNull())
 
     // The mock's call tuple is untyped — read the recorded body through one cast.
-    const lastBody = () => (apiPost.mock.calls.at(-1) as unknown as [string, { body: string }])[1].body
+    const lastBody = () => String(formOf().get('body'))
 
     await act(async () => { await result.current.submit() })
     expect(lastBody()).not.toContain('Mijn motivatie')
@@ -279,10 +289,9 @@ describe('useProposeForm', () => {
     expect(lastBody()).toContain('Mijn motivatie')
   })
 
-  // DEFECT 3 regression: the CV is recorded BEFORE it is generated/downloaded —
-  // on a rejected /propose (403/422), buildProposalCvBlob must never run, so no
-  // special-category PDF leaves the browser while Koios has no record of it.
-  it('surfaces an error, does not claim success, and never builds the CV when the /propose POST fails', async () => {
+  // DEFECT 3 regression: the CV is only DOWNLOADED after the record succeeded —
+  // on a rejected /propose no special-category PDF is saved while Koios has no record.
+  it('surfaces an error, does not claim success, and never downloads the CV when the /propose POST fails', async () => {
     apiPost.mockRejectedValueOnce(new Error('network'))
     const { result } = renderHook(() => useProposeForm(app()), { wrapper })
     await waitFor(() => expect(result.current.candidateLoading).toBe(false))
@@ -293,7 +302,7 @@ describe('useProposeForm', () => {
     expect(ok).toBe(false)
     expect(notifyError).toHaveBeenCalled()
     expect(notifySuccess).not.toHaveBeenCalled()
-    expect(buildProposalCvBlob).not.toHaveBeenCalled()
+    expect(triggerBlobDownload).not.toHaveBeenCalled()
   })
 
   // V-appdetail-5: the response's own share_url is captured into state so the
@@ -387,9 +396,10 @@ describe('useProposeForm', () => {
     await act(async () => { await result.current.forceSend() })
     expect(apiPost).toHaveBeenLastCalledWith(
       '/applications/1/propose',
-      expect.objectContaining({ force: true }),
+      expect.any(FormData),
       expect.objectContaining({ headers: expect.objectContaining({ 'Idempotency-Key': expect.any(String) }) }),
     )
+    expect(formOf().get('force')).toBe('1')
     const [firstKey, lastKey] = apiPost.mock.calls.map(c => (c as unknown as [string, unknown, { headers?: Record<string, string> }])[2]?.headers?.['Idempotency-Key'])
     expect(lastKey).not.toBe(firstKey)
     expect(result.current.conflict).toBeNull()
@@ -489,5 +499,58 @@ describe('useProposeForm', () => {
     act(() => { result.current.setBody('mine') })
     await act(async () => { resolveCandidate({ data: { id: 'c1', firstname: 'Sanne', lastname: 'de Vries' } }) })
     expect(result.current.body).toBe('mine')
+  })
+
+  // Y-002: the CV is rendered first; a render failure refuses with no request at all.
+  it('sends no request and shows the translated refusal when the CV cannot be built', async () => {
+    buildProposalCvBlob.mockRejectedValueOnce(new Error('render'))
+    const { result } = renderHook(() => useProposeForm(app()), { wrapper })
+    await waitFor(() => expect(result.current.candidateLoading).toBe(false))
+    act(() => { result.current.setConsentConfirmed(true) })
+    await waitFor(() => expect(result.current.disabledReason).toBeNull())
+    let ok: boolean | undefined
+    await act(async () => { ok = await result.current.submit() })
+    expect(ok).toBe(false)
+    expect(apiPost).not.toHaveBeenCalled()
+    expect(notifyError).toHaveBeenCalledWith('propose.cvBuildFailed')
+  })
+
+  // Y-002: an oversized CV is refused before any request, with the shared too-large copy.
+  it('sends no request and shows the too-large copy when the CV exceeds the cap', async () => {
+    buildProposalCvBlob.mockResolvedValueOnce(new Blob([new Uint8Array(PROPOSAL_CV_MAX_BYTES + 1)]))
+    const { result } = renderHook(() => useProposeForm(app()), { wrapper })
+    await waitFor(() => expect(result.current.candidateLoading).toBe(false))
+    act(() => { result.current.setConsentConfirmed(true) })
+    await waitFor(() => expect(result.current.disabledReason).toBeNull())
+    let ok: boolean | undefined
+    await act(async () => { ok = await result.current.submit() })
+    expect(ok).toBe(false)
+    expect(apiPost).not.toHaveBeenCalled()
+    expect(notifyError).toHaveBeenCalledWith('common:upload.tooLargeMax')
+  })
+
+  // Y-002: a field-keyed 422 on cv_pdf goes through the shared apiErrorMessage chain.
+  it('shows the server sentence for a 422 on cv_pdf and downloads nothing', async () => {
+    apiPost.mockRejectedValueOnce({ response: { status: 422, data: { message: 'The cv pdf must be a PDF.', errors: { cv_pdf: ['The cv pdf must be a PDF.'] } } } })
+    const { result } = renderHook(() => useProposeForm(app()), { wrapper })
+    await waitFor(() => expect(result.current.candidateLoading).toBe(false))
+    act(() => { result.current.setConsentConfirmed(true) })
+    await waitFor(() => expect(result.current.disabledReason).toBeNull())
+    await act(async () => { await result.current.submit() })
+    expect(notifyError).toHaveBeenCalledWith('The cv pdf must be a PDF.')
+    expect(triggerBlobDownload).not.toHaveBeenCalled()
+  })
+
+  // Y-002: success reuses the SAME rendered blob for the download (one render only).
+  it('downloads the same blob it uploaded after a successful record', async () => {
+    const { result } = renderHook(() => useProposeForm(app()), { wrapper })
+    await waitFor(() => expect(result.current.candidateLoading).toBe(false))
+    act(() => { result.current.setConsentConfirmed(true) })
+    await waitFor(() => expect(result.current.disabledReason).toBeNull())
+    await act(async () => { await result.current.submit() })
+    expect(buildProposalCvBlob).toHaveBeenCalledTimes(1)
+    const blob = await buildProposalCvBlob.mock.results[0].value
+    expect(triggerBlobDownload).toHaveBeenCalledTimes(1)
+    expect(triggerBlobDownload).toHaveBeenCalledWith(blob, 'CV - Jan de Vries.pdf')
   })
 })

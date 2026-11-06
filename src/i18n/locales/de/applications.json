@@ -524,6 +524,8 @@
     "copied": "Kopiert",
     "notSentYet": "Koios verschickt diese Nachricht nicht selbst. Laden Sie den Lebenslauf herunter und versenden Sie ihn über Ihr eigenes E-Mail-Programm, oder nutzen Sie den widerrufbaren Link oben.",
     "recorded": "Vorschlag festgehalten",
+    "cvBuildFailed": "Der Lebenslauf konnte nicht erstellt werden. Versuchen Sie es erneut oder prüfen Sie das Kandidatenprofil.",
+    "downloadCv": "Lebenslauf herunterladen: {{name}}",
     "loading": "Wird geladen…",
     "noteTitle": "Kandidat vorgeschlagen",
     "defaultSubject": "Kandidat {candidate_short} für {vacancy} vorgeschlagen",

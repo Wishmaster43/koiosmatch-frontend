@@ -544,6 +544,8 @@
     "copied": "Gekopieerd",
     "notSentYet": "Koios verstuurt dit bericht niet zelf. Download de CV en verstuur hem vanuit je eigen e-mailprogramma, of gebruik de intrekbare deellink hierboven.",
     "recorded": "Voorstel vastgelegd",
+    "cvBuildFailed": "Het cv kon niet worden opgebouwd. Probeer het opnieuw of controleer het kandidaatprofiel.",
+    "downloadCv": "Cv downloaden: {{name}}",
     "loading": "Laden…",
     "noteTitle": "Kandidaat voorgesteld",
     "defaultSubject": "Kandidaat {candidate_short} voorgesteld voor {vacancy}",

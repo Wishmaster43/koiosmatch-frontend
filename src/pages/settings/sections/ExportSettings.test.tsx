@@ -51,7 +51,8 @@ describe('downloadCsv (the real per-entity export request)', () => {
     expect(mockedApi.get).toHaveBeenCalledWith('/exports/candidates.csv', { responseType: 'blob' })
     expect(createObjectURL).toHaveBeenCalled()
     expect(clickSpy).toHaveBeenCalled()
-    expect(revokeObjectURL).toHaveBeenCalledWith('blob:mock-url')
+    // The revoke is deferred a tick (DEFECT 3).
+    await vi.waitFor(() => expect(revokeObjectURL).toHaveBeenCalledWith('blob:mock-url'))
 
     clickSpy.mockRestore()
     vi.unstubAllGlobals()

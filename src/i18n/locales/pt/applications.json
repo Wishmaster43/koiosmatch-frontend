@@ -544,6 +544,8 @@
     "copied": "Copiado",
     "notSentYet": "O Koios não envia esta mensagem por conta própria. Descarregue o CV e envie-o a partir do seu próprio programa de e-mail, ou utilize o link de partilha revogável acima.",
     "recorded": "Proposta registada",
+    "cvBuildFailed": "Não foi possível gerar o CV. Tente novamente ou verifique o perfil do candidato.",
+    "downloadCv": "Transferir CV: {{name}}",
     "loading": "A carregar…",
     "noteTitle": "Candidato proposto",
     "defaultSubject": "Candidato {candidate_short} proposto para {vacancy}",

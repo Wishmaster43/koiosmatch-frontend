@@ -13,5 +13,6 @@ export function triggerBlobDownload(blob: Blob, filename: string) {
   document.body.appendChild(a)
   a.click()
   document.body.removeChild(a)
-  URL.revokeObjectURL(url)
+  // DEFECT 3: a synchronous revoke right after click() can cancel the download in some browsers.
+  setTimeout(() => URL.revokeObjectURL(url), 0)
 }

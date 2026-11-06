@@ -13,6 +13,11 @@ import type { Proposal } from './useProposals'
 import type { ApplicationDetail } from '@/types/application'
 
 vi.mock('react-i18next', () => ({ useTranslation: () => ({ t: (k: string, opts?: Record<string, unknown>) => (opts ? `${k}:${JSON.stringify(opts)}` : k) }) }))
+// Fixed-locale number formatter: the real hook needs the locale/tenant providers.
+vi.mock('@/lib/formatters', async () => {
+  const actual = await vi.importActual<typeof import('@/lib/formatters')>('@/lib/formatters')
+  return { ...actual, useNumberFormat: () => ({ formatFileSize: (v: number) => actual.formatFileSize(v, 'en-GB') }) }
+})
 vi.mock('@/lib/datetime', () => ({ useDateFormat: () => ({ formatDate: (v: string) => v, formatDateTime: (v: string) => v }) }))
 
 const mockUseProposals = vi.fn()
@@ -38,6 +43,27 @@ const inkOf = (label: string): string => {
   const el = screen.getByText(label).closest<HTMLElement>('[style*="color"]')
   return el?.style.color ?? ''
 }
+
+describe('ProposalsBlock CV snapshot', () => {
+  it('shows the snapshot name and formatted size', () => {
+    setProposals([proposal({ cv_snapshot: { name: 'CV - J. Jansen.pdf', bytes: 2048 } })])
+    render(<ProposalsBlock application={app} />)
+    expect(screen.getByText(/CV - J\. Jansen\.pdf/)).toBeInTheDocument()
+    expect(screen.getByText(/2\sKB/)).toBeInTheDocument()
+  })
+
+  it('renders no CV line without a snapshot', () => {
+    setProposals([proposal()])
+    render(<ProposalsBlock application={app} />)
+    expect(screen.queryByText(/\.pdf/)).not.toBeInTheDocument()
+  })
+
+  it('renders the name as a link when cv_url is present', () => {
+    setProposals([proposal({ cv_snapshot: { name: 'CV.pdf', bytes: 100 }, cv_url: 'https://x.test/cv' })])
+    render(<ProposalsBlock application={app} />)
+    expect(screen.getByRole('link', { name: 'propose.downloadCv:{"name":"CV.pdf"}' })).toHaveAttribute('href', 'https://x.test/cv')
+  })
+})
 
 describe('ProposalsBlock', () => {
   it('renders nothing while loading', () => {

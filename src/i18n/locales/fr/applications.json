@@ -524,6 +524,8 @@
     "copied": "Copié",
     "notSentYet": "Koios n'envoie pas ce message lui-même. Téléchargez le CV et envoyez-le depuis votre propre messagerie, ou utilisez le lien partageable révocable ci-dessus.",
     "recorded": "Proposition enregistrée",
+    "cvBuildFailed": "Le CV n'a pas pu être généré. Réessayez ou vérifiez le profil du candidat.",
+    "downloadCv": "Télécharger le CV : {{name}}",
     "loading": "Chargement…",
     "noteTitle": "Candidat proposé",
     "defaultSubject": "Candidat {candidate_short} proposé pour {vacancy}",

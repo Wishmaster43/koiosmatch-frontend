@@ -544,6 +544,8 @@
     "copied": "Copied",
     "notSentYet": "Koios does not send this message itself. Download the CV and send it from your own mail program, or use the revocable share link above.",
     "recorded": "Proposal recorded",
+    "cvBuildFailed": "The CV could not be built. Try again or check the candidate profile.",
+    "downloadCv": "Download CV: {{name}}",
     "loading": "Loading…",
     "noteTitle": "Candidate proposed",
     "defaultSubject": "Candidate {candidate_short} proposed for {vacancy}",
