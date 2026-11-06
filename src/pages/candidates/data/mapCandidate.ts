@@ -357,6 +357,9 @@ export function mapCandidate(c: ApiCandidate, locale: string = 'nl-NL'): Candida
     },
     // K-008: GDPR first-contact notice; `due` is the BE verdict, null when absent.
     privacyNoticeSentAt: c.privacy_notice_sent_at ?? null,
+    // K012-CONSENT-VERSION-1: privacy notice acceptance facts for the dossier line.
+    privacyConsentedAt: c.privacy_consented_at ?? null,
+    privacyNoticeVersion: c.privacy_notice_version ?? null,
     privacyNotice: readPrivacyNotice(c.privacy_notice),
     // AVG-RET-2: derived retention deadline (tenant retention_months_never_placed /
     // _ever_placed windows, applied server-side) — feeds the Communication → Consent

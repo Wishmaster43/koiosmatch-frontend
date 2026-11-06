@@ -289,6 +289,9 @@ export interface Candidate {
   // K-008: the DETAIL resource carries this root field; LIST rows do not (null there) — a consumer that
   // may render a list row reads privacyNotice.sentAt instead, never this field.
   privacyNoticeSentAt: string | null
+  // K012-CONSENT-VERSION-1: when the candidate accepted the privacy notice, and which version.
+  privacyConsentedAt: string | null
+  privacyNoticeVersion: string | null
   privacyNotice: PrivacyNotice
   // AVG-RET-2: derived, read-only retention deadline (tenant retention_months_*
   // windows applied server-side) — GET /candidates/{id} returns this already.
@@ -516,6 +519,9 @@ export interface ApiCandidate {
   }
   // K-008: privacy-notice facts at the resource root (the list row carries only the block).
   privacy_notice_sent_at?: string | null
+  // K012-CONSENT-VERSION-1: acceptance timestamp + 12-hex notice version (both null until accepted).
+  privacy_consented_at?: string | null
+  privacy_notice_version?: string | null
   privacy_notice?: { sent_at?: string | null; due?: boolean | null } | null
   // AVG-RET-2: derived retention deadline (tenant policy applied server-side),
   // already returned by CandidateDetailResource.

@@ -8,19 +8,19 @@ import { usePrivacyNotice } from '../hooks/usePrivacyNotice'
 interface PrivacyNoticeDisclosureProps {
   tenant: string
   locale: string
-  // Reports whether the notice text is really rendered (K-012: gates privacy_consent).
-  onLoadedChange: (loaded: boolean) => void
+  // Reports whether the notice text is really rendered (K-012: gates privacy_consent) and its version (K-012V).
+  onLoadedChange: (loaded: boolean, version: string | null) => void
 }
 
 // Collapsible bureau privacy notice shown above the AVG consent box; the text is
 // rendered as a plain text node (never HTML).
 export function PrivacyNoticeDisclosure({ tenant, locale, onLoadedChange }: PrivacyNoticeDisclosureProps) {
-  const { status, text, retry } = usePrivacyNotice(tenant, locale)
+  const { status, text, version, retry } = usePrivacyNotice(tenant, locale)
 
   // Tell the form whether the notice text is on screen.
   useEffect(() => {
-    onLoadedChange(status === 'ready')
-  }, [status, onLoadedChange])
+    onLoadedChange(status === 'ready', status === 'ready' ? version : null)
+  }, [status, version, onLoadedChange])
 
   const copy = strings.apply.privacyNotice
   return (

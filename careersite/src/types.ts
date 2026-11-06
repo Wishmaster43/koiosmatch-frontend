@@ -13,6 +13,8 @@ export interface SiteInfo {
   // (default OFF/opt-in). When false, the data endpoints (vacancies/apply/feeds)
   // 404 — the frontend must gate on this flag rather than treat it as an error.
   active: boolean
+  // K-012V: version/locale of the bureau privacy notice (bureau default locale).
+  privacy_notice?: { version: string; locale: string }
   // CAREER-EMBED-1 (additive): origins allowed to frame the site; read by the hosting
   // edge for frame-ancestors, the app itself has no UI for it.
   embed_origins?: string[]
@@ -23,6 +25,8 @@ export interface SiteInfo {
 export interface PrivacyNotice {
   text: string
   locale: string
+  // K-012V: first 12 hex chars of sha256 over the rendered text (per locale and bureau text).
+  version: string
 }
 
 export interface HoursRange {
@@ -141,6 +145,8 @@ export interface ApplyPayload {
   // K-012: sent (as true) ONLY when the privacy notice text was rendered and the AVG
   // box is ticked; otherwise left undefined so the field never reaches the request.
   privacy_consent?: boolean
+  // K-012V: version of the notice the visitor saw; sent only together with privacy_consent.
+  privacy_notice_version?: string
   // K-008 opt-ins: sent (as true) only when ticked.
   whatsapp_consent?: boolean
   email_consent?: boolean

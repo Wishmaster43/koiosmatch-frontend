@@ -632,6 +632,10 @@
     "consentEmail": "Email",
     "consentNewsletter": "Newsletter",
     "consentGivenAt": "Consenso dato il {{date}}",
+    "consent": {
+      "privacyAccepted": "Informativa sulla privacy accettata il {{date}} (versione {{version}})",
+      "privacyAcceptedNoVersion": "Informativa sulla privacy accettata il {{date}}"
+    },
     "consentRetentionOptIn": "Può essere conservato",
     "retentionUntil": "Conservato fino al {{date}}",
     "retentionUnlimited": "Conservato a tempo indeterminato (consenso dato il {{date}})",

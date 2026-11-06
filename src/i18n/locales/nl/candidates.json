@@ -632,6 +632,10 @@
     "consentEmail": "E-mail",
     "consentNewsletter": "Nieuwsbrief",
     "consentGivenAt": "Toestemming gegeven op {{date}}",
+    "consent": {
+      "privacyAccepted": "Privacyverklaring geaccepteerd op {{date}} (versie {{version}})",
+      "privacyAcceptedNoVersion": "Privacyverklaring geaccepteerd op {{date}}"
+    },
     "consentRetentionOptIn": "Mag bewaard blijven",
     "retentionUntil": "Bewaren tot {{date}}",
     "retentionUnlimited": "Onbeperkt bewaard (toestemming op {{date}})",

@@ -73,6 +73,19 @@ describe('mapCandidate · KEY-ADOPTION', () => {
   })
 })
 
+describe('mapCandidate · privacy consent version (K012-CONSENT-VERSION-1)', () => {
+  it('maps the acceptance timestamp and notice version when present', () => {
+    const c = mapCandidate({ id: '1', privacy_consented_at: '2026-10-02T09:30:00+00:00', privacy_notice_version: 'a1b2c3d4e5f6' } as ApiCandidate)
+    expect(c.privacyConsentedAt).toBe('2026-10-02T09:30:00+00:00')
+    expect(c.privacyNoticeVersion).toBe('a1b2c3d4e5f6')
+  })
+  it('maps absent fields to null', () => {
+    const c = mapCandidate({ id: '1' } as ApiCandidate)
+    expect(c.privacyConsentedAt).toBeNull()
+    expect(c.privacyNoticeVersion).toBeNull()
+  })
+})
+
 describe('mapCandidate · consent states and privacy notice (K-008)', () => {
   it('maps the three states verbatim and the notice passthrough', () => {
     const c = mapCandidate({

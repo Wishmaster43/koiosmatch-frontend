@@ -71,7 +71,7 @@ export default function CommunicationTab({ c, onSave, onEditStatusEvent, initial
   // so the host can avoid re-passing it on a later tab remount (see CandidateDrawer).
   onInitialActionConsumed?: () => void }) {
   const { t } = useTranslation('candidates')
-  const { formatDate } = useDateFormat()
+  const { formatDate, formatDateTime } = useDateFormat()
   // OPENERS-HIDE-1 (pass 5): POST /conversations/start is gated on page.whatsapp
   // (communication-ai.php:76-80) — hide "Conversatie starten" rather than let it 422 (§3).
   const auth = useAuth()
@@ -315,6 +315,15 @@ export default function CommunicationTab({ c, onSave, onEditStatusEvent, initial
             })}
 
           </div>
+
+          {/* K012-DOSSIER-LINE-1: read-only fact line, shown only once the notice was accepted. */}
+          {c.privacyConsentedAt && (
+            <Caption as="div" style={{ marginTop: 8 }}>
+              {c.privacyNoticeVersion
+                ? t('communication.consent.privacyAccepted', { date: formatDateTime(c.privacyConsentedAt), version: c.privacyNoticeVersion })
+                : t('communication.consent.privacyAcceptedNoVersion', { date: formatDateTime(c.privacyConsentedAt) })}
+            </Caption>
+          )}
 
           {/* AVG-bewaartermijn — its OWN clearly bounded block (Danny 24-07: the
               loose text line under the channel consents was unreadable). The consent's

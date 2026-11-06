@@ -22,10 +22,10 @@ describe('api client — request construction', () => {
   // K-012: privacy notice GET.
   it('fetchPrivacyNotice GETs the tenant privacy-notice with the locale and returns the flat body', async () => {
     const mockFetch = vi.mocked(fetch)
-    mockFetch.mockResolvedValue(mockJsonResponse({ text: 'Tekst', locale: 'nl' }))
+    mockFetch.mockResolvedValue(mockJsonResponse({ text: 'Tekst', locale: 'nl', version: '3f9a1c07be52' }))
     const notice = await fetchPrivacyNotice('acme', 'nl')
     expect(mockFetch).toHaveBeenCalledWith('http://koiosmatch-api.test/api/public/acme/privacy-notice?locale=nl', { credentials: 'omit' })
-    expect(notice).toEqual({ text: 'Tekst', locale: 'nl' })
+    expect(notice).toEqual({ text: 'Tekst', locale: 'nl', version: '3f9a1c07be52' })
   })
 
   it('fetchSite hits GET {base}/public/{tenant}/site with no credentials', async () => {
@@ -202,6 +202,22 @@ describe('api client — request construction', () => {
     expect((await bodyFor(true)).get('privacy_consent')).toBe('1')
     expect((await bodyFor(false)).get('privacy_consent')).toBeNull()
     expect((await bodyFor(undefined)).get('privacy_consent')).toBeNull()
+  })
+
+  // K-012V: the seen notice version is sent only with a true consent and a known version.
+  it('sends privacy_notice_version only with consent true and a version given', async () => {
+    const mockFetch = vi.mocked(fetch)
+    const base = { first_name: 'Jane', last_name: 'Doe', email: 'jane@example.com', phone: '0612345678', website: '' }
+    const bodyFor = async (privacy_consent?: boolean, privacy_notice_version?: string) => {
+      mockFetch.mockReset()
+      mockFetch.mockResolvedValue(mockJsonResponse({ status: 'applied' }, 201))
+      await applyToVacancy('acme', 'REF-1', { ...base, privacy_consent, privacy_notice_version })
+      return mockFetch.mock.calls[0][1]?.body as FormData
+    }
+    expect((await bodyFor(true, '3f9a1c07be52')).get('privacy_notice_version')).toBe('3f9a1c07be52')
+    expect((await bodyFor(false, '3f9a1c07be52')).get('privacy_notice_version')).toBeNull()
+    expect((await bodyFor(undefined, '3f9a1c07be52')).get('privacy_notice_version')).toBeNull()
+    expect((await bodyFor(true, undefined)).get('privacy_notice_version')).toBeNull()
   })
 
   // K-008: the opt-ins follow the privacy_consent rule, '1' only for a real true tick.

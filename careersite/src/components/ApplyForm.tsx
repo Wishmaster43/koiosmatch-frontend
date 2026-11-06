@@ -1,4 +1,4 @@
-import { useState, type FormEvent } from 'react'
+import { useCallback, useState, type FormEvent } from 'react'
 import { strings, CAREERSITE_LOCALE } from '../strings'
 import { validateCvFile } from '../lib/validateFile'
 import { validatePhotoFile } from '../lib/validatePhotoFile'
@@ -73,6 +73,12 @@ export function ApplyForm({ tenant, reference, applicationSettings }: ApplyFormP
   const [emailOptIn, setEmailOptIn] = useState(false)
   // K-012: true only while the privacy notice text is really rendered.
   const [noticeShown, setNoticeShown] = useState(false)
+  // K-012V: version of the notice text the visitor actually saw.
+  const [noticeVersion, setNoticeVersion] = useState<string | null>(null)
+  const handleNoticeLoaded = useCallback((shown: boolean, version: string | null) => {
+    setNoticeShown(shown)
+    setNoticeVersion(version)
+  }, [])
   // Honeypot — invisible to real visitors; a bot filling this in tells the backend to reject.
   const [website, setWebsite] = useState('')
   const [errors, setErrors] = useState<FieldErrors>({})
@@ -171,6 +177,8 @@ export function ApplyForm({ tenant, reference, applicationSettings }: ApplyFormP
       interviewConsent: applicationSettings.interview_consent !== 'hidden' ? interviewConsent : undefined,
       // K-012: the tick counts as privacy consent only when the notice was really shown.
       privacyConsent: noticeShown && consent ? true : undefined,
+      // K-012V: the version the visitor saw rides along with the tick, never without it.
+      privacyNoticeVersion: noticeShown && consent && noticeVersion ? noticeVersion : undefined,
       // K-008: optional opt-ins, unchecked by default; a tick travels as true, nothing otherwise.
       whatsappConsent: whatsappOptIn ? true : undefined,
       emailConsent: emailOptIn ? true : undefined,
@@ -266,7 +274,7 @@ export function ApplyForm({ tenant, reference, applicationSettings }: ApplyFormP
         </>
       ) : null}
 
-      <PrivacyNoticeDisclosure tenant={tenant} locale={CAREERSITE_LOCALE} onLoadedChange={setNoticeShown} />
+      <PrivacyNoticeDisclosure tenant={tenant} locale={CAREERSITE_LOCALE} onLoadedChange={handleNoticeLoaded} />
 
       <label className="apply-form__consent">
         <input type="checkbox" checked={consent} onChange={(event) => setConsent(event.target.checked)} />

@@ -609,6 +609,10 @@
     "consentEmail": "E-Mail",
     "consentNewsletter": "Newsletter",
     "consentGivenAt": "Einwilligung erteilt am {{date}}",
+    "consent": {
+      "privacyAccepted": "Datenschutzerklärung akzeptiert am {{date}} (Version {{version}})",
+      "privacyAcceptedNoVersion": "Datenschutzerklärung akzeptiert am {{date}}"
+    },
     "consentRetentionOptIn": "Darf aufbewahrt werden",
     "retentionUntil": "Aufbewahrt bis {{date}}",
     "retentionUnlimited": "Unbegrenzt aufbewahrt (Einwilligung am {{date}})",

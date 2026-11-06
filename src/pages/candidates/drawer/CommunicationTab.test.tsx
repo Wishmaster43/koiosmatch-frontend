@@ -609,3 +609,29 @@ describe('CommunicationTab · start action vs auth loading (GAPS-A4)', () => {
     expect(onConsumed).toHaveBeenCalled()
   })
 })
+
+// K012-DOSSIER-LINE-1: real i18n is loaded lazily and LAST, so the key-echo cases above stay untouched.
+describe('CommunicationTab · privacy notice acceptance line (K012-DOSSIER-LINE-1)', () => {
+  const openConsent = async (extra: Partial<Candidate>) => {
+    const { default: i18n } = await import('@/i18n')
+    await i18n.changeLanguage('en')
+    const user = userEvent.setup()
+    render(<CommunicationTab c={candidate({}, extra)} />)
+    await user.click(screen.getByRole('tab', { name: i18n.t('candidates:communication.consentTitle') }))
+  }
+
+  it('shows the date and the version when both are present', async () => {
+    await openConsent({ privacyConsentedAt: '2026-10-02 09:30', privacyNoticeVersion: 'a1b2c3d4e5f6' } as Partial<Candidate>)
+    expect(screen.getByText('Privacy notice accepted on 2026-10-02 09:30 (version a1b2c3d4e5f6)')).toBeInTheDocument()
+  })
+
+  it('shows the no-version variant when only the date is present', async () => {
+    await openConsent({ privacyConsentedAt: '2026-10-02 09:30', privacyNoticeVersion: null } as Partial<Candidate>)
+    expect(screen.getByText('Privacy notice accepted on 2026-10-02 09:30')).toBeInTheDocument()
+  })
+
+  it('renders no line when the notice was never accepted', async () => {
+    await openConsent({ privacyConsentedAt: null, privacyNoticeVersion: null } as Partial<Candidate>)
+    expect(screen.queryByText(/Privacy notice accepted/)).not.toBeInTheDocument()
+  })
+})

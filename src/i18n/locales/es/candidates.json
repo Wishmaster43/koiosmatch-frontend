@@ -609,6 +609,10 @@
     "consentEmail": "Correo electrónico",
     "consentNewsletter": "Boletín",
     "consentGivenAt": "Consentimiento otorgado el {{date}}",
+    "consent": {
+      "privacyAccepted": "Aviso de privacidad aceptado el {{date}} (versión {{version}})",
+      "privacyAcceptedNoVersion": "Aviso de privacidad aceptado el {{date}}"
+    },
     "consentRetentionOptIn": "Puede conservarse",
     "retentionUntil": "Conservado hasta {{date}}",
     "retentionUnlimited": "Conservado indefinidamente (consentimiento otorgado el {{date}})",

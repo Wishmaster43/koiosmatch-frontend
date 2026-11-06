@@ -34,7 +34,7 @@ beforeEach(() => {
   // The API deliberately sends no reference any more (N-011).
   mockedApply.mockResolvedValue({ status: 'applied' })
   mockedNotice.mockReset()
-  mockedNotice.mockResolvedValue({ text: NOTICE_TEXT, locale: 'nl' })
+  mockedNotice.mockResolvedValue({ text: NOTICE_TEXT, locale: 'nl', version: '3f9a1c07be52' })
 })
 
 // Fills the four required contact fields; consent/CV are each test's own concern.
@@ -307,6 +307,30 @@ describe('ApplyForm — privacy notice + privacy_consent (K-012)', () => {
     expect(mockedApply.mock.calls[0][2].privacy_consent).toBe(true)
   })
 
+  it('sends the seen privacy_notice_version when the box is ticked', async () => {
+    const user = userEvent.setup()
+    render(<ApplyForm tenant="acme" reference="REF-1" applicationSettings={BASE_SETTINGS} />)
+    await screen.findByText(NOTICE_TEXT)
+    await fillRequiredFields(user)
+    await user.click(screen.getByRole('checkbox', { name: strings.apply.consentLabel }))
+    await user.click(screen.getByRole('button', { name: strings.apply.submit }))
+    expect(await screen.findByText(strings.apply.success)).toBeTruthy()
+    expect(mockedApply.mock.calls[0][2].privacy_notice_version).toBe('3f9a1c07be52')
+  })
+
+  it('does not send a malformed privacy_notice_version', async () => {
+    mockedNotice.mockResolvedValue({ text: NOTICE_TEXT, locale: 'nl', version: 'not-a-hash' })
+    const user = userEvent.setup()
+    render(<ApplyForm tenant="acme" reference="REF-1" applicationSettings={BASE_SETTINGS} />)
+    await screen.findByText(NOTICE_TEXT)
+    await fillRequiredFields(user)
+    await user.click(screen.getByRole('checkbox', { name: strings.apply.consentLabel }))
+    await user.click(screen.getByRole('button', { name: strings.apply.submit }))
+    expect(await screen.findByText(strings.apply.success)).toBeTruthy()
+    expect(mockedApply.mock.calls[0][2].privacy_consent).toBe(true)
+    expect(mockedApply.mock.calls[0][2].privacy_notice_version).toBeUndefined()
+  })
+
   it('shows an error + retry when the notice fails, still submits, and sends no privacy_consent', async () => {
     mockedNotice.mockRejectedValue(new Error('down'))
     const user = userEvent.setup()
@@ -318,6 +342,7 @@ describe('ApplyForm — privacy notice + privacy_consent (K-012)', () => {
     await user.click(screen.getByRole('button', { name: strings.apply.submit }))
     expect(await screen.findByText(strings.apply.success)).toBeTruthy()
     expect(mockedApply.mock.calls[0][2].privacy_consent).toBeUndefined()
+    expect(mockedApply.mock.calls[0][2].privacy_notice_version).toBeUndefined()
   })
 
   it('retry fetches again and renders the text once it resolves', async () => {
