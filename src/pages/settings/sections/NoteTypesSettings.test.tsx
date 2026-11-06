@@ -132,7 +132,9 @@ describe('NoteTypesSettings · entity labels resolve for location and department
   it.each(['location', 'department'] as const)('renders no raw nav.* key for entity %s', async (entity) => {
     api.get.mockResolvedValue({ data: [] })
     render(<NoteTypesSettings entity={entity} />)
-    await screen.findByRole('heading', { level: 3 }).catch(() => null)
+    // Wait for a control the screen renders for every entity (the add button), never for a wait that is
+    // expected to fail: a rejecting findBy costs the whole asyncUtilTimeout (CI-TIMING-2: 15 s, the test timed out).
+    await screen.findByRole('button', { name: st('noteTypes.add') })
     expect(document.body.textContent).not.toMatch(/nav\.(location|department)/)
   })
 })
