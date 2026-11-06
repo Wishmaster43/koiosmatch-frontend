@@ -251,6 +251,7 @@
     "notif_matches": "Matches",
     "notif_tasks": "Taken",
     "notif_calllists": "Bellijsten",
+    "notif_kpi": "KPI's",
     "notif_opportunities": "Kansen",
     "notif_appointments": "Afspraken",
     "notif_conversations": "Gesprekken",
@@ -300,6 +301,11 @@
       "never_contacted_alert": {
         "label": "Alert: nooit gecontacteerd",
         "description": "Toon een aandacht-signaal bij records die nog nooit contact hadden",
+        "unit": ""
+      },
+      "never_contacted_alert_threshold": {
+        "label": "Drempel nooit gecontacteerd",
+        "description": "Meld pas wanneer het aantal nooit gecontacteerde kandidaten boven dit aantal komt (standaard 25).",
         "unit": ""
       },
       "open_tasks_target": {
@@ -1222,6 +1228,10 @@
       "calllists": {
         "title": "Bellijsten",
         "desc": "Meldingen over toegewezen bellijst-doelen."
+      },
+      "kpi": {
+        "title": "KPI-meldingen",
+        "desc": "Dagelijkse KPI-digests en drempelmeldingen (onder doel, nooit gecontacteerd)."
       },
       "opportunities": {
         "title": "Kansen",

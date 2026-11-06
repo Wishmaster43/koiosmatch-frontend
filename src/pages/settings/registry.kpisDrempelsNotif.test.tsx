@@ -45,6 +45,11 @@ describe('registry — notif_calllists / notif_opportunities (NOTIF-CONTEXTEN-FE
     expect(contextProp(item?.render?.())).toBe('opportunities')
   })
 
+  it('renders NotificationsSettings with context="kpi"', () => {
+    const item = notifGroup?.items.find((i) => i.id === 'notif_kpi')
+    expect(contextProp(item?.render?.())).toBe('kpi')
+  })
+
   // SETTINGS-TABS-FIX-1 review: every row in this group reads Bell — a
   // per-context icon (Phone/Target) made the notifications list read as
   // several different lists instead of one.

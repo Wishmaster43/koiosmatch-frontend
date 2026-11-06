@@ -91,6 +91,8 @@ export const communicationGroups: NavGroup[] = [
       // review) — the notifications menu is one list, not a per-context icon set.
       { id: 'notif_calllists', icon: Bell, render: () => <NotificationsSettings context="calllists" /> },
       { id: 'notif_opportunities', icon: Bell, render: () => <NotificationsSettings context="opportunities" /> },
+      // KPI-MUTE-CONTEXT-1: switchable context for KPI digests and threshold alerts.
+      { id: 'notif_kpi', icon: Bell, render: () => <NotificationsSettings context="kpi" /> },
       { id: 'notif_appointments', icon: Bell, render: () => <NotificationsSettings context="appointments" /> },
       // NOTIF-CONVERSATIE-1 (api Notifier.php TYPE_CONTEXT_MAP): unanswered-conversation
       // nudges get their own switchable context, with real conversation.* Notifier::send()

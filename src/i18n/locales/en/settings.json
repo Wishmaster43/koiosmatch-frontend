@@ -251,6 +251,7 @@
     "notif_matches": "Matches",
     "notif_tasks": "Tasks",
     "notif_calllists": "Call lists",
+    "notif_kpi": "KPIs",
     "notif_opportunities": "Opportunities",
     "notif_appointments": "Appointments",
     "notif_conversations": "Conversations",
@@ -300,6 +301,11 @@
       "never_contacted_alert": {
         "label": "Alert: never contacted",
         "description": "Flag records that have never had any contact",
+        "unit": ""
+      },
+      "never_contacted_alert_threshold": {
+        "label": "Never-contacted threshold",
+        "description": "Alert only when the number of never-contacted candidates exceeds this count (default 25).",
         "unit": ""
       },
       "open_tasks_target": {
@@ -1222,6 +1228,10 @@
       "calllists": {
         "title": "Call lists",
         "desc": "Notifications about call-list target assignments."
+      },
+      "kpi": {
+        "title": "KPI notifications",
+        "desc": "Daily KPI digests and threshold alerts (below target, never contacted)."
       },
       "opportunities": {
         "title": "Opportunities",

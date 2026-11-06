@@ -218,6 +218,11 @@ describe('kpisCandidates · window amounts carry an inline unit companion', () =
     expect(kpisCandidates.fields[i + 1]).toEqual(unitField('candidate_no_followup_workdays', 'windows', 'workdays'))
   })
 
+  it('carries the never-contacted threshold number row (KPI-NEVER-CONTACTED-1)', () => {
+    const row = kpisCandidates.fields.find((f) => f.key === 'never_contacted_alert_threshold')
+    expect(row).toMatchObject({ type: 'number', min: 1, max: 1000000, default: 25 })
+  })
+
   it('the shared no_contact_alert_months window carries its unit field too', () => {
     const keys = kpisCandidates.fields.map((f) => f.key)
     const i = keys.indexOf('no_contact_alert_months')

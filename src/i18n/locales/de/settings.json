@@ -251,6 +251,7 @@
     "notif_matches": "Matches",
     "notif_tasks": "Aufgaben",
     "notif_calllists": "Anruflisten",
+    "notif_kpi": "KPIs",
     "notif_opportunities": "Chancen",
     "notif_appointments": "Termine",
     "notif_conversations": "Gespräche",
@@ -300,6 +301,11 @@
       "never_contacted_alert": {
         "label": "Warnung: nie kontaktiert",
         "description": "Kennzeichnet Datensätze ohne jeglichen Kontakt",
+        "unit": ""
+      },
+      "never_contacted_alert_threshold": {
+        "label": "Schwelle nie kontaktiert",
+        "description": "Erst melden, wenn die Zahl der nie kontaktierten Kandidaten über diesem Wert liegt (Standard 25).",
         "unit": ""
       },
       "open_tasks_target": {
@@ -962,6 +968,10 @@
       "calllists": {
         "title": "Anruflisten",
         "desc": "Benachrichtigungen über zugewiesene Anruflisten-Ziele."
+      },
+      "kpi": {
+        "title": "KPI-Benachrichtigungen",
+        "desc": "Tägliche KPI-Digests und Schwellenwert-Meldungen (unter Ziel, nie kontaktiert)."
       },
       "opportunities": {
         "title": "Chancen",

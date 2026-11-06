@@ -251,6 +251,7 @@
     "notif_matches": "Matches",
     "notif_tasks": "Tarefas",
     "notif_calllists": "Listas de chamadas",
+    "notif_kpi": "KPIs",
     "notif_opportunities": "Oportunidades",
     "notif_appointments": "Marcações",
     "notif_conversations": "Conversas",
@@ -300,6 +301,11 @@
       "never_contacted_alert": {
         "label": "Alerta: nunca contactado",
         "description": "Mostrar um sinal de atenção para registos que nunca tiveram contacto",
+        "unit": ""
+      },
+      "never_contacted_alert_threshold": {
+        "label": "Limiar nunca contactados",
+        "description": "Alertar apenas quando o número de candidatos nunca contactados ultrapassar este valor (predefinição 25).",
         "unit": ""
       },
       "open_tasks_target": {
@@ -1222,6 +1228,10 @@
       "calllists": {
         "title": "Listas de chamadas",
         "desc": "Notificações sobre atribuições de objetivos de listas de chamadas."
+      },
+      "kpi": {
+        "title": "Notificações de KPI",
+        "desc": "Resumos diários de KPI e alertas de limiar (abaixo da meta, nunca contactados)."
       },
       "opportunities": {
         "title": "Oportunidades",

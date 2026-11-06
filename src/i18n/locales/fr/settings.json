@@ -251,6 +251,7 @@
     "notif_matches": "Matchs",
     "notif_tasks": "Tâches",
     "notif_calllists": "Listes d'appels",
+    "notif_kpi": "KPI",
     "notif_opportunities": "Opportunités",
     "notif_appointments": "Rendez-vous",
     "notif_conversations": "Conversations",
@@ -300,6 +301,11 @@
       "never_contacted_alert": {
         "label": "Alerte : jamais contacté",
         "description": "Signale les enregistrements sans aucun contact",
+        "unit": ""
+      },
+      "never_contacted_alert_threshold": {
+        "label": "Seuil jamais contactés",
+        "description": "Alerter seulement lorsque le nombre de candidats jamais contactés dépasse ce seuil (25 par défaut).",
         "unit": ""
       },
       "open_tasks_target": {
@@ -962,6 +968,10 @@
       "calllists": {
         "title": "Listes d'appels",
         "desc": "Notifications sur les cibles assignées des listes d'appels."
+      },
+      "kpi": {
+        "title": "Notifications KPI",
+        "desc": "Digests KPI quotidiens et alertes de seuil (sous l’objectif, jamais contactés)."
       },
       "opportunities": {
         "title": "Opportunités",

@@ -17,6 +17,8 @@ const noContactAlert = [
   { key: 'no_contact_alert_months', type: 'number', default: 6, min: 1, max: 60 },
   unitFieldFor('no_contact_alert_months', 'windows', 'months'),
   { key: 'never_contacted_alert', type: 'toggle', default: true },
+  // Dashboard alert fires when the never-contacted count EXCEEDS this; the BE reads blank or 0 as its default 25.
+  { key: 'never_contacted_alert_threshold', type: 'number', default: 25, min: 1, max: 1000000 },
 ]
 
 // Leads — top-of-funnel intake targets.
