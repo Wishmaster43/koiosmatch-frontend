@@ -814,6 +814,7 @@
     "cvInfected": "The CV was rejected by the virus scanner and discarded. Nothing was sent.",
     "documentNotAvailable": "This document is not available yet: the virus scan has not finished or has rejected the file.",
     "tenantNotReady": "This agency is still being set up, or its setup failed. Try again later or choose another agency.",
+    "smCredentialsUnsatisfied": "The Shiftmanager connection has incomplete or invalid credentials and cannot fetch anything. Check the connection under Settings → Shiftmanager.",
     "aiDisclosureMissing": "The interview intro is missing the mandatory AI disclosure; adjust the template before you activate this.",
     "fieldRequired": "{{field}} is required."
   },

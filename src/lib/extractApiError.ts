@@ -51,6 +51,9 @@ export function extractApiError(err: unknown, fallback: string, fieldLabels?: Re
 const ERROR_CODE_KEYS: Record<string, string> = {
   // IDEMP-BODY-1 (422): a reused Idempotency-Key arrived with a different body or query.
   idempotency_key_reused: 'errors.idempotencyKeyReused',
+  // PROPOSAL-CV-ATTACH-1: the CV virus scan refused the proposal (scanner down / file infected).
+  cv_scan_unavailable: 'errors.cvScanUnavailable',
+  cv_infected: 'errors.cvInfected',
   koios_credit_exhausted: 'errors.koiosCreditExhausted',
   koios_unavailable: 'errors.koiosUnavailable',
   // HF-CONTRACTMAP-1: the manual send-to-HelloFlex path returns this 409 when the
@@ -76,6 +79,8 @@ const ERROR_CODE_KEYS: Record<string, string> = {
   inbound_scenario_clash: 'errors.inboundScenarioClash',
   // Activating an inbound scenario that names none of the bureau's numbers on its lane (422).
   inbound_scenario_number_missing: 'errors.inboundScenarioNumberMissing',
+  // ONIX G-014 (422): a Shiftmanager sync whose stored credentials do not fill the keys of the connection's auth type sends nothing.
+  sm_credentials_unsatisfied: 'errors.smCredentialsUnsatisfied',
 }
 
 /**

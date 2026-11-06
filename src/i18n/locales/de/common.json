@@ -814,6 +814,7 @@
     "cvInfected": "Der Lebenslauf wurde vom Virenscanner abgelehnt und verworfen. Es wurde nichts gesendet.",
     "documentNotAvailable": "Dieses Dokument ist noch nicht verfügbar: Die Virenprüfung ist nicht abgeschlossen oder hat die Datei abgelehnt.",
     "tenantNotReady": "Diese Agentur wird noch eingerichtet oder die Einrichtung ist fehlgeschlagen. Versuchen Sie es später erneut oder wählen Sie eine andere Agentur.",
+    "smCredentialsUnsatisfied": "Die Shiftmanager-Verbindung hat unvollständige oder ungültige Zugangsdaten und kann nichts abrufen. Prüfen Sie die Verbindung unter Einstellungen → Shiftmanager.",
     "aiDisclosureMissing": "Im Interview-Intro fehlt der verpflichtende KI-Hinweis; passen Sie die Vorlage an, bevor Sie dies aktivieren.",
     "fieldRequired": "{{field}} ist erforderlich."
   },

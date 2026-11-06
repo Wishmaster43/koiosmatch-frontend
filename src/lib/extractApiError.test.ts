@@ -66,6 +66,12 @@ describe('apiErrorKey · UPLOADS-SCAN-1 / TENANT-READY codes', () => {
   })
 })
 
+describe('apiErrorKey · sm_credentials_unsatisfied (ONIX G-014)', () => {
+  it('maps sm_credentials_unsatisfied (422) to its i18n key', () => {
+    expect(apiErrorKey({ response: { data: { code: 'sm_credentials_unsatisfied' } } })).toBe('errors.smCredentialsUnsatisfied')
+  })
+})
+
 describe('apiErrorKey · email_unavailable (ONIX C-007)', () => {
   it('maps email_unavailable (422) to its i18n key regardless of the English message', () => {
     expect(apiErrorKey({ response: { data: { code: 'email_unavailable', message: 'This e-mail address cannot be used.' } } })).toBe('errors.emailUnavailable')
@@ -122,5 +128,13 @@ describe('idempotency_key_reused', () => {
   it('maps to the translated common sentence', () => {
     const err = { response: { data: { code: 'idempotency_key_reused', message: 'x' } } }
     expect(apiErrorKey(err)).toBe('errors.idempotencyKeyReused')
+  })
+})
+
+// PROPOSAL-CV-ATTACH-1: the two CV virus-scan refusals of POST /applications/{id}/propose.
+describe('cv scan refusals', () => {
+  it('maps cv_scan_unavailable and cv_infected to their translated sentences', () => {
+    expect(apiErrorKey({ response: { data: { code: 'cv_scan_unavailable', message: 'x' } } })).toBe('errors.cvScanUnavailable')
+    expect(apiErrorKey({ response: { data: { code: 'cv_infected', message: 'x' } } })).toBe('errors.cvInfected')
   })
 })

@@ -814,6 +814,7 @@
     "cvInfected": "Il CV è stato respinto dall'antivirus ed eliminato. Non è stato inviato nulla.",
     "documentNotAvailable": "Questo documento non è ancora disponibile: la scansione antivirus non è terminata o ha rifiutato il file.",
     "tenantNotReady": "Questa agenzia è ancora in fase di configurazione o la configurazione è fallita. Riprova più tardi o scegli un'altra agenzia.",
+    "smCredentialsUnsatisfied": "La connessione Shiftmanager ha credenziali incomplete o non valide e non può recuperare nulla. Controlla la connessione in Impostazioni → Shiftmanager.",
     "aiDisclosureMissing": "Nell'introduzione del colloquio manca l'informativa obbligatoria sull'IA; modifica il modello prima di attivarlo.",
     "fieldRequired": "{{field}} è obbligatorio."
   },
