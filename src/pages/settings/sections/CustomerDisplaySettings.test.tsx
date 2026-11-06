@@ -67,9 +67,10 @@ describe('customerDisplay · invalid colour is rejected in the field (CHIPKLEUR-
     fireEvent.change(input, { target: { value: 'javascript:alert(1)' } })
     fireEvent.blur(input)
 
-    // Generous wait like the save-button check below: a saturated CI runner rendered the message at 1087 ms
-    // once (findByText's default is 1 s); it still resolves the instant the message appears.
-    expect(await screen.findByText(st('common.invalidColorValue'), undefined, { timeout: 6000 })).toBeInTheDocument()
+    // The wait inherits the one global asyncUtilTimeout (src/test/setup.js, CI-TIMING-2): a saturated CI
+    // runner rendered the message after 1087 ms once and after 6044 ms on 06-11; it still resolves the
+    // instant the message appears, so the cap only decides how long a real failure takes to report.
+    expect(await screen.findByText(st('common.invalidColorValue'))).toBeInTheDocument()
     // Nothing became dirty, so Save must stay disabled — the invalid value never
     // reaches the form's own values, let alone the API.
     expect(screen.getByRole('button', { name: st('common.save') })).toBeDisabled()
