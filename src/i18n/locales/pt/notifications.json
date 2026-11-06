@@ -126,6 +126,22 @@
     "limit_blocked_platform": {
       "title": "Limite atingido: {{label}}",
       "body": "{{label}} atingiu o limite configurado para um tenant. Aprove um aumento através do ecrã de administração."
+    },
+    "limit_warning": {
+      "title": "Perto do limite: {{label}}",
+      "body": "{{label}} está em 80% ou mais do seu limite."
+    },
+    "limit_warning_reached": {
+      "title": "Limite atingido: {{label}}",
+      "body": "{{label}} está em 100% do seu limite. Os pedidos seguintes podem falhar até ao próximo período."
+    },
+    "limit_warning_budget": {
+      "title": "Sinal de orçamento: {{label}}",
+      "body": "{{label}} está em 100% do orçamento definido. Nada é bloqueado, este é um sinal de orçamento."
+    },
+    "limit_warning_overage": {
+      "title": "Acima do escalão: {{label}}",
+      "body": "{{label}} está acima do seu escalão. O consumo acima do limite é faturado como excedente."
     }
   },
   "kpi": {
@@ -189,6 +205,63 @@
     "mailbox_needs_reconnect": {
       "title": "A caixa de correio tem de ser ligada novamente",
       "body": "Uma caixa de correio ligada deixou de funcionar. Ligue-a novamente nas definições de e-mail; até lá, o e-mail sai por outro remetente."
+    }
+  },
+  "interview": {
+    "wa_web_reply_attention": {
+      "title": "WhatsApp Web: resposta manual necessária",
+      "body": "Uma resposta do WhatsApp Web processada aguarda uma resposta manual."
+    },
+    "rejection_proposed": {
+      "title": "Rejeição de entrevista com IA para revisão",
+      "body": "Uma entrevista com IA propôs uma rejeição; confirme ou rejeite através da candidatura."
+    }
+  },
+  "billing": {
+    "workflow_blocked": {
+      "title": "Escalão de workflows cheio",
+      "body": "As novas execuções de workflow estão em pausa até ser escolhido um pacote maior."
+    }
+  },
+  "appointment": {
+    "today": {
+      "title": "Ação agendada para hoje às {{time}}",
+      "body": "Compromisso agendado."
+    }
+  },
+  "vacancy": {
+    "leads_suggested": {
+      "title": "Novas sugestões de candidatos para a vaga"
+    }
+  },
+  "documents": {
+    "zip_ready": {
+      "title": "ZIP de documentos pronto"
+    },
+    "zip_failed": {
+      "title": "ZIP de documentos falhou",
+      "body": "A criação do ZIP de documentos falhou. Tente novamente."
+    }
+  },
+  "proposal": {
+    "send_failed": {
+      "title": "Proposta não enviada"
+    }
+  },
+  "task": {
+    "assigned": {
+      "title": "Tarefa atribuída a si"
+    },
+    "assigned_team": {
+      "title": "Nova tarefa para o seu departamento"
+    }
+  },
+  "calllist": {
+    "target_assigned": {
+      "title": "Candidatos atribuídos para contacto telefónico"
+    },
+    "target_added": {
+      "title": "Novos candidatos na lista de chamadas"
     }
   }
 }

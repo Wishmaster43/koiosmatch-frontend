@@ -126,6 +126,22 @@
     "limit_blocked_platform": {
       "title": "Limit reached: {{label}}",
       "body": "{{label}} has reached its configured limit for a tenant. Approve an increase via the admin screen."
+    },
+    "limit_warning": {
+      "title": "Nearing the limit: {{label}}",
+      "body": "{{label}} is at 80% or more of its limit."
+    },
+    "limit_warning_reached": {
+      "title": "Limit reached: {{label}}",
+      "body": "{{label}} is at 100% of its limit. Further requests may fail until the next period."
+    },
+    "limit_warning_budget": {
+      "title": "Budget signal: {{label}}",
+      "body": "{{label}} is at 100% of its configured budget. Nothing is blocked, this is a budget signal."
+    },
+    "limit_warning_overage": {
+      "title": "Over the tier: {{label}}",
+      "body": "{{label}} is over its tier. Usage above the limit is billed as overage."
     }
   },
   "kpi": {
@@ -189,6 +205,63 @@
     "mailbox_needs_reconnect": {
       "title": "Mailbox needs to be reconnected",
       "body": "A connected mailbox stopped working. Reconnect it in the e-mail settings; until then mail leaves via another sender."
+    }
+  },
+  "interview": {
+    "wa_web_reply_attention": {
+      "title": "WhatsApp Web: manual reply needed",
+      "body": "A processed WhatsApp Web reply is waiting for a manual answer."
+    },
+    "rejection_proposed": {
+      "title": "AI interview rejection awaiting review",
+      "body": "An AI interview proposed a rejection; confirm or reject via the application."
+    }
+  },
+  "billing": {
+    "workflow_blocked": {
+      "title": "Workflow tier full",
+      "body": "New workflow runs are paused until a larger bundle is chosen."
+    }
+  },
+  "appointment": {
+    "today": {
+      "title": "Action scheduled today at {{time}}",
+      "body": "Scheduled appointment."
+    }
+  },
+  "vacancy": {
+    "leads_suggested": {
+      "title": "New candidate suggestions for vacancy"
+    }
+  },
+  "documents": {
+    "zip_ready": {
+      "title": "Documents ZIP ready"
+    },
+    "zip_failed": {
+      "title": "Documents ZIP failed",
+      "body": "Building the documents ZIP failed. Please try again."
+    }
+  },
+  "proposal": {
+    "send_failed": {
+      "title": "Proposal not sent"
+    }
+  },
+  "task": {
+    "assigned": {
+      "title": "Task assigned to you"
+    },
+    "assigned_team": {
+      "title": "New task for your department"
+    }
+  },
+  "calllist": {
+    "target_assigned": {
+      "title": "Candidates assigned for calling"
+    },
+    "target_added": {
+      "title": "New candidates in the call list"
     }
   }
 }

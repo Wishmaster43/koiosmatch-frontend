@@ -56,6 +56,18 @@ describe('notificationText', () => {
     expect(body).toBe('')
   })
 
+  // NOTIF-LANG-GAPS-1: a connector.limit_warning_reached row renders the catalogue title with its label.
+  it('translates connector.limit_warning_reached with the label param', () => {
+    const n = {
+      id: 6, seen: false, title: 'SERVER TITLE', body: null,
+      title_key: 'notifications.connector.limit_warning_reached.title',
+      body_key: 'notifications.connector.limit_warning_reached.body',
+      params: { label: 'HelloFlex' },
+    } as unknown as AppNotification
+    const { title } = notificationText(n, i18n.t.bind(i18n))
+    expect(title).toBe('Limiet bereikt: HelloFlex')
+  })
+
   // Regression: a kpi.below_target row renders the FE catalogue sentence with its params filled, not the server literal.
   it('translates kpi.below_target title and body with their params', () => {
     const n = {

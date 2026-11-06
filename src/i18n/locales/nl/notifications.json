@@ -126,6 +126,22 @@
     "limit_blocked_platform": {
       "title": "Limiet bereikt: {{label}}",
       "body": "{{label}} heeft de ingestelde limiet bereikt voor een tenant. Keur een verhoging goed via het beheerscherm."
+    },
+    "limit_warning": {
+      "title": "Bijna bij de limiet: {{label}}",
+      "body": "{{label}} zit op 80% of meer van zijn limiet."
+    },
+    "limit_warning_reached": {
+      "title": "Limiet bereikt: {{label}}",
+      "body": "{{label}} zit op 100% van zijn limiet. Verdere aanvragen kunnen mislukken tot de volgende periode."
+    },
+    "limit_warning_budget": {
+      "title": "Budgetsignaal: {{label}}",
+      "body": "{{label}} zit op 100% van het ingestelde budget. Er wordt niets geblokkeerd, dit is een budgetsignaal."
+    },
+    "limit_warning_overage": {
+      "title": "Boven de staffel: {{label}}",
+      "body": "{{label}} zit boven de staffel. Verbruik boven de limiet wordt als overage gefactureerd."
     }
   },
   "kpi": {
@@ -189,6 +205,63 @@
     "mailbox_needs_reconnect": {
       "title": "Mailbox moet opnieuw worden gekoppeld",
       "body": "Een gekoppelde mailbox werkt niet meer. Koppel hem opnieuw bij de e-mailinstellingen; tot die tijd verstuurt een andere afzender de mail."
+    }
+  },
+  "interview": {
+    "wa_web_reply_attention": {
+      "title": "WhatsApp Web: handmatig antwoorden nodig",
+      "body": "Een verwerkte WhatsApp Web-reactie wacht op een handmatig antwoord."
+    },
+    "rejection_proposed": {
+      "title": "AI-interview afwijzing ter controle",
+      "body": "Een AI-interview stelde een afwijzing voor; bevestig of wijs af via de sollicitatie."
+    }
+  },
+  "billing": {
+    "workflow_blocked": {
+      "title": "Workflow-staffel vol",
+      "body": "Nieuwe workflow-runs zijn gepauzeerd tot een grotere bundel is gekozen."
+    }
+  },
+  "appointment": {
+    "today": {
+      "title": "Actie gepland vandaag om {{time}}",
+      "body": "Geplande afspraak."
+    }
+  },
+  "vacancy": {
+    "leads_suggested": {
+      "title": "Nieuwe kandidaatsuggesties voor vacature"
+    }
+  },
+  "documents": {
+    "zip_ready": {
+      "title": "Documenten-ZIP klaar"
+    },
+    "zip_failed": {
+      "title": "Documenten-ZIP mislukt",
+      "body": "Het bouwen van de documenten-ZIP is mislukt. Probeer het opnieuw."
+    }
+  },
+  "proposal": {
+    "send_failed": {
+      "title": "Voorstel niet verzonden"
+    }
+  },
+  "task": {
+    "assigned": {
+      "title": "Taak aan je toegewezen"
+    },
+    "assigned_team": {
+      "title": "Nieuwe taak voor je afdeling"
+    }
+  },
+  "calllist": {
+    "target_assigned": {
+      "title": "Kandidaten toegewezen om te bellen"
+    },
+    "target_added": {
+      "title": "Nieuwe kandidaten in de bellijst"
     }
   }
 }
