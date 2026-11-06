@@ -30,6 +30,20 @@ describe('targetLine', () => {
   })
 })
 
+// KPI-BRANCH-VERDICT-1: a null verdict on a day-scoped target must not claim a monthly goal.
+describe('targetLine day scope', () => {
+  it('null verdict + day scope gives the day kinds', () => {
+    expect(targetLine(entry({ below_target: null, period_scope: 'day', comparison: 'gte' }))?.kind).toBe('dayOnly')
+    expect(targetLine(entry({ below_target: null, period_scope: 'day', comparison: 'lte' }))?.kind).toBe('dayOnlyMax')
+    expect(targetLine(entry({ below_target: null, period_scope: 'month' }))?.kind).toBe('monthOnly')
+  })
+  it('formatTargetLine renders the day keys', () => {
+    const args = { t: (k: string) => k, num: (v?: number | null) => `n${v}`, pct: (v: number) => `${v}%` }
+    expect(formatTargetLine({ kind: 'dayOnly', value: 1, target: 2 }, false, args).text).toBe('kpi.target.dayOnly')
+    expect(formatTargetLine({ kind: 'dayOnlyMax', value: 1, target: 2 }, false, args).text).toBe('kpi.target.dayOnlyMax')
+  })
+})
+
 describe('formatTargetLine', () => {
   const args = { t: (k: string, o?: Record<string, unknown>) => `${k}|${o?.value}|${o?.target}`, num: (v?: number | null) => `n${v}`, pct: (v: number) => `${v}%` }
   it('tones: only reached and over are coloured; progress is muted', () => {

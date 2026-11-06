@@ -143,7 +143,7 @@ describe('AiTransparencySettings · sub-tabs (13-09)', () => {
 })
 
 // Row 21 (Danny 09-09, "Ik kan niets instellen??????"): the AI retention windows are
-// editable here — prompt log (1..3650 days) and chat conversation memory (0..365, 0 = off).
+// editable here — prompt log (1..365 days) and chat conversation memory (0..365, 0 = off).
 describe('AiTransparencySettings · AI retention windows (row 21)', () => {
   it('renders both retention rows with the stored values', async () => {
     const user = userEvent.setup()
@@ -164,5 +164,15 @@ describe('AiTransparencySettings · AI retention windows (row 21)', () => {
     fireEvent.change(promptLog, { target: { value: '120' } })
     fireEvent.blur(promptLog)
     expect(formSet).toHaveBeenCalledWith('ai_prompt_log_retention_days', 120)
+  })
+
+  it('clamps a new prompt-log value above 365 to the maximum on blur', async () => {
+    const user = userEvent.setup()
+    render(<AiTransparencySettings />)
+    await user.click(await screen.findByRole('tab', { name: i18n.t('aiAct.retention.title', { ns: 'settings' }) }))
+    const promptLog = await screen.findByRole('textbox', { name: i18n.t('aiAct.retention.promptLog.label', { ns: 'settings' }) })
+    fireEvent.change(promptLog, { target: { value: '400' } })
+    fireEvent.blur(promptLog)
+    expect(formSet).toHaveBeenLastCalledWith('ai_prompt_log_retention_days', 365)
   })
 })

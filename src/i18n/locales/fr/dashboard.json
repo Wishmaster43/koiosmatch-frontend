@@ -10,7 +10,9 @@
       "over": "{{value}}, au-dessus du maximum {{target}}",
       "within": "{{value}} sur un maximum de {{target}}",
       "monthOnly": "{{value}}, objectif mensuel {{target}}",
-      "monthOnlyMax": "{{value}}, maximum {{target}}"
+      "monthOnlyMax": "{{value}}, maximum {{target}}",
+      "dayOnly": "{{value}}, objectif du jour {{target}}",
+      "dayOnlyMax": "{{value}}, maximum du jour {{target}}"
     },
     "candidatesTotal": "Total candidats",
     "inAts": "Dans l'ATS",
@@ -153,7 +155,7 @@
     "redeployRadar": "Radar de replacement",
     "productivityByRecruiter": "Candidatures proposées et placements par recruteur (30 jours)",
     "callsPerRecruiter": "Appels par recruteur",
-    "fillRateTimeseries": "Taux de pourvoi, 14 derniers jours",
+    "fillRateTimeseries": "Taux de pourvoi sur la période",
     "fillRateByBranch": "Taux de pourvoi par agence",
     "matchesByContractType": "Placements par type de contrat",
     "placementsStartedEndedToday": "Démarrés et terminés aujourd'hui",

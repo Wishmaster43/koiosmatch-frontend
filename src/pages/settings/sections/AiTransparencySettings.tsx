@@ -8,7 +8,7 @@
  * Row 21 (Danny 09-09, "Ik kan niets instellen??????"): the two AI retention windows
  * are editable here, through the same /settings form path every settings section
  * uses — `ai_prompt_log_retention_days` (read-clamped by PruneAiPromptLogs; the
- * catalogue landing pins 1..3650) and `koios_conversation_memory_days` (SettingSchema
+ * catalogue landing pins 1..365) and `koios_conversation_memory_days` (SettingSchema
  * int 0..365, zero = no memory; KoiosConversationAssistController::transcript).
  *
  * SUB-TABS (Danny 13-09, verbatim: "SubTabjes!!!"): the four stacked blocks (the
@@ -45,7 +45,8 @@ const FEATURE_KEYS = ['koios_chat', 'ai_agent_interviews', 'ai_workflow_steps'] 
 // Tenant defaults = today's reader behaviour: prompt log 90 days (config
 // koios_ai.prompt_log_retention_days), conversation memory unset = no day bound.
 const RETENTION_DEFAULTS = { ai_prompt_log_retention_days: 90, koios_conversation_memory_days: 0 }
-const PROMPT_LOG_RANGE = { min: 1, max: 3650 }
+// BE answers 422 above 365 on a new value; a stored higher value is NOT clamped on load and posts back unchanged (NumberField clamps only on blur).
+const PROMPT_LOG_RANGE = { min: 1, max: 365 }
 const MEMORY_RANGE = { min: 0, max: 365 }
 
 type TransparencyTab = 'principles' | 'tenant_posture' | 'retention' | 'features'

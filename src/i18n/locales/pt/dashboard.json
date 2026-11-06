@@ -10,7 +10,9 @@
       "over": "{{value}}, acima do máximo {{target}}",
       "within": "{{value}} de um máximo de {{target}}",
       "monthOnly": "{{value}}, meta mensal {{target}}",
-      "monthOnlyMax": "{{value}}, máximo {{target}}"
+      "monthOnlyMax": "{{value}}, máximo {{target}}",
+      "dayOnly": "{{value}}, meta diária {{target}}",
+      "dayOnlyMax": "{{value}}, máximo diário {{target}}"
     },
     "candidatesTotal": "Total de candidatos",
     "inAts": "No ATS",
@@ -153,7 +155,7 @@
     "redeployRadar": "Radar de recolocação",
     "productivityByRecruiter": "Propostas e colocações por recrutador (30 dias)",
     "callsPerRecruiter": "Chamadas por recrutador",
-    "fillRateTimeseries": "Taxa de preenchimento, últimos 14 dias",
+    "fillRateTimeseries": "Taxa de preenchimento no período",
     "fillRateByBranch": "Taxa de preenchimento por filial",
     "matchesByContractType": "Colocações por tipo de contrato",
     "placementsStartedEndedToday": "Iniciadas e terminadas hoje",

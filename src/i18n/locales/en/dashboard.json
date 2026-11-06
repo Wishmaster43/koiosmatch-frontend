@@ -10,7 +10,9 @@
       "over": "{{value}}, above maximum {{target}}",
       "within": "{{value}} of maximum {{target}}",
       "monthOnly": "{{value}}, monthly target {{target}}",
-      "monthOnlyMax": "{{value}}, maximum {{target}}"
+      "monthOnlyMax": "{{value}}, maximum {{target}}",
+      "dayOnly": "{{value}}, daily target {{target}}",
+      "dayOnlyMax": "{{value}}, daily maximum {{target}}"
     },
     "candidatesTotal": "Total candidates",
     "inAts": "In the ATS",
@@ -153,7 +155,7 @@
     "redeployRadar": "Redeployment radar",
     "productivityByRecruiter": "Submissions and placements per recruiter (30 days)",
     "callsPerRecruiter": "Calls per recruiter",
-    "fillRateTimeseries": "Fill rate, last 14 days",
+    "fillRateTimeseries": "Fill rate in the period",
     "fillRateByBranch": "Fill rate by branch",
     "matchesByContractType": "Placements by contract type",
     "placementsStartedEndedToday": "Started and ended today",

@@ -10,7 +10,9 @@
       "over": "{{value}}, boven maximum {{target}}",
       "within": "{{value}} van maximum {{target}}",
       "monthOnly": "{{value}}, maanddoel {{target}}",
-      "monthOnlyMax": "{{value}}, maximum {{target}}"
+      "monthOnlyMax": "{{value}}, maximum {{target}}",
+      "dayOnly": "{{value}}, dagdoel {{target}}",
+      "dayOnlyMax": "{{value}}, dagmaximum {{target}}"
     },
     "candidatesTotal": "Totaal kandidaten",
     "inAts": "In het ATS",
@@ -153,7 +155,7 @@
     "redeployRadar": "Herplaatsingsradar",
     "productivityByRecruiter": "Voordrachten en plaatsingen per recruiter (30 dagen)",
     "callsPerRecruiter": "Gebelde contacten per recruiter",
-    "fillRateTimeseries": "Fill rate laatste 14 dagen",
+    "fillRateTimeseries": "Fill rate in de periode",
     "fillRateByBranch": "Fill rate per vestiging",
     "matchesByContractType": "Plaatsingen naar contracttype",
     "placementsStartedEndedToday": "Vandaag gestart en beëindigd",

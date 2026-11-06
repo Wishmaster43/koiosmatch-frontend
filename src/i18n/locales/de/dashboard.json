@@ -10,7 +10,9 @@
       "over": "{{value}}, über dem Maximum {{target}}",
       "within": "{{value}} von maximal {{target}}",
       "monthOnly": "{{value}}, Monatsziel {{target}}",
-      "monthOnlyMax": "{{value}}, Maximum {{target}}"
+      "monthOnlyMax": "{{value}}, Maximum {{target}}",
+      "dayOnly": "{{value}}, Tagesziel {{target}}",
+      "dayOnlyMax": "{{value}}, Tagesmaximum {{target}}"
     },
     "candidatesTotal": "Kandidaten gesamt",
     "inAts": "Im ATS",
@@ -153,7 +155,7 @@
     "redeployRadar": "Wiedereinsatz-Radar",
     "productivityByRecruiter": "Vorschläge und Platzierungen pro Recruiter (30 Tage)",
     "callsPerRecruiter": "Anrufe pro Recruiter",
-    "fillRateTimeseries": "Fill Rate, letzte 14 Tage",
+    "fillRateTimeseries": "Fill Rate im Zeitraum",
     "fillRateByBranch": "Fill Rate nach Niederlassung",
     "matchesByContractType": "Vermittlungen nach Vertragstyp",
     "placementsStartedEndedToday": "Heute gestartet und beendet",

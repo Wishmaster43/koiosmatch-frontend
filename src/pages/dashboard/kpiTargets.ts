@@ -4,7 +4,7 @@
  */
 import type { KpiTarget, PerRecruiterCallsRow } from '@/types/dashboard'
 
-export const TARGET_LINE_KINDS = ['progress', 'reached', 'over', 'within', 'monthOnly', 'monthOnlyMax'] as const
+export const TARGET_LINE_KINDS = ['progress', 'reached', 'over', 'within', 'monthOnly', 'monthOnlyMax', 'dayOnly', 'dayOnlyMax'] as const
 export type TargetLineKind = (typeof TARGET_LINE_KINDS)[number]
 export type TargetTone = 'muted' | 'success' | 'warning'
 export interface TargetLine { kind: TargetLineKind; value: number; target: number }
@@ -23,15 +23,19 @@ export const TILE_TARGET_KEY: Record<string, string> = {
 export const PERCENT_TILES = new Set(['fillRate'])
 
 // Tone per kind: only reached (green) and over-maximum (orange) are coloured; progress is never an alarm (M1).
-const TONE: Record<TargetLineKind, TargetTone> = { progress: 'muted', reached: 'success', over: 'warning', within: 'muted', monthOnly: 'muted', monthOnlyMax: 'muted' }
+const TONE: Record<TargetLineKind, TargetTone> = { progress: 'muted', reached: 'success', over: 'warning', within: 'muted', monthOnly: 'muted', monthOnlyMax: 'muted', dayOnly: 'muted', dayOnlyMax: 'muted' }
 export const targetTone = (kind: TargetLineKind): TargetTone => TONE[kind]
 
 // Classify one entry; absent, target-less or value-less entries draw nothing (no fake value).
 export function targetLine(entry: KpiTarget | undefined | null): TargetLine | null {
   if (!entry || entry.target == null || entry.value == null) return null
   const { value, target } = entry
-  // No verdict (non-month period): a ceiling keeps its maximum wording, never a monthly-goal claim.
-  if (entry.below_target == null) return { kind: entry.comparison === 'lte' ? 'monthOnlyMax' : 'monthOnly', value, target }
+  // No verdict (non-month period or branch-restricted viewer): a ceiling keeps its maximum wording; a day target says "daily", never "monthly".
+  if (entry.below_target == null) {
+    const isMax = entry.comparison === 'lte'
+    if (entry.period_scope === 'day') return { kind: isMax ? 'dayOnlyMax' : 'dayOnly', value, target }
+    return { kind: isMax ? 'monthOnlyMax' : 'monthOnly', value, target }
+  }
   if (entry.comparison === 'gte') return { kind: entry.below_target ? 'progress' : 'reached', value, target }
   if (entry.comparison === 'lte') return { kind: entry.below_target ? 'over' : 'within', value, target }
   return null
