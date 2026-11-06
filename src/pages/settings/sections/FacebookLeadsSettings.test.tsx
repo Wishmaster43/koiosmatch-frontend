@@ -19,6 +19,9 @@ vi.mock('@/lib/api', async () => {
   return { ...actual, default: { get: vi.fn(), post: vi.fn(), put: vi.fn(), delete: vi.fn() } }
 })
 
+// The owner block has its own suite (and needs a QueryClient); stub it here.
+vi.mock('./facebookLeads/LeadFormOwnersBlock', () => ({ default: () => null }))
+
 const mockUseAuth = vi.fn()
 vi.mock('@/context/AuthContext', () => ({ useAuth: () => mockUseAuth() }))
 

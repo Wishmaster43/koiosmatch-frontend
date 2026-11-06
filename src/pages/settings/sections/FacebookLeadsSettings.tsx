@@ -23,6 +23,7 @@ import { publicApiUrl } from '@/lib/publicApiUrl'
 import SubTabBar from '@/components/drawer/SubTabBar'
 import { useHashViewParam } from '@/hooks/useHashViewParam'
 import LeadQueuePanel from './facebookLeads/LeadQueuePanel'
+import LeadFormOwnersBlock from './facebookLeads/LeadFormOwnersBlock'
 
 // The exact placeholder the backend masks a stored secret with (SettingController::MASK) —
 // matching it lets the FE tell "already set" apart from "empty" without ever seeing the value.
@@ -197,6 +198,9 @@ function FacebookConnectionForm() {
           </CopyIconButton>
         </div>
       </div>
+
+      {/* Per-form owner of the new leads (LEAD-FORM-OWNER-FE-1). */}
+      <LeadFormOwnersBlock />
     </div>
   )
 }
