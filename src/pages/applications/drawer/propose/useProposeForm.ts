@@ -158,7 +158,6 @@ export function useProposeForm(application: ApplicationDetail) {
   // Form fields. Recipient defaults to the application's own contact when present.
   const [recipientContactId, setRecipientContactId] = useState<string>(application.contact?.id != null ? String(application.contact.id) : '')
   const [cvVariant, setCvVariant] = useState<CvVariant>(proposalSettings.default_cv_variant === 'full' ? 'full' : 'proposal')
-  const [includeMotivation, setIncludeMotivation] = useState(false)
   const [subject, setSubjectState] = useState('')
   const [body, setBodyState] = useState('')
   const [consentConfirmed, setConsentConfirmed] = useState(false)
@@ -247,8 +246,6 @@ export function useProposeForm(application: ApplicationDetail) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [recipient?.id, recipient?.name, senderName, settingsValues, candidate?.id, candidateLoading])
 
-  const hasMotivation = Boolean(application.coverLetter)
-
   // Why the primary action is disabled — the modal renders this, never a bare
   // greyed-out button with no explanation (§3 no fake affordances).
   const disabledReason: ProposeDisabledReason =
@@ -259,15 +256,8 @@ export function useProposeForm(application: ApplicationDetail) {
     : null
 
   // Copy the drafted subject + a plain-text version of the (rich-text) body.
-  // The message as it is actually shared: the drafted body, plus the candidate's
-  // own motivation letter appended when the recruiter ticked it. Without this the
-  // "motivatiebrief meesturen" ("send along motivation letter") checkbox changed
-  // nothing at all — the /propose
-  // contract has no field for it, so the letter travels inside the message body
-  // (§3: a control must have a real effect, or not exist).
-  const composedBody = () => (includeMotivation && application.coverLetter
-    ? `${body}<hr />${application.coverLetter}`
-    : body)
+  // The shared message is the drafted body; the CV travels as the attachment, never a motivation letter (5f = C).
+  const composedBody = () => body
 
   // Copies the drafted subject + a plain-text (tags stripped) version of the composed
   // body, then flips a temporary "copied" flag for the button's own feedback.
@@ -386,7 +376,6 @@ export function useProposeForm(application: ApplicationDetail) {
     candidateLoading, candidateError,
     recipientContactId, setRecipientContactId, recipient,
     cvVariant, setCvVariant,
-    includeMotivation, setIncludeMotivation, hasMotivation,
     subject, setSubject, body, setBody,
     consentConfirmed, setConsentConfirmed,
     senderUserId, setSenderUserId, users, usersLoading,

@@ -43,7 +43,6 @@ const { formFixture } = vi.hoisted(() => ({
     recipientContactId: 'ct1', setRecipientContactId: vi.fn(),
     recipient: { id: 'ct1', name: 'Piet Klaassen', email: 'piet@zorggroep.nl' },
     cvVariant: 'proposal' as const, setCvVariant: vi.fn(),
-    includeMotivation: false, setIncludeMotivation: vi.fn(), hasMotivation: false,
     subject: 'Voorstel Jan de Vries', setSubject: vi.fn(),
     body: '<p>Bericht</p>', setBody: vi.fn(),
     consentConfirmed: false, setConsentConfirmed: vi.fn(),

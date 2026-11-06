@@ -530,7 +530,6 @@
 "contactsError": "Could not load contacts. Please try again.",
     "documents": "Documents",
     "cvHouseStyle": "CV in house style",
-    "motivationLetter": "Include the candidate's motivation letter",
     "variantTitle": "CV variant",
     "variantProposal": "Proposal (name visible, contact details hidden)",
     "variantFull": "Full CV",

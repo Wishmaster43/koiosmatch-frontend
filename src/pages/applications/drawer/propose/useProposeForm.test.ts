@@ -267,10 +267,8 @@ describe('useProposeForm', () => {
     expect(formOf().get('send')).toBe('0')
   })
 
-  // Regression (25-07): the "motivatiebrief meesturen" checkbox changed nothing —
-  // the /propose contract has no field for it, so ticking it was a control without
-  // an effect. The letter now travels inside the recorded/copied message body.
-  it('appends the motivation letter to the recorded body only when it is ticked', async () => {
+  // 5f = C: the cover letter never travels in the proposal message, only the CV attachment.
+  it('never puts the candidate cover letter in the recorded body', async () => {
     settingsFixture = {}
     const withLetter = app({ coverLetter: '<p>Mijn motivatie</p>' } as Partial<ApplicationDetail>)
     const { result } = renderHook(() => useProposeForm(withLetter), { wrapper })
@@ -283,10 +281,6 @@ describe('useProposeForm', () => {
 
     await act(async () => { await result.current.submit() })
     expect(lastBody()).not.toContain('Mijn motivatie')
-
-    act(() => { result.current.setIncludeMotivation(true) })
-    await act(async () => { await result.current.submit() })
-    expect(lastBody()).toContain('Mijn motivatie')
   })
 
   // DEFECT 3 regression: the CV is only DOWNLOADED after the record succeeded —

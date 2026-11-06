@@ -172,21 +172,14 @@ export default function ProposeCandidateModal({ application: a, onClose, onOpenE
             <Caption as="div" style={{ marginTop: 6 }}>{t('propose.onBehalfOfHint')}</Caption>
           </div>
 
-          {/* 2. Documents — the house-style CV is always included (not unselectable:
-              without it this isn't a proposal); the motivation letter checkbox only
-              shows when the candidate actually submitted one. */}
+          {/* 2. Documents: the house-style CV is always included (not unselectable:
+              without it this isn't a proposal); no motivation letter travels (5f = C). */}
           <div>
             <div style={sectionTitle}>{t('propose.documents')}</div>
-            <label style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 12, color: 'var(--text)', marginBottom: form.hasMotivation ? 6 : 0 }}>
+            <label style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 12, color: 'var(--text)' }}>
               <input type="checkbox" checked disabled aria-label={t('propose.cvHouseStyle')} />
               {t('propose.cvHouseStyle')}
             </label>
-            {form.hasMotivation && (
-              <label style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 12, color: 'var(--text)' }}>
-                <input type="checkbox" checked={form.includeMotivation} onChange={e => form.setIncludeMotivation(e.target.checked)} />
-                {t('propose.motivationLetter')}
-              </label>
-            )}
           </div>
 
           {/* 3. CV variant — the AVG (Dutch GDPR) control: which fields the proposal variant hides
