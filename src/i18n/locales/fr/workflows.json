@@ -1133,7 +1133,9 @@
     "Customer bonus": "Bonus client",
     "Customer malus": "Malus client",
     "Shift-type preference": "Préférence de type de shift",
-    "Shift ≥ 8 hours": "Shift ≥ 8 heures"
+    "Shift ≥ 8 hours": "Shift ≥ 8 heures",
+    "E-mail — can be contacted now (derived)": "E-mail : joignable maintenant (dérivé)",
+    "WhatsApp — can be contacted now (derived)": "WhatsApp : joignable maintenant (dérivé)"
   },
   "fieldOptions": {
     "WhatsApp Web (own number)": "WhatsApp Web (numéro propre)",

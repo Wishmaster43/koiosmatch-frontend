@@ -1201,7 +1201,9 @@
     "Customer bonus": "Klantbonus",
     "Customer malus": "Klantmalus",
     "Shift-type preference": "Voorkeur diensttype",
-    "Shift ≥ 8 hours": "Dienst ≥ 8 uur"
+    "Shift ≥ 8 hours": "Dienst ≥ 8 uur",
+    "E-mail — can be contacted now (derived)": "E-mail: nu benaderbaar (afgeleid)",
+    "WhatsApp — can be contacted now (derived)": "WhatsApp: nu benaderbaar (afgeleid)"
   },
   "fieldOptions": {
     "WhatsApp Web (own number)": "WhatsApp Web (eigen nummer)",
