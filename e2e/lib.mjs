@@ -145,6 +145,13 @@ export async function go(page, navLabel) {
   await quiet(page)
 }
 
+// SMOKE-COLD-1 (06-11, measured): on a cold Vite `go()` returns ~330 ms after the click with the
+// table still empty (rows attach at ~850 ms); a flow that counts rows right away is red alone and
+// green in a warmed full run. Wait for the first row (or a given label) to attach, never for a fixed time.
+export async function waitForContent(page, selector = 'table tbody tr', { timeout = 15000 } = {}) {
+  await page.locator(selector).first().waitFor({ state: 'attached', timeout }).catch(() => {})
+}
+
 // Escape closes the open drawer; wait until its tab bar is gone instead of sleeping.
 export async function closeDrawer(page) {
   await page.keyboard.press('Escape')
@@ -166,7 +173,10 @@ export async function hasNav(page, navLabel) {
 // (candidates/vacancies/customers) or already on table view.
 export async function ensureTableView(page) {
   const tableBtn = page.locator('button:has(svg.lucide-layout-list)').first()
-  if (await tableBtn.count()) {
+  // SMOKE-COLD-1 (06-11, measured on Klanten): on a cold load a toggle can be attached but
+  // invisible for a moment and gone 1.5 s later; clicking it waits 30 s and fails the flow.
+  // Only a visible toggle is a real view switch (isVisible() answers at once, no waiting).
+  if (await tableBtn.count() && await tableBtn.isVisible()) {
     await tableBtn.click()
     // The table (or its empty state) replaces the board; an empty list may render no <table> at all.
     await page.locator('table').first().waitFor({ state: 'attached', timeout: 5000 }).catch(() => {})

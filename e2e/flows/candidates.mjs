@@ -5,11 +5,12 @@
  * channel → author visible, and super-search through note text. These run through
  * the real UI + real API, so a broken seam turns the suite red — not Danny's demo.
  */
-import { go, expect, quiet, closeDrawer } from '../lib.mjs'
+import { go, expect, quiet, closeDrawer, waitForContent } from '../lib.mjs'
 
 // Open the drawer of the first candidate row; returns the candidate's name.
 async function openFirstCandidate(page, { withStatus = false } = {}) {
   await go(page, 'Kandidaten')
+  await waitForContent(page)
   // A Lead has no status → the drawer hides the deployability picker; status flows need a
   // row that actually carries a status chip.
   const row = withStatus
@@ -69,6 +70,7 @@ export async function archiveAndFindBack({ page, errors }) {
   await go(page, 'Kandidaten')
   const wis = page.locator('button:has-text("Wis alle filters")').first()
   if (await wis.count()) { await wis.click(); await quiet(page) }
+  await waitForContent(page)
   let name = null
   const rowCount = Math.min(await page.locator('table tbody tr').count(), 10)
   expect(rowCount > 0, 'geen kandidaat-rijen')

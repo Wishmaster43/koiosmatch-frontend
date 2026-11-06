@@ -12,7 +12,7 @@
  *      — never silently stuck showing a number bigger than what's actually in effect.
  * Bails per page on the first bad option (runtime budget) but still visits every page.
  */
-import { go, ensureTableView, expect, quiet } from '../lib.mjs'
+import { go, ensureTableView, expect, quiet, waitForContent } from '../lib.mjs'
 import { ENTITIES } from './entities.mjs'
 
 // The exact Dutch label PaginationBar renders next to its <select> — the one string
@@ -29,6 +29,7 @@ export async function pagination({ page, errors }) {
     await ensureTableView(page)
 
     // 1. Footer must exist — this alone catches a page shipping no pagination at all.
+    await waitForContent(page, `text=${FOOTER_LABEL}`)
     const hasFooter = (await page.locator(`text=${FOOTER_LABEL}`).count()) > 0
     if (!hasFooter) { findings.push(`${nav}: GEEN paginering-footer gevonden`); continue }
 
