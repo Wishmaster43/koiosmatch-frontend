@@ -179,16 +179,20 @@ export default function KoiosPendingActionCard({ action }: { action: KoiosPendin
           data?: Record<string, unknown> & { budget?: ActionBudget; code?: string; ref?: { type: string; id: Id; archived?: boolean } }
         } | undefined
         if (body?.status === 'declined') {
-          // §5: a duplicate-twin decline's `message` is the BE's English
-          // fallback prose — translate via the slug code instead of showing it.
-          const code = body.data?.code
+          // §5: a decline's `message` is the BE's English fallback prose — translate via the slug instead of showing it.
+          // Measured in the BE (BuildsToolResult.php): declinedDuplicate() stamps the slug as `code`, refused() carries it
+          // only as the reason/reden twins (REFUSAL-CONVENTION-1), so read code first and the twins after it.
+          const code = body.data?.code ?? pick<string>(body.data, 'reason', 'reden')
           if (code?.startsWith('duplicate_')) {
             setRefusedReason(t(code.endsWith('_archived')
               ? 'notesAssist.execute.declined.duplicate_archived'
               : 'notesAssist.execute.declined.duplicate'))
+          } else if (code === 'proposal_cv_required') {
+            // Y-002: a browserless proposal needs a stored CV of the application.
+            setRefusedReason(t('notesAssist.execute.declined.proposal_cv_required'))
           } else {
             // Any other decline: translate the stable reason slug, fall back to the server message.
-            setRefusedReason(translateReason(pick<string>(body.data, 'reason', 'reden'), body.message))
+            setRefusedReason(translateReason(code, body.message))
           }
           setBudget(body.data?.budget ?? null)
           setExistingRef(body.data?.ref ?? null)

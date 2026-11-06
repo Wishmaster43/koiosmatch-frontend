@@ -657,7 +657,8 @@
         "proposal_in_flight": "La proposition est déjà en cours d'envoi",
         "proposal_recently_sent": "La proposition a déjà été envoyée récemment",
         "duplicate": "Existe déjà",
-        "duplicate_archived": "Existe déjà, archivé"
+        "duplicate_archived": "Existe déjà, archivé",
+        "proposal_cv_required": "Une proposition via Koios a besoin d’un CV enregistré de cette candidature. Proposez d’abord une fois depuis la candidature avec un CV ; Koios pourra ensuite choisir ce CV."
       },
       "viewRun": "Voir l'exécution du workflow",
       "confirm": "Confirmer",
@@ -815,6 +816,7 @@
     "documentNotAvailable": "Ce document n'est pas encore disponible : l'analyse antivirus n'est pas terminée ou a rejeté le fichier.",
     "tenantNotReady": "Cette agence est en cours de configuration ou sa configuration a échoué. Réessayez plus tard ou choisissez une autre agence.",
     "smCredentialsUnsatisfied": "La connexion Shiftmanager a des identifiants incomplets ou invalides et ne peut rien récupérer. Vérifiez la connexion dans Paramètres → Shiftmanager.",
+    "numberingFrozen": "La valeur de départ ne peut plus être modifiée : un numéro a déjà été attribué.",
     "aiDisclosureMissing": "L'introduction de l'entretien ne contient pas la mention IA obligatoire ; modifiez le modèle avant de l'activer.",
     "fieldRequired": "{{field}} est obligatoire."
   },

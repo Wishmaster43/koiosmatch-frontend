@@ -458,7 +458,8 @@
       "calllist_nothing_new": "Tous les candidats demandés figurent déjà sur la liste, rien n'a été ajouté.",
       "candidate_not_visible": "Le candidat est hors de l'agence de cette exécution, l'étape de planification a été ignorée.",
       "shift_not_visible": "Le service est hors de l'agence de cette exécution, l'étape de planification a été ignorée.",
-      "planning_no_shift_matched": "Aucun service correspondant trouvé, l'étape de planification a été ignorée."
+      "planning_no_shift_matched": "Aucun service correspondant trouvé, l'étape de planification a été ignorée.",
+      "archived": "Tous les destinataires sont archivés."
     },
     "reasonLabel": "Motif",
     "openHistory": "Voir dans l'historique",

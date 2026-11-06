@@ -657,7 +657,8 @@
         "proposal_in_flight": "Proposal is already being sent",
         "proposal_recently_sent": "Proposal was already sent recently",
         "duplicate": "Already exists",
-        "duplicate_archived": "Already exists, archived"
+        "duplicate_archived": "Already exists, archived",
+        "proposal_cv_required": "A proposal via Koios needs a stored CV of this application. Propose once from the application with a CV first; Koios can then pick that CV."
       },
       "viewRun": "View workflow run",
       "confirm": "Confirm",
@@ -815,6 +816,7 @@
     "documentNotAvailable": "This document is not available yet: the virus scan has not finished or has rejected the file.",
     "tenantNotReady": "This agency is still being set up, or its setup failed. Try again later or choose another agency.",
     "smCredentialsUnsatisfied": "The Shiftmanager connection has incomplete or invalid credentials and cannot fetch anything. Check the connection under Settings → Shiftmanager.",
+    "numberingFrozen": "The start value can no longer be changed: a number has already been issued.",
     "aiDisclosureMissing": "The interview intro is missing the mandatory AI disclosure; adjust the template before you activate this.",
     "fieldRequired": "{{field}} is required."
   },

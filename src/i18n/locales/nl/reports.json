@@ -458,7 +458,8 @@
       "calllist_nothing_new": "Elke gevraagde kandidaat staat al op de lijst, er is niets toegevoegd.",
       "candidate_not_visible": "De kandidaat valt buiten de vestiging van deze run, de planningstap is overgeslagen.",
       "shift_not_visible": "De dienst valt buiten de vestiging van deze run, de planningstap is overgeslagen.",
-      "planning_no_shift_matched": "Geen passende dienst gevonden, de planningstap is overgeslagen."
+      "planning_no_shift_matched": "Geen passende dienst gevonden, de planningstap is overgeslagen.",
+      "archived": "Alle ontvangers zijn gearchiveerd."
     },
     "reasonLabel": "Reden",
     "openHistory": "Bekijk in geschiedenis",

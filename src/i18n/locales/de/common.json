@@ -657,7 +657,8 @@
         "proposal_in_flight": "Vorschlag wird bereits gesendet",
         "proposal_recently_sent": "Vorschlag wurde bereits kürzlich gesendet",
         "duplicate": "Existiert bereits",
-        "duplicate_archived": "Existiert bereits, archiviert"
+        "duplicate_archived": "Existiert bereits, archiviert",
+        "proposal_cv_required": "Ein Vorschlag über Koios braucht einen gespeicherten Lebenslauf dieser Bewerbung. Schlagen Sie zuerst einmal aus der Bewerbung mit Lebenslauf vor; danach kann Koios diesen Lebenslauf wählen."
       },
       "viewRun": "Workflow-Lauf ansehen",
       "confirm": "Bestätigen",
@@ -815,6 +816,7 @@
     "documentNotAvailable": "Dieses Dokument ist noch nicht verfügbar: Die Virenprüfung ist nicht abgeschlossen oder hat die Datei abgelehnt.",
     "tenantNotReady": "Diese Agentur wird noch eingerichtet oder die Einrichtung ist fehlgeschlagen. Versuchen Sie es später erneut oder wählen Sie eine andere Agentur.",
     "smCredentialsUnsatisfied": "Die Shiftmanager-Verbindung hat unvollständige oder ungültige Zugangsdaten und kann nichts abrufen. Prüfen Sie die Verbindung unter Einstellungen → Shiftmanager.",
+    "numberingFrozen": "Der Startwert kann nicht mehr geändert werden: Es wurde bereits eine Nummer vergeben.",
     "aiDisclosureMissing": "Im Interview-Intro fehlt der verpflichtende KI-Hinweis; passen Sie die Vorlage an, bevor Sie dies aktivieren.",
     "fieldRequired": "{{field}} ist erforderlich."
   },

@@ -72,6 +72,12 @@ describe('apiErrorKey · sm_credentials_unsatisfied (ONIX G-014)', () => {
   })
 })
 
+describe('apiErrorKey · numbering_frozen (DANNY-0511-D)', () => {
+  it('maps numbering_frozen (422) to its i18n key', () => {
+    expect(apiErrorKey({ response: { data: { code: 'numbering_frozen' } } })).toBe('errors.numberingFrozen')
+  })
+})
+
 describe('apiErrorKey · email_unavailable (ONIX C-007)', () => {
   it('maps email_unavailable (422) to its i18n key regardless of the English message', () => {
     expect(apiErrorKey({ response: { data: { code: 'email_unavailable', message: 'This e-mail address cannot be used.' } } })).toBe('errors.emailUnavailable')

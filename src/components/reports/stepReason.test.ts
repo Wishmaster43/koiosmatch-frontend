@@ -24,6 +24,10 @@ describe('stepReasonLabel', () => {
     expect(stepReasonLabel('planning_no_shift_matched', mockT)).toBe('runs.stepReasons.planning_no_shift_matched')
   })
 
+  it('resolves the archived skip code (ARCHIVED-AUTOMATION-MAIL-1)', () => {
+    expect(stepReasonLabel('archived', mockT)).toBe('runs.stepReasons.archived')
+  })
+
   it('returns null for an unknown code, so the caller keeps the server sentence (never a raw code)', () => {
     expect(stepReasonLabel('some_future_reason', mockT)).toBeNull()
   })
@@ -36,7 +40,7 @@ describe('stepReasonLabel', () => {
 
   it('has a translated sentence for every code in all seven locales, without an em dash (§5)', () => {
     // 20 engine codes + the three E1 planning skip codes (BE WAVE2-HIGH-PRIVACY-SCOPE-1).
-    expect(STEP_REASON_CODES).toHaveLength(23)
+    expect(STEP_REASON_CODES).toHaveLength(24)
     for (const [lc, json] of Object.entries({ nl, en, de, fr, es, it: it_, pt })) {
       const labels = (json as { runs: { stepReasons: Record<string, string> } }).runs.stepReasons
       for (const code of STEP_REASON_CODES) {

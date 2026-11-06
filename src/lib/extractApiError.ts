@@ -81,6 +81,8 @@ const ERROR_CODE_KEYS: Record<string, string> = {
   inbound_scenario_number_missing: 'errors.inboundScenarioNumberMissing',
   // ONIX G-014 (422): a Shiftmanager sync whose stored credentials do not fill the keys of the connection's auth type sends nothing.
   sm_credentials_unsatisfied: 'errors.smCredentialsUnsatisfied',
+  // DANNY-0511-D (422): the numbering start value is frozen once the first number was issued.
+  numbering_frozen: 'errors.numberingFrozen',
 }
 
 /**

@@ -458,7 +458,8 @@
       "calllist_nothing_new": "Alle angefragten Kandidaten stehen bereits auf der Liste, es wurde nichts hinzugefügt.",
       "candidate_not_visible": "Der Kandidat liegt außerhalb der Niederlassung dieses Laufs, der Planungsschritt wurde übersprungen.",
       "shift_not_visible": "Die Schicht liegt außerhalb der Niederlassung dieses Laufs, der Planungsschritt wurde übersprungen.",
-      "planning_no_shift_matched": "Keine passende Schicht gefunden, der Planungsschritt wurde übersprungen."
+      "planning_no_shift_matched": "Keine passende Schicht gefunden, der Planungsschritt wurde übersprungen.",
+      "archived": "Alle Empfänger sind archiviert."
     },
     "reasonLabel": "Grund",
     "openHistory": "In Verlauf anzeigen",

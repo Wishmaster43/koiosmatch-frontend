@@ -458,7 +458,8 @@
       "calllist_nothing_new": "Every requested candidate is already on the list, nothing was added.",
       "candidate_not_visible": "The candidate is outside this run's branch, the planning step was skipped.",
       "shift_not_visible": "The shift is outside this run's branch, the planning step was skipped.",
-      "planning_no_shift_matched": "No matching shift was found, the planning step was skipped."
+      "planning_no_shift_matched": "No matching shift was found, the planning step was skipped.",
+      "archived": "Every recipient is archived."
     },
     "reasonLabel": "Reason",
     "openHistory": "View in history",

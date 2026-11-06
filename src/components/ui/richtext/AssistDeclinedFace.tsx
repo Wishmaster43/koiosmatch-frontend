@@ -43,15 +43,19 @@ interface AssistDeclinedFaceProps {
 export default function AssistDeclinedFace({ code, reason, applicationId, proposalId, existingRef, confirming, onForceSend }: AssistDeclinedFaceProps) {
   const { t } = useTranslation('common')
   const duplicate = isDuplicateCode(code)
+  // Y-002 PROPOSAL-CV-ATTACH-1: a propose without a browser and without a stored CV of the application.
+  const cvRequired = code === 'proposal_cv_required'
   const label = code === 'proposal_in_flight'
     ? t('notesAssist.execute.declined.proposal_in_flight')
     : code === 'proposal_recently_sent'
       ? t('notesAssist.execute.declined.proposal_recently_sent')
-      : duplicate
-        ? (code!.endsWith('_archived')
-          ? t('notesAssist.execute.declined.duplicate_archived')
-          : t('notesAssist.execute.declined.duplicate'))
-        : (reason ?? t('notesAssist.execute.forbidden'))
+      : cvRequired
+        ? t('notesAssist.execute.declined.proposal_cv_required')
+        : duplicate
+          ? (code!.endsWith('_archived')
+            ? t('notesAssist.execute.declined.duplicate_archived')
+            : t('notesAssist.execute.declined.duplicate'))
+          : (reason ?? t('notesAssist.execute.forbidden'))
   // A duplicate's existing-record chip only renders when the ref's type
   // resolves to a real page — same degrade-safely rule as KoiosRefChip.
   const existingPage = existingRef ? pageForResultRef(existingRef.type) : null
@@ -71,8 +75,8 @@ export default function AssistDeclinedFace({ code, reason, applicationId, propos
           {t('notesAssist.execute.openExisting')} <ExternalLink size={11} />
         </Button>
       )}
-      {/* A duplicate has no force path — only the proposal-collision codes do. */}
-      {!duplicate && (
+      {/* A duplicate has no force path, and neither has a missing CV — only the proposal-collision codes do. */}
+      {!duplicate && !cvRequired && (
         <Button variant="secondary" size="sm" onClick={onForceSend} disabled={confirming} style={{ flexShrink: 0 }}>
           {confirming ? <Spinner size={12} /> : null} {t('notesAssist.execute.forceSend')}
         </Button>

@@ -38,6 +38,8 @@ export const STEP_REASON_CODES = [
   'candidate_not_visible',
   'shift_not_visible',
   'planning_no_shift_matched',
+  // BE ARCHIVED-AUTOMATION-MAIL-1: a mail/WhatsApp step whose every recipient is archived is skipped.
+  'archived',
 ] as const
 
 export type StepReasonCode = (typeof STEP_REASON_CODES)[number]

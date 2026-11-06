@@ -458,7 +458,8 @@
       "calllist_nothing_new": "Todos os candidatos pedidos já estão na lista, nada foi adicionado.",
       "candidate_not_visible": "O candidato está fora da filial desta execução, o passo de planeamento foi ignorado.",
       "shift_not_visible": "O turno está fora da filial desta execução, o passo de planeamento foi ignorado.",
-      "planning_no_shift_matched": "Nenhum turno adequado encontrado, o passo de planeamento foi ignorado."
+      "planning_no_shift_matched": "Nenhum turno adequado encontrado, o passo de planeamento foi ignorado.",
+      "archived": "Todos os destinatários estão arquivados."
     },
     "reasonLabel": "Motivo",
     "openHistory": "Ver no histórico",

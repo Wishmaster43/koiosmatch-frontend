@@ -458,7 +458,8 @@
       "calllist_nothing_new": "Tutti i candidati richiesti sono già nella lista, non è stato aggiunto nulla.",
       "candidate_not_visible": "Il candidato è fuori dalla sede di questa esecuzione, il passaggio di pianificazione è stato saltato.",
       "shift_not_visible": "Il turno è fuori dalla sede di questa esecuzione, il passaggio di pianificazione è stato saltato.",
-      "planning_no_shift_matched": "Nessun turno adatto trovato, il passaggio di pianificazione è stato saltato."
+      "planning_no_shift_matched": "Nessun turno adatto trovato, il passaggio di pianificazione è stato saltato.",
+      "archived": "Tutti i destinatari sono archiviati."
     },
     "reasonLabel": "Motivo",
     "openHistory": "Visualizza nella cronologia",

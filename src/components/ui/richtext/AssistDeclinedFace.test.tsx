@@ -22,6 +22,12 @@ describe('AssistDeclinedFace', () => {
     expect(screen.getByText('notesAssist.execute.declined.proposal_recently_sent')).toBeInTheDocument()
   })
 
+  it('renders the proposal_cv_required reason by code and offers no force-send button', () => {
+    render(<AssistDeclinedFace code="proposal_cv_required" reason="server text" onForceSend={vi.fn()} />)
+    expect(screen.getByText('notesAssist.execute.declined.proposal_cv_required')).toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: 'notesAssist.execute.forceSend' })).toBeNull()
+  })
+
   it('falls back to the server reason, then the forbidden text, for an unknown code', () => {
     const { rerender } = render(<AssistDeclinedFace code={null} reason="Own server reason" onForceSend={vi.fn()} />)
     expect(screen.getByText('Own server reason')).toBeInTheDocument()
