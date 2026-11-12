@@ -15,6 +15,7 @@ import { useTenantCurrency } from './useTenantCurrency'
 // they are re-exported here so every existing import keeps working.
 import { toFiniteNumber, formatFileSizeMb } from './numberFormat'
 import type { NumberInput } from './numberFormat'
+import { ddmm, ddmmyyyy, parseIsoDay } from './localDate'
 export { formatFileSizeMb } from './numberFormat'
 export type { NumberInput } from './numberFormat'
 
@@ -24,6 +25,27 @@ export type { NumberInput } from './numberFormat'
 export function formatNumber(value: NumberInput, locale: string = 'nl-NL', maximumFractionDigits?: number): string {
   const n = toFiniteNumber(value)
   return n === null ? '—' : new Intl.NumberFormat(locale, { maximumFractionDigits }).format(n)
+}
+
+/**
+ * AXIS-TICK-DATE-1 (Danny 12-11): the ONLY place a user-visible date may drop the year is a
+ * chart axis tick, because thirty full dates do not fit an axis. The tooltip of the same
+ * chart always carries DD-MM-YYYY (formatChartDate). Both are built from the house
+ * localDate builders (date parts), so no locale or timezone can reshape them (no "06/11", no "9 nov.").
+ */
+
+// Axis tick "DD-MM" for an ISO date (or timestamp); anything else renders as ''.
+// No locale argument on purpose: the notation is digits only (localDate's pad2 idiom).
+export function formatAxisDay(iso: string | null | undefined): string {
+  const d = parseIsoDay(iso)
+  return d ? ddmm(d) : ''
+}
+
+// Tooltip "DD-MM-YYYY" via the house builder (localDate.ddmmyyyy); anything that is not a
+// date is echoed unchanged, so a chart whose category is not a date still shows its own label.
+export function formatChartDate(iso: string | null | undefined): string {
+  const d = parseIsoDay(iso)
+  return d ? ddmmyyyy(d) : (iso ?? '')
 }
 
 // The group and decimal separators Intl uses for a locale (nl "." and ","; en "," and ".").
@@ -165,6 +187,8 @@ export function useNumberFormat() {
     formatFileSize: (value: NumberInput) => formatFileSize(value, locale),
     formatCoord: formatCoord,
     formatSeconds: (value: NumberInput) => formatSeconds(value, locale),
+    formatAxisDay: (iso: string | null | undefined) => formatAxisDay(iso),
+    formatChartDate: (iso: string | null | undefined) => formatChartDate(iso),
     currency: tenantCurrency,
     formatCurrency: (value: NumberInput, currency?: string, maximumFractionDigits?: number, minimumFractionDigits?: number) =>
       formatCurrency(value, currency ?? tenantCurrency, locale, maximumFractionDigits, minimumFractionDigits),

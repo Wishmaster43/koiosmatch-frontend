@@ -23,7 +23,6 @@ import BarChartCard from '@/components/charts/BarChartCard'
 import { CHART_SERIES_COLORS } from '@/components/charts/chartTypes'
 import type { ChartDatum } from '@/components/charts/chartTypes'
 import { useNavigation } from '@/context/NavigationContext'
-import { useDateFormat } from '@/lib/datetime'
 import type {
   ApplicationsReportData, VacanciesReportData, MatchesReportData, TasksReportData, CandidatesReportData,
 } from '@/types/analytics'
@@ -72,7 +71,6 @@ export default function ReportsHubCharts({ applications, vacancies, matches, tas
 }) {
   const { t } = useTranslation('analytics')
   const { navigate } = useNavigation()
-  const { formatDate } = useDateFormat()
   const open = (id: string) => () => navigate(`reports.${id}`)
 
   // Applications funnel bucket counts → four named bars (§ EENHEID-LES: plain counts, no percent mode).
@@ -88,7 +86,7 @@ export default function ReportsHubCharts({ applications, vacancies, matches, tas
   // count — percentValues, never showPercent (§14 EENHEID-LES).
   const fillRateData: ChartDatum[] = (vacancies.data?.fill_rate_timeseries ?? [])
     .filter(pt => pt.rate != null)
-    .map(pt => ({ name: formatDate(pt.date), value: pt.rate as number }))
+    .map(pt => ({ name: pt.date, value: pt.rate as number }))
 
   // Matches under contract: sent/active/ended — three named bars.
   const underContract = matches.data?.under_contract
@@ -114,7 +112,7 @@ export default function ReportsHubCharts({ applications, vacancies, matches, tas
       {/* Applications inflow over time — mirrors the sub-report's own line. */}
       <ChartBlock title={t('hub.charts.applicationsTrend')} onOpen={open('applications')}
         loading={applications.loading} error={applications.error} empty={!applications.loading && !applications.error && (applications.data?.timeseries?.series?.length ?? 0) === 0}
-        chart={<ReportTimeseriesChart series={applications.data?.timeseries?.series ?? []} />} />
+        chart={<ReportTimeseriesChart series={applications.data?.timeseries?.series ?? []} bucket={applications.data?.timeseries?.bucket} />} />
 
       <ChartBlock title={t('hub.charts.applicationsFunnel')} onOpen={open('applications')}
         loading={applications.loading} error={applications.error} empty={!applications.loading && !applications.error && bucketData.every(d => d.value === 0)}
@@ -126,7 +124,7 @@ export default function ReportsHubCharts({ applications, vacancies, matches, tas
 
       <ChartBlock title={t('hub.charts.vacanciesFillRate')} onOpen={open('vacancies')}
         loading={vacancies.loading} error={vacancies.error} empty={!vacancies.loading && !vacancies.error && fillRateData.length === 0}
-        chart={<BarChartCard data={fillRateData} percentValues />} />
+        chart={<BarChartCard data={fillRateData} percentValues dateAxis />} />
 
       <ChartBlock title={t('hub.charts.matchesUnderContract')} onOpen={open('matches')}
         loading={matches.loading} error={matches.error} empty={!matches.loading && !matches.error && underContractData.every(d => d.value === 0)}

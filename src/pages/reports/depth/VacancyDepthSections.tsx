@@ -14,7 +14,6 @@ import DataTable from '@/components/ui/DataTable'
 import type { Column } from '@/components/ui/DataTable'
 import LineChartCard from '@/components/charts/LineChartCard'
 import ReportChartCard from '../ReportChartCard'
-import { useDateFormat } from '@/lib/datetime'
 import { useNumberFormat } from '@/lib/formatters'
 import type { VacanciesReportData } from '@/types/analytics'
 
@@ -33,7 +32,6 @@ export default function VacancyDepthSections({ data, onAgingRow }: {
   onAgingRow?: (row: AgingRow) => void
 }) {
   const { t } = useTranslation('analytics')
-  const { formatDate } = useDateFormat()
   const { formatPercent, formatNumber } = useNumberFormat()
 
   // Section 1: time-to-fill decomposition, three median-day KPI tiles. Informational only.
@@ -44,7 +42,7 @@ export default function VacancyDepthSections({ data, onAgingRow }: {
   const series = data.fill_rate_timeseries
   const seriesPoints = (series ?? [])
     .filter(p => p.rate != null)
-    .map(p => ({ name: formatDate(p.date, { day: '2-digit', month: '2-digit' }), value: Math.round(p.rate as number) }))
+    .map(p => ({ name: p.date, value: Math.round(p.rate as number) }))
 
   // Section 3: fill rate by branch — the house default 3-month window (also ignores the panel filters).
   const branchRows = data.fill_rate_by_branch
@@ -93,7 +91,7 @@ export default function VacancyDepthSections({ data, onAgingRow }: {
         <ReportChartCard title={t('vacancies.depth.fillRateSeries.title')} chart={
           <>
             <Caption as="div">{t('vacancies.depth.fixedWindow')}</Caption>
-            <LineChartCard data={seriesPoints} formatValue={formatPercent} />
+            <LineChartCard data={seriesPoints} formatValue={formatPercent} dateAxis />
           </>
         } />
       )}

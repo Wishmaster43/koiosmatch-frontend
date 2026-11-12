@@ -14,14 +14,18 @@ import type { ChartDatum } from '@/components/charts/chartTypes'
 export interface ReportTimeseriesPoint { date: string; label: string; value: number }
 
 // The one shared timeseries line chart every report renders through; a click hands back the point's raw date key so callers keep their own bucket logic (see file header).
-export default function ReportTimeseriesChart({ series, onPick, unit }: {
+export default function ReportTimeseriesChart({ series, onPick, unit, bucket }: {
   series: ReportTimeseriesPoint[]
+  // Granularity of the series: a week bucket keeps the BE label ('wk 45'), a day bucket shows the date.
+  bucket?: 'day' | 'week'
   onPick?: (dateKey: string) => void
   unit?: string
 }) {
-  // The house chart only knows generic `name`/`value` data points; `key` carries
-  // the raw date back through so a click can drill without re-parsing the label.
-  const data: ChartDatum[] = series.map(p => ({ name: p.label, value: p.value, key: p.date }))
+  // The house chart only knows generic `name`/`value` data points; the ISO date is the
+  // category (DD-MM ticks, DD-MM-YYYY tooltip, AXIS-TICK-DATE-1) and `key` carries it back for the drill click.
+  // A week bucket stays a week: the BE label ('wk 45') is the category and no date axis is applied.
+  const isWeek = bucket === 'week'
+  const data: ChartDatum[] = series.map(p => ({ name: isWeek ? p.label : p.date, value: p.value, key: p.date }))
 
   // Recharts hands the dot's own props to onClick — the datum can arrive either
   // directly or nested under `payload`, so read the date key defensively off both.
@@ -31,5 +35,5 @@ export default function ReportTimeseriesChart({ series, onPick, unit }: {
     if (key) onPick(key)
   } : undefined
 
-  return <LineChartCard data={data} onItemClick={onItemClick} unit={unit} height={200} />
+  return <LineChartCard data={data} onItemClick={onItemClick} unit={unit} height={200} dateAxis={!isWeek} />
 }

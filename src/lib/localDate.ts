@@ -34,6 +34,22 @@ export function toLocalIsoDate(d: Date): string {
 // module's i18n import — datetime.ts re-exports these for its own hook formatters.
 const pad2 = (n: number) => String(n).padStart(2, '0')
 export const ddmmyyyy = (d: Date) => `${pad2(d.getDate())}-${pad2(d.getMonth() + 1)}-${d.getFullYear()}`
+// DD-MM (no year): the axis-tick shape, same pad2 idiom (AXIS-TICK-DATE-1, see formatters.ts).
+export const ddmm = (d: Date) => `${pad2(d.getDate())}-${pad2(d.getMonth() + 1)}`
+// Parses an ISO date or timestamp to a Date; a date-only string is read as a LOCAL day so
+// no timezone can shift it, a timestamp goes through the Date parser. Invalid input -> null.
+const DATE_ONLY_RE = /^(\d{4})-(\d{2})-(\d{2})$/
+const ISO_PREFIX_RE = /^\d{4}-\d{2}-\d{2}[T ]/
+export function parseIsoDay(iso: string | null | undefined): Date | null {
+  if (!iso) return null
+  const m = DATE_ONLY_RE.exec(iso)
+  if (!m && !ISO_PREFIX_RE.test(iso)) return null
+  const d = m ? new Date(Number(m[1]), Number(m[2]) - 1, Number(m[3])) : new Date(iso)
+  if (isNaN(d.getTime())) return null
+  // Round-trip check: an impossible calendar day ('2026-02-30') would roll into March, so reject it.
+  if (m && (d.getFullYear() !== Number(m[1]) || d.getMonth() !== Number(m[2]) - 1 || d.getDate() !== Number(m[3]))) return null
+  return d
+}
 export const hhmm = (d: Date) => `${pad2(d.getHours())}:${pad2(d.getMinutes())}`
 // HH:mm:ss — for the few surfaces where seconds matter (a workflow run's own
 // step timing, a jobs-board completion time). Same house-numeric contract as

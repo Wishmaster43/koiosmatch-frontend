@@ -13,10 +13,12 @@ vi.mock('@/lib/datetime', () => ({ useDateFormat: () => ({ formatDate: (d: strin
 
 let capturedData: unknown
 let capturedFormatTick: ((v: number) => string) | undefined
+let capturedDateAxis: boolean | undefined
 let capturedOnItemClick: (() => void) | undefined
 vi.mock('@/components/charts/LineChartCard', () => ({
-  default: (props: { data: unknown; onItemClick?: () => void; formatTick?: (v: number) => string }) => {
+  default: (props: { data: unknown; dateAxis?: boolean; onItemClick?: () => void; formatTick?: (v: number) => string }) => {
     capturedData = props.data
+    capturedDateAxis = props.dateAxis
     capturedOnItemClick = props.onItemClick
     capturedFormatTick = props.formatTick
     return <div data-testid="line" />
@@ -37,6 +39,7 @@ describe('FillRateTimeseriesLine', () => {
   it('skips null-rate points and renders the real ones', () => {
     render(<FillRateTimeseriesLine rows={points} />)
     expect(capturedData).toEqual([{ name: '2026-08-24', value: 80 }])
+    expect(capturedDateAxis).toBe(true)
   })
 
   it('point click opens the vacancies report via the shared report intent key', () => {

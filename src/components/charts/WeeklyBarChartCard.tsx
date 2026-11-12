@@ -19,12 +19,12 @@ export interface BarSeries { key: string; label: string; color: string; line?: b
 // Tooltip listing every series' value for the hovered bucket. `formatNumber` is
 // passed in (the tooltip is a plain function, not a component, so it can't call
 // the useNumberFormat hook itself).
-function MultiTooltip({ active, payload, label, formatNumber, rightKeys, rightAxisUnit }: TipProps & { formatNumber: (v: number) => string; rightKeys: Set<string>; rightAxisUnit: string }) {
+function MultiTooltip({ active, payload, label, formatNumber, rightKeys, rightAxisUnit, formatLabel }: TipProps & { formatNumber: (v: number) => string; rightKeys: Set<string>; rightAxisUnit: string; formatLabel?: (l: string) => string }) {
   if (!active || !payload?.length) return null
   return (
     <div style={{ padding: '8px 11px', fontSize: 12, background: 'var(--surface)', borderRadius: 10,
       border: '1px solid var(--border)', boxShadow: 'var(--shadow-float)', minWidth: 130 }}>
-      <div style={{ fontWeight: 600, color: 'var(--text)', marginBottom: 5 }}>{label}</div>
+      <div style={{ fontWeight: 600, color: 'var(--text)', marginBottom: 5 }}>{formatLabel ? formatLabel(String(label ?? '')) : label}</div>
       {payload.map(p => (
         <div key={String(p.dataKey)} style={{ display: 'flex', alignItems: 'center', gap: 6, marginTop: 2 }}>
           <span style={{ width: 8, height: 8, borderRadius: '50%', background: p.color, flexShrink: 0 }} />
@@ -37,15 +37,17 @@ function MultiTooltip({ active, payload, label, formatNumber, rightKeys, rightAx
 }
 
 // Config-driven grouped bar chart (see the module doc above); `axis` is set per series so a rate column never silently shares the count scale, while `stacked` is one card-level switch applied to every bar series alike.
-export default function WeeklyBarChartCard({ title, data = [], series = [], height = 240, onBarClick, stacked = false, rightAxisUnit = '' }: {
+export default function WeeklyBarChartCard({ title, data = [], series = [], height = 240, onBarClick, stacked = false, rightAxisUnit = '', dateAxis = false }: {
   title?: ReactNode; data?: ChartDatum[]; series?: BarSeries[]; height?: number; onBarClick?: (row: unknown, series: BarSeries) => void
   // Stack every bar series onto one column instead of grouping them side-by-side.
   // Line series are untouched (a line has no stack). Default false = byte-identical
   // output to before this prop existed.
   stacked?: boolean; rightAxisUnit?: string
+  // AXIS-TICK-DATE-1: each datum's `name` is an ISO date; ticks read DD-MM, the tooltip DD-MM-YYYY.
+  dateAxis?: boolean
 }) {
   // Locale-aware grouping (§ FMT-GETAL-1) — never a hardcoded 'nl-NL' toLocaleString.
-  const { formatNumber } = useNumberFormat()
+  const { formatNumber, formatAxisDay, formatChartDate } = useNumberFormat()
   // Series on the right axis (RIGHT-AXIS-1) — rendered only when one asks for it.
   const rightKeys = new Set(series.filter(s => s.axis === 'right').map(s => s.key))
   const hasRight = rightKeys.size > 0
@@ -64,7 +66,8 @@ export default function WeeklyBarChartCard({ title, data = [], series = [], heig
       <ErrorBoundary compact>
       <ResponsiveContainer width="100%" height={height}>
         <ComposedChart data={data} margin={{ top: 4, right: 8, left: -20, bottom: 0 }}>
-          <XAxis dataKey="name" tick={{ fontSize: 10, fill: 'var(--text-muted)' }} axisLine={false} tickLine={false} />
+          <XAxis dataKey="name" tick={{ fontSize: 10, fill: 'var(--text-muted)' }} axisLine={false} tickLine={false}
+            tickFormatter={dateAxis ? (v => formatAxisDay(String(v))) : undefined} />
           <YAxis yAxisId="left" tick={{ fontSize: 10, fill: 'var(--text-muted)' }} axisLine={false} tickLine={false} allowDecimals={false}
             tickFormatter={v => formatNumber(Number(v))} />
           {hasRight && (
@@ -72,7 +75,7 @@ export default function WeeklyBarChartCard({ title, data = [], series = [], heig
               allowDecimals={false} domain={rightAxisUnit === '%' ? [0, 100] : undefined}
               tickFormatter={v => `${formatNumber(Number(v))}${rightAxisUnit}`} />
           )}
-          <Tooltip content={<MultiTooltip formatNumber={formatNumber} rightKeys={rightKeys} rightAxisUnit={rightAxisUnit} />} cursor={{ fill: 'rgba(0,0,0,0.03)' }} />
+          <Tooltip content={<MultiTooltip formatNumber={formatNumber} rightKeys={rightKeys} rightAxisUnit={rightAxisUnit} formatLabel={dateAxis ? formatChartDate : undefined} />} cursor={{ fill: 'rgba(0,0,0,0.03)' }} />
           <Legend wrapperStyle={{ fontSize: 11, paddingTop: 6 }} iconType="circle" iconSize={8} />
           {series.map(s => s.line ? (
             <Line key={s.key} yAxisId={s.axis === 'right' ? 'right' : 'left'} type="monotone" dataKey={s.key} name={s.label} stroke={s.color} strokeWidth={2} dot={{ r: 2 }} isAnimationActive={false} />

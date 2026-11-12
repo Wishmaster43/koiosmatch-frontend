@@ -9,7 +9,6 @@ import { Fragment } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Block } from '@/pages/dashboard/DashboardPrimitives'
 import { Mono, Caption } from '@/components/ui/typography'
-import { useDateFormat } from '@/lib/datetime'
 import { useNumberFormat } from '@/lib/formatters'
 import { tintBg } from '@/lib/tint'
 import { interactive } from '@/lib/a11y'
@@ -24,9 +23,8 @@ export default function ShiftCoverageHeatmap({ rows, onNavigate }: {
   onNavigate?: (page: string, params?: Record<string, unknown>) => void
 }) {
   const { t } = useTranslation('dashboard')
-  const { formatDate } = useDateFormat()
   // Locale-aware cell counts (GETALLEN-1).
-  const { formatNumber } = useNumberFormat()
+  const { formatNumber, formatAxisDay } = useNumberFormat()
 
   // Build the stable 7-date x 3-part matrix; missing cells default to 0/0.
   const dates = Array.from(new Set(rows.map(r => r.date))).sort()
@@ -39,7 +37,7 @@ export default function ShiftCoverageHeatmap({ rows, onNavigate }: {
         <div style={{ display: 'grid', gridTemplateColumns: `100px repeat(${dates.length}, 1fr)`, gap: 4, minWidth: 480 }}>
           <div />
           {dates.map(d => (
-            <Caption key={d} as="div" style={{ textAlign: 'center' }}>{formatDate(d, { day: '2-digit', month: '2-digit' })}</Caption>
+            <Caption key={d} as="div" style={{ textAlign: 'center' }}>{formatAxisDay(d)}</Caption>
           ))}
           {PARTS.map(part => (
             <Fragment key={part}>

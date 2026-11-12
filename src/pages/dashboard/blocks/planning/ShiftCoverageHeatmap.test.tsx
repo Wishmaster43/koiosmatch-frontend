@@ -9,8 +9,11 @@ import { render, screen } from '@testing-library/react'
 import ShiftCoverageHeatmap from './ShiftCoverageHeatmap'
 
 vi.mock('react-i18next', () => ({ useTranslation: () => ({ t: (k: string, opts?: Record<string, unknown>) => opts ? `${k}:${JSON.stringify(opts)}` : k }) }))
-vi.mock('@/lib/datetime', () => ({ useDateFormat: () => ({ formatDate: (v: string) => v }) }))
-vi.mock('@/lib/formatters', () => ({ useNumberFormat: () => ({ formatNumber: (n: number) => `nf(${n})` }) }))
+vi.mock('@/lib/datetime', () => ({ useLocale: () => 'nl-NL' }))
+vi.mock('@/lib/formatters', async () => {
+  const actual = await vi.importActual<typeof import('@/lib/formatters')>('@/lib/formatters')
+  return { useNumberFormat: () => ({ formatNumber: (n: number) => `nf(${n})`, formatAxisDay: actual.formatAxisDay }) }
+})
 
 const rows = [
   { date: '2026-08-24', part: 'morning' as const, shifts: 4, filled: 4 },
@@ -26,6 +29,11 @@ describe('ShiftCoverageHeatmap', () => {
     expect(screen.getByText('nf(1)/nf(4)')).toBeInTheDocument()
     screen.getByText('nf(4)/nf(4)').closest('[role="button"]')?.dispatchEvent(new MouseEvent('click', { bubbles: true }))
     expect(onNavigate).toHaveBeenCalledWith('planning', { date: '2026-08-24' })
+  })
+
+  it('renders the column header as DD-MM', () => {
+    render(<ShiftCoverageHeatmap rows={rows} onNavigate={vi.fn()} />)
+    expect(screen.getByText('24-08')).toBeInTheDocument()
   })
 
   it('defaults a missing cell to 0/0', () => {

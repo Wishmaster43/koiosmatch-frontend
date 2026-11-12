@@ -7,11 +7,20 @@ import { describe, it, expect, vi } from 'vitest'
 import { render, screen } from '@testing-library/react'
 import ActivityChart from './ActivityChart'
 
+// Capture the formatters the chart hands to recharts (real layout does not exist in jsdom).
+const captured: { tick?: (v: string) => string; label?: (v: unknown) => string } = {}
+vi.mock('recharts', () => {
+  const Null = () => null
+  const Box = ({ children }: { children?: React.ReactNode }) => <div>{children}</div>
+  return {
+    AreaChart: Box, ResponsiveContainer: Box, Area: Null, YAxis: Null, CartesianGrid: Null, Legend: Null,
+    XAxis: (p: { tickFormatter: (v: string) => string }) => { captured.tick = p.tickFormatter; return null },
+    Tooltip: (p: { labelFormatter: (v: unknown) => string }) => { captured.label = p.labelFormatter; return null },
+  }
+})
+
 vi.mock('react-i18next', () => ({ useTranslation: () => ({ t: (k: string) => k }) }))
-// `@/lib/datetime` transitively imports the real i18n bootstrap (module-scope
-// `i18n.use(initReactI18next)`) which throws against the flat react-i18next
-// mock above (no `initReactI18next` export) — mocked here so the chart's own
-// `useLocale()` call never loads the real module.
+// formatters imports `@/lib/datetime` (i18n bootstrap), which the flat react-i18next mock cannot carry.
 vi.mock('@/lib/datetime', () => ({ useLocale: () => 'nl-NL' }))
 
 describe('ActivityChart', () => {
@@ -21,6 +30,12 @@ describe('ActivityChart', () => {
       { date: '2026-08-25', inbound: 1, outbound: 2 },
     ]} />)
     expect(screen.getByText('chartTitle')).toBeInTheDocument()
+  })
+
+  it('formats the axis tick as DD-MM and the tooltip label as DD-MM-YYYY', () => {
+    render(<ActivityChart data={[{ date: '2026-08-24', inbound: 1, outbound: 2 }]} />)
+    expect(captured.tick?.('2026-08-24')).toBe('24-08')
+    expect(captured.label?.('2026-08-24')).toBe('24-08-2026')
   })
 
   it('shows the loading state instead of the chart', () => {

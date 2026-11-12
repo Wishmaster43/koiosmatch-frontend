@@ -15,7 +15,8 @@ vi.mock('react-i18next', () => ({ useTranslation: () => ({ t: (k: string) => k }
 vi.mock('@/lib/formatters', () => ({ useNumberFormat: () => ({ formatNumber: (n: number) => String(n) }) }))
 vi.mock('@/lib/datetime', () => ({ useDateFormat: () => ({ formatDate: (v: unknown) => String(v) }) }))
 // The shared line chart needs real layout — a stub keeps the strip testable.
-vi.mock('@/components/charts/LineChartCard', () => ({ default: ({ title }: { title: ReactNode }) => <div>{title}</div> }))
+const lineProps = vi.fn()
+vi.mock('@/components/charts/LineChartCard', () => ({ default: (p: { title: ReactNode; dateAxis?: boolean }) => { lineProps(p); return <div>{p.title}</div> } }))
 
 vi.mock('@/lib/api', async () => {
   const actual = await vi.importActual<typeof import('@/lib/api')>('@/lib/api')
@@ -76,6 +77,7 @@ describe('KoiosPerformanceCard', () => {
     expect(await screen.findByText('koiosPerformance.completed')).toBeInTheDocument()
     expect(screen.getByText('Danny')).toBeInTheDocument()
     expect(screen.getByText('koiosPerformance.trend')).toBeInTheDocument()
+    expect(lineProps).toHaveBeenCalledWith(expect.objectContaining({ dateAxis: true, data: [{ name: '2026-08-23', value: 8 }] }))
   })
 
   it('hides only the strip on a 403 — the shared card itself stays', async () => {

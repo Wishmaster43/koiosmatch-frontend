@@ -257,7 +257,7 @@ export default function ApplicationsReport({ period, filters = EMPTY_REPORT_FILT
         <ReportGrid>
           {/* Inflow over time — week/day timeseries, bucket set server-side. */}
           <ReportChartCard span={2} title={t('applications.series')}
-            chart={<ReportTimeseriesChart series={data.timeseries.series} onPick={onSeriesPick} />} />
+            chart={<ReportTimeseriesChart series={data.timeseries.series} bucket={data.timeseries.bucket} onPick={onSeriesPick} />} />
 
           {/* Fixed four-value funnel bucket, no lookup colour → donut with the
               semantic BUCKET_COLOR slices. */}

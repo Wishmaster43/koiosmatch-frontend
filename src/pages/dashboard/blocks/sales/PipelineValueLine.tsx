@@ -18,10 +18,10 @@ export default function PipelineValueLine({ rows, onNavigate }: {
   onNavigate?: FeedTileContext['onNavigate']
 }) {
   const { t } = useTranslation('dashboard')
-  const { formatDate, locale } = useDateFormat()
+  const { locale } = useDateFormat()
 
-  // Short day/month label per point (DD-MM per §3B DATUM-1, house formatter only).
-  const data = rows.map(p => ({ name: formatDate(p.date, { day: '2-digit', month: '2-digit' }), value: p.value }))
+  // The ISO date is the category; the chart renders DD-MM ticks and a DD-MM-YYYY tooltip (AXIS-TICK-DATE-1).
+  const data = rows.map(p => ({ name: p.date, value: p.value }))
 
   return (
     <Panel>
@@ -29,6 +29,7 @@ export default function PipelineValueLine({ rows, onNavigate }: {
       <LineChartCard
         title={t('block.pipelineValueTimeseries')}
         data={data}
+        dateAxis
         formatValue={v => eur(v, locale)}
         onItemClick={onNavigate ? () => onNavigate('reports', { report: 'opportunities' }) : undefined}
       />

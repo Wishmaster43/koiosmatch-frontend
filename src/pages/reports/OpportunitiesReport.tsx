@@ -173,7 +173,7 @@ export default function OpportunitiesReport({ period, filters = EMPTY_REPORT_FIL
         <ReportGrid>
           {/* Created over time — week/day timeseries, bucket set server-side. */}
           <ReportChartCard span={2} title={t('opportunities.series')}
-            chart={<ReportTimeseriesChart series={data.timeseries.series} onPick={onSeriesPick} />} />
+            chart={<ReportTimeseriesChart series={data.timeseries.series} bucket={data.timeseries.bucket} onPick={onSeriesPick} />} />
 
           {/* Stage axis — a lookup axis with its own colour per value → donut,
               always sums to total ('none' + orphan-uuid rows included). */}

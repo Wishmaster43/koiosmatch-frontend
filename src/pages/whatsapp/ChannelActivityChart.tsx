@@ -11,22 +11,18 @@ import { useTranslation } from 'react-i18next'
 import WeeklyBarChartCard from '@/components/charts/WeeklyBarChartCard'
 import { CHANNEL_COLORS, CHANNEL_KEYS } from '@/components/drawer/channelColors'
 import type { WaActivityDatum } from '@/types/whatsapp'
-import { fmtAxisDate } from './data/axisDate'
-// App-wide active locale (DATUM-1/LANE-B) — feeds the per-day axis label.
-import { useLocale } from '@/lib/datetime'
 
 // Per-day inbound/outbound activity bar chart, one series per channel with its house colour and translated label.
 export default function ChannelActivityChart({ data }: { data: WaActivityDatum[] }) {
   const { t } = useTranslation('whatsapp')
   // Channel names live in the candidates namespace (one label per enum value, app-wide).
   const { t: tCandidates } = useTranslation('candidates')
-  const locale = useLocale()
   // Memoised: series list only rebuilds when the channel-label translator changes.
   const series = useMemo(() => CHANNEL_KEYS.map(key => ({ key, label: tCandidates(`conversations.channel.${key}`), color: CHANNEL_COLORS[key] })), [tCandidates])
   // One row per day: each channel's inbound + outbound, `value` = the day total.
   const rows = data.map(d => {
     const per = Object.fromEntries(CHANNEL_KEYS.map(key => [key, (d.by_channel?.[key]?.inbound ?? 0) + (d.by_channel?.[key]?.outbound ?? 0)]))
-    return { name: fmtAxisDate(d.date, locale), value: Object.values(per).reduce((a, b) => a + b, 0), ...per }
+    return { name: d.date, value: Object.values(per).reduce((a, b) => a + b, 0), ...per }
   })
-  return <WeeklyBarChartCard title={t('overview.channelActivityTitle')} data={rows} series={series} stacked height={200} />
+  return <WeeklyBarChartCard title={t('overview.channelActivityTitle')} data={rows} series={series} stacked height={200} dateAxis />
 }

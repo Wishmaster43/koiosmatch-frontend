@@ -166,7 +166,7 @@ export default function TasksReport({ period, filters = EMPTY_REPORT_FILTERS, co
         <ReportGrid>
           {/* Created over time — week/day timeseries, bucket set server-side. */}
           <ReportChartCard span={2} title={t('tasks.series')}
-            chart={<ReportTimeseriesChart series={data.timeseries.series} onPick={onSeriesPick} />} />
+            chart={<ReportTimeseriesChart series={data.timeseries.series} bucket={data.timeseries.bucket} onPick={onSeriesPick} />} />
 
           {/* Status carries a tenant lookup colour, ID-keyed (slug is not
               unique-protected); always sums to total ('none' folding +

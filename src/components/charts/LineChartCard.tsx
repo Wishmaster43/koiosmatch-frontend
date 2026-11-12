@@ -14,13 +14,13 @@ import { ChartCardTitle, ChartCardEmpty } from './ChartCardChrome'
 // Tooltip showing the point value + a caller-supplied unit (e.g. "candidates").
 // `formatNumber` is passed in (the tooltip is a plain function, not a component,
 // so it can't call the useNumberFormat hook itself).
-function LineTooltip({ active, payload, label, onItemClick, unit, t, formatNumber, formatValue }: TipProps & { onItemClick?: (d: unknown) => void; unit?: string; t: TFunction; formatNumber: (v: number) => string; formatValue?: (v: number) => string }) {
+function LineTooltip({ active, payload, label, onItemClick, unit, t, formatNumber, formatValue, formatLabel }: TipProps & { onItemClick?: (d: unknown) => void; unit?: string; t: TFunction; formatNumber: (v: number) => string; formatValue?: (v: number) => string; formatLabel?: (l: string) => string }) {
   if (!active || !payload?.length) return null
   const value = payload[0].value ?? 0
   return (
     <div className="px-3 py-2 text-sm rounded-xl"
       style={{ background: 'var(--surface)', border: '1px solid var(--border)', boxShadow: 'var(--shadow-float)' }}>
-      <div className="mb-0.5 font-medium" style={captionStyle}>{label}</div>
+      <div className="mb-0.5 font-medium" style={captionStyle}>{formatLabel ? formatLabel(String(label ?? '')) : label}</div>
       <div style={{ color: 'var(--color-primary-text)', fontSize: 13, fontWeight: 500 }}>
         {formatValue ? formatValue(value) : `${formatNumber(value)}${unit ? ` ${unit}` : ''}`}
       </div>
@@ -31,17 +31,19 @@ function LineTooltip({ active, payload, label, onItemClick, unit, t, formatNumbe
 
 // `unit` is the noun shown after the value in the tooltip; the caller passes it
 // (the chart is generic), e.g. t('common:units.candidates').
-export default function LineChartCard({ title, data = [], color = 'var(--color-primary)', height = 220, onItemClick, unit = '', formatValue, formatTick }: {
+export default function LineChartCard({ title, data = [], color = 'var(--color-primary)', height = 220, onItemClick, unit = '', formatValue, formatTick, dateAxis = false }: {
   title?: ReactNode; data?: ChartDatum[]; color?: string; height?: number; onItemClick?: (d: unknown) => void; unit?: string
   // Full value formatter for the tooltip (a currency, a percentage) — wins over
   // `unit`, which is only a noun appended after a plain number.
   formatValue?: (v: number) => string
   // Y-axis tick formatter (a percentage axis); defaults to the plain locale number.
   formatTick?: (v: number) => string
+  // AXIS-TICK-DATE-1: each datum's `name` is an ISO date; ticks read DD-MM, the tooltip DD-MM-YYYY.
+  dateAxis?: boolean
 }) {
   const { t } = useTranslation('common')
   // Locale-aware grouping (§ FMT-GETAL-1) — never a hardcoded 'nl-NL' toLocaleString.
-  const { formatNumber } = useNumberFormat()
+  const { formatNumber, formatAxisDay, formatChartDate } = useNumberFormat()
 
   if (!data.length) {
     return (
@@ -62,10 +64,11 @@ export default function LineChartCard({ title, data = [], color = 'var(--color-p
       <ResponsiveContainer width="100%" height={height}>
         <LineChart data={data} margin={{ top: 4, right: 16, left: -20, bottom: 0 }}>
           <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" vertical={false} />
-          <XAxis dataKey="name" tick={{ fontSize: 10, fill: 'var(--text-muted)' }} axisLine={false} tickLine={false} />
+          <XAxis dataKey="name" tick={{ fontSize: 10, fill: 'var(--text-muted)' }} axisLine={false} tickLine={false}
+            tickFormatter={dateAxis ? (v => formatAxisDay(String(v))) : undefined} />
           <YAxis tick={{ fontSize: 10, fill: 'var(--text-muted)' }} axisLine={false} tickLine={false} allowDecimals={false}
             tickFormatter={v => (formatTick ?? formatNumber)(Number(v))} />
-          <Tooltip content={<LineTooltip onItemClick={onItemClick} unit={unit} t={t} formatNumber={formatNumber} formatValue={formatValue} />} />
+          <Tooltip content={<LineTooltip onItemClick={onItemClick} unit={unit} t={t} formatNumber={formatNumber} formatValue={formatValue} formatLabel={dateAxis ? formatChartDate : undefined} />} />
           <Line
             type="monotone"
             dataKey="value"

@@ -90,7 +90,7 @@ function PerformanceStrip() {
 
           {/* Day trend — the shared line chart; hidden when the series is empty. */}
           {data.timeseries.length > 0 ? (
-            <LineChartCard title={t('koiosPerformance.trend')} data={data.timeseries.map(p => ({ name: p.date, value: p.count }))} />
+            <LineChartCard title={t('koiosPerformance.trend')} data={data.timeseries.map(p => ({ name: p.date, value: p.count }))} dateAxis />
           ) : (
             <Caption>{t('koiosPerformance.noTrend')}</Caption>
           )}

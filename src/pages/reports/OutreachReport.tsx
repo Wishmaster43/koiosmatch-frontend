@@ -169,7 +169,7 @@ export default function OutreachReport({ period, filters, compare = COMPARE_OFF 
         <ReportGrid>
           {/* Targets over time — week/day timeseries, bucket set server-side. */}
           <ReportChartCard span={2} title={t('outreach.series')}
-            chart={<ReportTimeseriesChart series={data.timeseries.series} onPick={onSeriesPick} />} />
+            chart={<ReportTimeseriesChart series={data.timeseries.series} bucket={data.timeseries.bucket} onPick={onSeriesPick} />} />
 
           {/* Ranking axes → bar charts. Top-20 call lists + 'others' (the exact
               complement, a real drillable row); an archived campaign keeps its

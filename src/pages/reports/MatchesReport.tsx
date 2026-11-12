@@ -229,7 +229,7 @@ export default function MatchesReport({ period, filters = EMPTY_REPORT_FILTERS, 
           {/* Matches over time — week/day timeseries, bucket set server-side;
               every bar drills on its own date key (portie 7). */}
           <ReportChartCard span={2} title={t('matches.series')}
-            chart={<ReportTimeseriesChart series={data.timeseries.series} onPick={onSeriesPick} />} />
+            chart={<ReportTimeseriesChart series={data.timeseries.series} bucket={data.timeseries.bucket} onPick={onSeriesPick} />} />
 
           {/* Soort-as (MATCH-SOORT-1): a lookup axis with its own colour per value
               (CHART-TYPE RULE) → donut, sums to total incl. the 'none' sentinel

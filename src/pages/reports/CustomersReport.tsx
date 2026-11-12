@@ -324,7 +324,7 @@ export default function CustomersReport({ period, filters = EMPTY_REPORT_FILTERS
         <ReportGrid>
           {/* Inflow over time — week/day timeseries, bucket set server-side. */}
           <ReportChartCard span={2} title={t(isProspects ? 'prospects.series' : 'customers.series')}
-            chart={<ReportTimeseriesChart series={data.timeseries.series} onPick={onSeriesPick} />} />
+            chart={<ReportTimeseriesChart series={data.timeseries.series} bucket={data.timeseries.bucket} onPick={onSeriesPick} />} />
 
           {/* Coloured lookup axes → donuts (each slice wears its tenant colour). */}
           <PieAxisCard title={t('customers.axes.status')} segments={data.by_status} onItemClick={pickSegment('status', data.by_status)} />

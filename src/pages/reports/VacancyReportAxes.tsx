@@ -60,7 +60,7 @@ export default function VacancyReportAxes({ data, onSegment, onBucket }: {
     <>
       {/* Created over time — week/day timeseries, bucket set server-side. */}
       <ReportChartCard span={2} title={t('vacancies.series')}
-        chart={<ReportTimeseriesChart series={data.timeseries.series} onPick={onSeriesPick} />} />
+        chart={<ReportTimeseriesChart series={data.timeseries.series} bucket={data.timeseries.bucket} onPick={onSeriesPick} />} />
 
       {/* Coloured status lookup axis → donut (each slice wears its tenant colour). */}
       <ReportChartCard title={t('customers.axes.status')} chart={

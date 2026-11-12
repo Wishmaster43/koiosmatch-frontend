@@ -10,14 +10,14 @@ import { useNumberFormat } from '@/lib/formatters'
 
 // `formatNumber` and `formatPercent` are passed in (the tooltip is a plain function, not a component,
 // so it can't call the useNumberFormat hook itself).
-function BarTooltip({ active, payload, label, total, showPercent, percentValues, formatNumber, formatPercent: fmt }: TipProps & { total?: number; showPercent?: boolean; percentValues?: boolean; formatNumber: (v: number) => string; formatPercent: (v: number) => string }) {
+function BarTooltip({ active, payload, label, total, showPercent, percentValues, formatNumber, formatPercent: fmt, formatLabel }: TipProps & { total?: number; showPercent?: boolean; percentValues?: boolean; formatNumber: (v: number) => string; formatPercent: (v: number) => string; formatLabel?: (l: string) => string }) {
   if (!active || !payload?.length) return null
   const value = payload[0].value ?? 0
   const pct   = total ? fmt((value / total) * 100) : '—'
   return (
     <div className="px-3 py-2 text-sm rounded-xl"
       style={{ background: 'var(--surface)', border: '1px solid var(--border)', boxShadow: 'var(--shadow-float)' }}>
-      <div className="mb-0.5 font-medium" style={{ fontSize: 12, color: 'var(--text)' }}>{label}</div>
+      <div className="mb-0.5 font-medium" style={{ fontSize: 12, color: 'var(--text)' }}>{formatLabel ? formatLabel(String(label ?? '')) : label}</div>
       <div style={{ color: payload[0].fill, fontSize: 13, fontWeight: 500 }}>
         {/* GETALLEN-1: percentValues are already a server percentage — through
             formatPercent, never a hand-built `${formatNumber(x)}%` (that let
@@ -32,17 +32,19 @@ function BarTooltip({ active, payload, label, total, showPercent, percentValues,
 
 // House bar chart card. percentValues renders values already expressed as a
 // server percentage (0..100) as-is; showPercent instead computes each bar's own share of the total (EENHEID-LES, §14).
-export default function BarChartCard({ title, data = [], colors = [], showPercent = false, percentValues = false, height = 220, onBarClick, showAverage = false }: {
+export default function BarChartCard({ title, data = [], colors = [], showPercent = false, percentValues = false, height = 220, onBarClick, showAverage = false, dateAxis = false }: {
   title?: ReactNode; data?: ChartDatum[]; colors?: string[]; showPercent?: boolean; height?: number; onBarClick?: (d: ChartDatum) => void; showAverage?: boolean
   // PERCENT-VALUES-1: the values ARE already percentages (0..100, e.g. a fill
   // rate per branch) — plot them as-is on a % axis, never re-expressed as a
   // share of the sum (that is what `showPercent` means, for raw counts). The
   // footer then states the average instead of a meaningless "total of rates".
   percentValues?: boolean
+  // AXIS-TICK-DATE-1: each datum's `name` is an ISO date; ticks read DD-MM, the tooltip DD-MM-YYYY.
+  dateAxis?: boolean
 }) {
   const { t } = useTranslation('common')
   // Locale-aware grouping (§ FMT-GETAL-1) — never a hardcoded 'nl-NL' toLocaleString.
-  const { formatNumber, formatPercent: fmt } = useNumberFormat()
+  const { formatNumber, formatPercent: fmt, formatAxisDay, formatChartDate } = useNumberFormat()
   const rawTotal   = data.reduce((s, d) => s + d.value, 0)
   const rawAverage = data.length ? (percentValues ? rawTotal / data.length : Math.round(rawTotal / data.length)) : 0
 
@@ -78,14 +80,15 @@ export default function BarChartCard({ title, data = [], colors = [], showPercen
       <ResponsiveContainer width="100%" height={height}>
         <BarChart data={displayData} margin={{ top: 4, right: showAverage ? 50 : 8, left: -20, bottom: 60 }}>
           <XAxis dataKey="name" tick={{ fontSize: 10, fill: 'var(--text-muted)' }}
-            angle={-35} textAnchor="end" interval={0} />
+            angle={-35} textAnchor="end" interval={0}
+            tickFormatter={dateAxis ? (v => formatAxisDay(String(v))) : undefined} />
           <YAxis
             tick={{ fontSize: 10, fill: 'var(--text-muted)' }}
             allowDecimals={asPercent}
             tickFormatter={v => asPercent ? fmt(Number(v)) : formatNumber(Number(v))}
             domain={asPercent ? [0, 100] : undefined}
           />
-          <Tooltip content={<BarTooltip total={rawTotal} showPercent={showPercent && !percentValues} percentValues={percentValues} formatNumber={formatNumber} formatPercent={fmt} />} />
+          <Tooltip content={<BarTooltip total={rawTotal} showPercent={showPercent && !percentValues} percentValues={percentValues} formatNumber={formatNumber} formatPercent={fmt} formatLabel={dateAxis ? formatChartDate : undefined} />} />
 
           {showAverage && displayAverage > 0 && (
             <ReferenceLine
@@ -118,7 +121,7 @@ export default function BarChartCard({ title, data = [], colors = [], showPercen
             <button key={d.key ?? d.name} type="button"
               className="sr-only focus:not-sr-only"
               onClick={() => onBarClick(d)}>
-              {d.name}: {formatNumber(d.value)}{percentValues ? '%' : ''}
+              {dateAxis ? formatChartDate(d.name) : d.name}: {formatNumber(d.value)}{percentValues ? '%' : ''}
             </button>
           ))}
         </div>

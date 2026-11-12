@@ -8,7 +8,6 @@ import type { Column } from '@/components/ui/DataTable'
 import { Caption } from '@/components/ui/typography'
 import { CHART_SERIES_COLORS } from '@/components/charts/chartTypes'
 import type { ChartDatum } from '@/components/charts/chartTypes'
-import { useDateFormat } from '@/lib/datetime'
 import { useNumberFormat } from '@/lib/formatters'
 import type { OutreachReportData } from '@/types/analytics'
 
@@ -43,7 +42,6 @@ export default function OutreachDepthSections({ data, onChannel }: {
   onChannel?: (channel: string, total: number) => void
 }) {
   const { t, i18n } = useTranslation('analytics')
-  const { formatDate } = useDateFormat()
   const { formatPercent } = useNumberFormat()
 
   // ODD-CARD RULE for these two half cards: when both self-hide or both
@@ -98,7 +96,7 @@ export default function OutreachDepthSections({ data, onChannel }: {
           full-width. Inert: informative trend only, no drill target. */}
       {data.campaign_timeseries && data.campaign_timeseries.length > 0 && (
         <ReportChartCard span={2} title={t('outreach.depth.campaignSeries.title')} chart={
-          <CampaignTimeseriesChart campaigns={data.campaign_timeseries} formatDate={formatDate} />
+          <CampaignTimeseriesChart campaigns={data.campaign_timeseries} />
         } />
       )}
     </Fragment>
@@ -155,17 +153,16 @@ function HeatmapTable({ cells, t, i18n, formatPercent }: {
 
 // Union of every campaign's dates → one row per date, one numeric column per
 // campaign (each drawn as a line series).
-function CampaignTimeseriesChart({ campaigns, formatDate }: {
+function CampaignTimeseriesChart({ campaigns }: {
   campaigns: NonNullable<OutreachReportData['campaign_timeseries']>
-  formatDate: (v: string, opts?: Intl.DateTimeFormatOptions) => string
 }) {
   const dateSet = new Set<string>()
   campaigns.forEach(c => c.series.forEach(p => dateSet.add(p.date)))
   const dates = Array.from(dateSet).sort()
-  // Briefed as DD-MM (no year): a 90-day period would otherwise carry ~90
-  // ten-character DD-MM-YYYY labels on the x-axis.
+  // The ISO date is the category: DD-MM ticks (a 90-day period would carry ~90 long labels),
+  // DD-MM-YYYY tooltip (AXIS-TICK-DATE-1).
   const data: ChartDatum[] = dates.map(date => {
-    const row: ChartDatum = { name: formatDate(date, { day: '2-digit', month: '2-digit' }), key: date, value: 0 }
+    const row: ChartDatum = { name: date, key: date, value: 0 }
     campaigns.forEach(c => {
       const pt = c.series.find(p => p.date === date)
       row[c.campaign_id] = pt?.count ?? 0
@@ -175,5 +172,5 @@ function CampaignTimeseriesChart({ campaigns, formatDate }: {
   const series: BarSeries[] = campaigns.map((c, i) => ({
     key: c.campaign_id, label: c.name, color: CHART_SERIES_COLORS[i % CHART_SERIES_COLORS.length], line: true,
   }))
-  return <WeeklyBarChartCard data={data} series={series} />
+  return <WeeklyBarChartCard data={data} series={series} dateAxis />
 }

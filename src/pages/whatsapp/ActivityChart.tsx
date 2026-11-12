@@ -1,7 +1,7 @@
 /**
  * ActivityChart — recharts area chart of daily inbound/outbound WhatsApp volume.
  * Own file, same reason as ChannelActivityChart (K-197): the chart pulls in
- * @/lib/datetime (via useLocale, for the locale-aware axis label), which
+ * @/lib/datetime (via the formatters module, for the axis label), which
  * components.test.tsx's flat i18n mock cannot carry — src/i18n's real init
  * throws when react-i18next is mocked without initReactI18next.
  */
@@ -10,15 +10,12 @@ import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContai
 import ErrorBoundary from '@/components/ui/ErrorBoundary'
 import { SectionTitle, Caption } from '@/components/ui/typography'
 import type { WaActivityDatum } from '@/types/whatsapp'
-import { fmtAxisDate } from './data/axisDate'
-// App-wide active locale (DATUM-1/LANE-B) — feeds the per-day axis label.
-import { useLocale } from '@/lib/datetime'
+import { formatAxisDay, formatChartDate } from '@/lib/formatters'
 
 // Daily inbound/outbound WhatsApp volume area chart (see file docblock above),
-// kept in its own file since it pulls the locale-aware axis date formatter.
+// kept in its own file (see docblock).
 export default function ActivityChart({ data, loading }: { data: WaActivityDatum[]; loading?: boolean }) {
   const { t } = useTranslation('whatsapp')
-  const locale = useLocale()
   return (
     <div style={{
       background: 'var(--surface)', borderRadius: 14,
@@ -48,13 +45,13 @@ export default function ActivityChart({ data, loading }: { data: WaActivityDatum
               </linearGradient>
             </defs>
             <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" vertical={false} />
-            <XAxis dataKey="date" tickFormatter={(v: string) => fmtAxisDate(v, locale)} tick={{ fontSize: 10, fill: 'var(--text-muted)' }}
+            <XAxis dataKey="date" tickFormatter={(v: string) => formatAxisDay(v)} tick={{ fontSize: 10, fill: 'var(--text-muted)' }}
                    axisLine={false} tickLine={false} interval={1} />
             <YAxis tick={{ fontSize: 10, fill: 'var(--text-muted)' }} axisLine={false} tickLine={false} />
             <Tooltip
               contentStyle={{ background: 'var(--surface)', border: '1px solid var(--border)',
                               borderRadius: 8, fontSize: 12 }}
-              labelFormatter={(label) => fmtAxisDate(String(label), locale)}
+              labelFormatter={(label) => formatChartDate(String(label))}
             />
             <Legend iconType="circle" iconSize={7}
               formatter={v => <Caption as="span">

@@ -297,7 +297,7 @@ export default function CandidatesReport({ period, filters = EMPTY_REPORT_FILTER
         <ReportGrid>
           {/* Inflow over time — the line, full width. */}
           <ReportChartCard span={2} title={t(isLeads ? 'leads.series' : 'candidates.series')}
-            chart={<ReportTimeseriesChart series={data.timeseries.series} onPick={onSeriesPick} />} />
+            chart={<ReportTimeseriesChart series={data.timeseries.series} bucket={data.timeseries.bucket} onPick={onSeriesPick} />} />
 
           {/* Coloured lookup axes → donuts (each slice wears its tenant colour). */}
           <ReportChartCard title={t('candidates.axes.status')} chart={

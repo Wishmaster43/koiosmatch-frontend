@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest'
 import { renderHook } from '@testing-library/react'
-import { formatNumber, formatNumberCompact, formatCurrency, formatPercent, formatRatio, formatDistanceKm, formatFileSizeMb, formatCoord, formatSeconds, useNumberFormat } from './formatters'
+import { formatNumber, formatNumberCompact, formatCurrency, formatPercent, formatRatio, formatDistanceKm, formatFileSizeMb, formatCoord, formatSeconds, formatAxisDay, formatChartDate, useNumberFormat } from './formatters'
 
 describe('formatNumber', () => {
   it('groups thousands with the nl-NL separator by default', () => {
@@ -135,3 +135,25 @@ describe('formatFileSize', () => {
   })
 })
 
+
+// AXIS-TICK-DATE-1: axis ticks DD-MM, tooltips DD-MM-YYYY, from the ISO parts (no locale reshaping).
+describe('formatAxisDay / formatChartDate', () => {
+  it('renders an ISO date as DD-MM on every locale', () => {
+    expect(formatAxisDay('2026-02-01')).toBe('01-02')
+    expect(formatAxisDay('2026-12-31')).toBe('31-12')
+    expect(formatAxisDay('2026-11-06T12:00:00Z')).toBe('06-11')
+  })
+
+  it('renders an empty string for invalid input', () => {
+    expect(formatAxisDay('nope')).toBe('')
+    expect(formatAxisDay('Wk 32')).toBe('')
+    expect(formatAxisDay(null)).toBe('')
+    expect(formatAxisDay(undefined)).toBe('')
+    expect(formatAxisDay('2026-02-30')).toBe('')
+  })
+
+  it('renders the full DD-MM-YYYY for the tooltip and echoes a non-date label', () => {
+    expect(formatChartDate('2026-02-01')).toBe('01-02-2026')
+    expect(formatChartDate('Wk 32')).toBe('Wk 32')
+  })
+})
