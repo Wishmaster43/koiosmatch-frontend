@@ -17,7 +17,7 @@ import type { ChartDatum } from '@/components/charts/chartTypes'
 import ShiftMatrixTable from './ShiftMatrixTable'
 import { monthLabel } from './shiftMonth'
 import { useShiftAnalysis, METRIC_KEYS, type MetricKey } from './hooks/useShiftAnalysis'
-import { SectionTitle } from '@/components/ui/typography'
+import { SectionTitle, PageTitle, Caption } from '@/components/ui/typography'
 
 // Centered empty/info block for the unavailable + empty states.
 function InfoBlock({ text }: { text: string }) {
@@ -57,10 +57,8 @@ export default function ShiftAnalysisPage() {
     <div className="p-6">
       {/* Header */}
       <div style={{ marginBottom: 20 }}>
-        <h1 style={{ fontSize: 20, fontWeight: 700, color: 'var(--text)', letterSpacing: '-0.3px' }}>
-          {t('shiftAnalysis.title')}
-        </h1>
-        <p style={{ fontSize: 13, color: 'var(--text-muted)', marginTop: 2 }}>{t('shiftAnalysis.subtitle')}</p>
+        <PageTitle>{t('shiftAnalysis.title')}</PageTitle>
+        <Caption style={{ display: 'block', marginTop: 2 }}>{t('shiftAnalysis.subtitle')}</Caption>
       </div>
 
       {loading ? (

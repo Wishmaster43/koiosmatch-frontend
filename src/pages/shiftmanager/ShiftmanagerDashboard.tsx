@@ -8,6 +8,8 @@ import { useTranslation } from 'react-i18next'
 import { CheckCircle, AlertCircle, Clock } from 'lucide-react'
 import { useKpiSettings } from '@/lib/useKpiSettings'
 import { useAuth } from '@/context/AuthContext'
+import { useNumberFormat } from '@/lib/formatters'
+import { SmLoadErrorBanner } from './SmLoadErrorBanner'
 import type { KpiSpec } from '@/components/insights/InsightsRow'
 import KpiDrillDownDrawer from '@/components/reports/KpiDrillDownDrawer'
 import DrillDownDrawer from '@/components/reports/DrillDownDrawer'
@@ -37,17 +39,18 @@ function DashboardCardHeader({ title, viewAllLabel }: { title: string; viewAllLa
 export default function ShiftmanagerDashboard() {
   const { t } = useTranslation('shiftmanager')
   const { candidates_per_page, new_candidates_target: target } = useKpiSettings()
+  const { formatNumber } = useNumberFormat()
   const auth = useAuth()
   const pkg  = auth?.activeTenant?.package ?? auth?.user?.tenant?.package ?? ''
   const hasAI = AI_PACKAGES.includes(pkg)
 
-  // Data layer: SM candidates, shift KPIs, candidate stat COUNTS, + (AI packages) recent runs/conversations.
-  const { candidates, runs, conversations, candidateStats, candidateStatsLoading, candidateStatsError } =
+  // Data layer: SM candidates, candidate stat COUNTS, + (AI packages) recent runs/conversations.
+  const { candidates, loading, error, refetch, runs, conversations, candidateStats, candidateStatsLoading, candidateStatsError } =
     useShiftmanagerDashboard(candidates_per_page, hasAI)
   const useCandidateStats = !candidateStatsLoading && !candidateStatsError && Boolean(candidateStats)
 
   // Candidate-derived KPIs (real data — the shift/hours stats stay graceful "—"
-  // until the /sm_reports/dashboard feed lands, worklist SM-SHIFTS). Keep the actual
+  // until the shift KPI feed lands, worklist SM-SHIFTS). Keep the actual
   // candidate lists so each tile can drill into them.
   const derived = useMemo(() => {
     const now = new Date(); const m = now.getMonth(); const y = now.getFullYear()
@@ -130,10 +133,13 @@ export default function ShiftmanagerDashboard() {
                  : derived.newCount >= derived.avg ? 'var(--color-warning)' : 'var(--color-danger)'
   // Only the two candidate cards on the dashboard; ShiftsChartsBlock adds the seven
   // shift cards → one 9-card row. (Totaal/Inactief eruit — Danny: "ruk".)
+  const pair = (a: number, b: number) => `${formatNumber(a)}/${formatNumber(b)}`
+  // While the candidate rows load or failed the tiles show an empty value (never a misleading 0/0) and are not clickable.
+  const tilesReady = !loading && !error
   const leadingKpis: KpiSpec[] = [
-    { key: 'activity',  label: t('dashboard.stats.workedActive'), value: `${derived.bWorked.length}/${derived.active.length}`, color: 'var(--color-success-text)', onClick: openActivityDrill },
-    { key: 'new',       label: `${t('dashboard.stats.newThisMonth')} — ${t('dashboard.stats.avgOnly', { avg: derived.avg })}`, value: `${derived.newCount}/${target}`, color: newColor, onClick: () => openDrill('average', t('monthlyKpi.averageCalc'), derived.all) },
-    { key: 'attention', label: t('dashboard.stats.attentionCandidates'), value: `${derived.attention.length}/${derived.active.length}`, color: derived.attention.length > 0 ? 'var(--color-danger)' : 'var(--color-success)', onClick: openAttentionDrill },
+    { key: 'activity',  label: t('dashboard.stats.workedActive'), value: tilesReady ? pair(derived.bWorked.length, derived.active.length) : null, color: 'var(--color-success-text)', onClick: tilesReady ? openActivityDrill : undefined },
+    { key: 'new',       label: t('dashboard.stats.newThisMonthAvg', { avg: formatNumber(derived.avg) }), value: tilesReady ? pair(derived.newCount, target) : null, color: newColor, onClick: tilesReady ? () => openDrill('average', t('monthlyKpi.averageCalc'), derived.all) : undefined },
+    { key: 'attention', label: t('dashboard.stats.attentionCandidates'), value: tilesReady ? pair(derived.attention.length, derived.active.length) : null, color: derived.attention.length > 0 ? 'var(--color-danger)' : 'var(--color-success)', onClick: tilesReady ? openAttentionDrill : undefined },
   ]
 
   return (
@@ -144,6 +150,8 @@ export default function ShiftmanagerDashboard() {
         ? <KpiDrillDownDrawer mode="average" title={drill.title} candidates={drill.candidates} onClose={() => setDrill(null)} />
         : <DrillDownDrawer title={drill.title} candidates={drill.candidates} tabs={drill.tabs} initialTab={drill.initialTab} onClose={() => setDrill(null)} />
       )}
+
+      <SmLoadErrorBanner isError={error} onRetry={refetch} />
 
       {/* Combined KPI row + charts — ShiftsChartsBlock owns the row so the shift cards follow the applied filter */}
       <ShiftsChartsBlock filterKey="shiftmanager-dashboard" leadingKpis={leadingKpis} />

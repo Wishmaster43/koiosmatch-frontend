@@ -53,7 +53,6 @@ function mockAllEndpoints() {
   mockedGet.mockImplementation((url: string) => {
     if (url === '/sm_candidates')         return Promise.resolve({ data: { data: [] } })
     if (url === '/sm_candidates/stats')   return Promise.resolve({ data: SAMPLE_STATS })
-    if (url === '/sm_reports/dashboard')  return Promise.resolve({ data: {} })
     if (url === '/workflow-runs')         return Promise.resolve({ data: { data: [] } })
     if (url === '/whatsapp/messages')     return Promise.resolve({ data: { data: [] } })
     return Promise.resolve({ data: {} })
@@ -70,6 +69,15 @@ describe('useShiftmanagerDashboard · candidates fetch (PERF-1)', () => {
       '/sm_candidates',
       { params: { per_page: 500 }, signal: expect.anything() },
     )
+  })
+})
+
+describe('useShiftmanagerDashboard · requests', () => {
+  it('never requests the unused /sm_reports/dashboard feed', async () => {
+    mockAllEndpoints()
+    renderHook(() => useShiftmanagerDashboard(500, true), { wrapper })
+    await waitFor(() => expect(mockedGet).toHaveBeenCalledWith('/sm_candidates', expect.anything()))
+    expect(mockedGet.mock.calls.map(c => c[0])).not.toContain('/sm_reports/dashboard')
   })
 })
 

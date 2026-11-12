@@ -4,24 +4,19 @@
  * in the right panel. KpiBlock below = one small KPI card.
  */
 import { useState, useEffect, useMemo } from 'react'
-import { useTranslation } from 'react-i18next'
 import { Layers, MapPin, Building2, Hash } from 'lucide-react'
 import ShiftsChartsBlock from '@/components/shiftmanager/ShiftsChartsBlock'
-import { useRightPanel } from '@/context/RightPanelContext'
-import { useNumberFormat } from '@/lib/formatters'
 import KpiBlock from '@/components/ui/KpiBlock'  // shared KPI card
 import { SmReportHeader, SmKpiGrid } from './SmReportHeader'
-import { useSmCustomerTree } from '@/hooks/useSmCustomerTree'
+import { useSmReportPage } from './hooks/useSmReportPage'
+import { SmTreeNotices } from './SmTreeNotices'
 
 // Flattens the SM customer→location→department tree into one department list, derives
 // its KPI counts, and registers the customer filter with the shared right panel.
 export default function DepartmentsReport() {
-  const { t } = useTranslation('shiftmanager')
-  const { formatNumber } = useNumberFormat()
-  const { customers, loading } = useSmCustomerTree()
+  const { t, formatNumber, customers, loading, error, truncated, reload, registerFilters, unregisterFilters } = useSmReportPage()
   const [selectedCustomers, setSelectedCustomers] = useState<string[]>([])
 
-  const { registerFilters, unregisterFilters } = useRightPanel()
 
   // Flatten the customer tree to departments (+ location/customer context).
   const departments = useMemo(() => customers.flatMap(c =>
@@ -73,6 +68,8 @@ export default function DepartmentsReport() {
           {t('departmentsReport.count', { count: departments.length })}
         </span>
       </SmReportHeader>
+
+      <SmTreeNotices error={error} truncated={truncated} onRetry={reload} />
 
       {/* KPI blocks */}
       <SmKpiGrid>

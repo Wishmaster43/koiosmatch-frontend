@@ -11,6 +11,7 @@ import { render, screen, waitFor } from '@testing-library/react'
 import { describe, it, expect, vi } from 'vitest'
 import { QueryClientProvider, QueryClient } from '@tanstack/react-query'
 import ShiftmanagerDashboard from './ShiftmanagerDashboard'
+import api from '@/lib/api'
 import i18n from '@/i18n'
 
 const t = (key: string, opts?: Record<string, unknown>) => i18n.t(key, { ns: 'shiftmanager', ...opts })
@@ -101,7 +102,7 @@ describe('ShiftmanagerDashboard · new-this-month KPI (SM-STATS-2)', () => {
     renderDashboard()
 
     const tile = await screen.findByTestId('kpi-new')
-    await waitFor(() => expect(tile.textContent).toContain(t('dashboard.stats.avgOnly', { avg: 20 })))
+    await waitFor(() => expect(tile.textContent).toContain(t('dashboard.stats.newThisMonthAvg', { avg: 20 })))
   })
 })
 
@@ -138,5 +139,28 @@ describe('ShiftmanagerDashboard · recent runs tile (tri-state ok render)', () =
 
     await screen.findByTestId('kpi-new')
     expect(screen.queryByText('Completed sync')).toBeNull()
+  })
+})
+
+// Dashboard tile states: loading shows no number, an error shows the shared banner and an empty tile,
+// and the removed /sm_reports/dashboard feed is never requested (REQUEST-ASSERT-1).
+describe('ShiftmanagerDashboard · tile loading/error states', () => {
+  it('shows the empty value while the candidate rows load, and never requests /sm_reports/dashboard', async () => {
+    mockUseAuth.mockReturnValue({ activeTenant: { package: 'core' }, user: null })
+    renderDashboard()
+    expect(screen.getByTestId('kpi-activity').textContent).not.toMatch(/\d+\/\d+/)
+    await waitFor(() => expect(screen.getByTestId('kpi-new').textContent).toMatch(/\b5\/\d+/))
+    const urls = vi.mocked(api.get).mock.calls.map(c => c[0])
+    expect(urls).not.toContain('/sm_reports/dashboard')
+    expect(urls).toContain('/sm_candidates')
+  })
+
+  it('shows the error banner and no numbers when the candidate fetch fails', async () => {
+    mockUseAuth.mockReturnValue({ activeTenant: { package: 'core' }, user: null })
+    vi.mocked(api.get).mockImplementation((url: string) =>
+      ['/sm_candidates', '/sm_candidates/stats'].includes(url) ? Promise.reject(new Error('boom')) : Promise.resolve({ data: {} }))
+    renderDashboard()
+    expect(await screen.findByRole('alert')).toHaveTextContent(t('mirror.loadError'))
+    expect(screen.getByTestId('kpi-activity').textContent).not.toMatch(/\d+\/\d+/)
   })
 })

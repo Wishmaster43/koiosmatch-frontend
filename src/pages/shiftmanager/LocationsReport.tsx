@@ -4,29 +4,23 @@
  * in the right panel. Clicking a KPI block opens a drill-down drawer.
  */
 import { useState, useEffect, useMemo } from 'react'
-import { useTranslation } from 'react-i18next'
 import { MapPin, Layers, Building2, AlertCircle } from 'lucide-react'
 import ShiftsChartsBlock from '@/components/shiftmanager/ShiftsChartsBlock'
-import { useRightPanel } from '@/context/RightPanelContext'
-import { useNumberFormat } from '@/lib/formatters'
 import { distinctSortedValues } from '@/components/reports/distinctSortedValues'
 import KpiBlock         from '@/components/ui/KpiBlock'
 import EntityListDrawer from '@/components/ui/EntityListDrawer'
 import { SmReportHeader, SmKpiGrid } from './SmReportHeader'
-import { useSmCustomerTree } from '@/hooks/useSmCustomerTree'
+import { useSmReportPage } from './hooks/useSmReportPage'
+import { SmTreeNotices } from './SmTreeNotices'
 import type { SmDrillItem } from '@/types/shiftmanager'
 import SmReportStatusBadge from '@/components/shiftmanager/SmReportStatusBadge'
 
 // Flattens the SM customer→location tree into one location list, builds its KPI/
 // drill-down datasets, and registers the status filter with the shared right panel.
 export default function LocationsReport() {
-  const { t } = useTranslation('shiftmanager')
-  const { formatNumber } = useNumberFormat()
-  const { customers, loading } = useSmCustomerTree()
-  const [drawer,    setDrawer]    = useState<{ title: string; items: SmDrillItem[] } | null>(null)
+  const { t, formatNumber, customers, loading, error, truncated, reload, drawer, setDrawer, registerFilters, unregisterFilters } = useSmReportPage()
   const [selectedStatuses, setSelectedStatuses] = useState<string[]>([])
 
-  const { registerFilters, unregisterFilters } = useRightPanel()
 
   // Flatten the customer tree to locations (+ customer name + dept count).
   const locations = useMemo(() => customers.flatMap(c =>
@@ -116,6 +110,8 @@ export default function LocationsReport() {
           />
         </div>
       </SmReportHeader>
+
+      <SmTreeNotices error={error} truncated={truncated} onRetry={reload} />
 
       {/* KPI blocks */}
       <SmKpiGrid>

@@ -1,6 +1,6 @@
 /**
  * useShiftmanagerDashboard — data layer for the Shiftmanager dashboard (§3): SM
- * candidates (feed the "new this month" KPI), shift KPIs, and — only for AI/Workflow
+ * candidates (feed the "new this month" KPI) and — only for AI/Workflow
  * packages — recent workflow runs + WhatsApp conversations. Via React Query: each
  * request dedups + caches + auto-cancels; the AI-only calls stay disabled until the
  * package is present (A-3 — replaces four raw useEffect fetches).
@@ -15,11 +15,6 @@ import { hhmm as houseHhmm } from '@/lib/localDate'
 // configurable engine base URL, same as every other run/cancel/logs call.
 import { resolveWorkflowBaseURL } from '@/lib/workflowApi'
 
-// Shift KPI stats from /sm_reports/dashboard.
-export interface SmDashStats {
-  open_hours?: number; hours_this_month?: number; occupancy_pct?: number
-  messages_sent?: number; response_rate_pct?: number; [k: string]: unknown
-}
 // ok: true = completed successfully, false = failed/cancelled, null = still in
 // flight (running/waiting) — a tri-state so an in-flight run can paint neutral
 // instead of borrowing the "completed" success colour (SCHERMWAARHEID-1).
@@ -52,12 +47,6 @@ export function useShiftmanagerDashboard(candidatesPerPage: number, hasAI: boole
       const raw = (Array.isArray(body) ? body : (body?.data ?? [])) as Array<Record<string, unknown>>
       return raw.map(normalizeSmCandidate)
     },
-  })
-
-  // Shift KPIs from the Shiftmanager report endpoint.
-  const statsQ = useQuery({
-    queryKey: ['sm_reports', 'dashboard'],
-    queryFn: async ({ signal }) => ((await api.get('/sm_reports/dashboard', { signal })).data ?? null) as SmDashStats | null,
   })
 
   // Recent workflow runs — only for AI/Workflow packages. Contract: RunPresenter
@@ -107,7 +96,8 @@ export function useShiftmanagerDashboard(candidatesPerPage: number, hasAI: boole
   return {
     candidates:    candidatesQ.data ?? [],
     loading:       candidatesQ.isLoading,
-    stats:         statsQ.data ?? null,
+    error:         candidatesQ.isError,
+    refetch:       candidatesQ.refetch,
     runs:          runsQ.data ?? [],
     conversations: convQ.data ?? [],
     candidateStats:        candidateStatsQ.stats,

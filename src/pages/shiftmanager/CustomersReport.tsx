@@ -9,11 +9,9 @@
 // EntityListDrawer/distinctSortedValues); the actual KPI/chart bodies differ
 // (customer counts vs location/shift metrics) so there is no shared logic to extract.
 import { useState, useEffect, useMemo } from 'react'
-import { useTranslation } from 'react-i18next'
 import ShiftsChartsBlock from '@/components/shiftmanager/ShiftsChartsBlock'
-import { useSmCustomerTree } from '@/hooks/useSmCustomerTree'
-import { useRightPanel } from '@/context/RightPanelContext'
-import { useNumberFormat } from '@/lib/formatters'
+import { useSmReportPage } from './hooks/useSmReportPage'
+import { SmTreeNotices } from './SmTreeNotices'
 import ModuleView       from '@/components/settings/ModuleView'
 import EntityListDrawer  from '@/components/ui/EntityListDrawer'
 import Spinner from '@/components/ui/Spinner'
@@ -24,12 +22,8 @@ import { distinctSortedValues } from '@/components/reports/distinctSortedValues'
 
 // Renders the KPI blocks and shifts chart, registers filters into the right panel, and opens a drill-down drawer on KPI click.
 export default function CustomersReport() {
-  const { t } = useTranslation('shiftmanager')
-  const { formatNumber } = useNumberFormat()
-  const { customers, loading } = useSmCustomerTree()
-  const [drawer, setDrawer] = useState<{ title: string; items: SmDrillItem[] } | null>(null)
+  const { t, formatNumber, customers, loading, error, truncated, reload, drawer, setDrawer, registerFilters, unregisterFilters } = useSmReportPage()
 
-  const { registerFilters, unregisterFilters } = useRightPanel()
 
   // Derived KPI values
   const active   = customers.filter(c => c.status?.toLowerCase() === 'active')
@@ -154,6 +148,8 @@ export default function CustomersReport() {
         )}
         {loading && <span style={{ color: 'var(--border)' }}><Spinner size={14} /></span>}
       </div>
+
+      <SmTreeNotices error={error} truncated={truncated} onRetry={reload} />
 
       {/* KPI blocks — layout configurable in Settings → Views → Klanten */}
       <div style={{ marginBottom: 28 }}>

@@ -6,7 +6,7 @@
  * own flattened view via useMemo. Cancels on unmount. A failed fetch is reported
  * via `error`, not folded into an empty tree; `truncated` flags a page-cap cut-off.
  */
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { fetchAllPages } from '@/lib/fetchAllPages'
 import { SM_FETCH_ALL } from '@/lib/smFetchAll'
 import type { ReportCustomer } from '@/types/reports'
@@ -20,9 +20,13 @@ export function useSmCustomerTree() {
   const [loading,   setLoading]   = useState(true)
   const [error,     setError]     = useState(false)
   const [truncated, setTruncated] = useState(false)
+  // Bumped by reload() so the fetch effect runs again (retry after an error).
+  const [attempt,   setAttempt]   = useState(0)
 
   // Loads every page once on mount; the abort controller drops a late response after unmount.
   useEffect(() => {
+    setLoading(true)
+    setError(false)
     const ctrl = new AbortController()
     fetchAllPages<ReportCustomer>('/sm_customers', {}, ctrl.signal, SM_FETCH_ALL)
       .then(res => {
@@ -33,7 +37,10 @@ export function useSmCustomerTree() {
       .catch(() => { if (!ctrl.signal.aborted) setError(true) })
       .finally(() => { if (!ctrl.signal.aborted) setLoading(false) })
     return () => ctrl.abort()
-  }, [])
+  }, [attempt])
 
-  return { customers, loading, error, truncated }
+  // Retry handler for the shared error banner.
+  const reload = useCallback(() => setAttempt(n => n + 1), [])
+
+  return { customers, loading, error, truncated, reload }
 }

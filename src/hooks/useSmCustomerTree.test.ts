@@ -5,7 +5,7 @@
  * if the tenant genuinely had zero rows. This pins the honest error channel.
  */
 import { describe, it, expect, vi } from 'vitest'
-import { renderHook, waitFor } from '@testing-library/react'
+import { renderHook, waitFor, act } from '@testing-library/react'
 import api from '@/lib/api'
 import { useSmCustomerTree } from './useSmCustomerTree'
 
@@ -55,5 +55,23 @@ describe('useSmCustomerTree', () => {
     await waitFor(() => expect(result.current.loading).toBe(false))
     expect(vi.mocked(api.get)).toHaveBeenCalledTimes(20)
     expect(result.current.truncated).toBe(true)
+  })
+
+  // reload() re-arms loading/error and requests the tree again (retry after an error).
+  it('reload retries after a failure: loading goes true then false, error clears, rows merge', async () => {
+    vi.mocked(api.get).mockReset()
+    vi.mocked(api.get).mockRejectedValueOnce(new Error('network')).mockResolvedValueOnce({ data: { data: [{ id: 'r1' }] } } as never)
+    const { result } = renderHook(() => useSmCustomerTree())
+    await waitFor(() => expect(result.current.error).toBe(true))
+    act(() => result.current.reload())
+    expect(result.current.loading).toBe(true)
+    await waitFor(() => expect(result.current.loading).toBe(false))
+    expect(result.current.error).toBe(false)
+    expect(result.current.customers).toEqual([{ id: 'r1' }])
+    const calls = vi.mocked(api.get).mock.calls
+    expect(calls.map(c => [c[0], (c[1] as { params: unknown }).params])).toEqual([
+      ['/sm_customers', { per_page: 200 }],
+      ['/sm_customers', { per_page: 200 }],
+    ])
   })
 })

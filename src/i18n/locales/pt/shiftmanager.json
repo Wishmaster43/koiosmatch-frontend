@@ -282,7 +282,7 @@
       "totalCandidates": "Candidatos",
       "neverWorked": "Nunca trabalhou",
       "workedThisMonth": "Trabalhou este mês",
-      "avgOnly": "média {{avg}}",
+      "newThisMonthAvg": "Novos este mês, média {{avg}}",
       "workedActive": "Trabalhou / Ativo",
       "planned": "Planeado (futuro)",
       "unknownFunction": "Desconhecido",

@@ -218,7 +218,7 @@ export function renderPage(activePage: string, { navIntent, goTo, dashView }: { 
     case 'shiftmanager':
     case 'shiftmanager.dashboard':   return <ShiftmanagerDashboard />
     // Reports
-    case 'shiftmanager.candidates':  return <CandidatesReport initialTab="candidates" />
+    case 'shiftmanager.candidates':  return <CandidatesReport />
     case 'shiftmanager.candidate-shifts': return <ShiftAnalysisPage />
     case 'shiftmanager.customers':   return <CustomerReport />
     case 'shiftmanager.locations':   return <LocationsReport />
