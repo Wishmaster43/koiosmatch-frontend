@@ -92,6 +92,21 @@ describe('api · coded 401s (SESSION-CODES-FE-1)', () => {
     expect(localStorage.getItem('km_session')).toBeNull()
   })
 
+  it('a 401 session_expired with reason absolute_cap sets the cap flag next to the expired flag (ONIX C-008)', async () => {
+    const capped = { response: { status: 401, data: { code: 'session_expired', reason: 'absolute_cap' } }, config: { url: '/candidates', method: 'get' } }
+    await expect(rejected()(capped)).rejects.toBe(capped)
+    expect(sessionStorage.getItem('km_session_expired')).toBe('1')
+    expect(sessionStorage.getItem('km_session_cap')).toBe('1')
+    expect(sessionStorage.getItem('km_session_revoked')).toBeNull()
+  })
+
+  it('a 401 session_expired with reason idle sets only the expired flag', async () => {
+    const idle = { response: { status: 401, data: { code: 'session_expired', reason: 'idle' } }, config: { url: '/candidates', method: 'get' } }
+    await expect(rejected()(idle)).rejects.toBe(idle)
+    expect(sessionStorage.getItem('km_session_expired')).toBe('1')
+    expect(sessionStorage.getItem('km_session_cap')).toBeNull()
+  })
+
   it('a 401 session_expired and a bare 401 set only the expired flag', async () => {
     const coded = { response: { status: 401, data: { code: 'session_expired' } }, config: { url: '/candidates', method: 'get' } }
     await expect(rejected()(coded)).rejects.toBe(coded)
@@ -109,6 +124,17 @@ describe('api · boot probe /auth/me (ONIX C-005)', () => {
     const err = { response: { status: 401, data: { code: 'session_revoked' } }, config: { url: '/auth/me', method: 'get' } }
     await expect(rejected()(err)).rejects.toBe(err)
     expect(sessionStorage.getItem('km_session_revoked')).toBe('1')
+    expect(seen).not.toHaveBeenCalled()
+    window.removeEventListener('km:auth-expired', seen)
+  })
+
+  it('a session_expired 401 with reason absolute_cap on /auth/me sets the cap flag without an event (ONIX C-008)', async () => {
+    const seen = vi.fn()
+    window.addEventListener('km:auth-expired', seen)
+    const err = { response: { status: 401, data: { code: 'session_expired', reason: 'absolute_cap' } }, config: { url: '/auth/me', method: 'get' } }
+    await expect(rejected()(err)).rejects.toBe(err)
+    expect(sessionStorage.getItem('km_session_cap')).toBe('1')
+    expect(sessionStorage.getItem('km_session_expired')).toBeNull()
     expect(seen).not.toHaveBeenCalled()
     window.removeEventListener('km:auth-expired', seen)
   })

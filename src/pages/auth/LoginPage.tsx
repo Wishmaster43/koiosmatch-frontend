@@ -28,7 +28,7 @@ import { readAuthNotice, clearAuthNotice } from '@/lib/authNotice'
 // DUP-04: one shared axios-error → message extractor, never a re-derived inline dance.
 import { extractApiError } from '@/lib/extractApiError'
 import { isNoOrganisationError, NO_ORGANISATION_FLAG } from '@/lib/orphanAccount'
-import { SESSION_REVOKED_FLAG, isMfaChallengeUsedError } from '@/lib/sessionCodes'
+import { SESSION_REVOKED_FLAG, SESSION_CAP_FLAG, isMfaChallengeUsedError } from '@/lib/sessionCodes'
 
 // ── Step 1: email + password ──────────────────────────────────────────────────
 function CredentialForm({ onMfaRequired, notice }: { onMfaRequired: (token: string) => void; notice?: string }) {
@@ -46,11 +46,14 @@ function CredentialForm({ onMfaRequired, notice }: { onMfaRequired: (token: stri
   const [orphaned] = useState(() => sessionStorage.getItem(NO_ORGANISATION_FLAG) === '1')
   // ONIX C-005: a credential event revoked the previous session (wins over the plain expired hint).
   const [revoked] = useState(() => sessionStorage.getItem(SESSION_REVOKED_FLAG) === '1')
+  // ONIX C-008: the absolute session cap ended the previous session (own wording in the same notice box; set by the boot probe too).
+  const [capped] = useState(() => sessionStorage.getItem(SESSION_CAP_FLAG) === '1')
   // A success notice handed over by the reset / invitation pages, shown once.
   const [authNotice] = useState(() => readAuthNotice())
   useEffect(() => { if (authNotice) clearAuthNotice() }, [authNotice])
   useEffect(() => { if (expired) sessionStorage.removeItem('km_session_expired') }, [expired])
   useEffect(() => { if (revoked) sessionStorage.removeItem(SESSION_REVOKED_FLAG) }, [revoked])
+  useEffect(() => { if (capped) sessionStorage.removeItem(SESSION_CAP_FLAG) }, [capped])
   useEffect(() => { if (orphaned) sessionStorage.removeItem(NO_ORGANISATION_FLAG) }, [orphaned])
 
   // Submit credentials: routes to the MFA step when the server asks for it,
@@ -90,9 +93,9 @@ function CredentialForm({ onMfaRequired, notice }: { onMfaRequired: (token: stri
           <CalloutBox variant="danger">{t('login.noOrganisation')}</CalloutBox>
         </div>
       )}
-      {(revoked || expired) && !orphaned && !error && (
+      {(revoked || capped || expired) && !orphaned && !error && (
         <div style={{ marginBottom: 16 }}>
-          <CalloutBox variant="warning">{revoked ? t('login.sessionRevoked') : t('login.sessionExpired')}</CalloutBox>
+          <CalloutBox variant="warning">{revoked ? t('login.sessionRevoked') : capped ? t('login.sessionCapReached') : t('login.sessionExpired')}</CalloutBox>
         </div>
       )}
       {authNotice && !error && (

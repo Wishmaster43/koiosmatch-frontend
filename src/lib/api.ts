@@ -25,7 +25,7 @@ import { clearDeviceCaches } from './deviceCaches'
 import { isMfaEnrollmentError } from './mfaGate'
 import { isNoOrganisationError, NO_ORGANISATION_FLAG } from './orphanAccount'
 import { isTenantResolutionError, tenantResolutionCode, clearTenantPickSignal, TENANT_PICK_FLAG, TENANT_PICK_CODE_KEY, TENANT_REQUIRED_EVENT } from './tenantResolution'
-import { isSessionRevokedError, SESSION_REVOKED_FLAG } from './sessionCodes'
+import { isSessionRevokedError, isSessionCapError, SESSION_REVOKED_FLAG, SESSION_CAP_FLAG } from './sessionCodes'
 import { notifyError } from './notify'
 import { requestKey, dedupeInFlight } from './inFlightDedupe'
 
@@ -244,6 +244,8 @@ api.interceptors.response.use(
       clearDeviceCaches()
       // ONIX C-005: remember a revoked session so the login screen can explain it after the quiet boot probe.
       if (isSessionRevokedError(error)) sessionStorage.setItem(SESSION_REVOKED_FLAG, '1')
+      // ONIX C-008: the absolute cap gets its own flag so the login screen can word it quietly.
+      if (isSessionCapError(error)) sessionStorage.setItem(SESSION_CAP_FLAG, '1')
     }
 
     // ONIX C-002: a 401 on the single-use MFA verify is an invalid code for the form, never a lost session.
@@ -270,6 +272,8 @@ api.interceptors.response.use(
         // ONIX C-005 (BE c5bf84fb): a 401 session_revoked means a credential event ended this
         // session; the login screen explains that instead of the generic "expired" hint.
         if (isSessionRevokedError(error)) sessionStorage.setItem(SESSION_REVOKED_FLAG, '1')
+        // ONIX C-008: the absolute cap gets its own flag so the login screen can word it quietly.
+        if (isSessionCapError(error)) sessionStorage.setItem(SESSION_CAP_FLAG, '1')
         window.dispatchEvent(new CustomEvent('km:auth-expired'))
       }
     }

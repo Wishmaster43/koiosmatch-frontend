@@ -155,6 +155,23 @@ describe('LoginPage · re-entrancy latch', () => {
 describe('LoginPage · session_revoked and mfa_challenge_used', () => {
   afterEach(() => { sessionStorage.clear(); loginMock.mockReset(); verifyMfaMock.mockReset() })
 
+  it('shows the absolute-cap notice instead of the expired one and clears both flags (ONIX C-008)', () => {
+    sessionStorage.setItem('km_session_cap', '1')
+    sessionStorage.setItem('km_session_expired', '1')
+    renderLogin()
+    expect(screen.getByRole('alert')).toHaveTextContent(nlAuth.login.sessionCapReached)
+    expect(screen.queryByText(nlAuth.login.sessionExpired)).toBeNull()
+    expect(sessionStorage.getItem('km_session_cap')).toBeNull()
+    expect(sessionStorage.getItem('km_session_expired')).toBeNull()
+  })
+
+  it('shows the absolute-cap notice when only the cap flag is set (the quiet boot probe path) and clears it', () => {
+    sessionStorage.setItem('km_session_cap', '1')
+    renderLogin()
+    expect(screen.getByRole('alert')).toHaveTextContent(nlAuth.login.sessionCapReached)
+    expect(sessionStorage.getItem('km_session_cap')).toBeNull()
+  })
+
   it('shows the revoked notice instead of the expired one and clears both flags', () => {
     sessionStorage.setItem('km_session_revoked', '1')
     sessionStorage.setItem('km_session_expired', '1')

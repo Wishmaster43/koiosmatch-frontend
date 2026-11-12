@@ -8,14 +8,20 @@
 
 // The error codes the API returns for an ended session and a spent MFA challenge.
 export const SESSION_REVOKED_CODE    = 'session_revoked'
+// ONIX C-008 (BE REST-7b): a 401 `{code: 'session_expired', reason: 'absolute_cap'}` is the
+// absolute session cap (720 min), `reason: 'idle'` the idle timeout; the login screen words the cap.
+export const SESSION_EXPIRED_CODE    = 'session_expired'
+export const SESSION_CAP_REASON      = 'absolute_cap'
 export const MFA_CHALLENGE_USED_CODE = 'mfa_challenge_used'
 // The session flag the login screen reads to explain that the session was revoked
 // (set next to km_session_expired, which stays the generic "session gone" hint).
 export const SESSION_REVOKED_FLAG = 'km_session_revoked'
+// The flag for the absolute cap (C-008), set next to km_session_expired like the revoked flag.
+export const SESSION_CAP_FLAG = 'km_session_cap'
 
 // Minimal axios-error shape we probe — keeps this module dependency-free.
 type MaybeAxiosError = {
-  response?: { status?: number; data?: { code?: string } | null } | null
+  response?: { status?: number; data?: { code?: string; reason?: string } | null } | null
 } | null | undefined
 
 // The code of a 401, or null when the error is not a coded 401.
@@ -27,6 +33,12 @@ function unauthorizedCode(error: unknown): string | null {
 /** True when a 401 says a credential event revoked this session. */
 export function isSessionRevokedError(error: unknown): boolean {
   return unauthorizedCode(error) === SESSION_REVOKED_CODE
+}
+
+/** True when a 401 says the absolute session cap ended this session (C-008). */
+export function isSessionCapError(error: unknown): boolean {
+  const response = (error as MaybeAxiosError)?.response
+  return unauthorizedCode(error) === SESSION_EXPIRED_CODE && response?.data?.reason === SESSION_CAP_REASON
 }
 
 /** True when a 401 on the MFA verify says the login challenge was already redeemed. */
