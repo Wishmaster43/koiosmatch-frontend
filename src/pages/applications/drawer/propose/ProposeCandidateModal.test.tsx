@@ -34,7 +34,7 @@ vi.mock('@/components/actionrules', () => ({
     open ? <div role="dialog" data-testid="block-dialog">{decision?.message}</div> : null,
 }))
 
-// The form hook has its own dedicated test (useProposeForm.test.ts) — here it is
+// The form hook has its own dedicated test (the useProposeForm.*.test.ts suites) — here it is
 // a controllable fixture so the modal's rendering/gating can be asserted in isolation.
 const { formFixture } = vi.hoisted(() => ({
   formFixture: {

@@ -1,7 +1,7 @@
 /**
  * CandidateNotesPopout — the four UI states (§3): loading skeleton, error+retry,
  * success (header + shared NotesTab), and the document.title bootstrap/restore.
- * Mirrors CommunicationTab.test.tsx's mocking convention for the note-type/
+ * Mirrors the CommunicationTab.*.test.tsx mocking convention for the note-type/
  * last-contact lookups so this stays a focused test of THIS page's own wiring.
  */
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
@@ -21,7 +21,7 @@ vi.mock('@/lib/api', async () => {
 
 // NotesTab pulls in `@/lib/datetime`, which side-effect-imports the real i18n
 // bootstrap (`src/i18n`) for LOCALE_BY_LANG — mocked here so this test, like
-// CommunicationTab.test.tsx, stays on react-i18next's key-fallback behaviour
+// the CommunicationTab.*.test.tsx suites, stays on react-i18next's key-fallback behaviour
 // (no real translation resources loaded) instead of rendering real Dutch copy.
 vi.mock('@/lib/datetime', () => ({ useDateFormat: () => ({ formatDate: (v: string) => v, formatDateTime: (v: string) => v, formatTime: (v: string) => v, locale: 'nl-NL' }) }))
 vi.mock('@/lib/useNoteTypes', () => ({ useNoteTypes: () => ({ types: [], writableTypes: [] }), SYSTEM_NOTE_TYPES: new Set(['status_change']) }))

@@ -9,7 +9,7 @@ const heavyGetMock = vi.fn()
 vi.mock('@/lib/heavyGet', () => ({ heavyGet: (...args: unknown[]) => heavyGetMock(...args) }))
 // lib/formatters re-exports datetime's useLocale at module scope (DATETIME-IMPORT-LES,
 // CLAUDE.md §2): a real import would drag in the i18n init and break this suite's
-// deliberate NO_I18NEXT_INSTANCE raw-key assertions below (mirrors KoiosPendingActionCard.test.tsx).
+// deliberate NO_I18NEXT_INSTANCE raw-key assertions below (mirrors the KoiosPendingActionCard.*.test.tsx suites).
 vi.mock('@/lib/formatters', () => ({ useNumberFormat: () => ({ formatNumber: (n: number) => String(n) }) }))
 
 // Wire shape mirrors the Laravel API-resource double-wrap ({ data: { data: … } })

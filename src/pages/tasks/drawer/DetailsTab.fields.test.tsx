@@ -4,7 +4,7 @@ import { render, screen, fireEvent, renderHook } from '@testing-library/react'
 // Real i18n (nl) instance — kept as a binding (not just the side-effect import) so
 // the T4 advice-block test below can read the SAME resolved string the component
 // renders, whether or not the reported nl copy for the new 'ai.*' keys has landed
-// in tasks.json yet (mirrors TaskDrawer.test.tsx's NT-TASK-1 pattern).
+// in tasks.json yet (mirrors the TaskDrawer.*.test.tsx NT-TASK-1 pattern).
 import i18n from '@/i18n'
 import DetailsTab from './DetailsTab'
 import { useTaskAdvice } from '@/lib/useTaskAdvice'
