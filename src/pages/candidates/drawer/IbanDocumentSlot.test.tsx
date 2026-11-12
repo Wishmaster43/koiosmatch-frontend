@@ -117,7 +117,7 @@ describe('IbanDocumentSlot', () => {
     // react-datepicker's customInput parses typed text in MM/dd/yyyy (its own
     // locale default) — mirrors PendingUploadQueue.test.tsx's own pattern.
     // The date picker chunk is lazy: wait for the real picker before typing.
-    await waitFor(() => expect(document.querySelector('.react-datepicker__input-container')).toBeTruthy(), { timeout: 5000 })
+    await waitFor(() => expect(document.querySelector('.react-datepicker__input-container')).toBeTruthy())
     const dateInput = screen.getByRole('textbox')
     await user.type(dateInput, '01/31/2027')
     const input = screen.getByLabelText('bankDoc.uploadNew', { selector: 'input' })
@@ -214,7 +214,7 @@ describe('IbanDocumentSlot · expiry hygiene (GAPS-A3)', () => {
     vi.mocked(api.post).mockResolvedValue({ data: { data: { id: 'd9', name: 'vog.pdf' } } })
     render(<IbanDocumentSlot candidateId="c1" documents={docs} linkedDocumentId={null} onLink={vi.fn()} />)
     await user.click(screen.getByRole('button', { name: /bankDoc\.link/ }))
-    await waitFor(() => expect(document.querySelector('.react-datepicker__input-container')).toBeTruthy(), { timeout: 5000 })
+    await waitFor(() => expect(document.querySelector('.react-datepicker__input-container')).toBeTruthy())
     await user.type(screen.getByRole('textbox'), '01/31/2027')
     await user.upload(screen.getByLabelText('bankDoc.uploadNew', { selector: 'input' }) as HTMLInputElement, new File(['x'], 'vog.pdf', { type: 'application/pdf' }))
     await waitFor(() => expect(api.post).toHaveBeenCalledTimes(1))
@@ -232,7 +232,7 @@ describe('IbanDocumentSlot · expiry hygiene (GAPS-A3)', () => {
     vi.mocked(api.post).mockResolvedValue({ data: { data: { id: 'd9', name: 'x.pdf' } } })
     render(<IbanDocumentSlot candidateId="c1" documents={docs} linkedDocumentId={null} onLink={vi.fn()} />)
     await user.click(screen.getByRole('button', { name: /bankDoc\.link/ }))
-    await waitFor(() => expect(document.querySelector('.react-datepicker__input-container')).toBeTruthy(), { timeout: 5000 })
+    await waitFor(() => expect(document.querySelector('.react-datepicker__input-container')).toBeTruthy())
     await user.type(screen.getByRole('textbox'), '01/31/2027')
     // Switch the upload type to one without an expiry requirement.
     await user.click(screen.getByRole('button', { name: 'VOG' }))

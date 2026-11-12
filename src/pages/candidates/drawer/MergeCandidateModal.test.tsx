@@ -82,7 +82,7 @@ function openPickerAndType(term = 'anna') {
 // Full step 1: open, search, pick the duplicate row.
 async function searchAndPick() {
   openPickerAndType()
-  const row = await screen.findByText(/Anna Dubbel · K-2/, undefined, { timeout: 2000 })
+  const row = await screen.findByText(/Anna Dubbel · K-2/)
   fireEvent.click(row)
 }
 
@@ -153,14 +153,14 @@ describe('MergeCandidateModal · duplicate picker (punt 20)', () => {
     mount()
     openPickerAndType('anna')
     await waitFor(() => expect(getMock).toHaveBeenCalledWith('/candidates',
-      expect.objectContaining({ params: expect.objectContaining({ search: 'anna', per_page: 8 }) })), { timeout: 2000 })
+      expect.objectContaining({ params: expect.objectContaining({ search: 'anna', per_page: 8 }) })))
   })
 
   it('shows the candidate NUMBER and e-mail in the option, so lookalikes are tellable apart', async () => {
     getMock.mockResolvedValue({ data: { data: [dupRow] } })
     mount()
     openPickerAndType()
-    const row = await screen.findByText(/Anna Dubbel · K-2 · dup@x.nl/, undefined, { timeout: 2000 })
+    const row = await screen.findByText(/Anna Dubbel · K-2 · dup@x.nl/)
     expect(row).toBeTruthy()
   })
 
@@ -177,7 +177,7 @@ describe('MergeCandidateModal · duplicate picker (punt 20)', () => {
     getMock.mockResolvedValue({ data: { data: [] } })
     mount()
     openPickerAndType('zzzz')
-    await waitFor(() => expect(getMock).toHaveBeenCalled(), { timeout: 2000 })
+    await waitFor(() => expect(getMock).toHaveBeenCalled())
     expect(screen.queryByText(/“zzzz”/)).toBeNull()
   })
 
@@ -204,9 +204,7 @@ describe('MergeCandidateModal · duplicate picker (punt 20)', () => {
     getMock.mockRejectedValue(new Error('boom'))
     mount()
     openPickerAndType()
-    // SearchSelect debounces 250 ms before the rejected read lands; under a full-suite load the error text
-    // took longer than 2 s once in 1715 files, so the wait is generous (it still resolves as soon as it renders).
-    expect(await screen.findByText(/merge\.errSearch|zoeken mislukt/i, undefined, { timeout: 6000 })).toBeTruthy()
+    expect(await screen.findByText(/merge\.errSearch|zoeken mislukt/i)).toBeTruthy()
   })
 })
 

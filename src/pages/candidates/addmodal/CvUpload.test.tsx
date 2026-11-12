@@ -276,7 +276,6 @@ describe('CV upload · failure states are honest', () => {
     await waitFor(() => expect(screen.getByText('modal.cv.reading')).toBeInTheDocument())
     await waitFor(
       () => expect((screen.getByPlaceholderText('common:placeholders.firstName') as HTMLInputElement).value).toBe('Anna'),
-      { timeout: CV_POLL_INTERVAL_MS + 3000 },
     )
     expect(getMock).toHaveBeenCalledTimes(2)
   })

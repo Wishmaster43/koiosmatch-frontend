@@ -190,7 +190,7 @@ describe('OpportunitiesPage · picking a branch (VESTIGING-2)', () => {
  * array, so it proves the filter outcome without depending on row rendering. The
  * column itself is covered in OpportunitiesTable.test.tsx.
  *
- * The search box debounces 300ms, hence the generous waitFor timeouts. usePageMemory
+ * The search box debounces 300ms; the waits inherit the one global cap (src/test/setup.js). usePageMemory
  * is module-level, so each test clears the box again in a finally — a failed
  * assertion must not leak its search text into the next test.
  */
@@ -209,13 +209,12 @@ describe('OpportunitiesPage · reference-number search (NUMMER-1)', () => {
       await user.type(screen.getByLabelText(searchLabel()), 'KA-00042')
       await waitFor(
         () => expect(useOpportunitiesDataMock).toHaveBeenLastCalledWith(false, [], 'KA-00042'),
-        { timeout: 2000 },
       )
       // The server-matched deal survives the client-side filter pass (1 row, not 0).
       expect(screen.queryByText(cm('noResults'))).toBeNull()
     } finally {
       await user.clear(screen.getByLabelText(searchLabel()))
-      await waitFor(() => expect(useOpportunitiesDataMock).toHaveBeenLastCalledWith(false, [], null), { timeout: 2000 })
+      await waitFor(() => expect(useOpportunitiesDataMock).toHaveBeenLastCalledWith(false, [], null))
     }
   })
 
@@ -228,11 +227,11 @@ describe('OpportunitiesPage · reference-number search (NUMMER-1)', () => {
     try {
       await user.type(screen.getByLabelText(searchLabel()), 'nietbestaand')
       // Free text still filters locally — the deal drops out, and nothing goes to ?ref=.
-      await waitFor(() => expect(screen.getByText(cm('noResults'))).toBeInTheDocument(), { timeout: 2000 })
+      await waitFor(() => expect(screen.getByText(cm('noResults'))).toBeInTheDocument())
       expect(useOpportunitiesDataMock).toHaveBeenLastCalledWith(false, [], null)
     } finally {
       await user.clear(screen.getByLabelText(searchLabel()))
-      await waitFor(() => expect(screen.queryByText(cm('noResults'))).toBeNull(), { timeout: 2000 })
+      await waitFor(() => expect(screen.queryByText(cm('noResults'))).toBeNull())
     }
   })
 })

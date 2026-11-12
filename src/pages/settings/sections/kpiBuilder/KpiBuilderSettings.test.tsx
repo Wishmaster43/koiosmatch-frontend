@@ -193,8 +193,8 @@ describe('KpiBuilderSettings', () => {
     }) as typeof api.get)
     renderPanel()
 
-    // useKpiDefinitions retries once (retry: 1) before settling into error — allow for that.
-    expect(await screen.findByText(st('kpiBuilder.loadError'), {}, { timeout: 5000 })).toBeInTheDocument()
+    // useKpiDefinitions retries once (retry: 1) before settling into the error state.
+    expect(await screen.findByText(st('kpiBuilder.loadError'))).toBeInTheDocument()
     expect(screen.queryByRole('button', { name: st('kpiBuilder.addBtn') })).not.toBeInTheDocument()
   })
 })

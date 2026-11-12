@@ -42,7 +42,7 @@ describe('AddLinkRow — customer_location', () => {
 
     await waitFor(() => expect(mockGet).toHaveBeenLastCalledWith('/customer-locations', {
       params: expect.objectContaining({ q: 'floor 2', search: 'floor 2', per_page: 25 }),
-    }), { timeout: 2000 })
+    }))
   })
 
   it('labels a row "Location X (Customer Y)" and stages that exact link on pick', async () => {

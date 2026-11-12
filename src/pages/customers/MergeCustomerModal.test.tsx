@@ -43,7 +43,7 @@ function mount(onMerged = vi.fn()) {
 async function searchAndPick() {
   getMock.mockResolvedValue({ data: { data: [dupRow, { ...dupRow, id: 'aaa' }] } })
   fireEvent.change(screen.getByPlaceholderText('merge.searchPlaceholder'), { target: { value: 'acme' } })
-  const row = await screen.findByText('Acme Dubbel', undefined, { timeout: 2000 })
+  const row = await screen.findByText('Acme Dubbel')
   fireEvent.click(row)
 }
 
@@ -86,7 +86,7 @@ describe('MergeCustomerModal', () => {
     fireEvent.change(screen.getByPlaceholderText('merge.searchPlaceholder'), { target: { value: 'acme' } })
     // The API returned exactly one row (the open record itself); the in-memory self-filter
     // must drop it, leaving the empty-results state rather than an offerable self-merge.
-    await screen.findByText('merge.noResults', undefined, { timeout: 2000 })
+    await screen.findByText('merge.noResults')
   })
 
   // §3 four UI states: a failed search must never render the same as "no results".
@@ -94,7 +94,7 @@ describe('MergeCustomerModal', () => {
     mount()
     getMock.mockRejectedValue(new Error('network down'))
     fireEvent.change(screen.getByPlaceholderText('merge.searchPlaceholder'), { target: { value: 'acme' } })
-    await screen.findByText('merge.searchError', undefined, { timeout: 2000 })
+    await screen.findByText('merge.searchError')
     expect(screen.queryByText('merge.noResults')).toBeNull()
   })
 })

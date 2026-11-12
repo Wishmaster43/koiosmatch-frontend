@@ -66,7 +66,7 @@ describe('PendingUploadQueue · expiry field (N008-DOC-EXPIRY-FE-1)', () => {
     const onSetExpiry = vi.fn()
     const { rerender } = render(<PendingUploadQueue {...baseProps} pending={[item({ type: 'VOG' })]} onSetExpiry={onSetExpiry} />)
     // The date picker chunk is lazy: wait for the real picker before typing.
-    await waitFor(() => expect(document.querySelector('.react-datepicker__input-container')).toBeTruthy(), { timeout: 5000 })
+    await waitFor(() => expect(document.querySelector('.react-datepicker__input-container')).toBeTruthy())
     const field = screen.getByRole('textbox')
     await user.type(field, '12/31/2027')
     expect(onSetExpiry).toHaveBeenLastCalledWith(0, '2027-12-31')

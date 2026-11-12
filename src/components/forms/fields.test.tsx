@@ -37,8 +37,7 @@ describe('DateField · sends the LOCAL calendar day, never a UTC-shifted one', (
     const onChange = vi.fn()
     render(<DateField value={null} onChange={onChange} />)
     // The picker chunk is lazy: wait for the real picker (it is the only input that opens a calendar).
-    // 5 s: the first lazy import under full-suite load measured 1.7 s (29-10), past waitFor's 1 s default.
-    await waitFor(() => expect(document.querySelector('.react-datepicker__input-container')).toBeTruthy(), { timeout: 5000 })
+    await waitFor(() => expect(document.querySelector('.react-datepicker__input-container')).toBeTruthy())
     await user.click(screen.getByRole('textbox'))
     // The calendar renders into the shared datepicker-portal (outside the RTL
     // container), so query the document like a real user would see it.
@@ -74,8 +73,7 @@ describe('DateField · lazy picker chunk', () => {
   it('shows the DD-MM-YYYY value in the fallback input, then the picker with the same value', async () => {
     render(<DateField value="2026-03-09" onChange={() => {}} />)
     expect((screen.getByRole('textbox') as HTMLInputElement).value).toBe('09-03-2026')
-    // 5 s: the first lazy import under full-suite load measured 1.7 s (29-10), past waitFor's 1 s default.
-    await waitFor(() => expect(document.querySelector('.react-datepicker__input-container')).toBeTruthy(), { timeout: 5000 })
+    await waitFor(() => expect(document.querySelector('.react-datepicker__input-container')).toBeTruthy())
     expect((screen.getByRole('textbox') as HTMLInputElement).value).toBe('09-03-2026')
   })
 })

@@ -53,7 +53,7 @@ describe('PickCandidateForAppointmentModal · candidate search (step 1)', () => 
     fireEvent.click(screen.getByRole('button', { name: /^kandidaat$/i }))
     fireEvent.change(screen.getByPlaceholderText(/zoeken/i), { target: { value: 'jane' } })
     await waitFor(() => expect(getMock).toHaveBeenCalledWith('/candidates',
-      expect.objectContaining({ params: { search: 'jane', per_page: 25 } })), { timeout: 2000 })
+      expect.objectContaining({ params: { search: 'jane', per_page: 25 } })))
   })
 
   it('shows the honest "shown of total" hint when the tenant has more candidates than the capped page', async () => {

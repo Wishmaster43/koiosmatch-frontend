@@ -129,7 +129,7 @@ describe('useWorkflowEditor · RUN-INSPECTOR-1b stepForNode + inspecting', () =>
       }),
       { wrapper },
     )
-    await waitFor(() => expect(result.current.nodesWithFirst[0].data.inspectStepId).toBe(42), { timeout: 5000 })
+    await waitFor(() => expect(result.current.nodesWithFirst[0].data.inspectStepId).toBe(42))
     expect(result.current.stepForNode('n1')).toMatchObject({ step_id: 'n1', id: 42 })
     expect(result.current.inspecting).toBeNull()
 

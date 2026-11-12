@@ -97,7 +97,7 @@ describe('customerDisplay · invalid colour is rejected in the field (CHIPKLEUR-
       const btn = screen.getByRole('button', { name: st('common.save') })
       expect(btn).toBeEnabled()
       return btn
-    }, { timeout: 10000 })
+    })
     fireEvent.click(saveBtn)
 
     await waitFor(() => expect(mockedApi.post).toHaveBeenCalled())
