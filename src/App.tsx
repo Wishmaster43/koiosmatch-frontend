@@ -22,6 +22,9 @@ import DashboardLayout                            from './components/layout/Dash
 import TenantThemed from './components/layout/TenantThemed'
 import './index.css'
 import { mfaSignals } from '@/lib/mfaGate'
+import api from '@/lib/api'
+import { registerOffboardingGate } from '@/lib/offboardingGate'
+import { useOffboardingState } from './pages/auth/useOffboardingState'
 
 // Lazy: only users blocked by tenant-wide MFA enforcement ever load this screen.
 const MfaEnrollmentGate = lazy(() => import('./pages/auth/MfaEnrollmentGate'))
@@ -42,6 +45,11 @@ const CandidatePopoutRedirect = lazy(() => import('./pages/popout/CandidatePopou
 // Lazy: TEKST-POPOUT-1 — the second-screen window for ONE free-text field
 // (candidate profile text today), same recipe as the notes popout above.
 const TextPopoutPage = lazy(() => import('./pages/popout/TextPopoutPage'))
+
+// Lazy: shown instead of the app while the bureau is in its offboarding grace.
+const OffboardingPage = lazy(() => import('./pages/auth/OffboardingPage'))
+// Boot: detect 423 tenant_offboarding on any API call (module scope, registered once).
+registerOffboardingGate(api)
 
 // Boot loader — shown while the auth context resolves (and as Suspense fallback).
 function BootLoader() {
@@ -64,7 +72,12 @@ function ProtectedRoute({ children }: { children: ReactNode }) {
   // Defensive: tolerate a null auth context (provider not ready, or an upstream
   // failure like /auth/me 500'ing) — show the loader instead of crashing the tree.
   const auth = useAuth()
+  const offboarding = useOffboardingState()
   if (!auth || auth.loading) return <BootLoader />
+  // Offboarding wall: a suspended bureau sees one calm notice and a sign-out, nothing else.
+  if (auth.user && offboarding.offboarding) {
+    return <Suspense fallback={<BootLoader />}><OffboardingPage dueAt={offboarding.dueAt} /></Suspense>
+  }
   // MFA: the enrollment WALL only on the hard signals (a 403 mfa_enrollment_required seen
   // mid-session, or user.mfa_enrollment_blocked from /auth/me); mfa_setup_required is the
   // soft policy flag, a profile nudge, never a wall (MFA-GATE-SPLIT-1, CMBE 08-09).
