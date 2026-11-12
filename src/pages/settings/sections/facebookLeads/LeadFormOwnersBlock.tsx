@@ -54,6 +54,8 @@ export default function LeadFormOwnersBlock() {
         return (
           <div key={row.formId} style={{ display: 'grid', gridTemplateColumns: '160px 1fr auto', gap: 10, alignItems: 'center' }}>
             <Mono>{row.formId}</Mono>
+            {/* Content-sized cell so the picker's clear X anchors to the trigger edge, not the stretched 1fr grid cell */}
+            <div data-testid="lead-form-owner-cell" style={{ justifySelf: 'start', maxWidth: '100%' }}>
             <SearchSelect
               closeOnToggle
               options={options}
@@ -63,6 +65,7 @@ export default function LeadFormOwnersBlock() {
               triggerLabel={current?.label ?? (row.ownerId ? t('facebookLeads.formOwners.unknownUser') : t('facebookLeads.formOwners.noOwner'))}
               triggerAriaLabel={`${t('facebookLeads.formOwners.owner')} ${row.formId}`}
             />
+            </div>
             <Button variant="ghost" iconOnly aria-label={t('facebookLeads.formOwners.remove')}
               onClick={() => removeForm(row.formId)}><X size={14} /></Button>
           </div>

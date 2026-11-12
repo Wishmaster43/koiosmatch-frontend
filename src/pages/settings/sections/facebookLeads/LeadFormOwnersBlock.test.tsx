@@ -3,7 +3,7 @@
  * the GET on mount and the whole-map PUT body (key echo for copy, no Dutch literals).
  */
 import { describe, it, expect, afterEach, vi } from 'vitest'
-import { render, screen, waitFor } from '@testing-library/react'
+import { render, screen, waitFor, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import api from '@/lib/api'
 import { notifyError } from '@/lib/notify'
@@ -23,6 +23,14 @@ const mockedApi = vi.mocked(api, true)
 afterEach(() => vi.clearAllMocks())
 
 describe('LeadFormOwnersBlock', () => {
+  it('wraps the owner picker in a content-sized cell so the clear X sits at the trigger edge', async () => {
+    mockedApi.get.mockResolvedValue({ data: { data: { owners: { '111': 'u1' } } } })
+    render(<LeadFormOwnersBlock />)
+    const cell = await screen.findByTestId('lead-form-owner-cell')
+    expect(cell.style.justifySelf).toBe('start')
+    expect(within(cell).getByRole('button', { name: 'facebookLeads.formOwners.owner 111' })).toBeInTheDocument()
+  })
+
   it('GETs the owner map on mount and renders the rows', async () => {
     mockedApi.get.mockResolvedValue({ data: { data: { owners: { '111': 'u1' } } } })
     render(<LeadFormOwnersBlock />)
