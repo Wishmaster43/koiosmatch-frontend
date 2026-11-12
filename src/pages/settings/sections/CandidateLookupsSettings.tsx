@@ -124,13 +124,15 @@ export function LookupBlock({ slug, title, subtitle, items, setItems, readOnly =
       // match form renders fillable contract lines for this contract form).
       ...(isContractFormBlock ? { customer_not_applicable: modal.customer_not_applicable, has_contract_lines: modal.has_contract_lines } : {}),
     }
+    // Funnel stages answer 409 {open_placements} themselves below; declare it so the dev write-failure toast stays quiet.
+    const quiet409 = isFunnelBlock ? [{ quietStatuses: [409] }] : []
     try {
       if (modal.mode === 'add') {
         const value = modal.value.trim() || slugify(modal.label)
-        const created = unwrap(await api.post(`${BASE}/${slug}`, { value, label: modal.label.trim(), color: modal.color, ...flagFields })) as LookupItem
+        const created = unwrap(await api.post(`${BASE}/${slug}`, { value, label: modal.label.trim(), color: modal.color, ...flagFields }, ...quiet409)) as LookupItem
         setItems(p => [...p, created])
       } else {
-        await api.put(`${BASE}/${slug}/${modal.id}`, { label: modal.label.trim(), color: modal.color, ...flagFields })
+        await api.put(`${BASE}/${slug}/${modal.id}`, { label: modal.label.trim(), color: modal.color, ...flagFields }, ...quiet409)
         setItems(p => p.map(x => x.id === modal.id ? { ...x, label: modal.label.trim(), color: modal.color, ...flagFields } : x))
       }
       setModal(null)

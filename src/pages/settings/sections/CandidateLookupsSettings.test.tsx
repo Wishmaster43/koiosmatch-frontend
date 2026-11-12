@@ -299,7 +299,7 @@ describe('CandidateLookupsSettings — funnel is_proposal flag', () => {
     await user.click(screen.getByText(st('common.save')))
 
     await waitFor(() => expect(mockedApi.put).toHaveBeenCalledWith(
-      '/settings/candidate-lookups/funnel-types/f1', expect.objectContaining({ is_proposal: true })))
+      '/settings/candidate-lookups/funnel-types/f1', expect.objectContaining({ is_proposal: true }), { quietStatuses: [409] }))
   })
 })
 
@@ -531,7 +531,8 @@ describe('CandidateLookupsSettings — open_placements 409 (LANE-C2)', () => {
     const { notifyError } = await import('@/lib/notify')
     await waitFor(() => expect(notifyError).toHaveBeenCalledWith(st('lookups.openPlacementsBlocked', { count: 2 })))
     expect(notifyError).not.toHaveBeenCalledWith(st('statusList.saveFailed'))
-    expect(mockedApi.put).toHaveBeenCalledWith('/settings/candidate-lookups/funnel-types/f1', expect.any(Object))
+    // REQUEST-ASSERT-1: the handled 409 is declared quiet so the dev write-failure toast stays off.
+    expect(mockedApi.put).toHaveBeenCalledWith('/settings/candidate-lookups/funnel-types/f1', expect.any(Object), { quietStatuses: [409] })
     expect(screen.getByText(st('common.save'))).toBeInTheDocument()
   })
 })
