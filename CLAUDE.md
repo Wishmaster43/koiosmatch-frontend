@@ -616,6 +616,11 @@ the code is worse than no rule, because the next reader builds on it. What is tr
   a native `<input type="date/datetime-local">` — the browser draws that itself in the
   OS locale and it cannot be steered; everywhere outside the input field the rule is hard.
   A new date display without the house formatter is a finding.
+  **AXIS-TICK-DATE-1 (Danny 12-11, decision A):** the ONE written exception is a chart AXIS day
+  tick, which reads DD-MM through `formatAxisDay` (lib/formatters) because thirty full dates do not
+  fit an axis; the tooltip of the same chart always carries DD-MM-YYYY (`formatChartDate`), a week
+  bucket keeps the server's week label, and `src/lib/axisTickDate.houseStyle.test.ts` fails any
+  chart that formats an axis date by hand or with a short-month variant.
 - Add **birthplace** (`place_of_birth`); surface **Facebook Lead ID** (when present) in drawer + table.
 - `last_contact_at` + `last_contact_type` shown in table + drawer; seeder randomises both so KPIs test.
 - Skills render as a vertical **list** (edit/remove per row), not inline chips.
