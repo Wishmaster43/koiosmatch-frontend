@@ -6,18 +6,16 @@
  */
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Check, Copy, Info, Send, TriangleAlert } from 'lucide-react'
+import { Check, Copy, Info, Send } from 'lucide-react'
 import FloatingPanel from '@/components/ui/FloatingPanel'
 import { useActionRulePreflight, ActionRuleBanner, ActionRuleDialog } from '@/components/actionrules'
 import type { ActionRuleDecision } from '@/components/actionrules'
-import CreatableSelect from '@/components/ui/CreatableSelect'
 import RichTextEditor from '@/components/ui/RichTextEditor'
 import ReasonModalHeader from '@/components/ui/ReasonModalHeader'
-import ErrorBanner from '@/components/ui/ErrorBanner'
-import { fieldInputStyle } from '@/components/forms/fieldMetrics'
-import { contactOptionLabel } from '@/lib/contactLabel'
+import ModalFooter from '@/components/ui/ModalFooter'
 import { Caption, sectionTitleStyle } from '@/components/ui/typography'
 import { useProposeForm } from './useProposeForm'
+import ProposeFieldRows, { ProposeSubjectRow } from './ProposeFieldRows'
 import type { ApplicationDetail } from '@/types/application'
 import Button from '@/components/ui/Button'
 import CalloutBox from '@/components/ui/CalloutBox'
@@ -25,8 +23,6 @@ import Toggle from '@/components/ui/Toggle'
 
 // r6: the identity comes from the typography module; only the layout margin is local.
 const sectionTitle = { ...sectionTitleStyle, fontSize: 12, marginBottom: 6 } as const
-// Canon field style (G33/fieldMetrics) — was its own padding-7/font-13/radius-8 copy.
-const inputBase = fieldInputStyle
 
 // The strictest of two AXIS-MATRIX decisions wins (block > warn > allow) — this
 // action touches BOTH the candidate axis and the customer axis (§3A).
@@ -89,18 +85,6 @@ export default function ProposeCandidateModal({ application: a, onClose, onOpenE
     return <ActionRuleDialog open decision={decision} onConfirm={onClose} onCancel={onClose} />
   }
 
-  // The shared "Name — Function" label (same as every other contact picker) —
-  // distinguishes same-named contacts on the customer, never a dangling separator.
-  const contactOptions = form.contacts.map(c => ({ value: c.id, label: contactOptionLabel(c) }))
-  // VOORSTEL-AFZENDER-FE-1: tenant users as the sender picker's options.
-  const senderOptions = (form.users ?? []).map((u: { id: string; name: string }) => ({ value: u.id, label: u.name }))
-  // Only pass a value CreatableSelect can resolve to a label — while the users
-  // list is still loading, or the stale tenant default no longer matches a real
-  // user, senderOptions won't contain it and the trigger would otherwise print
-  // the raw uuid (CreatableSelect.tsx:211 `value || placeholder`). The
-  // underlying form.senderUserId stays untouched, so submit() still POSTs it.
-  const senderDisplayValue = senderOptions.some(o => o.value === form.senderUserId) ? form.senderUserId : ''
-
   // Human-readable reason the primary action is disabled (§3 — never a bare
   // greyed-out button with no explanation).
   const disabledText = form.disabledReason === 'loading' ? t('propose.loading')
@@ -129,49 +113,15 @@ export default function ProposeCandidateModal({ application: a, onClose, onOpenE
     // resizable, remembered position) — body/footer and flows unchanged.
     <FloatingPanel open onClose={onClose} ariaLabel={t('propose.title')}
       persistKey="application-propose" width={560} maxWidth="92vw"
-      bodyStyle={{ padding: 20 }}
+      scrollBody={false}
       header={<ReasonModalHeader icon={Send} iconBg="var(--color-primary-bg)" iconColor="var(--color-primary-text)" title={t('propose.title')} />}>
+      {/* Scroll area with the form; the shared footer below stays pinned. */}
+      <div style={{ flex: 1, minHeight: 0, overflow: 'auto', padding: 20 }}>
         {decision?.effect === 'warn' && <div style={{ marginBottom: 12 }}><ActionRuleBanner decision={decision} /></div>}
 
         <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
-          {/* 1. Recipient — searchable, tenant-lookup style contact picker (no free entry). */}
-          <div>
-            <div style={sectionTitle}>{t('propose.recipient')}</div>
-            {form.contactsLoading ? (
-              <Caption as="div">{t('propose.loading')}</Caption>
-            ) : form.contactsError ? (
-              // D8: an honest error state — never read as "this customer has no contacts".
-              // The shared calm-inline variant (§4 typography, no local fontSize/colour).
-              <ErrorBanner variant="subtle">{t('propose.contactsError')}</ErrorBanner>
-            ) : contactOptions.length === 0 && !form.recipient ? (
-              <Caption as="div">{t('propose.noContacts')}</Caption>
-            ) : (
-              <CreatableSelect allowCreate={false} value={form.recipientContactId || null}
-                onChange={form.setRecipientContactId} options={contactOptions}
-                placeholder={t('propose.recipientPlaceholder')} />
-            )}
-            {form.recipient && !form.recipient.email && (
-              <div style={{ display: 'flex', alignItems: 'center', gap: 5, marginTop: 6, fontSize: 11, color: 'var(--color-warning-text)' }}>
-                <TriangleAlert size={12} /> {t('propose.recipientMissingEmail')}
-              </div>
-            )}
-          </div>
-
-          {/* 1b. Sender — VOORSTEL-AFZENDER-FE-1: which tenant user the e-mail goes
-              out in the name of; empty = the recruiter recording this proposal. */}
-          <div>
-            <div style={sectionTitle}>{t('propose.onBehalfOf')}</div>
-            {/* While the users list loads, a preselected tenant default must not read as "self":
-                the loading caption mirrors the recipient picker above. */}
-            {form.usersLoading ? (
-              <Caption as="div">{t('propose.loading')}</Caption>
-            ) : (
-              <CreatableSelect allowCreate={false} value={senderDisplayValue || null}
-                onChange={form.setSenderUserId} options={senderOptions}
-                placeholder={t('propose.onBehalfOfSelf')} clearable clearLabel={t('propose.onBehalfOf')} />
-            )}
-            <Caption as="div" style={{ marginTop: 6 }}>{t('propose.onBehalfOfHint')}</Caption>
-          </div>
+          {/* 1. Recipient + sender: label-left rows on the shared form kit. */}
+          <ProposeFieldRows form={form} />
 
           {/* 2. Documents: the house-style CV is always included (not unselectable:
               without it this isn't a proposal); no motivation letter travels (5f = C). */}
@@ -207,9 +157,7 @@ export default function ProposeCandidateModal({ application: a, onClose, onOpenE
               {recruiter} tokens filled in by useProposeForm). */}
           <div>
             <div style={sectionTitle}>{t('propose.message')}</div>
-            <label htmlFor="propose-subject" style={{ display: 'block', marginBottom: 4 }}><Caption as="span">{t('propose.subject')}</Caption></label>
-            <input id="propose-subject" value={form.subject} onChange={e => form.setSubject(e.target.value)}
-              style={{ ...inputBase, marginBottom: 8 }} />
+            <div style={{ marginBottom: 8 }}><ProposeSubjectRow form={form} /></div>
             <RichTextEditor value={form.body} onChange={form.setBody}
               expanded={bodyExpanded} onToggleExpand={() => setBodyExpanded(v => !v)} />
           </div>
@@ -278,23 +226,19 @@ export default function ProposeCandidateModal({ application: a, onClose, onOpenE
           </div>
         )}
 
-        {disabledText && (
-          <Caption as="div" style={{ marginTop: 8 }}>{disabledText}</Caption>
-        )}
+      </div>
 
-        <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 8, marginTop: 14 }}>
-          <Button variant="secondary" onClick={onClose}>
-            {t('common:cancel')}
-          </Button>
-          {/* PRIMAIR-VLAK-1 (19-08): the tinted-primary action face is retired — the
-              secondary-action button now carries this copy affordance. */}
+      {/* The disabled reason keeps its own pinned line above the footer (§3 never a bare greyed
+          button): inside the footer row the three buttons leave it no width (lens 12-11). */}
+      {disabledText && <Caption as="div" style={{ padding: '0 24px 8px' }}>{disabledText}</Caption>}
+      {/* Shared footer: the copy-message affordance sits left (PRIMAIR-VLAK-1: secondary, not a completion). */}
+      <ModalFooter onCancel={onClose} onSubmit={handleSubmit} cancelLabel={t('common:cancel')}
+        submitLabel={t('propose.submit')} disabled={!!form.disabledReason} busy={form.submitting}
+        leftSlot={(
           <Button variant="secondary" onClick={form.copyMessage}>
             {form.copied ? t('propose.copied') : t('propose.copyMessage')}
           </Button>
-          <Button variant="primary" onClick={handleSubmit} disabled={!!form.disabledReason || form.submitting}>
-            {t('propose.submit')}
-          </Button>
-        </div>
+        )} />
     </FloatingPanel>
   )
 }

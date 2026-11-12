@@ -66,7 +66,7 @@ const app = (over: Partial<ApplicationDetail> = {}): ApplicationDetail => ({
 } as unknown as ApplicationDetail)
 
 // Tests mutate the shared fixture in place; restore here so a throwing test can never leak state.
-afterEach(() => { formFixture.senderUserId = ''; formFixture.usersLoading = false; formFixture.conflict = null })
+afterEach(() => { formFixture.senderUserId = ''; formFixture.usersLoading = false; formFixture.conflict = null; formFixture.disabledReason = 'noConsent' })
 
 describe('ProposeCandidateModal', () => {
   it('never renders a button whose label suggests the message is actually sent', () => {
@@ -155,7 +155,8 @@ describe('ProposeCandidateModal · sender', () => {
     render(<ProposeCandidateModal application={app()} onClose={vi.fn()} />)
     expect(screen.getByText('propose.onBehalfOf')).toBeInTheDocument()
     expect(document.querySelector('select')).toBeNull()
-    await user.click(screen.getByRole('button', { name: 'propose.onBehalfOfSelf' }))
+    expect(screen.getByRole('button', { name: 'propose.onBehalfOf' })).toHaveTextContent('propose.onBehalfOfSelf')
+    await user.click(screen.getByRole('button', { name: 'propose.onBehalfOf' }))
     await user.click(await screen.findByRole('button', { name: 'Sara Demo' }))
     expect(formFixture.setSenderUserId).toHaveBeenCalledWith('u2')
   })
@@ -176,7 +177,9 @@ describe('ProposeCandidateModal · sender', () => {
     // the commit and re-render to assert the trigger falls back to the placeholder.
     formFixture.senderUserId = ''
     rerender(<ProposeCandidateModal application={app()} onClose={vi.fn()} />)
-    expect(screen.getByRole('button', { name: 'propose.onBehalfOfSelf' })).toBeInTheDocument()
+    const trigger = screen.getByRole('button', { name: 'propose.onBehalfOf' })
+    expect(trigger).toHaveTextContent('propose.onBehalfOfSelf')
+    expect(trigger).not.toHaveTextContent('Sara Demo')
   })
 
   // An id that no longer matches any option (users still loading, or a stale
@@ -184,7 +187,7 @@ describe('ProposeCandidateModal · sender', () => {
   it('shows the placeholder, not the raw uuid, for a sender id with no matching option', () => {
     formFixture.senderUserId = 'u-unknown'
     render(<ProposeCandidateModal application={app()} onClose={vi.fn()} />)
-    expect(screen.getByRole('button', { name: 'propose.onBehalfOfSelf' })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'propose.onBehalfOf' })).toHaveTextContent('propose.onBehalfOfSelf')
     expect(screen.queryByText('u-unknown')).toBeNull()
     formFixture.senderUserId = ''
   })
@@ -262,5 +265,39 @@ describe('ProposeCandidateModal · sender picker while users load', () => {
     render(<ProposeCandidateModal application={app()} onClose={vi.fn()} />)
     expect(screen.getAllByText('propose.loading').length).toBeGreaterThan(0)
     expect(screen.queryByText('propose.onBehalfOfSelf')).toBeNull()
+  })
+})
+
+// PROPOSE-MODAL-CANON-1: label-left kit rows and the shared footer, functionally unchanged.
+describe('ProposeCandidateModal · house-style canon', () => {
+  it('renders recipient, sender and subject labels associated with their controls', () => {
+    mockDecision.candidate = null; mockDecision.customer = null
+    render(<ProposeCandidateModal application={app()} onClose={vi.fn()} />)
+    expect(screen.getByLabelText('propose.recipient')).toBeInTheDocument()
+    expect(screen.getByLabelText('propose.onBehalfOf')).toBeInTheDocument()
+    expect(screen.getByLabelText('propose.subject')).toHaveValue('Voorstel Jan de Vries')
+  })
+
+  it('renders the shared footer: cancel closes, submit stays disabled, copy-message calls the hook', async () => {
+    mockDecision.candidate = null; mockDecision.customer = null
+    const onClose = vi.fn()
+    const user = userEvent.setup()
+    render(<ProposeCandidateModal application={app()} onClose={onClose} />)
+    await user.click(screen.getByRole('button', { name: 'common:cancel' }))
+    expect(onClose).toHaveBeenCalled()
+    expect(screen.getByRole('button', { name: 'propose.submit' })).toBeDisabled()
+    await user.click(screen.getByRole('button', { name: 'propose.copyMessage' }))
+    expect(formFixture.copyMessage).toHaveBeenCalled()
+  })
+
+  it('renders the disabled reason caption on its own line directly above the footer for pickRecipient', () => {
+    mockDecision.candidate = null; mockDecision.customer = null
+    formFixture.disabledReason = 'pickRecipient'
+    render(<ProposeCandidateModal application={app()} onClose={vi.fn()} />)
+    expect(screen.getByText('propose.pickRecipient')).toBeInTheDocument()
+    // DOM order: the caption precedes the cancel button of the footer (its own line above the footer).
+    const caption = screen.getByText('propose.pickRecipient')
+    const cancel = screen.getByRole('button', { name: 'common:cancel' })
+    expect(caption.compareDocumentPosition(cancel) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy()
   })
 })

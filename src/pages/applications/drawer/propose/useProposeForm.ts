@@ -91,6 +91,8 @@ const SENDER_SETTING_KEY = 'proposal_default_sender_user_id'
 // docblock) and returns the flat state/handlers the modal renders.
 export function useProposeForm(application: ApplicationDetail) {
   const { t } = useTranslation(['applications', 'common'])
+  // The CV labeller resolves cv.* keys, which live in the candidates namespace only (measured 12-11).
+  const { t: tCv } = useTranslation('candidates')
   const locale = useLocale()
   // To invalidate the proposals-history query (ProposalsBlock) after a
   // successful record, so the new entry shows up without a manual reload.
@@ -287,7 +289,7 @@ export function useProposeForm(application: ApplicationDetail) {
       // 0. Y-002: render the CV FIRST (reused for upload + download); a failure or oversize refuses before any request.
       let blob: Blob
       try {
-        blob = await buildProposalCvBlob({ candidate: candidate as unknown as CvCandidate, settings: cvSettings as never, locale, t, variant: cvVariant })
+        blob = await buildProposalCvBlob({ candidate: candidate as unknown as CvCandidate, settings: cvSettings as never, locale, t: tCv, variant: cvVariant })
         assertProposalCvSize(blob)
       } catch (cvErr) {
         notifyError(cvErr instanceof ProposalCvTooLargeError ? t('common:upload.tooLargeMax', { max: formatFileSizeMb(PROPOSAL_CV_MAX_BYTES, locale) }) : t('propose.cvBuildFailed'))

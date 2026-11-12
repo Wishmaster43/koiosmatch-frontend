@@ -22,7 +22,8 @@ function wrapper({ children }: { children: ReactNode }) {
   return createElement(QueryClientProvider, { client: qc }, children)
 }
 
-vi.mock('react-i18next', () => ({ useTranslation: () => ({ t: (k: string) => k }) }))
+// The candidates-namespace t is distinguishable so the CV render can be pinned to it.
+vi.mock('react-i18next', () => ({ useTranslation: (ns?: string | string[]) => ({ t: ns === 'candidates' ? (k: string) => `candidates:${k}` : (k: string) => k }) }))
 
 const { notifyError, notifySuccess } = vi.hoisted(() => ({ notifyError: vi.fn(), notifySuccess: vi.fn() }))
 vi.mock('@/lib/notify', () => ({ notifyError, notifySuccess }))
@@ -557,6 +558,9 @@ describe('useProposeForm', () => {
     await waitFor(() => expect(result.current.disabledReason).toBeNull())
     await act(async () => { await result.current.submit() })
     expect(buildProposalCvBlob).toHaveBeenCalledTimes(1)
+    // The CV renders with the candidates-namespace t: cv.* labels live there only (12-11).
+    const cvArgs = (buildProposalCvBlob.mock.calls as unknown as Array<[{ t: (k: string) => string }]>)[0][0]
+    expect(cvArgs.t('cv.contact')).toBe('candidates:cv.contact')
     const blob = await buildProposalCvBlob.mock.results[0].value
     expect(triggerBlobDownload).toHaveBeenCalledTimes(1)
     expect(triggerBlobDownload).toHaveBeenCalledWith(blob, 'CV - Jan de Vries.pdf')
