@@ -9,7 +9,7 @@ import { describe, it, expect, vi, afterEach } from 'vitest'
 import { renderHook, waitFor } from '@testing-library/react'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import type { ReactNode } from 'react'
-import { act } from 'react'
+import { act, StrictMode } from 'react'
 import { useWorkflowRunControl } from './useWorkflowRunControl'
 import api from '@/lib/api'
 import { notifyError } from '@/lib/notify'
@@ -289,5 +289,20 @@ describe('useWorkflowRunControl · runBulk', () => {
     expect(result.current.runError).toBe('Workflow is niet actief')
     // WORKFLOW-422: item (c) — toast and visible state carry the same string.
     expect(notifyError).toHaveBeenCalledWith('Workflow is niet actief')
+  })
+})
+
+// Regression: under StrictMode (setup, cleanup, setup) a reopened editor must still adopt the live run.
+describe('useWorkflowRunControl · adoption under StrictMode', () => {
+  it('adopts a live run from GET /workflows/<id>/runs when mounted in StrictMode', async () => {
+    mockedGet.mockImplementation((url: string) => Promise.resolve(
+      url === '/workflows/w9/runs' ? { data: { data: [{ id: 'r9', status: 'running' }] } } : { data: { id: 'r9', status: 'running' } }))
+    const onRunStarted = vi.fn()
+    const strictWrapper = ({ children }: { children: ReactNode }) => <StrictMode>{wrapper({ children })}</StrictMode>
+    const { result } = renderHook(() => useWorkflowRunControl({ workflowId: 'w9', onRunStarted }), { wrapper: strictWrapper })
+    await waitFor(() => expect(result.current.activeRunId).toBe('r9'))
+    expect(mockedGet).toHaveBeenCalledWith('/workflows/w9/runs', expect.objectContaining({ baseURL: expect.any(String) }))
+    await waitFor(() => expect(mockedGet).toHaveBeenCalledWith('/workflow-runs/r9', expect.objectContaining({ baseURL: expect.any(String) })))
+    expect(onRunStarted).toHaveBeenCalled()
   })
 })

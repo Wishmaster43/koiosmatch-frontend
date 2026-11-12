@@ -109,11 +109,14 @@ export default function WorkflowEditorHeader({
 
   return (
     <div style={{
-      display: 'flex', alignItems: 'center', gap: 12,
-      height: 56, padding: '0 20px', flexShrink: 0,
+      // HEADER-FIT-2: the row WRAPS (actions keep their order on a second row) instead of pushing Save/close off-screen.
+      display: 'flex', alignItems: 'center', gap: 12, flexWrap: 'wrap', rowGap: 8,
+      minHeight: 56, padding: '8px 20px', flexShrink: 0,
       background: 'var(--surface)', borderBottom: '1px solid var(--border)',
     }}>
-      <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+      {/* The name group may SHRINK (the name input ellipsises) so it never forces the actions out; a
+          small flex-basis keeps its hypothetical width out of the wrap decision (HEADER-FIT-2). */}
+      <div style={{ display: 'flex', alignItems: 'center', gap: 8, minWidth: 0, flexShrink: 1, flexGrow: 1, flexBasis: 120 }}>
         <div style={{ width: 30, height: 30, borderRadius: 8, background: 'var(--color-primary-bg)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
           <Zap size={15} color="var(--color-primary)" />
         </div>
@@ -125,7 +128,7 @@ export default function WorkflowEditorHeader({
         <input
           value={name} onChange={e => onNameChange(e.target.value)}
           aria-label={t('editor.nameAriaLabel')}
-          style={{ fontSize: 14, fontWeight: 600, color: 'var(--text)', border: 'none', background: 'transparent', outline: 'none', minWidth: 60, maxWidth: 240 }}
+          style={{ fontSize: 14, fontWeight: 600, color: 'var(--text)', border: 'none', background: 'transparent', outline: 'none', minWidth: 60, maxWidth: 240, flexShrink: 1, textOverflow: 'ellipsis' }}
         />
         {/* §3A(d): record history is a changelog icon-popover in the title row, never a tab. */}
         {workflowId !== undefined && (
@@ -181,6 +184,8 @@ export default function WorkflowEditorHeader({
           multi-line opening tag, past where eslint-disable-next-line reaches. */}
       {/* eslint-disable huisstijlLegacy/no-restricted-syntax */}
       <button onClick={onToggleStatus} aria-pressed={status === 'active'}
+        // HEADER-FIT-2: the 'run requires active' hint lives in this always-focusable badge's tooltip (a disabled Run swallows its own), so Save and close stay in view at 1280px.
+        title={status !== 'active' ? t('editor.runRequiresActive') : undefined}
         style={{
           display: 'flex', alignItems: 'center', gap: 6, padding: '4px 10px', borderRadius: 999,
           background: status === 'active' ? 'var(--color-success-bg)' : 'var(--hover-bg)',
@@ -270,16 +275,16 @@ export default function WorkflowEditorHeader({
           master data (entity node or webhook) announces itself as broken. */}
       {startInvalid && (
         <span role="status" title={t('editor.missingStartModule')}
-          style={{ maxWidth: 260, minWidth: 0, flexShrink: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+          style={{ maxWidth: 260, minWidth: 0, flexShrink: 1, flexGrow: 1, flexBasis: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
           <Caption as="span" style={{ color: 'var(--color-danger-text)' }}>{t('editor.missingStartModule')}</Caption>
         </span>
       )}
       {status !== 'active' && (
         <span role="status" title={t('editor.runRequiresActive')}
-          // The notice may SHRINK (never the buttons): at narrow widths it truncates with an
-          // ellipsis and keeps its full text in the title; a non-shrinking notice pushed
-          // "Opslaan" outside the viewport (smoke flow workflow-editor, 30-08).
-          style={{ maxWidth: 220, minWidth: 0, flexShrink: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+          // The notice takes LEFTOVER space only (flex-basis 0, so it never forces a wrap) and
+          // ellipsises; the row wraps for the buttons alone (HEADER-FIT-2), so the reason for a
+          // disabled Run stays visible at every width (§3: disabled WITH an honest notice).
+          style={{ maxWidth: 220, minWidth: 0, flexShrink: 1, flexGrow: 1, flexBasis: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
           <Caption as="span" style={{ color: 'var(--color-warning-text)' }}>{t('editor.runRequiresActive')}</Caption>
         </span>
       )}

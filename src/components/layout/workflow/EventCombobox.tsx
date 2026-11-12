@@ -24,12 +24,13 @@
  * around a document-level listener there — it is kept on `useEscapeLayer` because
  * that IS the current, correct mechanism for a non-portalled popover like this one.
  */
-import { useState } from 'react'
+import { useId, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Search, ChevronDown, Check } from 'lucide-react'
 import { WORKFLOW_EVENT_KEYS, eventKeyToI18nKey } from './eventCatalog'
 import { Mono, bodyTextStyle } from '@/components/ui/typography'
 import { usePopoverBox } from './usePopoverBox'
+import SelectClearButton, { CLEAR_BUTTON_SIZE } from '@/components/ui/SelectClearButton'
 
 // Searchable dropdown over the workflow event catalogue; see the module doc
 // comment above for why its Escape closes via the window-capture escape layer.
@@ -40,8 +41,12 @@ export function EventCombobox({ value, onChange, label }: {
   const [open, setOpen] = useState(false)
   const [search, setSearch] = useState('')
   const { boxRef, onBlur } = usePopoverBox(open, setOpen)
+  // Stable whitespace-free id for the input and its clear button; the ref returns focus after a clear.
+  const inputId = useId()
+  const inputRef = useRef<HTMLInputElement>(null)
 
-  const labelFor = (key: string) => t(`triggers.events.${eventKeyToI18nKey(key)}`)
+  // An empty value has no catalogue label: show the generic select placeholder instead.
+  const labelFor = (key: string) => (key ? t(`triggers.events.${eventKeyToI18nKey(key)}`) : t('fields.selectPlaceholder'))
   const filtered = WORKFLOW_EVENT_KEYS.filter(key =>
     !search || labelFor(key).toLowerCase().includes(search.toLowerCase()) || key.includes(search.toLowerCase()))
 
@@ -52,16 +57,23 @@ export function EventCombobox({ value, onChange, label }: {
     <div ref={boxRef} style={{ position: 'relative' }} onBlur={onBlur}>
       {/* Control: the selected event, or the live filter while open. */}
       <div onClick={() => setOpen(true)}
-        style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '9px 12px', borderRadius: 8,
+        style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '9px 10px 9px 12px', borderRadius: 8,
                  border: '1px solid var(--border)', background: 'var(--surface)', cursor: 'text' }}>
         <Search size={13} color="var(--text-muted)" style={{ flexShrink: 0 }} />
-        <input value={open ? search : labelFor(value)} aria-label={label}
+        <input ref={inputRef} id={inputId} value={open ? search : (value ? labelFor(value) : '')} aria-label={label}
           placeholder={labelFor(value)}
           onFocus={() => { setOpen(true); setSearch('') }}
           onChange={e => { setSearch(e.target.value); setOpen(true) }}
-          style={{ flex: 1, border: 'none', outline: 'none', background: 'transparent', ...bodyTextStyle }} />
-        <ChevronDown size={13} color="var(--text-muted)" style={{ flexShrink: 0 }} />
+          // The X sits left of the chevron: reserve its slot on the input (SearchSelect idiom).
+          style={{ flex: 1, border: 'none', outline: 'none', background: 'transparent', marginRight: value ? CLEAR_BUTTON_SIZE : 0, ...bodyTextStyle }} />
+        <ChevronDown size={12} color="var(--text-muted)" style={{ flexShrink: 0 }} />
       </div>
+      {/* DROPDOWN-CLEAR-1: shared clear button while a value is set; clearing is onChange(''). */}
+      {value && (
+        <SelectClearButton triggerId={inputId} clearLabel={label}
+          // Focus returns to the input, whose onFocus reopens the list so the user can pick again.
+          onClear={() => { onChange(''); setSearch(''); inputRef.current?.focus() }} />
+      )}
 
       {/* Dropdown: every catalogued event, filtered as you type. */}
       {open && (

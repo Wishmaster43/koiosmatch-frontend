@@ -135,3 +135,15 @@ describe('useScheduleForm · webhook number', () => {
     expect(onSave).toHaveBeenCalledWith('Webhook', { agent: 'Michelle', source: 'meta', number_id: 'n-meta' })
   })
 })
+
+// An event trigger with an emptied event must not be saveable (clear button on the picker).
+describe('useScheduleForm · empty event', () => {
+  it('blocks Save and does not call onSave when the event key is cleared', () => {
+    const onSave = vi.fn()
+    const { result } = renderHook(() => useScheduleForm('Event', { event: 'mail.received' }, onSave))
+    act(() => result.current.setEventKey(''))
+    expect(result.current.canSave).toBe(false)
+    act(() => result.current.handleSave())
+    expect(onSave).not.toHaveBeenCalled()
+  })
+})

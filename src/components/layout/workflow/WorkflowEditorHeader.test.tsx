@@ -117,12 +117,15 @@ describe('WorkflowEditorHeader · run gated on status (F4)', () => {
     expect(screen.getByText('editor.dryRun').closest('button')).not.toBeDisabled()
   })
 
-  // A disabled button shows no tooltip and takes no focus, so the reason must be a
-  // visible status line (§3: disabled WITH an honest notice), absent once active.
-  it('shows the visible run-gate notice for a draft and hides it when active', () => {
+  // A disabled button shows no tooltip and takes no focus, so the reason sits on the
+  // focusable status badge as its title AND as a visible status line (§3 honest notice;
+  // the row wraps, HEADER-FIT-2, so the line never pushes Save off-screen); gone once active.
+  it('gives a draft the run-gate reason as the badge title and a visible notice, both gone when active', () => {
     const { rerender } = render(<WorkflowEditorHeader {...baseProps} status="draft" />)
-    expect(screen.getByText('editor.runRequiresActive').closest('[role="status"]')).not.toBeNull()
+    expect(screen.getByText('status.inactive').closest('button')).toHaveAttribute('title', 'editor.runRequiresActive')
+    expect(screen.getByRole('status')).toHaveTextContent('editor.runRequiresActive')
     rerender(<WorkflowEditorHeader {...baseProps} status="active" />)
+    expect(screen.getByText('status.active').closest('button')).not.toHaveAttribute('title')
     expect(screen.queryByText('editor.runRequiresActive')).toBeNull()
   })
 })
@@ -178,5 +181,21 @@ describe('WorkflowEditorHeader · saving disables both Save buttons (ONIX N-007)
     render(<WorkflowEditorHeader {...baseProps} status="active" canSave saving />)
     expect(screen.getByText('editor.save').closest('button')).toBeDisabled()
     expect(screen.getByText('editor.saveClose').closest('button')).toBeDisabled()
+  })
+})
+
+// HEADER-FIT-2: pins the shrink/wrap style props (geometry itself is not measured in jsdom).
+describe('WorkflowEditorHeader · fit at narrow widths', () => {
+  it('lets the row wrap and the name group and input shrink so Save and close stay reachable', () => {
+    const { container } = render(<WorkflowEditorHeader {...baseProps} status="draft" />)
+    const row = container.firstElementChild as HTMLElement
+    expect(row.style.flexWrap).toBe('wrap')
+    expect(row.style.height).toBe('')
+    const nameInput = screen.getByLabelText('editor.nameAriaLabel') as HTMLInputElement
+    expect(nameInput.style.flexShrink).toBe('1')
+    expect(nameInput.style.textOverflow).toBe('ellipsis')
+    const group = nameInput.parentElement as HTMLElement
+    expect(group.style.minWidth).toBe('0px')
+    expect(group.style.flexShrink).toBe('1')
   })
 })

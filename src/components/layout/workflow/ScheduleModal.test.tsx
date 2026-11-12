@@ -240,3 +240,20 @@ describe('ScheduleModal · webhook number binding', () => {
     expect(screen.getByText('scheduleModal.save')).toBeDisabled()
   })
 })
+
+// DROPDOWN-CLEAR-1: pick -> clear -> placeholder on the event picker, and Save stays blocked while it is empty.
+describe('ScheduleModal · event picker clear', () => {
+  it('pick, clear, then the placeholder shows and Save is disabled', () => {
+    render(<ScheduleModal onSave={vi.fn()} onClose={vi.fn()} />)
+    fireEvent.click(screen.getByText('scheduleModal.trigger.event'))
+    const input = screen.getByLabelText('scheduleModal.eventLabel') as HTMLInputElement
+    fireEvent.focus(input)
+    fireEvent.click(screen.getAllByRole('option')[1])
+    expect(input.value).not.toBe('')
+    fireEvent.click(screen.getByRole('button', { name: 'clearField' }))
+    expect(input.value).toBe('')
+    expect(input.placeholder).toBe('fields.selectPlaceholder')
+    expect(screen.queryByRole('button', { name: 'clearField' })).toBeNull()
+    expect(screen.getByText('scheduleModal.save')).toBeDisabled()
+  })
+})

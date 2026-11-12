@@ -81,6 +81,7 @@ export function useScheduleForm(
     (type === 'scheduled' && frequency === 'interval' && (Number.isNaN(+intervalMinutes) || +intervalMinutes < 5 || +intervalMinutes > 10080)) ||
     (type === 'scheduled' && frequency === 'weekly' && weekdays.length === 0) ||
     (type === 'scheduled' && frequency !== 'interval' && times.length === 0) ||
+    (type === 'event' && !eventKey) ||
     (type === 'webhook' && (!agentName || !source || !numberId)) ||
     (type === 'date_relative' && (!dateField || Number.isNaN(+offsetDays) || +offsetDays < 0))
   )

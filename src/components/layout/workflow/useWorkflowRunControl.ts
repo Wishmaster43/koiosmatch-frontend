@@ -5,7 +5,7 @@
  * running" single-flight conflict, and stopping it. Pure extraction — identical
  * behaviour, useWorkflowEditor stays the composer and callers are unchanged.
  */
-import { useState, useCallback, useEffect, useRef } from 'react'
+import { useState, useCallback, useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useWorkflowRun } from './useWorkflowRun'
 import api from '@/lib/api'
@@ -46,11 +46,9 @@ export function useWorkflowRunControl({ workflowId, initialRunId = null, onRunSt
   // RUN-VISIBILITY-1 (Danny 24-07 "reopen it and you can't see that it's still
   // busy"): on mount, ADOPT a run that is still live for this workflow — the
   // poll, node rings, "busy" status and the stop button resume as if never closed.
-  const adopted = useRef(false)
   // On mount, adopt any run already live for this workflow so reopening the editor shows it as busy instead of idle.
   useEffect(() => {
-    if (adopted.current || initialRunId != null || workflowId == null) return
-    adopted.current = true
+    if (initialRunId != null || workflowId == null) return
     let alive = true
     Promise.resolve(api.get(`/workflows/${workflowId}/runs`, { baseURL: resolveWorkflowBaseURL() }))
       .then(res => {
@@ -64,6 +62,7 @@ export function useWorkflowRunControl({ workflowId, initialRunId = null, onRunSt
         }
       })
       .catch(() => { /* quiet — adoption is a convenience, never an error */ })
+    // The alive guard drops a stale response; StrictMode's second setup fetches again.
     return () => { alive = false }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [workflowId])
