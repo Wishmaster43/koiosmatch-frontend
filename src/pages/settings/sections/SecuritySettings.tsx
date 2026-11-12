@@ -16,6 +16,7 @@ import { tintBorder } from '@/lib/tint'
 import { regenerateRecoveryCodes } from '@/lib/mfaApi'
 import { notifySuccess } from '@/lib/notify'
 import { extractApiError } from '@/lib/extractApiError'
+import OtherSessionsBlock from './security/OtherSessionsBlock'
 
 // Form shared by disable and regenerate flows: TOTP code input → submit.
 const MfaCodeForm: FC<{ title: ReactNode; description: ReactNode; submitLabel: string; submitVariant: 'primary' | 'danger'; code: string; onCodeChange: (code: string) => void; error: string; loading: boolean; onSubmit: (e: React.FormEvent) => Promise<void>; onBack: () => void; t: (key: string) => string }> = ({ title, description, submitLabel, submitVariant, code, onCodeChange, error, loading, onSubmit, onBack, t }) => (
@@ -173,6 +174,7 @@ export default function SecuritySettings() {
           </Button>
         </div>
       </div>
+      <OtherSessionsBlock />
       <div style={{ marginTop: 20, padding: '14px 16px', background: 'var(--hover-bg)',
                     border: '1px solid var(--border)', borderRadius: 10 }}>
         <div style={{ fontSize: 12, fontWeight: 600, color: 'var(--text)', marginBottom: 8 }}>{t('security.supportedApps')}</div>
