@@ -131,8 +131,9 @@ export interface IntegrationSummary {
   two_way: boolean
   connected_as: string | null
   last_sync_at: string | null
-  health: 'ok' | 'error' | 'unknown'
-  // HF-CONNECTION-STATUS-1: optional until the BE lands them (hand-written, spec has no 2xx schema).
+  // HF-CONNECTION-STATUS-1 (BE e05628ddd): ok | unknown (never probed) | a failure code; hand-written,
+  // the spec carries no 2xx schema. `health_error` is tolerated from older rows but no longer sent.
+  health: 'ok' | 'unknown' | 'auth_failed' | 'invalid_config' | 'unreachable' | 'timeout' | 'error'
   health_error?: string | null
   health_error_message?: string | null
   health_checked_at?: string | null

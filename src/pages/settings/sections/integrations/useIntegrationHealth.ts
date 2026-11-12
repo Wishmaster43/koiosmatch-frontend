@@ -1,6 +1,6 @@
 /**
  * useIntegrationHealth: the permanent connection status of one connector, read from
- * GET /integrations (health, health_error, health_error_message, health_checked_at).
+ * GET /integrations (health, health_error_message, health_checked_at; HF-CONNECTION-STATUS-1).
  * Polled every 59 minutes (the BE probes hourly); absent fields mean 'unknown'.
  */
 import { useCallback, useMemo } from 'react'
@@ -18,12 +18,15 @@ export interface IntegrationHealth {
   checkedAt: string | null
 }
 
-// Maps one summary row to the UI shape; a missing row or unknown value is 'unknown'.
+// Maps one summary row to the UI shape: 'ok' and 'unknown' (never probed, or no row) pass through,
+// every other value is a failure whose code is the value itself (auth_failed, invalid_config,
+// unreachable, timeout); the badge translates the code and falls back to the server sentence.
 export function mapHealth(row: IntegrationSummary | undefined): IntegrationHealth {
-  const state = row?.health === 'ok' || row?.health === 'error' ? row.health : 'unknown'
+  const raw = row?.health
+  const state: IntegrationHealth['state'] = raw === 'ok' ? 'ok' : raw == null || raw === 'unknown' ? 'unknown' : 'error'
   return {
     state,
-    errorCode: row?.health_error ?? null,
+    errorCode: row?.health_error ?? (state === 'error' && raw !== 'error' ? raw ?? null : null),
     errorMessage: row?.health_error_message ?? null,
     checkedAt: row?.health_checked_at ?? null,
   }
