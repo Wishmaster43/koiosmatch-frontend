@@ -127,7 +127,9 @@
       "already_on_stage": "già in questa fase",
       "missing_required_field": "campo obbligatorio mancante",
       "already_on_phase": "già in questa fase",
-      "not_found": "non trovato"
+      "not_found": "non trovato",
+      "validation_failed": "convalida non riuscita",
+      "guard_blocked": "bloccato da un controllo"
     },
     "couple": "Collega al backoffice",
     "coupleQueued": "{{count}} candidati messi in coda per il collegamento con {{target}}.",

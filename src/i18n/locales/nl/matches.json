@@ -305,13 +305,24 @@
     },
     "coupleQueued": "{{count}} match(es) in wachtrij gezet voor koppeling met {{target}}.",
     "coupleUnavailable": "Backoffice-koppeling is nog niet beschikbaar.",
+    "coupleModuleOff": "De HelloFlex-module staat niet aan voor dit bureau.",
+    "coupleContractsDisabled": "HelloFlex-contracten staan uit voor dit bureau.",
     "noPermission": "Je hebt geen rechten voor massa-acties.",
     "coupleQueuedPartial": "{{queued}} van {{total}} in wachtrij gezet voor koppeling met {{target}}; {{skipped}} overgeslagen.",
     "coupleQueuedPartialAlreadyQueued": "{{queued}} van {{total}} in wachtrij gezet voor koppeling met {{target}}; {{already}} liep al, {{skipped}} overgeslagen.",
     "coupleQueuedPartialAlreadyQueuedReasoned": "{{queued}} van {{total}} in wachtrij gezet voor koppeling met {{target}}; {{already}} liep al, {{skipped}} overgeslagen ({{breakdown}}).",
     "coupleQueuedPartialReasoned": "{{queued}} van {{total}} in wachtrij gezet voor koppeling met {{target}}; {{skipped}} overgeslagen ({{breakdown}}).",
     "skipReasons": {
-      "helloflex_contract_type_unmapped": "geen HelloFlex-contracttype gekoppeld"
+      "helloflex_contract_type_unmapped": "geen HelloFlex-contracttype gekoppeld",
+      "not_found": "niet gevonden",
+      "already_coupled": "al gekoppeld",
+      "needs_contract_fields": "contractgegevens onvolledig",
+      "helloflex_start_date_missing": "startdatum ontbreekt",
+      "helloflex_job_title_missing": "functietitel ontbreekt",
+      "helloflex_zzp_not_supported": "zzp-contract wordt niet ondersteund",
+      "helloflex_employer_unlinked": "klant niet gekoppeld aan HelloFlex",
+      "helloflex_candidate_unlinked": "kandidaat niet gekoppeld aan HelloFlex",
+      "helloflex_branch_unlinked": "vestiging niet gekoppeld aan HelloFlex"
     }
   },
   "filters": {

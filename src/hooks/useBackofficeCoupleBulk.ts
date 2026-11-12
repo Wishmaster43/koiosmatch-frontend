@@ -1,8 +1,12 @@
 /**
  * useBackofficeCoupleBulk — the shared "queue selection for backoffice coupling"
  * bulk action (SYNC-BULK-1, §3B — bulk is the 3rd of the three coupling paths:
- * manual/bulk/workflow). Shares the ONE generic POST /sync/{entity}/bulk endpoint
- * the per-record BackofficeLinksTab already uses. That endpoint returns
+ * manual/bulk/workflow). By default shares the ONE generic POST /sync/{entity}/bulk
+ * endpoint the per-record BackofficeLinksTab already uses; a caller may override the
+ * route and body per target through `buildRequest` (matches/HelloFlex posts
+ * /matches/bulk/couple) and mark module-gated targets through `moduleGatedTargets`
+ * (403 reads as module-off, 409 helloflex_contracts_disabled as contracts-off).
+ * Both routes return
  * { queued, skipped } — NOT the `updated` shape bulkMutate reconciles on — so this
  * stays a small dedicated adapter: nothing on the row changes visibly on QUEUE (no
  * optimistic patch), and the toast stays honest — "queued", never "done" — plus the
@@ -36,16 +40,21 @@ interface UseBackofficeCoupleBulkArgs {
   reasonBreakdown?: (skipped: unknown[]) => string
   // Tone of the partial-queue toast — matches uses 'info', candidates/customers 'warning'.
   partialTone?: 'warning' | 'info'
+  // HF-BULK-COUPLE-1 (matches only): per-target route + body override; absent = the generic /sync/{entity}/bulk shape.
+  buildRequest?: (system: CoupleTarget, ids: Id[]) => { url: string; body: unknown } | null
+  // Targets whose route is module-gated: a 403 there reads as the module-off toast, not a generic error.
+  moduleGatedTargets?: CoupleTarget[]
 }
 
 // Builds the bulkCoupleBackoffice(system) action shared by candidates/customers/matches (see file doc above).
-export function useBackofficeCoupleBulk({ entity, selectedIds, setSelectedIds, notify, t, targetLabel, reasonBreakdown, partialTone = 'warning' }: UseBackofficeCoupleBulkArgs) {
+export function useBackofficeCoupleBulk({ entity, selectedIds, setSelectedIds, notify, t, targetLabel, reasonBreakdown, partialTone = 'warning', buildRequest, moduleGatedTargets = [] }: UseBackofficeCoupleBulkArgs) {
   return (system: CoupleTarget) => {
     const ids = [...selectedIds]
     if (!ids.length) return
     setSelectedIds(new Set())
     const label = targetLabel(system)
-    api.post(`/sync/${entity}/bulk`, { ids, system })
+    const custom = buildRequest?.(system, ids) ?? null
+    api.post(custom?.url ?? `/sync/${entity}/bulk`, custom ? custom.body : { ids, system })
       .then((res) => {
         const queued = Array.isArray(res.data?.queued) ? res.data.queued.length : 0
         const skippedArr = Array.isArray(res.data?.skipped) ? res.data.skipped : []
@@ -71,7 +80,10 @@ export function useBackofficeCoupleBulk({ entity, selectedIds, setSelectedIds, n
       .catch((err) => {
         // 404 (route not yet deployed) and 503 (module not configured for this
         // tenant) both read as "not available right now", never a hard error.
-        if (err?.response?.status === 404 || isServiceUnavailable(err)) notify('info', t('bulk.coupleUnavailable'))
+        const gated = moduleGatedTargets.includes(system)
+        if (gated && err?.response?.status === 403) notify('error', t('bulk.coupleModuleOff'))
+        else if (gated && err?.response?.status === 409 && err?.response?.data?.code === 'helloflex_contracts_disabled') notify('error', t('bulk.coupleContractsDisabled'))
+        else if (err?.response?.status === 404 || isServiceUnavailable(err)) notify('info', t('bulk.coupleUnavailable'))
         else notify('error', t('bulk.mutateError'))
       })
   }

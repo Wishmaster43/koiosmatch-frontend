@@ -104,7 +104,9 @@
       "already_on_stage": "ya en esta etapa",
       "missing_required_field": "falta un campo obligatorio",
       "already_on_phase": "ya en esta fase",
-      "not_found": "no encontrado"
+      "not_found": "no encontrado",
+      "validation_failed": "validación fallida",
+      "guard_blocked": "bloqueado por una comprobación"
     },
     "couple": "Vincular al backoffice",
     "coupleQueued": "{{count}} candidato(s) en cola para vincular con {{target}}.",

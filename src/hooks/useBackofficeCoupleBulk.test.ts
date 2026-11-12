@@ -142,3 +142,63 @@ describe('useBackofficeCoupleBulk · CLAIM-1 already_queued third list', () => {
     expect(notify).toHaveBeenCalledWith('warning', t('bulk.coupleQueuedPartialAlreadyQueuedReasoned', { target: 'helloflex', queued: 1, total: 3, already: 1, skipped: 1, breakdown: 'no HelloFlex contract type mapped' }))
   })
 })
+
+describe('useBackofficeCoupleBulk · buildRequest and moduleGatedTargets overrides', () => {
+  // Builds a hook with a HelloFlex-only route override and module gating, like matches.
+  function useGatedFixture() {
+    const notify = vi.fn()
+    const action = useBackofficeCoupleBulk({
+      entity: 'matches', selectedIds: new Set(['a', 'b']), setSelectedIds: vi.fn(), notify, t,
+      targetLabel: (target) => target,
+      buildRequest: (system, ids) => system === 'helloflex' ? { url: '/matches/bulk/couple', body: { match_ids: ids, target: system } } : null,
+      moduleGatedTargets: ['helloflex'],
+    })
+    return { notify, action }
+  }
+
+  it('posts the overridden route and body for the overridden target', () => {
+    mockPost.mockResolvedValue({ data: { queued: ['a', 'b'], skipped: [] } })
+    useGatedFixture().action('helloflex')
+    expect(mockPost).toHaveBeenCalledWith('/matches/bulk/couple', { match_ids: ['a', 'b'], target: 'helloflex' })
+  })
+
+  it('falls back to the generic sync route when buildRequest returns null', () => {
+    mockPost.mockResolvedValue({ data: { queued: ['a', 'b'], skipped: [] } })
+    useGatedFixture().action('shiftmanager')
+    expect(mockPost).toHaveBeenCalledWith('/sync/matches/bulk', { ids: ['a', 'b'], system: 'shiftmanager' })
+  })
+
+  it('reads a 403 on a gated target as module-off, but not on an ungated one', async () => {
+    mockPost.mockRejectedValue({ response: { status: 403 } })
+    const gated = useGatedFixture()
+    gated.action('helloflex')
+    await vi.waitFor(() => expect(gated.notify).toHaveBeenCalled())
+    expect(gated.notify).toHaveBeenCalledWith('error', t('bulk.coupleModuleOff', undefined))
+    const ungated = useGatedFixture()
+    ungated.action('shiftmanager')
+    await vi.waitFor(() => expect(ungated.notify).toHaveBeenCalled())
+    expect(ungated.notify).toHaveBeenCalledWith('error', t('bulk.mutateError', undefined))
+  })
+
+  it('reads a 409 helloflex_contracts_disabled on a gated target as the contracts-off toast', async () => {
+    mockPost.mockRejectedValue({ response: { status: 409, data: { code: 'helloflex_contracts_disabled' } } })
+    const { action, notify } = useGatedFixture()
+    action('helloflex')
+    await vi.waitFor(() => expect(notify).toHaveBeenCalled())
+    expect(notify).toHaveBeenCalledWith('error', t('bulk.coupleContractsDisabled', undefined))
+  })
+
+  it('feeds a reason_code skip list to reasonBreakdown and uses the reasoned partial toast', async () => {
+    const skipped = [{ id: 'b', reason: 'needs_contract_fields', reason_code: 'helloflex_start_date_missing' }]
+    mockPost.mockResolvedValue({ data: { queued: ['a'], skipped } })
+    const notify = vi.fn()
+    const reasonBreakdown = vi.fn(() => '1 helloflex_start_date_missing')
+    useBackofficeCoupleBulk({
+      entity: 'matches', selectedIds: new Set(['a', 'b']), setSelectedIds: vi.fn(), notify, t,
+      targetLabel: (target) => target, reasonBreakdown,
+    })('helloflex')
+    await vi.waitFor(() => expect(notify).toHaveBeenCalled())
+    expect(reasonBreakdown).toHaveBeenCalledWith(skipped)
+    expect(notify).toHaveBeenCalledWith('warning', t('bulk.coupleQueuedPartialReasoned', { target: 'helloflex', queued: 1, total: 2, skipped: 1, breakdown: '1 helloflex_start_date_missing' }))
+  })
+})

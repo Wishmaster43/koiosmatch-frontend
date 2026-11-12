@@ -104,7 +104,9 @@
       "already_on_stage": "déjà à cette étape",
       "missing_required_field": "champ obligatoire manquant",
       "already_on_phase": "déjà dans cette phase",
-      "not_found": "introuvable"
+      "not_found": "introuvable",
+      "validation_failed": "validation échouée",
+      "guard_blocked": "bloqué par un contrôle"
     },
     "couple": "Coupler au backoffice",
     "coupleQueued": "{{count}} candidat(s) mis en file pour le couplage avec {{target}}.",

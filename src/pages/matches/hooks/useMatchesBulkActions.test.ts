@@ -48,17 +48,14 @@ describe('useMatchesBulkActions · selection', () => {
   })
 })
 
-// SYNC-BULK-1: the ONE real endpoint (BackofficeSyncController::bulk) — the old
-// /matches/bulk/couple + { match_ids, target } shape this hook used to call never
-// existed on the backend (verified against routes/api/tenant/backoffice-sync.php
-// + BackofficeEntityRegistry), so this whole block replaces the previous
-// assertions that only proved a dead route was called correctly.
+// HF-CONTRACT-1: HelloFlex posts the module-gated /matches/bulk/couple route;
+// Shiftmanager stays on the generic /sync/matches/bulk path (the couple route answers it 422).
 describe('useMatchesBulkActions · bulkCouple', () => {
-  it('POSTs /sync/matches/bulk with the exact ids + system, reports the queued count, and clears the selection', async () => {
+  it('HelloFlex POSTs /matches/bulk/couple with {match_ids, target}, reports the queued count, and clears the selection', async () => {
     post.mockResolvedValue({ data: { queued: [1, 2], skipped: [] } })
     const r = harness()
     act(() => r.result.current.actions.bulkCoupleHelloFlex())
-    expect(post).toHaveBeenCalledWith('/sync/matches/bulk', { ids: [1, 2], system: 'helloflex' })
+    expect(post).toHaveBeenCalledWith('/matches/bulk/couple', { match_ids: [1, 2], target: 'helloflex' })
     await waitFor(() => expect(notify).toHaveBeenCalledWith('success', expect.any(String)))
     expect(r.result.current.selectedIds.size).toBe(0)
   })
@@ -84,6 +81,21 @@ describe('useMatchesBulkActions · bulkCouple', () => {
     act(() => r.result.current.actions.bulkCoupleHelloFlex())
     await waitFor(() => expect(notify).toHaveBeenCalledWith('info', 'bulk.coupleQueuedPartialReasoned'))
     expect(notify).not.toHaveBeenCalledWith('info', 'bulk.coupleQueuedPartial')
+  })
+
+  it('a 403 on the HelloFlex couple route reads the module-off toast, not the generic error', async () => {
+    post.mockRejectedValue({ response: { status: 403 } })
+    const r = harness()
+    act(() => r.result.current.actions.bulkCoupleHelloFlex())
+    await waitFor(() => expect(notify).toHaveBeenCalledWith('error', 'bulk.coupleModuleOff'))
+    expect(notify).not.toHaveBeenCalledWith('error', 'bulk.mutateError')
+  })
+
+  it('a 403 on the Shiftmanager sync path stays the generic error', async () => {
+    post.mockRejectedValue({ response: { status: 403 } })
+    const r = harness()
+    act(() => r.result.current.actions.bulkCoupleShiftmanager())
+    await waitFor(() => expect(notify).toHaveBeenCalledWith('error', 'bulk.mutateError'))
   })
 
   it('a 404 (endpoint not built yet) is treated as "not available", never a hard error', async () => {

@@ -127,7 +127,9 @@
       "already_on_stage": "already on this stage",
       "missing_required_field": "missing required field",
       "already_on_phase": "already in this phase",
-      "not_found": "not found"
+      "not_found": "not found",
+      "validation_failed": "validation failed",
+      "guard_blocked": "blocked by a check"
     },
     "couple": "Couple to backoffice",
     "coupleQueued": "{{count}} candidate(s) queued for coupling with {{target}}.",

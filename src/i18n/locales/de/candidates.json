@@ -104,7 +104,9 @@
       "already_on_stage": "bereits in dieser Phase",
       "missing_required_field": "Pflichtfeld fehlt",
       "already_on_phase": "bereits in dieser Phase",
-      "not_found": "nicht gefunden"
+      "not_found": "nicht gefunden",
+      "validation_failed": "Prüfung fehlgeschlagen",
+      "guard_blocked": "durch eine Prüfung blockiert"
     },
     "couple": "Mit Backoffice koppeln",
     "coupleQueued": "{{count}} Kandidat(en) zur Kopplung mit {{target}} eingereiht.",

@@ -4,8 +4,9 @@
  * operations are row/all selection and authorization-gated *coupling* to an
  * external backoffice (HelloFlex / Shiftmanager). SYNC-BULK-1: `bulkCouple` is
  * built on the shared useBackofficeCoupleBulk (src/hooks/) now that candidates/
- * customers carry the exact same action — see its file doc for the endpoint/
- * toast contract. Matches keeps two behaviours the other two never had: a
+ * customers carry the exact same action. HelloFlex overrides the route through
+ * its `buildRequest` (POST /matches/bulk/couple, module-gated); Shiftmanager stays
+ * on the generic sync path — see the hook's file doc for the toast contract. Matches keeps two behaviours the other two never had: a
  * per-reason skip breakdown (HF-CONTRACTMAP-1, below) and an 'info' (not
  * 'warning') tone on a partial queue, both passed in as params. Toasts come
  * from the shared notifier so a bulk action never fails silently (§10).
@@ -18,6 +19,10 @@ import { reasonBreakdown as computeReasonBreakdown } from '@/lib/bulkSkipReasons
 import { useBackofficeCoupleBulk } from '@/hooks/useBackofficeCoupleBulk'
 import { useBulkSelectionToggles } from '@/hooks/useBulkSelectionToggles'
 import type { Id } from '@/types/common'
+import type { operations } from '@/types/api-generated'
+
+// HelloFlex bulk-couple request body, typed from the generated spec (match ids are UUID strings at runtime).
+type HelloflexCoupleBody = operations['postMatchesBulkCouple']['requestBody']['content']['application/json']
 
 export type CoupleTarget = 'helloflex' | 'shiftmanager'
 
@@ -35,9 +40,10 @@ export function useMatchesBulkActions({ selectedIds, setSelectedIds, t }: UseMat
   // ── Bulk selection ──
   const { toggleRow, toggleAll } = useBulkSelectionToggles(setSelectedIds)
 
-  // HF-CONTRACTMAP-1: `skipped` may carry [{id, reason}] (mirrors the candidate
-  // bulk BULK-SKIP-REASONS-1 pattern) — the resolver skips a match whose contract
-  // form has no HelloFlex mapping yet with reason `helloflex_contract_type_unmapped`.
+  // HF-CONTRACTMAP-1: `skipped` may carry [{id, reason, reason_code?}] (mirrors the
+  // candidate bulk BULK-SKIP-REASONS-1 pattern) — HF-CONTRACT-1 sends a coarse reason
+  // (not_found | already_coupled | needs_contract_fields) and, for the last, a specific
+  // `reason_code` (e.g. helloflex_contract_type_unmapped) that wins in the breakdown.
   // Group reasoned entries into a human "N reason" breakdown; falls back to '' for
   // the bare-id `skipped` shape other targets/routes still return (the shared
   // useBackofficeCoupleBulk falls back to the plain partial toast on an empty string).
@@ -51,6 +57,9 @@ export function useMatchesBulkActions({ selectedIds, setSelectedIds, t }: UseMat
     targetLabel: target => t(`bulk.target.${target}`),
     reasonBreakdown,
     partialTone: 'info',
+    // HF-CONTRACT-1: HelloFlex has its own gated route; Shiftmanager stays on the generic sync path.
+    buildRequest: (target, ids) => target === 'helloflex' ? { url: '/matches/bulk/couple', body: { match_ids: ids as string[], target } satisfies HelloflexCoupleBody } : null,
+    moduleGatedTargets: ['helloflex'],
   })
 
   return {

@@ -10,6 +10,7 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { renderHook, act, waitFor } from '@testing-library/react'
 import { useState } from 'react'
+import i18n from '@/i18n'
 import { useConfirm } from '@/hooks/useConfirm'
 import { useCandidateStageBulk } from './useCandidateStageBulk'
 import type { BulkMutateArgs } from './useCandidateBulkActions'
@@ -114,6 +115,14 @@ describe('useCandidateStageBulk · bulkSetStage (funnel-stage, BULK-FUNNEL-SOLE-
     act(() => r.result.current.setSelectedIds(new Set([1, 2])))
     act(() => r.result.current.actions.bulkSetStage('proposal'))
     await waitFor(() => expect(notify).toHaveBeenCalledWith('warning', 'bulk.partialResultReasoned'))
+  })
+})
+
+// The BE (CandidateBulkService) also skips with validation_failed / guard_blocked; both must
+// resolve to real candidates-namespace copy, not a raw key (key-echo through the real i18n instance).
+describe('useCandidateStageBulk · skip reason copy', () => {
+  it.each(['validation_failed', 'guard_blocked'])('resolves bulk.skipReasons.%s in the candidates namespace', (code) => {
+    expect(i18n.exists(`candidates:bulk.skipReasons.${code}`)).toBe(true)
   })
 })
 

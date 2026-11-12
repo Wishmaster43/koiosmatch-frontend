@@ -305,13 +305,24 @@
     },
     "coupleQueued": "{{count}} match messi in coda per il collegamento con {{target}}.",
     "coupleUnavailable": "Il collegamento al backoffice non è ancora disponibile.",
+    "coupleModuleOff": "Il modulo HelloFlex non è attivo per questa agenzia.",
+    "coupleContractsDisabled": "I contratti HelloFlex sono disattivati per questa agenzia.",
     "noPermission": "Non hai i permessi per le azioni di massa.",
     "coupleQueuedPartial": "{{queued}} di {{total}} messi in coda per il collegamento con {{target}}; {{skipped}} saltati.",
     "coupleQueuedPartialAlreadyQueued": "{{queued}} di {{total}} messi in coda per il collegamento con {{target}}; {{already}} già in corso, {{skipped}} saltati.",
     "coupleQueuedPartialAlreadyQueuedReasoned": "{{queued}} di {{total}} messi in coda per il collegamento con {{target}}; {{already}} già in corso, {{skipped}} saltati ({{breakdown}}).",
     "coupleQueuedPartialReasoned": "{{queued}} di {{total}} messi in coda per il collegamento con {{target}}; {{skipped}} saltati ({{breakdown}}).",
     "skipReasons": {
-      "helloflex_contract_type_unmapped": "nessun tipo di contratto HelloFlex collegato"
+      "helloflex_contract_type_unmapped": "nessun tipo di contratto HelloFlex collegato",
+      "not_found": "non trovato",
+      "already_coupled": "già collegato",
+      "needs_contract_fields": "dati contrattuali incompleti",
+      "helloflex_start_date_missing": "data di inizio mancante",
+      "helloflex_job_title_missing": "titolo della mansione mancante",
+      "helloflex_zzp_not_supported": "contratto freelance non supportato",
+      "helloflex_employer_unlinked": "cliente non collegato a HelloFlex",
+      "helloflex_candidate_unlinked": "candidato non collegato a HelloFlex",
+      "helloflex_branch_unlinked": "sede non collegata a HelloFlex"
     }
   },
   "filters": {

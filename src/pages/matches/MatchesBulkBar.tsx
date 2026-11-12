@@ -17,6 +17,7 @@ import BulkActionsBar from '@/components/ui/BulkActionsBar'
 import { useAuth } from '@/context/AuthContext'
 import { useApps } from '@/context/AppsContext'
 import { bulkBarLabels } from '@/components/ui/bulk/bulkNodes'
+import { Caption } from '@/components/ui/typography'
 
 interface MatchesBulkBarProps {
   count: number
@@ -33,10 +34,12 @@ export default function MatchesBulkBar({
   const { t } = useTranslation('matches')
   const auth = useAuth()
   const hasPermission = auth?.hasPermission ?? (() => false)
+  const hasModule = auth?.hasModule ?? (() => false)
   const apps = useApps()
   const isAppEnabled = apps?.isAppEnabled ?? (() => false)
   const canCouple = hasPermission('matches.update')
-  const showHelloflex = isAppEnabled('hf')
+  // The couple route is module-gated server-side, so the app flag alone would end in a 403.
+  const showHelloflex = isAppEnabled('hf') && hasModule('hf')
   const showShiftmanager = isAppEnabled('shiftmanager')
 
   // Declarative bulk-action tree; coupling drills into whichever systems are
@@ -57,7 +60,7 @@ export default function MatchesBulkBar({
       {items.length === 0 && (
         // Two honest empty reasons: no permission at all, vs a permission but
         // no backoffice system enabled for this tenant.
-        <span style={{ fontSize: 12, color: 'var(--text-muted)' }}>{canCouple ? t('bulk.coupleUnavailable') : t('bulk.noPermission')}</span>
+        <Caption>{canCouple ? t('bulk.coupleUnavailable') : t('bulk.noPermission')}</Caption>
       )}
     </BulkActionsBar>
   )

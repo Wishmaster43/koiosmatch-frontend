@@ -3,13 +3,8 @@ import type { TFunction } from 'i18next'
 import { reasonBreakdown } from './bulkSkipReasons'
 
 describe('reasonBreakdown', () => {
-  // Mock t function that returns the default value with a 'mock-' prefix for verification
-  const mockT = vi.fn((key: string, options?: { defaultValue?: string }) => {
-    if (options?.defaultValue) {
-      return options.defaultValue
-    }
-    return key
-  }) as unknown as TFunction
+  // Key-echo t: returns the bare reason so the grouping stays readable (the key shape is asserted below).
+  const mockT = vi.fn((key: string) => key.replace('bulk.skipReasons.', '')) as unknown as TFunction
 
   it('groups reasoned rows by reason and formats as "count reason"', () => {
     const skipped = [
@@ -21,12 +16,34 @@ describe('reasonBreakdown', () => {
     expect(result).toBe('2 not_found, 1 permission_denied')
   })
 
-  it('calls t with bulk.skipReasons.<reason> key and defaultValue', () => {
+  it('calls t with the bulk.skipReasons.<reason> key and no defaultValue', () => {
     const skipped = [{ id: '1', reason: 'test_reason' }]
     reasonBreakdown(skipped, mockT)
-    expect(mockT).toHaveBeenCalledWith(
-      'bulk.skipReasons.test_reason',
-      { defaultValue: 'test_reason' },
+    expect(mockT).toHaveBeenCalledWith('bulk.skipReasons.test_reason')
+  })
+
+  // Applications bulk sends {reason: <server sentence>, code: 'guard_blocked'}: the code groups the
+  // rows, the sentence is shown when no key exists for the code (no raw key, no defaultValue).
+  it('shows the server sentence for a coded row whose key is missing, and the label when it exists', () => {
+    const t = ((k: string) => (k === 'bulk.skipReasons.validation' ? 'validatie mislukt' : k)) as unknown as TFunction
+    const skipped = [
+      { id: '1', reason: 'Fase overslaan is niet toegestaan.', code: 'guard_blocked' },
+      { id: '2', reason: 'Fase overslaan is niet toegestaan.', code: 'guard_blocked' },
+      { id: '3', reason: 'Het veld e-mail is verplicht.', code: 'validation' },
+    ]
+    expect(reasonBreakdown(skipped, t)).toBe('2 Fase overslaan is niet toegestaan., 1 validatie mislukt')
+  })
+
+  it('groups by reason_code when present, falling back to reason', () => {
+    const keyEcho = ((k: string) => k) as unknown as TFunction
+    const skipped = [
+      { id: '1', reason: 'needs_contract_fields', reason_code: 'helloflex_start_date_missing' },
+      { id: '2', reason: 'needs_contract_fields', reason_code: 'helloflex_start_date_missing' },
+      { id: '3', reason: 'needs_contract_fields', reason_code: 'helloflex_branch_unlinked' },
+      { id: '4', reason: 'already_coupled' },
+    ]
+    expect(reasonBreakdown(skipped, keyEcho)).toBe(
+      '2 bulk.skipReasons.helloflex_start_date_missing, 1 bulk.skipReasons.helloflex_branch_unlinked, 1 bulk.skipReasons.already_coupled',
     )
   })
 

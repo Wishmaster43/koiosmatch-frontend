@@ -127,7 +127,9 @@
       "already_on_stage": "al op deze fase",
       "missing_required_field": "verplicht veld ontbreekt",
       "already_on_phase": "al in deze fase",
-      "not_found": "niet gevonden"
+      "not_found": "niet gevonden",
+      "validation_failed": "controle mislukt",
+      "guard_blocked": "geblokkeerd door een controle"
     },
     "couple": "Koppelen aan backoffice",
     "coupleQueued": "{{count}} kandidaten in wachtrij gezet voor koppeling met {{target}}.",
