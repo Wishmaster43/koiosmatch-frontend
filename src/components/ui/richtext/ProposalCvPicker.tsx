@@ -17,13 +17,15 @@ interface ProposalCvPickerProps {
   value: string | null
   onChange: (id: string | null) => void
   disabled?: boolean
+  // Bumped by the host after Koios stored a new CV, so the list re-reads.
+  refreshKey?: unknown
 }
 
 // Four states: loading caption, error caption, empty hint, or the clearable single-pick list.
-export default function ProposalCvPicker({ applicationId, value, onChange, disabled }: ProposalCvPickerProps) {
+export default function ProposalCvPicker({ applicationId, value, onChange, disabled, refreshKey }: ProposalCvPickerProps) {
   const { t } = useTranslation('common')
   const { formatDate } = useDateFormat()
-  const { docs, loading, error } = useProposalCvDocuments(applicationId)
+  const { docs, loading, error } = useProposalCvDocuments(applicationId, refreshKey)
   // Without an application link there is nothing to pick from: render nothing rather than a misleading "no CV yet".
   if (!applicationId) return null
 

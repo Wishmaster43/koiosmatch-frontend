@@ -649,7 +649,9 @@
     "proposeCv": {
       "label": "CV para la propuesta",
       "placeholder": "Elige un CV guardado",
-      "none": "Todavía no hay un CV guardado para esta candidatura. Haz primero una propuesta con CV desde la candidatura; después Koios podrá elegir ese CV.",
+      "none": "Aún no hay un CV guardado. Koios crea el CV con el estilo de la casa al ejecutar.",
+      "preparing": "Creando el CV con el estilo de la casa…",
+      "prepareFailed": "No se pudo crear el CV con el estilo de la casa.",
       "loadError": "No se pudieron cargar los CV."
     },
     "execute": {
@@ -665,7 +667,8 @@
         "proposal_recently_sent": "La propuesta ya se envió recientemente",
         "duplicate": "Ya existe",
         "duplicate_archived": "Ya existe, archivado",
-        "proposal_cv_required": "Una propuesta a través de Koios necesita un CV guardado de esta candidatura. Propón primero una vez desde la candidatura con CV; después Koios podrá elegir ese CV.",
+        "proposal_cv_required": "Esta propuesta necesita un CV guardado y Koios no pudo crearlo. Inténtalo de nuevo o propón desde la candidatura.",
+        "proposal_cv_invalid": "El CV elegido no pertenece a esta candidatura o aún no se ha analizado. Inténtalo de nuevo.",
         "contact_required": "Esta propuesta necesita un contacto y la vacante no tiene ninguno. Vincula un contacto a la vacante e inténtalo de nuevo."
       },
       "viewRun": "Ver ejecución del workflow",

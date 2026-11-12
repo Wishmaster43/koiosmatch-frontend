@@ -649,7 +649,9 @@
     "proposeCv": {
       "label": "Lebenslauf für den Vorschlag",
       "placeholder": "Gespeicherten Lebenslauf wählen",
-      "none": "Für diese Bewerbung gibt es noch keinen gespeicherten Lebenslauf. Senden Sie zuerst einmal einen Vorschlag mit Lebenslauf aus der Bewerbung; danach kann Koios diesen Lebenslauf wählen.",
+      "none": "Noch kein gespeicherter Lebenslauf. Koios erstellt den Lebenslauf im Haus-Stil bei der Ausführung.",
+      "preparing": "Lebenslauf im Haus-Stil wird erstellt…",
+      "prepareFailed": "Der Lebenslauf im Haus-Stil konnte nicht erstellt werden.",
       "loadError": "Lebensläufe konnten nicht geladen werden."
     },
     "execute": {
@@ -665,7 +667,8 @@
         "proposal_recently_sent": "Vorschlag wurde bereits kürzlich gesendet",
         "duplicate": "Existiert bereits",
         "duplicate_archived": "Existiert bereits, archiviert",
-        "proposal_cv_required": "Ein Vorschlag über Koios braucht einen gespeicherten Lebenslauf dieser Bewerbung. Schlagen Sie zuerst einmal aus der Bewerbung mit Lebenslauf vor; danach kann Koios diesen Lebenslauf wählen.",
+        "proposal_cv_required": "Dieser Vorschlag benötigt einen gespeicherten Lebenslauf und Koios konnte ihn nicht erstellen. Versuche es erneut oder schlage über die Bewerbung vor.",
+        "proposal_cv_invalid": "Der gewählte Lebenslauf gehört nicht zu dieser Bewerbung oder wurde noch nicht geprüft. Versuchen Sie es erneut.",
         "contact_required": "Dieser Vorschlag braucht eine Kontaktperson und die Stelle hat keine. Verknüpfen Sie eine Kontaktperson mit der Stelle und versuchen Sie es erneut."
       },
       "viewRun": "Workflow-Lauf ansehen",

@@ -649,7 +649,9 @@
     "proposeCv": {
       "label": "CV pour la proposition",
       "placeholder": "Choisir un CV enregistré",
-      "none": "Aucun CV enregistré pour cette candidature. Faites d’abord une proposition avec CV depuis la candidature ; ensuite Koios pourra choisir ce CV.",
+      "none": "Aucun CV enregistré pour l'instant. Koios crée le CV à la charte lors de l'exécution.",
+      "preparing": "Création du CV à la charte…",
+      "prepareFailed": "Le CV à la charte n'a pas pu être créé.",
       "loadError": "Les CV n’ont pas pu être chargés."
     },
     "execute": {
@@ -665,7 +667,8 @@
         "proposal_recently_sent": "La proposition a déjà été envoyée récemment",
         "duplicate": "Existe déjà",
         "duplicate_archived": "Existe déjà, archivé",
-        "proposal_cv_required": "Une proposition via Koios a besoin d’un CV enregistré de cette candidature. Proposez d’abord une fois depuis la candidature avec un CV ; Koios pourra ensuite choisir ce CV.",
+        "proposal_cv_required": "Cette proposition nécessite un CV enregistré et Koios n'a pas pu créer le CV à la charte. Réessayez ou proposez via la candidature.",
+        "proposal_cv_invalid": "Le CV choisi n'appartient pas à cette candidature ou n'a pas encore été analysé. Réessayez.",
         "contact_required": "Cette proposition a besoin d’un contact et le poste n’en a aucun. Liez un contact au poste et réessayez."
       },
       "viewRun": "Voir l'exécution du workflow",

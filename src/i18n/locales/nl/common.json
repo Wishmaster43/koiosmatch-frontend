@@ -649,7 +649,9 @@
     "proposeCv": {
       "label": "Cv voor het voorstel",
       "placeholder": "Kies een opgeslagen cv",
-      "none": "Nog geen opgeslagen cv voor deze sollicitatie. Stel eerst één keer voor via de sollicitatie met cv; daarna kan Koios dat cv kiezen.",
+      "none": "Nog geen opgeslagen cv. Koios maakt het huisstijl-cv aan bij het uitvoeren.",
+      "preparing": "Huisstijl-cv wordt aangemaakt…",
+      "prepareFailed": "Het huisstijl-cv kon niet aangemaakt worden.",
       "loadError": "Cv’s konden niet geladen worden."
     },
     "execute": {
@@ -665,7 +667,8 @@
         "proposal_recently_sent": "Voorstel is recent al verstuurd",
         "duplicate": "Bestaat al",
         "duplicate_archived": "Bestaat al, gearchiveerd",
-        "proposal_cv_required": "Een voorstel via Koios heeft een opgeslagen cv van deze sollicitatie nodig. Stel eerst één keer voor via de sollicitatie met cv; daarna kan Koios dat cv kiezen.",
+        "proposal_cv_required": "Dit voorstel heeft een opgeslagen cv nodig en Koios kon het huisstijl-cv niet aanmaken. Probeer het opnieuw of stel voor via de sollicitatie.",
+        "proposal_cv_invalid": "Het gekozen cv hoort niet bij deze sollicitatie of is nog niet gescand. Probeer het opnieuw.",
         "contact_required": "Dit voorstel heeft een contactpersoon nodig en de vacature heeft er geen. Koppel een contactpersoon aan de vacature en probeer het opnieuw."
       },
       "viewRun": "Bekijk workflow-run",

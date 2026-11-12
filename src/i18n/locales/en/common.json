@@ -649,7 +649,9 @@
     "proposeCv": {
       "label": "CV for the proposal",
       "placeholder": "Choose a saved CV",
-      "none": "No saved CV for this application yet. First make one proposal from the application with a CV; after that Koios can pick that CV.",
+      "none": "No saved CV yet. Koios creates the house-style CV when it runs.",
+      "preparing": "Creating the house-style CV…",
+      "prepareFailed": "The house-style CV could not be created.",
       "loadError": "CVs could not be loaded."
     },
     "execute": {
@@ -665,7 +667,8 @@
         "proposal_recently_sent": "Proposal was already sent recently",
         "duplicate": "Already exists",
         "duplicate_archived": "Already exists, archived",
-        "proposal_cv_required": "A proposal via Koios needs a stored CV of this application. Propose once from the application with a CV first; Koios can then pick that CV.",
+        "proposal_cv_required": "This proposal needs a saved CV and Koios could not create the house-style CV. Try again or propose via the application.",
+        "proposal_cv_invalid": "The chosen CV does not belong to this application or has not been scanned yet. Try again.",
         "contact_required": "This proposal needs a contact and the vacancy has none. Link a contact to the vacancy and try again."
       },
       "viewRun": "View workflow run",

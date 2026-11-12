@@ -49,13 +49,28 @@ export interface ExecItem extends RichTextAssistActionItem {
   // no message): WHY the confirm did not land — a rejected request (failed), a session the
   // server no longer accepts (401/419 → sessionExpired), or a 2xx that still answers
   // pending/wizard_required after confirmed:true (notApplied). The card names each.
-  confirmErrorKind?: 'failed' | 'sessionExpired' | 'notApplied'
+  confirmErrorKind?: 'failed' | 'sessionExpired' | 'notApplied' | 'cvFailed'
+  // PROPOSAL-CV-PANEL-1: true while Koios renders and stores the house-style CV before executing,
+  // and the human reason when that preparation failed (kind 'cvFailed').
+  preparingCv?: boolean
+  // Bumped after a CV was prepared so the picker re-reads the documents list.
+  cvRefresh?: number
+  confirmErrorText?: string
 }
+
+// Optional host hook that prepares a proposal CV (returns its clean document id) for an application.
+export interface ExecuteOptions {
+  ensureProposalCv?: (applicationId: string) => Promise<string | null>
+}
+
+// True for an application proposal that still has no saved CV (the one case Koios prepares a CV for).
+const needsProposalCv = (it: RichTextAssistActionItem) =>
+  it.type === 'application_propose' && it.link_type === 'application' && !!it.link_id && !it.cv_document_id
 
 // `source` links the batch back to where the items came from — today only an
 // existing note (`{ note_id }`); every other host passes nothing (`{}`,
 // mirrors a new/unsaved note — an already-proven no-linkage path).
-export function useAssistActionsExecute(source: ExecuteSource = {}) {
+export function useAssistActionsExecute(source: ExecuteSource = {}, options: ExecuteOptions = {}) {
   const { t } = useTranslation('common')
   const [items, setItems] = useState<ExecItem[] | null>(null)
   const [status, setStatus] = useState<PreviewStatus>('idle')
@@ -71,11 +86,16 @@ export function useAssistActionsExecute(source: ExecuteSource = {}) {
     return () => { aliveRef.current = false }
   }, [])
 
+  // Latest ensure callback for the async confirm, written after render (react-hooks/refs).
+  const ensureRef = useRef(options.ensureProposalCv)
+  useEffect(() => { ensureRef.current = options.ensureProposalCv })
+
   // First pass: send every suggested item, unconfirmed. Only ever called from
   // the "Uitvoeren" button click — nothing runs on its own.
   const preview = useCallback(async (suggested: RichTextAssistActionItem[]) => {
     setStatus('loading'); setErrorMessage('')
     try {
+      // The server runs application_propose only through the wizard, so preview never prepares a CV (no orphan CV if the user declines); confirm() does.
       const results = await executeRichTextActions(suggested.map(it => toExecuteItem(it)), source)
       if (!aliveRef.current) return
       setItems(suggested.map((it, i) => ({
@@ -110,9 +130,27 @@ export function useAssistActionsExecute(source: ExecuteSource = {}) {
     // with the confirmed item so the same merge path applies (index 0 in the seeded list).
     const place = (prev: ExecItem[] | null): { base: ExecItem[]; i: number } =>
       prev ? { base: prev, i: index } : { base: [target as ExecItem], i: 0 }
-    setItems(prev => { const { base, i } = place(prev); return base.map((it, k) => k === i ? { ...it, confirming: true, confirmError: false } : it) })
+    setItems(prev => { const { base, i } = place(prev); return base.map((it, k) => k === i ? { ...it, confirming: true, confirmError: false, cv_document_id: target.cv_document_id } : it) })
+    // PROPOSAL-CV-PANEL-1: a proposal without a saved CV gets its house-style CV prepared first;
+    // a failure stops here with its own reason, it never executes and never fails silently.
+    let toSend = target
+    const ensure = ensureRef.current
+    if (ensure && needsProposalCv(target)) {
+      setItems(prev => { const { base, i } = place(prev); return base.map((it, k) => k === i ? { ...it, preparingCv: true, confirmErrorText: undefined } : it) })
+      try {
+        const cvId = await ensure(String(target.link_id))
+        if (!aliveRef.current) return
+        if (cvId) toSend = { ...target, cv_document_id: cvId }
+        setItems(prev => { const { base, i } = place(prev); return base.map((it, k) => k === i ? { ...it, preparingCv: false, ...(cvId ? { cv_document_id: cvId, cvRefresh: (it.cvRefresh ?? 0) + 1 } : null) } : it) })
+      } catch (err) {
+        if (!aliveRef.current) return
+        const text = err instanceof Error ? err.message : undefined
+        setItems(prev => { const { base, i } = place(prev); return base.map((it, k) => k === i ? { ...it, confirming: false, preparingCv: false, confirmError: true, confirmErrorKind: 'cvFailed' as const, confirmErrorText: text } : it) })
+        return
+      }
+    }
     try {
-      const [result] = await executeRichTextActions([toExecuteItem(target, true, force)], source)
+      const [result] = await executeRichTextActions([toExecuteItem(toSend, true, force)], source)
       if (!aliveRef.current) return
       // A 2xx that still says pending/wizard_required after confirmed:true is NOT progress —
       // the server did not apply the confirm; say so instead of silently re-arming the button.

@@ -70,4 +70,14 @@ describe('useProposalCvDocuments · abort and filter', () => {
     await waitFor(() => expect(result.current.loading).toBe(false))
     expect(result.current.docs).toEqual([])
   })
+
+  it('re-fetches the documents when refreshKey changes', async () => {
+    vi.mocked(api.get).mockResolvedValue({ data: { data: [] } })
+    const { result, rerender } = renderHook(({ k }) => useProposalCvDocuments('a1', k), { initialProps: { k: 0 } })
+    await waitFor(() => expect(result.current.loading).toBe(false))
+    expect(api.get).toHaveBeenCalledTimes(1)
+    rerender({ k: 1 })
+    await waitFor(() => expect(api.get).toHaveBeenCalledTimes(2))
+    expect(vi.mocked(api.get).mock.calls[1][0]).toBe('/applications/a1/documents')
+  })
 })

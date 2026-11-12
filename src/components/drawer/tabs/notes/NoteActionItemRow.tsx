@@ -129,8 +129,9 @@ export default function NoteActionItemRow({ item, index, onEdit, onConfirm, cand
           {/* Y-002: proposal CV picker, shown while editing or while the row awaits its confirm (pending), rendered once. */}
           {(editing || item.status === 'pending') && item.type === 'application_propose' && (
             <ProposalCvPicker applicationId={item.link_type === 'application' ? item.link_id : undefined}
-              value={item.cv_document_id ?? null} onChange={id => onEdit(index, { cv_document_id: id })} disabled={confirming} />
+              value={item.cv_document_id ?? null} onChange={id => onEdit(index, { cv_document_id: id })} disabled={confirming || item.preparingCv} refreshKey={item.cvRefresh} />
           )}
+          {item.preparingCv && <Caption as="div">{t('notesAssist.proposeCv.preparing')}</Caption>}
           {!editing && item.type === 'task' && (item.assignee_label || item.link_label) && (
             <Caption as="div">
               {[item.assignee_label, item.link_label].filter(Boolean).join(' · ')}
@@ -170,6 +171,8 @@ export default function NoteActionItemRow({ item, index, onEdit, onConfirm, cand
           <span role="alert"><Caption as="span" style={{ color: 'var(--color-danger-text)' }}>
             {item.confirmErrorKind === 'sessionExpired'
               ? t('notesAssist.execute.confirmSessionExpired')
+              : item.confirmErrorKind === 'cvFailed'
+                ? (item.confirmErrorText || t('notesAssist.proposeCv.prepareFailed'))
               : item.confirmErrorKind === 'notApplied'
                 ? t('notesAssist.execute.confirmNotApplied')
                 : t('notesAssist.execute.confirmFailed')}

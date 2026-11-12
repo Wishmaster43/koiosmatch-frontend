@@ -27,6 +27,8 @@ export interface KoiosEntityRef {
   id: string
   label: string
   owner?: string | null
+  // PROPOSAL-CV-PANEL-1: the application a propose_application action targets.
+  application_id?: string | null
 }
 
 // A write the model wants to make, held server-side until confirmed (§6).

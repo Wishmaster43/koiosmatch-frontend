@@ -21,6 +21,7 @@ import Button from '@/components/ui/Button'
 import Spinner from '@/components/ui/Spinner'
 import { GroupLabel, Caption } from '@/components/ui/typography'
 import { useAssistActionsExecute } from '@/components/ui/richtext/useAssistActionsExecute'
+import { useEnsureProposalCv } from '@/components/ui/richtext/useEnsureProposalCv'
 import { useNumberFormat } from '@/lib/formatters'
 import type { AssistActionType } from './noteAssistApi'
 import type { ActionBudget } from '@/types/actionBudget'
@@ -65,7 +66,12 @@ export interface NoteActionPanelItem {
   // card's own spinner on forever because nothing about the item changed.
   confirming?: boolean
   confirmError?: boolean
-  confirmErrorKind?: 'failed' | 'sessionExpired' | 'notApplied'
+  confirmErrorKind?: 'failed' | 'sessionExpired' | 'notApplied' | 'cvFailed'
+  confirmErrorText?: string
+  // PROPOSAL-CV-PANEL-1: Koios is preparing the house-style CV before executing.
+  preparingCv?: boolean
+  // Bumped after a CV was prepared so the picker re-reads the documents list.
+  cvRefresh?: number
   // K-159 task extras (edit-before-execute): who the task is for and one
   // optional entity link — executed verbatim; labels are display-only.
   assignee_user_id?: string
@@ -100,7 +106,8 @@ export default function NoteActionsPanel({ items, onItemsChange, noteId, candida
   // The dossier's candidate rides on every execute call (NOTE-CONFIRM-HANG-2): the note may not
   // be saved yet, so note_id alone can be absent — candidate_id is what makes the created
   // appointment/task land on THIS person.
-  const exec = useAssistActionsExecute({ ...(noteId ? { note_id: noteId } : {}), ...(candidateId ? { candidate_id: candidateId } : {}) })
+  const { ensureProposalCv } = useEnsureProposalCv()
+  const exec = useAssistActionsExecute({ ...(noteId ? { note_id: noteId } : {}), ...(candidateId ? { candidate_id: candidateId } : {}) }, { ensureProposalCv })
   const hasProposed = items.some(it => it.status === 'proposed')
   // Always-current panel items for the sync effect below (avoids re-running
   // it — and re-merging — on every panel item edit, only on exec's own
@@ -134,7 +141,9 @@ export default function NoteActionsPanel({ items, onItemsChange, noteId, candida
         budget: r.budget ?? it.budget,
         code: r.code, proposal_id: r.proposal_id, ref: r.ref,
         created: r.created ?? it.created ?? null,
-        confirming: r.confirming, confirmError: r.confirmError, confirmErrorKind: r.confirmErrorKind }
+        confirming: r.confirming, confirmError: r.confirmError, confirmErrorKind: r.confirmErrorKind,
+        confirmErrorText: r.confirmErrorText, preparingCv: r.preparingCv, cvRefresh: r.cvRefresh ?? it.cvRefresh,
+        cv_document_id: r.cv_document_id ?? it.cv_document_id }
     })
     onItemsChange(next)
     // onItemsChange is the caller's setter (stable identity in practice); the

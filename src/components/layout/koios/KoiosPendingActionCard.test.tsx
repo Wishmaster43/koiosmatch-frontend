@@ -15,6 +15,13 @@ vi.mock('@/context/NavigationContext', () => ({ useNavigation: vi.fn() }))
 vi.mock('@/lib/api', () => ({ default: { get: vi.fn() }, unwrap: (r: { data: unknown }) => r.data }))
 vi.mock('react-i18next', () => ({ useTranslation: () => ({ t: (k: string, opts?: { defaultValue?: string; count?: number }) => (k === 'koios.pendingAction.reasons.send_failed' ? 'Sending failed.' : null) ?? opts?.defaultValue ?? (opts?.count != null ? `${k}|${opts.count}` : k) }) }))
 vi.mock('@/lib/formatters', () => ({ useNumberFormat: () => ({ formatNumber: (n: number) => String(n) }) }))
+// PROPOSAL-CV-PANEL-1: the lazy host that wraps the shared ensure hook is mocked (the hook renders a PDF and fetches).
+const mockEnsure = vi.fn()
+vi.mock('./EnsureProposalCvHost', async () => {
+  const { useEffect } = await import('react')
+  const Host = ({ onReady }: { onReady: (fn: unknown) => void }) => { useEffect(() => { onReady(mockEnsure); return () => onReady(null) }, [onReady]); return null }
+  return { default: Host }
+})
 const mockConfirm = confirmPendingAction as unknown as ReturnType<typeof vi.fn>
 const mockCancel = cancelPendingAction as unknown as ReturnType<typeof vi.fn>
 const mockCapabilities = (api as unknown as { get: ReturnType<typeof vi.fn> }).get
@@ -43,6 +50,7 @@ describe('KoiosPendingActionCard', () => {
   beforeEach(() => {
     mockConfirm.mockReset()
     mockCancel.mockReset()
+    mockEnsure.mockReset()
     mockCapabilities.mockReset()
     mockOpenEntity.mockReset()
     ;(useNavigation as unknown as ReturnType<typeof vi.fn>).mockReturnValue({ openEntity: mockOpenEntity })
@@ -299,6 +307,64 @@ describe('KoiosPendingActionCard', () => {
     expect(screen.getByText('notesAssist.execute.declined.proposal_cv_required')).toBeInTheDocument()
     expect(screen.queryByText('CV required.')).not.toBeInTheDocument()
   })
+  const proposeAction = () => action({ tool: 'propose_application', entity_ref: { type: 'application', id: 'a1', label: 'Voorstel', application_id: 'app1' } })
+
+  it('ensures the proposal CV then POSTs the confirm with {cv_document_id} for a propose action', async () => {
+    mockEnsure.mockResolvedValue('d1')
+    mockConfirm.mockResolvedValue({ status: 'executed', data: { ok: true } })
+    const user = userEvent.setup()
+    renderCard(proposeAction())
+    await waitFor(() => expect(screen.getByText('koios.pendingAction.confirm').closest('button')).toBeEnabled())
+    await user.click(screen.getByText('koios.pendingAction.confirm'))
+    await waitFor(() => expect(screen.getByTestId('koios-pending-action')).toHaveAttribute('data-status', 'confirmed'))
+    expect(mockEnsure).toHaveBeenCalledWith('app1')
+    expect(mockConfirm).toHaveBeenCalledWith('pa1', { cv_document_id: 'd1' })
+  })
+
+  it('confirms a non-propose action with no body and never prepares a CV', async () => {
+    mockConfirm.mockResolvedValue({ status: 'executed', data: { ok: true } })
+    const user = userEvent.setup()
+    renderCard(action())
+    await user.click(screen.getByText('koios.pendingAction.confirm'))
+    await waitFor(() => expect(mockConfirm).toHaveBeenCalledWith('pa1'))
+    expect(mockEnsure).not.toHaveBeenCalled()
+  })
+
+  it('shows the preparing caption while the CV is being made', async () => {
+    mockEnsure.mockReturnValue(new Promise(() => {}))
+    const user = userEvent.setup()
+    renderCard(proposeAction())
+    await waitFor(() => expect(screen.getByText('koios.pendingAction.confirm').closest('button')).toBeEnabled())
+    await user.click(screen.getByText('koios.pendingAction.confirm'))
+    expect(await screen.findByText('notesAssist.proposeCv.preparing')).toBeInTheDocument()
+  })
+
+  it('shows the refused face with the prepare message and does not POST when the CV preparation fails', async () => {
+    mockEnsure.mockRejectedValue(new Error('prepare failed text'))
+    const user = userEvent.setup()
+    renderCard(proposeAction())
+    await waitFor(() => expect(screen.getByText('koios.pendingAction.confirm').closest('button')).toBeEnabled())
+    await user.click(screen.getByText('koios.pendingAction.confirm'))
+    await waitFor(() => expect(screen.getByTestId('koios-pending-action')).toHaveAttribute('data-status', 'refused'))
+    expect(screen.getByText('prepare failed text')).toBeInTheDocument()
+    expect(mockConfirm).not.toHaveBeenCalled()
+  })
+
+  it('keeps the card pending and shows the invalid-override key on a 422 invalid_override, allowing a retry', async () => {
+    mockEnsure.mockResolvedValue('d1')
+    mockConfirm.mockRejectedValueOnce({ response: { status: 422, data: { status: 'invalid_override', code: 'proposal_cv_invalid', message: 'x' } } })
+    mockConfirm.mockResolvedValueOnce({ status: 'executed', data: { ok: true } })
+    const user = userEvent.setup()
+    renderCard(proposeAction())
+    await waitFor(() => expect(screen.getByText('koios.pendingAction.confirm').closest('button')).toBeEnabled())
+    await user.click(screen.getByText('koios.pendingAction.confirm'))
+    expect(await screen.findByText('notesAssist.execute.declined.proposal_cv_invalid')).toBeInTheDocument()
+    expect(screen.getByTestId('koios-pending-action')).toHaveAttribute('data-status', 'proposed')
+    await user.click(screen.getByText('koios.pendingAction.confirm'))
+    await waitFor(() => expect(screen.getByTestId('koios-pending-action')).toHaveAttribute('data-status', 'confirmed'))
+    expect(mockConfirm).toHaveBeenCalledTimes(2)
+  })
+
   it('renders the contact_required key on that decline code, not the BE prose', async () => {
     mockConfirm.mockRejectedValue({
       response: { status: 422, data: { status: 'declined', message: 'Contact required.', data: { ok: false, reason: 'contact_required', error: 'CV required.' } } },

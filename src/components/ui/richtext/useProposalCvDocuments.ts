@@ -23,7 +23,7 @@ export interface ProposalCvOption { id: string; label: string; uploadedAt: strin
 interface Loaded { appId: Id; docs: ProposalCvOption[]; error: boolean }
 
 // Fetches once per application id; the result is keyed by id so a fast id switch never shows the previous entity's answer.
-export function useProposalCvDocuments(applicationId: Id | null | undefined) {
+export function useProposalCvDocuments(applicationId: Id | null | undefined, refreshKey: unknown = 0) {
   const [loaded, setLoaded] = useState<Loaded | null>(null)
 
   useEffect(() => {
@@ -40,9 +40,10 @@ export function useProposalCvDocuments(applicationId: Id | null | undefined) {
       if (!ctrl.signal.aborted) setLoaded({ appId: applicationId, docs: [], error: true })
     })
     return () => ctrl.abort()
-  }, [applicationId])
+  }, [applicationId, refreshKey])
 
   const has = applicationId != null && applicationId !== ''
+  // A refresh keeps the previous list on screen (no flash back to loading).
   const current = has && loaded?.appId === applicationId ? loaded : null
   return { docs: current?.docs ?? [], loading: has && current === null, error: current?.error ?? false }
 }

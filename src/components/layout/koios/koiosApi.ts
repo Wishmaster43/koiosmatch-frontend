@@ -77,9 +77,9 @@ export const getKoiosSettings = () =>
 // tool refusal is a 422 { status: 'declined', message, data } (KOIOS-CONFIRM-
 // DECLINE-1); the caller still treats a bare 404/410 (no `declined` status) as
 // "expired/already resolved".
-export const confirmPendingAction = (id: string) =>
-  // IDEMP-KEY-BODYLESS-1: a bare confirm POST carries its own per-click key so a double click never executes the action twice.
-  api.post<KoiosConfirmActionResponse>(`/ai/koios/actions/${id}/confirm`, undefined, withIdempotencyKey()).then((r) => r.data)
+export const confirmPendingAction = (id: string, body?: { cv_document_id: string }) =>
+  // IDEMP-KEY-BODYLESS-1: a confirm POST carries its own per-click key so a double click never executes the action twice; the optional body is the chosen proposal CV (PROPOSAL-CV-PANEL-1).
+  api.post<KoiosConfirmActionResponse>(`/ai/koios/actions/${id}/confirm`, body, withIdempotencyKey()).then((r) => r.data)
 
 // Cancel a pending action — same dormant/expiry handling as confirm.
 export const cancelPendingAction = (id: string) =>

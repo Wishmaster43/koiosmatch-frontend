@@ -31,7 +31,10 @@ vi.mock('@/lib/notify', () => ({ notifyError, notifySuccess }))
 const { buildProposalCvBlob } = vi.hoisted(() => ({ buildProposalCvBlob: vi.fn(() => Promise.resolve(new Blob(['pdf']))) }))
 const { triggerBlobDownload } = vi.hoisted(() => ({ triggerBlobDownload: vi.fn() }))
 vi.mock('@/lib/downloadBlob', () => ({ triggerBlobDownload }))
-vi.mock('@/lib/proposalCv', () => ({ buildProposalCvBlob }))
+vi.mock('@/lib/proposalCv', async () => {
+  const actual = await vi.importActual<typeof import('@/lib/proposalCv')>('@/lib/proposalCv')
+  return { ...actual, buildProposalCvBlob }
+})
 
 vi.mock('@/lib/useCvSettings', () => ({ useCvSettings: () => ({ settings: {} }) }))
 vi.mock('@/lib/datetime', () => ({ useLocale: () => 'nl-NL' }))

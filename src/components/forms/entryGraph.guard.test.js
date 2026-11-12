@@ -11,7 +11,7 @@ const SRC = resolve('src')
 const EXTS = ['', '.ts', '.tsx', '.js', '.jsx', '/index.ts', '/index.tsx', '/index.js']
 // recharts, @react-pdf and leaflet joined the list on 29-10 (ONIX-RECHECK-1 #74: the charts chunk sat in index.html's modulepreload via Sidebar → reports barrel → ReportKpiBand).
 const BANNED = /^(react-datepicker|date-fns|recharts|@react-pdf\/renderer|leaflet|react-leaflet)(\/|$)/
-const STATIC_IMPORT = /^\s*(?:import|export)\s+(?:type\s+)?(?:[^'"()]*?\sfrom\s+)?['"]([^'"]+)['"]/gm
+const STATIC_IMPORT = /^\s*(?:import|export)\s+(type\s+)?(?:[^'"()]*?\sfrom\s+)?['"]([^'"]+)['"]/gm
 
 // Resolve a local specifier to a source file, or null for packages/assets.
 function resolveLocal(spec, from) {
@@ -35,7 +35,9 @@ function walk(entry) {
     seen.add(file)
     const text = readFileSync(file, 'utf8')
     for (const m of text.matchAll(STATIC_IMPORT)) {
-      const spec = m[1]
+      // Whole-statement type imports/exports are erased at build time and never reach a bundle.
+      if (m[1]) continue
+      const spec = m[2]
       if (BANNED.test(spec)) hits.push(`${file.replace(SRC, 'src')} -> ${spec}`)
       const next = resolveLocal(spec, file)
       if (next) queue.push(next)
@@ -50,5 +52,12 @@ describe('entry bundle graph', () => {
     // Sanity: the walk really traversed the app chrome (a broken resolver would pass vacuously).
     expect(files).toBeGreaterThan(150)
     expect(hits).toEqual([])
+  })
+
+  // The STATIC_IMPORT walk must tell erased type-only statements from real edges.
+  it('captures the type keyword so type-only statements can be skipped', () => {
+    const src = "import type { A } from '@/x'\nimport { B } from '@/y'\nexport type { C } from '@/z'"
+    const found = [...src.matchAll(STATIC_IMPORT)].map((m) => [Boolean(m[1]), m[2]])
+    expect(found).toEqual([[true, '@/x'], [false, '@/y'], [true, '@/z']])
   })
 })

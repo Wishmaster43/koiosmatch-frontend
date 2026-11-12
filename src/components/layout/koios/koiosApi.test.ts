@@ -147,6 +147,13 @@ describe('confirmPendingAction / cancelPendingAction', () => {
       expect.objectContaining({ headers: expect.objectContaining({ 'Idempotency-Key': expect.any(String) }) }))
   })
 
+  it('POSTs the chosen cv_document_id as the confirm body when given', async () => {
+    mockPost.mockResolvedValueOnce({ data: { status: 'confirmed' } })
+    await confirmPendingAction('action-1', { cv_document_id: 'd1' })
+    expect(mockPost).toHaveBeenCalledWith('/ai/koios/actions/action-1/confirm', { cv_document_id: 'd1' },
+      expect.objectContaining({ headers: expect.objectContaining({ 'Idempotency-Key': expect.any(String) }) }))
+  })
+
   it('sends a per-call Idempotency-Key header on cancel', async () => {
     mockPost.mockResolvedValueOnce({ data: { status: 'cancelled' } })
     await cancelPendingAction('action-1')

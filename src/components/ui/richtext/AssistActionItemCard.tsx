@@ -120,8 +120,9 @@ export default function AssistActionItemCard({ item, onConfirm, onViewRun, onCvC
           extra reason surfaced — the button itself already says what to do. */}
       {(item.status === 'pending' || item.status === 'wizard_required') && onCvChange && item.type === 'application_propose' && (
         <ProposalCvPicker applicationId={item.link_type === 'application' ? item.link_id : undefined}
-          value={item.cv_document_id ?? null} onChange={onCvChange} />
+          value={item.cv_document_id ?? null} onChange={onCvChange} disabled={item.preparingCv} refreshKey={item.cvRefresh} />
       )}
+      {item.preparingCv && <Caption as="div">{t('notesAssist.proposeCv.preparing')}</Caption>}
       {(item.status === 'pending' || item.status === 'wizard_required') && (
         <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}
           title={item.status === 'wizard_required' ? item.reason : undefined}>
@@ -129,6 +130,8 @@ export default function AssistActionItemCard({ item, onConfirm, onViewRun, onCvC
             <span style={{ fontSize: 10, color: 'var(--color-danger-text)' }}>
               {item.confirmErrorKind === 'sessionExpired'
                 ? t('notesAssist.execute.confirmSessionExpired')
+                : item.confirmErrorKind === 'cvFailed'
+                  ? (item.confirmErrorText || t('notesAssist.proposeCv.prepareFailed'))
                 : item.confirmErrorKind === 'notApplied'
                   ? t('notesAssist.execute.confirmNotApplied')
                   : t('notesAssist.execute.confirmFailed')}

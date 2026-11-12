@@ -5,7 +5,7 @@
  */
 import { describe, it, expect, vi } from 'vitest'
 import type { ReactElement } from 'react'
-import { buildProposalCvBlob } from './proposalCv'
+import { assertProposalCvSize, buildProposalCvBlob, PROPOSAL_CV_MAX_BYTES, ProposalCvTooLargeError } from './proposalCv'
 
 const pdfMock = vi.hoisted(() => vi.fn((element: unknown) => ({
   toBlob: () => Promise.resolve({ __element: element } as unknown as Blob),
@@ -40,5 +40,19 @@ describe('buildProposalCvBlob', () => {
     expect(props.settings).toEqual(settings)
     expect(props.locale).toBe('en-US')
     expect(props.t).toBe(t)
+  })
+})
+
+describe('assertProposalCvSize', () => {
+  it('accepts a CV at exactly the cap', () => {
+    expect(() => assertProposalCvSize(new Blob([new Uint8Array(PROPOSAL_CV_MAX_BYTES)]))).not.toThrow()
+  })
+
+  it('refuses a CV one byte over the cap with ProposalCvTooLargeError', () => {
+    expect(() => assertProposalCvSize(new Blob([new Uint8Array(PROPOSAL_CV_MAX_BYTES + 1)]))).toThrow(ProposalCvTooLargeError)
+  })
+
+  it('keeps the cap at 5 MB', () => {
+    expect(PROPOSAL_CV_MAX_BYTES).toBe(5 * 1024 * 1024)
   })
 })

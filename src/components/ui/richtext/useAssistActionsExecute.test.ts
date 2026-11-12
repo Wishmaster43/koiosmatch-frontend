@@ -167,4 +167,76 @@ describe('useAssistActionsExecute', () => {
     expect(result.current.items).toBeNull()
     expect(result.current.status).toBe('idle')
   })
+  // PROPOSAL-CV-PANEL-1: a proposal without a CV is prepared first, then executed with it.
+  const proposal = { title: 'Stel voor', type: 'application_propose' as const, due_date: null, note_excerpt: null, link_type: 'application', link_id: 'a1' }
+
+  it('confirm on a proposal without cv calls ensureProposalCv, then executes with cv_document_id', async () => {
+    vi.mocked(executeRichTextActions).mockResolvedValue([{ title: 'Stel voor', type: 'application_propose', status: 'executed' }])
+    const ensure = vi.fn().mockResolvedValue('cv9')
+    const { result } = renderHook(() => useAssistActionsExecute({}, { ensureProposalCv: ensure }))
+    await act(async () => { await result.current.confirm(0, proposal) })
+    expect(ensure).toHaveBeenCalledWith('a1')
+    expect(vi.mocked(executeRichTextActions).mock.calls[0][0][0]).toMatchObject({ application_id: 'a1', cv_document_id: 'cv9', confirmed: true })
+    expect(result.current.items?.[0].cv_document_id).toBe('cv9')
+  })
+
+  it('a failing ensure never executes and surfaces the error text', async () => {
+    const ensure = vi.fn().mockRejectedValue(new Error('no cv today'))
+    const { result } = renderHook(() => useAssistActionsExecute({}, { ensureProposalCv: ensure }))
+    await act(async () => { await result.current.confirm(0, proposal) })
+    expect(executeRichTextActions).not.toHaveBeenCalled()
+    expect(result.current.items?.[0]).toMatchObject({ confirmError: true, confirmErrorKind: 'cvFailed', confirmErrorText: 'no cv today', preparingCv: false })
+  })
+
+  it('an item that already carries a cv skips ensureProposalCv', async () => {
+    vi.mocked(executeRichTextActions).mockResolvedValue([{ title: 'Stel voor', type: 'application_propose', status: 'executed' }])
+    const ensure = vi.fn()
+    const { result } = renderHook(() => useAssistActionsExecute({}, { ensureProposalCv: ensure }))
+    await act(async () => { await result.current.confirm(0, { ...proposal, cv_document_id: 'cv1' }) })
+    expect(ensure).not.toHaveBeenCalled()
+  })
+  it('marks preparingCv while ensure runs', async () => {
+    vi.mocked(executeRichTextActions).mockResolvedValue([{ title: 'Stel voor', type: 'application_propose', status: 'executed' }])
+    let release: (v: string) => void = () => {}
+    const ensure = vi.fn(() => new Promise<string>(r => { release = r }))
+    const { result } = renderHook(() => useAssistActionsExecute({}, { ensureProposalCv: ensure }))
+    let done: Promise<void> = Promise.resolve()
+    act(() => { done = result.current.confirm(0, proposal) })
+    await waitFor(() => expect(result.current.items?.[0].preparingCv).toBe(true))
+    await act(async () => { release('cv2'); await done })
+    expect(result.current.items?.[0].preparingCv).toBe(false)
+  })
+
+  it('preview sends a proposal without cv untouched and never prepares a cv', async () => {
+    vi.mocked(executeRichTextActions).mockResolvedValue([{ title: 'Stel voor', type: 'application_propose', status: 'pending' }])
+    const ensure = vi.fn().mockResolvedValue('cv7')
+    const { result } = renderHook(() => useAssistActionsExecute({}, { ensureProposalCv: ensure }))
+    await act(async () => { await result.current.preview([proposal]) })
+    expect(ensure).not.toHaveBeenCalled()
+    expect(vi.mocked(executeRichTextActions).mock.calls[0][0][0]).toMatchObject({ application_id: 'a1', confirmed: undefined })
+    expect(vi.mocked(executeRichTextActions).mock.calls[0][0][0].cv_document_id).toBeUndefined()
+    expect(result.current.items?.[0].cv_document_id).toBeUndefined()
+    expect(result.current.items?.[0].cvRefresh).toBeUndefined()
+  })
+
+  it('confirm after a preview prepares the cv and sends it with confirmed:true', async () => {
+    vi.mocked(executeRichTextActions)
+      .mockResolvedValueOnce([{ title: 'Stel voor', type: 'application_propose', status: 'pending' }])
+      .mockResolvedValueOnce([{ title: 'Stel voor', type: 'application_propose', status: 'executed' }])
+    const ensure = vi.fn().mockResolvedValue('cv7')
+    const { result } = renderHook(() => useAssistActionsExecute({}, { ensureProposalCv: ensure }))
+    await act(async () => { await result.current.preview([proposal]) })
+    await act(async () => { await result.current.confirm(0) })
+    expect(ensure).toHaveBeenCalledTimes(1)
+    expect(ensure).toHaveBeenCalledWith('a1')
+    expect(vi.mocked(executeRichTextActions).mock.calls[1][0][0]).toMatchObject({ application_id: 'a1', cv_document_id: 'cv7', confirmed: true })
+    expect(result.current.items?.[0]).toMatchObject({ cv_document_id: 'cv7', cvRefresh: 1 })
+  })
+
+  it('stamps the sent cv pick on the exec item so a retry resends what was sent', async () => {
+    vi.mocked(executeRichTextActions).mockRejectedValue(new Error('x'))
+    const { result } = renderHook(() => useAssistActionsExecute({}))
+    await act(async () => { await result.current.confirm(0, { ...proposal, cv_document_id: 'B' }) })
+    expect(result.current.items?.[0].cv_document_id).toBe('B')
+  })
 })

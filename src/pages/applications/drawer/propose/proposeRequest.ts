@@ -7,8 +7,8 @@
 import api from '@/lib/api'
 import { withIdempotencyKey } from '@/lib/idempotency'
 
-// The route's cap. The uploadPolicy store publishes no `proposal_cv` surface, so the constant is the source.
-export const PROPOSAL_CV_MAX_BYTES = 5 * 1024 * 1024
+// The size guard lives in the shared lib (one source); re-exported so this module's importers keep working.
+export { PROPOSAL_CV_MAX_BYTES, ProposalCvTooLargeError, assertProposalCvSize } from '@/lib/proposalCv'
 
 // Scalar fields of the propose request; undefined and null are omitted from the form.
 export interface ProposeFields {
@@ -19,16 +19,6 @@ export interface ProposeFields {
   send: boolean
   sender_user_id?: string | null
   force?: boolean
-}
-
-// Raised before any request when the rendered CV exceeds the cap.
-export class ProposalCvTooLargeError extends Error {
-  constructor() { super('proposal_cv_too_large'); this.name = 'ProposalCvTooLargeError' }
-}
-
-// Refuses an oversized CV client-side (the server would answer 422 anyway).
-export function assertProposalCvSize(blob: Blob): void {
-  if (blob.size > PROPOSAL_CV_MAX_BYTES) throw new ProposalCvTooLargeError()
 }
 
 // Builds the multipart body: strings as is, booleans as '1'/'0', cv_pdf as a named PDF File.

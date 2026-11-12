@@ -23,6 +23,7 @@ function Controlled({ initial, noteId, candidateId, autoRun }: { initial: NoteAc
 
 // K-159 extras mount in edit mode — stub the users query (no QueryClient here).
 // Y-002: the CV picker pulls the datetime/i18n init into this suite's react-i18next mock; stubbed (it has its own test).
+vi.mock('@/components/ui/richtext/useEnsureProposalCv', () => ({ useEnsureProposalCv: () => ({ ensureProposalCv: vi.fn(), preparingFor: null, error: null }) }))
 vi.mock('@/components/ui/richtext/ProposalCvPicker', () => ({ default: () => null }))
 vi.mock('@/lib/queries', () => ({ useUsers: () => ({ data: [] }) }))
 vi.mock('@/pages/tasks/shared', () => ({ AddLinkRow: () => null }))

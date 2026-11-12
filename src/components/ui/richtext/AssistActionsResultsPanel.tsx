@@ -17,6 +17,7 @@ import { Z } from '@/lib/zIndexScale'
 import { fetchWorkflowRun } from './assistActionsExecuteApi'
 import type { ExecuteSource } from './assistActionsExecuteApi'
 import { useAssistActionsExecute } from './useAssistActionsExecute'
+import { useEnsureProposalCv } from './useEnsureProposalCv'
 import AssistActionItemCard from './AssistActionItemCard'
 import type { RichTextAssistActionItem } from './richTextAssistApi'
 import type { RunRow } from '@/types/reports'
@@ -43,7 +44,8 @@ interface AssistActionsResultsPanelProps {
 // Shared action-points result surface: a preview + execute/apply-as-text/discard before running, then a live per-item status card with a drill-in to its run once executed (see file header).
 export default function AssistActionsResultsPanel({ items, source, onApplyAsText, onDiscard }: AssistActionsResultsPanelProps) {
   const { t } = useTranslation('common')
-  const exec = useAssistActionsExecute(source)
+  const { ensureProposalCv } = useEnsureProposalCv()
+  const exec = useAssistActionsExecute(source, { ensureProposalCv })
   // Guards the ONE-time text append (idempotent across re-clicks/re-renders).
   // appliedRef: after one apply, a re-run executes again but never re-appends
   // text (guards the 6x-duplicate class); deliberately NOT reset by exec.reset().

@@ -31,6 +31,7 @@ import { useNumberFormat } from '@/lib/formatters'
 import { confirmPendingAction, cancelPendingAction } from './koiosApi'
 import { createdRefFromToolResult } from './koiosToolResult'
 import { pick } from './koiosToolIds'
+import { useProposalCvConfirm, PrepareFailure } from './useProposalCvConfirm'
 import { KoiosRefChip } from './KoiosResultCards'
 import { pageForResultRef } from './koiosResultLinks'
 import type { KoiosContextRef } from '@/types/koios'
@@ -91,6 +92,8 @@ export default function KoiosPendingActionCard({ action }: { action: KoiosPendin
   // CALLLIST-KEY-1: English warning strings from a reuse that could not apply a
   // requested channel/owner (the existing list kept its own stored values).
   const [warnings, setWarnings] = useState<string[] | null>(null)
+  // PROPOSAL-CV-PANEL-1: the CV preparation phase and a rejected override (the card stays pending).
+  const cv = useProposalCvConfirm(action)
 
   // The tool's connection gate (KOIOS-AGENT-FE-1 rule 1): an integration tool with
   // an inactive connection is never offered as a silent-failing confirm.
@@ -128,7 +131,9 @@ export default function KoiosPendingActionCard({ action }: { action: KoiosPendin
     if (connectionInactive) return
     if (action.destructive && status !== 'confirming') { setStatus('confirming'); return }
     setStatus('submitting')
-    confirmPendingAction(action.id)
+    // A propose_application action with a known application first makes sure a clean proposal CV exists.
+    cv.prepareBody()
+      .then((body) => (body ? confirmPendingAction(action.id, body) : confirmPendingAction(action.id)))
       .then((res: unknown) => {
         // ToolExecutor::executePending still answers HTTP 200 "executed" when the
         // tool itself refuses (consent fail-closed, not-found, …) — the refusal
@@ -166,6 +171,8 @@ export default function KoiosPendingActionCard({ action }: { action: KoiosPendin
         setStatus('confirmed')
       })
       .catch((e) => {
+        // Preparation failed: the refused face with the prepare message; nothing was POSTed.
+        if (e instanceof PrepareFailure) { setRefusedReason(e.message); setStatus('refused'); return }
         // KOIOS-CONFIRM-DECLINE-1 (PRIJSMODEL-C): a genuine tool refusal is now a
         // 422 { status: 'declined', message, data: { budget? } } — checked BEFORE
         // the generic expired/already-resolved fallback, or a budget-full decline
@@ -173,6 +180,8 @@ export default function KoiosPendingActionCard({ action }: { action: KoiosPendin
         // KOIOS-DEDUPE-1: a duplicate-twin decline also carries `code` (e.g.
         // `duplicate_candidate[_archived]`) and `ref` (the existing record,
         // present only for a caller holding its view permission).
+        // PROPOSAL-CV-PANEL-1: the server rejected the chosen CV; the card stays pending and allows a retry.
+        if (cv.handleOverrideError(e)) { setStatus('proposed'); return }
         const body = e?.response?.data as {
           status?: string; message?: string
           // reason/error twins are read through pick() (KOIOS-EN-1 contract keys), so the type names only the English members.
@@ -345,7 +354,7 @@ export default function KoiosPendingActionCard({ action }: { action: KoiosPendin
         <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginTop: 2 }}>
           {/* Destructive 2nd-step confirm switches to the danger variant; otherwise primary. */}
           <Button variant={action.destructive && status === 'confirming' ? 'danger' : 'primary'}
-            size="sm" onClick={confirm} disabled={status === 'submitting' || connectionInactive || gateChecking}
+            size="sm" onClick={confirm} disabled={status === 'submitting' || connectionInactive || gateChecking || !cv.ready}
             aria-describedby={connectionInactive || gateChecking ? 'koios-action-gate-reason' : undefined}>
             {status === 'confirming' ? t('koios.pendingAction.confirmFinal') : t('koios.pendingAction.confirm')}
           </Button>
@@ -358,6 +367,16 @@ export default function KoiosPendingActionCard({ action }: { action: KoiosPendin
             )}
             <Caption>{countdownText}</Caption>
           </span>
+        </div>
+      )}
+      {/* PROPOSAL-CV-PANEL-1: CV preparation caption and the rejected-override notice (retry allowed). */}
+      {cv.host}
+      {/* Live region so a screen reader announces the preparing state and the retry hint; it
+          mounts only with content, so the card's column gap never carries an empty node. */}
+      {(cv.preparing || (cv.overrideInvalid && status === 'proposed')) && (
+        <div role="status">
+          {cv.preparing && <Caption as="p">{t('notesAssist.proposeCv.preparing')}</Caption>}
+          {cv.overrideInvalid && status === 'proposed' && <Caption as="p">{t('notesAssist.execute.declined.proposal_cv_invalid')}</Caption>}
         </div>
       )}
       {/* The gate's reason, in the accessible tree (a disabled button's title is
