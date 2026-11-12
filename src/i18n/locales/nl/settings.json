@@ -2573,11 +2573,11 @@
   "audit": {
     "title": "Audit log",
     "loading": "Laden…",
-    "countSummary": "{{shown}} van {{total}} entries",
+    "countSummary": "{{shown}} van {{total}} regels",
     "unavailable": "Audit log niet beschikbaar.",
     "searchPlaceholder": "Zoek op actie of gebruiker…",
     "dateTo": "t/m",
-    "noEntries": "Geen entries gevonden",
+    "noEntries": "Geen regels gevonden",
     "colDateTime": "Datum & tijd",
     "colDate": "Datum",
     "colTime": "Tijd",
