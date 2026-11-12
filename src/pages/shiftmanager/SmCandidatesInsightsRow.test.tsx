@@ -29,9 +29,11 @@ const rows = [
   { id: '3', status: 'intake' },
 ] as unknown as ReportCandidate[]
 
+const getMock = vi.fn(() => Promise.resolve({ data: STATS_RESPONSE as Record<string, unknown> }))
+
 vi.mock('@/lib/api', async () => {
   const actual = await vi.importActual<typeof import('@/lib/api')>('@/lib/api')
-  return { ...actual, default: { get: vi.fn(() => Promise.resolve({ data: STATS_RESPONSE })) } }
+  return { ...actual, default: { get: (...a: unknown[]) => (getMock as unknown as (...x: unknown[]) => unknown)(...a) } }
 })
 
 function renderRow() {
@@ -66,5 +68,17 @@ describe('SmCandidatesInsightsRow · status KPI counts (SM-STATS-2)', () => {
     renderRow()
 
     await waitFor(() => expect(screen.getByText('7')).toBeInTheDocument())
+  })
+
+  // A stats payload without registrations_per_month must not throw; the tile
+  // falls back to the row-derived count (0 rows with a registration date).
+  it('renders without throwing when stats lack registrations_per_month', async () => {
+    const partial: Record<string, unknown> = { ...STATS_RESPONSE }
+    delete partial.registrations_per_month
+    getMock.mockResolvedValueOnce({ data: partial })
+    renderRow()
+
+    await waitFor(() => expect(screen.getByText('100')).toBeInTheDocument())
+    expect(screen.queryByText('7')).not.toBeInTheDocument()
   })
 })

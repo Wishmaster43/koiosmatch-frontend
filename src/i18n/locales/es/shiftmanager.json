@@ -451,7 +451,7 @@
   "erase": {
     "button": "Borrar datos personales",
     "title": "Borrar datos personales",
-    "explanation": "Los datos personales de este empleado se borrarán de forma irreversible. Esta acción no se puede deshacer.",
+    "explanation": "Los datos personales de este empleado se borrarán de forma irreversible.",
     "confirm": "Borrar definitivamente",
     "success": "Los datos personales se han borrado.",
     "erasedNotice": "Los datos personales de este empleado se borraron el {{date}}. Una nueva sincronización con Shiftmanager no los recupera."

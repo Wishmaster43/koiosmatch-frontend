@@ -454,7 +454,7 @@
   "erase": {
     "button": "Cancella i dati personali",
     "title": "Cancella i dati personali",
-    "explanation": "I dati personali di questo dipendente verranno cancellati in modo irreversibile. L'operazione non può essere annullata.",
+    "explanation": "I dati personali di questo dipendente verranno cancellati in modo irreversibile.",
     "confirm": "Cancella definitivamente",
     "success": "I dati personali sono stati cancellati.",
     "erasedNotice": "I dati personali di questo dipendente sono stati cancellati il {{date}}. Una nuova sincronizzazione con Shiftmanager non li ripristina."

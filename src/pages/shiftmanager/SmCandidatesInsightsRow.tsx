@@ -159,13 +159,15 @@ export default function SmCandidatesInsightsRow({
   // available, never pairing a stats avg with a row-capped count.
   const rowMonthStats  = useMemo(() => calcMonthStats(candidates), [candidates])
   const currentMonthIdx = new Date().getMonth()
-  const statsMonthTotal = useStats && stats
-    ? stats.registrations_per_month.find(m => m.month - 1 === currentMonthIdx)?.total
+  // A stats payload without the array falls back to the row-derived figures (never throws).
+  const perMonth = stats?.registrations_per_month
+  const statsMonthTotal = useStats && perMonth
+    ? perMonth.find(m => m.month - 1 === currentMonthIdx)?.total
     : undefined
   const monthStats    = {
     items: rowMonthStats.items,
     count: statsMonthTotal ?? rowMonthStats.items.length,
-    avg: useStats && stats ? avgFromStats(stats.registrations_per_month, currentMonthIdx) : rowMonthStats.avg,
+    avg: useStats && perMonth ? avgFromStats(perMonth, currentMonthIdx) : rowMonthStats.avg,
   }
   // Candidates with at least one recorded no-show, for their own KPI card.
   const noShows       = useMemo(() => candidates.filter(c => noShowCountOf(c) > 0), [candidates])

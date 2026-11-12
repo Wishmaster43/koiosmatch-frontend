@@ -451,7 +451,7 @@
   "erase": {
     "button": "Erase personal data",
     "title": "Erase personal data",
-    "explanation": "This employee's personal data will be erased irreversibly. This cannot be undone.",
+    "explanation": "This employee's personal data will be erased irreversibly.",
     "confirm": "Erase permanently",
     "success": "The personal data has been erased.",
     "erasedNotice": "This employee's personal data was erased on {{date}}. A new sync with Shiftmanager does not bring it back."
