@@ -2,9 +2,9 @@
  * HelloflexContractMapSettings (HF-CONTRACTMAP-1, Settings → HelloFlex → Contractmap) —
  * one row per tenant contract-form lookup value (candidate_types, §3B "Contractvorm";
  * `useLookups().candidateTypes`, NEVER a hardcoded slug list per CLAUDE.md), letting the
- * tenant paste the matching HelloFlex contract-type GUID + a human label. Persisted as one
+ * tenant enter the matching HelloFlex contract-type id (digits) + a human label. Persisted as one
  * JSON settings value under the key `helloflex_contract_type_map`
- * ({ [slug]: { guid: string, label: string } }) via the shared GET/POST /settings
+ * ({ [slug]: { guid: string, label: string, ...extra keys such as self_employed } }) via the shared GET/POST /settings
  * helpers (mirrors every other settings screen — see settingsApi.js docblock).
  *
  * An empty mapping for a given contract form is a legal, saved state (backend passthrough,
@@ -28,15 +28,15 @@ import { PageTitle, formLabelStyle } from '@/components/ui/typography'
 
 const SETTINGS_KEY = 'helloflex_contract_type_map'
 
-// One mapped row: HelloFlex contract-type GUID + a free-text label for readability
-// in the UI (the GUID alone means nothing to a recruiter reviewing this screen).
-interface MapRow { guid: string; label: string }
+// One mapped row: HelloFlex integer contract-type id (field still named `guid` on the wire) + a free-text
+// label; extra keys such as `self_employed` ride along untouched so an edit never drops them.
+type MapRow = { guid: string; label: string } & Record<string, unknown>
 type ContractMap = Record<string, MapRow>
 
 // Shared FormLabel identity (12/500/muted) + this file's own layout (§4: identity from the atom, layout local).
 const labelStyle = { ...formLabelStyle, marginBottom: 4, display: 'block' }
 
-// One row per tenant contract-form, mapping to a HelloFlex GUID + label (see file
+// One row per tenant contract-form, mapping to a HelloFlex contract-type id + label (see file
 // docblock above); an empty mapping is a legal saved state, not a bug.
 export default function HelloflexContractMapSettings() {
   const { t } = useTranslation('settings')
@@ -68,7 +68,7 @@ export default function HelloflexContractMapSettings() {
   }, [])
 
   const setRow = (slug: string, patch: Partial<MapRow>) =>
-    setMap((prev) => ({ ...prev, [slug]: { guid: prev[slug]?.guid ?? '', label: prev[slug]?.label ?? '', ...patch } }))
+    setMap((prev) => ({ ...prev, [slug]: { ...prev[slug], guid: prev[slug]?.guid ?? '', label: prev[slug]?.label ?? '', ...patch } }))
 
   const dirty = JSON.stringify(map) !== JSON.stringify(initial)
 
@@ -79,11 +79,11 @@ export default function HelloflexContractMapSettings() {
     setSaving(true)
     const previous = initial
     try {
-      // Drop fully-empty rows (both fields blank) before persisting — an untouched
-      // contract form stays absent from the map rather than saving a `{guid:'',label:''}` noise row.
+      // Drop rows with blank id and label and no other key; keep every extra key of a kept row verbatim.
       const cleaned: ContractMap = {}
       Object.entries(map).forEach(([slug, row]) => {
-        if (row.guid.trim() || row.label.trim()) cleaned[slug] = { guid: row.guid.trim(), label: row.label.trim() }
+        const hasExtra = Object.keys(row).some((k) => k !== 'guid' && k !== 'label')
+        if (row.guid.trim() || row.label.trim() || hasExtra) cleaned[slug] = { ...row, guid: row.guid.trim(), label: row.label.trim() }
       })
       await saveSettings({ [SETTINGS_KEY]: JSON.stringify(cleaned) })
       setMap(cleaned)
@@ -110,13 +110,14 @@ export default function HelloflexContractMapSettings() {
       ) : (
         <div style={{ display: 'flex', flexDirection: 'column', gap: 14, marginBottom: 20 }}>
           {candidateTypes.map((ct) => {
-            const row = map[ct.value] ?? { guid: '', label: '' }
+            const row: MapRow = map[ct.value] ?? { guid: '', label: '' }
             return (
               <div key={ct.value} style={{ display: 'grid', gridTemplateColumns: '120px 1fr 1fr', gap: 10, alignItems: 'end' }}>
                 <span style={{ fontSize: 12, fontWeight: 500, color: 'var(--text)', paddingBottom: 8 }}>{ct.label}</span>
                 <div>
                   <label htmlFor={`hf-map-guid-${ct.value}`} style={labelStyle}>{t('helloflexContractMap.guid')}</label>
-                  <input id={`hf-map-guid-${ct.value}`} value={row.guid} onChange={(e) => setRow(ct.value, { guid: e.target.value })}
+                  <input id={`hf-map-guid-${ct.value}`} value={row.guid} onChange={(e) => setRow(ct.value, { guid: e.target.value.replace(/\D/g, '') })}
+                    inputMode="numeric" pattern="[0-9]*" maxLength={12}
                     placeholder={t('helloflexContractMap.guidPlaceholder')} style={fieldInputStyle} />
                 </div>
                 <div>

@@ -34,7 +34,7 @@ beforeEach(() => {
 })
 
 describe('HelloflexContractMapSettings — loading', () => {
-  it('renders one GUID+label row per tenant contract-form lookup value', async () => {
+  it('renders one id+label row per tenant contract-form lookup value', async () => {
     vi.mocked(api.get).mockResolvedValue({ data: {} })
     render(<HelloflexContractMapSettings />)
     expect(await screen.findByText('Uitzend')).toBeInTheDocument()
@@ -43,10 +43,10 @@ describe('HelloflexContractMapSettings — loading', () => {
 
   it('pre-fills rows from the stored JSON map', async () => {
     vi.mocked(api.get).mockResolvedValue({ data: { helloflex_contract_type_map: JSON.stringify({
-      temp_agency: { guid: 'guid-1', label: 'Uitzendkracht' },
+      temp_agency: { guid: '7', label: 'Uitzendkracht' },
     }) } })
     render(<HelloflexContractMapSettings />)
-    expect(await screen.findByDisplayValue('guid-1')).toBeInTheDocument()
+    expect(await screen.findByDisplayValue('7')).toBeInTheDocument()
     expect(screen.getByDisplayValue('Uitzendkracht')).toBeInTheDocument()
   })
 })
@@ -62,30 +62,73 @@ describe('HelloflexContractMapSettings — saving', () => {
     // so the id is the one unambiguous handle for a specific contract form's inputs.
     const guidInput = document.getElementById('hf-map-guid-temp_agency') as HTMLInputElement
     const labelInput = document.getElementById('hf-map-label-temp_agency') as HTMLInputElement
-    await user.type(guidInput, 'guid-abc')
+    await user.type(guidInput, '345')
     await user.type(labelInput, 'Uitzendkracht')
 
     const saveBtn = screen.getByRole('button', { name: t('common.save') })
     await user.click(saveBtn)
 
     await waitFor(() => expect(api.post).toHaveBeenCalledWith('/settings', {
-      helloflex_contract_type_map: JSON.stringify({ temp_agency: { guid: 'guid-abc', label: 'Uitzendkracht' } }),
+      helloflex_contract_type_map: JSON.stringify({ temp_agency: { guid: '345', label: 'Uitzendkracht' } }),
     }))
-    expect(guidInput.value).toBe('guid-abc')
+    expect(guidInput.value).toBe('345')
   })
 
   it('can clear a mapping back to empty (deletable, never stuck) and saves the empty map', async () => {
     vi.mocked(api.get).mockResolvedValue({ data: { helloflex_contract_type_map: JSON.stringify({
-      temp_agency: { guid: 'guid-1', label: 'Uitzendkracht' },
+      temp_agency: { guid: '7', label: 'Uitzendkracht' },
     }) } })
     const user = userEvent.setup()
     render(<HelloflexContractMapSettings />)
-    const guidInput = await screen.findByDisplayValue('guid-1')
+    const guidInput = await screen.findByDisplayValue('7')
     const labelInput = screen.getByDisplayValue('Uitzendkracht')
     await user.clear(guidInput)
     await user.clear(labelInput)
 
     await user.click(screen.getByRole('button', { name: t('common.save') }))
     await waitFor(() => expect(api.post).toHaveBeenCalledWith('/settings', { helloflex_contract_type_map: '{}' }))
+  })
+})
+
+describe('HelloflexContractMapSettings — round trip and id input', () => {
+  it('keeps self_employed when the label is edited and saved', async () => {
+    vi.mocked(api.get).mockResolvedValue({ data: { helloflex_contract_type_map: JSON.stringify({
+      temp_agency: { guid: '12', label: 'Uitzend', self_employed: true },
+    }) } })
+    const user = userEvent.setup()
+    render(<HelloflexContractMapSettings />)
+    const labelInput = await screen.findByDisplayValue('Uitzend')
+    await user.type(labelInput, 'x')
+    await user.click(screen.getByRole('button', { name: t('common.save') }))
+    await waitFor(() => expect(api.post).toHaveBeenCalledWith('/settings', {
+      helloflex_contract_type_map: JSON.stringify({ temp_agency: { guid: '12', label: 'Uitzendx', self_employed: true } }),
+    }))
+  })
+
+  it('keeps a row that only carries self_employed', async () => {
+    vi.mocked(api.get).mockResolvedValue({ data: { helloflex_contract_type_map: JSON.stringify({
+      payroll: { guid: '', label: '', self_employed: true },
+    }) } })
+    const user = userEvent.setup()
+    render(<HelloflexContractMapSettings />)
+    await screen.findByText('Payroll')
+    // Dirty the form through another row so the payroll row stays untouched.
+    await user.type(document.getElementById('hf-map-guid-temp_agency') as HTMLInputElement, '3')
+    await user.click(screen.getByRole('button', { name: t('common.save') }))
+    await waitFor(() => expect(api.post).toHaveBeenCalledWith('/settings', {
+      helloflex_contract_type_map: JSON.stringify({ payroll: { guid: '', label: '', self_employed: true }, temp_agency: { guid: '3', label: '' } }),
+    }))
+  })
+
+  it('strips non-digits from the id input and exposes the relabelled name', async () => {
+    vi.mocked(api.get).mockResolvedValue({ data: {} })
+    const user = userEvent.setup()
+    render(<HelloflexContractMapSettings />)
+    await screen.findByText('Uitzend')
+    const guidInput = document.getElementById('hf-map-guid-temp_agency') as HTMLInputElement
+    await user.type(guidInput, 'a1b2-')
+    expect(guidInput.value).toBe('12')
+    expect(guidInput).toHaveAttribute('inputmode', 'numeric')
+    expect(guidInput).toHaveAccessibleName(t('helloflexContractMap.guid'))
   })
 })

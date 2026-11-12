@@ -4597,9 +4597,9 @@
   },
   "helloflexContractMap": {
     "title": "Mappa contratti HelloFlex",
-    "subtitle": "Collega ogni tipo di contratto al tipo di contratto HelloFlex corrispondente (GUID). Un collegamento vuoto è consentito: il collegamento a HelloFlex viene allora bloccato apertamente per quel tipo.",
-    "guid": "GUID HelloFlex",
-    "guidPlaceholder": "es. 3f7a1c9e-…",
+    "subtitle": "Collega ogni tipo di contratto al tipo di contratto HelloFlex corrispondente (numero). Un collegamento vuoto è consentito: il collegamento a HelloFlex viene allora bloccato apertamente per quel tipo.",
+    "guid": "ID del tipo di contratto HelloFlex (numero)",
+    "guidPlaceholder": "ad es. 12",
     "label": "Etichetta",
     "labelPlaceholder": "Nome riconoscibile",
     "empty": "Non sono ancora stati configurati tipi di contratto.",

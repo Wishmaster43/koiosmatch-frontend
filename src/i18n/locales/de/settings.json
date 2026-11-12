@@ -4596,9 +4596,9 @@
   },
   "helloflexContractMap": {
     "title": "HelloFlex-Vertragszuordnung",
-    "subtitle": "Verknüpfe jede Vertragsform mit dem passenden HelloFlex-Vertragstyp (GUID). Eine leere Zuordnung ist erlaubt: Die Verknüpfung mit HelloFlex wird für diese Vertragsform dann ehrlich blockiert.",
-    "guid": "HelloFlex-GUID",
-    "guidPlaceholder": "z. B. 3f7a1c9e-…",
+    "subtitle": "Verknüpfe jede Vertragsform mit dem passenden HelloFlex-Vertragstyp (Zahl). Eine leere Zuordnung ist erlaubt: Die Verknüpfung mit HelloFlex wird für diese Vertragsform dann ehrlich blockiert.",
+    "guid": "HelloFlex-Vertragstyp-ID (Zahl)",
+    "guidPlaceholder": "z. B. 12",
     "label": "Bezeichnung",
     "labelPlaceholder": "Erkennbarer Name",
     "empty": "Es sind noch keine Vertragsformen eingerichtet.",

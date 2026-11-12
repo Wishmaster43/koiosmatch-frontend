@@ -4596,9 +4596,9 @@
   },
   "helloflexContractMap": {
     "title": "HelloFlex contract map",
-    "subtitle": "Link each contract form to its matching HelloFlex contract type (GUID). An empty mapping is allowed: linking to HelloFlex is then honestly blocked for that contract form.",
-    "guid": "HelloFlex GUID",
-    "guidPlaceholder": "e.g. 3f7a1c9e-…",
+    "subtitle": "Link each contract form to its matching HelloFlex contract type (number). An empty mapping is allowed: linking to HelloFlex is then honestly blocked for that contract form.",
+    "guid": "HelloFlex contract type id (number)",
+    "guidPlaceholder": "e.g. 12",
     "label": "Label",
     "labelPlaceholder": "Recognisable name",
     "empty": "No contract forms are configured yet.",
