@@ -1207,6 +1207,7 @@
     "sellRate": "Verkooptarief",
     "margin": "Marge",
     "costCenter": "Kostenplaats",
+    "purchaseOrderNumber": "Inkoopordernummer",
     "billingEmail": "Facturatie-e-mail",
     "matchRemarks": "Match opmerkingen",
     "remarksAdd": "Klik om een opmerking toe te voegen",

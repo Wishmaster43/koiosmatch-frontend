@@ -360,7 +360,22 @@ describe('MatchModal · Vestiging default (7.4)', () => {
     await within(branchField()).findByRole('button', { name: /Hoofdkantoor$/ })
 
     await user.click(screen.getByRole('button', { name: 'placement.create' }))
-    expect(api.post).toHaveBeenCalledWith('/matches', expect.objectContaining({ branch_id: 'branch-1' }))
+    expect(api.post).toHaveBeenCalledWith('/matches', expect.objectContaining({ branch_id: 'branch-1', purchase_order_number: null }))
+  })
+
+  // HF-CONTRACT-1: a typed purchase order number travels in the create body as typed.
+  it('sends a typed purchase_order_number on create', async () => {
+    const user = userEvent.setup()
+    render(<MatchModal candidateId="cand-1" onClose={noop} onCreated={noop} />)
+    await user.click(screen.getByRole('button', { name: /placement\.pickCustomer$/ }))
+    await user.click(await screen.findByRole('button', { name: 'Zorggroep A' }))
+    await user.click(screen.getByRole('button', { name: /placement\.pickFunction$/ }))
+    await user.click(await screen.findByRole('button', { name: 'Verzorgende IG' }))
+    await within(branchField()).findByRole('button', { name: /Hoofdkantoor$/ })
+    await user.type(screen.getByRole('textbox', { name: 'placement.purchaseOrderNumber' }), 'PO-1')
+
+    await user.click(screen.getByRole('button', { name: 'placement.create' }))
+    expect(api.post).toHaveBeenCalledWith('/matches', expect.objectContaining({ purchase_order_number: 'PO-1' }))
   })
 
   it('an overridden branch wins over the proposal', async () => {

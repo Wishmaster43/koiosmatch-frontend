@@ -109,6 +109,7 @@
       "sellRate": "Verkaufstarif",
       "margin": "Marge",
       "costCenter": "Kostenstelle",
+      "purchaseOrderNumber": "Bestellnummer",
       "billingEmails": "Rechnungs-E-Mail(s), eine pro Zeile oder durch Komma getrennt",
       "remarks": "Anmerkungen",
       "loading": "Vertragsdetails werden geladen…",

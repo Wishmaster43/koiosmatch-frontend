@@ -1207,6 +1207,7 @@
     "sellRate": "Sell rate",
     "margin": "Margin",
     "costCenter": "Cost center",
+    "purchaseOrderNumber": "Purchase order number",
     "billingEmail": "Billing email",
     "matchRemarks": "Match remarks",
     "remarksAdd": "Click to add a remark",

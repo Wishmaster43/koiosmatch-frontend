@@ -1207,6 +1207,7 @@
     "sellRate": "Verkaufstarif",
     "margin": "Marge",
     "costCenter": "Kostenstelle",
+    "purchaseOrderNumber": "Bestellnummer",
     "billingEmail": "Rechnungs-E-Mail",
     "matchRemarks": "Match-Anmerkungen",
     "remarksAdd": "Klicken, um eine Anmerkung hinzuzufügen",

@@ -109,6 +109,7 @@
       "sellRate": "Tarif de vente",
       "margin": "Marge",
       "costCenter": "Centre de coûts",
+      "purchaseOrderNumber": "Numéro de bon de commande",
       "billingEmails": "E-mail(s) de facturation, un par ligne, ou séparés par une virgule",
       "remarks": "Remarques",
       "loading": "Chargement des détails du contrat…",

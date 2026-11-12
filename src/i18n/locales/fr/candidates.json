@@ -1207,6 +1207,7 @@
     "sellRate": "Tarif de vente",
     "margin": "Marge",
     "costCenter": "Centre de coûts",
+    "purchaseOrderNumber": "Numéro de bon de commande",
     "billingEmail": "E-mail de facturation",
     "matchRemarks": "Remarques du match",
     "remarksAdd": "Cliquez pour ajouter une remarque",

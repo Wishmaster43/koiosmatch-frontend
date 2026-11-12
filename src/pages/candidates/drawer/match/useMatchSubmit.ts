@@ -40,7 +40,7 @@ interface MatchEditDetail {
   start_date?: string | null; end_date?: string | null; hours_per_week?: number | string | null
   cao?: string | null; scale?: string | null; step?: string | null
   purchase_rate?: number | string | null; sell_rate?: number | string | null
-  cost_center?: string | null; billing_emails?: string[] | null; remarks?: string | null
+  cost_center?: string | null; purchase_order_number?: string | null; billing_emails?: string[] | null; remarks?: string | null
   // MATCH-SOORT-1: resolved chip on read; echoed rows (with id) on read.
   contract_form?: MatchContractForm | null
   contract_lines?: Array<{ id?: Id; function_title?: string | null; rate?: number | string | null }> | null
@@ -53,7 +53,7 @@ export function useMatchSubmit({
   customerId, locationId, departmentId, contactId, branchId,
   contractForm, contractLines, hasContractLines, customerNotApplicable,
   func, contractType, startDate, endDate, hours, cao, scale, step,
-  purchase, sell, costCenter, billingEmails, remarks, ownerId, vacancyId,
+  purchase, sell, costCenter, purchaseOrderNumber, billingEmails, remarks, ownerId, vacancyId,
   branchMismatch, mismatchChoice, detail,
   deviatesFromProposal, confirmDeviation, setConfirmDeviation,
   skipCascadeResetRef,
@@ -61,7 +61,7 @@ export function useMatchSubmit({
   setBranchIdRaw, setBranchDirty, setVacancyIdRaw, setOwnerId, setFunc,
   setContractType, setStartDateRaw, setEndDateRaw, setEndDateDirty, setHoursRaw,
   setCao, setScale, setStep, setPurchase, setSell,
-  setCostCenter, setCostCenterDirty, setBillingEmails, setBillingDirty, setRemarks,
+  setCostCenter, setCostCenterDirty, setPurchaseOrderNumber, setBillingEmails, setBillingDirty, setRemarks,
   setContractFormRaw, setContractLinesRaw,
 }: {
   editing: boolean; editMatchId?: Id; candidateId: Id | string; t: TFunction
@@ -76,7 +76,7 @@ export function useMatchSubmit({
   // from the submit body entirely (the server 422s any of the four otherwise).
   customerNotApplicable: boolean
   func: string; contractType: string; startDate: string; endDate: string; hours: string; cao: string
-  scale: string; step: string; purchase: string; sell: string; costCenter: string
+  scale: string; step: string; purchase: string; sell: string; costCenter: string; purchaseOrderNumber: string
   billingEmails: string[]; remarks: string; ownerId: string; vacancyId: string
   branchMismatch: boolean; mismatchChoice: 'match' | 'candidate'; detail: CustomerCascadeDetail | null
   // Rate-deviation confirm gate (useRateProposal, owned by useMatchForm) — the
@@ -104,6 +104,7 @@ export function useMatchSubmit({
   setPurchase: (v: string) => void
   setSell: (v: string) => void
   setCostCenter: (v: string) => void; setCostCenterDirty: (v: boolean) => void
+  setPurchaseOrderNumber: (v: string) => void
   setBillingEmails: (v: string[]) => void; setBillingDirty: (v: boolean) => void
   setRemarks: (v: string) => void
   setContractFormRaw: (v: string) => void
@@ -166,6 +167,7 @@ export function useMatchSubmit({
     setPurchase(editDetail.purchase_rate != null ? String(editDetail.purchase_rate) : '')
     setSell(editDetail.sell_rate != null ? String(editDetail.sell_rate) : '')
     setCostCenter(editDetail.cost_center ?? ''); setCostCenterDirty(true)
+    setPurchaseOrderNumber(editDetail.purchase_order_number ?? '')
     setBillingEmails(editDetail.billing_emails?.length ? editDetail.billing_emails : [''])
     setBillingDirty(true)
     setRemarks(editDetail.remarks ?? '')
@@ -234,6 +236,7 @@ export function useMatchSubmit({
       purchase_rate: purchase ? Number(purchase) : null,
       sell_rate: sell ? Number(sell) : null,
       cost_center: costCenter || null,
+      purchase_order_number: purchaseOrderNumber.trim() || null,
       billing_emails: billingEmails.map(e => e.trim()).filter(Boolean),
       remarks: remarks || null,
       ...(ownerId ? { owner_id: ownerId } : {}),

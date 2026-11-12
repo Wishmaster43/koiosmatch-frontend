@@ -24,7 +24,7 @@ afterEach(() => vi.clearAllMocks())
 const detailRow = {
   function_title: 'Verpleegkundige', contract_type: 'ZZP Flex', start_date: '2026-01-01', end_date: null, hours_per_week: 32,
   cao: 'vvt', scale: '', step: '', surcharge: 15, purchase_rate: 28.5, sell_rate: 41.75,
-  cost_center: 'KP-1', billing_emails: ['a@example.org'], remarks: '', margin: 13.25,
+  cost_center: 'KP-1', purchase_order_number: 'PO-7', billing_emails: ['a@example.org'], remarks: '', margin: 13.25,
 }
 
 describe('useMatchContract', () => {
@@ -47,6 +47,18 @@ describe('useMatchContract', () => {
     const { result } = renderHook(() => useMatchContract('m1'))
     await waitFor(() => expect(result.current.loading).toBe(false))
     expect(result.current.data.billing_source).toBe('department')
+  })
+
+  // HF-CONTRACT-1: purchase_order_number maps straight off the detail row, null when absent.
+  it('maps purchase_order_number off the detail row and defaults it to null', async () => {
+    mockedGet.mockResolvedValue({ data: { data: detailRow } })
+    const first = renderHook(() => useMatchContract('m1'))
+    await waitFor(() => expect(first.result.current.loading).toBe(false))
+    expect(first.result.current.data.purchase_order_number).toBe('PO-7')
+    mockedGet.mockResolvedValue({ data: { data: { ...detailRow, purchase_order_number: undefined } } })
+    const second = renderHook(() => useMatchContract('m2'))
+    await waitFor(() => expect(second.result.current.loading).toBe(false))
+    expect(second.result.current.data.purchase_order_number).toBeNull()
   })
 
   it('defaults billing_source to null when the detail row carries no such key', async () => {

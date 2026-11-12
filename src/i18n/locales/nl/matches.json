@@ -109,6 +109,7 @@
       "sellRate": "Verkooptarief",
       "margin": "Marge",
       "costCenter": "Kostenplaats",
+      "purchaseOrderNumber": "Inkoopordernummer",
       "billingEmails": "Facturatie-e-mail(s), één per regel of gescheiden door een komma",
       "remarks": "Opmerkingen",
       "loading": "Contractgegevens laden…",

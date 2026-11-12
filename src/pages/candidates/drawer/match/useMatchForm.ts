@@ -296,6 +296,8 @@ export function useMatchForm({
   // sibling hook, mirrors useRateProposal's propose-but-freeze-on-edit pattern.
   const { costCenter, setCostCenter, setCostCenterDirty, billingEmails, setBillingEmails, setBillingDirty } =
     useCascadeDefaults({ detail, locationId, departmentId })
+  // Optional customer purchase order reference (HF-CONTRACT-1).
+  const [purchaseOrderNumber, setPurchaseOrderNumber] = useState('')
   const [remarks, setRemarks] = useState('')
   const [remarksExpanded, setRemarksExpanded] = useState(false)
   // Opmerkingen starts COLLAPSED (Danny 24-07: "dicht geklapt laten") — the
@@ -333,7 +335,7 @@ export function useMatchForm({
     customerId, locationId, departmentId, contactId, branchId,
     contractForm, contractLines, hasContractLines, customerNotApplicable,
     func, contractType, startDate, endDate, hours, cao, scale, step,
-    purchase, sell, costCenter, billingEmails, remarks, ownerId, vacancyId,
+    purchase, sell, costCenter, purchaseOrderNumber, billingEmails, remarks, ownerId, vacancyId,
     branchMismatch, mismatchChoice, detail,
     deviatesFromProposal, confirmDeviation, setConfirmDeviation,
     skipCascadeResetRef,
@@ -344,7 +346,7 @@ export function useMatchForm({
     // wrappers, so loading an existing match never freezes a later vacancy pick.
     setContractType: setContractTypeRaw, setStartDateRaw, setEndDateRaw, setEndDateDirty, setHoursRaw,
     setCao: setCaoRaw, setScale, setStep, setPurchase, setSell,
-    setCostCenter, setCostCenterDirty, setBillingEmails, setBillingDirty, setRemarks,
+    setCostCenter, setCostCenterDirty, setPurchaseOrderNumber, setBillingEmails, setBillingDirty, setRemarks,
     setContractFormRaw: setContractForm, setContractLinesRaw: setContractLines,
   })
 
@@ -379,7 +381,7 @@ export function useMatchForm({
     // MATCH-SOORT-1: Contractvorm + its conditional CONTRACTREGELS editor.
     candidateTypes, contractForm, setContractForm, hasContractLines, contractLines, setContractLines, customerNotApplicable,
     scale, setScale, step, setStep, purchase, setPurchase, sell, setSell,
-    costCenter, setCostCenter, setCostCenterDirty, billingEmails, setBillingEmails, setBillingDirty,
+    costCenter, setCostCenter, setCostCenterDirty, purchaseOrderNumber, setPurchaseOrderNumber, billingEmails, setBillingEmails, setBillingDirty,
     remarks, setRemarks, remarksExpanded, setRemarksExpanded, remarksEditing, setRemarksEditing,
     margin, hasRates,
     proposal, deviatesFromProposal, confirmDeviation, setConfirmDeviation,

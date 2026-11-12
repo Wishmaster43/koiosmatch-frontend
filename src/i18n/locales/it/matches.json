@@ -109,6 +109,7 @@
       "sellRate": "Tariffa di vendita",
       "margin": "Margine",
       "costCenter": "Centro di costo",
+      "purchaseOrderNumber": "Numero d’ordine",
       "billingEmails": "E-mail di fatturazione, una per riga o separate da virgola",
       "remarks": "Osservazioni",
       "loading": "Caricamento dati contrattuali…",

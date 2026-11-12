@@ -251,7 +251,7 @@ describe('MatchModal · edit mode (point 2, Danny live P1)', () => {
     function_title: 'Verzorgende IG', contract_type: 'Fase 1-2 z.u.b. (Works)',
     start_date: '2026-07-01', end_date: null, hours_per_week: 24,
     cao: 'ggz', scale: null, step: null,
-    purchase_rate: 20, sell_rate: 28, cost_center: 'KP-EXISTING',
+    purchase_rate: 20, sell_rate: 28, cost_center: 'KP-EXISTING', purchase_order_number: 'PO-OLD',
     billing_emails: ['bestaand@factuur.nl'], remarks: null,
   }
 
@@ -264,6 +264,19 @@ describe('MatchModal · edit mode (point 2, Danny live P1)', () => {
     // Cost centre is a plain input — the loaded value must survive the cascade's
     // OWN "propose from customer" effect (frozen via setCostCenterDirty(true)).
     expect(screen.getByDisplayValue('KP-EXISTING')).toBeInTheDocument()
+  })
+
+  it('prefills the purchase order number and sends blank as null on PATCH', async () => {
+    editMatchFixture.current = editMatch
+    const user = userEvent.setup()
+    render(<MatchModal candidateId="cand-1" editMatchId="match-1" onClose={noop} onCreated={noop} />)
+    await screen.findByRole('button', { name: /Zorggroep A$/ })
+    // The field is reachable by its label (aria-labelledby), with the stored value prefilled.
+    const poInput = screen.getByRole('textbox', { name: 'placement.purchaseOrderNumber' })
+    expect(poInput).toHaveValue('PO-OLD')
+    await user.clear(poInput)
+    await user.click(screen.getByRole('button', { name: 'common:save' }))
+    expect(api.patch).toHaveBeenCalledWith('/matches/match-1', expect.objectContaining({ purchase_order_number: null }))
   })
 
   it('renders the vacancy field read-only (identity is not editable via PATCH)', async () => {
@@ -287,7 +300,7 @@ describe('MatchModal · edit mode (point 2, Danny live P1)', () => {
 
     await user.click(screen.getByRole('button', { name: 'common:save' }))
     expect(api.patch).toHaveBeenCalledWith('/matches/match-1', expect.objectContaining({
-      customer_id: 'cust-1', function_title: 'Verzorgende IG', cost_center: 'KP-NIEUW',
+      customer_id: 'cust-1', function_title: 'Verzorgende IG', cost_center: 'KP-NIEUW', purchase_order_number: 'PO-OLD',
     }))
     // Identity fields never ride a PATCH (UpdateMatchRequest doesn't accept them).
     const [, body] = vi.mocked(api.patch).mock.calls.find(c => c[0] === '/matches/match-1') ?? []

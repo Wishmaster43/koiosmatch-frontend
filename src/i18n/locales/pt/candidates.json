@@ -1207,6 +1207,7 @@
     "sellRate": "Tarifa de venda",
     "margin": "Margem",
     "costCenter": "Centro de custo",
+    "purchaseOrderNumber": "Número da ordem de compra",
     "billingEmail": "E-mail de faturação",
     "matchRemarks": "Observações do match",
     "remarksAdd": "Clique para adicionar uma observação",

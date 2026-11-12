@@ -109,6 +109,7 @@
       "sellRate": "Sell rate",
       "margin": "Margin",
       "costCenter": "Cost center",
+      "purchaseOrderNumber": "Purchase order number",
       "billingEmails": "Billing email(s), one per line, or comma-separated",
       "remarks": "Remarks",
       "loading": "Loading contract details…",

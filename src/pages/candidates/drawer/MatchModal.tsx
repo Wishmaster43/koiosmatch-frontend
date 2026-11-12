@@ -233,6 +233,7 @@ export default function MatchModal({
                 purchase={form.purchase} setPurchase={form.setPurchase} sell={form.sell} setSell={form.setSell}
                 margin={form.margin} hasRates={form.hasRates} proposal={form.proposal}
                 costCenter={form.costCenter} setCostCenter={form.setCostCenter} setCostCenterDirty={form.setCostCenterDirty}
+                purchaseOrderNumber={form.purchaseOrderNumber} setPurchaseOrderNumber={form.setPurchaseOrderNumber}
                 billingEmails={form.billingEmails} setBillingEmails={form.setBillingEmails} setBillingDirty={form.setBillingDirty}
               />
             </div>

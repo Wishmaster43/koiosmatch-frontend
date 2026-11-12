@@ -105,12 +105,13 @@ describe('OverviewTab · overzicht-data cluster', () => {
 
   it('fetches the detail-only contract layer and shows hours/week + cost centre + billing e-mail', async () => {
     mockedGet.mockResolvedValue({
-      data: { data: { hours_per_week: 32, cost_center: 'KP-1', billing_emails: ['a@example.org'] } },
+      data: { data: { hours_per_week: 32, cost_center: 'KP-1', purchase_order_number: 'PO-55', billing_emails: ['a@example.org'] } },
     })
     renderTab(baseMatch)
     expect(mockedGet).toHaveBeenCalledWith('/matches/m1')
     expect(await screen.findByText('32')).toBeInTheDocument()
     expect(screen.getByText('KP-1')).toBeInTheDocument()
+    expect(screen.getByText('PO-55')).toBeInTheDocument()
     expect(screen.getByText('a@example.org')).toBeInTheDocument()
   })
 
@@ -217,6 +218,35 @@ describe('OverviewTab · Contract/Financieel card is editable (MATCH-EDIT-1)', (
     contract_type: null, start_date: null, end_date: null,
     hours_per_week: null, cost_center: null, billing_emails: [] as string[],
   }
+
+  it('edits and saves purchase_order_number via PATCH /matches/{id}, blank becomes null', async () => {
+    const user = userEvent.setup()
+    mockedGet.mockResolvedValue({ data: { data: emptyContract } })
+    mockedPatch.mockResolvedValue({ data: { data: {} } })
+    render(<I18nextProvider i18n={i18n}><OverviewTab match={baseMatch} onUpdate={vi.fn()} /></I18nextProvider>)
+    await waitFor(() => expect(mockedGet).toHaveBeenCalledWith('/matches/m1'))
+    await user.click(screen.getByRole('button', { name: i18n.t('common:edit') }))
+    const label = screen.getByText(i18n.t('matches:drawer.contract.purchaseOrderNumber'))
+    const input = label.nextElementSibling?.querySelector('input') as HTMLInputElement
+    expect(input).toBeTruthy()
+    await user.type(input, 'PO-9')
+    await user.click(screen.getByTitle(i18n.t('common:save')))
+    await waitFor(() => expect(mockedPatch).toHaveBeenCalledWith('/matches/m1', expect.objectContaining({ purchase_order_number: 'PO-9' })))
+  })
+
+  it('sends purchase_order_number null when the field is whitespace only', async () => {
+    const user = userEvent.setup()
+    mockedGet.mockResolvedValue({ data: { data: emptyContract } })
+    mockedPatch.mockResolvedValue({ data: { data: {} } })
+    render(<I18nextProvider i18n={i18n}><OverviewTab match={baseMatch} onUpdate={vi.fn()} /></I18nextProvider>)
+    await waitFor(() => expect(mockedGet).toHaveBeenCalledWith('/matches/m1'))
+    await user.click(screen.getByRole('button', { name: i18n.t('common:edit') }))
+    const label = screen.getByText(i18n.t('matches:drawer.contract.purchaseOrderNumber'))
+    const input = label.nextElementSibling?.querySelector('input') as HTMLInputElement
+    await user.type(input, '   ')
+    await user.click(screen.getByTitle(i18n.t('common:save')))
+    await waitFor(() => expect(mockedPatch).toHaveBeenCalledWith('/matches/m1', expect.objectContaining({ purchase_order_number: null })))
+  })
 
   it('edits and saves cost_center via PATCH /matches/{id} with the mapped body, syncing the list row', async () => {
     const user = userEvent.setup()

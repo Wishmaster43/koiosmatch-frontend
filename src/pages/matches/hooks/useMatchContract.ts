@@ -35,6 +35,7 @@ export interface MatchContract {
   purchase_rate: number | null
   sell_rate: number | null
   cost_center: string | null
+  purchase_order_number: string | null
   billing_emails: string[]
   // K-249 C.4: which level the (frozen-at-creation) cost_center/billing_emails snapshot
   // was copied from at CREATION — 'department' | 'location' | 'customer', or 'manual'
@@ -61,7 +62,7 @@ export interface MatchContract {
 const EMPTY: MatchContract = {
   function_title: null, contract_type: null, start_date: null, end_date: null, hours_per_week: null,
   cao: null, scale: null, step: null, surcharge: null, purchase_rate: null, sell_rate: null,
-  cost_center: null, billing_emails: [], billing_source: null, remarks: null, contractForm: null, contractLines: [], description: null, margin: null,
+  cost_center: null, purchase_order_number: null, billing_emails: [], billing_source: null, remarks: null, contractForm: null, contractLines: [], description: null, margin: null,
 }
 
 // Pull just the contract/financial keys off a raw API row (tolerant of extras).
@@ -80,6 +81,7 @@ function pick(d: Record<string, unknown>): MatchContract {
     purchase_rate:  num(d.purchase_rate),
     sell_rate:      num(d.sell_rate),
     cost_center:    (d.cost_center as string) ?? null,
+    purchase_order_number: (d.purchase_order_number as string) ?? null,
     billing_emails: Array.isArray(d.billing_emails) ? (d.billing_emails as unknown[]).map(String) : [],
     billing_source: (d.billing_source as MatchContract['billing_source']) ?? null,
     remarks:        (d.remarks as string) ?? null,

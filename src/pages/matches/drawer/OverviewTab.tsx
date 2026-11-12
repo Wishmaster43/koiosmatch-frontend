@@ -160,6 +160,7 @@ export default function OverviewTab({ match, onUpdate, onOpenNotes }: OverviewTa
     { key: 'end_date', label: t('drawer.contract.endDate'), type: 'date', group: t('drawer.contract.groupContract') },
     { key: 'hours_per_week', label: t('drawer.contract.hoursPerWeek'), inputType: 'number', group: t('drawer.contract.groupContract') },
     { key: 'cost_center', label: t('drawer.contract.costCenter'), group: t('drawer.contract.groupFinancial') },
+    { key: 'purchase_order_number', label: t('drawer.contract.purchaseOrderNumber'), group: t('drawer.contract.groupFinancial') },
     // billing_emails is a multi-line LIST (one address per line) — the shared
     // textarea row deliberately renders label-above/full-width (same as it did on
     // the Contract tab); the label-left canon governs single-value field rows.
@@ -171,6 +172,7 @@ export default function OverviewTab({ match, onUpdate, onOpenNotes }: OverviewTa
     end_date: contract.end_date ?? '',
     hours_per_week: contract.hours_per_week ?? '',
     cost_center: contract.cost_center ?? '',
+    purchase_order_number: contract.purchase_order_number ?? '',
     billing_emails_text: contract.billing_emails.join('\n'),
   }
   // Map the UI draft back to the PATCH body and persist through the SAME
@@ -183,6 +185,7 @@ export default function OverviewTab({ match, onUpdate, onOpenNotes }: OverviewTa
       end_date:       (v.end_date as string) || null,
       hours_per_week: numOrNull(v.hours_per_week),
       cost_center:    (v.cost_center as string) || null,
+      purchase_order_number: ((v.purchase_order_number as string) ?? '').trim() || null,
       billing_emails: parseEmails(String(v.billing_emails_text ?? '')),
     }
     try {

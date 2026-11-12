@@ -30,6 +30,7 @@ export default function FinancialSection({
   purchase, setPurchase, sell, setSell,
   margin, hasRates, proposal,
   costCenter, setCostCenter, setCostCenterDirty,
+  purchaseOrderNumber, setPurchaseOrderNumber,
   billingEmails, setBillingEmails, setBillingDirty,
 }: {
   t: TFunction; errors: Record<string, boolean>
@@ -37,6 +38,7 @@ export default function FinancialSection({
   purchase: string; setPurchase: (v: string) => void; sell: string; setSell: (v: string) => void
   margin: number; hasRates: boolean; proposal: RateProposal | null
   costCenter: string; setCostCenter: (v: string) => void; setCostCenterDirty: (v: boolean) => void
+  purchaseOrderNumber: string; setPurchaseOrderNumber: (v: string) => void
   billingEmails: string[]; setBillingEmails: (fn: (p: string[]) => string[]) => void; setBillingDirty: (v: boolean) => void
 }) {
   // Margin is a calculated number with 2 decimal places (locale-aware formatting);
@@ -89,9 +91,20 @@ export default function FinancialSection({
           here freezes it (job 21/22 — never overwritten again after that). */}
       <F label={t('placement.costCenter')} error={errors.costCenter}>
         {/* "KP-…" is the cost-centre FORMAT example (tenant data prefix), not
-            prose — locale-neutral by design (§5 code/ID class). */}
-        <input value={costCenter} onChange={e => { setCostCenterDirty(true); setCostCenter(e.target.value) }}
-          style={input} placeholder="KP-…" />
+            prose — locale-neutral by design (§5 code/ID class). The input names
+            itself by the row label (aria-labelledby) like every row above. */}
+        {(labelId: string) => (
+          <input value={costCenter} onChange={e => { setCostCenterDirty(true); setCostCenter(e.target.value) }}
+            style={input} placeholder="KP-…" aria-labelledby={labelId} />
+        )}
+      </F>
+      {/* Purchase order number: optional customer PO reference (max 128, blank saves as null).
+          "PO-…" is the FORMAT example of that reference (§5 code/ID class), not prose. */}
+      <F label={t('placement.purchaseOrderNumber')}>
+        {(labelId: string) => (
+          <input value={purchaseOrderNumber} onChange={e => setPurchaseOrderNumber(e.target.value)}
+            style={input} placeholder="PO-…" maxLength={128} aria-labelledby={labelId} />
+        )}
       </F>
       <div style={{ display: 'flex', alignItems: 'flex-start', gap: 10 }}>
         {/* Label row carries the "+ e-mail" action RIGHT-aligned (Danny 24-07) —
