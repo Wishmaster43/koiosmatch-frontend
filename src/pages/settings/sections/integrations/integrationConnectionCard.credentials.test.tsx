@@ -14,6 +14,12 @@ import {
 const mockSync = vi.fn()
 vi.mock('@/components/shiftmanager/useSmLastSync', () => ({ useSmLastSync: (enabled: boolean) => mockSync(enabled) }))
 
+// The health hook is mocked: no QueryClient; refresh is asserted in the health tests.
+const mockRefresh = vi.fn()
+vi.mock('./useIntegrationHealth', () => ({
+  useIntegrationHealth: () => ({ health: { state: 'unknown', errorCode: null, errorMessage: null, checkedAt: null }, refresh: mockRefresh }),
+}))
+
 vi.mock('./integrationsApi', () => ({
   getIntegrationSettings: vi.fn(),
   putIntegrationSettings: vi.fn(),
@@ -200,5 +206,58 @@ describe('Shiftmanager sync status line (ONIX G-012)', () => {
     expect(screen.queryByText(t('integrations.connection.notActiveYet'))).not.toBeInTheDocument()
     expect(screen.queryByText(/09-10-2026/)).not.toBeInTheDocument()
     expect(mockSync).toHaveBeenCalledWith(false)
+  })
+})
+
+// HF-CONNECTION-STATUS-1: shared health badge, honest Test, GUID check, refresh after save/test.
+describe('connection health and honest test', () => {
+  // Both connectors mount the same badge.
+  it('mounts the health badge for helloflex and shiftmanager', async () => {
+    mockGet.mockResolvedValue({ two_way: false, environment: 'uat', client_id: '', has_client_secret: false, connected_as: null })
+    await renderCard('helloflex')
+    expect(screen.getByTestId('integration-health')).toBeInTheDocument()
+  })
+
+  it('mounts the health badge for shiftmanager', async () => {
+    mockGet.mockResolvedValue({ two_way: true, has_api_key: false, connected_as: null })
+    await renderCard('shiftmanager')
+    expect(screen.getByTestId('integration-health')).toBeInTheDocument()
+  })
+
+  // A dirty form disables Test and says why; the test posts nothing.
+  it('disables Test while dirty with the save-first caption', async () => {
+    mockGet.mockResolvedValue({ two_way: false, environment: 'uat', client_id: '', has_client_secret: false, connected_as: null })
+    await renderCard('helloflex')
+    await userEvent.type(screen.getByLabelText(t('integrations.connection.clientId')), 'x')
+    expect(screen.getByRole('button', { name: t('integrations.connection.test') })).toBeDisabled()
+    expect(screen.getByText(t('integrations.connection.saveBeforeTest'))).toBeInTheDocument()
+    expect(mockTest).not.toHaveBeenCalled()
+  })
+
+  // A non-GUID client id blocks Save; a valid one enables it and the PUT carries it.
+  it('blocks Save on an invalid GUID and refreshes health after save', async () => {
+    mockGet.mockResolvedValue({ two_way: false, environment: 'uat', client_id: '', has_client_secret: false, connected_as: null })
+    await renderCard('helloflex')
+    const input = screen.getByLabelText(t('integrations.connection.clientId'))
+    await userEvent.type(input, 'not-a-guid')
+    expect(screen.getByText(t('integrations.connection.clientIdInvalid'))).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: t('common.save') })).toBeDisabled()
+    const guid = '123e4567-e89b-12d3-a456-426614174000'
+    await userEvent.clear(input)
+    await userEvent.type(input, guid)
+    mockPut.mockResolvedValue({ two_way: false, environment: 'uat', client_id: guid, has_client_secret: false, connected_as: null })
+    await userEvent.click(screen.getByRole('button', { name: t('common.save') }))
+    await waitFor(() => expect(mockPut).toHaveBeenCalledWith('helloflex', expect.objectContaining({ client_id: guid })))
+    await waitFor(() => expect(mockRefresh).toHaveBeenCalled())
+  })
+
+  // Running the test refreshes the stored health.
+  it('refreshes health after a test', async () => {
+    mockGet.mockResolvedValue({ two_way: false, environment: 'uat', client_id: '', has_client_secret: true, connected_as: null })
+    mockTest.mockResolvedValue({ ok: true, connected_as: 'X' })
+    await renderCard('helloflex')
+    await userEvent.click(screen.getByRole('button', { name: t('integrations.connection.test') }))
+    await waitFor(() => expect(mockTest).toHaveBeenCalledWith('helloflex'))
+    await waitFor(() => expect(mockRefresh).toHaveBeenCalled())
   })
 })

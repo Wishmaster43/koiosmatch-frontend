@@ -4819,7 +4819,15 @@
       "mapping": "Mapping",
       "contractmap": "Table des contrats"
     },
+    "health": {
+      "ok": "La connexion fonctionne",
+      "error": "Échec de la connexion",
+      "unknown": "Pas encore vérifié",
+      "checkedAt": "vérifié à {{time}}"
+    },
     "connection": {
+      "saveBeforeTest": "Enregistrez d'abord ; le test utilise les identifiants enregistrés.",
+      "clientIdInvalid": "Saisissez un GUID valide (par exemple 123e4567-e89b-12d3-a456-426614174000).",
       "title": "Connexion",
       "subtitle": "Paramètres de connexion et de synchronisation pour cette intégration.",
       "twoWay": "Synchronisation bidirectionnelle",

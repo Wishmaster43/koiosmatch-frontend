@@ -132,6 +132,10 @@ export interface IntegrationSummary {
   connected_as: string | null
   last_sync_at: string | null
   health: 'ok' | 'error' | 'unknown'
+  // HF-CONNECTION-STATUS-1: optional until the BE lands them (hand-written, spec has no 2xx schema).
+  health_error?: string | null
+  health_error_message?: string | null
+  health_checked_at?: string | null
 }
 
 // Fetch the connector list (contract §2, GET /api/integrations).

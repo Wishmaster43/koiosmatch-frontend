@@ -4819,7 +4819,15 @@
       "mapping": "Mapping",
       "contractmap": "Contract map"
     },
+    "health": {
+      "ok": "Connection works",
+      "error": "Connection failed",
+      "unknown": "Not checked yet",
+      "checkedAt": "checked at {{time}}"
+    },
     "connection": {
+      "saveBeforeTest": "Save first; the test uses the saved credentials.",
+      "clientIdInvalid": "Enter a valid GUID (for example 123e4567-e89b-12d3-a456-426614174000).",
       "title": "Connection",
       "subtitle": "Connection and synchronisation settings for this integration.",
       "twoWay": "Two-way synchronisation",

@@ -20,6 +20,12 @@ import {
 const mockSync = vi.fn()
 vi.mock('@/components/shiftmanager/useSmLastSync', () => ({ useSmLastSync: (enabled: boolean) => mockSync(enabled) }))
 
+// The health hook is mocked: no QueryClient; refresh is asserted in the health tests.
+const mockRefresh = vi.fn()
+vi.mock('./useIntegrationHealth', () => ({
+  useIntegrationHealth: () => ({ health: { state: 'unknown', errorCode: null, errorMessage: null, checkedAt: null }, refresh: mockRefresh }),
+}))
+
 vi.mock('./integrationsApi', () => ({
   getIntegrationSettings: vi.fn(),
   putIntegrationSettings: vi.fn(),

@@ -4819,7 +4819,15 @@
       "mapping": "Mapping",
       "contractmap": "Vertragszuordnung"
     },
+    "health": {
+      "ok": "Verbindung funktioniert",
+      "error": "Verbindung fehlgeschlagen",
+      "unknown": "Noch nicht geprüft",
+      "checkedAt": "geprüft um {{time}}"
+    },
     "connection": {
+      "saveBeforeTest": "Bitte zuerst speichern; der Test verwendet die gespeicherten Zugangsdaten.",
+      "clientIdInvalid": "Geben Sie eine gültige GUID ein (zum Beispiel 123e4567-e89b-12d3-a456-426614174000).",
       "title": "Verbindung",
       "subtitle": "Verbindungs- und Synchronisierungseinstellungen für diese Integration.",
       "twoWay": "Zwei-Wege-Synchronisierung",

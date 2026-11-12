@@ -4820,7 +4820,15 @@
       "mapping": "Mapping",
       "contractmap": "Mappa contratti"
     },
+    "health": {
+      "ok": "La connessione funziona",
+      "error": "Connessione non riuscita",
+      "unknown": "Non ancora verificato",
+      "checkedAt": "verificato alle {{time}}"
+    },
     "connection": {
+      "saveBeforeTest": "Salva prima; il test usa le credenziali salvate.",
+      "clientIdInvalid": "Inserisci un GUID valido (ad esempio 123e4567-e89b-12d3-a456-426614174000).",
       "title": "Connessione",
       "subtitle": "Impostazioni di connessione e sincronizzazione per questa integrazione.",
       "twoWay": "Sincronizzazione bidirezionale",

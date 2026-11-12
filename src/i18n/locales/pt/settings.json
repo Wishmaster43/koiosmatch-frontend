@@ -4820,7 +4820,15 @@
       "mapping": "Mapeamento",
       "contractmap": "Mapa de contrato"
     },
+    "health": {
+      "ok": "A ligação funciona",
+      "error": "Falha na ligação",
+      "unknown": "Ainda não verificado",
+      "checkedAt": "verificado às {{time}}"
+    },
     "connection": {
+      "saveBeforeTest": "Guarde primeiro; o teste usa as credenciais guardadas.",
+      "clientIdInvalid": "Introduza um GUID válido (por exemplo 123e4567-e89b-12d3-a456-426614174000).",
       "title": "Ligação",
       "subtitle": "Definições de ligação e sincronização para esta integração.",
       "twoWay": "Sincronização bidirecional",

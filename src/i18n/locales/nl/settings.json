@@ -4819,7 +4819,15 @@
       "mapping": "Mapping",
       "contractmap": "Contractmap"
     },
+    "health": {
+      "ok": "Verbinding werkt",
+      "error": "Verbinding mislukt",
+      "unknown": "Nog niet gecontroleerd",
+      "checkedAt": "gecontroleerd om {{time}}"
+    },
     "connection": {
+      "saveBeforeTest": "Sla eerst op; de test gebruikt de opgeslagen gegevens.",
+      "clientIdInvalid": "Voer een geldige GUID in (bijvoorbeeld 123e4567-e89b-12d3-a456-426614174000).",
       "title": "Koppeling",
       "subtitle": "Verbinding en synchronisatie-instellingen voor deze koppeling.",
       "twoWay": "Tweeweg-synchronisatie",
