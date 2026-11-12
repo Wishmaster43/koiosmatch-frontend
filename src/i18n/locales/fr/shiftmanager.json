@@ -2,11 +2,11 @@
   "comingSoon": "{{label}}. Bientôt disponible",
   "shiftAnalysis": {
     "title": "Analyse des shifts candidats",
-    "subtitle": "Tendance et signaux d'attention par candidat selon les heures planifiées et travaillées.",
-    "loading": "Chargement de l'analyse…",
-    "error": "Impossible de charger l'analyse des shifts.",
-    "unavailable": "Cette analyse attend le flux de shifts du backend. Dès qu'il sera disponible, les tendances et signaux d'attention apparaîtront ici.",
-    "empty": "Aucun candidat avec un signal d'attention.",
+    "subtitle": "Tendance et signaux d’attention par candidat selon les heures planifiées et travaillées.",
+    "loading": "Chargement de l’analyse…",
+    "error": "Impossible de charger l’analyse des shifts.",
+    "unavailable": "Cette analyse attend le flux de shifts du backend. Dès qu’il sera disponible, les tendances et signaux d’attention apparaîtront ici.",
+    "empty": "Aucun candidat avec un signal d’attention.",
     "hours": "{{n}} h",
     "cols": {
       "name": "Nom",
@@ -144,7 +144,7 @@
     "byHours": "Heures"
   },
   "charts": {
-    "hours": "Nombre d'heures",
+    "hours": "Nombre d’heures",
     "shifts": "Nombre de missions",
     "loading": "Chargement…",
     "loadError": "Échec du chargement",
@@ -190,7 +190,7 @@
       "button": "Sync",
       "busy": "En cours…",
       "choose": "Choisir un compte Shiftmanager…",
-      "noPermission": "Pas d'autorisation pour synchroniser",
+      "noPermission": "Pas d’autorisation pour synchroniser",
       "noConnection": "Aucune connexion Shiftmanager active trouvée",
       "started": "Synchronisation démarrée. Cela peut prendre quelques minutes",
       "awaiting": "Synchronisation démarrée…",
@@ -268,12 +268,12 @@
     "recentConversations": "Conversations récentes",
     "viewAll": "Tout voir →",
     "candidates": "{{n}} candidats",
-    "runFailed": "Échec de l'exécution",
+    "runFailed": "Échec de l’exécution",
     "runInProgress": "Exécution en cours",
     "stats": {
-      "openHours": "Nombre d'heures ouvertes",
+      "openHours": "Nombre d’heures ouvertes",
       "hoursThisMonth": "Heures ce mois-ci",
-      "occupancy": "Taux d'occupation",
+      "occupancy": "Taux d’occupation",
       "messagesSent": "Messages envoyés",
       "responseRate": "Taux de réponse",
       "newThisMonth": "Nouveau ce mois-ci",
@@ -289,8 +289,8 @@
       "otherFunctions": "Autres",
       "idle": "Sans activité récente",
       "workedThisMonthHint": "A effectué une mission ce mois-ci",
-      "plannedHint": "Planifié pour une mission à venir, mais n'a pas encore travaillé ce mois-ci",
-      "neverWorkedHint": "Actif, mais n'a jamais effectué de mission",
+      "plannedHint": "Planifié pour une mission à venir, mais n’a pas encore travaillé ce mois-ci",
+      "neverWorkedHint": "Actif, mais n’a jamais effectué de mission",
       "idleHint": "A déjà travaillé, mais pas ce mois-ci et rien de planifié",
       "inactive": "Inactif",
       "openShifts": "Services ouverts",
@@ -426,10 +426,10 @@
       "cancellations": "Annulations",
       "cancellationsSub": "Candidats avec au moins 1 annulation",
       "endingSoon": "Départ < 30 j",
-      "endingSoonSub": "Fin d'emploi dans les 30 jours"
+      "endingSoonSub": "Fin d’emploi dans les 30 jours"
     },
     "cols": {
-      "endEmployment": "Fin d'emploi"
+      "endEmployment": "Fin d’emploi"
     }
   },
   "monthlyKpi": {
@@ -458,8 +458,8 @@
   },
   "aiOptOut": {
     "label": "IA et WhatsApp autorisés",
-    "help": "Désactivez si cet employé s'oppose au traitement par IA et aux messages WhatsApp. Seul ce commutateur le modifie.",
-    "failed": "Le paramètre n'a pas pu être enregistré.",
+    "help": "Désactivez si cet employé s’oppose au traitement par IA et aux messages WhatsApp. Seul ce commutateur le modifie.",
+    "failed": "Le paramètre n’a pas pu être enregistré.",
     "erasedHint": "Pour un employé effacé, ce réglage est toujours désactivé."
   }
 }

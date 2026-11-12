@@ -4,7 +4,7 @@
     "title": "Analisi turni candidati",
     "subtitle": "Andamento e segnali di attenzione per candidato in base alle ore pianificate e lavorate.",
     "loading": "Caricamento analisi…",
-    "error": "Impossibile caricare l'analisi turni.",
+    "error": "Impossibile caricare l’analisi turni.",
     "unavailable": "Questa analisi attende il feed dei turni dal backend. Non appena sarà disponibile, qui compariranno gli andamenti e i segnali di attenzione.",
     "empty": "Nessun candidato con un segnale di attenzione.",
     "hours": "{{n}} h",
@@ -462,7 +462,7 @@
   "aiOptOut": {
     "label": "IA e WhatsApp consentiti",
     "help": "Disattiva se questo dipendente si oppone al trattamento tramite IA e ai messaggi WhatsApp. Solo questo interruttore lo modifica.",
-    "failed": "Impossibile salvare l'impostazione.",
+    "failed": "Impossibile salvare l’impostazione.",
     "erasedHint": "Per un dipendente cancellato è sempre disattivato."
   }
 }

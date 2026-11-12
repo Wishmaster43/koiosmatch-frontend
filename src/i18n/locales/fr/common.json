@@ -12,7 +12,7 @@
       "title": "Supprimer définitivement",
       "intro": "{{entity}} est déplacé vers la corbeille et sera supprimé définitivement de façon automatique après le délai de conservation de votre organisation.",
       "blockedTitle": "Encore utilisé",
-      "blockedIntro": "Cet enregistrement ne peut pas être supprimé définitivement pour le moment. Réglez d'abord les éléments liés ci-dessous.",
+      "blockedIntro": "Cet enregistrement ne peut pas être supprimé définitivement pour le moment. Réglez d’abord les éléments liés ci-dessous.",
       "transferLabel": "Transférer la propriété à",
       "transferPlaceholder": "Choisir un utilisateur",
       "confirm": "Supprimer définitivement",
@@ -29,7 +29,7 @@
       "contract": "Contrat",
       "contract_status": "Statut du contrat",
       "open_period": "Période ouverte",
-      "placed_basis": "Base d'un placement",
+      "placed_basis": "Base d’un placement",
       "lifecycle_history": "Historique du cycle de vie",
       "replaced_by": "Remplacé par",
       "open_runs": "Exécutions ouvertes",
@@ -39,7 +39,7 @@
     "marked": "Placé dans la corbeille.",
     "unmarked": "Remis aux archives."
   },
-  "actionFailed": "Échec de l'action. Veuillez réessayer.",
+  "actionFailed": "Échec de l’action. Veuillez réessayer.",
   "consentState": {
     "title": "Consentements",
     "granted": "Donné",
@@ -57,11 +57,11 @@
   "upload": {
     "tooLarge": "Ce fichier est trop volumineux pour le serveur. Veuillez choisir un fichier plus petit.",
     "storageUnavailable": "Le stockage est temporairement indisponible. Veuillez réessayer.",
-    "typeNotAllowed": "Ce type de fichier n'est pas autorisé. Autorisés : {{allowed}}.",
+    "typeNotAllowed": "Ce type de fichier n’est pas autorisé. Autorisés : {{allowed}}.",
     "tooLargeMax": "Ce fichier est trop volumineux. Maximum {{max}} Mo.",
-    "rejectedByScanner": "Ce fichier a été rejeté par l'antivirus.",
+    "rejectedByScanner": "Ce fichier a été rejeté par l’antivirus.",
     "scanPending": "Analyse antivirus en cours",
-    "scanRejected": "Rejeté par l'antivirus"
+    "scanRejected": "Rejeté par l’antivirus"
   },
   "eraseDialog": {
     "password": "Mot de passe",
@@ -71,12 +71,12 @@
   },
   "resolveClaim": {
     "reason": "Motif",
-    "hint": "Que s'est-il passé ? Ceci est enregistré dans le journal d'audit.",
+    "hint": "Que s’est-il passé ? Ceci est enregistré dans le journal d’audit.",
     "errors": {
       "contract_not_in_flight": "Aucun envoi en cours.",
       "contract_already_sent": "Le contrat a déjà été envoyé.",
       "invoice_already_sent": "La facture a déjà été envoyée par e-mail.",
-      "invoice_not_sending": "Aucun envoi d'e-mail en cours."
+      "invoice_not_sending": "Aucun envoi d’e-mail en cours."
     }
   },
   "save": "Enregistrer",
@@ -183,7 +183,7 @@
     "reports": "Rapports",
     "reports_vacancies": "Postes",
     "reports_matches": "Matchs",
-    "reports_outreach": "Listes d'appels",
+    "reports_outreach": "Listes d’appels",
     "shiftmanager": "Shiftmanager",
     "shiftmanager_candidates": "Candidats-SM",
     "shiftmanager_customers": "Clients-SM",
@@ -212,7 +212,7 @@
     "matches": "Matchs",
     "opportunities": "Opportunités",
     "tasks": "Tâches",
-    "outreach": "Listes d'appels",
+    "outreach": "Listes d’appels",
     "reports_candidates": "Candidats",
     "reports_applications": "Candidatures",
     "reports_customers": "Clients",
@@ -236,17 +236,17 @@
     "stepsToggle": "Détails ({{count}})",
     "typing": "Koios rédige une réponse",
     "refusedOrg": "Non autorisé au sein de votre organisation.",
-    "refusedRights": "Vous n'avez pas les droits suffisants pour cette action.",
+    "refusedRights": "Vous n’avez pas les droits suffisants pour cette action.",
     "stopRefused": "Refusé",
-    "stopMaxSteps": "N'a pas pu être terminé dans les étapes",
-    "notConfigured": "Koios n'est pas encore connecté.",
+    "stopMaxSteps": "N’a pas pu être terminé dans les étapes",
+    "notConfigured": "Koios n’est pas encore connecté.",
     "errorReply": "Impossible de joindre Koios. Veuillez réessayer.",
-    "budgetExceededDaily": "Le budget Koios quotidien est atteint. Il sera de nouveau disponible demain, ou demandez à l'administrateur de l'augmenter.",
-    "budgetExceededMonthly": "Le budget Koios mensuel de cette organisation est atteint. Il sera de nouveau disponible le 1er du mois prochain, ou demandez à l'administrateur de l'augmenter.",
-    "forbidden": "Vous n'avez pas accès à Koios.",
+    "budgetExceededDaily": "Le budget Koios quotidien est atteint. Il sera de nouveau disponible demain, ou demandez à l’administrateur de l’augmenter.",
+    "budgetExceededMonthly": "Le budget Koios mensuel de cette organisation est atteint. Il sera de nouveau disponible le 1er du mois prochain, ou demandez à l’administrateur de l’augmenter.",
+    "forbidden": "Vous n’avez pas accès à Koios.",
     "usageLine": "{{model}} · {{tokens}} tokens",
     "offline": "Non connecté",
-    "offlineConnect": "Koios n'est pas connecté. Cliquez pour vous connecter.",
+    "offlineConnect": "Koios n’est pas connecté. Cliquez pour vous connecter.",
     "contextPending": "Cet enregistrement ne peut pas encore être lié comme contexte IA. Épinglé à titre indicatif uniquement.",
     "contextRecordFallback": "{{entity}} #{{id}}",
     "selection": {
@@ -256,7 +256,7 @@
     },
     "radar": {
       "title": "Conseils Koios",
-      "empty": "Rien ne nécessite votre attention pour le moment. N'hésitez pas à me poser une question."
+      "empty": "Rien ne nécessite votre attention pour le moment. N’hésitez pas à me poser une question."
     },
     "mention": {
       "leads": "Prospects",
@@ -265,7 +265,7 @@
       "contacts": "Contacts",
       "total": "au total",
       "searchError": "Impossible de charger cette catégorie.",
-      "searchUnsupported": "La recherche en direct n'est pas encore disponible pour cette catégorie.",
+      "searchUnsupported": "La recherche en direct n’est pas encore disponible pour cette catégorie.",
       "singular": {
         "candidate": "Candidat",
         "vacancy": "Poste",
@@ -274,7 +274,7 @@
         "match": "Match",
         "opportunity": "Opportunité",
         "task": "Tâche",
-        "outreach_campaign": "Liste d'appel"
+        "outreach_campaign": "Liste d’appel"
       }
     },
     "pendingAction": {
@@ -284,12 +284,12 @@
       "cancel": "Annuler",
       "back": "Retour",
       "expiresIn": "Expire dans {{count}} min",
-      "expiresSoon": "Expire dans moins d'une minute",
+      "expiresSoon": "Expire dans moins d’une minute",
       "confirmed": "Terminé.",
       "warnings": "Remarque",
       "cancelled": "Annulé.",
       "expired": "Cette proposition a expiré. Redemandez-la.",
-      "error": "Une erreur s'est produite. Veuillez réessayer.",
+      "error": "Une erreur s’est produite. Veuillez réessayer.",
       "refusedTitle": "Exécution incomplète",
       "confirmDisabledConnection": "La connexion requise n’est pas active. Activez-la d’abord dans les paramètres.",
       "connectionCheckLoading": "Vérification de la connexion…",
@@ -312,11 +312,11 @@
       },
       "fields": {
         "title": "Titre",
-        "due_date": "Date d'échéance",
+        "due_date": "Date d’échéance",
         "description": "Description",
         "candidate": "Candidat",
         "customer": "Client",
-        "vacancy": "Offre d'emploi",
+        "vacancy": "Offre d’emploi",
         "contact": "Contact",
         "location": "Lieu",
         "department": "Service",
@@ -334,7 +334,7 @@
         "phase": "Phase",
         "reason": "Motif"
       },
-      "openExisting": "Voir l'enregistrement existant",
+      "openExisting": "Voir l’enregistrement existant",
       "existingArchived": "archivé"
     },
     "resizeHandle": "Ajuster la largeur du panneau",
@@ -448,11 +448,11 @@
     "advice": {
       "refresh": "Actualiser le conseil",
       "score": "score",
-      "none": "Pas encore d'avis récapitulatif",
+      "none": "Pas encore d’avis récapitulatif",
       "generatedAt": "Généré le {{date}}",
       "pending": "Koios prépare le conseil...",
       "alreadyRunning": "Une génération de conseil est déjà en cours pour cet enregistrement.",
-      "unavailable": "Le conseil IA n'est pas activé pour cette section.",
+      "unavailable": "Le conseil IA n’est pas activé pour cette section.",
       "verdict": {
         "proceed": "Poursuivre",
         "review": "À examiner",
@@ -467,14 +467,14 @@
         "ending": "Se termine",
         "next_step": "Prochaine étape"
       },
-      "timeout": "L'avis n'est pas arrivé dans la minute. Actualisez la page ou réessayez plus tard."
+      "timeout": "L’avis n’est pas arrivé dans la minute. Actualisez la page ou réessayez plus tard."
     },
     "welcomeAnonymous": "Bonjour, que puis-je faire pour toi ?",
     "welcomeAttention_one": "Il y a 1 point qui demande ton attention.",
     "welcomeAttention_other": "Il y a {{count}} points qui demandent ton attention."
   },
   "actionRules": {
-    "title": "Vérification de l'action",
+    "title": "Vérification de l’action",
     "ok": "Confirmer",
     "cancel": "Annuler",
     "warnTitle": "Attention",
@@ -535,13 +535,13 @@
     "notFound": "Adresse introuvable. Vérifiez les coordonnées."
   },
   "noAccess": "Accès refusé",
-  "noAccessDesc": "Vous n'avez pas les droits pour cette page.",
+  "noAccessDesc": "Vous n’avez pas les droits pour cette page.",
   "noAgencies": "Aucune agence trouvée",
   "sidebarCollapse": "Réduire la barre latérale",
   "sidebarExpand": "Développer la barre latérale",
   "comingSoon": "bientôt",
-  "justNow": "à l'instant",
-  "errorGeneric": "Une erreur s'est produite",
+  "justNow": "à l’instant",
+  "errorGeneric": "Une erreur s’est produite",
   "validation": {
     "fieldRequiredNamed": "Le champ '{{field}}' est obligatoire."
   },
@@ -581,7 +581,7 @@
       "syncing": "Synchronisation…",
       "syncSuccess": "Synchronisation réussie",
       "syncFailed": "Échec de la synchronisation",
-      "syncNotFound": "Cet employé n'existe pas dans Shiftmanager ou ses données personnelles ont été effacées.",
+      "syncNotFound": "Cet employé n’existe pas dans Shiftmanager ou ses données personnelles ont été effacées.",
       "syncUnexpected": "Shiftmanager a renvoyé une réponse inattendue. Réessayez plus tard.",
       "lastSynced": "Dernière synchronisation : {{date}}"
     },
@@ -608,14 +608,14 @@
       "alt": "Logo OpenCage",
       "linked": "Lié",
       "notGeocoded": "Pas encore géocodé",
-      "autoInfo": "Les coordonnées sont automatiquement mises à jour lorsque l'adresse change.",
-      "readOnly": "Les coordonnées proviennent du lieu de la cliente elle-même ; le re-géocodage n'est pas encore possible ici."
+      "autoInfo": "Les coordonnées sont automatiquement mises à jour lorsque l’adresse change.",
+      "readOnly": "Les coordonnées proviennent du lieu de la cliente elle-même ; le re-géocodage n’est pas encore possible ici."
     }
   },
   "breadcrumb": "Fil d’Ariane",
   "branchSection": {
     "widenTitle": "Supprimer la dernière filiale ?",
-    "widenMessage": "C'est la seule filiale liée. La supprimer rend cet enregistrement à nouveau visible pour toutes les filiales."
+    "widenMessage": "C’est la seule filiale liée. La supprimer rend cet enregistrement à nouveau visible pour toutes les filiales."
   },
   "drillPager": {
     "prev": "Précédent",
@@ -624,11 +624,11 @@
     "nextAt": "Suivant ({{index}} sur {{total}})"
   },
   "new": "Nouveau",
-  "aiGenerated": "Généré par l'IA",
+  "aiGenerated": "Généré par l’IA",
   "aiGeneratedHint": "Généré par Koios AI. À vérifier avant utilisation.",
   "notesAssist": {
     "title": "Assistant Koios",
-    "needsText": "Ajoutez d'abord du texte",
+    "needsText": "Ajoutez d’abord du texte",
     "improve": "Améliorer",
     "summarize": "Résumer",
     "actions": "Actions à mener",
@@ -637,7 +637,7 @@
     "noItems": "Aucune action trouvée",
     "apply": "Appliquer",
     "discard": "Rejeter",
-    "error": "L'assistant IA Koios est indisponible. Veuillez réessayer.",
+    "error": "L’assistant IA Koios est indisponible. Veuillez réessayer.",
     "actionTypes": {
       "task": "Tâche",
       "whatsapp": "WhatsApp",
@@ -649,43 +649,43 @@
     "proposeCv": {
       "label": "CV pour la proposition",
       "placeholder": "Choisir un CV enregistré",
-      "none": "Aucun CV enregistré pour l'instant. Koios crée le CV à la charte lors de l'exécution.",
+      "none": "Aucun CV enregistré pour l’instant. Koios crée le CV à la charte lors de l’exécution.",
       "preparing": "Création du CV à la charte…",
-      "prepareFailed": "Le CV à la charte n'a pas pu être créé.",
+      "prepareFailed": "Le CV à la charte n’a pas pu être créé.",
       "loadError": "Les CV n’ont pas pu être chargés."
     },
     "execute": {
       "run": "Exécuter",
       "applyAsText": "Ajouter comme texte",
       "done": "Terminé",
-      "loadingRun": "Chargement de l'exécution…",
-      "error": "Koios n'a pas pu démarrer les actions.",
+      "loadingRun": "Chargement de l’exécution…",
+      "error": "Koios n’a pas pu démarrer les actions.",
       "executed": "Exécutée",
       "executing": "Exécution…",
       "declined": {
-        "proposal_in_flight": "La proposition est déjà en cours d'envoi",
+        "proposal_in_flight": "La proposition est déjà en cours d’envoi",
         "proposal_recently_sent": "La proposition a déjà été envoyée récemment",
         "duplicate": "Existe déjà",
         "duplicate_archived": "Existe déjà, archivé",
-        "proposal_cv_required": "Cette proposition nécessite un CV enregistré et Koios n'a pas pu créer le CV à la charte. Réessayez ou proposez via la candidature.",
-        "proposal_cv_invalid": "Le CV choisi n'appartient pas à cette candidature ou n'a pas encore été analysé. Réessayez.",
+        "proposal_cv_required": "Cette proposition nécessite un CV enregistré et Koios n’a pas pu créer le CV à la charte. Réessayez ou proposez via la candidature.",
+        "proposal_cv_invalid": "Le CV choisi n’appartient pas à cette candidature ou n’a pas encore été analysé. Réessayez.",
         "contact_required": "Cette proposition a besoin d’un contact et le poste n’en a aucun. Liez un contact au poste et réessayez."
       },
-      "viewRun": "Voir l'exécution du workflow",
+      "viewRun": "Voir l’exécution du workflow",
       "confirm": "Confirmer",
       "confirmFailed": "Échec de la confirmation",
       "confirmSessionExpired": "Session expirée : reconnectez-vous et confirmez à nouveau",
-      "confirmNotApplied": "Le serveur n'a pas appliqué la confirmation, veuillez réessayer",
+      "confirmNotApplied": "Le serveur n’a pas appliqué la confirmation, veuillez réessayer",
       "forbidden": "Aucun droit",
       "unsupported": "Pas encore pris en charge",
       "forceSend": "Envoyer malgré tout",
       "openProposal": "Proposition existante",
       "forbiddenReason": {
-        "task": "Vous n'avez pas le droit de créer des tâches.",
-        "whatsapp": "Vous n'avez pas le droit d'envoyer des messages WhatsApp.",
-        "email": "Vous n'avez pas le droit d'effectuer cette action pour le candidat.",
-        "appointment": "Vous n'avez pas le droit d'effectuer cette action pour le candidat.",
-        "notification": "Vous n'avez pas le droit d'effectuer cette action."
+        "task": "Vous n’avez pas le droit de créer des tâches.",
+        "whatsapp": "Vous n’avez pas le droit d’envoyer des messages WhatsApp.",
+        "email": "Vous n’avez pas le droit d’effectuer cette action pour le candidat.",
+        "appointment": "Vous n’avez pas le droit d’effectuer cette action pour le candidat.",
+        "notification": "Vous n’avez pas le droit d’effectuer cette action."
       },
       "draftMessage": "Brouillon de message",
       "proposedTime": "Heure proposée",
@@ -696,13 +696,13 @@
       },
       "budgetLine": "{{used}}/{{allowance}} {{unit}}",
       "upgradeHint": "Passer à {{tier}}",
-      "openExisting": "Voir l'enregistrement existant"
+      "openExisting": "Voir l’enregistrement existant"
     },
     "koiosMode": {
       "title": "Mode Koios",
       "wizard": "Assistant",
       "auto": "Auto",
-      "wizardHint": "Confirmer chaque action d'abord",
+      "wizardHint": "Confirmer chaque action d’abord",
       "autoHint": "Exécuter les actions immédiatement (les messages attendent une confirmation sauf si activé dans votre profil)",
       "bureauDefault": "(défaut du cabinet)"
     },
@@ -715,7 +715,7 @@
     "diffRemoved": "Supprimé",
     "viewLabel": "Affichage",
     "panel": {
-      "title": "Points d'action",
+      "title": "Points d’action",
       "edit": "Modifier",
       "statusProposed": "Proposé",
       "statusPending": "En attente de confirmation",
@@ -752,7 +752,7 @@
   "openSecondScreen": "Ouvrir sur un second écran",
   "popupBlocked": "Votre navigateur a bloqué la fenêtre détachée. Veuillez autoriser les fenêtres pop-up pour ce site.",
   "popout": {
-    "unknownEntity": "Cette fenêtre détachée n'a pas pu être reconnue.",
+    "unknownEntity": "Cette fenêtre détachée n’a pas pu être reconnue.",
     "saveAndClose": "Enregistrer et fermer",
     "windowTitle": "{{name}} — notes",
     "loadError": "Échec du chargement.",
@@ -773,7 +773,7 @@
       "allSources": "Toutes les sources",
       "search": "Rechercher des notes liées…",
       "filterLabel": "Source",
-      "saveError": "Échec de l'enregistrement. Veuillez réessayer.",
+      "saveError": "Échec de l’enregistrement. Veuillez réessayer.",
       "sourceType": {
         "candidate": "Candidat",
         "customer": "Client",
@@ -792,7 +792,7 @@
     "restoreConfirm": "Restaurer la version du {{date}} ?",
     "restoreConfirmNoDate": "Restaurer la version précédente ?",
     "restoreNotice": "Restauré. Vous pouvez encore annuler cette action une fois.",
-    "restoreUnavailable": "Il n'y a pas de version précédente à restaurer.",
+    "restoreUnavailable": "Il n’y a pas de version précédente à restaurer.",
     "links": {
       "title": "Liens",
       "add": "Lier",
@@ -812,19 +812,19 @@
   "errors": {
     "koiosCreditExhausted": "Le crédit Koios de cette organisation est épuisé ou pas encore activé. Rechargez le solde ou contactez votre administrateur.",
     "koiosUnavailable": "Koios est momentanément indisponible. Réessayez dans un instant.",
-    "helloflexContractTypeUnmapped": "Aucun type de contrat HelloFlex n'est lié à cette forme de contrat. Configurez-le dans Paramètres → HelloFlex.",
+    "helloflexContractTypeUnmapped": "Aucun type de contrat HelloFlex n’est lié à cette forme de contrat. Configurez-le dans Paramètres → HelloFlex.",
     "recipientSuppressed": "Cette adresse est bloquée après un rebond ou une plainte antérieurs ; aucun nouvel envoi n’aura lieu.",
     "emailUnavailable": "Cette adresse e-mail ne peut pas être utilisée.",
     "inboundScenarioClash": "Un autre scénario actif répond déjà à ce numéro et à cette lane : {{clash_name}}.",
     "inboundScenarioNumberMissing": "Ce scénario ne nomme aucun numéro de ce bureau sur sa lane et ne peut pas être activé.",
     "contractInFlight": "Un envoi de contrat est déjà en cours pour ce match.",
-    "contractUnconfirmed": "L'envoi précédent du contrat pour ce match n'a jamais été confirmé. Un membre du bureau a été prévenu.",
+    "contractUnconfirmed": "L’envoi précédent du contrat pour ce match n’a jamais été confirmé. Un membre du bureau a été prévenu.",
     "contractSent": "Un contrat a déjà été envoyé récemment pour ce match.",
-    "twoWayOff": "La liaison HelloFlex est à sens unique, les contrats ne peuvent donc pas être envoyés d'ici.",
-    "idempotencyKeyReused": "Cette action a déjà été envoyée avec d'autres données. Veuillez réessayer.",
-    "cvScanUnavailable": "L'antivirus est injoignable. Le CV n'a pas été enregistré et rien n'a été envoyé. Réessayez plus tard.",
-    "cvInfected": "Le CV a été refusé par l'antivirus et supprimé. Rien n'a été envoyé.",
-    "documentNotAvailable": "Ce document n'est pas encore disponible : l'analyse antivirus n'est pas terminée ou a rejeté le fichier.",
+    "twoWayOff": "La liaison HelloFlex est à sens unique, les contrats ne peuvent donc pas être envoyés d’ici.",
+    "idempotencyKeyReused": "Cette action a déjà été envoyée avec d’autres données. Veuillez réessayer.",
+    "cvScanUnavailable": "L’antivirus est injoignable. Le CV n’a pas été enregistré et rien n’a été envoyé. Réessayez plus tard.",
+    "cvInfected": "Le CV a été refusé par l’antivirus et supprimé. Rien n’a été envoyé.",
+    "documentNotAvailable": "Ce document n’est pas encore disponible : l’analyse antivirus n’est pas terminée ou a rejeté le fichier.",
     "tenantNotReady": "Cette agence est en cours de configuration ou sa configuration a échoué. Réessayez plus tard ou choisissez une autre agence.",
     "smCredentialsUnsatisfied": "La connexion Shiftmanager a des identifiants incomplets ou invalides et ne peut rien récupérer. Vérifiez la connexion dans Paramètres → Shiftmanager.",
     "numberingFrozen": "Cette série a déjà attribué un numéro : le préfixe, le nombre de chiffres et la valeur de départ sont verrouillés.",
@@ -835,11 +835,11 @@
     "helloflexCandidateUnlinked": "Le candidat n’est pas relié à HelloFlex.",
     "helloflexBranchUnlinked": "L’agence {{branch}} n’est pas reliée à HelloFlex.",
     "helloflexModuleOff": "Le module HelloFlex n’est pas activé pour ce bureau.",
-    "aiDisclosureMissing": "L'introduction de l'entretien ne contient pas la mention IA obligatoire ; modifiez le modèle avant de l'activer.",
+    "aiDisclosureMissing": "L’introduction de l’entretien ne contient pas la mention IA obligatoire ; modifiez le modèle avant de l’activer.",
     "fieldRequired": "{{field}} est obligatoire."
   },
   "timeline": {
-    "today": "Aujourd'hui",
+    "today": "Aujourd’hui",
     "yesterday": "Hier"
   },
   "identifierCheck": {
@@ -853,12 +853,12 @@
   "multiSelect": {
     "selectVisible": "Tout sélectionner",
     "clearVisible": "Tout effacer",
-    "visibleHint": "S'applique aux {{count}} options visibles"
+    "visibleHint": "S’applique aux {{count}} options visibles"
   },
-  "popoutHandoffFailed": "Le second écran n'a pas repris la note. Votre texte est toujours ici.",
+  "popoutHandoffFailed": "Le second écran n’a pas repris la note. Votre texte est toujours ici.",
   "discardChangesConfirm": "Vous avez du texte non enregistré. Fermer sans enregistrer ?",
-  "koiosSuggested": "Proposé par Koios AI selon l'historique du candidat",
-  "koiosSuggestedOwnerAgent": "Proposé par Koios AI selon le propriétaire de l'offre",
+  "koiosSuggested": "Proposé par Koios AI selon l’historique du candidat",
+  "koiosSuggestedOwnerAgent": "Proposé par Koios AI selon le propriétaire de l’offre",
   "koiosSuggestedBranch": "Proposé par Koios AI selon le client ou votre propre agence",
   "koiosRejectAdvice": "Koios AI propose un refus. Choisissez vous-même le motif dans la liste.",
   "dragList": {
@@ -913,7 +913,7 @@
       "referral_2": "Parrainage",
       "walkIn_2": "Visite spontanée",
       "website": "Site web",
-      "werkzoeken": "Recherche d'emploi",
+      "werkzoeken": "Recherche d’emploi",
       "werkzoekenNl": "Werkzoeken.nl"
     },
     "customerSources": {
@@ -948,7 +948,7 @@
       "operationsManager": "Responsable opérationnel",
       "planner": "Planificateur",
       "recruiter": "Recruteur",
-      "teamLeader": "Chef d'équipe"
+      "teamLeader": "Chef d’équipe"
     },
     "contractTypes": {
       "bepaalde_tijd": "CDD",
@@ -975,7 +975,7 @@
       "cv": "CV",
       "diploma": "Diplôme",
       "photo": "Photo",
-      "idDocument": "Pièce d'identité",
+      "idDocument": "Pièce d’identité",
       "other": "Autre",
       "certificateOfConductVOG": "Certificat de bonne conduite (VOG)"
     },
@@ -1045,13 +1045,13 @@
       "packer": "Emballeur",
       "cook": "Cuisinier",
       "logisticsEmployee": "Employé logistique",
-      "warehouseOperative": "Employé d'entrepôt",
+      "warehouseOperative": "Employé d’entrepôt",
       "mobilePatrolOfficer": "Agent de surveillance mobile",
       "siteSecurityGuard": "Agent de sécurité de site",
       "orderPicker": "Préparateur de commandes",
-      "receptionSecurityGuard": "Agent de sécurité d'accueil",
+      "receptionSecurityGuard": "Agent de sécurité d’accueil",
       "patrolOfficer": "Agent de surveillance",
-      "warehouseTeamLeader": "Chef d'équipe entrepôt",
+      "warehouseTeamLeader": "Chef d’équipe entrepôt",
       "nurseN4": "Infirmier N4",
       "nurseN5": "Infirmier N5",
       "careWorkerIG": "Aide-soignant IG",
@@ -1083,7 +1083,7 @@
       "manufacturing": "Production",
       "retail": "Commerce de détail",
       "engineering": "Technique",
-      "staffingAgency": "Agence d'intérim",
+      "staffingAgency": "Agence d’intérim",
       "recruitment": "Recrutement",
       "healthcare": "Santé"
     },
@@ -1164,9 +1164,9 @@
       "location": "Site (interne)",
       "match": "Match",
       "opportunity": "Opportunité",
-      "outreach_campaign": "Campagne d'appels",
+      "outreach_campaign": "Campagne d’appels",
       "task": "Tâche",
-      "vacancy": "Offre d'emploi",
+      "vacancy": "Offre d’emploi",
       "zzp_creditor": "Créditeur indépendant"
     },
     "opportunityStages": {
@@ -1205,11 +1205,11 @@
       "docent": "Enseignant",
       "klant": "Client",
       "manager": "Manager",
-      "opdrachtgever": "Donneur d'ordre"
+      "opdrachtgever": "Donneur d’ordre"
     },
     "rejectionReasons": {
       "anotherCandidateWasChosen": "Autre candidat retenu",
-      "noCulturalFit": "Pas d'adéquation culturelle",
+      "noCulturalFit": "Pas d’adéquation culturelle",
       "notQualified": "Non qualifié",
       "insufficientExperience": "Expérience insuffisante",
       "salaryExpectationTooHigh": "Prétention salariale trop élevée",
@@ -1265,7 +1265,7 @@
       "candidates": "Candidats",
       "applications": "Candidatures",
       "matches": "Matches",
-      "vacancies": "Offres d'emploi",
+      "vacancies": "Offres d’emploi",
       "opportunities": "Opportunités",
       "tasks": "Tâches",
       "systemNotifications": "Notifications système",
@@ -1286,7 +1286,7 @@
     "workflowNames": {
       "reactivation": "Réactivation",
       "notApproachedXDays": "Non contacté > X jours",
-      "birthdayGreeting": "Message d'anniversaire",
+      "birthdayGreeting": "Message d’anniversaire",
       "appointmentConfirmation": "Confirmation de rendez-vous",
       "helloflexConnectionPerCandidate": "Connexion HelloFlex (par candidat)",
       "helloflexConnectionBulk": "Connexion HelloFlex — en masse",
@@ -1294,7 +1294,7 @@
       "shiftmanagerConnectionBulk": "Connexion Shiftmanager — en masse",
       "applicationStageMatch": "Étape de candidature → Match",
       "sendRejection": "Envoyer un refus",
-      "vacancyLeadCount": "Comptage des leads d'offres d'emploi",
+      "vacancyLeadCount": "Comptage des leads d’offres d’emploi",
       "matchWorkExperience": "Match → expérience professionnelle",
       "contractExpiring": "Contrat arrivant à échéance",
       "matchExpiringCandidateReminder": "Match arrivant à échéance — rappel candidat",
@@ -1303,7 +1303,7 @@
       "taskOnExpiringCustomerContract": "Tâche en cas de contrat client arrivant à échéance",
       "taskOnLongNoCustomerContact": "Tâche en cas de longue absence de contact client",
       "taskOnExpiringCustomerMatch": "Tâche en cas de match client arrivant à échéance",
-      "taskOnVacancyLongOnlineWithoutResult": "Tâche en cas d'offre d'emploi longtemps en ligne sans résultat",
+      "taskOnVacancyLongOnlineWithoutResult": "Tâche en cas d’offre d’emploi longtemps en ligne sans résultat",
       "notificationOnApproachingClosingDate": "Notification en cas de date de clôture proche",
       "onboardingEvaluation": "Intégration et évaluation",
       "newMatchNotification": "Nouveau match — notification",
@@ -1322,23 +1322,23 @@
       "leaveEndingSoonTask": "Congé arrivant bientôt à échéance — tâche",
       "leaveDatePassedNotification": "Date de congé dépassée — notification",
       "leaveDatePassedTask": "Date de congé dépassée — tâche",
-      "unavailabilityPeriodEndingSoonNotification": "Période d'indisponibilité arrivant bientôt à échéance — notification",
-      "unavailabilityPeriodEndingSoonTask": "Période d'indisponibilité arrivant bientôt à échéance — tâche",
-      "unavailabilityDatePassedNotification": "Date d'indisponibilité dépassée — notification",
-      "unavailabilityDatePassedTask": "Date d'indisponibilité dépassée — tâche",
+      "unavailabilityPeriodEndingSoonNotification": "Période d’indisponibilité arrivant bientôt à échéance — notification",
+      "unavailabilityPeriodEndingSoonTask": "Période d’indisponibilité arrivant bientôt à échéance — tâche",
+      "unavailabilityDatePassedNotification": "Date d’indisponibilité dépassée — notification",
+      "unavailabilityDatePassedTask": "Date d’indisponibilité dépassée — tâche",
       "stalledOnStatusNotification": "Bloqué sur le statut — notification",
       "stalledOnStatusTask": "Bloqué sur le statut — tâche",
       "leadStalledNotification": "Lead bloqué — notification",
       "leadStalledTask": "Lead bloqué — tâche",
-      "longNoContactCallList": "Longue absence de contact → liste d'appels",
+      "longNoContactCallList": "Longue absence de contact → liste d’appels",
       "longNoContactWhatsAppCheckIn": "Longue absence de contact → point WhatsApp",
       "longNoConversationNotification": "Longtemps sans échange — notification",
       "askRetentionConsent": "Demander le consentement de conservation",
-      "retentionPeriodExpiryNotification": "Notification d'expiration du délai de conservation",
+      "retentionPeriodExpiryNotification": "Notification d’expiration du délai de conservation",
       "archiveOnExpiredRetentionPeriod": "Archiver en cas de délai de conservation expiré",
       "escalationFileArchivedTooLong": "Escalade : dossier archivé trop longtemps",
-      "emailBackofficeOnArchiving": "Envoyer un e-mail au backoffice lors de l'archivage",
-      "aiPlannerEmployeeStatusChange": "AI Planner - Changement de statut de l'employé",
+      "emailBackofficeOnArchiving": "Envoyer un e-mail au backoffice lors de l’archivage",
+      "aiPlannerEmployeeStatusChange": "AI Planner - Changement de statut de l’employé",
       "aiPlannerOfferingShiftsActiveNEW": "AI Planner - Offering Shifts - Actif - NOUVEAU",
       "aiPlannerOfferingShiftsActive": "AI Planner - Offering Shifts - Actif",
       "aiPlannerOfferingShiftsNotActive": "AI Planner - Offering Shifts - Non actif",
@@ -1372,7 +1372,7 @@
       "koiosCreateTask": "Koios : créer une tâche",
       "koiosScheduleAppointment": "Koios : planifier un rendez-vous",
       "koiosSendNotification": "Koios : envoyer une notification",
-      "koiosAddToCallList": "Koios : ajouter à la liste d'appels"
+      "koiosAddToCallList": "Koios : ajouter à la liste d’appels"
     },
     "workPermitTypes": {
       "geen_vergunning_nodig": "Aucun permis requis (NL/UE)",
@@ -1383,13 +1383,13 @@
     }
   },
   "copyAddress": {
-    "copy": "Copier l'adresse",
+    "copy": "Copier l’adresse",
     "copied": "Adresse copiée"
   },
   "changelogDescriptions": {
     "action_rule": {
-      "reset": "Règle d'action réinitialisée par défaut",
-      "updated": "Règles d'action mises à jour",
+      "reset": "Règle d’action réinitialisée par défaut",
+      "updated": "Règles d’action mises à jour",
       "viewed": "Dossier ouvert"
     },
     "ai_agent": {
@@ -1478,12 +1478,12 @@
       "search_index_backfilled": "Index de recherche des candidats rempli",
       "status_updated": "Statut de candidat modifié par Koios",
       "updated": "Statut du candidat modifié",
-      "whatsapp_sent": "Workflow d'envoi WhatsApp démarré"
+      "whatsapp_sent": "Workflow d’envoi WhatsApp démarré"
     },
     "candidate_call_list": {
-      "added": "Candidats ajoutés à la liste d'appels par Koios",
-      "created": "Liste d'appels créée par Koios",
-      "distributed": "Liste d'appels distribuée par Koios"
+      "added": "Candidats ajoutés à la liste d’appels par Koios",
+      "created": "Liste d’appels créée par Koios",
+      "distributed": "Liste d’appels distribuée par Koios"
     },
     "candidate_contact_moment": {
       "registered": "Moment de contact enregistré"
@@ -1492,8 +1492,8 @@
       "registered": "Moment de contact enregistré"
     },
     "candidate_cv_parse_proposal": {
-      "accepted": "Proposition d'analyse CV acceptée",
-      "rejected": "Proposition d'analyse CV rejetée"
+      "accepted": "Proposition d’analyse CV acceptée",
+      "rejected": "Proposition d’analyse CV rejetée"
     },
     "candidate_document": {
       "replaced": "Document candidat remplacé"
@@ -1523,7 +1523,7 @@
       "bulk_updated": "Clients mis à jour en masse",
       "created": "Client créé par Koios",
       "merged": "Client fusionné",
-      "restored": "Client restauré de l'archive",
+      "restored": "Client restauré de l’archive",
       "updated": "Sites du client modifiés"
     },
     "customer_contact": {
@@ -1559,11 +1559,11 @@
       "unmarked": "Marquage de suppression retiré"
     },
     "document_zip_import": {
-      "attached": "Fichier attaché à l'import ZIP",
+      "attached": "Fichier attaché à l’import ZIP",
       "completed": "Import ZIP terminé"
     },
     "email_log": {
-      "viewed": "Corps de l'e-mail consulté"
+      "viewed": "Corps de l’e-mail consulté"
     },
     "export": {
       "downloaded": "Export ZIP téléchargé: documents",
@@ -1601,8 +1601,8 @@
       "requeued": "Job échouée remise en attente"
     },
     "koios_action_item": {
-      "executed": "Point d'action IA exécuté",
-      "failed": "Point d'action IA exécuté"
+      "executed": "Point d’action IA exécuté",
+      "failed": "Point d’action IA exécuté"
     },
     "koios_ai_settings": {
       "budget_updated": "Budget quotidien IA mis à jour",
@@ -1661,7 +1661,7 @@
       "login_success": "Connecté (MFA)"
     },
     "module_setting": {
-      "updated": "Paramètres d'app mis à jour"
+      "updated": "Paramètres d’app mis à jour"
     },
     "note_importer": {
       "cleared": "Auteur de note effacé après import"
@@ -1672,28 +1672,28 @@
       "updated": "Opportunité mise à jour par Koios"
     },
     "opportunity_note": {
-      "added": "Note d'opportunité ajoutée par Koios",
-      "deleted": "Note d'opportunité supprimée",
-      "edited": "Note d'opportunité modifiée",
+      "added": "Note d’opportunité ajoutée par Koios",
+      "deleted": "Note d’opportunité supprimée",
+      "edited": "Note d’opportunité modifiée",
       "restored": "Version précédente de la note restaurée"
     },
     "outreach_campaign": {
-      "created": "Liste d'appels créée",
-      "deleted": "Liste d'appels supprimée",
-      "distributed": "Liste d'appels distribuée",
-      "generated": "Liste d'appels générée",
-      "restored": "Liste d'appels restaurée",
-      "updated": "Liste d'appels mise à jour"
+      "created": "Liste d’appels créée",
+      "deleted": "Liste d’appels supprimée",
+      "distributed": "Liste d’appels distribuée",
+      "generated": "Liste d’appels générée",
+      "restored": "Liste d’appels restaurée",
+      "updated": "Liste d’appels mise à jour"
     },
     "outreach_campaign_generator": {
-      "added": "Candidat ajouté à la liste d'appels malgré l'avertissement",
-      "blocked": "Candidat ignoré lors du remplissage de la liste d'appels"
+      "added": "Candidat ajouté à la liste d’appels malgré l’avertissement",
+      "blocked": "Candidat ignoré lors du remplissage de la liste d’appels"
     },
     "outreach_campaign_note": {
-      "added": "Note de liste d'appels ajoutée",
-      "deleted": "Note de liste d'appels supprimée",
+      "added": "Note de liste d’appels ajoutée",
+      "deleted": "Note de liste d’appels supprimée",
       "restored": "Version précédente de la note restaurée",
-      "updated": "Note de liste d'appels mise à jour"
+      "updated": "Note de liste d’appels mise à jour"
     },
     "outreach_target": {
       "assigned": "Cibles de sensibilisation assignées",
@@ -1779,8 +1779,8 @@
     "user": {
       "created": "Utilisateur créé",
       "deleted": "Utilisateur supprimé",
-      "mfa_reset": "MFA réinitialisé pour l'utilisateur",
-      "roles_updated": "Rôle modifié pour l'utilisateur",
+      "mfa_reset": "MFA réinitialisé pour l’utilisateur",
+      "roles_updated": "Rôle modifié pour l’utilisateur",
       "updated": "Utilisateur mis à jour"
     },
     "vacancy": {
@@ -1805,7 +1805,7 @@
       "stored": "Connexion WhatsApp coexistence stockée"
     },
     "whatsapp_send": {
-      "blocked": "Candidat ignoré lors de l'envoi WhatsApp",
+      "blocked": "Candidat ignoré lors de l’envoi WhatsApp",
       "forced_despite_warning": "WhatsApp envoyé malgré avertissement"
     },
     "workflow": {

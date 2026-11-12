@@ -3,7 +3,7 @@
   "loading": "Chargement des opportunités…",
   "empty": "Aucune opportunité pour le moment.",
   "error": "Impossible de charger les opportunités.",
-  "pickClientFirst": "Sélectionnez d'abord un client",
+  "pickClientFirst": "Sélectionnez d’abord un client",
   "page": {
     "add": "Nouvelle opportunité",
     "selected": "{{count}} sélectionné(e)s",
@@ -53,13 +53,13 @@
     "archive": "Archiver",
     "archiveConfirm": "Archiver cette opportunité ? Vous pourrez la restaurer ensuite.",
     "archived": "Opportunité archivée.",
-    "archiveFailed": "Impossible d'archiver l'opportunité.",
+    "archiveFailed": "Impossible d’archiver l’opportunité.",
     "archivedBanner": {
       "since": "Archivée depuis le {{date}}",
       "flag": "Archivée",
       "restore": "Restaurer",
       "restored": "Opportunité restaurée.",
-      "restoreFailed": "Impossible de restaurer l'opportunité."
+      "restoreFailed": "Impossible de restaurer l’opportunité."
     },
     "tabs": {
       "details": "Détails",
@@ -80,9 +80,9 @@
       "client": "Opportunité {{position}} sur {{total}} pour ce client"
     },
     "statistics": {
-      "empty": "Aucune statistique d'opportunité disponible pour le moment.",
+      "empty": "Aucune statistique d’opportunité disponible pour le moment.",
       "onlyOpportunity": "Aucune autre opportunité trouvée.",
-      "openOpportunity": "Ouvrir l'opportunité"
+      "openOpportunity": "Ouvrir l’opportunité"
     }
   },
   "details": {
@@ -94,7 +94,7 @@
     "created": "Créé",
     "groups": {
       "deal": "Affaire",
-      "opportunityDescription": "Description de l'opportunité"
+      "opportunityDescription": "Description de l’opportunité"
     },
     "currency": "Devise",
     "hours": "Heures",
@@ -115,7 +115,7 @@
   },
   "modal": {
     "title": "Nouvelle opportunité",
-    "editTitle": "Modifier l'opportunité",
+    "editTitle": "Modifier l’opportunité",
     "titlePlaceholder": "P. ex. 5 préparateurs de commandes pour Logistique Nord",
     "required": "Le titre est requis",
     "create": "Créer",
@@ -173,7 +173,7 @@
       "lost_reason": "Motif de perte",
       "lost_note": "Note de perte",
       "stage_changed_at": "Phase modifiée le",
-      "deal_type_id": "Type d'affaire",
+      "deal_type_id": "Type d’affaire",
       "value": "Valeur",
       "currency": "Devise",
       "owner_id": "Responsable",
@@ -200,13 +200,13 @@
   "email": {
     "loading": "Chargement des e-mails…",
     "error": "Impossible de charger les e-mails.",
-    "noAccess": "Pas d'accès au journal des e-mails.",
+    "noAccess": "Pas d’accès au journal des e-mails.",
     "empty": "Aucun e-mail pour cette opportunité pour le moment.",
     "showingOf": "Les {{shown}} premiers e-mails sur {{total}}.",
     "body": {
       "loading": "Chargement du message…",
       "error": "Impossible de charger ce message.",
-      "noAccess": "Pas d'accès à ce message."
+      "noAccess": "Pas d’accès à ce message."
     }
   },
   "notes": {
@@ -239,18 +239,18 @@
     "title": "Koios AI conseille",
     "beta": "Beta",
     "refresh": "Actualiser",
-    "analyzing": "Koios AI analyse l'opportunité…",
-    "dealHealthLabel": "Ampleur de l'affaire",
-    "dealHealthSet": "Une valeur ou un nombre d'heures est renseigné.",
-    "dealHealthMissing": "Aucune valeur ni nombre d'heures n'est encore renseigné.",
+    "analyzing": "Koios AI analyse l’opportunité…",
+    "dealHealthLabel": "Ampleur de l’affaire",
+    "dealHealthSet": "Une valeur ou un nombre d’heures est renseigné.",
+    "dealHealthMissing": "Aucune valeur ni nombre d’heures n’est encore renseigné.",
     "closeWindowLabel": "Date de clôture",
     "closeWindowTerminal": "Cette opportunité est clôturée (gagnée ou perdue). Plus de conseil.",
-    "closeWindowUnknown": "Aucune date de clôture prévue n'est connue.",
+    "closeWindowUnknown": "Aucune date de clôture prévue n’est connue.",
     "closeWindowOverdue": "La date de clôture prévue est dépassée de {{days}} jour(s).",
     "closeWindowUpcoming": "Encore {{days}} jour(s) avant la clôture prévue."
   },
   "richText": {
-    "empty": "Rien d'enregistré pour l'instant"
+    "empty": "Rien d’enregistré pour l’instant"
   },
   "filters": {
     "archived": "Archivé",
@@ -261,13 +261,13 @@
     }
   },
   "popout": {
-    "textWindowTitle": "Texte de l'opportunité — {{name}}",
-    "loadError": "Cette opportunité n'a pas pu être chargée."
+    "textWindowTitle": "Texte de l’opportunité — {{name}}",
+    "loadError": "Cette opportunité n’a pas pu être chargée."
   },
   "conversation": {
-    "noContact": "Associez d'abord un contact à cette opportunité pour voir la conversation.",
+    "noContact": "Associez d’abord un contact à cette opportunité pour voir la conversation.",
     "emailSectionLabel": "E-mails",
-    "noCustomer": "Cette opportunité a un contact mais aucun client associé. Associez d'abord le client pour voir la conversation."
+    "noCustomer": "Cette opportunité a un contact mais aucun client associé. Associez d’abord le client pour voir la conversation."
   },
   "conversations": {
     "start": "Démarrer la conversation"

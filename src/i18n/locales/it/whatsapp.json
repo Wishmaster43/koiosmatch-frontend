@@ -74,7 +74,7 @@
     "title": "Nessuna connessione WhatsApp",
     "desc": "Per questa agenzia non è ancora stata configurata una connessione WhatsApp Business. Configura una connessione tramite il backend per vedere qui messaggi e statistiche.",
     "hintLabel": "Come risolvere",
-    "hint": "Vai su Impostazioni → WhatsApp per creare una connessione Business, oppure chiedi all'amministratore di questa agenzia di farlo."
+    "hint": "Vai su Impostazioni → WhatsApp per creare una connessione Business, oppure chiedi all’amministratore di questa agenzia di farlo."
   },
   "queue": {
     "active": "Attivo",
@@ -132,7 +132,7 @@
       "type": "Tipo",
       "priority": "Priorità",
       "status": "Stato",
-      "holdReason": "Motivo dell'attesa",
+      "holdReason": "Motivo dell’attesa",
       "scheduledAt": "Pianificato per",
       "attempts": "Tentativi",
       "actions": "Azioni"
@@ -142,7 +142,7 @@
       "scheduled": "Pianificato nel futuro",
       "rate_limit": "Limite numero raggiunto",
       "priority_wait": "In attesa di priorità più alta",
-      "ready": "Pronto per l'invio",
+      "ready": "Pronto per l’invio",
       "new_number_hourly": "Limite di riscaldamento (orario)",
       "new_number_daily": "Limite di riscaldamento (giornaliero)",
       "new_number_weekly": "Limite di riscaldamento (settimanale)"
@@ -157,8 +157,8 @@
     "noDevices": "Nessun numero WhatsApp Web collegato.",
     "statValue": "{{count}} in coda",
     "estDrain": "± {{hours}} ore per svuotarsi",
-    "rateAndDrain": "{{rate}} all'ora · ± {{hours}} ore per svuotarsi",
-    "rateLimit": "{{rate}} all'ora",
+    "rateAndDrain": "{{rate}} all’ora · ± {{hours}} ore per svuotarsi",
+    "rateLimit": "{{rate}} all’ora",
     "loading": "Caricamento coda…",
     "error": "Impossibile caricare la coda.",
     "empty": "Nulla in coda."
@@ -193,15 +193,15 @@
     "windowClosesIn": "La finestra si chiude tra {{time}}",
     "countdownHours": "{{hours}} h {{minutes}} min",
     "countdownMinutes": "{{minutes}} min",
-    "pauseAgent": "Metti in pausa l'agente IA",
-    "resumeAgent": "Riprendi l'agente IA",
-    "pauseConfirmTitle": "Mettere in pausa l'agente IA?",
-    "pauseConfirm": "Prendi tu in mano questa conversazione. L'agente IA non invia più messaggi finché non lo riprendi.",
+    "pauseAgent": "Metti in pausa l’agente IA",
+    "resumeAgent": "Riprendi l’agente IA",
+    "pauseConfirmTitle": "Mettere in pausa l’agente IA?",
+    "pauseConfirm": "Prendi tu in mano questa conversazione. L’agente IA non invia più messaggi finché non lo riprendi.",
     "pauseConfirmAction": "Metti in pausa",
-    "agentControlFailed": "Impossibile modificare l'agente IA."
+    "agentControlFailed": "Impossibile modificare l’agente IA."
   },
   "embeddedSignup": {
-    "pending": "Numero registrato, in attesa dell'attivazione da parte di Meta.",
+    "pending": "Numero registrato, in attesa dell’attivazione da parte di Meta.",
     "pendingReasons": {
       "subscribed_apps": "Meta deve ancora attivare l’iscrizione webhook di questo numero.",
       "phone_numbers": "Meta deve ancora sincronizzare il numero di telefono."

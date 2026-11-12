@@ -41,8 +41,8 @@
     "archive": "Archiver",
     "archiveConfirm": "Archiver ce match ? Vous pourrez le restaurer ensuite.",
     "archived": "Match archivé.",
-    "archiveFailed": "Impossible d'archiver le match.",
-    "archiveBlockedActiveContract": "Ce match a un contrat actif. Mettez-y fin d'abord.",
+    "archiveFailed": "Impossible d’archiver le match.",
+    "archiveBlockedActiveContract": "Ce match a un contrat actif. Mettez-y fin d’abord.",
     "archivedBanner": {
       "since": "Archivé depuis le {{date}}",
       "flag": "Archivé",
@@ -86,9 +86,9 @@
     "editClient": "Modifier le client",
     "clientChange": {
       "title": "Rattacher le match à un autre client",
-      "body": "Ce match sera rattaché à {{customer}} (site : {{location}}, service : {{department}}). Les données de facturation seront redéterminées à partir du nouveau client. Le responsable, l'agence propre et le poste lié restent inchangés : vérifiez-les après le changement. L'approbation peut repasser à 'en attente'. Continuer ?",
+      "body": "Ce match sera rattaché à {{customer}} (site : {{location}}, service : {{department}}). Les données de facturation seront redéterminées à partir du nouveau client. Le responsable, l’agence propre et le poste lié restent inchangés : vérifiez-les après le changement. L’approbation peut repasser à 'en attente'. Continuer ?",
       "none": "aucun",
-      "saveError": "Impossible d'enregistrer la modification.",
+      "saveError": "Impossible d’enregistrer la modification.",
       "currentOwner": "Responsable : {{owner}}",
       "currentVacancy": "Poste : {{vacancy}}",
       "currentBranch": "Agence : {{branch}}",
@@ -105,7 +105,7 @@
       "hoursPerWeek": "Heures par semaine",
       "scale": "Échelle",
       "step": "Échelon",
-      "purchaseRate": "Tarif d'achat",
+      "purchaseRate": "Tarif d’achat",
       "sellRate": "Tarif de vente",
       "margin": "Marge",
       "costCenter": "Centre de coûts",
@@ -115,7 +115,7 @@
       "loading": "Chargement des détails du contrat…",
       "error": "Impossible de charger les détails du contrat.",
       "unavailable": "Les détails du contrat ne sont pas encore disponibles (intégration non configurée).",
-      "saveError": "Impossible d'enregistrer la modification.",
+      "saveError": "Impossible d’enregistrer la modification.",
       "saved": "Détails du contrat enregistrés.",
       "functionTitle": "Intitule de fonction",
       "surcharge": "Majoration",
@@ -147,7 +147,7 @@
       "costCenter": "Centre de coûts",
       "submit": "Envoyer",
       "success": "Contrat envoyé à HelloFlex.",
-      "error": "Le contrat n'a pas pu être envoyé. Réessayez.",
+      "error": "Le contrat n’a pas pu être envoyé. Réessayez.",
       "intro": "HelloFlex construit le contrat à partir des données enregistrées du match. Vérifiez-les et envoyez.",
       "missing": "non renseigné",
       "purchaseOrderNumber": "Numéro de bon de commande",
@@ -160,26 +160,26 @@
       "reasonLabel": "Motif",
       "reasonPlaceholder": "Choisir un motif…",
       "noReasonsConfigured": "Aucun motif de résiliation configuré pour le moment.",
-      "effectiveDateLabel": "Date d'effet",
+      "effectiveDateLabel": "Date d’effet",
       "noteLabel": "Note (facultatif)",
       "notePlaceholder": "Ajouter une note…",
       "noteCounter": "{{count}}/{{max}}",
       "confirm": "Confirmer la résiliation",
       "success": "Match résilié.",
-      "error": "Le match n'a pas pu être résilié.",
+      "error": "Le match n’a pas pu être résilié.",
       "reasonLine": "{{date}} · {{reason}}",
       "reasonLineNoDate": "Motif : {{reason}}"
     },
     "remarks": {
       "title": "Remarques",
       "saved": "Remarques enregistrées.",
-      "saveError": "Impossible d'enregistrer les remarques.",
+      "saveError": "Impossible d’enregistrer les remarques.",
       "deprecated": "Ce champ est supprimé. Déplacez le texte vers les Notes. Il y reçoit un auteur, une date, un type et un canal, et apparaît dans la chronologie.",
       "moveToNotes": "Déplacer vers les notes",
       "moving": "Déplacement…",
       "moved": "La remarque a été déplacée vers les notes.",
       "moveError": "Le déplacement vers les notes a échoué. Le texte est inchangé.",
-      "moveClearError": "La note a été enregistrée, mais l'ancien champ n'a pas pu être vidé. Le texte figure désormais à deux endroits."
+      "moveClearError": "La note a été enregistrée, mais l’ancien champ n’a pas pu être vidé. Le texte figure désormais à deux endroits."
     },
     "duration": {
       "unit": {
@@ -204,7 +204,7 @@
     "matchText": {
       "title": "Texte du match",
       "saved": "Texte du match enregistré.",
-      "saveError": "Impossible d'enregistrer le texte du match."
+      "saveError": "Impossible d’enregistrer le texte du match."
     },
     "renew": {
       "button": "Renouveler",
@@ -215,8 +215,8 @@
       "noCurrentEndDate": "Aucune date de fin définie (en cours).",
       "mustBeAfterCurrent": "La nouvelle date de fin doit être postérieure à la date de fin actuelle.",
       "success": "Match renouvelé.",
-      "error": "Le match n'a pas pu être renouvelé.",
-      "disabledArchived": "Match archivé. Restaurez-le d'abord.",
+      "error": "Le match n’a pas pu être renouvelé.",
+      "disabledArchived": "Match archivé. Restaurez-le d’abord.",
       "disabledClosed": "Ce match a déjà été résilié.",
       "renewalCount_ordinal_one": "{{count}}re prolongation",
       "renewalCount_ordinal_other": "{{count}}e prolongation"
@@ -233,13 +233,13 @@
     "reasonPlaceholder": "Motif du rejet…",
     "confirmReject": "Confirmer le rejet",
     "alreadyReviewed": "Ce match a déjà été évalué.",
-    "error": "Impossible d'appliquer l'évaluation.",
+    "error": "Impossible d’appliquer l’évaluation.",
     "badgeLabel": "Évaluation",
     "badgeWithLabel": "Évaluation : {{status}}"
   },
   "changelog": {
-    "loading": "Chargement de l'historique…",
-    "error": "Impossible de charger l'historique.",
+    "loading": "Chargement de l’historique…",
+    "error": "Impossible de charger l’historique.",
     "empty": "Aucune modification enregistrée.",
     "system": "Système",
     "actions": {
@@ -277,7 +277,7 @@
       "scale": "Échelle",
       "step": "Échelon",
       "surcharge": "Majoration",
-      "purchase_rate": "Tarif d'achat",
+      "purchase_rate": "Tarif d’achat",
       "sell_rate": "Tarif de vente",
       "cost_center": "Centre de coûts",
       "billing_emails": "E-mail(s) de facturation",
@@ -294,17 +294,17 @@
     "selected": "{{count}} sélectionné(s)",
     "actions": "Actions groupées",
     "deselect": "Désélectionner",
-    "mutateError": "Impossible d'appliquer la modification.",
+    "mutateError": "Impossible d’appliquer la modification.",
     "couple": "Coupler au backoffice",
     "target": {
       "helloflex": "HelloFlex",
       "shiftmanager": "Shiftmanager"
     },
     "coupleQueued": "{{count}} match(es) mis en file pour le couplage avec {{target}}.",
-    "coupleUnavailable": "Le couplage backoffice n'est pas encore disponible.",
+    "coupleUnavailable": "Le couplage backoffice n’est pas encore disponible.",
     "coupleModuleOff": "Le module HelloFlex n’est pas activé pour cette agence.",
     "coupleContractsDisabled": "Les contrats HelloFlex sont désactivés pour cette agence.",
-    "noPermission": "Vous n'avez pas l'autorisation pour les actions groupées.",
+    "noPermission": "Vous n’avez pas l’autorisation pour les actions groupées.",
     "coupleQueuedPartial": "{{queued}} sur {{total}} mis en file pour le couplage avec {{target}} ; {{skipped}} ignoré(s).",
     "coupleQueuedPartialAlreadyQueued": "{{queued}} sur {{total}} mis en file pour le couplage avec {{target}} ; {{already}} déjà en cours, {{skipped}} ignoré(s).",
     "coupleQueuedPartialAlreadyQueuedReasoned": "{{queued}} sur {{total}} mis en file pour le couplage avec {{target}} ; {{already}} déjà en cours, {{skipped}} ignoré(s) ({{breakdown}}).",
@@ -371,7 +371,7 @@
     "cancel": "Annuler",
     "searchPlaceholder": "Rechercher des notes…",
     "loading": "Chargement des notes…",
-    "loadError": "Les notes n'ont pas pu être chargées.",
+    "loadError": "Les notes n’ont pas pu être chargées.",
     "edit": "Modifier",
     "deleteNote": "Supprimer la note",
     "deleteConfirm": "Supprimer cette note ?"
@@ -383,7 +383,7 @@
     "analyzing": "Koios AI analyse le match…",
     "scoreLabel": "Score",
     "scoreGood": "Bonne correspondance ({{score}}).",
-    "scoreAverage": "Correspondance moyenne ({{score}}). Vérifiez l'adéquation.",
+    "scoreAverage": "Correspondance moyenne ({{score}}). Vérifiez l’adéquation.",
     "scorePoor": "Correspondance faible ({{score}}). Nécessite attention.",
     "scoreUnknown": "Pas encore de score.",
     "windowLabel": "Période du contrat",
@@ -399,7 +399,7 @@
   },
   "popout": {
     "textWindowTitle": "Texte du match — {{name}}",
-    "loadError": "Ce match n'a pas pu être chargé."
+    "loadError": "Ce match n’a pas pu être chargé."
   },
   "lookupSeeds": {
     "statuses": {
@@ -409,14 +409,14 @@
   },
   "agentSessions": {
     "loading": "Chargement des sessions...",
-    "loadError": "Les sessions IA n'ont pas pu être chargées.",
-    "empty": "Pas encore d'entretien IA pour ce match.",
-    "viaCandidate": "Ce match n'a pas sa propre candidature; ce sont les sessions IA du candidat.",
-    "pause": "Suspendre l'agent IA",
-    "resume": "Reprendre l'agent IA",
-    "pauseConfirmTitle": "Suspendre l'agent IA?",
-    "pauseConfirm": "Vous reprenez cette conversation. L'agent IA n'enverra pas de messages jusqu'à ce que vous le repreniez.",
+    "loadError": "Les sessions IA n’ont pas pu être chargées.",
+    "empty": "Pas encore d’entretien IA pour ce match.",
+    "viaCandidate": "Ce match n’a pas sa propre candidature; ce sont les sessions IA du candidat.",
+    "pause": "Suspendre l’agent IA",
+    "resume": "Reprendre l’agent IA",
+    "pauseConfirmTitle": "Suspendre l’agent IA?",
+    "pauseConfirm": "Vous reprenez cette conversation. L’agent IA n’enverra pas de messages jusqu’à ce que vous le repreniez.",
     "pauseConfirmAction": "Suspendre",
-    "controlFailed": "Impossible d'ajuster l'agent IA."
+    "controlFailed": "Impossible d’ajuster l’agent IA."
   }
 }

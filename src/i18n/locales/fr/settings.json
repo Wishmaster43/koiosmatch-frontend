@@ -16,7 +16,7 @@
     "saving": "Enregistrement…",
     "saved": "Enregistré",
     "loading": "Chargement des paramètres…",
-    "loadError": "Impossible de charger les paramètres. L'enregistrement est désactivé tant que le chargement échoue.",
+    "loadError": "Impossible de charger les paramètres. L’enregistrement est désactivé tant que le chargement échoue.",
     "upload": "Téléverser",
     "remove": "Supprimer",
     "cancel": "Annuler",
@@ -45,7 +45,7 @@
     "planning": "Planification",
     "modules": "Modules",
     "superadmin": "Super Admin",
-    "audit": "Journal d'audit",
+    "audit": "Journal d’audit",
     "candidate_lookups": "Listes de candidats",
     "languages": "Langues",
     "vacancies": "Postes",
@@ -57,11 +57,11 @@
     "whatsapp": "WhatsApp",
     "tasks": "Tâches",
     "matches": "Matchs",
-    "outreach": "Listes d'appels",
+    "outreach": "Listes d’appels",
     "opportunities": "Opportunités",
     "custom_fields": "Champs personnalisés",
     "note_types": "Types de note",
-    "action_rules": "Règles d'action",
+    "action_rules": "Règles d’action",
     "ai": "Koios AI",
     "import_export": "Import & Export",
     "document_types": "Types de document",
@@ -117,7 +117,7 @@
     "roles": "Rôles et droits",
     "users": "Utilisateurs",
     "sync": "Synchronisation",
-    "audit": "Journal d'audit",
+    "audit": "Journal d’audit",
     "email_customers": "E-mail clients",
     "email_candidates": "E-mail candidats",
     "email_planning": "E-mail planning",
@@ -131,7 +131,7 @@
     "numbering": "Numérotation",
     "mod_helloflex": "HelloFlex",
     "contract_forms": "Types de contrat",
-    "funnel_stages": "Étapes de l'entonnoir",
+    "funnel_stages": "Étapes de l’entonnoir",
     "candidate_statuses": "Statuts",
     "lang_languages": "Langues",
     "lang_levels": "Niveaux",
@@ -145,7 +145,7 @@
     "contact_statuses": "Statuts",
     "last_contact_types": "Dernier contact",
     "pools": "Viviers",
-    "assessment_criteria": "Critères d'évaluation",
+    "assessment_criteria": "Critères d’évaluation",
     "usage": "Utilisation",
     "languages": "Langues",
     "genders": "Genre",
@@ -153,21 +153,21 @@
     "industries": "Secteurs",
     "provinces": "Provinces",
     "vacancy_employment": "Type de contrat",
-    "vacancy_seniority": "Niveau d'expérience",
+    "vacancy_seniority": "Niveau d’expérience",
     "vacancy_education": "Formation",
-    "vacancy_channels": "Sites d'emploi & canaux de publication",
+    "vacancy_channels": "Sites d’emploi & canaux de publication",
     "vacancy_matching": "Matching",
     "vacancy_candidate_tab": "Onglet Recherche de candidats",
     "match_templates": "Profils de matching",
     "task_statuses": "Statuts",
     "matches": "Matchs",
-    "outreach": "Listes d'appels",
+    "outreach": "Listes d’appels",
     "match_statuses": "Statuts",
     "contract_types": "Types de contrat",
     "match_rates": "Facteur de conversion",
     "match_contract_line_rate_side": "Côté du tarif",
     "outreach_statuses": "Statuts",
-    "task_types": "Types d'activité",
+    "task_types": "Types d’activité",
     "task_priorities": "Priorités",
     "task_display": "Affichage tableau",
     "candidate_phases": "Phase",
@@ -186,7 +186,7 @@
     "kpis_departments": "Départements",
     "kpis_contacts": "Contacts",
     "kpis_tasks": "Tâches",
-    "kpis_calllists": "Listes d'appels",
+    "kpis_calllists": "Listes d’appels",
     "kpis_matches": "Matchs",
     "kpis_opportunities": "Opportunités",
     "kpis_vacancies": "Postes",
@@ -208,7 +208,7 @@
     "cf_vacancy": "Postes",
     "cf_task": "Tâches",
     "cf_opportunity": "Opportunités",
-    "cf_outreach_campaign": "Listes d'appels",
+    "cf_outreach_campaign": "Listes d’appels",
     "cf_customer": "Clients",
     "cf_customer_location": "Sites",
     "cf_customer_department": "Services",
@@ -222,9 +222,9 @@
     "nt_contact": "Contacts",
     "nt_opportunity": "Opportunités",
     "nt_vacancy": "Postes",
-    "action_rules": "Règles d'action",
-    "vacancy_generation": "Génération d'annonces",
-    "org_policy": "Politique d'organisation",
+    "action_rules": "Règles d’action",
+    "vacancy_generation": "Génération d’annonces",
+    "org_policy": "Politique d’organisation",
     "career_site": "Site carrière",
     "cao": "Conventions",
     "customer_conversion": "Conversion",
@@ -236,7 +236,7 @@
     "vacancy_default_status": "Statut par défaut",
     "nationalities": "Nationalités",
     "blacklist_reasons": "Motifs de liste noire",
-    "escalation_reasons": "Motifs d'escalade",
+    "escalation_reasons": "Motifs d’escalade",
     "opportunity_lookups": "Étapes et types",
     "nt_match": "Matchs",
     "nt_task": "Tâches",
@@ -245,12 +245,12 @@
     "match_approval": "Approbation",
     "outreach_outcomes": "Résultats",
     "workflow_run_history": "Historique des exécutions",
-    "candidate_education_levels": "Niveaux d'études",
+    "candidate_education_levels": "Niveaux d’études",
     "notif_candidates": "Candidats",
     "notif_customers": "Clients",
     "notif_matches": "Matchs",
     "notif_tasks": "Tâches",
-    "notif_calllists": "Listes d'appels",
+    "notif_calllists": "Listes d’appels",
     "notif_kpi": "KPI",
     "notif_opportunities": "Opportunités",
     "notif_appointments": "Rendez-vous",
@@ -286,7 +286,7 @@
   "kpis": {
     "title": "Paramètres KPI",
     "subtitle": "Objectifs pour les tableaux de bord et les rapports",
-    "vacanciesSubtitle": "Objectifs pour les tableaux de bord et les rapports. L'ancienneté des postes est gérée sous Koios AI → Seuils de conseils.",
+    "vacanciesSubtitle": "Objectifs pour les tableaux de bord et les rapports. L’ancienneté des postes est gérée sous Koios AI → Seuils de conseils.",
     "fields": {
       "new_candidates_target": {
         "label": "Objectif nouveaux leads / mois",
@@ -314,8 +314,8 @@
         "unit": "tâches"
       },
       "daily_calls_target": {
-        "label": "Objectif d'appels par jour",
-        "description": "Nombre cible d'appels par recruteur par jour",
+        "label": "Objectif d’appels par jour",
+        "description": "Nombre cible d’appels par recruteur par jour",
         "unit": "appels"
       },
       "uncalled_warning_threshold": {
@@ -344,8 +344,8 @@
         "unit": "jours ouvrés"
       },
       "opportunity_stale_days": {
-        "label": "Seuil d'opportunité stagnante",
-        "description": "Nombre de jours sans changement d'étape avant qu'une opportunité ouverte compte comme stagnante",
+        "label": "Seuil d’opportunité stagnante",
+        "description": "Nombre de jours sans changement d’étape avant qu’une opportunité ouverte compte comme stagnante",
         "unit": "jours"
       },
       "opportunity_closing_soon_days": {
@@ -355,7 +355,7 @@
       },
       "vacancy_closing_soon_days": {
         "label": "Seuil de clôture proche du poste",
-        "description": "Nombre de jours avant la date limite de candidature d'un poste à partir duquel il compte comme proche de la clôture",
+        "description": "Nombre de jours avant la date limite de candidature d’un poste à partir duquel il compte comme proche de la clôture",
         "unit": "jours"
       }
     }
@@ -368,9 +368,9 @@
       "candidate": "Candidats",
       "task": "Tâches",
       "match": "Matchs",
-      "vacancy": "Offres d'emploi",
+      "vacancy": "Offres d’emploi",
       "opportunity": "Opportunités",
-      "outreach": "Listes d'appels",
+      "outreach": "Listes d’appels",
       "whatsapp": "WhatsApp",
       "customer": "Clients"
     },
@@ -398,17 +398,17 @@
     "placeholder": {
       "metric": "Choisir un indicateur",
       "dimensionValue": "Toutes les valeurs",
-      "label": "Nom propre de l'indicateur"
+      "label": "Nom propre de l’indicateur"
     },
     "hint": {
       "dimensionValue": "Laissez vide pour une carte par valeur.",
       "unitFixed": "Cet indicateur a une unité fixe : {{unit}}.",
-      "label": "Vide signifie : le nom propre de l'indicateur."
+      "label": "Vide signifie : le nom propre de l’indicateur."
     },
     "comparison": {
       "gte": "Plus haut est mieux",
       "lte": "Plus bas est mieux",
-      "none": "Pas d'objectif"
+      "none": "Pas d’objectif"
     },
     "surface": {
       "report": "Rapport",
@@ -420,20 +420,20 @@
     },
     "capReached": "Le maximum de {{max}} KPI actifs est atteint. Désactivez-en un ou supprimez-en un.",
     "loading": "Chargement des KPI…",
-    "loadError": "Les KPI n'ont pas pu être chargés.",
-    "registryError": "Les indicateurs n'ont pas pu être chargés.",
+    "loadError": "Les KPI n’ont pas pu être chargés.",
+    "registryError": "Les indicateurs n’ont pas pu être chargés.",
     "empty": "Pas encore de KPI propre pour cette entité.",
-    "saveFailed": "L'enregistrement a échoué.",
+    "saveFailed": "L’enregistrement a échoué.",
     "deleteFailed": "La suppression a échoué.",
     "restoreFailed": "La restauration a échoué.",
-    "orderFailed": "Le nouvel ordre n'a pas été enregistré.",
+    "orderFailed": "Le nouvel ordre n’a pas été enregistré.",
     "confirmDelete": "Supprimer '{{name}}' ?",
     "deletedUndo": "'{{name}}' a été supprimé.",
     "restoreBtn": "Restaurer",
     "fanOutBadge": "Par valeur",
     "targetBadge": "objectif {{value}}",
     "activeAria": "KPI actif",
-    "noPermission": "Vous n'avez pas les droits pour modifier les KPI.",
+    "noPermission": "Vous n’avez pas les droits pour modifier les KPI.",
     "unit": {
       "count": "nombre",
       "percent": "pourcentage",
@@ -467,7 +467,7 @@
       },
       "candidate_avatar_colored_by_gender": {
         "label": "Avatar du nom par genre",
-        "description": "Activé = l'avatar à côté du nom du candidat est coloré par genre. Désactivé = un gris sobre."
+        "description": "Activé = l’avatar à côté du nom du candidat est coloré par genre. Désactivé = un gris sobre."
       },
       "candidate_table_color_status": {
         "label": "Statut",
@@ -475,7 +475,7 @@
       },
       "candidate_table_color_owner": {
         "label": "Couleur du responsable",
-        "description": "Activé = l'avatar du responsable utilise la couleur du recruteur. Désactivé = gris neutre."
+        "description": "Activé = l’avatar du responsable utilise la couleur du recruteur. Désactivé = gris neutre."
       },
       "candidate_table_color_phase": {
         "label": "Phase",
@@ -484,7 +484,7 @@
     }
   },
   "display": {
-    "title": "Paramètres d'affichage",
+    "title": "Paramètres d’affichage",
     "subtitle": "Limites et valeurs par défaut des tableaux et graphiques",
     "fields": {
       "candidates_per_page": {
@@ -503,8 +503,8 @@
         "unit": "enreg."
       },
       "activity_log_limit": {
-        "label": "Entrées du journal d'audit",
-        "description": "Nombre maximal d'entrées du journal récupérées",
+        "label": "Entrées du journal d’audit",
+        "description": "Nombre maximal d’entrées du journal récupérées",
         "unit": "entrées"
       }
     }
@@ -512,7 +512,7 @@
   "brand": {
     "title": "Marque",
     "subtitle": "Logo, nom et couleur principale pour cette plateforme",
-    "companyName": "Nom de l'entreprise",
+    "companyName": "Nom de l’entreprise",
     "companyNameHint": "Affiché dans la barre de navigation et les e-mails",
     "companyNamePlaceholder": "p.ex. MonEntreprise SARL",
     "primaryColor": "Couleur principale",
@@ -523,22 +523,22 @@
     "logo": "Logo",
     "logoHint": "PNG, JPG, WEBP ou SVG, max 2 Mo. Le SVG est scanné côté serveur. Affiché dans la barre de navigation.",
     "noLogo": "Aucun logo",
-    "logoUploadError": "Échec de l'envoi du logo.",
-    "textColor": "Couleur du texte sur l'accent",
-    "textColorHint": "La couleur du texte sur les boutons et puces colorés. Le mode automatique choisit le noir ou le blanc selon votre couleur d'accent. Une couleur claire comme le jaune reçoit donc du texte foncé.",
+    "logoUploadError": "Échec de l’envoi du logo.",
+    "textColor": "Couleur du texte sur l’accent",
+    "textColorHint": "La couleur du texte sur les boutons et puces colorés. Le mode automatique choisit le noir ou le blanc selon votre couleur d’accent. Une couleur claire comme le jaune reçoit donc du texte foncé.",
     "textColorAuto": "Automatique",
     "textColorLight": "Blanc",
     "textColorDark": "Foncé",
     "textColorLowContrast": "Cette couleur de texte contraste trop peu avec votre couleur de marque (ratio {{ratio}} ; lisible à partir de 4,5). Choisissez « Automatique » pour la meilleure lisibilité.",
-    "textColorOverridden": "Cette couleur de texte n'est PAS utilisée : le contraste avec votre couleur de marque est trop faible (rapport {{ratio}}). {{used}} est affiché automatiquement afin que les boutons restent lisibles. Choisissez une autre couleur de texte ou une autre couleur de marque.",
+    "textColorOverridden": "Cette couleur de texte n’est PAS utilisée : le contraste avec votre couleur de marque est trop faible (rapport {{ratio}}). {{used}} est affiché automatiquement afin que les boutons restent lisibles. Choisissez une autre couleur de texte ou une autre couleur de marque.",
     "loadError": "Impossible de charger les paramètres de marque.",
     "retry": "Réessayer"
   },
   "company": {
     "title": "Entreprise",
     "subtitle": "Gérez les informations et préférences de votre entreprise.",
-    "managedUnder": "Le nom et le logo de l'entreprise sont gérés sous Général → Marque.",
-    "banner": "Bannière d'entreprise",
+    "managedUnder": "Le nom et le logo de l’entreprise sont gérés sous Général → Marque.",
+    "banner": "Bannière d’entreprise",
     "country": "Pays",
     "postcode": "Code postal",
     "city": "Ville",
@@ -555,8 +555,8 @@
     "sectionIdentity": "Identité",
     "sectionAddress": "Adresse",
     "sectionPreferences": "Préférences",
-    "saveError": "Impossible d'enregistrer les paramètres.",
-    "loadError": "Impossible de charger le profil de l'entreprise.",
+    "saveError": "Impossible d’enregistrer les paramètres.",
+    "loadError": "Impossible de charger le profil de l’entreprise.",
     "retry": "Réessayer"
   },
   "locations": {
@@ -576,11 +576,11 @@
     "empty": "Aucun emplacement.",
     "loadError": "Impossible de charger les emplacements.",
     "edit": "Modifier",
-    "editTitle": "Modifier l'emplacement",
+    "editTitle": "Modifier l’emplacement",
     "delete": "Supprimer",
-    "confirmDelete": "Supprimer l'emplacement \"{{name}}\" ?",
+    "confirmDelete": "Supprimer l’emplacement \"{{name}}\" ?",
     "deleteSuccess": "Emplacement supprimé.",
-    "deleteFailed": "La suppression de l'emplacement a échoué.",
+    "deleteFailed": "La suppression de l’emplacement a échoué.",
     "deleteBlockedTooltip": "Utilisé. Impossible de supprimer",
     "deleteBlocked": "Impossible de supprimer, encore lié à : {{list}}",
     "usage": {
@@ -610,8 +610,8 @@
       "whatsappWebDevices_other": "{{count}} appareils WhatsApp Web",
       "apiKeys_one": "{{count}} clé API",
       "apiKeys_other": "{{count}} clés API",
-      "outreachCampaigns_one": "{{count}} liste d'appels",
-      "outreachCampaigns_other": "{{count}} listes d'appels",
+      "outreachCampaigns_one": "{{count}} liste d’appels",
+      "outreachCampaigns_other": "{{count}} listes d’appels",
       "branchLinks_one": "{{count}} liaison client",
       "branchLinks_other": "{{count}} liaisons clients",
       "customerLocations_one": "{{count}} site client",
@@ -619,11 +619,11 @@
       "appointments_one": "{{count}} rendez-vous",
       "appointments_other": "{{count}} rendez-vous"
     },
-    "saveFailed": "L'enregistrement de l'emplacement a échoué.",
+    "saveFailed": "L’enregistrement de l’emplacement a échoué.",
     "prev": "Précédent",
     "next": "Suivant",
     "nameLabel": "Nom",
-    "namePlaceholder": "Nom de l'emplacement",
+    "namePlaceholder": "Nom de l’emplacement",
     "addressLabel": "Adresse",
     "addressPlaceholder": "Adresse complète",
     "createBtn": "Créer",
@@ -636,15 +636,15 @@
     "country": "Pays",
     "sectionGeneral": "Général",
     "sectionAddress": "Adresse",
-    "sectionBusiness": "Informations d'entreprise",
+    "sectionBusiness": "Informations d’entreprise",
     "sectionContact": "Contact",
     "vatNumber": "N° de TVA",
     "cocNumber": "N° RCS",
     "contactName": "Personne de contact",
     "phone": "Téléphone",
     "email": "E-mail",
-    "mapNoCoords": "Aucun emplacement avec des coordonnées pour l'instant. Renseignez l'adresse d'un emplacement et il apparaîtra automatiquement sur la carte.",
-    "mapPending_one": "{{count}} emplacement n'est pas encore sur la carte. L'adresse est traitée automatiquement.",
+    "mapNoCoords": "Aucun emplacement avec des coordonnées pour l’instant. Renseignez l’adresse d’un emplacement et il apparaîtra automatiquement sur la carte.",
+    "mapPending_one": "{{count}} emplacement n’est pas encore sur la carte. L’adresse est traitée automatiquement.",
     "mapPending_other": "{{count}} emplacements ne sont pas encore sur la carte. Les adresses sont traitées automatiquement.",
     "color": "Couleur",
     "icon": "Icône",
@@ -664,32 +664,32 @@
     "subtitle": "Durée pendant laquelle les données du candidat sont conservées avant de pouvoir être supprimées (RGPD).",
     "neverPlaced": {
       "label": "Conservation — jamais placé",
-      "description": "Nombre de mois de conservation d'un candidat jamais placé, à compter du dernier contact."
+      "description": "Nombre de mois de conservation d’un candidat jamais placé, à compter du dernier contact."
     },
     "everPlaced": {
       "label": "Conservation — déjà placé",
-      "description": "Nombre de mois de conservation d'un candidat placé au moins une fois. Plus long par défaut en raison de l'obligation légale de conservation fiscale."
+      "description": "Nombre de mois de conservation d’un candidat placé au moins une fois. Plus long par défaut en raison de l’obligation légale de conservation fiscale."
     },
     "consentMonths": {
       "label": "Validité du consentement",
-      "description": "Nombre de mois pendant lesquels un consentement de conservation accordé reste valable avant de devoir être reconfirmé. 0 = le consentement n'expire jamais."
+      "description": "Nombre de mois pendant lesquels un consentement de conservation accordé reste valable avant de devoir être reconfirmé. 0 = le consentement n’expire jamais."
     },
     "contactMonths": {
       "label": "Durée de conservation des contacts",
-      "description": "Nombre de mois sans activité après lesquels un contact client est proposé pour examen (via l'événement contact.retention_due). Un contact ayant donné un consentement explicite est exclu."
+      "description": "Nombre de mois sans activité après lesquels un contact client est proposé pour examen (via l’événement contact.retention_due). Un contact ayant donné un consentement explicite est exclu."
     },
     "graceDays": {
       "label": "Délai de la corbeille",
-      "description": "Nombre de jours pendant lesquels un enregistrement reste dans la corbeille avant d'être supprimé définitivement de façon automatique."
+      "description": "Nombre de jours pendant lesquels un enregistrement reste dans la corbeille avant d’être supprimé définitivement de façon automatique."
     },
     "unit": "mois",
     "warningDays": {
-      "label": "Avis d'expiration",
-      "description": "Nombre de jours avant l'expiration du délai de rétention que le recruteur reçoit une notification."
+      "label": "Avis d’expiration",
+      "description": "Nombre de jours avant l’expiration du délai de rétention que le recruteur reçoit une notification."
     },
     "escalationDays": {
       "label": "Escalade après archivage",
-      "description": "Nombre de jours qu'un dossier archivé automatiquement peut attendre avant que le gestionnaire reçoive une escalade quotidienne."
+      "description": "Nombre de jours qu’un dossier archivé automatiquement peut attendre avant que le gestionnaire reçoive une escalade quotidienne."
     }
   },
   "statusList": {
@@ -706,7 +706,7 @@
     "iconPlaceholder": "p. ex. 📞",
     "loadError": "Impossible de charger la liste.",
     "deleteFailed": "Échec de la suppression.",
-    "saveFailed": "Échec de l'enregistrement.",
+    "saveFailed": "Échec de l’enregistrement.",
     "clearDefault": "Cliquer pour retirer la valeur par défaut",
     "valueMark": "Icône et couleur : {{label}}",
     "colorMark": "Couleur : {{label}}",
@@ -733,29 +733,29 @@
     "employmentTitle": "Type de contrat",
     "employmentSubtitle": "Gérez les types de contrat utilisables par vos postes.",
     "employmentAdd": "Ajouter un type de contrat",
-    "seniorityTitle": "Niveau d'expérience",
-    "senioritySubtitle": "Gérez les niveaux d'expérience pour vos postes.",
+    "seniorityTitle": "Niveau d’expérience",
+    "senioritySubtitle": "Gérez les niveaux d’expérience pour vos postes.",
     "seniorityAdd": "Ajouter un niveau",
     "educationTitle": "Formation",
     "educationSubtitle": "Gérez les niveaux de formation pour vos postes.",
     "educationAdd": "Ajouter un niveau",
-    "channelsTitle": "Sites d'emploi & canaux de publication",
-    "channelsSubtitle": "Définissez par site d'emploi et canal (site carrière, API partenaire, Indeed, Werkzoeken, Google Jobs) s'il est disponible, pré-coché ou toujours actif.",
-    "channelsAdd": "Ajouter un site d'emploi",
+    "channelsTitle": "Sites d’emploi & canaux de publication",
+    "channelsSubtitle": "Définissez par site d’emploi et canal (site carrière, API partenaire, Indeed, Werkzoeken, Google Jobs) s’il est disponible, pré-coché ou toujours actif.",
+    "channelsAdd": "Ajouter un site d’emploi",
     "appDefaultsTitle": "Paramètres de candidature",
     "appDefaultsSubtitle": "La valeur par défaut héritée par une nouvelle offre. Ajustable par offre dans le tiroir.",
     "flagOpen": "Marque comme ouvert",
-    "flagOpenDesc": "Le statut d'un poste actif et ouvert.",
+    "flagOpenDesc": "Le statut d’un poste actif et ouvert.",
     "flagClosed": "Arrête les candidatures",
-    "flagClosedDesc": "Un poste dans ce statut n'accepte plus de nouvelles candidatures (page carrière et API partenaire).",
+    "flagClosedDesc": "Un poste dans ce statut n’accepte plus de nouvelles candidatures (page carrière et API partenaire).",
     "channelActive": "Actif",
-    "channelActiveDesc": "Disponible pour publier. Désactivez pour masquer un site d'emploi abandonné sans le supprimer.",
+    "channelActiveDesc": "Disponible pour publier. Désactivez pour masquer un site d’emploi abandonné sans le supprimer.",
     "channelDefaultEnabled": "Précoché pour les nouveaux postes",
-    "channelDefaultEnabledDesc": "Les nouveaux postes démarrent avec ce site d'emploi activé dans le panneau de publication ; toujours ajustable par poste.",
+    "channelDefaultEnabledDesc": "Les nouveaux postes démarrent avec ce site d’emploi activé dans le panneau de publication ; toujours ajustable par poste.",
     "channelLockedOn": "Toujours actif",
-    "channelLockedOnDesc": "Chaque offre est toujours sur ce canal ; l'interrupteur par offre reste activé. Possible uniquement tant que le canal est actif.",
-    "appDefaultsChannelsLink": "Les sites d'emploi et canaux visibles, pré-cochés ou toujours actifs se définissent sous",
-    "appDefaultsChannelsLinkLabel": "Sites d'emploi & canaux de publication"
+    "channelLockedOnDesc": "Chaque offre est toujours sur ce canal ; l’interrupteur par offre reste activé. Possible uniquement tant que le canal est actif.",
+    "appDefaultsChannelsLink": "Les sites d’emploi et canaux visibles, pré-cochés ou toujours actifs se définissent sous",
+    "appDefaultsChannelsLinkLabel": "Sites d’emploi & canaux de publication"
   },
   "rejection": {
     "title": "Motifs de refus",
@@ -766,34 +766,34 @@
     "defaultChannel": "Canal par défaut",
     "email": "E-mail",
     "whatsapp": "WhatsApp",
-    "emailSubject": "Objet de l'e-mail",
+    "emailSubject": "Objet de l’e-mail",
     "emailBody": "Message e-mail",
     "whatsappBody": "Message WhatsApp",
     "tokensHint": "Tokens : {candidate}, {vacancy}, {reason}, {recruiter}",
     "save": "Enregistrer les modèles",
     "saved": "Enregistré",
     "loading": "Chargement…",
-    "noReasons": "Ajoutez d'abord un motif de refus."
+    "noReasons": "Ajoutez d’abord un motif de refus."
   },
   "proposal": {
     "title": "Proposer le candidat",
-    "subtitle": "Configurez l'objet et le message utilisés par un recruteur pour proposer un candidat à un contact client.",
-    "subjectLabel": "Objet de l'e-mail",
+    "subtitle": "Configurez l’objet et le message utilisés par un recruteur pour proposer un candidat à un contact client.",
+    "subjectLabel": "Objet de l’e-mail",
     "bodyLabel": "Message",
     "tokensTitle": "Jetons disponibles",
-    "tokensHint": "Utilisez ces jetons dans l'objet et le message ; ils sont remplis automatiquement.",
+    "tokensHint": "Utilisez ces jetons dans l’objet et le message ; ils sont remplis automatiquement.",
     "setsPhaseLabel": "Faire passer automatiquement la candidature à la phase Proposé",
-    "setsPhaseHint": "Si activé : l'enregistrement d'une proposition fait automatiquement passer la candidature à la phase marquée « Proposé ». Si désactivé : le recruteur change la phase lui-même.",
+    "setsPhaseHint": "Si activé : l’enregistrement d’une proposition fait automatiquement passer la candidature à la phase marquée « Proposé ». Si désactivé : le recruteur change la phase lui-même.",
     "defaultVariantLabel": "Variante de CV par défaut",
     "variantProposal": "CV de proposition (nom visible, coordonnées masquées)",
     "variantFull": "CV complet (avec coordonnées)",
-    "notSentYet": "Koios n'envoie pas encore la proposition lui-même. Le recruteur télécharge le CV et l'envoie depuis sa propre messagerie. Le lien de partage automatique et révocable arrivera dès que cette fonctionnalité sera disponible.",
-    "saveFailed": "Échec de l'enregistrement",
+    "notSentYet": "Koios n’envoie pas encore la proposition lui-même. Le recruteur télécharge le CV et l’envoie depuis sa propre messagerie. Le lien de partage automatique et révocable arrivera dès que cette fonctionnalité sera disponible.",
+    "saveFailed": "Échec de l’enregistrement",
     "saved": "Enregistré",
     "defaultSenderTitle": "Expéditeur par défaut",
-    "defaultSenderSubtitle": "L'utilisateur au nom duquel les propositions sont envoyées par défaut ; vide = le recruteur qui propose.",
+    "defaultSenderSubtitle": "L’utilisateur au nom duquel les propositions sont envoyées par défaut ; vide = le recruteur qui propose.",
     "defaultSenderSelf": "Le recruteur",
-    "defaultSenderStale": "L'expéditeur par défaut enregistré n'existe plus ; les propositions partent désormais au nom du recruteur. Choisissez un nouvel expéditeur ou videz le champ.",
+    "defaultSenderStale": "L’expéditeur par défaut enregistré n’existe plus ; les propositions partent désormais au nom du recruteur. Choisissez un nouvel expéditeur ou videz le champ.",
     "usersUnavailable": "Liste des utilisateurs indisponible. Réessayez plus tard."
   },
   "cvTemplate": {
@@ -802,7 +802,7 @@
     "pdfPreview": "Aperçu PDF",
     "generating": "Génération…",
     "reset": "Réinitialiser",
-    "accentColors": "Couleurs d'accent",
+    "accentColors": "Couleurs d’accent",
     "accentColorsHint": "Couleur 1 = barre latérale et bande. Couleur 2 = titres de section et liens.",
     "color1": "Couleur 1",
     "color2": "Couleur 2",
@@ -811,8 +811,8 @@
     "regionSidebar": "Colonne latérale",
     "regionMain": "Colonne principale",
     "regionHeader": "En-tête",
-    "regionFixedMainHint": "Cette section est trop étendue pour l'étroite colonne latérale et reste donc toujours dans la colonne principale.",
-    "regionHeaderHint": "Cette section se trouve dans l'en-tête au-dessus du nom et n'a pas de colonne propre.",
+    "regionFixedMainHint": "Cette section est trop étendue pour l’étroite colonne latérale et reste donc toujours dans la colonne principale.",
+    "regionHeaderHint": "Cette section se trouve dans l’en-tête au-dessus du nom et n’a pas de colonne propre.",
     "moveSectionUp": "Déplacer « {{section}} » vers le haut",
     "moveSectionDown": "Déplacer « {{section}} » vers le bas",
     "preview": "Aperçu",
@@ -825,16 +825,16 @@
     "enable": "Activer",
     "disable": "Désactiver",
     "enabledTitle": "Authentification à deux facteurs activée",
-    "enabledDesc": "Enregistrez vos codes de récupération. Ils ne sont utilisables qu'une fois et ne seront plus affichés.",
+    "enabledDesc": "Enregistrez vos codes de récupération. Ils ne sont utilisables qu’une fois et ne seront plus affichés.",
     "recoveryCodes": "Codes de récupération",
     "copy": "Copier",
     "copied": "Copié !",
     "done": "Terminé",
     "back": "Retour",
     "scanTitle": "Scannez le QR code",
-    "scanDesc": "Ouvrez votre application d'authentification (Google Authenticator, Microsoft Authenticator, Bitwarden, etc.) et scannez le QR code ci-dessous.",
+    "scanDesc": "Ouvrez votre application d’authentification (Google Authenticator, Microsoft Authenticator, Bitwarden, etc.) et scannez le QR code ci-dessous.",
     "manualEntry": "Saisie manuelle",
-    "codeLabel": "Code de vérification de l'application",
+    "codeLabel": "Code de vérification de l’application",
     "working": "En cours…",
     "otherSessionsTitle": "Autres sessions",
     "otherSessionsDesc": "Déconnectez tous les autres appareils et navigateurs. Cette session reste connectée.",
@@ -843,7 +843,7 @@
     "otherSessionsThrottled": "Trop de tentatives. Réessayez dans quelques minutes.",
     "otherSessionsFailed": "La déconnexion des autres appareils a échoué.",
     "confirmEnable": "Confirmer et activer",
-    "disableTitle": "Désactiver l'authentification à deux facteurs",
+    "disableTitle": "Désactiver l’authentification à deux facteurs",
     "disableDesc": "Saisissez votre code de vérification actuel pour désactiver la 2FA.",
     "disableBtn": "Désactiver la 2FA",
     "supportedApps": "Applications prises en charge",
@@ -852,14 +852,14 @@
     "errInvalid": "Code invalide.",
     "errFinish": "Impossible de terminer. Veuillez réessayer.",
     "retry": "Réessayer",
-    "enforceSection": "Politique de l'organisation",
+    "enforceSection": "Politique de l’organisation",
     "enforceTitle": "MFA obligatoire pour tout le monde",
-    "enforceDesc": "Chaque utilisateur de cette organisation doit configurer l'authentification à deux facteurs avant de pouvoir continuer à travailler.",
-    "enforceError": "Échec de l'enregistrement. Veuillez réessayer.",
+    "enforceDesc": "Chaque utilisateur de cette organisation doit configurer l’authentification à deux facteurs avant de pouvoir continuer à travailler.",
+    "enforceError": "Échec de l’enregistrement. Veuillez réessayer.",
     "enforceLoadError": "Impossible de charger l’état de la politique MFA. Essayez d’actualiser la page.",
     "regenerateCodes": "Nouveaux codes de récupération",
     "regenerateTitle": "Générer de nouveaux codes de récupération",
-    "regenerateDesc": "Entrez le code de votre application d'authentification ou un code de récupération inutilisé. Vos anciens codes de récupération vont expirer.",
+    "regenerateDesc": "Entrez le code de votre application d’authentification ou un code de récupération inutilisé. Vos anciens codes de récupération vont expirer.",
     "regenerateBtn": "Régénérer les codes",
     "newCodesTitle": "Nouveaux codes de récupération",
     "newCodesDesc": "Stockez ces codes en sécurité. Les anciens codes ne fonctionneront plus.",
@@ -867,18 +867,18 @@
   },
   "email": {
     "title": "Paramètres e-mail",
-    "subtitle": "Adresse d'expéditeur et connexion pour le module e-mail",
+    "subtitle": "Adresse d’expéditeur et connexion pour le module e-mail",
     "testConnection": "Tester la connexion",
     "testSent": "E-mail de test envoyé",
     "testSentButton": "Test envoyé",
     "testFailed": "Échec de la connexion",
     "provider": "Fournisseur e-mail",
-    "gmailDesc": "Connexion via OAuth2 ou mot de passe d'application",
+    "gmailDesc": "Connexion via OAuth2 ou mot de passe d’application",
     "officeDesc": "Connexion via Microsoft OAuth2 ou SMTP",
     "manualLabel": "SMTP manuel",
     "manualDesc": "Votre propre serveur de messagerie ou fournisseur",
     "oauthWarningTitle": "Non connecté",
-    "oauthWarning": "{{provider}} n'est pas encore connecté pour ce contexte. Cliquez sur Connecter pour démarrer l'autorisation OAuth.",
+    "oauthWarning": "{{provider}} n’est pas encore connecté pour ce contexte. Cliquez sur Connecter pour démarrer l’autorisation OAuth.",
     "oauthConnectedTitle": "Connecté",
     "oauthConnected": "Connecté avec {{provider}} en tant que {{address}}.",
     "oauthConnect": "Connecter",
@@ -898,16 +898,16 @@
     "tenantPolicy": "Microsoft 365 a refusé la connexion car le SMTP authentifié est désactivé pour votre organisation.",
     "statusAt": "Dernière vérification : {{date}}",
     "oauthReasonBrowserMismatch": "La liaison de la boîte mail a échoué : l’autorisation est revenue dans un autre navigateur. Reliez la boîte mail à nouveau depuis le navigateur où vous avez commencé.",
-    "senderDetails": "Coordonnées de l'expéditeur",
-    "senderName": "Nom de l'expéditeur",
+    "senderDetails": "Coordonnées de l’expéditeur",
+    "senderName": "Nom de l’expéditeur",
     "senderNamePlaceholder": "p.ex. KoiosMatch",
-    "fromAddress": "Adresse d'expéditeur (from)",
+    "fromAddress": "Adresse d’expéditeur (from)",
     "fromPlaceholder": "noreply@votreentreprise.fr",
     "smtpConfig": "Configuration SMTP",
     "smtpServer": "Serveur SMTP",
     "smtpServerPlaceholder": "smtp.votreentreprise.fr",
     "port": "Port",
-    "username": "Nom d'utilisateur",
+    "username": "Nom d’utilisateur",
     "usernamePlaceholder": "utilisateur@votreentreprise.fr",
     "password": "Mot de passe",
     "passwordSet": "✓ défini",
@@ -940,13 +940,13 @@
     "email": {
       "label": "Notifications e-mail",
       "desc": "Recevoir des notifications par e-mail",
-      "notYetDelivered": "L'envoi par e-mail n'existe pas encore. Cette préférence s'activera dès que le canal e-mail sera disponible."
+      "notYetDelivered": "L’envoi par e-mail n’existe pas encore. Cette préférence s’activera dès que le canal e-mail sera disponible."
     },
     "inApp": {
       "label": "Notifications in-app",
       "desc": "Recevoir des notifications dans la plateforme",
       "notYetActive": "Pas encore actif",
-      "notYetActiveReason": "Aucune notification n'est encore envoyée pour ce type. Le bouton est déjà configurable."
+      "notYetActiveReason": "Aucune notification n’est encore envoyée pour ce type. Le bouton est déjà configurable."
     },
     "context": {
       "sollicitaties": {
@@ -978,8 +978,8 @@
         "desc": "Notifications sur les tâches nouvelles et mises à jour."
       },
       "calllists": {
-        "title": "Listes d'appels",
-        "desc": "Notifications sur les cibles assignées des listes d'appels."
+        "title": "Listes d’appels",
+        "desc": "Notifications sur les cibles assignées des listes d’appels."
       },
       "kpi": {
         "title": "Notifications KPI",
@@ -991,7 +991,7 @@
       },
       "appointments": {
         "title": "Rendez-vous",
-        "desc": "Notifications concernant les rendez-vous prévus aujourd'hui."
+        "desc": "Notifications concernant les rendez-vous prévus aujourd’hui."
       },
       "gesprekken": {
         "title": "Conversations",
@@ -1000,21 +1000,21 @@
     },
     "my": {
       "title": "Mes notifications",
-      "subtitle": "Votre propre exception en plus des paramètres de notification communs à l'organisation. Choisissez par sujet si vous voulez toujours être notifié, jamais, ou simplement suivre le réglage de votre organisation.",
+      "subtitle": "Votre propre exception en plus des paramètres de notification communs à l’organisation. Choisissez par sujet si vous voulez toujours être notifié, jamais, ou simplement suivre le réglage de votre organisation.",
       "inherit": "Hériter",
       "on": "Activé",
       "off": "Désactivé",
-      "empty": "Aucun sujet de notification n'est encore configuré.",
-      "saveFailed": "Échec de l'enregistrement. Votre choix a été annulé.",
+      "empty": "Aucun sujet de notification n’est encore configuré.",
+      "saveFailed": "Échec de l’enregistrement. Votre choix a été annulé.",
       "emailNotAvailable": "Pas encore disponible",
-      "emailNotAvailableReason": "Une exception e-mail personnelle n'est pas encore possible. Pour cela, vous suivez le réglage e-mail commun à l'organisation."
+      "emailNotAvailableReason": "Une exception e-mail personnelle n’est pas encore possible. Pour cela, vous suivez le réglage e-mail commun à l’organisation."
     },
     "push": {
       "title": "Notifications du navigateur",
-      "desc": "Recevez les notifications sous forme de pop-up du navigateur, même quand cet onglet n'est pas ouvert.",
+      "desc": "Recevez les notifications sous forme de pop-up du navigateur, même quand cet onglet n’est pas ouvert.",
       "unsupported": "Votre navigateur ne prend pas en charge les notifications du navigateur.",
       "blocked": "Votre navigateur bloque les notifications pour ce site. Activez-les dans les paramètres du navigateur pour utiliser cette option.",
-      "subscribeFailed": "L'inscription aux notifications du navigateur a échoué.",
+      "subscribeFailed": "L’inscription aux notifications du navigateur a échoué.",
       "unsubscribeFailed": "La désinscription des notifications du navigateur a échoué."
     },
     "sound": {
@@ -1031,7 +1031,7 @@
   },
   "escalation": {
     "title": "Escalade",
-    "subtitle": "Si un signal d'attention reste trop longtemps sans action, une notification est envoyée à la personne ou au rôle choisi.",
+    "subtitle": "Si un signal d’attention reste trop longtemps sans action, une notification est envoyée à la personne ou au rôle choisi.",
     "afterDaysLabel": "Escalader après",
     "afterDaysOff": "désactivé",
     "targetLabel": "Vers",
@@ -1041,11 +1041,11 @@
     "signal": {
       "task_overdue": {
         "title": "Tâche en retard",
-        "desc": "Une tâche a dépassé sa date d'échéance et n'est pas encore terminée."
+        "desc": "Une tâche a dépassé sa date d’échéance et n’est pas encore terminée."
       },
       "candidate_status_stale": {
         "title": "Statut candidat stagnant",
-        "desc": "Le statut de disponibilité d'un candidat n'a pas changé depuis trop longtemps."
+        "desc": "Le statut de disponibilité d’un candidat n’a pas changé depuis trop longtemps."
       },
       "conversation_unanswered": {
         "title": "Conversation sans réponse",
@@ -1053,7 +1053,7 @@
       },
       "candidate_phase_stale": {
         "title": "Phase candidat stagnante",
-        "desc": "La phase du cycle de vie d'un candidat n'a pas changé depuis trop longtemps."
+        "desc": "La phase du cycle de vie d’un candidat n’a pas changé depuis trop longtemps."
       },
       "customer_match_ending": {
         "title": "Match se termine",
@@ -1077,7 +1077,7 @@
       },
       "missing_cv": {
         "title": "Pas de CV",
-        "desc": "Un candidat n'a pas téléchargé de CV."
+        "desc": "Un candidat n’a pas téléchargé de CV."
       },
       "candidate_availability_upcoming": {
         "title": "Candidat devenant disponible",
@@ -1089,19 +1089,19 @@
       },
       "candidate_leave_ending_soon": {
         "title": "Congé se termine bientôt",
-        "desc": "Le congé d'un candidat se termine bientôt."
+        "desc": "Le congé d’un candidat se termine bientôt."
       },
       "candidate_leave_overdue": {
         "title": "Congé déjà terminé",
-        "desc": "Le congé d'un candidat s'est déjà terminé."
+        "desc": "Le congé d’un candidat s’est déjà terminé."
       },
       "candidate_unavailable_ending_soon": {
         "title": "Candidat devient opérationnel",
         "desc": "Un candidat devient opérationnel bientôt."
       },
       "candidate_unavailable_overdue": {
-        "title": "Période d'indisponibilité du candidat échue",
-        "desc": "La période d'indisponibilité d'un candidat est déjà écoulée."
+        "title": "Période d’indisponibilité du candidat échue",
+        "desc": "La période d’indisponibilité d’un candidat est déjà écoulée."
       }
     },
     "missingTargetHint": "Choisissez une personne ou un rôle vers qui escalader, ou videz « Escalader après » pour désactiver.",
@@ -1114,13 +1114,13 @@
     "usage": {
       "title": "Utilisation & limites",
       "desc": "Aperçu de votre utilisation actuelle sur cette période.",
-      "periodToday": "Aujourd'hui",
+      "periodToday": "Aujourd’hui",
       "periodMonth": "Ce mois-ci",
       "plan": {
         "title": "Abonnement et jetons de workflow",
-        "notice": "Le plan actuel, la barre de progression des jetons de workflow, la date de réinitialisation et le solde ne sont pas encore disponibles. Il n'existe pas encore de modèle backend pour les abonnements.",
+        "notice": "Le plan actuel, la barre de progression des jetons de workflow, la date de réinitialisation et le solde ne sont pas encore disponibles. Il n’existe pas encore de modèle backend pour les abonnements.",
         "loadError": "Impossible de charger votre abonnement.",
-        "unavailable": "Vous n'avez pas les droits pour voir ceci.",
+        "unavailable": "Vous n’avez pas les droits pour voir ceci.",
         "resetsOn": "Réinitialisation le {{date}}",
         "aiMeter": "Jetons IA",
         "workflowMeter": "Jetons de workflow",
@@ -1133,7 +1133,7 @@
           "pct": "{{pct}} %",
           "warning": "Vous êtes à {{pct}} % du palier {{tier}}.",
           "exceeded": "Le palier {{tier}} est complet. Passez à un palier supérieur pour continuer.",
-          "exceededOverage": "Le palier {{tier}} est complet. L'utilisation supplémentaire est facturée en extra : {{price}} par {{unit}}.",
+          "exceededOverage": "Le palier {{tier}} est complet. L’utilisation supplémentaire est facturée en extra : {{price}} par {{unit}}.",
           "overageLine": "{{n}} {{unit}} en plus · {{amount}}",
           "upgradeCta": "Passer à un palier supérieur",
           "upgradeSubject": "Mise à niveau du palier pour {{tenant}}",
@@ -1144,7 +1144,7 @@
           "weightsLine": "Pondération: question chat {{chat}} · autres actions {{other}} · intelligent ×{{smart}} · max ×{{max}}",
           "warningNoTier": "Vous êtes à {{pct}} % de votre forfait.",
           "exceededNoTier": "Votre forfait est complet. Passez à un palier supérieur pour continuer.",
-          "exceededOverageNoTier": "Votre forfait est complet. L'utilisation supplémentaire est facturée en extra : {{price}} par {{unit}}."
+          "exceededOverageNoTier": "Votre forfait est complet. L’utilisation supplémentaire est facturée en extra : {{price}} par {{unit}}."
         },
         "users": {
           "line": "{{active}} utilisateurs ({{included}} inclus)",
@@ -1165,8 +1165,8 @@
         "colTokens": "Jetons",
         "colCost": "Coût",
         "empty": "Aucune utilisation IA pour cette période.",
-        "loadError": "Échec du chargement de l'utilisation IA.",
-        "unavailable": "L'IA n'est pas active pour ce client."
+        "loadError": "Échec du chargement de l’utilisation IA.",
+        "unavailable": "L’IA n’est pas active pour ce client."
       },
       "whatsapp": {
         "title": "Utilisation WhatsApp",
@@ -1178,8 +1178,8 @@
         "colMessages": "Messages",
         "colCost": "Coût",
         "empty": "Aucune utilisation WhatsApp ce mois-ci.",
-        "loadError": "Échec du chargement de l'utilisation WhatsApp.",
-        "unavailable": "Vous n'avez pas les droits pour consulter ceci.",
+        "loadError": "Échec du chargement de l’utilisation WhatsApp.",
+        "unavailable": "Vous n’avez pas les droits pour consulter ceci.",
         "colChannel": "Canal",
         "tokensMeterLabel": "Jetons WhatsApp cette période",
         "fallbackCaption": "Ce mois-ci (par numéro, répartition par canal pas encore disponible)."
@@ -1187,7 +1187,7 @@
       "daily": {
         "title": "Utilisation quotidienne",
         "subtitle": "Utilisation workflow et IA par jour (prix de vente), pour cette période.",
-        "notice": "Un graphique quotidien par catégorie (Total · IA · Leads · Appels téléphoniques · WhatsApp) n'est pas encore disponible. Le backend ne renvoie actuellement que des totaux par période, pas de chiffres par jour.",
+        "notice": "Un graphique quotidien par catégorie (Total · IA · Leads · Appels téléphoniques · WhatsApp) n’est pas encore disponible. Le backend ne renvoie actuellement que des totaux par période, pas de chiffres par jour.",
         "periodLabel": "Période",
         "categoryLabel": "Catégorie",
         "categoryTotal": "Total",
@@ -1200,7 +1200,7 @@
         "colAiTokens": "Jetons IA",
         "colAiAmount": "Montant IA",
         "colTotalAmount": "Montant total",
-        "loadError": "Échec du chargement de l'utilisation quotidienne.",
+        "loadError": "Échec du chargement de l’utilisation quotidienne.",
         "empty": "Aucune utilisation pour cette période.",
         "granularityLabel": "Affichage",
         "granularityDay": "Jour",
@@ -1212,10 +1212,10 @@
       },
       "credits": {
         "periodPrevMonth": "Mois précédent",
-        "unavailable": "Vous n'avez pas la permission de voir ceci."
+        "unavailable": "Vous n’avez pas la permission de voir ceci."
       },
       "exportXlsx": "Exporter Excel",
-      "exportFailed": "L'exportation a échoué.",
+      "exportFailed": "L’exportation a échoué.",
       "kpi": {
         "totalLabel": "Total sur la période",
         "workflowLabel": "Workflow",
@@ -1235,7 +1235,7 @@
       "activity": {
         "title": "Utilisation par activité",
         "subtitle": "Utilisation IA par activité et jetons de workflow par module, pour la période choisie.",
-        "periodCaption": "L'utilisation par activité ne prend pas en charge \"mois précédent\": elle affiche toujours la période en cours.",
+        "periodCaption": "L’utilisation par activité ne prend pas en charge \"mois précédent\": elle affiche toujours la période en cours.",
         "aiSectionTitle": "Jetons IA par activité",
         "workflowSectionTitle": "Jetons de workflow par module",
         "colActivity": "Activité",
@@ -1246,9 +1246,9 @@
         "colAmount": "Montant",
         "colModule": "Module",
         "colRuns": "Exécutions",
-        "empty": "Pas encore d'utilisation sur cette période.",
-        "loadError": "Le chargement de l'utilisation par activité a échoué.",
-        "unavailable": "Vous n'avez pas l'autorisation de voir ceci.",
+        "empty": "Pas encore d’utilisation sur cette période.",
+        "loadError": "Le chargement de l’utilisation par activité a échoué.",
+        "unavailable": "Vous n’avez pas l’autorisation de voir ceci.",
         "activityMap": {
           "chat": "Chat",
           "workflow": "Workflow",
@@ -1266,9 +1266,9 @@
         "colName": "Workflow",
         "colRuns": "Exécutions",
         "colTokens": "Jetons de workflow",
-        "empty": "Pas encore d'utilisation de workflow sur cette période.",
-        "loadError": "Le chargement de l'utilisation par workflow a échoué.",
-        "unavailable": "Vous n'avez pas l'autorisation de voir ceci.",
+        "empty": "Pas encore d’utilisation de workflow sur cette période.",
+        "loadError": "Le chargement de l’utilisation par workflow a échoué.",
+        "unavailable": "Vous n’avez pas l’autorisation de voir ceci.",
         "rowHint": "Ouvrir ce workflow",
         "colAmount": "Montant"
       },
@@ -1280,9 +1280,9 @@
         "colTokens": "Jetons IA",
         "colAmount": "Montant",
         "colSuccessRate": "Taux de réussite",
-        "empty": "Pas encore d'utilisation IA par utilisateur sur cette période.",
-        "loadError": "Le chargement de l'utilisation par utilisateur a échoué.",
-        "unavailable": "Vous n'avez pas l'autorisation de voir ceci."
+        "empty": "Pas encore d’utilisation IA par utilisateur sur cette période.",
+        "loadError": "Le chargement de l’utilisation par utilisateur a échoué.",
+        "unavailable": "Vous n’avez pas l’autorisation de voir ceci."
       },
       "invoice": {
         "title": "Aperçu de facture",
@@ -1293,15 +1293,15 @@
         "tierWorkflowLine": "Palier workflow {{tier}}",
         "overageLine": "Dépassement {{meter}}",
         "aiLine": "Jetons IA",
-        "freeAllowanceNote": "Le forfait gratuit pour les jetons IA n'est pas encore affiché séparément ici. Seul le point de terminaison de facturation renvoie ce chiffre (volontairement exclu de cette page, voir le commentaire de code).",
-        "loadError": "Le chargement de l'estimation de facture a échoué.",
-        "unavailable": "Vous n'avez pas l'autorisation de consulter ceci."
+        "freeAllowanceNote": "Le forfait gratuit pour les jetons IA n’est pas encore affiché séparément ici. Seul le point de terminaison de facturation renvoie ce chiffre (volontairement exclu de cette page, voir le commentaire de code).",
+        "loadError": "Le chargement de l’estimation de facture a échoué.",
+        "unavailable": "Vous n’avez pas l’autorisation de consulter ceci."
       },
       "activityPerDay": {
         "title": "Workflow-tokens par activité par jour",
-        "subtitle": "Distribution des workflow-tokens par type d'activité par jour",
-        "loadError": "Erreur lors du chargement des données d'activité",
-        "empty": "Aucune donnée d'activité disponible"
+        "subtitle": "Distribution des workflow-tokens par type d’activité par jour",
+        "loadError": "Erreur lors du chargement des données d’activité",
+        "empty": "Aucune donnée d’activité disponible"
       }
     },
     "invoices": {
@@ -1352,8 +1352,8 @@
     "secretHidden": "affiché uniquement à la création",
     "dismiss": "Fermer",
     "allowedIps": "IP autorisées",
-    "allowedIpsHint": "Facultatif. Laissez vide pour aucune restriction d'IP. IPv4/IPv6 ou CIDR (ex. 192.168.0.0/24).",
-    "noIps": "Aucune restriction d'IP",
+    "allowedIpsHint": "Facultatif. Laissez vide pour aucune restriction d’IP. IPv4/IPv6 ou CIDR (ex. 192.168.0.0/24).",
+    "noIps": "Aucune restriction d’IP",
     "ipPlaceholder": "IP ou CIDR…",
     "col": {
       "name": "Nom convivial",
@@ -1371,7 +1371,7 @@
       "description": "Description",
       "guid": "GUID",
       "secret": "Secret",
-      "created": "Date d'enregistrement",
+      "created": "Date d’enregistrement",
       "updated": "Dernière modification",
       "contactName": "Personne de contact",
       "contactEmail": "E-mail"
@@ -1422,7 +1422,7 @@
       "users": "Utilisateurs",
       "noLevelOffered": "Aucun niveau disponible pour ce type"
     },
-    "detailLoadError": "Impossible de charger les détails complets. Les autorisations peuvent ne pas s'afficher correctement."
+    "detailLoadError": "Impossible de charger les détails complets. Les autorisations peuvent ne pas s’afficher correctement."
   },
   "webhooks": {
     "tab": {
@@ -1440,20 +1440,20 @@
       "empty": "Aucun webhook créé pour le moment.",
       "lastTriggered": "Dernier",
       "removeConfirm": "Supprimer le webhook ?",
-      "copyUrl": "Copier l'URL",
+      "copyUrl": "Copier l’URL",
       "requests": {
         "viewButton": "Voir les requêtes",
         "title": "Requêtes de {{name}}",
         "subtitle": "Chaque requête reçue par ce webhook, la plus récente en premier.",
         "loading": "Chargement des requêtes…",
         "loadError": "Impossible de charger les requêtes.",
-        "empty": "Aucune requête reçue pour l'instant. Les requêtes sont conservées 30 jours.",
+        "empty": "Aucune requête reçue pour l’instant. Les requêtes sont conservées 30 jours.",
         "retention": "Les requêtes sont conservées 30 jours.",
         "noWorkflows": "Aucun",
         "noIp": "Inconnu",
         "retry": "Réessayer",
-        "openHistory": "Ouvrir l'historique d'exécution du workflow",
-        "openWorkflowRuns": "Ouvrir l'historique d'exécution de {{name}}",
+        "openHistory": "Ouvrir l’historique d’exécution du workflow",
+        "openWorkflowRuns": "Ouvrir l’historique d’exécution de {{name}}",
         "col": {
           "time": "Reçue",
           "method": "Méthode",
@@ -1463,7 +1463,7 @@
         },
         "status": {
           "received": "Reçue, aucun workflow associé.",
-          "queued": "Workflow(s) en file d'attente pour traitement.",
+          "queued": "Workflow(s) en file d’attente pour traitement.",
           "rejected": "Signature refusée.",
           "other": "HTTP {{code}}"
         },
@@ -1476,7 +1476,7 @@
           "workflows": "Workflows associés",
           "headers": "En-têtes",
           "noHeaders": "Aucun en-tête enregistré.",
-          "maskedTooltip": "Masqué pour des raisons de sécurité : la valeur d'origine n'est pas conservée.",
+          "maskedTooltip": "Masqué pour des raisons de sécurité : la valeur d’origine n’est pas conservée.",
           "query": "Paramètres de requête",
           "noQuery": "Aucun paramètre de requête.",
           "body": "Corps",
@@ -1509,7 +1509,7 @@
       },
       "field": {
         "name": "Nom",
-        "url": "URL de l'endpoint",
+        "url": "URL de l’endpoint",
         "events": "Événements"
       },
       "detailsTitle": "Détails",
@@ -1586,7 +1586,7 @@
         "leave_ending_soon": "Congé se termine bientôt",
         "leave_overdue": "Congé dépassé",
         "match_ending": "Match se termine bientôt",
-        "missing_cv": "CV manquant après le délai d'alerte",
+        "missing_cv": "CV manquant après le délai d’alerte",
         "no_contact": "Non contacté",
         "overdue": "En retard",
         "phase_stale": "Phase bloquée",
@@ -1597,7 +1597,7 @@
         "retention_due": "Vérification de rétention due",
         "sent": "Envoyé",
         "stage_changed": "Étape modifiée",
-        "stage_stale": "Bloqué à l'étape",
+        "stage_stale": "Bloqué à l’étape",
         "stale": "Aucun changement de phase",
         "stale_online": "En ligne depuis longtemps (sans candidatures)",
         "started": "Démarré",
@@ -1606,12 +1606,12 @@
         "terminated": "Résilié",
         "reopened": "Rouvert",
         "unanswered": "Sans réponse",
-        "unavailable_ending_soon": "Période d'indisponibilité se termine bientôt",
-        "unavailable_overdue": "Période d'indisponibilité dépassée",
+        "unavailable_ending_soon": "Période d’indisponibilité se termine bientôt",
+        "unavailable_overdue": "Période d’indisponibilité dépassée",
         "upcoming": "À venir",
         "vacancy_stale": "Offre en ligne depuis longtemps",
         "webhook_received": "Webhook reçu",
-        "approval_pending": "En attente d'approbation",
+        "approval_pending": "En attente d’approbation",
         "approval_overdue": "Approbation en retard",
         "approved": "Approuvé",
         "rejected": "Rejeté",
@@ -1630,17 +1630,17 @@
       "stepAgent": "Les URL de webhook des agents (sur la carte agent) sont internes à Koios — ne jamais les enregistrer chez Meta.",
       "verifyTokenSet": "Token de vérification défini",
       "verifyTokenMissing": "Token de vérification manquant",
-      "appSecretSet": "Secret d'application défini",
-      "appSecretMissing": "Secret d'application manquant",
-      "appSecretWarning": "Secret d'application manquant : les webhooks Meta ne seront pas vérifiés et les messages entrants seront rejetés."
+      "appSecretSet": "Secret d’application défini",
+      "appSecretMissing": "Secret d’application manquant",
+      "appSecretWarning": "Secret d’application manquant : les webhooks Meta ne seront pas vérifiés et les messages entrants seront rejetés."
     },
     "endpoints": {
       "title": "Points de terminaison de flux",
-      "hint": "Les URL vers lesquelles l'étape de workflow webhook_send envoie. Chaque slug correspond au réglage webhook_endpoint_<slug>.",
+      "hint": "Les URL vers lesquelles l’étape de workflow webhook_send envoie. Chaque slug correspond au réglage webhook_endpoint_<slug>.",
       "slugPlaceholder": "par exemple crm_partner",
       "urlPlaceholder": "https://api.example.com/webhook",
       "add": "Ajouter un endpoint",
-      "remove": "Supprimer l'endpoint",
+      "remove": "Supprimer l’endpoint",
       "invalidSlug": "Un slug ne contient que des minuscules, des chiffres, des tirets et des tirets bas."
     }
   },
@@ -1654,7 +1654,7 @@
     "noAccess": "Aucun accès",
     "syncBtn": "Sync",
     "cooldown": "Cooldown",
-    "noPermission": "Vous n'avez pas l'autorisation de synchroniser",
+    "noPermission": "Vous n’avez pas l’autorisation de synchroniser",
     "succeeded": "Réussi",
     "failed": "Échec",
     "tooManyRequests": "Trop de requêtes. Attendez {{secs}}s",
@@ -1700,15 +1700,15 @@
     "entities": {
       "customers": {
         "label": "Clients",
-        "desc": "Données d'entreprise : nom, coordonnées, numéro KvK/TVA, site web et secteur."
+        "desc": "Données d’entreprise : nom, coordonnées, numéro KvK/TVA, site web et secteur."
       },
       "locations": {
         "label": "Sites",
-        "desc": "Adresses des sites d'un client. Nécessite un client existant."
+        "desc": "Adresses des sites d’un client. Nécessite un client existant."
       },
       "departments": {
         "label": "Services",
-        "desc": "Services au sein d'un site. Nécessite un client et un site existants."
+        "desc": "Services au sein d’un site. Nécessite un client et un site existants."
       },
       "contacts": {
         "label": "Contacts",
@@ -1716,7 +1716,7 @@
       },
       "customer_tree": {
         "label": "Client (complet)",
-        "desc": "Crée un client avec ses sites, services et contacts en une seule fois. Pour un client qui n'existe pas encore."
+        "desc": "Crée un client avec ses sites, services et contacts en une seule fois. Pour un client qui n’existe pas encore."
       },
       "applications": {
         "label": "Candidatures",
@@ -1735,8 +1735,8 @@
         "desc": "Opportunités avec titre (requis), client, phase, valeur et propriétaire (e-mail). Requiert le droit de modification des opportunités."
       },
       "outreach": {
-        "label": "Listes d'appels",
-        "desc": "Listes d'appels avec nom (requis), canal, statut, propriétaire (e-mail) et paramètres de relance."
+        "label": "Listes d’appels",
+        "desc": "Listes d’appels avec nom (requis), canal, statut, propriétaire (e-mail) et paramètres de relance."
       },
       "vacancies": {
         "label": "Offres",
@@ -1748,15 +1748,15 @@
       },
       "notes": {
         "label": "Notes",
-        "desc": "Notes liées par ligne à un candidat (e-mail) ou un client (nom), avec type, auteur, date et texte. Requiert le droit d'import des notes. La date peut inclure une heure (10-03-2026 14:30) ; sans heure, tout atterrit à 00:00."
+        "desc": "Notes liées par ligne à un candidat (e-mail) ou un client (nom), avec type, auteur, date et texte. Requiert le droit d’import des notes. La date peut inclure une heure (10-03-2026 14:30) ; sans heure, tout atterrit à 00:00."
       },
       "conversations": {
         "label": "Conversations",
-        "desc": "Historique WhatsApp au niveau message par candidat (e-mail) : direction, canal, horodatage et texte. Migration uniquement, rien n'est jamais envoyé. Requiert le droit d'import des conversations. Pour l'historique WhatsApp Web, indiquez toujours le canal wa_web : sans canal, waba s'applique et l'historique atterrit définitivement dans le mauvais fil."
+        "desc": "Historique WhatsApp au niveau message par candidat (e-mail) : direction, canal, horodatage et texte. Migration uniquement, rien n’est jamais envoyé. Requiert le droit d’import des conversations. Pour l’historique WhatsApp Web, indiquez toujours le canal wa_web : sans canal, waba s’applique et l’historique atterrit définitivement dans le mauvais fil."
       },
       "documents": {
         "label": "Documents (fichiers)",
-        "desc": "ZIP avec les fichiers de documents plus un mapping.csv (nom de fichier, entité, record_ref, type, valide_jusqu'au) reliant chaque fichier à un candidat ou un client. Requiert le droit d'import des documents. Le nom de fichier peut aussi être un chemin dans le ZIP (dossier/fichier.pdf)."
+        "desc": "ZIP avec les fichiers de documents plus un mapping.csv (nom de fichier, entité, record_ref, type, valide_jusqu’au) reliant chaque fichier à un candidat ou un client. Requiert le droit d’import des documents. Le nom de fichier peut aussi être un chemin dans le ZIP (dossier/fichier.pdf)."
       }
     },
     "groups": {
@@ -1765,11 +1765,11 @@
     },
     "order": {
       "title": "Importez dans cet ordre",
-      "hint": "Chaque ligne se rattache à la précédente par son nom. Importez-la d'abord.",
-      "customersHint": "Commencez ici. Rien d'autre n'a besoin d'exister encore.",
-      "locationsHint": "Se rattache à un client existant par son nom (klant_naam). Importez d'abord les clients.",
-      "departmentsHint": "Se rattache à un client et un site existants par leur nom (klant_naam, locatie_naam). Importez-les d'abord.",
-      "contactsHint": "Se rattache à un client, un site et un service existants par leur nom (klant_naam, locatie_naam, afdeling_naam). Importez-les d'abord.",
+      "hint": "Chaque ligne se rattache à la précédente par son nom. Importez-la d’abord.",
+      "customersHint": "Commencez ici. Rien d’autre n’a besoin d’exister encore.",
+      "locationsHint": "Se rattache à un client existant par son nom (klant_naam). Importez d’abord les clients.",
+      "departmentsHint": "Se rattache à un client et un site existants par leur nom (klant_naam, locatie_naam). Importez-les d’abord.",
+      "contactsHint": "Se rattache à un client, un site et un service existants par leur nom (klant_naam, locatie_naam, afdeling_naam). Importez-les d’abord.",
       "treeAlternative": "Vous créez un client entièrement nouveau ?",
       "switchToTree": "Utiliser le fichier combiné"
     },
@@ -1777,44 +1777,44 @@
       "title": "Cet import crée",
       "replacesOrder": "Aucun ordre fixe requis. Ce fichier unique remplace les quatre étapes séparées.",
       "rowGrain": "Une ligne = une personne de contact, avec le client, le site et le service répétés à côté. Quarante lignes ne veulent donc pas dire quarante clients.",
-      "levelTruncation": "Si vous laissez un champ de nom vide sur une ligne (par exemple le service), cette ligne s'arrête là : rien n'est créé pour ce niveau ni au-delà.",
-      "allOrNothing": "Une ligne, c'est tout ou rien : si le contact échoue, le client, le site et le service de cette même ligne ne sont pas créés non plus. Un client déjà créé par une ligne précédente, lui, reste en place.",
+      "levelTruncation": "Si vous laissez un champ de nom vide sur une ligne (par exemple le service), cette ligne s’arrête là : rien n’est créé pour ce niveau ni au-delà.",
+      "allOrNothing": "Une ligne, c’est tout ou rien : si le contact échoue, le client, le site et le service de cette même ligne ne sont pas créés non plus. Un client déjà créé par une ligne précédente, lui, reste en place.",
       "separateAlternative": "Vous voulez ajouter quelque chose à un client déjà existant ?",
       "switchToSeparate": "Utiliser les fichiers séparés"
     },
-    "loadingTemplates": "Chargement des types d'import…",
-    "loadTemplatesError": "Impossible de charger les types d'import. Réessayez.",
-    "noTemplates": "Aucun type d'import n'est encore disponible.",
-    "downloadTemplate": "Télécharger le fichier d'exemple",
-    "downloadTemplateHint": "Un fichier d'exemple déjà rempli avec les noms de colonnes exacts. Le moyen le plus rapide de préparer vos données.",
-    "downloadError": "Impossible de télécharger le fichier d'exemple. Réessayez.",
-    "noViewPermission": "Vous n'avez pas le droit de consulter ce modèle.",
-    "noImportPermission": "Vous pouvez consulter le fichier d'exemple, mais vous n'avez pas le droit d'exécuter un import. Demandez à un administrateur.",
+    "loadingTemplates": "Chargement des types d’import…",
+    "loadTemplatesError": "Impossible de charger les types d’import. Réessayez.",
+    "noTemplates": "Aucun type d’import n’est encore disponible.",
+    "downloadTemplate": "Télécharger le fichier d’exemple",
+    "downloadTemplateHint": "Un fichier d’exemple déjà rempli avec les noms de colonnes exacts. Le moyen le plus rapide de préparer vos données.",
+    "downloadError": "Impossible de télécharger le fichier d’exemple. Réessayez.",
+    "noViewPermission": "Vous n’avez pas le droit de consulter ce modèle.",
+    "noImportPermission": "Vous pouvez consulter le fichier d’exemple, mais vous n’avez pas le droit d’exécuter un import. Demandez à un administrateur.",
     "dropHere": "Glissez votre fichier CSV ici",
     "selectCsv": "Sélectionner un fichier",
-    "acceptedTypes": "CSV, TXT ou Excel (.xlsx), 5 Mo max, jusqu'à 2000 lignes.",
-    "wrongFileType": "Ce type de fichier n'est pas pris en charge. Téléversez un fichier CSV, TXT ou Excel (.xlsx).",
-    "acceptedTypesCsvOnly": "CSV ou TXT, 5 Mo max, jusqu'à 2000 lignes.",
-    "wrongFileTypeCsvOnly": "Ce type de fichier n'est pas pris en charge ici. Téléversez un fichier CSV ou TXT (pour Excel, utilisez l'écran d'import dans les paramètres).",
+    "acceptedTypes": "CSV, TXT ou Excel (.xlsx), 5 Mo max, jusqu’à 2000 lignes.",
+    "wrongFileType": "Ce type de fichier n’est pas pris en charge. Téléversez un fichier CSV, TXT ou Excel (.xlsx).",
+    "acceptedTypesCsvOnly": "CSV ou TXT, 5 Mo max, jusqu’à 2000 lignes.",
+    "wrongFileTypeCsvOnly": "Ce type de fichier n’est pas pris en charge ici. Téléversez un fichier CSV ou TXT (pour Excel, utilisez l’écran d’import dans les paramètres).",
     "fileSelected": "Sélectionné : {{name}}",
     "replaceFile": "Choisir un autre fichier",
-    "runPreview": "Aperçu de l'import",
+    "runPreview": "Aperçu de l’import",
     "runningPreview": "Vérification du fichier…",
-    "previewErrorFallback": "Le fichier n'a pas pu être lu. Vérifiez le format et réessayez.",
+    "previewErrorFallback": "Le fichier n’a pas pu être lu. Vérifiez le format et réessayez.",
     "preview": {
       "title": "Aperçu",
-      "subtitle": "Voici ce qui SE PASSERAIT. Rien n'a encore été enregistré.",
-      "nothingToImport": "Aucune ligne ne serait créée ou mise à jour. Il n'y a rien à importer.",
-      "confirm": "Lancer l'import réel",
+      "subtitle": "Voici ce qui SE PASSERAIT. Rien n’a encore été enregistré.",
+      "nothingToImport": "Aucune ligne ne serait créée ou mise à jour. Il n’y a rien à importer.",
+      "confirm": "Lancer l’import réel",
       "running": "Import en cours…",
       "back": "Choisir un autre fichier",
-      "confirmError": "L'import n'a pas pu être terminé. Réessayez."
+      "confirmError": "L’import n’a pas pu être terminé. Réessayez."
     },
     "result": {
-      "title": "Résultat de l'import",
+      "title": "Résultat de l’import",
       "subtitleSuccess": "Toutes les lignes ont été importées avec succès.",
       "subtitleSuccessWithRemarks": "Tout a été importé, mais {{count}} lignes ont été importées avec un élément manquant. Voir ci-dessous.",
-      "subtitlePartial": "{{errorCount}} lignes sur {{total}} n'ont pas pu être importées. Voir ci-dessous.",
+      "subtitlePartial": "{{errorCount}} lignes sur {{total}} n’ont pas pu être importées. Voir ci-dessous.",
       "newImport": "Importer un autre fichier"
     },
     "stats": {
@@ -1829,21 +1829,21 @@
     },
     "unknownColumns": {
       "title": "Colonnes non reconnues (ignorées)",
-      "hint": "Ces colonnes de votre fichier ne correspondent à aucun champ connu. Elles ont été ignorées. Rien d'autre n'a été affecté."
+      "hint": "Ces colonnes de votre fichier ne correspondent à aucun champ connu. Elles ont été ignorées. Rien d’autre n’a été affecté."
     },
     "rows": {
       "attentionTitle": "{{count}} lignes qui demandent votre attention",
       "allTitle": "Les {{count}} lignes",
       "showAll": "Afficher les {{count}} lignes",
       "showAttentionOnly": "Afficher uniquement les lignes qui demandent votre attention",
-      "noAttention": "Aucune ligne ne nécessite d'attention.",
+      "noAttention": "Aucune ligne ne nécessite d’attention.",
       "remark": "Remarque :",
       "row": "Ligne {{row}}"
     },
     "wizard": {
       "next": "Suivant",
       "linkFromSettings": "Vous préférez un import guidé, étape par étape, avec correspondance des colonnes et un aperçu modifiable ?",
-      "linkFromSettingsCta": "Ouvrir l'assistant d'importation",
+      "linkFromSettingsCta": "Ouvrir l’assistant d’importation",
       "fields": {
         "customerName": "Nom du client",
         "whatsappConsent": "Consentement WhatsApp",
@@ -1863,9 +1863,9 @@
       },
       "preview": {
         "title": "Vérifiez vos données",
-        "subtitle": "Voici exactement ce qui sera envoyé. Cliquez sur une cellule pour la modifier, puis relancez l'aperçu.",
+        "subtitle": "Voici exactement ce qui sera envoyé. Cliquez sur une cellule pour la modifier, puis relancez l’aperçu.",
         "noRows": "Aucune ligne à prévisualiser. Vérifiez votre fichier.",
-        "validateHint": "Lancez l'aperçu pour voir ce qui se passerait, puis confirmez."
+        "validateHint": "Lancez l’aperçu pour voir ce qui se passerait, puis confirmez."
       }
     },
     "acceptedTypesZip": "Accepté : .zip (max. 200 Mo)",
@@ -1888,27 +1888,27 @@
       "saveError": "Impossible d’enregistrer les responsables."
     },
     "title": "Facebook Leads",
-    "subtitle": "Connectez l'app Facebook Leads de ce client. Les leads entrants arrivent automatiquement comme candidat.",
+    "subtitle": "Connectez l’app Facebook Leads de ce client. Les leads entrants arrivent automatiquement comme candidat.",
     "verifyToken": "Jeton de vérification",
-    "verifyTokenPlaceholder": "Jeton des paramètres de l'app Facebook",
-    "appSecret": "Secret de l'app",
-    "appSecretPlaceholder": "Secret de l'app Facebook",
-    "accessToken": "Jeton d'accès",
-    "accessTokenPlaceholder": "Jeton d'accès de la page",
+    "verifyTokenPlaceholder": "Jeton des paramètres de l’app Facebook",
+    "appSecret": "Secret de l’app",
+    "appSecretPlaceholder": "Secret de l’app Facebook",
+    "accessToken": "Jeton d’accès",
+    "accessTokenPlaceholder": "Jeton d’accès de la page",
     "secretSet": "✓ défini",
     "showSecret": "Afficher la valeur",
     "hideSecret": "Masquer la valeur",
     "secretKeepPlaceholder": "Laissez vide pour conserver la valeur actuelle",
     "datasetId": "ID du dataset",
     "datasetIdPlaceholder": "ID du dataset Conversions API",
-    "webhookUrl": "URL du webhook (à coller dans l'app Facebook)",
-    "copyUrl": "Copier l'URL",
-    "saveError": "L'enregistrement a échoué.",
+    "webhookUrl": "URL du webhook (à coller dans l’app Facebook)",
+    "copyUrl": "Copier l’URL",
+    "saveError": "L’enregistrement a échoué.",
     "loadError": "Impossible de charger les paramètres Facebook Leads.",
     "retry": "Réessayer",
       "tabs": {
         "connection": "Connexion",
-        "queue": "File d'attente"
+        "queue": "File d’attente"
       },
       "queue": {
         "summary": {
@@ -1941,7 +1941,7 @@
         "view": "Voir",
         "retry": "Réessayer",
         "empty": "Aucun lead avec ce statut.",
-        "loadError": "Impossible de charger la file d'attente.",
+        "loadError": "Impossible de charger la file d’attente.",
         "alreadyRetrieved": "Ce lead a déjà été récupéré.",
         "retryInFlight": "Ce lead est en cours de récupération. Réessayez dans un instant.",
         "retryFailed": "La nouvelle tentative a échoué."
@@ -1949,14 +1949,14 @@
   },
   "export": {
     "includeArchived": "Inclure les enregistrements archivés",
-    "includeArchivedHint": "Les enregistrements archivés sont inclus dans cet export. Possible uniquement si vous voyez chaque agence ; sinon le serveur refuse l'export.",
+    "includeArchivedHint": "Les enregistrements archivés sont inclus dans cet export. Possible uniquement si vous voyez chaque agence ; sinon le serveur refuse l’export.",
     "archivedNotAllowed": "Les enregistrements archivés ne peuvent pas être inclus : vous ne voyez pas chaque agence.",
     "title": "Exporter",
     "subtitle": "Exportez vos données en CSV. Les mêmes colonnes que le tableau, uniquement les enregistrements auxquels vous avez accès.",
     "button": "Exporter en CSV",
-    "noPermission": "Vous n'avez pas les droits pour exporter ces données.",
-    "rateLimited": "Trop d'exports d'affilée. Réessayez dans une minute.",
-    "error": "L'export a échoué. Veuillez réessayer plus tard.",
+    "noPermission": "Vous n’avez pas les droits pour exporter ces données.",
+    "rateLimited": "Trop d’exports d’affilée. Réessayez dans une minute.",
+    "error": "L’export a échoué. Veuillez réessayer plus tard.",
     "entities": {
       "email_messages": {
         "title": "Messages e-mail",
@@ -1968,11 +1968,11 @@
       },
       "applications": {
         "title": "Candidatures",
-        "desc": "Candidatures avec étape, candidat et offre d'emploi."
+        "desc": "Candidatures avec étape, candidat et offre d’emploi."
       },
       "vacancies": {
-        "title": "Offres d'emploi",
-        "desc": "Offres d'emploi avec statut, client et fonction."
+        "title": "Offres d’emploi",
+        "desc": "Offres d’emploi avec statut, client et fonction."
       },
       "leads": {
         "title": "Leads",
@@ -2034,8 +2034,8 @@
     "zipAlreadyRunning": "Un ZIP est déjà en cours de création. Attendez la notification, puis réessayez."
   },
   "apps": {
-    "notOnPkg3Title": "Le tenant n'est pas encore sur le Forfait 3",
-    "notOnPkg3Desc": "Vous pouvez préconfigurer les connecteurs, mais ils ne deviennent visibles pour les utilisateurs qu'après avoir fait passer ce forfait tenant au Forfait 3 via l'onglet Modules.",
+    "notOnPkg3Title": "Le tenant n’est pas encore sur le Forfait 3",
+    "notOnPkg3Desc": "Vous pouvez préconfigurer les connecteurs, mais ils ne deviennent visibles pour les utilisateurs qu’après avoir fait passer ce forfait tenant au Forfait 3 via l’onglet Modules.",
     "costTitle": "Attention : des frais mensuels sont associés",
     "costDesc": "Activer ou désactiver des apps affecte directement votre facture. Contactez votre gestionnaire de compte pour les tarifs.",
     "adminOnly": "Seuls les admins peuvent activer ou désactiver des apps.",
@@ -2084,7 +2084,7 @@
     "tierHeading": "Forfait",
     "addonsHeading": "Modules individuels (add-ons)",
     "comingSoon": "bientôt",
-    "connectorsHint": "Les connecteurs (Shiftmanager, HelloFlex, Elanza…) se gèrent par client sous Intégrations → Apps. L'activation est payante et débloque les modèles de workflow.",
+    "connectorsHint": "Les connecteurs (Shiftmanager, HelloFlex, Elanza…) se gèrent par client sous Intégrations → Apps. L’activation est payante et débloque les modèles de workflow.",
     "tierDesc": {
       "core": "ATS + CRM + Koios Assist",
       "pro": "+ Koios AI + AI Agents + Workflows + WhatsApp Business",
@@ -2185,7 +2185,7 @@
     "scopeRolePlaceholder": "Choisir un rôle",
     "scopeRequired": "Choisissez un site ou un rôle.",
     "editFailed": "La mise à jour a échoué. Vérifiez les informations et réessayez.",
-    "noConnections": "Aucun jeton WhatsApp connecté pour l'instant.",
+    "noConnections": "Aucun jeton WhatsApp connecté pour l’instant.",
     "noConnectionsDesc": "Ajoutez le premier jeton pour commencer à envoyer des messages WhatsApp.",
     "loadListFailed": "Impossible de charger les jetons WhatsApp.",
     "manualOnly": "Manuel uniquement",
@@ -2197,29 +2197,29 @@
     "selectConnection": "Jeton",
     "embedded": {
       "title": "Connecter avec WhatsApp (recommandé)",
-      "subtitle": "Reliez un numéro déjà présent dans l'application WhatsApp Business : il reste utilisable dans l'application et se connecte à la Cloud API pour les workflows et Koios AI.",
-      "notReady": "L'inscription guidée n'est pas encore disponible : la plateforme attend l'approbation de Meta. En attendant, vous pouvez lier un jeton manuellement ci-dessous.",
-      "configError": "Le statut de l'inscription guidée n'a pas pu être chargé.",
-      "step1": "Démarrez la liaison : une fenêtre Meta s'ouvre pour vous connecter et choisir le numéro.",
-      "step2": "Confirmez dans l'application WhatsApp Business sur votre téléphone (vous y recevrez un message).",
-      "step3": "Terminé : le numéro fonctionne dans l'application et via la plateforme.",
+      "subtitle": "Reliez un numéro déjà présent dans l’application WhatsApp Business : il reste utilisable dans l’application et se connecte à la Cloud API pour les workflows et Koios AI.",
+      "notReady": "L’inscription guidée n’est pas encore disponible : la plateforme attend l’approbation de Meta. En attendant, vous pouvez lier un jeton manuellement ci-dessous.",
+      "configError": "Le statut de l’inscription guidée n’a pas pu être chargé.",
+      "step1": "Démarrez la liaison : une fenêtre Meta s’ouvre pour vous connecter et choisir le numéro.",
+      "step2": "Confirmez dans l’application WhatsApp Business sur votre téléphone (vous y recevrez un message).",
+      "step3": "Terminé : le numéro fonctionne dans l’application et via la plateforme.",
       "start": "Démarrer la liaison",
       "exchanging": "Finalisation de la liaison…",
       "popupClosed": "La liaison a été interrompue. Recommencez quand vous êtes prêt.",
-      "exchangeFailed": "La liaison n'a pas pu être finalisée. Réessayez ou liez manuellement avec un jeton.",
-      "sdkFailed": "Le script Meta n'a pas pu être chargé. Vérifiez votre connexion et réessayez.",
-      "noRights": "Vous n'avez pas les droits pour gérer les connexions WhatsApp.",
-      "linked": "Lié : {{waba}}. Le numéro continue de fonctionner aussi dans l'application WhatsApp Business.",
-      "syncStart": "Synchroniser l'historique des discussions",
+      "exchangeFailed": "La liaison n’a pas pu être finalisée. Réessayez ou liez manuellement avec un jeton.",
+      "sdkFailed": "Le script Meta n’a pas pu être chargé. Vérifiez votre connexion et réessayez.",
+      "noRights": "Vous n’avez pas les droits pour gérer les connexions WhatsApp.",
+      "linked": "Lié : {{waba}}. Le numéro continue de fonctionner aussi dans l’application WhatsApp Business.",
+      "syncStart": "Synchroniser l’historique des discussions",
       "syncFailed": "La demande de synchronisation a échoué. Réessayez dans les 24 heures suivant la liaison.",
       "syncDone": "Demandé : historique {{history}} · contacts {{contacts}}.",
       "syncYes": "oui",
       "syncNo": "non",
       "chip": "Coexistence",
-      "disconnected": "Déconnecté via l'application le {{date}}. La reliaison passe par l'assistant ci-dessus ; la déconnexion se fait toujours dans l'application WhatsApp Business."
+      "disconnected": "Déconnecté via l’application le {{date}}. La reliaison passe par l’assistant ci-dessus ; la déconnexion se fait toujours dans l’application WhatsApp Business."
     },
-    "appSecretSet": "Secret d'application défini",
-    "appSecretMissing": "Secret d'application manquant"
+    "appSecretSet": "Secret d’application défini",
+    "appSecretMissing": "Secret d’application manquant"
   },
   "roles": {
     "loading": "Chargement des rôles…",
@@ -2234,8 +2234,8 @@
     "usersCount_other": "{{count}} utilisateurs",
     "edit": "Modifier",
     "deleteTitle": "Supprimer le rôle",
-    "deleteBlocked_one": "Suppression impossible. {{count}} utilisateur possède ce rôle. Attribuez-lui d'abord un autre rôle.",
-    "deleteBlocked_other": "Suppression impossible. {{count}} utilisateurs possèdent ce rôle. Attribuez-leur d'abord un autre rôle.",
+    "deleteBlocked_one": "Suppression impossible. {{count}} utilisateur possède ce rôle. Attribuez-lui d’abord un autre rôle.",
+    "deleteBlocked_other": "Suppression impossible. {{count}} utilisateurs possèdent ce rôle. Attribuez-leur d’abord un autre rôle.",
     "confirmDelete": "Supprimer le rôle « {{name}} » ?",
     "empty": "Aucun rôle créé pour le moment.",
     "groups": {
@@ -2252,10 +2252,10 @@
       "matches": "Matchs",
       "opportunities": "Opportunités",
       "tasks": "Tâches",
-      "outreach": "Listes d'appels",
+      "outreach": "Listes d’appels",
       "planning": "Planning",
       "shifts": "Vacations",
-      "audit": "Journal d'audit",
+      "audit": "Journal d’audit",
       "privacy": "Confidentialité (RGPD)",
       "koios": "Koios AI",
       "page": "Accès au menu",
@@ -2263,7 +2263,7 @@
       "departments": "Services",
       "details": "Détails",
       "aiagents": "Agents IA",
-      "vacancy_generation": "Génération d'offres",
+      "vacancy_generation": "Génération d’offres",
       "notes": "Notes",
       "conversations": "Conversations",
       "documents": "Documents"
@@ -2296,12 +2296,12 @@
     "startDashboard": "Tableau de bord initial",
     "startDashboardNone": "Par défaut",
     "branchesTemplate": "Sites (modèle)",
-    "branchesTemplateHint": "L'ensemble de sites de départ attribué aux nouveaux utilisateurs ayant ce rôle. Les utilisateurs existants gardent leur propre ensemble. Ceci ne modifie que le modèle.",
+    "branchesTemplateHint": "L’ensemble de sites de départ attribué aux nouveaux utilisateurs ayant ce rôle. Les utilisateurs existants gardent leur propre ensemble. Ceci ne modifie que le modèle.",
     "branchesEmptyHint": "Aucune agence sélectionnée. Les nouveaux utilisateurs avec ce rôle démarrent sans rattachement et voient TOUS les candidats. Avec des agences rattachées, un utilisateur ne voit que les candidats de ces agences.",
     "branchesNoLocations": "Aucun site configuré pour le moment.",
-    "branchesSaveFailed": "Impossible d'enregistrer le modèle de sites. Veuillez réessayer.",
-    "appearanceSaveFailed": "Impossible d'enregistrer l'apparence. Veuillez réessayer.",
-    "permissionsSaveFailed": "Impossible d'enregistrer les autorisations. Veuillez réessayer.",
+    "branchesSaveFailed": "Impossible d’enregistrer le modèle de sites. Veuillez réessayer.",
+    "appearanceSaveFailed": "Impossible d’enregistrer l’apparence. Veuillez réessayer.",
+    "permissionsSaveFailed": "Impossible d’enregistrer les autorisations. Veuillez réessayer.",
     "pageAccess": "Page : {{label}}",
     "hints": {
       "candidatesSync": "Miroir SM"
@@ -2314,13 +2314,13 @@
       "label": "Appliquer les droits par site",
       "hint": "Applique les droits par site (consulter, modifier, supprimer) aux candidats, clients, sites, rendez-vous, tâches et conversations. Un utilisateur sans site rattaché reste sans restriction, activé ou non."
     },
-    "readOnlyNotice": "Les rôles sont gérés par l'administrateur de la plateforme; vous ne pouvez les afficher ici."
+    "readOnlyNotice": "Les rôles sont gérés par l’administrateur de la plateforme; vous ne pouvez les afficher ici."
   },
   "audit": {
-    "title": "Journal d'audit",
+    "title": "Journal d’audit",
     "loading": "Chargement…",
     "countSummary": "{{shown}} sur {{total}} entrées",
-    "unavailable": "Journal d'audit indisponible.",
+    "unavailable": "Journal d’audit indisponible.",
     "searchPlaceholder": "Rechercher par action ou utilisateur…",
     "dateTo": "au",
     "noEntries": "Aucune entrée trouvée",
@@ -2356,8 +2356,8 @@
       "change": "Modification",
       "access": "Accès (RGPD)"
     },
-    "accessNotice": "Accès en lecture seule à ce dossier, aucune modification (journal d'accès RGPD).",
-    "scrubbedNotice": "Le contenu de cette ligne a été supprimé à la demande de la personne concernée (RGPD). L'événement lui-même reste enregistré.",
+    "accessNotice": "Accès en lecture seule à ce dossier, aucune modification (journal d’accès RGPD).",
+    "scrubbedNotice": "Le contenu de cette ligne a été supprimé à la demande de la personne concernée (RGPD). L’événement lui-même reste enregistré.",
     "http": {
       "method": "Méthode",
       "path": "Chemin",
@@ -2404,7 +2404,7 @@
       "customer_departments": "Départements",
       "customer_contacts": "Contacts",
       "applications": "Candidatures",
-      "outreach_campaigns": "Listes d'appels",
+      "outreach_campaigns": "Listes d’appels",
       "documents": "Documents"
     },
     "kpi": {
@@ -2444,7 +2444,7 @@
       "opportunity": "Opportunité",
       "task": "Tâche",
       "match": "Match",
-      "outreach_campaign": "Liste d'appels",
+      "outreach_campaign": "Liste d’appels",
       "document": "Document"
     },
     "field": {
@@ -2487,7 +2487,7 @@
     "labelPlaceholder": "Nom affiché",
     "title": "Lookups candidats",
     "subtitle": "Gérez les types de contrat, les étapes du funnel et les statuts (libellés, couleurs et ordre).",
-    "confirmDelete": "Supprimer « {{name}} » ? S'il est utilisé, il sera archivé.",
+    "confirmDelete": "Supprimer « {{name}} » ? S’il est utilisé, il sera archivé.",
     "isApplicant": "Affiche le funnel de candidature",
     "isApplicantHint": "Les candidats avec ce statut affichent le funnel de candidature. Généralement un seul statut (p. ex. « Candidat »).",
     "applicantBadge": "Funnel",
@@ -2507,14 +2507,14 @@
       "subtitle": "Disponible maintenant ? (Disponible, Placé, Indisponible, Malade, Congé)."
     },
     "requiresAppointment": "Nécessite un rendez-vous",
-    "requiresAppointmentHint": "Cette étape attend un rendez-vous planifié (intake). S'il manque, c'est signalé sur le candidat.",
+    "requiresAppointmentHint": "Cette étape attend un rendez-vous planifié (intake). S’il manque, c’est signalé sur le candidat.",
     "appointmentBadge": "Rendez-vous requis",
     "requiresReason": "Motif obligatoire",
     "requiresReasonHint": "Ce statut exige un motif (p. ex. Inactif).",
     "reasonBadge": "Motif",
     "inUse": "Utilisé. Suppression impossible",
     "isMatch": "Crée un match",
-    "isMatchHint": "Dès qu'une candidature atteint cette phase, elle devient un match (le bucket Matched).",
+    "isMatchHint": "Dès qu’une candidature atteint cette phase, elle devient un match (le bucket Matched).",
     "isRejected": "Est un refus",
     "isRejectedHint": "Les candidatures dans cette phase comptent comme refusées (le bucket Rejected).",
     "phases": {
@@ -2532,9 +2532,9 @@
     "phaseApplicant": "Est la phase de candidature",
     "phaseApplicantHint": "Les nouveaux leads passent automatiquement à cette phase lors de leur première candidature (Lead → Candidat).",
     "phaseApplicantBadge": "Phase de candidat",
-    "phaseLockedHint": "Les automatisations et les KPI s'appuient sur ces phases, donc rien ne peut être ajouté, supprimé ou réordonné ici. Seule la couleur est modifiable.",
+    "phaseLockedHint": "Les automatisations et les KPI s’appuient sur ces phases, donc rien ne peut être ajouté, supprimé ou réordonné ici. Seule la couleur est modifiable.",
     "customerNotApplicable": "Client non applicable",
-    "customerNotApplicableHint": "Un match avec cette forme de contrat n'a ni client, ni site, ni service, ni personne de contact ; une agence est alors obligatoire.",
+    "customerNotApplicableHint": "Un match avec cette forme de contrat n’a ni client, ni site, ni service, ni personne de contact ; une agence est alors obligatoire.",
     "hasContractLines": "Afficher les lignes de contrat",
     "hasContractLinesHint": "Un match avec cette forme de contrat affiche des lignes de contrat modifiables.",
     "iconField": "Icône",
@@ -2613,10 +2613,10 @@
     "title": "Types de dernier contact",
     "subtitle": "Canaux du 'dernier contact' (E-mail, Téléphone, WhatsApp).",
     "add": "Ajouter un type",
-    "noContactDaysTitle": "Rappel d'absence de contact",
-    "noContactDaysHint": "Au bout de combien de jours sans dernier contact enregistré un candidat est marqué « non contacté » pour l'automatisation (workflows et webhooks).",
+    "noContactDaysTitle": "Rappel d’absence de contact",
+    "noContactDaysHint": "Au bout de combien de jours sans dernier contact enregistré un candidat est marqué « non contacté » pour l’automatisation (workflows et webhooks).",
     "noContactDaysLabel": "Jours (1-365)",
-    "noContactDaysSaveFailed": "Échec de l'enregistrement du délai d'absence de contact.",
+    "noContactDaysSaveFailed": "Échec de l’enregistrement du délai d’absence de contact.",
     "dedupeKeysTitle": "Détection des doublons",
     "dedupeKeysHint": "Sur quels champs un nouveau candidat est vérifié par rapport à une correspondance existante (à la création).",
     "dedupeKeys": {
@@ -2624,7 +2624,7 @@
       "mobile": "Mobile",
       "phone": "Téléphone"
     },
-    "dedupeKeysSaveFailed": "Échec de l'enregistrement des champs de détection des doublons.",
+    "dedupeKeysSaveFailed": "Échec de l’enregistrement des champs de détection des doublons.",
     "dedupeKeysMinOne": "Au moins un champ reste requis. Sans sélection, le contrôle revient à e-mail + mobile."
   },
   "noteTypes": {
@@ -2648,51 +2648,51 @@
     "contractTypeSubtitle": "Gérer les types de contrat et leur durée par défaut.",
     "contractTypeAdd": "Ajouter un type de contrat",
     "contractTypeDurationLabel": "Durée (jours)",
-    "stopReasonTitle": "Motifs d'arrêt",
-    "stopReasonSubtitle": "Motif obligatoire lors de l'arrêt anticipé d'un match.",
+    "stopReasonTitle": "Motifs d’arrêt",
+    "stopReasonSubtitle": "Motif obligatoire lors de l’arrêt anticipé d’un match.",
     "stopReasonAdd": "Ajouter un motif"
   },
   "matchRates": {
     "title": "Facteur de conversion achat→vente",
-    "subtitle": "Retombe sur le tarif d'achat × ce facteur lorsqu'aucun accord tarifaire ne correspond à la fonction/convention collective/échelon/niveau.",
+    "subtitle": "Retombe sur le tarif d’achat × ce facteur lorsqu’aucun accord tarifaire ne correspond à la fonction/convention collective/échelon/niveau.",
     "placeholder": "Ex. 1,35",
     "saveFailed": "Échec de l’enregistrement. La valeur a été rétablie.",
     "loadError": "Impossible de charger le facteur de conversion."
   },
   "matchContractLineRateSide": {
     "title": "Visibilité de la ligne tarifaire",
-    "subtitle": "Choisissez quel côté de l'argent la ligne tarifaire par fonction d'un match affiche : ce que le client paie, ou ce que vous payez au candidat.",
+    "subtitle": "Choisissez quel côté de l’argent la ligne tarifaire par fonction d’un match affiche : ce que le client paie, ou ce que vous payez au candidat.",
     "saleLabel": "Ce que le client paie (vente)",
     "saleDescription": "Toute personne pouvant voir ce match voit ce montant.",
     "purchaseLabel": "Ce que nous payons au candidat (achat)",
     "purchaseDescription": "Seules les personnes disposant du droit financier voient ce montant.",
-    "saveFailed": "Impossible d'enregistrer le paramètre de la ligne tarifaire. Veuillez réessayer."
+    "saveFailed": "Impossible d’enregistrer le paramètre de la ligne tarifaire. Veuillez réessayer."
   },
   "outreach": {
     "statusTitle": "Statuts",
-    "statusSubtitle": "Gérer les statuts des listes d'appels (statut + couleur).",
+    "statusSubtitle": "Gérer les statuts des listes d’appels (statut + couleur).",
     "statusAdd": "Ajouter un statut",
     "flagReached": "Compte comme joint",
-    "flagReachedDesc": "Ce statut horodate le contact sur la ligne de la liste d'appels.",
+    "flagReachedDesc": "Ce statut horodate le contact sur la ligne de la liste d’appels.",
     "outcomeTitle": "Résultats",
-    "outcomeSubtitle": "Le résultat d'une tentative d'appel, distinct du statut de la liste d'appels.",
+    "outcomeSubtitle": "Le résultat d’une tentative d’appel, distinct du statut de la liste d’appels.",
     "outcomeAdd": "Ajouter un résultat"
   },
   "tasks": {
     "statusTitle": "Statuts",
     "statusSubtitle": "Gérez les colonnes de votre tableau de tâches (statut + couleur).",
     "statusAdd": "Ajouter un statut",
-    "typeTitle": "Types d'activité",
-    "typeSubtitle": "Gérez les types d'activité (tâche, appel, e-mail…).",
+    "typeTitle": "Types d’activité",
+    "typeSubtitle": "Gérez les types d’activité (tâche, appel, e-mail…).",
     "typeAdd": "Ajouter un type",
     "priorityTitle": "Priorités",
     "prioritySubtitle": "Gérez les priorités de vos tâches (basse, normale, haute).",
     "priorityAdd": "Ajouter une priorité",
     "priorityDefault": "Par défaut",
     "flagDone": "Compte comme terminée",
-    "flagDoneDesc": "Les tâches dans ce statut comptent pour le KPI « terminées » et n'apparaissent plus comme ouvertes ou en retard.",
+    "flagDoneDesc": "Les tâches dans ce statut comptent pour le KPI « terminées » et n’apparaissent plus comme ouvertes ou en retard.",
     "typeCountsAsContact": "Compte comme contact",
-    "typeCountsAsContactDesc": "La complétion d'une tâche de ce type met à jour la date de dernier contact du candidat."
+    "typeCountsAsContactDesc": "La complétion d’une tâche de ce type met à jour la date de dernier contact du candidat."
   },
   "taskDisplay": {
     "title": "Affichage tableau",
@@ -2708,16 +2708,16 @@
       },
       "task_table_color_type": {
         "label": "Type",
-        "description": "Activé = type d'activité en libellé coloré. Désactivé = texte simple."
+        "description": "Activé = type d’activité en libellé coloré. Désactivé = texte simple."
       },
       "task_table_color_assignee": {
-        "label": "Couleur de l'assigné",
-        "description": "Activé = l'avatar de l'assigné utilise sa couleur. Désactivé = gris neutre."
+        "label": "Couleur de l’assigné",
+        "description": "Activé = l’avatar de l’assigné utilise sa couleur. Désactivé = gris neutre."
       }
     }
   },
   "assessment": {
-    "title": "Critères d'évaluation",
+    "title": "Critères d’évaluation",
     "subtitle": "Groupes de critères réutilisables que Koios AI utilise pour évaluer les candidats. Associez un groupe à un poste et ajustez-le par poste.",
     "addGroup": "Ajouter un groupe",
     "empty": "Aucun groupe de critères pour le moment.",
@@ -2771,18 +2771,18 @@
     },
     "leads": {
       "title": "Notifications pour les nouvelles suggestions",
-      "subtitle": "Déterminez qui est notifié lorsque l'IA trouve de nouveaux candidats pour un poste.",
+      "subtitle": "Déterminez qui est notifié lorsque l’IA trouve de nouveaux candidats pour un poste.",
       "modeLabel": "Qui reçoit la notification",
-      "modeOwner": "Propriétaire de l'offre",
+      "modeOwner": "Propriétaire de l’offre",
       "modeTeam": "Équipe avec rôle",
       "roleLabel": "Rôle",
-      "saveFailed": "Les paramètres n'ont pas pu être enregistrés"
+      "saveFailed": "Les paramètres n’ont pas pu être enregistrés"
     }
   },
   "matchTemplatesSettings": {
     "title": "Profils de matching",
     "subtitle": "Profils de pondération de matching réutilisables, sélectionnables sur un poste (onglet Matching). Attribuer un profil copie ses pondérations sur ce poste. Les modifications ultérieures ici ne se répercutent pas automatiquement.",
-    "empty": "Aucun profil de matching pour l'instant. Créez-en un ci-dessous.",
+    "empty": "Aucun profil de matching pour l’instant. Créez-en un ci-dessous.",
     "loadError": "Impossible de charger les profils de matching.",
     "nameLabel": "Nom",
     "namePlaceholder": "Ex. Profil technique senior",
@@ -2798,7 +2798,7 @@
     "delete": "Supprimer",
     "deleteBlocked": "Ce profil est encore lié à un poste et ne peut pas être supprimé.",
     "confirmDelete": "Supprimer « {{name}} » ?",
-    "saveFailed": "Échec de l'enregistrement.",
+    "saveFailed": "Échec de l’enregistrement.",
     "applyPrompt": "Appliquer à {{count}} postes liés ?",
     "applyResult": "Appliqué à {{applied}} poste(s), {{skipped}} ignoré(s)."
   },
@@ -2812,12 +2812,12 @@
   },
   "industrySettings": {
     "title": "Secteurs",
-    "subtitle": "Gérez les secteurs sélectionnables dans le profil d'entreprise.",
+    "subtitle": "Gérez les secteurs sélectionnables dans le profil d’entreprise.",
     "add": "Ajouter un secteur"
   },
   "provinces": {
     "title": "Provinces",
-    "subtitle": "Provinces par pays, utilisées dans les champs d'adresse et les filtres.",
+    "subtitle": "Provinces par pays, utilisées dans les champs d’adresse et les filtres.",
     "add": "Ajouter une province",
     "country": "Pays",
     "empty": "Pas encore de provinces pour ce pays. Ajoutez la première.",
@@ -2826,7 +2826,7 @@
   },
   "genderSettings": {
     "title": "Genre",
-    "subtitle": "Genres avec une couleur, détermine la couleur de l'icône du candidat.",
+    "subtitle": "Genres avec une couleur, détermine la couleur de l’icône du candidat.",
     "add": "Ajouter un genre"
   },
   "documentTypes": {
@@ -2834,15 +2834,15 @@
     "subtitle": "Catégories, couleurs et icônes pour les documents de cette section.",
     "add": "Ajouter un type",
     "icon": "Icône",
-    "requiresExpiry": "A une date d'expiration",
-    "requiresExpiryDesc": "Les documents de ce type reçoivent une date d'expiration, calculée à partir de la validité par défaut ci-dessous (ou définie par document si elle est absente).",
+    "requiresExpiry": "A une date d’expiration",
+    "requiresExpiryDesc": "Les documents de ce type reçoivent une date d’expiration, calculée à partir de la validité par défaut ci-dessous (ou définie par document si elle est absente).",
     "isCv": "Marqueur CV",
     "defaultValidityMonths": "Validité par défaut (mois)",
     "validityMonthsSuffix": "mois",
-    "expiringAlertDaysTitle": "Fenêtre d'alerte d'expiration",
-    "expiringAlertDaysHint": "Combien de jours avant la date d'expiration d'un document de candidat l'automatisation d'alerte d'expiration se déclenche.",
+    "expiringAlertDaysTitle": "Fenêtre d’alerte d’expiration",
+    "expiringAlertDaysHint": "Combien de jours avant la date d’expiration d’un document de candidat l’automatisation d’alerte d’expiration se déclenche.",
     "expiringAlertDaysLabel": "Jours (1-365)",
-    "expiringAlertDaysSaveFailed": "Échec de l'enregistrement de la fenêtre d'alerte d'expiration."
+    "expiringAlertDaysSaveFailed": "Échec de l’enregistrement de la fenêtre d’alerte d’expiration."
   },
   "requiredFields": {
     "expandAll": "Tout déplier",
@@ -2852,11 +2852,11 @@
     "field": "Champ",
     "groupCount": "{{required}} sur {{total}} obligatoires",
     "customHint": "Les champs personnalisés enregistrent leur caractère obligatoire sur la définition du champ elle-même, et non dans ce paramètre.",
-    "customEmpty": "Il n'y a pas encore de champs personnalisés pour les candidats. Dès que vous en créez un, il apparaît ici et vous pouvez le rendre obligatoire par phase.",
+    "customEmpty": "Il n’y a pas encore de champs personnalisés pour les candidats. Dès que vous en créez un, il apparaît ici et vous pouvez le rendre obligatoire par phase.",
     "customAlwaysRequired": "Toujours obligatoire, à chaque phase",
-    "customSaveFailed": "L'enregistrement de la définition du champ a échoué. Veuillez réessayer.",
-    "inventoryLoadFailed": "Le chargement de l'inventaire des champs a échoué. Veuillez réessayer.",
-    "inventoryEmpty": "Il n'y a aucun champ à afficher.",
+    "customSaveFailed": "L’enregistrement de la définition du champ a échoué. Veuillez réessayer.",
+    "inventoryLoadFailed": "Le chargement de l’inventaire des champs a échoué. Veuillez réessayer.",
+    "inventoryEmpty": "Il n’y a aucun champ à afficher.",
     "fieldLabels": {
       "initials": "Initiales",
       "facebookLeadsId": "Facebook Lead ID",
@@ -2865,14 +2865,14 @@
   },
   "applicationRequiredFields": {
     "title": "Champs obligatoires",
-    "subtitle": "Déterminez quels champs sont obligatoires lors de la création d'une nouvelle candidature.",
-    "hint": "Ceci est vérifié lors de la création d'une nouvelle candidature.",
+    "subtitle": "Déterminez quels champs sont obligatoires lors de la création d’une nouvelle candidature.",
+    "hint": "Ceci est vérifié lors de la création d’une nouvelle candidature.",
     "fieldLabels": {
       "candidateId": "Candidat",
       "newCandidate": "Nouveau candidat (créé en ligne)",
       "rejectionReason": "Motif de refus",
-      "interviewFlow": "Flux d'entretien",
-      "interviewWorkflow": "Workflow d'entretien",
+      "interviewFlow": "Flux d’entretien",
+      "interviewWorkflow": "Workflow d’entretien",
       "matchScore": "Score de correspondance",
       "matchCriteria": "Critères de correspondance",
       "phaseKey": "Phase (système)"
@@ -2880,11 +2880,11 @@
   },
   "vacancyTab": {
     "title": "Onglet Postes chez les candidats",
-    "subtitle": "Décidez quand l'onglet « Postes » est visible dans la fiche détaillée du candidat.",
+    "subtitle": "Décidez quand l’onglet « Postes » est visible dans la fiche détaillée du candidat.",
     "phasesTitle": "Visible selon la phase",
     "statusesTitle": "Masquer selon la disponibilité",
     "typesTitle": "Visible selon la forme contractuelle",
-    "vacancyStatusesTitle": "Statuts de poste dans l'onglet",
+    "vacancyStatusesTitle": "Statuts de poste dans l’onglet",
     "tabs": {
       "phases": "Phase",
       "statuses": "Disponibilité",
@@ -2894,15 +2894,15 @@
   },
   "candidateTab": {
     "title": "Onglet Recherche de candidats sur les postes",
-    "subtitle": "Décidez quand l'onglet « Recherche de candidats » est visible dans la fiche détaillée du poste et quels candidats sont présélectionnés par défaut.",
+    "subtitle": "Décidez quand l’onglet « Recherche de candidats » est visible dans la fiche détaillée du poste et quels candidats sont présélectionnés par défaut.",
     "vacancyStatusesTitle": "Visible selon le statut du poste",
-    "candidateStatusesTitle": "Disponibilité présélectionnée dans l'onglet",
-    "contractFormsTitle": "Formes contractuelles présélectionnées dans l'onglet",
+    "candidateStatusesTitle": "Disponibilité présélectionnée dans l’onglet",
+    "contractFormsTitle": "Formes contractuelles présélectionnées dans l’onglet",
     "defaultRadiusLabel": "Rayon par défaut (km)",
-    "defaultRadiusHint": "Rayon utilisé par défaut par l'onglet de recherche de candidats à l'ouverture d'une vacance (1–500 km).",
+    "defaultRadiusHint": "Rayon utilisé par défaut par l’onglet de recherche de candidats à l’ouverture d’une vacance (1–500 km).",
     "leadsCriteria": {
       "title": "Critères de leads",
-      "subtitle": "Déterminez quels candidats comptent comme « lead » pour ce poste. Cela alimente à la fois le compteur de leads et l'onglet « Recherche de candidats ».",
+      "subtitle": "Déterminez quels candidats comptent comme « lead » pour ce poste. Cela alimente à la fois le compteur de leads et l’onglet « Recherche de candidats ».",
       "countableStatusesTitle": "Statuts de poste qui comptent",
       "countableStatusesHint": "Aucune sélection = tous les statuts de poste comptent.",
       "radiusTitle": "Rayon de recherche",
@@ -2914,13 +2914,13 @@
       "functionMatchExactDesc": "Seuls les candidats ayant exactement la même fonction comptent.",
       "functionMatchCategory": "Catégorie",
       "functionMatchAll": "Toutes",
-      "functionMatchAllDesc": "Chaque fonction compte ; la fonction n'a aucun rôle dans les leads.",
+      "functionMatchAllDesc": "Chaque fonction compte ; la fonction n’a aucun rôle dans les leads.",
       "excludeAlreadyAppliedLabel": "Exclure les candidats ayant une candidature en cours",
       "excludeAlreadyAppliedHint": "Un candidat ayant déjà postulé à ce poste ne compte plus comme lead.",
       "includeExpiringPlacementsLabel": "Compter les matchs bientôt expirés",
       "includeExpiringPlacementsHint": "Les candidats actuellement placés mais dont le match se termine dans le nombre de jours configuré comptent aussi comme lead.",
       "expiringWithinDaysLabel": "Nombre de jours",
-      "expiringWithinDaysHint": "Combien de jours à l'avance un match expirant compte déjà comme lead (1–365)."
+      "expiringWithinDaysHint": "Combien de jours à l’avance un match expirant compte déjà comme lead (1–365)."
     },
     "tabs": {
       "vacancy_statuses": "Statut du poste",
@@ -2955,7 +2955,7 @@
       "filled_shifts": "Services pourvus",
       "fill_rate": "Taux de remplissage",
       "unfilled": "Non pourvus",
-      "revenue": "Chiffre d'affaires",
+      "revenue": "Chiffre d’affaires",
       "open_deals": "Affaires en cours",
       "won_deals": "Gagnées ce mois-ci",
       "conversion": "Taux de conversion",
@@ -2995,22 +2995,22 @@
     "freeEntryHint": "Activé : les recruteurs peuvent saisir leur propre fonction (combobox). Désactivé : choisir uniquement dans la liste.",
     "confirmFreeEntry": "Êtes-vous sûr ? La saisie libre autorise des fonctions hors liste. Cela peut réduire la qualité des données.",
     "confirmStrictMismatchTitle": "Certaines valeurs ne figurent pas dans la liste",
-    "confirmStrictMismatch": "{{count}} valeur de fonction utilisée par des candidats existants ne figure pas dans la liste et deviendrait inaccessible avec une liste stricte : {{values}}. Ajoutez-la d'abord à la liste, ou annulez et corrigez-la manuellement.",
-    "confirmStrictMismatch_other": "{{count}} valeurs de fonction utilisées par des candidats existants ne figurent pas dans la liste et deviendraient inaccessibles avec une liste stricte : {{values}}. Ajoutez-les d'abord à la liste, ou annulez et corrigez-les manuellement.",
+    "confirmStrictMismatch": "{{count}} valeur de fonction utilisée par des candidats existants ne figure pas dans la liste et deviendrait inaccessible avec une liste stricte : {{values}}. Ajoutez-la d’abord à la liste, ou annulez et corrigez-la manuellement.",
+    "confirmStrictMismatch_other": "{{count}} valeurs de fonction utilisées par des candidats existants ne figurent pas dans la liste et deviendraient inaccessibles avec une liste stricte : {{values}}. Ajoutez-les d’abord à la liste, ou annulez et corrigez-les manuellement.",
     "gatherMissing": "Ajouter à la liste"
   },
   "contactFunctionsSettings": {
     "title": "Fonctions des contacts",
-    "subtitle": "Gérez la liste des fonctions pour les contacts chez les clients (ex. Responsable de site, Chef d'équipe).",
+    "subtitle": "Gérez la liste des fonctions pour les contacts chez les clients (ex. Responsable de site, Chef d’équipe).",
     "add": "Ajouter une fonction",
-    "notAvailable": "Pas encore disponible. Cette liste s'active dès que la connexion backend est en place.",
+    "notAvailable": "Pas encore disponible. Cette liste s’active dès que la connexion backend est en place.",
     "freeEntry": "Autoriser la saisie libre",
     "freeEntryHint": "Activé : une fonction personnalisée peut être saisie (combobox). Désactivé : choix dans la liste uniquement (liste stricte).",
     "confirmFreeEntry": "Es-tu sûr ? La saisie libre permet de saisir des fonctions hors liste. Cela peut réduire la qualité des données."
   },
   "applicationSourcesSettings": {
     "title": "Sources",
-    "subtitle": "Gérez la liste des sources d'acquisition (ex. Indeed, LinkedIn, Recommandation) utilisée dans le champ source des candidatures et de l'accueil des candidats, et si les recruteurs peuvent saisir des valeurs libres.",
+    "subtitle": "Gérez la liste des sources d’acquisition (ex. Indeed, LinkedIn, Recommandation) utilisée dans le champ source des candidatures et de l’accueil des candidats, et si les recruteurs peuvent saisir des valeurs libres.",
     "add": "Ajouter une source",
     "freeEntry": "Autoriser la saisie libre",
     "freeEntryHint": "Activé : les recruteurs peuvent saisir leur propre source (combobox). Désactivé : choisir uniquement dans la liste.",
@@ -3030,7 +3030,7 @@
       },
       "customer_table_color_owner": {
         "label": "Couleur du gestionnaire",
-        "description": "Activé = l'avatar du gestionnaire utilise sa couleur. Désactivé = gris neutre."
+        "description": "Activé = l’avatar du gestionnaire utilise sa couleur. Désactivé = gris neutre."
       },
       "customer_location_chip_color": {
         "label": "Couleur puce site",
@@ -3050,7 +3050,7 @@
       },
       "customer_contact_table_color_status": {
         "label": "Couleur du statut (contacts)",
-        "description": "Activé = le statut d'un contact sous forme d'étiquette colorée. Désactivé = texte brut."
+        "description": "Activé = le statut d’un contact sous forme d’étiquette colorée. Désactivé = texte brut."
       },
       "customer_department_table_color_location": {
         "label": "Couleur site (services)",
@@ -3070,29 +3070,29 @@
       },
       "customer_opportunity_table_color_stage": {
         "label": "Couleur étape (opportunités)",
-        "description": "Activé = la puce d'étape dans le tableau des opportunités est colorée. Désactivé = texte simple."
+        "description": "Activé = la puce d’étape dans le tableau des opportunités est colorée. Désactivé = texte simple."
       }
     },
     "tabs": {
       "customerTable": {
         "title": "Liste des clients",
-        "subtitle": "Détermine l'apparence du tableau des clients sur la page principale Clients."
+        "subtitle": "Détermine l’apparence du tableau des clients sur la page principale Clients."
       },
       "locations": {
         "title": "Sites",
-        "subtitle": "Détermine l'apparence et le filtre par défaut de l'onglet Sites à l'ouverture d'un client."
+        "subtitle": "Détermine l’apparence et le filtre par défaut de l’onglet Sites à l’ouverture d’un client."
       },
       "departments": {
         "title": "Services",
-        "subtitle": "Détermine l'apparence et le filtre par défaut de l'onglet Services à l'ouverture d'un client."
+        "subtitle": "Détermine l’apparence et le filtre par défaut de l’onglet Services à l’ouverture d’un client."
       },
       "contacts": {
         "title": "Contacts",
-        "subtitle": "Détermine l'apparence et le filtre par défaut de l'onglet Contacts à l'ouverture d'un client."
+        "subtitle": "Détermine l’apparence et le filtre par défaut de l’onglet Contacts à l’ouverture d’un client."
       },
       "vacancies": {
         "title": "Postes",
-        "subtitle": "Détermine le filtre par défaut de l'onglet Postes à l'ouverture d'un client."
+        "subtitle": "Détermine le filtre par défaut de l’onglet Postes à l’ouverture d’un client."
       },
       "tasks": {
         "title": "Tâches"
@@ -3104,17 +3104,17 @@
     "defaultFilter": {
       "title": "Filtre de statut par défaut",
       "allOption": "Tous les statuts",
-      "chosenHint": "Ce statut est présélectionné dès l'ouverture de cet onglet.",
-      "autoHint": "Pas encore choisi. C'est actuellement le statut qui ressemble à 'actif' (ou Tous, s'il n'en existe aucun).",
-      "deletedHint": "Le statut précédemment choisi n'existe plus ; il sera remplacé par la valeur par défaut."
+      "chosenHint": "Ce statut est présélectionné dès l’ouverture de cet onglet.",
+      "autoHint": "Pas encore choisi. C’est actuellement le statut qui ressemble à 'actif' (ou Tous, s’il n’en existe aucun).",
+      "deletedHint": "Le statut précédemment choisi n’existe plus ; il sera remplacé par la valeur par défaut."
     }
   },
   "customerVacancyDefaults": {
     "title": "Visibilité des postes (par défaut)",
-    "subtitle": "La valeur par défaut du tenant pour les clients nouveaux et existants. Chaque client peut s'en écarter via son onglet Visibilité des postes.",
+    "subtitle": "La valeur par défaut du tenant pour les clients nouveaux et existants. Chaque client peut s’en écarter via son onglet Visibilité des postes.",
     "fields": {
       "customer_default_hide_company_name": {
-        "label": "Masquer le nom de l'entreprise",
+        "label": "Masquer le nom de l’entreprise",
         "description": "Activé = masque le nom de ce client sur les offres et le site carrière."
       },
       "customer_default_show_in_vacancies": {
@@ -3141,7 +3141,7 @@
       },
       "opportunity_table_color_owner": {
         "label": "Couleur du propriétaire",
-        "description": "Activé = l'avatar du propriétaire utilise sa propre couleur. Désactivé = gris neutre."
+        "description": "Activé = l’avatar du propriétaire utilise sa propre couleur. Désactivé = gris neutre."
       }
     }
   },
@@ -3155,7 +3155,7 @@
     "recruitment": "Axé candidat : points de contact, suivi, entonnoir et conversations.",
     "backoffice": "Documents, contrats, couplages et exécutions.",
     "sales": "Opportunités, valeur du pipeline et leads.",
-    "planning": "Services, file d'attente WhatsApp et exécutions incomplètes.",
+    "planning": "Services, file d’attente WhatsApp et exécutions incomplètes.",
     "readonly": "Résumé en lecture seule."
   },
   "dashboardsToggleOn": "Activer",
@@ -3180,7 +3180,7 @@
     "pageScopedHint": "La recherche ne porte que sur la page chargée.",
     "bodyError": "Impossible de charger le contenu.",
     "status": {
-      "queued": "En file d'attente",
+      "queued": "En file d’attente",
       "sent": "Envoyé",
       "delivered": "Distribué",
       "bounced": "Rejeté",
@@ -3201,10 +3201,10 @@
     "conversationUnknown": "Contact inconnu",
     "conversationCount_one": "{{count}} message dans ce journal",
     "conversationCount_other": "{{count}} messages dans ce journal",
-    "viaApp": "via l'app",
+    "viaApp": "via l’app",
     "loadMore": "Charger plus",
     "loadingMore": "Chargement…",
-    "loadMoreExhausted": "Il n'y a plus rien de plus ancien à charger.",
+    "loadMoreExhausted": "Il n’y a plus rien de plus ancien à charger.",
     "retentionHint": "Les 90 premiers jours se chargent immédiatement ; tout ce qui est plus ancien reste conservé et se charge à la demande ci-dessus."
   },
   "appointmentTypes": {
@@ -3237,7 +3237,7 @@
   },
   "waMessageTypes": {
     "title": "Types de messages",
-    "subtitle": "Votre classification des messages WhatsApp sortants (p. ex. Candidature, Rappel). L'ordre détermine la priorité de la file.",
+    "subtitle": "Votre classification des messages WhatsApp sortants (p. ex. Candidature, Rappel). L’ordre détermine la priorité de la file.",
     "add": "Ajouter un type de message",
     "isPriority": "Priorité",
     "isPriorityDesc": "Les messages de ce type passent avant les autres types dans la file.",
@@ -3248,7 +3248,7 @@
     "title": "Statut par défaut après conversion",
     "subtitle": "Le statut de disponibilité attribué au candidat juste après la conversion de Lead en Candidat. « Aucun » laisse le statut vide.",
     "none": "Aucun (définir manuellement)",
-    "saveFailed": "Échec de l'enregistrement"
+    "saveFailed": "Échec de l’enregistrement"
   },
   "numbering": {
     "title": "Numérotation",
@@ -3258,7 +3258,7 @@
     "prefix": "Préfixe",
     "pad": "Chiffres",
     "start": "Valeur de départ",
-    "saveFailed": "Échec de l'enregistrement",
+    "saveFailed": "Échec de l’enregistrement",
     "entities": {
       "candidate": "Candidat",
       "customer": "Client",
@@ -3269,7 +3269,7 @@
       "application": "Candidature",
       "task": "Tâche",
       "opportunity": "Opportunité",
-      "outreach_campaign": "Liste d'appels",
+      "outreach_campaign": "Liste d’appels",
       "customer_contact": "Personne de contact",
       "location": "Agence (propre)"
     },
@@ -3284,7 +3284,7 @@
     "fields": {
       "vacancy_table_color_status": {
         "label": "Statut",
-        "description": "Activé = statut de l'offre en libellé coloré. Désactivé = texte simple."
+        "description": "Activé = statut de l’offre en libellé coloré. Désactivé = texte simple."
       },
       "vacancy_table_color_published": {
         "label": "Publié",
@@ -3292,7 +3292,7 @@
       },
       "vacancy_table_color_owner": {
         "label": "Couleur du propriétaire",
-        "description": "Activé = l'avatar du propriétaire utilise la couleur du recruteur. Désactivé = gris neutre."
+        "description": "Activé = l’avatar du propriétaire utilise la couleur du recruteur. Désactivé = gris neutre."
       }
     }
   },
@@ -3306,7 +3306,7 @@
       },
       "match_table_color_owner": {
         "label": "Couleur du propriétaire",
-        "description": "Activé = l'avatar du propriétaire utilise sa propre couleur. Désactivé = gris neutre."
+        "description": "Activé = l’avatar du propriétaire utilise sa propre couleur. Désactivé = gris neutre."
       }
     }
   },
@@ -3324,7 +3324,7 @@
       },
       "outreach_table_color_owner": {
         "label": "Couleur du propriétaire",
-        "description": "Activé = l'avatar du propriétaire est coloré dès que les données le permettent. Désactivé = gris neutre."
+        "description": "Activé = l’avatar du propriétaire est coloré dès que les données le permettent. Désactivé = gris neutre."
       }
     }
   },
@@ -3344,8 +3344,8 @@
     "deleteBlocked": "Impossible de supprimer. Le champ contient des données",
     "activate": "Activer",
     "deactivate": "Désactiver",
-    "showInUi": "Afficher dans l'UI",
-    "hideFromUi": "Masquer de l'UI",
+    "showInUi": "Afficher dans l’UI",
+    "hideFromUi": "Masquer de l’UI",
     "apiOnly": "API uniquement",
     "types": {
       "text": "Texte",
@@ -3366,7 +3366,7 @@
         "key": "deployment_notes"
       },
       "number": {
-        "label": "ex. Années d'expérience",
+        "label": "ex. Années d’expérience",
         "key": "years_experience"
       },
       "date": {
@@ -3378,7 +3378,7 @@
         "key": "own_transport"
       },
       "select": {
-        "label": "ex. Préférence d'équipe",
+        "label": "ex. Préférence d’équipe",
         "key": "shift_preference"
       }
     }
@@ -3421,7 +3421,7 @@
       "totalsLabel": "Total"
     },
     "breakdown": {
-      "title": "Répartition de l'utilisation",
+      "title": "Répartition de l’utilisation",
       "axisLabel": "Axe de répartition",
       "axis": {
         "activity": "Activité",
@@ -3435,7 +3435,7 @@
         "user": "Utilisateur",
         "day": "Jour",
         "requests": "Requêtes",
-        "inputTokens": "Jetons d'entrée",
+        "inputTokens": "Jetons d’entrée",
         "outputTokens": "Jetons de sortie",
         "purchase": "Achat",
         "sale": "Vente"
@@ -3453,7 +3453,7 @@
       "clearFilter": "Effacer le filtre",
       "totalsLabel": "Total"
     },
-    "nothingUsed": "Aucune consommation enregistrée pour ce mois. C'est pourquoi les tableaux ci-dessous sont à zéro.",
+    "nothingUsed": "Aucune consommation enregistrée pour ce mois. C’est pourquoi les tableaux ci-dessous sont à zéro.",
     "kpi": {
       "aiLabel": "IA (vente)",
       "aiNote": "Achat {{purchase}} · Marge {{margin}} · {{tokens}} jetons",
@@ -3481,7 +3481,7 @@
   },
   "jobs": {
     "title": "Gestion des tâches",
-    "subtitle": "État des files d'attente, tâches individuelles et tâches échouées. Réservé aux super admins.",
+    "subtitle": "État des files d’attente, tâches individuelles et tâches échouées. Réservé aux super admins.",
     "tab": {
       "overview": "Aperçu",
       "jobs": "Tâches",
@@ -3498,7 +3498,7 @@
       "pending": "En attente",
       "reserved": "En cours"
     },
-    "byQueue": "Par file d'attente",
+    "byQueue": "Par file d’attente",
     "byTenant": "Par tenant",
     "centralTenant": "Central (plateforme)",
     "health": {
@@ -3515,19 +3515,19 @@
     "oldestReserved": "Plus ancienne en cours",
     "failedTotal_one": "{{count}} tâche échouée",
     "failedTotal_other": "{{count}} tâches échouées",
-    "noQueues": "Aucune file d'attente avec du travail en attente.",
+    "noQueues": "Aucune file d’attente avec du travail en attente.",
     "noTenants": "Aucun tenant avec du travail en attente.",
-    "loadError": "Échec du chargement de l'aperçu des files d'attente.",
+    "loadError": "Échec du chargement de l’aperçu des files d’attente.",
     "refresh": "Actualiser",
     "autoRefresh": "Actualisation automatique toutes les 15s",
     "filters": {
-      "queue": "File d'attente",
+      "queue": "File d’attente",
       "tenant": "Tenant",
       "all": "Toutes",
       "status": "Filtrer par statut"
     },
     "col": {
-      "queue": "File d'attente",
+      "queue": "File d’attente",
       "tenant": "Tenant",
       "job": "Tâche",
       "attempts": "Tentatives",
@@ -3542,21 +3542,21 @@
     "empty": "Aucune tâche trouvée.",
     "emptyFailed": "Aucune tâche échouée.",
     "cancel": "Annuler",
-    "cancelReservedError": "Échec de l'annulation. Un worker exécute déjà cette tâche.",
+    "cancelReservedError": "Échec de l’annulation. Un worker exécute déjà cette tâche.",
     "retry": "Réessayer",
     "retryAll": "Tout réessayer",
-    "retryAllConfirm_one": "Remettre {{count}} tâche échouée dans la file d'attente ?",
-    "retryAllConfirm_other": "Remettre les {{count}} tâches échouées dans la file d'attente ?",
+    "retryAllConfirm_one": "Remettre {{count}} tâche échouée dans la file d’attente ?",
+    "retryAllConfirm_other": "Remettre les {{count}} tâches échouées dans la file d’attente ?",
     "retryAllQueueConfirm": "Réessayer {{ count }} tâches échouées dans la file '{{ queue }}' ?",
-    "retryAllUnfilteredConfirm_one": "Ceci remet en file d'attente TOUTES les tâches échouées, pas seulement la {{count}} filtrée. Le filtre de locataire ne s'applique pas ici.",
-    "retryAllUnfilteredConfirm_other": "Ceci remet TOUTES les tâches échouées dans la file d'attente, et pas seulement les {{count}} filtrées. Le filtre des locataires ne s'applique pas ici.",
+    "retryAllUnfilteredConfirm_one": "Ceci remet en file d’attente TOUTES les tâches échouées, pas seulement la {{count}} filtrée. Le filtre de locataire ne s’applique pas ici.",
+    "retryAllUnfilteredConfirm_other": "Ceci remet TOUTES les tâches échouées dans la file d’attente, et pas seulement les {{count}} filtrées. Le filtre des locataires ne s’applique pas ici.",
     "forget": "Supprimer",
     "forgetConfirm": "Supprimer définitivement cette tâche échouée ? Cette action est irréversible.",
     "flush": "Tout effacer",
     "flushConfirm_one": "Effacer définitivement {{count}} tâche échouée ? Cette action est irréversible.",
     "flushConfirm_other": "Effacer définitivement les {{count}} tâches échouées ? Cette action est irréversible.",
     "flushUnfilteredConfirm_one": "Ceci supprime TOUTES les tâches échouées dans TOUTES les files, pas seulement la {{count}} filtrée. Cette action est irréversible.",
-    "flushUnfilteredConfirm_other": "Ceci efface TOUTES les tâches échouées dans TOUTES les files d'attente, et pas seulement les {{count}} filtrées. Cette action est irréversible.",
+    "flushUnfilteredConfirm_other": "Ceci efface TOUTES les tâches échouées dans TOUTES les files d’attente, et pas seulement les {{count}} filtrées. Cette action est irréversible.",
     "pagination": {
       "prev": "Précédent",
       "next": "Suivant",
@@ -3573,7 +3573,7 @@
       "empty": "Aucun job récent dans la fenêtre Horizon.",
       "colTime": "Heure",
       "colJob": "Job",
-      "colQueue": "File d'attente",
+      "colQueue": "File d’attente",
       "colTenant": "Tenant",
       "colWorkflow": "Workflow",
       "colStatus": "Statut",
@@ -3597,7 +3597,7 @@
       "empty": "Pas encore de métriques. Horizon prend un instantané toutes les 5 minutes."
     },
     "retryAllSuccess": "{{count}} tâches renvoyées",
-    "retryAllSkipped": "{{count}} tâches ignorées (le locataire n'existe plus)",
+    "retryAllSkipped": "{{count}} tâches ignorées (le locataire n’existe plus)",
     "retryAllTruncated": "plus de tâches échouées que traitées à la fois, réessayer",
     "retryAllConfirm": "Réessayer {{ count }} tâches échouées ?",
     "retryAllTenantConfirm": "Réessayer {{ count }} tâches échouées du locataire '{{ tenant }}' ?",
@@ -3608,17 +3608,17 @@
     "flushQueueTenantConfirm": "Supprimer définitivement les {{ count }} tâches échouées dans la file '{{ queue }}' du locataire '{{ tenant }}' ? Cela ne peut pas être annulé."
   },
   "actionRules": {
-    "title": "Règles d'action",
+    "title": "Règles d’action",
     "subtitle": "La matrice action×condition configurable par tenant qui détermine si une action est autorisée silencieusement, affiche une popup de confirmation, ou est bloquée. Voir AXIS-MATRIX.md pour toutes les règles.",
-    "loadError": "Impossible de charger les règles d'action.",
-    "empty": "Aucune règle d'action trouvée.",
+    "loadError": "Impossible de charger les règles d’action.",
+    "empty": "Aucune règle d’action trouvée.",
     "tabs": {
       "candidate": "Candidat",
       "customer": "Client",
       "avg": "RGPD"
     },
     "candidateAxisTitle": "Actions candidat",
-    "candidateAxisSubtitle": "Actions sur ou autour d'un candidat, selon la condition d'employabilité.",
+    "candidateAxisSubtitle": "Actions sur ou autour d’un candidat, selon la condition d’employabilité.",
     "customerAxisTitle": "Actions client",
     "customerAxisSubtitle": "Actions depuis un client, selon le statut du client.",
     "consentSectionTitle": "Exception RGPD — consentement WhatsApp",
@@ -3645,8 +3645,8 @@
       "title": "Détails de la cellule",
       "popupCode": "Code de popup",
       "noPopup": "Aucune popup. Cette action est toujours autorisée silencieusement.",
-      "noPopupOverrideWarning": "Aucun code de popup n'existe pour cette cellule. L'utilisateur ne verra que le titre générique d'avertissement/blocage, sans message explicatif. Vérifiez que c'est bien voulu.",
-      "messageNote": "Le texte du message est fixe par code de popup et n'est pas (encore) modifiable par tenant.",
+      "noPopupOverrideWarning": "Aucun code de popup n’existe pour cette cellule. L’utilisateur ne verra que le titre générique d’avertissement/blocage, sans message explicatif. Vérifiez que c’est bien voulu.",
+      "messageNote": "Le texte du message est fixe par code de popup et n’est pas (encore) modifiable par tenant.",
       "resetCell": "Réinitialiser cette cellule par défaut",
       "isOverride": "Modifié par rapport à la règle par défaut",
       "isDefault": "Règle par défaut",
@@ -3659,7 +3659,7 @@
       "appointment_create": "Planifier un rendez-vous/intake",
       "match_create": "Créer un match",
       "task_create": "Créer une tâche",
-      "calllist_add": "Ajouter à la liste d'appels",
+      "calllist_add": "Ajouter à la liste d’appels",
       "whatsapp_send": "Envoyer un message WhatsApp",
       "candidate_propose": "Proposer au client",
       "candidate_status_set": "Définir le statut (workflow)",
@@ -3697,25 +3697,25 @@
       "dirtyCount_one": "{{count}} modification non enregistrée",
       "dirtyCount_other": "{{count}} modifications non enregistrées",
       "resetAll": "Tout réinitialiser par défaut",
-      "confirmResetAll": "Réinitialiser toutes les règles d'action à leurs valeurs par défaut ? Ceci écrasera vos modifications dès l'enregistrement.",
-      "saveFailed": "L'enregistrement des règles d'action a échoué."
+      "confirmResetAll": "Réinitialiser toutes les règles d’action à leurs valeurs par défaut ? Ceci écrasera vos modifications dès l’enregistrement.",
+      "saveFailed": "L’enregistrement des règles d’action a échoué."
     }
   },
   "vacancyGenerationSettings": {
-    "title": "Génération d'annonces",
-    "subtitle": "Gérez les profils de génération IA qui déterminent comment les textes d'offres d'emploi sont rédigés automatiquement.",
+    "title": "Génération d’annonces",
+    "subtitle": "Gérez les profils de génération IA qui déterminent comment les textes d’offres d’emploi sont rédigés automatiquement.",
     "tabProfiles": "Profils",
     "tabBlocks": "Blocs réutilisables",
-    "unavailable": "La génération d'annonces sera disponible dès que l'intégration backend sera en place.",
+    "unavailable": "La génération d’annonces sera disponible dès que l’intégration backend sera en place.",
     "loadError": "Le chargement des profils de génération a échoué.",
-    "saveFailed": "L'enregistrement a échoué.",
+    "saveFailed": "L’enregistrement a échoué.",
     "empty": "Aucun profil de génération créé pour le moment.",
     "add": "Ajouter un profil",
     "nameLabel": "Nom",
     "namePlaceholder": "Ex. Logistique — équipes flex du matin",
     "priorityLabel": "Priorité",
-    "priorityHint": "Si plusieurs profils correspondent, la priorité la plus élevée l'emporte.",
-    "matcherTitle": "Quand ce profil s'applique-t-il ?",
+    "priorityHint": "Si plusieurs profils correspondent, la priorité la plus élevée l’emporte.",
+    "matcherTitle": "Quand ce profil s’applique-t-il ?",
     "matcherHint": "Laissez un champ vide pour correspondre à toute valeur.",
     "matcherLocations": "Établissement",
     "matcherContractTypes": "Forme de contrat",
@@ -3742,7 +3742,7 @@
     "languageLabel": "Langue",
     "languagePlaceholder": "Choisir une langue",
     "emojiLabel": "Autoriser les emoji",
-    "emojiHint": "Permettre au générateur d'utiliser occasionnellement un emoji dans le texte.",
+    "emojiHint": "Permettre au générateur d’utiliser occasionnellement un emoji dans le texte.",
     "brandLabel": "Voix de marque & règles",
     "forbiddenLabel": "Mots interdits",
     "forbiddenPlaceholder": "Tapez un mot et appuyez sur Entrée",
@@ -3753,9 +3753,9 @@
     "confirmDelete": "Supprimer le profil « {{name}} » ?"
   },
   "vacancyContentBlocksSettings": {
-    "unavailable": "Les blocs réutilisables seront disponibles dès que l'intégration backend sera en place.",
+    "unavailable": "Les blocs réutilisables seront disponibles dès que l’intégration backend sera en place.",
     "loadError": "Le chargement des blocs a échoué.",
-    "saveFailed": "L'enregistrement a échoué.",
+    "saveFailed": "L’enregistrement a échoué.",
     "empty": "Aucun bloc créé pour le moment.",
     "add": "+ Bloc",
     "nameLabel": "Nom",
@@ -3763,7 +3763,7 @@
     "kindLabel": "Type",
     "kind": {
       "intro": "Introduction",
-      "cta": "Appel à l'action",
+      "cta": "Appel à l’action",
       "legal": "Mentions légales"
     },
     "bodyLabel": "Contenu",
@@ -3775,41 +3775,41 @@
     "title": "Site carrière",
     "subtitle": "Le site public des offres de ce locataire.",
     "activeLabel": "Site carrière actif",
-    "hint": "Active ou désactive le site carrière public (…/{tenant}/vacatures). Le backend l'applique immédiatement : désactivé = le site affiche un avis et les candidatures sont fermées.",
+    "hint": "Active ou désactive le site carrière public (…/{tenant}/vacatures). Le backend l’applique immédiatement : désactivé = le site affiche un avis et les candidatures sont fermées.",
     "urls": {
       "title": "URL publiques",
-      "subtitle": "À copier dans un site d'emploi ou un robot d'indexation. Construites à partir de l'adresse propre de ce client.",
+      "subtitle": "À copier dans un site d’emploi ou un robot d’indexation. Construites à partir de l’adresse propre de ce client.",
       "site": "Infos du site (image de marque)",
-      "vacancies": "Offres d'emploi (JSON)",
+      "vacancies": "Offres d’emploi (JSON)",
       "sitemap": "Plan du site",
       "indeedFeed": "Flux Indeed",
       "werkzoekenFeed": "Flux Werkzoeken.nl",
       "copy": "Copier",
       "open": "Ouvrir",
       "inactiveNotice": "Indisponible tant que le site carrière est désactivé.",
-      "noTenant": "Aucun client sélectionné pour l'instant."
+      "noTenant": "Aucun client sélectionné pour l’instant."
     },
-    "saveError": "Impossible d'enregistrer la modification.",
+    "saveError": "Impossible d’enregistrer la modification.",
     "urlLabel": "URL du site carrière personnalisé",
-    "urlHint": "URL absolue avec le placeholder {ref} à la place du numéro d'emploi, par exemple https://emplois.example.fr/offres/{ref}",
+    "urlHint": "URL absolue avec le placeholder {ref} à la place du numéro d’emploi, par exemple https://emplois.example.fr/offres/{ref}",
     "urlInvalid": "Utilisez une URL absolue contenant {ref}.",
     "urlPlaceholder": "https://emplois.exemple.fr/offre/{ref}",
     "phoneLabel": "Numéro de téléphone (public)",
     "phoneHint": "Public, également dans le flux Werkzoeken",
     "phonePlaceholder": "+33 1 23 45 67 89",
     "embedOrigins": {
-      "title": "Sites web autorisés à intégrer les pages d'offres",
+      "title": "Sites web autorisés à intégrer les pages d’offres",
       "hint": "Seuls ces sites web peuvent afficher le site carrière dans un cadre. Adresses https sans chemin uniquement, {{max}} au maximum. Vide signifie : intégration non autorisée.",
       "add": "Ajouter un site web",
       "addAction": "Ajouter",
       "placeholder": "https://www.exemple.fr",
       "remove": "Supprimer {{origin}}",
       "counter": "{{n}} sur {{max}}",
-      "empty": "Aucun site web pour le moment. L'intégration est désactivée.",
+      "empty": "Aucun site web pour le moment. L’intégration est désactivée.",
       "errors": {
         "invalid": "Saisissez une adresse valide, par exemple https://www.exemple.fr.",
         "notHttps": "Seules les adresses https sont autorisées.",
-        "hasPath": "Uniquement le domaine, avec un port éventuel. Pas de chemin, de point d'interrogation ni de #.",
+        "hasPath": "Uniquement le domaine, avec un port éventuel. Pas de chemin, de point d’interrogation ni de #.",
         "duplicate": "Ce site web figure déjà dans la liste.",
         "tooMany": "{{max}} sites web au maximum."
       }
@@ -3833,14 +3833,14 @@
       "department": "Département",
       "contact": "Contact"
     },
-    "phaseHint": "Ceci est vérifié à la création et lors d'une véritable transition de phase. Une modification ordinaire qui ne change pas la phase n'est jamais bloquée. Quels que soient les autres champs encore manquants.",
-    "empty": "Il n'y a pas encore de champs à gérer pour cet onglet.",
-    "flatHint": "Ceci est entièrement vérifié à la création. Lors d'une modification, seuls les champs que la modification touche réellement sont vérifiés. Un enregistrement déjà incomplet reste librement modifiable sur ses autres champs.",
+    "phaseHint": "Ceci est vérifié à la création et lors d’une véritable transition de phase. Une modification ordinaire qui ne change pas la phase n’est jamais bloquée. Quels que soient les autres champs encore manquants.",
+    "empty": "Il n’y a pas encore de champs à gérer pour cet onglet.",
+    "flatHint": "Ceci est entièrement vérifié à la création. Lors d’une modification, seuls les champs que la modification touche réellement sont vérifiés. Un enregistrement déjà incomplet reste librement modifiable sur ses autres champs.",
     "fieldLabels": {
       "billing_street": "Adresse de facturation : rue",
       "billing_house_number": "Adresse de facturation : numéro",
       "billing_house_number_suffix": "Adresse de facturation : complément",
-      "billing_address_line_2": "Adresse de facturation : ligne d'adresse 2",
+      "billing_address_line_2": "Adresse de facturation : ligne d’adresse 2",
       "billing_postcode": "Adresse de facturation : code postal",
       "billing_city": "Adresse de facturation : ville",
       "billing_province": "Adresse de facturation : province",
@@ -3848,7 +3848,7 @@
       "billing_branch_id": "Agence de facturation",
       "branch_ids": "Agences",
       "contractTypes": "Restriction de forme de contrat",
-      "contractEndDate": "Date de fin de l'accord de collaboration",
+      "contractEndDate": "Date de fin de l’accord de collaboration",
       "locationIds": "Sites (plusieurs)",
       "departmentIds": "Services (plusieurs)",
       "isPrimary": "Contact principal",
@@ -3862,15 +3862,15 @@
   },
   "customerConversion": {
     "title": "Statut par défaut après conversion",
-    "subtitle": "Le statut attribué à un client juste après la conversion de Prospect en Client. Sans configuration, le client reçoit le statut Actif. Choisissez un statut pour l'appliquer automatiquement.",
+    "subtitle": "Le statut attribué à un client juste après la conversion de Prospect en Client. Sans configuration, le client reçoit le statut Actif. Choisissez un statut pour l’appliquer automatiquement.",
     "none": "Par défaut (Actif)",
-    "saveFailed": "Échec de l'enregistrement"
+    "saveFailed": "Échec de l’enregistrement"
   },
   "vacancyDefaultStatus": {
     "title": "Statut par défaut à la création",
-    "subtitle": "Le statut attribué à un nouveau poste lorsqu'aucun n'est précisé. Sans configuration, le statut par défaut de la liste des statuts s'applique. Choisissez un statut pour l'appliquer automatiquement.",
+    "subtitle": "Le statut attribué à un nouveau poste lorsqu’aucun n’est précisé. Sans configuration, le statut par défaut de la liste des statuts s’applique. Choisissez un statut pour l’appliquer automatiquement.",
     "none": "Par défaut (liste des statuts)",
-    "saveFailed": "Échec de l'enregistrement"
+    "saveFailed": "Échec de l’enregistrement"
   },
   "nationalities": {
     "title": "Nationalités",
@@ -3880,12 +3880,12 @@
     "isEu": "UE/EEE",
     "isEuDesc": "Les candidats de cette nationalité ne sont pas invités à renseigner les champs de permis de travail.",
     "workPermitToggle": {
-      "label": "Permis de travail également obligatoire pour les ressortissants de l'UE/EEE",
-      "hint": "Activé : un candidat ayant la nationalité de l'UE/EEE est traité comme tout autre candidat non-néerlandais et doit posséder un permis de travail valide, aussi au moment du placement."
+      "label": "Permis de travail également obligatoire pour les ressortissants de l’UE/EEE",
+      "hint": "Activé : un candidat ayant la nationalité de l’UE/EEE est traité comme tout autre candidat non-néerlandais et doit posséder un permis de travail valide, aussi au moment du placement."
     }
   },
   "escalationReasons": {
-    "title": "Motifs d'escalade",
+    "title": "Motifs d’escalade",
     "subtitle": "Raisons pour lesquelles une conversation WhatsApp est transférée à un collaborateur.",
     "add": "Ajouter un motif"
   },
@@ -3912,8 +3912,8 @@
     "tabs": {
       "stages": "Étapes",
       "serviceTypes": "Types de service",
-      "agreementTypes": "Types d'accord",
-      "dealTypes": "Types d'affaire",
+      "agreementTypes": "Types d’accord",
+      "dealTypes": "Types d’affaire",
       "lostReasons": "Motifs de perte"
     },
     "add": "Ajouter une valeur",
@@ -3927,15 +3927,15 @@
     },
     "serviceTypes": {
       "title": "Types de service",
-      "subtitle": "Le type de service d'une opportunité."
+      "subtitle": "Le type de service d’une opportunité."
     },
     "agreementTypes": {
-      "title": "Types d'accord",
+      "title": "Types d’accord",
       "subtitle": "La forme de contrat sous laquelle une opportunité est conclue."
     },
     "dealTypes": {
-      "title": "Types d'affaire",
-      "subtitle": "Le type d'affaire, avec une unité (euro/heures/devis) qui mesure sa valeur.",
+      "title": "Types d’affaire",
+      "subtitle": "Le type d’affaire, avec une unité (euro/heures/devis) qui mesure sa valeur.",
       "unit": "Unité",
       "unitEuro": "Euro",
       "unitHours": "Heures",
@@ -3943,7 +3943,7 @@
     },
     "lostReasons": {
       "title": "Motifs de perte",
-      "subtitle": "Les motifs parmi lesquels un recruteur choisit lorsqu'une opportunité est perdue. Sans motifs, rien n'est demandé."
+      "subtitle": "Les motifs parmi lesquels un recruteur choisit lorsqu’une opportunité est perdue. Sans motifs, rien n’est demandé."
     }
   },
   "dashboards": {
@@ -3964,31 +3964,31 @@
     }
   },
   "educationLevels": {
-    "title": "Niveaux d'études",
+    "title": "Niveaux d’études",
     "subtitle": "Niveaux pour la liste déroulante des formations du candidat.",
     "add": "Ajouter un niveau"
   },
   "koiosAdvice": {
     "tabs": { "thresholds": "Seuils", "suggestions": "Suggestions" },
     "title": "Seuils des conseils Koios",
-    "subtitle": "Les fenêtres en jours derrière le signal d'attention Koios sur les vacatures et les matches.",
+    "subtitle": "Les fenêtres en jours derrière le signal d’attention Koios sur les vacatures et les matches.",
     "vacancyStaleTitle": "Ancienneté de la vacature",
     "vacancyStaleHint": "Au bout de combien de jours sans candidature une vacature publiée est signalée par Koios pour attention.",
     "vacancyStaleLabel": "Jours (1-365)",
-    "vacancyStaleSaveFailed": "Échec de l'enregistrement de la fenêtre d'ancienneté de la vacature.",
+    "vacancyStaleSaveFailed": "Échec de l’enregistrement de la fenêtre d’ancienneté de la vacature.",
     "matchRenewTitle": "Fenêtre de renouvellement du match",
-    "matchRenewHint": "Combien de jours avant (ou après) la date de fin d'un match Koios suggère de le renouveler.",
+    "matchRenewHint": "Combien de jours avant (ou après) la date de fin d’un match Koios suggère de le renouveler.",
     "matchRenewLabel": "Jours (1-365)",
     "matchRenewSaveFailed": "Échec de l’enregistrement de la fenêtre de renouvellement du match.",
     "applicationStaleTitle": "Stagnation de la candidature en phase",
-    "applicationStaleHint": "Au bout de combien de jours dans la même phase de l'entonnoir une candidature est signalée par Koios comme trop longue en phase.",
+    "applicationStaleHint": "Au bout de combien de jours dans la même phase de l’entonnoir une candidature est signalée par Koios comme trop longue en phase.",
     "applicationStaleLabel": "Jours (1-365)",
-    "applicationStaleSaveFailed": "Échec de l'enregistrement de la fenêtre de phase de la candidature.",
+    "applicationStaleSaveFailed": "Échec de l’enregistrement de la fenêtre de phase de la candidature.",
     "byPhaseTitle": "Par phase",
     "byPhaseHint": "Définissez une fenêtre distincte par phase de candidature ; une phase sans valeur propre utilise la fenêtre ci-dessus.",
     "byPhaseDefault": "Par défaut : {{amount}} {{unit}}",
     "byPhaseReset": "Utiliser la valeur par défaut",
-    "byPhaseSaveFailed": "Échec de l'enregistrement de la fenêtre de phase."
+    "byPhaseSaveFailed": "Échec de l’enregistrement de la fenêtre de phase."
   },
   "koiosModelsAdmin": {
     "tabs": {
@@ -3997,13 +3997,13 @@
       "routing": "Routage"
     },
     "title": "Modèles IA Koios",
-    "subtitle": "Routage des modèles à l'échelle de la plateforme : variantes, routage par type de requête, plafonds de forfait et exceptions par client.",
+    "subtitle": "Routage des modèles à l’échelle de la plateforme : variantes, routage par type de requête, plafonds de forfait et exceptions par client.",
     "refresh": "Actualiser",
     "loading": "Chargement du registre des modèles...",
     "loadFailed": "Le chargement du registre des modèles a échoué.",
-    "refreshFailed": "L'actualisation de la liste des modèles a échoué.",
-    "saveFailed": "L'enregistrement a échoué.",
-    "empty": "Aucun modèle disponible pour l'instant. Essayez d'actualiser.",
+    "refreshFailed": "L’actualisation de la liste des modèles a échoué.",
+    "saveFailed": "L’enregistrement a échoué.",
+    "empty": "Aucun modèle disponible pour l’instant. Essayez d’actualiser.",
     "save": "Enregistrer",
     "flavorLabel": {
       "max": "Max",
@@ -4028,19 +4028,19 @@
       "subtitle": "Quel modèle fournisseur se trouve derrière chaque variante visible du client.",
       "per1m": "par million de tokens",
       "pickPlaceholder": "Choisir un modèle",
-      "noEffort": "Ce modèle n'a pas de niveaux d'effort.",
+      "noEffort": "Ce modèle n’a pas de niveaux d’effort.",
       "hiddenModels_one": "{{count}} modèle sans prix catalogue masqué",
       "hiddenModels_other": "{{count}} modèles sans prix catalogue masqués"
     },
     "routing": {
       "title": "Routage par type de requête",
-      "subtitle": "Quelle variante et quel niveau d'effort traitent chaque type de requête.",
-      "chatNote": "Le chat n'est pas listé ici : il suit toujours le choix de variante propre au client.",
+      "subtitle": "Quelle variante et quel niveau d’effort traitent chaque type de requête.",
+      "chatNote": "Le chat n’est pas listé ici : il suit toujours le choix de variante propre au client.",
       "effortDefault": "Par défaut"
     },
     "packages": {
       "title": "Forfaits",
-      "subtitle": "Quelles variantes un client de ce forfait peut choisir, et le plafond d'effort.",
+      "subtitle": "Quelles variantes un client de ce forfait peut choisir, et le plafond d’effort.",
       "maxEffort": "Effort max"
     },
     "tenantOverrides": {
@@ -4059,18 +4059,18 @@
     }
   },
   "modShiftmanager": {
-    "reportingOff": "Le reporting Shiftmanager n'est pas encore activé. Activez le module pour configurer les objectifs KPI et les limites d'affichage."
+    "reportingOff": "Le reporting Shiftmanager n’est pas encore activé. Activez le module pour configurer les objectifs KPI et les limites d’affichage."
   },
   "dashboardsEmpty": "Aucun élément de tableau de bord configuré pour le moment.",
   "settings": {
     "matches": {
-      "stopReasonTitle": "Motifs d'arrêt",
-      "stopReasonSubtitle": "Motif obligatoire lors de l'arrêt anticipé d'un match.",
+      "stopReasonTitle": "Motifs d’arrêt",
+      "stopReasonSubtitle": "Motif obligatoire lors de l’arrêt anticipé d’un match.",
       "stopReasonAdd": "Ajouter un motif"
     },
     "outreach": {
       "outcomeTitle": "Résultats",
-      "outcomeSubtitle": "Le résultat d'une tentative d'appel, distinct du statut de la liste d'appels.",
+      "outcomeSubtitle": "Le résultat d’une tentative d’appel, distinct du statut de la liste d’appels.",
       "outcomeAdd": "Ajouter un résultat"
     },
     "windows": {
@@ -4502,8 +4502,8 @@
         "consent": "Pas encore obligatoire. Le consentement reste optionnel.",
         "financial": "Données financières, masquées aux utilisateurs sans autorisation ; un IBAN obligatoire bloquerait les collègues qui ne peuvent pas le voir.",
         "relation": "Pas encore disponible à rendre obligatoire. Ce champ sera ajouté à une phase ultérieure.",
-        "webhookStamped": "Rempli automatiquement par un système externe. Il n'existe aucun champ de saisie à rendre obligatoire.",
-        "customFields": "Les champs personnalisés ont leur propre réglage d'obligation sur la définition du champ.",
+        "webhookStamped": "Rempli automatiquement par un système externe. Il n’existe aucun champ de saisie à rendre obligatoire.",
+        "customFields": "Les champs personnalisés ont leur propre réglage d’obligation sur la définition du champ.",
         "setAfterCreation": "Renseigné seulement après la création. Le rendre obligatoire bloquerait chaque nouvelle candidature.",
         "inlineCandidate": "Renseigné uniquement pour un candidat en ligne. Le caractère obligatoire est décidé sur le candidat lié."
       }
@@ -4511,18 +4511,18 @@
   },
   "identifierValidation": {
     "title": "Validation des numéros",
-    "subtitle": "Déterminez avec quelle rigueur Koios Match vérifie qu'un numéro de registre/TVA correspond au pays du client.",
+    "subtitle": "Déterminez avec quelle rigueur Koios Match vérifie qu’un numéro de registre/TVA correspond au pays du client.",
     "modeLabel": "En cas de numéro non conforme",
-    "modeHint": "Avertir permet toujours d'enregistrer ; bloquer refuse le numéro tant qu'il n'est pas conforme.",
+    "modeHint": "Avertir permet toujours d’enregistrer ; bloquer refuse le numéro tant qu’il n’est pas conforme.",
     "modeWarn": "Avertir seulement",
-    "modeBlock": "Bloquer l'enregistrement",
+    "modeBlock": "Bloquer l’enregistrement",
     "rulesTitle": "Format attendu par pays",
     "colCountry": "Pays",
     "colCoc": "Numéro de registre",
     "colVat": "Numéro de TVA",
-    "unknownCountryHint": "Pour les pays sans règle ci-dessus, rien n'est bloqué. Vous recevez tout au plus une indication discrète.",
-    "listTitle": "Numéros d'identifiant personnalisés",
-    "listSubtitle": "Gérez les numéros d'identifiant (SIREN, TVA, IBAN, …) que Koios Match vérifie lors de l'enregistrement d'un client.",
+    "unknownCountryHint": "Pour les pays sans règle ci-dessus, rien n’est bloqué. Vous recevez tout au plus une indication discrète.",
+    "listTitle": "Numéros d’identifiant personnalisés",
+    "listSubtitle": "Gérez les numéros d’identifiant (SIREN, TVA, IBAN, …) que Koios Match vérifie lors de l’enregistrement d’un client.",
     "colKey": "Clé",
     "colLabel": "Libellé",
     "colPattern": "Motif",
@@ -4543,17 +4543,17 @@
   },
   "invoiceSettings": {
     "title": "Paramètres de facturation",
-    "subtitle": "Coordonnées de l'entreprise et numérotation des factures générées.",
+    "subtitle": "Coordonnées de l’entreprise et numérotation des factures générées.",
     "loadError": "Le chargement a échoué.",
-    "saveFailed": "L'enregistrement a échoué.",
+    "saveFailed": "L’enregistrement a échoué.",
     "notReadyTitle": "Pas encore prêt pour la facturation",
-    "notReadyDesc": "Renseignez les coordonnées de l'entreprise ci-dessous avant l'envoi de la première vraie facture.",
-    "sectionCompany": "Coordonnées de l'entreprise",
+    "notReadyDesc": "Renseignez les coordonnées de l’entreprise ci-dessous avant l’envoi de la première vraie facture.",
+    "sectionCompany": "Coordonnées de l’entreprise",
     "sectionNumbering": "Numérotation et TVA",
-    "companyName": "Nom de l'entreprise",
+    "companyName": "Nom de l’entreprise",
     "address": "Adresse",
     "postalCity": "Code postal et ville",
-    "cocNumber": "Numéro d'immatriculation",
+    "cocNumber": "Numéro d’immatriculation",
     "vatNumber": "Numéro de TVA",
     "iban": "IBAN",
     "email": "Adresse e-mail",
@@ -4569,7 +4569,7 @@
     "generateSuccess": "Factures brouillon générées.",
     "generateFailed": "La génération a échoué.",
     "exportXlsx": "Exporter Excel",
-    "exportFailed": "L'exportation a échoué.",
+    "exportFailed": "L’exportation a échoué.",
     "loadError": "Le chargement des factures a échoué.",
     "empty": "Pas encore de factures pour ce mois.",
     "colTenant": "Tenant",
@@ -4580,10 +4580,10 @@
     "finalize": "Finaliser",
     "finalizeSuccess": "Facture finalisée.",
     "finalizeFailed": "La finalisation a échoué.",
-    "mailInFlight": "La facture est définitive ; l'e-mail est déjà en cours d'envoi.",
-    "mailUnconfirmed": "La facture est définitive ; l'envoi précédent n'est pas encore confirmé, le bureau a été averti.",
-    "alreadyFinal": "La facture était déjà définitive ; rien n'a été renvoyé.",
-    "mailFailedUnknownReason": "La facture est définitive, mais l'e-mail n'a pas été envoyé.",
+    "mailInFlight": "La facture est définitive ; l’e-mail est déjà en cours d’envoi.",
+    "mailUnconfirmed": "La facture est définitive ; l’envoi précédent n’est pas encore confirmé, le bureau a été averti.",
+    "alreadyFinal": "La facture était déjà définitive ; rien n’a été renvoyé.",
+    "mailFailedUnknownReason": "La facture est définitive, mais l’e-mail n’a pas été envoyé.",
     "resend": "Renvoyer",
     "resendSuccess": "Facture renvoyée.",
     "download": "Télécharger",
@@ -4607,8 +4607,8 @@
     "guidPlaceholder": "p. ex. 12",
     "label": "Libellé",
     "labelPlaceholder": "Nom reconnaissable",
-    "empty": "Aucune forme de contrat n'est encore configurée.",
-    "saveError": "L'enregistrement de la correspondance a échoué."
+    "empty": "Aucune forme de contrat n’est encore configurée.",
+    "saveError": "L’enregistrement de la correspondance a échoué."
   },
   "reportKpis": {
     "intro": "Choisissez les neuf cartes KPI affichées par chaque rapport, et dans quel ordre. Un emplacement de carte ne peut être remplacé que par une autre carte de la liste de ce rapport, le nombre reste toujours neuf.",
@@ -4616,9 +4616,9 @@
     "slotsTitle": "Neuf cartes KPI",
     "saving": "Enregistrement…",
     "pinnedFirstNotice": "La première carte ({{label}}) est fixe et ne fait pas partie du sélecteur.",
-    "noSpareCards": "Il n'existe pas encore de cartes alternatives pour ce rapport. Vous pouvez réordonner les neuf, mais pas encore en remplacer une par une nouvelle.",
-    "noSpareAxes": "Toutes les catégories disponibles pour ce rapport sont déjà affichées. Vous pouvez les réordonner, mais il n'y en a pas d'autres à ajouter.",
-    "fellBackNotice": "Une carte précédemment choisie n'existe plus et a été réinitialisée par défaut. Le rapport lui-même continue toujours d'afficher neuf cartes.",
+    "noSpareCards": "Il n’existe pas encore de cartes alternatives pour ce rapport. Vous pouvez réordonner les neuf, mais pas encore en remplacer une par une nouvelle.",
+    "noSpareAxes": "Toutes les catégories disponibles pour ce rapport sont déjà affichées. Vous pouvez les réordonner, mais il n’y en a pas d’autres à ajouter.",
+    "fellBackNotice": "Une carte précédemment choisie n’existe plus et a été réinitialisée par défaut. Le rapport lui-même continue toujours d’afficher neuf cartes.",
     "reportNames": {
       "candidates": "Candidats",
       "leads": "Leads",
@@ -4628,7 +4628,7 @@
       "opportunities": "Opportunités",
       "tasks": "Tâches",
       "matches": "Matches",
-      "outreach": "Listes d'appels",
+      "outreach": "Listes d’appels",
       "whatsapp": "WhatsApp",
       "prospects": "Prospects"
     },
@@ -4642,7 +4642,7 @@
   },
   "jargonSettings": {
     "title": "Jargon métier",
-    "subtitle": "Corrigez le jargon métier et les abréviations que l'IA utilise dans les résultats de dictée et d'amélioration, par exemple bfv devient BHV.",
+    "subtitle": "Corrigez le jargon métier et les abréviations que l’IA utilise dans les résultats de dictée et d’amélioration, par exemple bfv devient BHV.",
     "add": "Ajouter un terme"
   },
   "billingBudgets": {
@@ -4662,7 +4662,7 @@
     "tenantClearPlaceholder": "valeur par défaut du pack",
     "tenantClearHint": "Vide = supprimer cette exception.",
     "loadError": "Impossible de charger les budgets mensuels.",
-    "saveFailed": "Échec de l'enregistrement des budgets.",
+    "saveFailed": "Échec de l’enregistrement des budgets.",
     "saved": "Budgets enregistrés.",
     "aiTierLabel": "Palier IA : {{tier}}",
     "baseFee": "Frais de base",
@@ -4686,7 +4686,7 @@
     "inUseValue_one": "{{count}} client",
     "inUseValue_other": "{{count}} clients",
     "overageHeading": "Overage",
-    "overageEnabled": "Autoriser l'utilisation au-delà du palier",
+    "overageEnabled": "Autoriser l’utilisation au-delà du palier",
     "overageAiPrice": "Prix par jeton supplémentaire",
     "overageWorkflowPrice": "Prix par jeton de workflow supplémentaire",
     "overageOffCaption": "Désactivé : à 100 %, Koios bloque et demande au client un palier supérieur.",
@@ -4702,16 +4702,16 @@
     "tenantAiTier": "Palier IA",
     "tenantWorkflowTier": "Palier workflow",
     "tenantPackageDefault": "Valeur par défaut du forfait",
-    "tenantEffectiveFrom": "Date d'effet",
+    "tenantEffectiveFrom": "Date d’effet",
     "assignmentsHeading": "Paliers actuels",
-    "assignmentsEmpty": "Aucun client n'a encore de choix de palier propre.",
+    "assignmentsEmpty": "Aucun client n’a encore de choix de palier propre.",
     "colTenant": "Client",
     "colAiTier": "Palier IA",
     "colWorkflowTier": "Palier workflow",
     "colSince": "Depuis",
     "fromPackage": "{{tier}} (forfait)",
     "loadError": "Impossible de charger les paliers.",
-    "saveFailed": "L'enregistrement des paliers a échoué.",
+    "saveFailed": "L’enregistrement des paliers a échoué.",
     "saved": "Paliers enregistrés.",
     "unavailable": "Les paliers ne sont pas encore disponibles sur ce serveur.",
     "perMonth": "par mois",
@@ -4725,15 +4725,15 @@
   },
   "billingUsers": {
     "title": "Utilisateurs",
-    "subtitle": "Utilisateurs inclus et prix par utilisateur supplémentaire par pack, et l'occupation actuelle par client.",
+    "subtitle": "Utilisateurs inclus et prix par utilisateur supplémentaire par pack, et l’occupation actuelle par client.",
     "packagesHeading": "Packs",
     "includedUsersLabel": "Utilisateurs inclus",
     "extraPriceLabel": "Prix par utilisateur supplémentaire",
     "loadError": "Impossible de charger les données utilisateurs.",
-    "saveFailed": "L'enregistrement a échoué.",
+    "saveFailed": "L’enregistrement a échoué.",
     "saved": "Enregistré.",
     "tenantsHeading": "Utilisateurs par client",
-    "tenantsEmpty": "Aucun client avec des données utilisateurs pour l'instant.",
+    "tenantsEmpty": "Aucun client avec des données utilisateurs pour l’instant.",
     "colTenant": "Client",
     "colPackage": "Forfait",
     "colActive": "Utilisateurs actifs",
@@ -4744,51 +4744,51 @@
     "perUser": "par utilisateur"
   },
   "dashboardsOrderRoleLabel": "Rôle",
-  "dashboardsOrderHint": "Définit l'ordre dans lequel les tuiles KPI apparaissent sur le tableau de bord pour ce rôle. Seuls les KPI activés (onglet KPI) sont listés.",
+  "dashboardsOrderHint": "Définit l’ordre dans lequel les tuiles KPI apparaissent sur le tableau de bord pour ce rôle. Seuls les KPI activés (onglet KPI) sont listés.",
   "dashboardsPreviewTitle": "Aperçu",
-  "dashboardsPreviewHint": "Affiche uniquement les libellés et l'ordre, pas les vrais chiffres de ce tenant.",
+  "dashboardsPreviewHint": "Affiche uniquement les libellés et l’ordre, pas les vrais chiffres de ce tenant.",
   "dashboardsOrderEmpty": "Aucun KPI activé pour ce rôle.",
   "dashboardsGoesTo": "Ouvre {{target}}.",
   "dashboardsCatalogUnavailable": "Les explications ne sont pas disponibles pour le moment.",
-  "dashboardsSaveError": "L'enregistrement du réglage KPI a échoué : la modification a été annulée. Veuillez réessayer.",
+  "dashboardsSaveError": "L’enregistrement du réglage KPI a échoué : la modification a été annulée. Veuillez réessayer.",
   "dashboardsSharedDefault": "partagé (Défaut)",
   "whatsappWeb": {
-    "intro": "Associez un numéro WhatsApp Web distinct à une ou plusieurs agences, en plus du compte WhatsApp Business de l'entreprise.",
+    "intro": "Associez un numéro WhatsApp Web distinct à une ou plusieurs agences, en plus du compte WhatsApp Business de l’entreprise.",
     "loading": "Chargement…",
-    "unavailable": "Cette fonction n'est pas disponible pour votre organisation.",
-    "error": "Impossible de charger les numéros d'agence.",
-    "empty": "Aucun numéro d'agence associé pour l'instant.",
+    "unavailable": "Cette fonction n’est pas disponible pour votre organisation.",
+    "error": "Impossible de charger les numéros d’agence.",
+    "empty": "Aucun numéro d’agence associé pour l’instant.",
     "noLocation": "Aucune agence",
     "contactSyncNote": "Ce numéro ne synchronise que les contacts des agences associées (uniquement avec le consentement WhatsApp).",
-    "addTitle": "Associer un numéro d'agence",
+    "addTitle": "Associer un numéro d’agence",
     "locationLabel": "Agences",
     "labelField": "Nom",
     "labelPlaceholder": "Nom (facultatif)",
     "phoneField": "Numéro de téléphone",
     "phonePlaceholder": "Numéro de téléphone (facultatif)",
-    "submit": "Associer le numéro d'agence",
-    "createError": "Impossible d'associer le numéro d'agence.",
-    "actionError": "L'action a échoué. Veuillez réessayer.",
+    "submit": "Associer le numéro d’agence",
+    "createError": "Impossible d’associer le numéro d’agence.",
+    "actionError": "L’action a échoué. Veuillez réessayer.",
     "queue": {
-      "title": "Limites de file d'attente",
-      "intro": "Limites d'envoi WhatsApp Web, séparées entre destinataires connus et nouveaux.",
+      "title": "Limites de file d’attente",
+      "intro": "Limites d’envoi WhatsApp Web, séparées entre destinataires connus et nouveaux.",
       "loading": "Chargement…",
-      "loadError": "Impossible de charger les limites de file d'attente.",
-      "saveError": "Impossible d'enregistrer les limites de file d'attente.",
+      "loadError": "Impossible de charger les limites de file d’attente.",
+      "saveError": "Impossible d’enregistrer les limites de file d’attente.",
       "knownHourly": "Connus, par heure",
       "newHourly": "Nouveaux, par heure",
       "newDaily": "Nouveaux, par jour",
       "newWeekly": "Nouveaux, par semaine",
       "save": "Enregistrer",
       "saved": "Enregistré",
-      "readOnlyNote": "Vous n'avez pas le droit de modifier ces limites.",
+      "readOnlyNote": "Vous n’avez pas le droit de modifier ces limites.",
       "maxHint": "max. {{max}}"
     },
     "noLocationsAvailable": "Aucune agence créée pour le moment.",
     "locationsRequired": "Choisissez au moins une agence.",
     "editLocations": "Modifier les agences",
     "saveLocations": "Enregistrer les agences",
-    "updateError": "Impossible d'enregistrer les agences."
+    "updateError": "Impossible d’enregistrer les agences."
   },
   "dashboardsOnOffFilter": "Filtre activé/désactivé",
   "dashboardsFilterAll": "Tout",
@@ -4800,7 +4800,7 @@
     "list": "Listes"
   },
   "dashboardsNoResults": "Aucun élément ne correspond à cette recherche ou à ce filtre.",
-  "dashboardsSharedDefaultNote": "Ce rôle partage la ligne KPI par défaut. Une modification s'applique aussi aux autres rôles qui la partagent.",
+  "dashboardsSharedDefaultNote": "Ce rôle partage la ligne KPI par défaut. Une modification s’applique aussi aux autres rôles qui la partagent.",
   "appsCatalog": {
     "aelio": "Connexion à Aelio pour la gestion des missions et la planification du personnel.",
     "afas": "Connexion back-office à AFAS (RH, paie et facturation).",
@@ -4848,7 +4848,7 @@
       "nothingReceived": "rien reçu pour l’instant"
     },
     "connection": {
-      "saveBeforeTest": "Enregistrez d'abord ; le test utilise les identifiants enregistrés.",
+      "saveBeforeTest": "Enregistrez d’abord ; le test utilise les identifiants enregistrés.",
       "clientIdInvalid": "Saisissez un GUID valide (par exemple 123e4567-e89b-12d3-a456-426614174000).",
       "title": "Connexion",
       "subtitle": "Paramètres de connexion et de synchronisation pour cette intégration.",
@@ -4865,11 +4865,11 @@
       "subdomain": "Sous-domaine",
       "subdomainHint": "yesway → yesway.shiftmanager.pro",
       "company": "Entreprise",
-      "authToken": "Jeton d'authentification",
+      "authToken": "Jeton d’authentification",
       "tokenApiTitle": "API à jeton",
       "companyApiTitle": "API entreprise",
-      "tokenApiHint": "Pour les synchronisations et la création d'employés (API du tenant).",
-      "companyApiHint": "Pour l'API ouverte (shifts ouverts).",
+      "tokenApiHint": "Pour les synchronisations et la création d’employés (API du tenant).",
+      "companyApiHint": "Pour l’API ouverte (shifts ouverts).",
       "environment": "Environnement",
       "envUat": "UAT (test)",
       "envLive": "Production",
@@ -4912,7 +4912,7 @@
       "loadError": "Échec du chargement des mappings.",
       "saveError": "Échec de l’enregistrement.",
       "deleteError": "Échec de la suppression.",
-      "preparationNotice": "Ces mappages de champs sont en préparation: ils ne seront utilisés qu'une fois la synchronisation activée dans une future version.",
+      "preparationNotice": "Ces mappages de champs sont en préparation: ils ne seront utilisés qu’une fois la synchronisation activée dans une future version.",
       "domains": {
         "cao": "Convention collective",
         "schaal": "Échelle",
@@ -4923,7 +4923,7 @@
   },
   "customerSourcesSettings": {
     "title": "Sources clients",
-    "subtitle": "Gérez la liste des sources d'acquisition (ex. LinkedIn, Google, Website leads) utilisée dans le champ source des clients, et si les utilisateurs peuvent saisir des valeurs libres.",
+    "subtitle": "Gérez la liste des sources d’acquisition (ex. LinkedIn, Google, Website leads) utilisée dans le champ source des clients, et si les utilisateurs peuvent saisir des valeurs libres.",
     "add": "Ajouter une source",
     "freeEntry": "Autoriser la saisie libre",
     "freeEntryHint": "Activé : les utilisateurs peuvent saisir leur propre source (combobox). Désactivé : choisir uniquement dans la liste.",
@@ -4933,10 +4933,10 @@
     "title": "Langue des messages",
     "subtitle": "La langue par défaut des messages aux candidats et contacts sans langue préférée propre.",
     "label": "Langue par défaut",
-    "saveFailed": "L'enregistrement a échoué."
+    "saveFailed": "L’enregistrement a échoué."
   },
   "changelog": {
-    "noTrailYet": "Pas encore de journal d'audit pour cette section"
+    "noTrailYet": "Pas encore de journal d’audit pour cette section"
   },
   "interview": {
     "title": "Entretien IA",
@@ -4947,7 +4947,7 @@
     "bookingLinkInvalid": "Utilisez une URL absolue commençant par http:// ou https://.",
     "rejectionMode": {
       "label": "Mode de rejet",
-      "description": "Un entretien refusé par l'IA est soumis au recruteur comme proposition; Koios ne rejette jamais de lui-même.",
+      "description": "Un entretien refusé par l’IA est soumis au recruteur comme proposition; Koios ne rejette jamais de lui-même.",
       "options": {
         "proposal": "Proposition, recruteur confirme"
       }
@@ -4965,12 +4965,12 @@
     "subtitle": "Comment fonctionne Koios IA: principes et paramètres",
     "principles": {
       "wizard_is_default": {
-        "title": "L'assistant est par défaut",
+        "title": "L’assistant est par défaut",
         "body": "La surveillance humaine est toujours activée. Koios propose, vous décidez avant que quoi que ce soit ne se produise."
       },
       "no_automatic_selection_decisions": {
         "title": "Pas de décisions de sélection automatique",
-        "body": "Le rejet, l'embauche et la sélection nécessitent toujours l'approbation humaine, même en mode automatique. Droit RGPD article 22."
+        "body": "Le rejet, l’embauche et la sélection nécessitent toujours l’approbation humaine, même en mode automatique. Droit RGPD article 22."
       },
       "every_action_is_a_logged_workflow": {
         "title": "Chaque action est enregistrée",
@@ -4978,11 +4978,11 @@
       },
       "ai_output_is_labeled": {
         "title": "Les sorties IA sont clairement étiquetées",
-        "body": "Quand quelque chose est généré par l'IA, vous le voyez immédiatement. Jamais caché."
+        "body": "Quand quelque chose est généré par l’IA, vous le voyez immédiatement. Jamais caché."
       },
       "toggles_never_disable_obligations": {
         "title": "Les paramètres peuvent activer ou désactiver les fonctionnalités, pas les obligations",
-        "body": "Désactiver une fonction n'élimine pas la surveillance ou l'arrêt de la journalisation. Ceux-ci sont permanents."
+        "body": "Désactiver une fonction n’élimine pas la surveillance ou l’arrêt de la journalisation. Ceux-ci sont permanents."
       }
     },
     "humanOversight": "Surveillance humaine des décisions de sélection",
@@ -5015,7 +5015,7 @@
       },
       "conversationMemory": {
         "label": "Mémoire de conversation du chat Koios",
-        "description": "Combien de jours de conversations antérieures comptent comme contexte pour l'assistant. Zéro signifie aucune mémoire."
+        "description": "Combien de jours de conversations antérieures comptent comme contexte pour l’assistant. Zéro signifie aucune mémoire."
       }
     },
     "tabs": {
@@ -5027,16 +5027,16 @@
     "cap_reached": "limite atteinte",
     "signal_not_blocked": "signal, non bloqué",
     "usage_and_limits": "Utilisation et limites",
-    "subtitle": "Combien d'appels cet environnement a effectué et quelles limites s'appliquent",
+    "subtitle": "Combien d’appels cet environnement a effectué et quelles limites s’appliquent",
     "empty": "Aucune utilisation enregistrée pour le moment",
     "tier": {
       "included": "Niveau {{tier}}: {{n}} inclus par mois",
       "price": "{{amount}} par mois"
     },
     "tenants_at_limit": "Locataires à la limite",
-    "tenantsAtLimitEmpty": "Aucun locataire près d'une limite",
-    "skipped_tenants_notice_one": "{{count}} locataire n'a pas pu être vérifié.",
-    "skipped_tenants_notice_other": "{{count}} locataires n'ont pas pu être vérifiés.",
+    "tenantsAtLimitEmpty": "Aucun locataire près d’une limite",
+    "skipped_tenants_notice_one": "{{count}} locataire n’a pas pu être vérifié.",
+    "skipped_tenants_notice_other": "{{count}} locataires n’ont pas pu être vérifiés.",
     "platformTitle": "Limites de plateforme",
     "platformSubtitle": "Utilisation par connecteur au niveau de la plateforme et locataires approchant de leur limite",
     "window": {
@@ -5047,12 +5047,12 @@
     },
     "mode": {
       "signal": "continuer",
-      "queue": "file d'attente",
+      "queue": "file d’attente",
       "block": "bloqué"
     },
     "at_cap_prefix": "À la limite :",
     "not_settable_notice": "Ceci passe par le forfait (niveau), pas par les limites.",
-    "not_tenant_scoped_notice": "Ce connecteur n'a pas de limite par locataire ; seulement une limite de plateforme.",
+    "not_tenant_scoped_notice": "Ce connecteur n’a pas de limite par locataire ; seulement une limite de plateforme.",
     "no_cap_hint": "Vide = pas de limite",
     "inherit_platform": "Suit la plateforme",
     "cap_source": "La limite provient de : {{source}}",
@@ -5073,26 +5073,26 @@
     },
     "approval": {
       "title": "Accorder une autorisation",
-      "until": "Jusqu'au",
+      "until": "Jusqu’au",
       "extra_cap": "Limite supplémentaire",
       "surcharge": "Supplément",
       "note": "Note (facultatif)",
-      "grant": "Accorder l'autorisation",
+      "grant": "Accorder l’autorisation",
       "revoke": "Révoquer",
       "revoke_confirm": "Révoquer cette autorisation ? Le locataire revient à la limite normale.",
-      "active": "Jusqu'au {{date}} · supplément {{extra}}",
+      "active": "Jusqu’au {{date}} · supplément {{extra}}",
       "approved_by": "Approuvé par {{name}}",
       "surcharge_line": "Supplément : {{amount}}",
       "error": "La demande a échoué."
     },
     "request": {
       "button": "Demander une augmentation",
-      "disabled_notice": "Demander une augmentation n'est pas disponible pour ce connecteur.",
+      "disabled_notice": "Demander une augmentation n’est pas disponible pour ce connecteur.",
       "requested": "Demandé",
-      "already_requested_today": "Déjà demandé aujourd'hui",
+      "already_requested_today": "Déjà demandé aujourd’hui",
       "no_recipient": "Demandé, mais personne ne peut le recevoir"
     },
-    "save_error": "L'enregistrement a échoué."
+    "save_error": "L’enregistrement a échoué."
   },
   "catalog": {
     "empty": "Aucun paramètre disponible pour cette section.",
@@ -5116,7 +5116,7 @@
       },
       "email": {
         "title": "E-mail",
-        "subtitle": "Configuration pour l'envoi d'e-mails."
+        "subtitle": "Configuration pour l’envoi d’e-mails."
       },
       "kpi": {
         "title": "Seuils KPI",

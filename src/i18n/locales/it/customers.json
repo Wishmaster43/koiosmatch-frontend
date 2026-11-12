@@ -164,9 +164,9 @@
     "billingAddress": {
       "title": "Indirizzo di fatturazione",
       "poBox": "Casella postale",
-      "usesVisitAddress": "Vuoto. La fattura viene inviata all'indirizzo di visita.",
+      "usesVisitAddress": "Vuoto. La fattura viene inviata all’indirizzo di visita.",
       "visitEmpty": "Nessun indirizzo di visita inserito",
-      "hint": "Lascia vuoto se la fattura può essere inviata all'indirizzo di visita. Compila solo per un indirizzo diverso o una casella postale."
+      "hint": "Lascia vuoto se la fattura può essere inviata all’indirizzo di visita. Compila solo per un indirizzo diverso o una casella postale."
     },
     "blacklistReason": "Motivo blacklist"
   },
@@ -258,7 +258,7 @@
       "setPrimaryContact": "Imposta come referente principale di questa sede",
       "setPrimaryContactDone": "{{name}} è ora il referente principale di questa sede.",
       "setPrimaryContactFailed": "Impossibile impostare il referente principale.",
-      "setPrimaryContactUnavailable": "Il server non ha ancora applicato questa modifica. Riprova dopo l'aggiornamento del database.",
+      "setPrimaryContactUnavailable": "Il server non ha ancora applicato questa modifica. Riprova dopo l’aggiornamento del database.",
       "createContactFailed": "Impossibile creare il referente.",
       "primaryContactTitle": "Referente principale",
       "noPrimaryContact": "Ancora nessun referente principale per questa sede",
@@ -296,7 +296,7 @@
       "intro": "Scegli la sede duplicata di questo cliente, poi decidi quale record rimane. {{name}} è il record aperto.",
       "searchPlaceholder": "Cerca per nome o numero di riferimento…",
       "noResults": "Nessuna sede trovata.",
-      "noOthers": "Questo cliente non ha un'altra sede da unire.",
+      "noOthers": "Questo cliente non ha un’altra sede da unire.",
       "stays": "Questo record rimane",
       "thisRecord": "Record aperto",
       "otherRecord": "Record trovato",
@@ -583,7 +583,7 @@
     "cao": "CAO",
     "scale": "Scala",
     "step": "Livello",
-    "purchaseRate": "Tariffa d'acquisto",
+    "purchaseRate": "Tariffa d’acquisto",
     "saleRate": "Tariffa di vendita",
     "validFrom": "Valido dal",
     "validUntil": "Valido fino al",
@@ -660,7 +660,7 @@
     "tagAdded": "Tag “{{tag}}” aggiunto ({{count}}).",
     "tagRemoved": "Tag “{{tag}}” rimosso ({{count}}).",
     "noteAdded": "Nota aggiunta ({{count}}).",
-    "mutateError": "L'operazione non è riuscita.",
+    "mutateError": "L’operazione non è riuscita.",
     "couple": "Collega al backoffice",
     "coupleQueued": "{{count}} cliente/i messi in coda per il collegamento con {{target}}.",
     "coupleQueuedPartial": "{{queued}} di {{total}} messi in coda per il collegamento con {{target}}; {{skipped}} saltati.",
@@ -692,7 +692,7 @@
     },
     "import": {
       "title": "Cliente da file",
-      "intro": "Importare un file crea subito questo cliente (con sedi, reparti e referenti). Non compila il modulo sottostante; controlla l'anteprima prima di confermare."
+      "intro": "Importare un file crea subito questo cliente (con sedi, reparti e referenti). Non compila il modulo sottostante; controlla l’anteprima prima di confermare."
     }
   },
   "duplicate": {
@@ -836,8 +836,8 @@
     "gender": "Genere",
     "import": {
       "title": "{{entity}} da file",
-      "intro": "Importare un file crea direttamente {{entity}}. Questo non compila il modulo qui sotto. Controlla prima l'anteprima prima di confermare.",
-      "parentWarning": "Il nome del cliente nel file determina a quale cliente vanno le righe. Non deve necessariamente essere \"{{customerName}}\". Controlla l'anteprima.",
+      "intro": "Importare un file crea direttamente {{entity}}. Questo non compila il modulo qui sotto. Controlla prima l’anteprima prima di confermare.",
+      "parentWarning": "Il nome del cliente nel file determina a quale cliente vanno le righe. Non deve necessariamente essere \"{{customerName}}\". Controlla l’anteprima.",
       "mismatchWarning": "{{count}} riga/e di questo file appartengono a un cliente diverso da questo ({{names}}). Quelle righe finiranno lì, non qui.",
       "mismatchConfirm": "{{count}} riga/e di questo file verranno create o aggiornate presso un altro cliente ({{names}}), non presso il cliente che hai aperto ora. Vuoi continuare comunque?",
       "mismatchTitle": "Cliente diverso nel file",
@@ -849,7 +849,7 @@
     "linkedin": "LinkedIn",
     "linkedinPlaceholder": "linkedin.com/in/nomeutente",
     "preferredLanguage": "Lingua preferita",
-    "preferredLanguageDefault": "Predefinito dell'agenzia"
+    "preferredLanguageDefault": "Predefinito dell’agenzia"
   },
   "changelog": {
     "loading": "Caricamento…",
@@ -873,7 +873,7 @@
   },
   "map": {
     "pointCount": "{{count}} clienti sulla mappa",
-    "pendingGeocode_one": "{{count}} cliente non è ancora sulla mappa. L'indirizzo viene elaborato automaticamente.",
+    "pendingGeocode_one": "{{count}} cliente non è ancora sulla mappa. L’indirizzo viene elaborato automaticamente.",
     "pendingGeocode_other": "{{count}} clienti non sono ancora sulla mappa. Gli indirizzi vengono elaborati automaticamente."
   },
   "ai": {
@@ -950,7 +950,7 @@
     "retentionConsentLoading": "Convalida in corso…",
     "retentionConsentWindowUnknown": "Validità sconosciuta. Impossibile caricare le impostazioni",
     "retentionConsentValidUntil": "Consenso valido fino al {{date}}",
-    "retentionConsentIndefinite": "Il consenso non scade (impostazione dell'organizzazione)",
+    "retentionConsentIndefinite": "Il consenso non scade (impostazione dell’organizzazione)",
     "retentionConsentUndated": "Consenso senza data. Trattato come scaduto",
     "retentionConsentLapsed": "Consenso scaduto il {{date}}",
     "retentionConsentExpiryNote": "Il consenso di conservazione scade automaticamente. Un workflow può chiedere al referente di rinnovarlo; la scadenza avviene comunque.",

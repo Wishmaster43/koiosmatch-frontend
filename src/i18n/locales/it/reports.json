@@ -266,7 +266,7 @@
     "atKpi": "✓ KPI",
     "calcLabel": "Calcolo:",
     "calcBody": "totale nuovi candidati in {{year}} fino a {{month}} ({{total}}) diviso per il numero di mesi ({{months}}) = {{avg}}/mese.",
-    "kpiGoal": "L'obiettivo KPI è {{target}} al mese.",
+    "kpiGoal": "L’obiettivo KPI è {{target}} al mese.",
     "newThisMonth": "Nuovi questo mese",
     "avgPerMonthLabel": "Media /mese",
     "kpiTargetLabel": "Obiettivo KPI /mese",
@@ -406,7 +406,7 @@
       "attempts": "Tentativo {{count}}",
       "nextAttempt": "Prossimo tentativo alle {{time}}",
       "runId": "ID esecuzione",
-      "copyId": "Clicca per copiare l'ID",
+      "copyId": "Clicca per copiare l’ID",
       "copiedId": "ID copiato",
       "processed": "Elaborati",
       "lineage": "Origine",
@@ -415,9 +415,9 @@
       "blockedReason": "Motivo del blocco"
     },
     "reasons": {
-      "interview_workflow_inactive": "Il flusso di lavoro dell'intervista è inattivo",
-      "interview_workflow_not_selected": "Nessun flusso di lavoro dell'intervista selezionato",
-      "interview_workflow_conditions_not_met": "Condizioni del flusso di lavoro dell'intervista non soddisfatte",
+      "interview_workflow_inactive": "Il flusso di lavoro dell’intervista è inattivo",
+      "interview_workflow_not_selected": "Nessun flusso di lavoro dell’intervista selezionato",
+      "interview_workflow_conditions_not_met": "Condizioni del flusso di lavoro dell’intervista non soddisfatte",
       "already_running": "È già in corso per questa candidatura",
       "no_candidate": "Nessun candidato trovato",
       "no_active_flow": "Nessun flusso di intervista attivo",
@@ -433,7 +433,7 @@
       "application_not_found": "Candidatura non trovata",
       "application_override": "Scelto sulla candidatura",
       "vacancy_coupling": "Collegato sulla posizione vacante",
-      "bureau_default": "Predefinito dell'agenzia"
+      "bureau_default": "Predefinito dell’agenzia"
     },
     "stepReasons": {
       "no_recipients": "Nessun destinatario, non è stato inviato nulla.",

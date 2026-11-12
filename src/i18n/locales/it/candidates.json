@@ -107,7 +107,7 @@
     "stageFailed": "{{count}} candidati non aggiornati.",
     "partialResult": "{{updated}} di {{total}} aggiornati, {{skipped}} saltati",
     "partialResultReasoned": "{{updated}} di {{total}} aggiornati, {{skipped}} saltati ({{breakdown}})",
-    "stageNote": "Modifica la fase dell'unica candidatura in corso per candidato (nessuna scelta di posizione, i candidati con zero o più candidature in corso vengono saltati).",
+    "stageNote": "Modifica la fase dell’unica candidatura in corso per candidato (nessuna scelta di posizione, i candidati con zero o più candidature in corso vengono saltati).",
     "manageByApplication": "Gestisci per candidatura →",
     "merge": "Unisci…",
     "statusBlockedConfirm": "{{blocked}} di {{total}} candidati non possono essere aggiornati ({{reasons}}). Continuare con {{proceed}}?",
@@ -140,8 +140,8 @@
     "scopeUseFilters": "Tutti i {{count}} risultati di questi filtri",
     "scopeUseSelection": "Solo le righe selezionate",
     "filteredConfirm": "Questa azione verrà applicata a tutti i {{count}} risultati dei filtri correnti, non solo alle righe selezionate. Continuare?",
-    "emptyFilterError": "Scegli almeno un filtro prima di applicare un'azione a tutto l'insieme filtrato.",
-    "limitExceeded": "Troppi risultati per un'unica azione di massa (max {{limit}}). Restringi i filtri e riprova."
+    "emptyFilterError": "Scegli almeno un filtro prima di applicare un’azione a tutto l’insieme filtrato.",
+    "limitExceeded": "Troppi risultati per un’unica azione di massa (max {{limit}}). Restringi i filtri e riprova."
   },
   "kpi": {
     "total": "Totale",
@@ -230,7 +230,7 @@
     "createGeneric": "Crea",
     "import": {
       "title": "Candidato da file",
-      "intro": "Importare un file crea direttamente questi candidati. Non compila il modulo qui sotto: controlla prima l'anteprima prima di confermare."
+      "intro": "Importare un file crea direttamente questi candidati. Non compila il modulo qui sotto: controlla prima l’anteprima prima di confermare."
     },
     "fields": {
       "firstName": "Nome",
@@ -267,7 +267,7 @@
       "addressExpand": "Aggiungi indirizzo",
       "linkedinPlaceholder": "linkedin.com/in/nomeutente",
       "preferredLanguage": "Lingua preferita",
-      "preferredLanguageDefault": "Predefinito dell'agenzia"
+      "preferredLanguageDefault": "Predefinito dell’agenzia"
     },
     "gender": {
       "male": "Uomo",
@@ -304,7 +304,7 @@
       "error": {
         "notPdf": "Questo tipo di file non è supportato. Consentiti: pdf, doc, docx, jpg, jpeg o png.",
         "tooLarge": "Questo file è più grande di 10 MB.",
-        "storageUnavailable": "Impossibile salvare il CV: l'archiviazione non è temporaneamente disponibile. Riprova.",
+        "storageUnavailable": "Impossibile salvare il CV: l’archiviazione non è temporaneamente disponibile. Riprova.",
         "throttled": "Troppi CV consecutivi. Attendi un minuto e riprova.",
         "forbidden": "Non hai i permessi per far leggere un CV.",
         "expired": "Questa richiesta è scaduta. Carica di nuovo il CV.",
@@ -327,8 +327,8 @@
   },
   "drawer": {
     "subjectExport": "Esporta i dati personali (diritto di accesso)",
-    "subjectExportStarted": "Esportazione avviata: il download sta per iniziare. Se non parte, aprilo tramite l'icona in questo avviso.",
-    "subjectExportFailed": "L'esportazione dei dati personali non è riuscita.",
+    "subjectExportStarted": "Esportazione avviata: il download sta per iniziare. Se non parte, aprilo tramite l’icona in questo avviso.",
+    "subjectExportFailed": "L’esportazione dei dati personali non è riuscita.",
     "availability": "Disponibilità",
     "label": "Candidato",
     "tabs": {
@@ -400,7 +400,7 @@
     "tasksError": "Caricamento attività non riuscito.",
     "tasksEmpty": "Nessuna attività aperta per questo candidato.",
     "byWho": "da {{name}}",
-    "recordGone": "Questo candidato non esiste più. Riga rimossa dall'elenco.",
+    "recordGone": "Questo candidato non esiste più. Riga rimossa dall’elenco.",
     "archivedOn": "Archiviato il {{date}}",
     "archivedFlag": "Archiviato",
     "restore": "Ripristina",
@@ -485,7 +485,7 @@
     "createdAt": "Creato il",
     "readOnlyStamp": "Sola lettura. Impostato dal sistema",
     "preferredLanguage": "Lingua preferita",
-    "preferredLanguageDefault": "Predefinito dell'agenzia"
+    "preferredLanguageDefault": "Predefinito dell’agenzia"
   },
   "addFields": {
     "functionTitle": "Titolo della posizione",
@@ -647,7 +647,7 @@
     "retentionConsentLoading": "Caricamento validità…",
     "retentionConsentWindowUnknown": "Validità sconosciuta. Impostazioni non caricate",
     "retentionConsentValidUntil": "Consenso valido fino al {{date}}",
-    "retentionConsentIndefinite": "Il consenso non scade (impostazione dell'organizzazione)",
+    "retentionConsentIndefinite": "Il consenso non scade (impostazione dell’organizzazione)",
     "retentionConsentUndated": "Consenso senza data. Considerato scaduto",
     "retentionConsentLapsed": "Consenso scaduto il {{date}}",
     "retentionConsentExpiryNote": "Il consenso di conservazione scade automaticamente. Un workflow può chiedere al candidato di rinnovarlo; la scadenza avviene comunque.",
@@ -667,7 +667,7 @@
     "shifts": "Turni",
     "hoursWorked": "Ore lavorate",
     "total": "totale",
-    "thisYear": "quest'anno",
+    "thisYear": "quest’anno",
     "statusOverview": "Panoramica dello stato",
     "status": "Stato",
     "lastContact": "Ultimo contatto",
@@ -689,8 +689,8 @@
     "timeline": "Cronologia",
     "daysSinceCreated_one": "{{count}} giorno dalla creazione",
     "daysSinceCreated_other": "{{count}} giorni dalla creazione",
-    "daysSincePhaseChange_one": "{{count}} giorno dall'ultimo cambio di fase",
-    "daysSincePhaseChange_other": "{{count}} giorni dall'ultimo cambio di fase"
+    "daysSincePhaseChange_one": "{{count}} giorno dall’ultimo cambio di fase",
+    "daysSincePhaseChange_other": "{{count}} giorni dall’ultimo cambio di fase"
   },
   "planning": {
     "availability": "Disponibilità",
@@ -752,7 +752,7 @@
     "workedBeforeYes": "Sì, {{count}}× presso {{client}}",
     "workedBeforeNo": "No, prima volta presso {{client}}",
     "reasonPlaceholder": "Motivo (facoltativo)",
-    "prefDuplicate": "È già presente nell'elenco.",
+    "prefDuplicate": "È già presente nell’elenco.",
     "part_day": "Tutto il giorno",
     "part_morning": "Mattina",
     "part_afternoon": "Pomeriggio",
@@ -829,8 +829,8 @@
     "minRate": "Tariffa oraria min. (€)",
     "contract": "Preferenza di contratto",
     "remarks": "Note",
-    "groupPayroll": "Ritenuta d'acconto",
-    "wageTax": "Applica ritenuta d'acconto",
+    "groupPayroll": "Ritenuta d’acconto",
+    "wageTax": "Applica ritenuta d’acconto",
     "wageTaxFrom": "A partire da",
     "groupAvailability": "Disponibilità",
     "groupTravel": "Viaggio",
@@ -839,8 +839,8 @@
     "groupOther": "Altro",
     "moreTitle": "Altre preferenze",
     "groupDesiredRate": "Tariffa oraria desiderata",
-    "desiredRateMin": "Da (€ all'ora)",
-    "desiredRateMax": "A (€ all'ora)",
+    "desiredRateMin": "Da (€ all’ora)",
+    "desiredRateMax": "A (€ all’ora)",
     "groupEmergencyContact": "Contatto di emergenza",
     "emergencyContactName": "Nome",
     "emergencyContactPhone": "Numero di telefono",
@@ -892,7 +892,7 @@
     "viesValidNoDate": "Valida secondo VIES",
     "viesInvalid": "Non valida secondo VIES",
     "viesUnknown": "VIES non è raggiungibile. La verifica non è stata eseguita.",
-    "viesFailed": "La verifica dell'IVA non è riuscita. Riprova più tardi.",
+    "viesFailed": "La verifica dell’IVA non è riuscita. Riprova più tardi.",
     "vatMissing": "Nessuna partita IVA registrata. Inseriscila prima.",
     "businessEmailInvalid": "Inserisci un indirizzo e-mail valido.",
     "businessEmailDuplicateTitle": "Questo indirizzo e-mail è già in uso",
@@ -939,7 +939,7 @@
     "deleteSelected": "Elimina ({{count}})",
     "types": {
       "cv": "CV",
-      "id": "Documento d'identità",
+      "id": "Documento d’identità",
       "diploma": "Diploma",
       "contract": "Contratto",
       "vog": "VOG",
@@ -1006,7 +1006,7 @@
     "loading": "Caricamento modifiche…",
     "error": "Impossibile caricare il registro delle modifiche.",
     "empty": "Ancora nessuna modifica registrata.",
-    "fromIp": "Modificato dall'IP {{ip}}",
+    "fromIp": "Modificato dall’IP {{ip}}",
     "system": "Sistema",
     "emptyValue": "Vuoto",
     "axisStatus": "Stato",
@@ -1088,11 +1088,11 @@
   },
   "map": {
     "pointCount": "{{count}} candidati sulla mappa",
-    "pendingGeocode_one": "{{count}} candidato non è ancora sulla mappa. L'indirizzo viene elaborato automaticamente.",
+    "pendingGeocode_one": "{{count}} candidato non è ancora sulla mappa. L’indirizzo viene elaborato automaticamente.",
     "pendingGeocode_other": "{{count}} candidati non sono ancora sulla mappa. Gli indirizzi vengono elaborati automaticamente."
   },
   "vacancySearch": {
-    "noLocation": "Questo candidato non ha ancora coordinate di posizione. Aggiorna prima l'indirizzo, poi la mappa apparirà qui.",
+    "noLocation": "Questo candidato non ha ancora coordinate di posizione. Aggiorna prima l’indirizzo, poi la mappa apparirà qui.",
     "statuses": "Stato posizione",
     "functions": "Funzione",
     "onMap": "{{count}} posizioni sulla mappa",
@@ -1105,7 +1105,7 @@
     "hoursMinPlaceholder": "Min",
     "hoursMaxPlaceholder": "Max",
     "availableFromFilter": "Disponibile da",
-    "functionNotInLookup": "La funzione '{{title}}' non è nell'elenco delle funzioni. Verranno cercate tutte le funzioni.",
+    "functionNotInLookup": "La funzione '{{title}}' non è nell’elenco delle funzioni. Verranno cercate tutte le funzioni.",
     "apply": "Candidati",
     "resetFilters": "Ripristina filtri",
     "moreFilters": "Altri filtri",
@@ -1116,17 +1116,17 @@
     "cardSalary": "{{range}} {{period}}",
     "cardExperience": "{{range}} anni di esperienza",
     "salaryPeriod": {
-      "hour": "all'ora",
+      "hour": "all’ora",
       "month": "al mese",
-      "year": "all'anno",
+      "year": "all’anno",
       "week": "alla settimana"
     },
-    "noLocationResults": "Questo candidato non ha ancora coordinate, quindi non è possibile effettuare una ricerca per distanza. Aggiorna l'indirizzo o geocodifica il candidato."
+    "noLocationResults": "Questo candidato non ha ancora coordinate, quindi non è possibile effettuare una ricerca per distanza. Aggiorna l’indirizzo o geocodifica il candidato."
   },
   "erase": {
     "trashView": "Cestino",
     "markDelete": "Sposta nel cestino",
-    "markConfirm": "Spostare \"{{name}}\" nel cestino? È un'azione reversibile.",
+    "markConfirm": "Spostare \"{{name}}\" nel cestino? È un’azione reversibile.",
     "markedForDeletion": "Spostato nel cestino",
     "markFailed": "Spostamento non riuscito",
     "deleteForever": "Elimina definitivamente",
@@ -1212,7 +1212,7 @@
     "purchaseOrderNumber": "Numero d’ordine",
     "billingEmail": "E-mail di fatturazione",
     "matchRemarks": "Osservazioni sul match",
-    "remarksAdd": "Clicca per aggiungere un'osservazione",
+    "remarksAdd": "Clicca per aggiungere un’osservazione",
     "create": "Crea match",
     "created": "Match creato",
     "failed": "Creazione del match non riuscita",
@@ -1228,7 +1228,7 @@
     "contactFunction": "Funzione",
     "phone": "Numero di telefono",
     "mobile": "Cellulare",
-    "duplicateContact": "Esiste già: {{name}}, scegli questo dall'elenco",
+    "duplicateContact": "Esiste già: {{name}}, scegli questo dall’elenco",
     "billingEmailMain": "E-mail di fatturazione",
     "billingEmailExtra": "E-mail aggiuntiva",
     "addBillingEmail": "aggiungi e-mail",
@@ -1240,8 +1240,8 @@
     "rateProposal": {
       "agreement": "Proposta (accordo tariffario): {{purchase}} acquisto / {{sell}} vendita",
       "conversionFactor": "Proposta (fattore di conversione): {{purchase}} acquisto / {{sell}} vendita",
-      "purchaseOnly": "Proposta, nota solo la tariffa d'acquisto: {{purchase}}",
-      "deviationWarning": "L'accordo tariffario propone {{proposalPurchase}} acquisto / {{proposalSell}} vendita. Tu hai inserito {{enteredPurchase}} / {{enteredSell}}. Sei sicuro?",
+      "purchaseOnly": "Proposta, nota solo la tariffa d’acquisto: {{purchase}}",
+      "deviationWarning": "L’accordo tariffario propone {{proposalPurchase}} acquisto / {{proposalSell}} vendita. Tu hai inserito {{enteredPurchase}} / {{enteredSell}}. Sei sicuro?",
       "deviationConfirm": "Sì, crea comunque il match",
       "deviationCancel": "Modifica le tariffe"
     },
@@ -1373,7 +1373,7 @@
     "queued": "Messaggio pianificato. Parte a breve.",
     "send": "Invia",
     "waWebComposerHint": "Tramite WhatsApp Web (numero personale): messaggio di testo libero, inviato tramite la coda in uscita",
-    "privacyNoticeIncluded": "Con questo primo messaggio inviamo l'informativa sulla privacy.",
+    "privacyNoticeIncluded": "Con questo primo messaggio inviamo l’informativa sulla privacy.",
     "sortLabel": "Ordina",
     "messagesRegion": "Messaggi",
     "sortOldestFirst": "Prima i più vecchi",
@@ -1389,11 +1389,11 @@
     "assist": {
       "title": "Assistente Koios",
       "summarize": "Riassumi",
-      "actions": "Elementi d'azione",
+      "actions": "Elementi d’azione",
       "needsMessages": "Questa conversazione non ha ancora messaggi",
       "apply": "Applica",
       "discard": "Scarta",
-      "noItems": "Nessun elemento d'azione trovato",
+      "noItems": "Nessun elemento d’azione trovato",
       "error": "Koios non è riuscito a elaborare questa conversazione. Riprova.",
       "actionTypes": {
         "task": "Attività",
@@ -1408,7 +1408,7 @@
     "windowLeftMinutes_other": "Ancora {{count}} minuti per rispondere liberamente",
     "windowLeftSeconds": "Meno di un minuto per rispondere liberamente",
     "windowClosesAt": "La finestra di 24 ore si chiude alle {{time}}",
-    "windowUnknown": "Non è chiaro se la finestra di 24 ore sia aperta: questa conversazione non riporta l'orario dell'ultimo messaggio in arrivo. Un template approvato arriva sempre a destinazione.",
+    "windowUnknown": "Non è chiaro se la finestra di 24 ore sia aperta: questa conversazione non riporta l’orario dell’ultimo messaggio in arrivo. Un template approvato arriva sempre a destinazione.",
     "sendTemplate": "Invia template",
     "templateSent": "Template inviato",
     "templateSendFailed": "Impossibile inviare il template",
@@ -1436,7 +1436,7 @@
   "references": {
     "verify": "Verifica",
     "verified": "Verificato",
-    "experienceLinkUnavailable": "Il collegamento a un'esperienza lavorativa non è ancora possibile. Sarà disponibile non appena l'API supporterà il campo.",
+    "experienceLinkUnavailable": "Il collegamento a un’esperienza lavorativa non è ancora possibile. Sarà disponibile non appena l’API supporterà il campo.",
     "linkedExperience": "Esperienza lavorativa collegata",
     "noExperiencesToLink": "Questo candidato non ha ancora esperienze lavorative. Aggiungine prima una per collegarvi una referenza."
   },
@@ -1529,7 +1529,7 @@
       "phaseChange": "Fase cambiata da {{from}} a {{to}}",
       "phaseSet": "Fase impostata su {{to}}",
       "archived": "Archiviato",
-      "restored": "Ripristinato dall'archivio",
+      "restored": "Ripristinato dall’archivio",
       "restoredCareerApply": "Ripristinato da una nuova candidatura (sito carriere)",
       "restoredPartnerApi": "Ripristinato da una nuova candidatura (partner)",
       "cvNotAttached": "CV di tipo {{type}} non allegato: questo tipo di documento richiede una data di scadenza senza valore predefinito. Carica il CV manualmente con una data di scadenza.",
@@ -1549,7 +1549,7 @@
       "alt": "Logo OpenCage",
       "linked": "Collegato",
       "notGeocoded": "Non ancora geocodificato",
-      "autoInfo": "Le coordinate vengono aggiornate automaticamente quando l'indirizzo cambia.",
+      "autoInfo": "Le coordinate vengono aggiornate automaticamente quando l’indirizzo cambia.",
       "updatedAt": "Aggiornato {{date}}",
       "updatedAtBy": "Aggiornato {{date}} · richiesto da {{name}}",
       "requestedAtBy": "Richiesto {{date}} da {{name}}",

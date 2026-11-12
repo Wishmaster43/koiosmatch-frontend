@@ -1,11 +1,11 @@
 {
-  "title": "Listes d'appels",
-  "new": "Nouvelle liste d'appels",
-  "empty": "Aucune liste d'appels.",
-  "loadError": "Échec du chargement des listes d'appels.",
+  "title": "Listes d’appels",
+  "new": "Nouvelle liste d’appels",
+  "empty": "Aucune liste d’appels.",
+  "loadError": "Échec du chargement des listes d’appels.",
   "retry": "Réessayer",
-  "count_one": "{{count}} liste d'appels",
-  "count_other": "{{count}} listes d'appels",
+  "count_one": "{{count}} liste d’appels",
+  "count_other": "{{count}} listes d’appels",
   "col": {
     "name": "Nom",
     "channel": "Canal",
@@ -32,7 +32,7 @@
   "board": {
     "empty": "Vide"
   },
-  "archivedEmpty": "Aucune liste d'appels archivée.",
+  "archivedEmpty": "Aucune liste d’appels archivée.",
   "moveError": "Échec du déplacement.",
   "insights": {
     "status": "Statut",
@@ -46,8 +46,8 @@
     "activeSub": "listes en cours",
     "targets": "Cibles",
     "targetsSub": "total candidats",
-    "calledToday": "Appelés aujourd'hui",
-    "calledTodaySub": "contacts aujourd'hui",
+    "calledToday": "Appelés aujourd’hui",
+    "calledTodaySub": "contacts aujourd’hui",
     "toCall": "À appeler",
     "toCallSub": "cibles ouvertes",
     "reachedPct": "Joints",
@@ -63,15 +63,15 @@
     "searchStatus": "Rechercher un statut…",
     "archive": "Archiver",
     "done": "{{count}} mis à jour",
-    "mutateError": "Échec de l'action. Veuillez réessayer.",
-    "archiveError": "Échec de l'archivage."
+    "mutateError": "Échec de l’action. Veuillez réessayer.",
+    "archiveError": "Échec de l’archivage."
   },
   "create": {
-    "title": "Nouvelle liste d'appels",
+    "title": "Nouvelle liste d’appels",
     "generalCard": "Général",
     "sourceCard": "Source",
     "name": "Nom",
-    "namePlaceholder": "p. ex. Liste d'appels chauffeurs disponibles",
+    "namePlaceholder": "p. ex. Liste d’appels chauffeurs disponibles",
     "channel": "Canal",
     "pool": "Vivier source (facultatif)",
     "poolNone": "Aucun, remplir plus tard",
@@ -80,33 +80,33 @@
     "saving": "Création…",
     "error": "Échec de la création. Veuillez réessayer.",
     "poolsLoadError": "Le chargement des viviers de talents a échoué.",
-    "nameTaken": "Une liste d'appels avec ce nom existe déjà.",
-    "nameTakenRef": "Une liste d'appels avec ce nom existe déjà ({{reference}}).",
-    "nameTakenArchived": "Une liste d'appels archivée avec ce nom existe déjà.",
-    "nameTakenArchivedRef": "Une liste d'appels archivée avec ce nom existe déjà ({{reference}})."
+    "nameTaken": "Une liste d’appels avec ce nom existe déjà.",
+    "nameTakenRef": "Une liste d’appels avec ce nom existe déjà ({{reference}}).",
+    "nameTakenArchived": "Une liste d’appels archivée avec ce nom existe déjà.",
+    "nameTakenArchivedRef": "Une liste d’appels archivée avec ce nom existe déjà ({{reference}})."
   },
   "page": {
-    "searchPlaceholder": "Rechercher une liste d'appel, un pool ou un candidat…"
+    "searchPlaceholder": "Rechercher une liste d’appel, un pool ou un candidat…"
   },
   "drawer": {
-    "label": "Liste d'appel",
+    "label": "Liste d’appel",
     "createdAt": "Créé le {{date}}",
     "archivedBanner": {
       "since": "Archivée le {{date}}",
       "flag": "Archivée",
       "restore": "Restaurer",
-      "restored": "Liste d'appels restaurée.",
+      "restored": "Liste d’appels restaurée.",
       "restoreFailed": "Échec de la restauration. Veuillez réessayer."
     },
     "tabs": {
-      "targets": "Liste d'appel",
+      "targets": "Liste d’appel",
       "extra": "Extra",
       "stats": "Statistiques",
       "timeline": "Chronologie",
       "information": "Informations"
     },
     "loading": "Chargement…",
-    "error": "Échec du chargement de la liste d'appel.",
+    "error": "Échec du chargement de la liste d’appel.",
     "empty": "Aucun candidat dans cette liste.",
     "progress": "{{done}} sur {{total}} traités",
     "target": {
@@ -114,7 +114,7 @@
       "contacted": "Contacté",
       "answered": "Répondu",
       "skipped": "Ignoré",
-      "saveFailed": "L'enregistrement a échoué. Veuillez réessayer.",
+      "saveFailed": "L’enregistrement a échoué. Veuillez réessayer.",
       "ownerSaveFailed": "Le changement de propriétaire a échoué. Veuillez réessayer."
     },
     "action": {
@@ -149,19 +149,19 @@
       "noMatches": "Aucun candidat ne correspond à ce filtre."
     },
     "note": {
-      "empty": "Aucune note pour l'instant.",
+      "empty": "Aucune note pour l’instant.",
       "placeholder": "Ajouter une note…",
-      "saveFailed": "L'enregistrement de la note a échoué.",
+      "saveFailed": "L’enregistrement de la note a échoué.",
       "title": "Note",
       "windowTitle": "Note — {{name}}"
     },
     "assign": {
       "button": "Assigner",
       "selected": "{{count}} sélectionné(s)",
-      "confirm": "Confirmer l'attribution",
+      "confirm": "Confirmer l’attribution",
       "resultPartial": "{{updated}} assigné(s), {{skipped}} ignoré(s)",
       "resultAll": "{{count}} assigné(s)",
-      "failed": "L'attribution a échoué. Veuillez réessayer.",
+      "failed": "L’attribution a échoué. Veuillez réessayer.",
       "assignedTo": "Assigné à {{name}}",
       "axisLabel": "Assigner à",
       "axis": {
@@ -184,13 +184,13 @@
       "channel": "Canal",
       "pool": "Pool source",
       "createdAt": "Créé",
-      "saveFailed": "L'enregistrement a échoué. Veuillez réessayer."
+      "saveFailed": "L’enregistrement a échoué. Veuillez réessayer."
     }
   },
   "changelog": {
     "loading": "Chargement…",
     "error": "Impossible de charger le journal des modifications.",
-    "empty": "Aucune modification pour l'instant.",
+    "empty": "Aucune modification pour l’instant.",
     "system": "Système",
     "emptyValue": "Vide",
     "updatedValue": "mis à jour",
@@ -213,8 +213,8 @@
   },
   "koios": {
     "reasons": {
-      "noTargets": "Cette campagne active n'a aucun contact chargé.",
-      "staleDraft": "Ce brouillon a des contacts chargés mais n'a jamais été activé."
+      "noTargets": "Cette campagne active n’a aucun contact chargé.",
+      "staleDraft": "Ce brouillon a des contacts chargés mais n’a jamais été activé."
     }
   },
   "filters": {

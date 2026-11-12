@@ -29,7 +29,7 @@
     "aiAgent": "Agent IA",
     "leadsUnknown": "Pas encore calculé. Ouvrez la vacance pour voir les candidats correspondants.",
     "leadsStale": "Recalcul en cours. Chiffre du {{date}}",
-    "leadsGeoMissing": "Sans coordonnées, le rayon n'a pas pu être appliqué",
+    "leadsGeoMissing": "Sans coordonnées, le rayon n’a pas pu être appliqué",
     "leadsPartial": "Compté partiellement. Une limite a été atteinte",
     "leadsComputedAt": "Mis à jour le {{date}}",
     "age": "Âge",
@@ -115,8 +115,8 @@
     "tagRemoved": "Tag « {{tag}} » retiré de {{count}} postes.",
     "noteAdded": "Note ajoutée à {{count}} postes.",
     "archived": "{{count}} postes archivés.",
-    "mutateError": "Impossible d'appliquer la modification.",
-    "archiveError": "Impossible d'archiver.",
+    "mutateError": "Impossible d’appliquer la modification.",
+    "archiveError": "Impossible d’archiver.",
     "aiAgent": "Agent IA",
     "linkAgent": "Lier l’agent IA",
     "unlinkAgent": "Dissocier l’agent IA",
@@ -180,7 +180,7 @@
   },
   "matching": {
     "title": "Pondération du matching IA",
-    "subtitle": "Définissez l'importance de chaque dimension pour ce poste. L'IA évalue les candidats en conséquence.",
+    "subtitle": "Définissez l’importance de chaque dimension pour ce poste. L’IA évalue les candidats en conséquence.",
     "less": "Moins important",
     "balanced": "Équilibré",
     "very": "Très important",
@@ -219,13 +219,13 @@
     "salary": "Salaire",
     "hours": "Heures hebdomadaires",
     "experience": "Expérience",
-    "seniority": "Niveau d'expérience",
+    "seniority": "Niveau d’expérience",
     "education": "Formation",
     "industry": "Secteur",
     "category": "Fonction",
     "skills": "Compétences additionnelles",
     "addSkill": "Ajouter une compétence",
-    "description": "Texte de l'offre",
+    "description": "Texte de l’offre",
     "contractType": "Type de contrat",
     "experienceFrom": "De (années)",
     "experienceTo": "À (années)",
@@ -245,30 +245,30 @@
     "customerLocation": "Site du client",
     "customerDepartment": "Service",
     "contactPerson": "Contact",
-    "pickClientFirst": "Choisissez d'abord un client",
+    "pickClientFirst": "Choisissez d’abord un client",
     "matchContractType": "Type de contrat proposé",
     "matchCao": "CCT proposée",
-    "skillsEmpty": "Aucune compétence additionnelle pour l'instant."
+    "skillsEmpty": "Aucune compétence additionnelle pour l’instant."
   },
   "aiagent": {
     "pickerLabel": "Agent IA",
     "placeholder": "Sélectionner un agent IA",
     "none": "Aucun agent",
-    "empty": "Aucun agent IA configuré pour l'instant.",
+    "empty": "Aucun agent IA configuré pour l’instant.",
     "loadError": "Impossible de charger les agents IA.",
-    "explanation": "Un agent associé mène les entretiens d'intake pour cette offre. La progression par candidat s'affiche sur la candidature.",
+    "explanation": "Un agent associé mène les entretiens d’intake pour cette offre. La progression par candidat s’affiche sur la candidature.",
     "flowTitle": "Entretien",
-    "flowHint": "Associez un agent pour voir l'entretien.",
+    "flowHint": "Associez un agent pour voir l’entretien.",
     "backfill": {
       "title": "Candidats existants",
-      "button": "Démarrer l'entretien pour les candidats existants",
-      "confirm": "L'agent doit-il aussi prendre en charge les candidats existants de cette offre ? Cela enverra des messages WhatsApp.",
-      "confirmWithCount_one": "L'agent doit-il aussi prendre en charge le {{count}} candidat existant de cette offre ? Cela enverra des messages WhatsApp.",
-      "confirmWithCount_other": "L'agent doit-il aussi prendre en charge les {{count}} candidats existants de cette offre ? Cela enverra des messages WhatsApp.",
+      "button": "Démarrer l’entretien pour les candidats existants",
+      "confirm": "L’agent doit-il aussi prendre en charge les candidats existants de cette offre ? Cela enverra des messages WhatsApp.",
+      "confirmWithCount_one": "L’agent doit-il aussi prendre en charge le {{count}} candidat existant de cette offre ? Cela enverra des messages WhatsApp.",
+      "confirmWithCount_other": "L’agent doit-il aussi prendre en charge les {{count}} candidats existants de cette offre ? Cela enverra des messages WhatsApp.",
       "resultToast": "{{started}} sur {{eligibleTotal}} démarré(s).",
-      "queuedClause": " {{queued}} en file d'attente.",
+      "queuedClause": " {{queued}} en file d’attente.",
       "resultToastWithReasons": "{{started}} sur {{eligibleTotal}} démarré(s), {{skippedTotal}} ignoré(s) : {{reasons}}.",
-      "unavailable": "Démarrer l'entretien pour les candidats existants n'est pas encore disponible. En attente de la liaison backend.",
+      "unavailable": "Démarrer l’entretien pour les candidats existants n’est pas encore disponible. En attente de la liaison backend.",
       "reasons": {
         "no_mobile_or_consent": "pas de consentement WhatsApp",
         "already_has_session": "déjà en cours",
@@ -277,14 +277,14 @@
         "placed_stage": "déjà placée",
         "no_active_flow": "aucun flux actif",
         "no_candidate": "aucun candidat",
-        "send_failed": "échec de l'envoi",
+        "send_failed": "échec de l’envoi",
         "error": "erreur inattendue"
       }
     },
     "flowSource": {
-      "fromAgent": "Hérité de l'agent lié ({{agent}}). Aucune valeur par défaut par type de contrat n'est encore disponible.",
-      "agentHasNoFlow": "L'agent lié n'a pas d'entretien configuré.",
-      "noContractType": "Cette offre n'a pas de type de contrat défini, le flux propre de l'agent est donc utilisé comme solution de repli.",
+      "fromAgent": "Hérité de l’agent lié ({{agent}}). Aucune valeur par défaut par type de contrat n’est encore disponible.",
+      "agentHasNoFlow": "L’agent lié n’a pas d’entretien configuré.",
+      "noContractType": "Cette offre n’a pas de type de contrat défini, le flux propre de l’agent est donc utilisé comme solution de repli.",
       "fromVacancy": "Cette offre utilise le flux {{flow}}.",
       "inactiveWarning": "Attention : ce flux est inactif, l’entretien sera ignoré."
     },
@@ -308,24 +308,24 @@
     "button": "Générer avec Koios",
     "resolving": "Détermination du profil…",
     "profileChip": "Profil : {{name}} · spécificité {{specificity}}",
-    "noProfile": "Aucun profil de génération n'est encore configuré pour ce client. Demandez à un administrateur d'en créer un dans les paramètres.",
+    "noProfile": "Aucun profil de génération n’est encore configuré pour ce client. Demandez à un administrateur d’en créer un dans les paramètres.",
     "cta": "Générer",
     "generating": "Koios génère un texte de vacance provisoire…",
     "error": "La génération a échoué. Veuillez réessayer.",
     "previewLabel": "Proposition (concept). Pas encore enregistrée",
     "apply": "Appliquer",
     "discard": "Rejeter",
-    "needsTitleFirst": "Renseignez d'abord un titre pour générer un texte."
+    "needsTitleFirst": "Renseignez d’abord un titre pour générer un texte."
   },
   "publishing": {
-    "channels": "Sites d'emploi",
+    "channels": "Sites d’emploi",
     "applicationSettings": "Paramètres de candidature",
     "fields": {
       "cv": "CV",
       "cover_letter": "Lettre de motivation",
       "photo": "Photo",
       "remarks": "Remarques",
-      "interview_consent": "Consentement à l'entretien"
+      "interview_consent": "Consentement à l’entretien"
     },
     "values": {
       "required": "Requis",
@@ -339,11 +339,11 @@
     "notLiveYet": "Le site carrière public et les flux (Google Jobs, Indeed, Werkzoeken) sont en construction. Ces interrupteurs déterminent déjà ce qui sera publié dès leur activation.",
     "tabs": {
       "settings": "Paramètres",
-      "sites": "Sites d'emploi"
+      "sites": "Sites d’emploi"
     },
     "siteLive": "Le site carrière public est en ligne. Ces interrupteurs déterminent ce qui y est publié actuellement, y compris les flux Indeed et Werkzoeken.",
     "siteOffline": "Le site carrière public est actuellement désactivé (Paramètres → Site carrière). Ces interrupteurs déterminent déjà ce qui sera publié dès son activation.",
-    "lockedOn": "Toujours actif. Modifiable sous Paramètres, Sites d'emploi & canaux de publication."
+    "lockedOn": "Toujours actif. Modifiable sous Paramètres, Sites d’emploi & canaux de publication."
   },
   "applicants": {
     "title": "Candidatures",
@@ -363,7 +363,7 @@
     "detachDone": "Candidature dissociée"
   },
   "candidateSearch": {
-    "noLocation": "Cette vacance n'a pas encore de coordonnées de localisation. Mettez d'abord à jour l'adresse, la carte apparaîtra ensuite ici.",
+    "noLocation": "Cette vacance n’a pas encore de coordonnées de localisation. Mettez d’abord à jour l’adresse, la carte apparaîtra ensuite ici.",
     "functions": "Fonction",
     "statuses": "Disponibilité",
     "contractForms": "Forme de contrat",
@@ -372,11 +372,11 @@
     "empty": "Aucun candidat trouvé avec ces filtres.",
     "shownOf": "Affiche les {{shown}} plus proches sur {{total}} candidats",
     "centerVacancy": "Lieu du poste",
-    "refreshAdvice": "Actualiser l'avis Koios",
+    "refreshAdvice": "Actualiser l’avis Koios",
     "rematchStarted": "Koios refait la correspondance des candidats ; la liste se rafraîchit dès que le workflow est terminé.",
     "rematchBusy": "Un recalcul est déjà en cours pour ce poste.",
     "rematchMissing": "Le workflow « Recalculer les leads (un poste) » est désactivé ou absent. Activez-le dans Workflows.",
-    "rematchBudget": "Le forfait de workflows est épuisé. Le recalcul n'a pas démarré.",
+    "rematchBudget": "Le forfait de workflows est épuisé. Le recalcul n’a pas démarré.",
     "aiAdvised": "Recommandé par Koios"
   },
   "statistics": {
@@ -404,7 +404,7 @@
     "tabs": {
       "general": "Général",
       "requirements": "Conditions & exigences",
-      "description": "Texte de l'offre",
+      "description": "Texte de l’offre",
       "matching": "Profil de correspondance",
       "aiAgent": "Agent IA",
       "publication": "Publication",
@@ -413,7 +413,7 @@
     "title": "Nouveau poste",
     "import": {
       "title": "Poste depuis un fichier",
-      "intro": "L'import d'un fichier crée ces postes immédiatement. Il ne remplit pas le formulaire ci-dessous ; vérifiez l'aperçu avant de confirmer."
+      "intro": "L’import d’un fichier crée ces postes immédiatement. Il ne remplit pas le formulaire ci-dessous ; vérifiez l’aperçu avant de confirmer."
     },
     "fields": {
       "title": "Titre",
@@ -449,7 +449,7 @@
   },
   "map": {
     "pointCount": "{{count}} postes sur la carte",
-    "pendingGeocode_one": "{{count}} poste n'est pas encore sur la carte. L'adresse est traitée automatiquement.",
+    "pendingGeocode_one": "{{count}} poste n’est pas encore sur la carte. L’adresse est traitée automatiquement.",
     "pendingGeocode_other": "{{count}} postes ne sont pas encore sur la carte. Les adresses sont traitées automatiquement."
   },
   "ai": {
@@ -462,7 +462,7 @@
     "completePartial": "Poste complété à {{pct}}%. Ajoutez description, fourchette salariale, heures, compétences, localisation et statut pour de meilleurs résultats.",
     "flowLabel": "Flux",
     "flowOpen": "Ouvert depuis {{days}} jours · {{count}} candidature(s) reçue(s).",
-    "flowUnknown": "Date d'ouverture inconnue · {{count}} candidature(s) reçue(s)."
+    "flowUnknown": "Date d’ouverture inconnue · {{count}} candidature(s) reçue(s)."
   },
   "changelog": {
     "loading": "Chargement…",
@@ -484,7 +484,7 @@
     },
     "fields": {
       "title": "Titre",
-      "description": "Texte de l'offre",
+      "description": "Texte de l’offre",
       "vacancy_status_id": "Statut",
       "start_date": "Date de début",
       "end_date": "Date de fin",
@@ -504,7 +504,7 @@
       "working_hours_from": "Heures (de)",
       "working_hours_to": "Heures (à)",
       "years_of_experience": "Expérience (années)",
-      "vacancy_seniority_level_id": "Niveau d'expérience",
+      "vacancy_seniority_level_id": "Niveau d’expérience",
       "vacancy_education_level_id": "Formation",
       "custom_fields": "Champs personnalisés",
       "match_weights": "Pondération du matching IA",
@@ -541,24 +541,24 @@
   },
   "popout": {
     "windowTitle": "Notes. {{name}}",
-    "loadError": "Cette offre d'emploi n'a pas pu être chargée.",
-    "descriptionWindowTitle": "Texte de l'offre — {{name}}"
+    "loadError": "Cette offre d’emploi n’a pas pu être chargée.",
+    "descriptionWindowTitle": "Texte de l’offre — {{name}}"
   },
   "matchesTab": {
     "loadError": "Impossible de charger les matchs."
   },
   "tasks": {
     "newTask": "Nouvelle tâche",
-    "empty": "Aucune tâche pour cette offre pour l'instant",
+    "empty": "Aucune tâche pour cette offre pour l’instant",
     "loading": "Chargement des tâches…",
     "error": "Impossible de charger les tâches",
     "openTask": "Ouvrir la tâche",
     "searchPlaceholder": "Rechercher une tâche…"
   },
   "appointmentsTab": {
-    "noPermission": "Vous n'avez pas l'autorisation de voir les rendez-vous.",
+    "noPermission": "Vous n’avez pas l’autorisation de voir les rendez-vous.",
     "loadError": "Impossible de charger les rendez-vous.",
-    "empty": "Pas encore de rendez-vous pour cette offre d'emploi.",
+    "empty": "Pas encore de rendez-vous pour cette offre d’emploi.",
     "overdue": "En retard",
     "noCandidate": "Aucun candidat",
     "pageOf": "Page {{page}} sur {{lastPage}}",
@@ -568,7 +568,7 @@
       "label": "Candidat",
       "placeholder": "Rechercher un candidat…",
       "error": "Impossible de charger les candidats.",
-      "noAccess": "Pas d'accès aux candidats."
+      "noAccess": "Pas d’accès aux candidats."
     }
   },
   "lookupSeeds": {

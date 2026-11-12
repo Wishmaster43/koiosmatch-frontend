@@ -8,7 +8,7 @@
     },
     "rejection_not_sent": {
       "title": "Rifiuto non inviato, chiamare il candidato personalmente",
-      "body": "Un candidato rifiutato non ha consenso WhatsApp né e-mail. Comunicare l'esito per telefono. ({{workflow}})"
+      "body": "Un candidato rifiutato non ha consenso WhatsApp né e-mail. Comunicare l’esito per telefono. ({{workflow}})"
     }
   },
   "opportunity": {
@@ -35,13 +35,13 @@
   },
   "sync": {
     "failed": {
-      "title": "Sincronizzazione dell'integrazione non riuscita"
+      "title": "Sincronizzazione dell’integrazione non riuscita"
     }
   },
   "match": {
     "approval_pending": {
       "title": "Match in attesa di approvazione",
-      "body": "Un match si discosta dall'accordo tariffario o richiede sempre approvazione. Esaminarlo."
+      "body": "Un match si discosta dall’accordo tariffario o richiede sempre approvazione. Esaminarlo."
     },
     "expiring": {
       "title": "Match in scadenza a breve"
@@ -79,7 +79,7 @@
     },
     "retention_due_escalation": {
       "title": "ESCALATION: fascicolo archiviato troppo a lungo (GDPR)",
-      "body": "Questo fascicolo candidato è archiviato ed è aperto da più tempo del termine di escalation configurato. Valutare se può essere eliminato definitivamente. Resta sempre un'azione manuale."
+      "body": "Questo fascicolo candidato è archiviato ed è aperto da più tempo del termine di escalation configurato. Valutare se può essere eliminato definitivamente. Resta sempre un’azione manuale."
     },
     "retention_ask_undelivered": {
       "title": "Domanda sul periodo di conservazione non recapitata",
@@ -105,7 +105,7 @@
     },
     "not_informed_email": {
       "title": "Impossibile informare il candidato",
-      "body": "Questo candidato non ha consenso e-mail per ricevere il link video dell'appuntamento. Condividi il link personalmente. ({{workflow}})"
+      "body": "Questo candidato non ha consenso e-mail per ricevere il link video dell’appuntamento. Condividi il link personalmente. ({{workflow}})"
     },
     "not_informed_retention_consent": {
       "title": "Impossibile informare il candidato",
@@ -146,11 +146,11 @@
   },
   "kpi": {
     "below_target": {
-      "title": "{{label}} è sotto l'obiettivo",
+      "title": "{{label}} è sotto l’obiettivo",
       "body": "{{label}} era a {{value}} con un obiettivo di {{target}} ({{period}}).\n{{recruiters}}"
     },
     "recruiter_below_target": {
-      "title": "Un recruiter è sotto l'obiettivo",
+      "title": "Un recruiter è sotto l’obiettivo",
       "body": "{{recruiters}}\nObiettivo: {{target}} ({{period}})."
     },
     "above_maximum": {
@@ -204,7 +204,7 @@
   "email": {
     "mailbox_needs_reconnect": {
       "title": "La casella di posta va ricollegata",
-      "body": "Una casella di posta collegata ha smesso di funzionare. Ricollegala nelle impostazioni e-mail; fino ad allora l'e-mail parte da un altro mittente."
+      "body": "Una casella di posta collegata ha smesso di funzionare. Ricollegala nelle impostazioni e-mail; fino ad allora l’e-mail parte da un altro mittente."
     }
   },
   "interview": {

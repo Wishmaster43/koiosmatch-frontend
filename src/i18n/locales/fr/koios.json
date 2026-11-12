@@ -1,9 +1,9 @@
 {
   "title": "Koios AI",
-  "subtitle": "Modèles, état de connexion et tarifs de l'assistant Koios.",
+  "subtitle": "Modèles, état de connexion et tarifs de l’assistant Koios.",
   "loading": "Chargement…",
   "loadError": "Impossible de charger les paramètres Koios.",
-  "unavailable": "Koios n'est pas disponible pour cette organisation.",
+  "unavailable": "Koios n’est pas disponible pour cette organisation.",
   "status": {
     "title": "Statut",
     "connection": "Connexion",
@@ -20,7 +20,7 @@
     "title": "Modèles",
     "active": "Modèle actif",
     "selectable": "Modèles sélectionnables",
-    "pickHint": "Choisissez le niveau d'IA pour votre agence.",
+    "pickHint": "Choisissez le niveau d’IA pour votre agence.",
     "tier": {
       "fast": "Rapide",
       "smart": "Malin",
@@ -45,8 +45,8 @@
   },
   "voice": {
     "start": "Dictez votre message",
-    "stop": "Arrêtez l'écoute",
-    "denied": "Microphone refusé. Autorisez l'accès dans votre navigateur",
+    "stop": "Arrêtez l’écoute",
+    "denied": "Microphone refusé. Autorisez l’accès dans votre navigateur",
     "insecureContext": "La dictée nécessite une connexion sécurisée (https). Indisponible sur cette page",
     "errorServiceNotAllowed": "La reconnaissance vocale a été bloquée par le navigateur. Service non autorisé",
     "errorAudioCapture": "Aucun microphone détecté. Vérifiez votre appareil",
@@ -57,23 +57,23 @@
   },
   "tabs": {
     "overview": "Aperçu",
-    "learning": "Rapport d'apprentissage",
+    "learning": "Rapport d’apprentissage",
     "capabilities": "Matrice d’outils",
     "feedback": "Retours"
   },
   "learning": {
     "loading": "Chargement du rapport…",
-    "loadError": "Le rapport d'apprentissage n'a pas pu être chargé.",
+    "loadError": "Le rapport d’apprentissage n’a pas pu être chargé.",
     "retry": "Réessayer",
     "topQuestions": "Questions les plus fréquentes",
     "noQuestions": "Aucune question enregistrée pour cette période.",
-    "failureReasons": "Raisons d'échec",
+    "failureReasons": "Raisons d’échec",
     "noFailures": "Aucun échec enregistré pour cette période.",
     "failureRefusal": "Refusé",
     "failureBudget": "Limite de budget",
-    "failureToolError": "Erreur d'outil",
+    "failureToolError": "Erreur d’outil",
     "failureNoResult": "Aucun résultat",
-    "deniedNotTracked": "Les demandes d'outils refusées ne sont pas encore suivies séparément.",
+    "deniedNotTracked": "Les demandes d’outils refusées ne sont pas encore suivies séparément.",
     "feedback": "Retours",
     "noFeedback": "Aucun retour pour cette période.",
     "downPct": "{{pct}} des réponses ont reçu un pouce vers le bas.",
@@ -140,7 +140,7 @@
       "generate": "Générer du texte",
       "conversation_assist": "Assistant de conversation",
       "report_advice": "Conseil de rapport",
-      "interview_flows": "Flux d'interview"
+      "interview_flows": "Flux d’interview"
     }
   },
   "feedbackAdmin": {
@@ -149,7 +149,7 @@
     "downPct": "Pouce baissé",
     "listTitle": "Retours",
     "loading": "Chargement des retours…",
-    "loadError": "L'aperçu des retours n'a pas pu être chargé.",
+    "loadError": "L’aperçu des retours n’a pas pu être chargé.",
     "retry": "Réessayer",
     "empty": "Aucun retour enregistré pour le moment.",
     "noComment": "Aucun commentaire laissé.",
@@ -163,18 +163,18 @@
   },
   "modeDefault": {
     "title": "Mode Koios par défaut",
-    "desc": "Le paramètre par défaut à l'échelle du cabinet pour Assistant/Auto ; les utilisateurs peuvent s'en écarter dans leur propre profil.",
+    "desc": "Le paramètre par défaut à l’échelle du cabinet pour Assistant/Auto ; les utilisateurs peuvent s’en écarter dans leur propre profil.",
     "wizard": "Assistant (confirmer chaque action)",
     "auto": "Auto (exécuter immédiatement)",
     "autoMessages": "Envoyer les messages directement en mode Auto",
     "deviationHint": "Les utilisateurs peuvent régler cela différemment dans leur propre profil.",
-    "noPermission": "Vous n'avez pas le droit de modifier ceci.",
-    "saveError": "L'enregistrement a échoué."
+    "noPermission": "Vous n’avez pas le droit de modifier ceci.",
+    "saveError": "L’enregistrement a échoué."
   },
   "results": {
     "group": {
       "candidates": "Candidats",
-      "vacancies": "Offres d'emploi",
+      "vacancies": "Offres d’emploi",
       "customers": "Clients",
       "opportunities": "Opportunités",
       "matches": "Correspondances",
@@ -188,9 +188,9 @@
   },
   "effortDefault": {
     "title": "Effort par défaut",
-    "hint": "Un effort plus élevé fait peser davantage chaque jeton Koios AI. Le plafond du forfait s'applique toujours.",
-    "noPermission": "Vous n'avez pas l'autorisation de modifier ce réglage.",
-    "saveError": "Échec de l'enregistrement."
+    "hint": "Un effort plus élevé fait peser davantage chaque jeton Koios AI. Le plafond du forfait s’applique toujours.",
+    "noPermission": "Vous n’avez pas l’autorisation de modifier ce réglage.",
+    "saveError": "Échec de l’enregistrement."
   },
   "effort": {
     "low": "Faible",
@@ -204,11 +204,11 @@
   },
   "budget": {
     "title": "Budget quotidien",
-    "hint": "Définissez les limites de dépenses quotidiennes pour l'utilisation de Koios AI par utilisateur et pour votre organisation.",
+    "hint": "Définissez les limites de dépenses quotidiennes pour l’utilisation de Koios AI par utilisateur et pour votre organisation.",
     "dailyUserLabel": "Limite par utilisateur (EUR)",
-    "dailyTenantLabel": "Limite de l'organisation (EUR)",
-    "noPermission": "Vous n'avez pas la permission de modifier ces paramètres.",
-    "saveError": "Erreur lors de l'enregistrement du budget",
+    "dailyTenantLabel": "Limite de l’organisation (EUR)",
+    "noPermission": "Vous n’avez pas la permission de modifier ces paramètres.",
+    "saveError": "Erreur lors de l’enregistrement du budget",
     "saved": "Budget enregistré"
   }
 }

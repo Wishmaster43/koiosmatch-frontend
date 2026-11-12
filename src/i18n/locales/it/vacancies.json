@@ -180,7 +180,7 @@
   },
   "matching": {
     "title": "Ponderazione match AI",
-    "subtitle": "Indica per ogni dimensione quanto è importante per questa posizione. L'AI valuta i candidati di conseguenza.",
+    "subtitle": "Indica per ogni dimensione quanto è importante per questa posizione. L’AI valuta i candidati di conseguenza.",
     "profile": "Profilo di match",
     "custom": "Personalizzato",
     "less": "Meno importante",
@@ -256,15 +256,15 @@
     "none": "Nessun agente",
     "empty": "Ancora nessun agente AI configurato.",
     "loadError": "Caricamento degli agenti AI non riuscito.",
-    "explanation": "Un agente collegato conduce i colloqui di intake per questa posizione. L'avanzamento per candidato è visibile sulla candidatura.",
+    "explanation": "Un agente collegato conduce i colloqui di intake per questa posizione. L’avanzamento per candidato è visibile sulla candidatura.",
     "flowTitle": "Colloquio",
     "flowHint": "Collega un agente per vedere il colloquio.",
     "backfill": {
       "title": "Candidati esistenti",
       "button": "Avvia colloquio per i candidati esistenti",
-      "confirm": "Vuoi far gestire anche i candidati esistenti di questa posizione dall'agente? Questo invia messaggi WhatsApp.",
-      "confirmWithCount_one": "Vuoi far gestire anche {{count}} candidato esistente di questa posizione dall'agente? Questo invia messaggi WhatsApp.",
-      "confirmWithCount_other": "Vuoi far gestire anche {{count}} candidati esistenti di questa posizione dall'agente? Questo invia messaggi WhatsApp.",
+      "confirm": "Vuoi far gestire anche i candidati esistenti di questa posizione dall’agente? Questo invia messaggi WhatsApp.",
+      "confirmWithCount_one": "Vuoi far gestire anche {{count}} candidato esistente di questa posizione dall’agente? Questo invia messaggi WhatsApp.",
+      "confirmWithCount_other": "Vuoi far gestire anche {{count}} candidati esistenti di questa posizione dall’agente? Questo invia messaggi WhatsApp.",
       "resultToast": "{{started}} su {{eligibleTotal}} avviati.",
       "queuedClause": " {{queued}} in coda.",
       "resultToastWithReasons": "{{started}} su {{eligibleTotal}} avviati, {{skippedTotal}} saltati: {{reasons}}.",
@@ -282,13 +282,13 @@
       }
     },
     "flowSource": {
-      "fromAgent": "Ereditato dall'agente collegato ({{agent}}). Non è ancora disponibile un valore predefinito per tipo di contratto.",
-      "agentHasNoFlow": "L'agente collegato non ha un flusso di colloquio configurato.",
-      "noContractType": "Questa posizione non ha un tipo di contratto impostato, quindi viene usato come ripiego il flusso proprio dell'agente.",
+      "fromAgent": "Ereditato dall’agente collegato ({{agent}}). Non è ancora disponibile un valore predefinito per tipo di contratto.",
+      "agentHasNoFlow": "L’agente collegato non ha un flusso di colloquio configurato.",
+      "noContractType": "Questa posizione non ha un tipo di contratto impostato, quindi viene usato come ripiego il flusso proprio dell’agente.",
       "fromVacancy": "Questa posizione usa il flusso {{flow}}.",
       "inactiveWarning": "Attenzione: questo flusso è inattivo, il colloquio verrà saltato."
     },
-    "flowPickerLabel": "Nessun flusso della posizione (predefinito dell'agente)",
+    "flowPickerLabel": "Nessun flusso della posizione (predefinito dell’agente)",
     "flowPickerPlaceholder": "Scegli un flusso di colloquio…",
     "workflow": {
       "sectionTitle": "Workflow di colloquio",
@@ -363,7 +363,7 @@
     "detachDone": "Candidatura scollegata"
   },
   "candidateSearch": {
-    "noLocation": "Questa posizione non ha ancora una posizione (coordinate). Aggiorna prima l'indirizzo, poi qui apparirà la mappa.",
+    "noLocation": "Questa posizione non ha ancora una posizione (coordinate). Aggiorna prima l’indirizzo, poi qui apparirà la mappa.",
     "functions": "Funzione",
     "statuses": "Disponibilità",
     "contractForms": "Tipo di contratto",
@@ -373,7 +373,7 @@
     "shownOf": "Mostra i {{shown}} più vicini su {{total}} candidati",
     "centerVacancy": "Posizione della vacatura",
     "refreshAdvice": "Aggiorna il consiglio di Koios",
-    "rematchStarted": "Koios sta riabbinando i candidati; l'elenco si aggiorna appena il workflow è completato.",
+    "rematchStarted": "Koios sta riabbinando i candidati; l’elenco si aggiorna appena il workflow è completato.",
     "rematchBusy": "È già in corso un ricalcolo per questa posizione.",
     "rematchMissing": "Il workflow \"Ricalcola lead (una posizione)\" è disattivato o mancante. Attivalo in Workflow.",
     "rematchBudget": "Il pacchetto di workflow è esaurito. Il ricalcolo non è partito.",
@@ -413,7 +413,7 @@
     "title": "Nuova posizione",
     "import": {
       "title": "Posizione da file",
-      "intro": "Importare un file crea subito queste posizioni. Non compila il modulo sottostante: controlla prima l'anteprima prima di confermare."
+      "intro": "Importare un file crea subito queste posizioni. Non compila il modulo sottostante: controlla prima l’anteprima prima di confermare."
     },
     "fields": {
       "title": "Titolo",
@@ -449,7 +449,7 @@
   },
   "map": {
     "pointCount": "{{count}} posizioni sulla mappa",
-    "pendingGeocode_one": "{{count}} posizione non è ancora sulla mappa. L'indirizzo viene elaborato automaticamente.",
+    "pendingGeocode_one": "{{count}} posizione non è ancora sulla mappa. L’indirizzo viene elaborato automaticamente.",
     "pendingGeocode_other": "{{count}} posizioni non sono ancora sulla mappa. Gli indirizzi vengono elaborati automaticamente."
   },
   "ai": {

@@ -1,6 +1,6 @@
 {
   "title": "Koios AI",
-  "subtitle": "Modelli, stato della connessione e tariffe per l'assistente Koios.",
+  "subtitle": "Modelli, stato della connessione e tariffe per l’assistente Koios.",
   "loading": "Caricamento…",
   "loadError": "Impossibile caricare le impostazioni di Koios.",
   "unavailable": "Koios non è disponibile per questa organizzazione.",
@@ -45,8 +45,8 @@
   },
   "voice": {
     "start": "Detta il tuo messaggio",
-    "stop": "Interrompi l'ascolto",
-    "denied": "Microfono negato. Consenti l'accesso nel tuo browser",
+    "stop": "Interrompi l’ascolto",
+    "denied": "Microfono negato. Consenti l’accesso nel tuo browser",
     "insecureContext": "La dettatura richiede una connessione sicura (https). Non disponibile in questa pagina",
     "errorServiceNotAllowed": "Il riconoscimento vocale è stato bloccato dal browser. Servizio non consentito",
     "errorAudioCapture": "Nessun microfono trovato. Controlla il tuo dispositivo",
@@ -93,7 +93,7 @@
     "resetToDefault": "Predefinito",
     "toggleAria": "Attiva o disattiva {{label}}",
     "otherGroup": "Altro",
-    "saveError": "Il salvataggio dell'impostazione dello strumento non è riuscito.",
+    "saveError": "Il salvataggio dell’impostazione dello strumento non è riuscito.",
     "showMore": "Altro",
     "showLess": "Meno",
     "groups": {
@@ -131,7 +131,7 @@
       "rateChat": "Limite chat",
       "rateOther": "Limite altre azioni",
       "perMinute": "{{count}} al minuto",
-      "perHour": "{{count}} all'ora",
+      "perHour": "{{count}} all’ora",
       "perSecond": "{{count}} al secondo"
     },
     "surfaces": {
@@ -204,9 +204,9 @@
   },
   "budget": {
     "title": "Budget giornaliero",
-    "hint": "Impostare i limiti di spesa giornalieri per l'utilizzo di Koios AI per utente e per la vostra organizzazione.",
+    "hint": "Impostare i limiti di spesa giornalieri per l’utilizzo di Koios AI per utente e per la vostra organizzazione.",
     "dailyUserLabel": "Limite per utente (EUR)",
-    "dailyTenantLabel": "Limite dell'organizzazione (EUR)",
+    "dailyTenantLabel": "Limite dell’organizzazione (EUR)",
     "noPermission": "Non hai il permesso di modificare queste impostazioni.",
     "saveError": "Errore nel salvataggio del budget",
     "saved": "Budget salvato"

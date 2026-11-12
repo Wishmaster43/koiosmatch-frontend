@@ -16,10 +16,10 @@
     "records": "Enregistrements sous-jacents",
     "loading": "Chargement…",
     "noRecords": "Aucun enregistrement sous-jacent.",
-    "rowsError": "Les enregistrements sous-jacents n'ont pas pu être chargés.",
+    "rowsError": "Les enregistrements sous-jacents n’ont pas pu être chargés.",
     "koios": "Conseil Koios AI",
-    "noAdvice": "Koios n'a pas encore de conseil pour ce chiffre.",
-    "adviceError": "Le conseil Koios n'a pas pu être chargé.",
+    "noAdvice": "Koios n’a pas encore de conseil pour ce chiffre.",
+    "adviceError": "Le conseil Koios n’a pas pu être chargé.",
     "search": "Rechercher…",
     "shownOf": "{{shown}} sur {{total}} affichés"
   },
@@ -31,7 +31,7 @@
     "opportunities": "Opportunités",
     "tasks": "Tâches",
     "matches": "Matchs",
-    "outreach": "Listes d'appels",
+    "outreach": "Listes d’appels",
     "whatsapp": "WhatsApp"
   },
   "candidates": {
@@ -54,7 +54,7 @@
       "contractForm": "Forme du contrat",
       "contractFormNone": "Sans forme de contrat"
     },
-    "kpiOrderFellBack": "Une carte KPI configurée dans les paramètres n'existe plus et a été réinitialisée par défaut.",
+    "kpiOrderFellBack": "Une carte KPI configurée dans les paramètres n’existe plus et a été réinitialisée par défaut.",
     "viewSwitch": {
       "ariaLabel": "Population",
       "candidates": "Candidats",
@@ -130,7 +130,7 @@
       "subtitle": "Compté à partir des postes ci-dessus : zéro candidature reçue sur cette période.",
       "empty": "Chaque poste de cette période a reçu au moins une candidature."
     },
-    "kpiOrderFellBack": "Une carte KPI configurée dans les paramètres n'existe plus et a été réinitialisée par défaut.",
+    "kpiOrderFellBack": "Une carte KPI configurée dans les paramètres n’existe plus et a été réinitialisée par défaut.",
     "depth": {
       "ttf": {
         "title": "Délai de pourvoi décomposé (médiane, jours)",
@@ -204,9 +204,9 @@
       "none": "Sans contrat"
     },
     "terminations": {
-      "title": "Motifs d'arrêt",
+      "title": "Motifs d’arrêt",
       "total": "Total des arrêts",
-      "rate": "Taux d'arrêt",
+      "rate": "Taux d’arrêt",
       "topReason": "Motif principal"
     },
     "summary": {
@@ -214,7 +214,7 @@
       "topContractForm": "Forme de contrat principale",
       "funnelRate": "Part via candidature"
     },
-    "kpiOrderFellBack": "Une carte KPI configurée dans les paramètres n'existe plus et a été réinitialisée par défaut.",
+    "kpiOrderFellBack": "Une carte KPI configurée dans les paramètres n’existe plus et a été réinitialisée par défaut.",
     "kpi": {
       "total": "Total",
       "newInPeriod": "Nouveaux sur la période",
@@ -247,9 +247,9 @@
       "conversionPct": "Conversion",
       "campaignsActive": "Campagnes actives",
       "campaignsDoneInPeriod": "Campagnes terminées sur la période",
-      "dueToday": "Échéance aujourd'hui"
+      "dueToday": "Échéance aujourd’hui"
     },
-    "kpiOrderFellBack": "Une carte KPI configurée dans les paramètres n'existe plus et a été réinitialisée par défaut.",
+    "kpiOrderFellBack": "Une carte KPI configurée dans les paramètres n’existe plus et a été réinitialisée par défaut.",
     "depth": {
       "channelFunnel": {
         "title": "Entonnoir par canal",
@@ -265,7 +265,7 @@
         "none": "Aucun canal"
       },
       "campaignSeries": {
-        "title": "Top 5 des listes d'appels par jour"
+        "title": "Top 5 des listes d’appels par jour"
       },
       "heatmap": {
         "title": "Meilleur moment de contact (atteint %)",
@@ -313,13 +313,13 @@
       "newInPeriod": "Nouvelles sur la période",
       "inboundInPeriod": "Entrants sur la période",
       "outboundInPeriod": "Sortants sur la période",
-      "appEchoesInPeriod": "Via l'app sur la période",
+      "appEchoesInPeriod": "Via l’app sur la période",
       "escalationsOpen": "Escalades ouvertes",
       "unansweredOverWindow": "Sans réponse au-delà du seuil",
       "avgFirstResponseMinutes": "Temps de 1re réponse moy.",
       "minutesUnit": "minutes"
     },
-    "kpiOrderFellBack": "Une carte KPI configurée dans les paramètres n'existe plus et a été réinitialisée par défaut.",
+    "kpiOrderFellBack": "Une carte KPI configurée dans les paramètres n’existe plus et a été réinitialisée par défaut.",
     "channel": {
       "waba": "WABA",
       "waba_coex": "WABA · local",
@@ -352,7 +352,7 @@
       "rejected": "Refusé",
       "placed": "Placé"
     },
-    "kpiOrderFellBack": "Une carte KPI configurée dans les paramètres n'existe plus et a été réinitialisée par défaut.",
+    "kpiOrderFellBack": "Une carte KPI configurée dans les paramètres n’existe plus et a été réinitialisée par défaut.",
     "kpi": {
       "total": "Total candidatures",
       "new": "Nouvelles",
@@ -360,7 +360,7 @@
       "matched": "Mises en relation",
       "rejected": "Rejetées",
       "conversionPct": "Conversion",
-      "avgDaysToMatch": "Jours moy. jusqu'au match",
+      "avgDaysToMatch": "Jours moy. jusqu’au match",
       "tooLongInStage": "Trop longtemps en phase",
       "missingAppointment": "Rendez-vous manquant",
       "daysUnit": "jours"
@@ -398,7 +398,7 @@
     },
     "forecastCount": "Affaires prévues",
     "forecastValue": "Valeur prévue",
-    "kpiOrderFellBack": "Une carte KPI configurée dans les paramètres n'existe plus et a été réinitialisée par défaut.",
+    "kpiOrderFellBack": "Une carte KPI configurée dans les paramètres n’existe plus et a été réinitialisée par défaut.",
     "axes": {
       "value": "Valeur du pipeline"
     },
@@ -425,7 +425,7 @@
       "open": "Ouvertes",
       "done": "Terminées",
       "overdue": "En retard",
-      "doneRate": "Taux d'achèvement",
+      "doneRate": "Taux d’achèvement",
       "topStatus": "Statut principal",
       "topType": "Type principal",
       "topPriority": "Priorité principale",
@@ -443,14 +443,14 @@
     "noTeam": "Sans service",
     "noBranch": "Sans agence",
     "overdueRate": "Taux de retard",
-    "kpiOrderFellBack": "Une carte KPI configurée dans les paramètres n'existe plus et a été réinitialisée par défaut.",
+    "kpiOrderFellBack": "Une carte KPI configurée dans les paramètres n’existe plus et a été réinitialisée par défaut.",
     "kpi": {
       "total": "Total des tâches",
       "open": "Ouvertes",
       "overdue": "En retard",
       "doneInPeriod": "Terminées sur la période",
       "createdInPeriod": "Créées sur la période",
-      "dueToday": "Échéance aujourd'hui",
+      "dueToday": "Échéance aujourd’hui",
       "dueThisWeek": "Échéance cette semaine",
       "withoutAssignee": "Sans responsable",
       "avgCompletionDays": "Durée moyenne",
@@ -475,7 +475,7 @@
       "owner": "Propriétaire",
       "branch": "Agence"
     },
-    "kpiOrderFellBack": "Une carte KPI configurée dans les paramètres n'existe plus et a été réinitialisée par défaut.",
+    "kpiOrderFellBack": "Une carte KPI configurée dans les paramètres n’existe plus et a été réinitialisée par défaut.",
     "viewSwitch": {
       "ariaLabel": "Population",
       "customers": "Clients",
@@ -531,7 +531,7 @@
     "kpis": { "stale": "Sans contact", "staleThreshold": "> {{days}} jours ouvrés", "staleNoThreshold": "Sans contact récent" },
     "series": "Leads dans le temps",
     "window": "Leads du {{from}} au {{to}}",
-    "kpiOrderFellBack": "Une carte KPI configurée dans les paramètres n'existe plus et a été réinitialisée par défaut."
+    "kpiOrderFellBack": "Une carte KPI configurée dans les paramètres n’existe plus et a été réinitialisée par défaut."
   },
   "prospects": {
     "loading": "Chargement des prospects…",
@@ -540,7 +540,7 @@
     "total": "Total des prospects",
     "series": "Prospects dans le temps",
     "window": "Prospects du {{from}} au {{to}}",
-    "kpiOrderFellBack": "Une carte KPI configurée dans les paramètres n'existe plus et a été réinitialisée par défaut."
+    "kpiOrderFellBack": "Une carte KPI configurée dans les paramètres n’existe plus et a été réinitialisée par défaut."
   },
   "compare": {
     "label": "Comparer avec",
@@ -553,12 +553,12 @@
     "rangeSeparator": "au",
     "previousValue": "precedent : {{value}}",
     "compareLoading": "Chargement de la comparaison…",
-    "compareError": "La comparaison n'a pas pu être chargée."
+    "compareError": "La comparaison n’a pas pu être chargée."
   },
   "hub": {
     "attention": {
       "title": "Nécessite une attention",
-      "error": "Les signaux d'attention n'ont pas pu être chargés",
+      "error": "Les signaux d’attention n’ont pas pu être chargés",
       "cards": {
         "candidates_no_follow_up": "Candidats sans suivi",
         "vacancies_stale_online": "Offres en ligne sans candidats",
@@ -570,8 +570,8 @@
         "vacancies_open": "Postes ouverts",
         "conversations_unanswered": "Conversations sans réponse"
       },
-      "empty": "Rien ne requiert d'attention : tout est à jour.",
-      "loading": "Chargement des points d'attention…"
+      "empty": "Rien ne requiert d’attention : tout est à jour.",
+      "loading": "Chargement des points d’attention…"
     },
     "charts": {
       "applicationsTrend": "Candidatures dans le temps",
@@ -601,8 +601,8 @@
     "target": "objectif {{value}}",
     "warn": "alerte {{value}}",
     "status": {
-      "ok": "dans l'objectif",
-      "warn": "proche de l'objectif",
+      "ok": "dans l’objectif",
+      "warn": "proche de l’objectif",
       "alert": "hors objectif"
     }
   }

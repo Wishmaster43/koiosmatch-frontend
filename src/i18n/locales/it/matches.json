@@ -86,7 +86,7 @@
     "editClient": "Cambia cliente",
     "clientChange": {
       "title": "Collega il match a un altro cliente",
-      "body": "Questo match verrà collegato a {{customer}} (posizione: {{location}}, reparto: {{department}}). I dati di fatturazione verranno ridefiniti a partire dal nuovo cliente. Responsabile, sede propria e posizione collegata restano invariati: verificali dopo il cambio. L'approvazione può tornare 'in attesa'. Continuare?",
+      "body": "Questo match verrà collegato a {{customer}} (posizione: {{location}}, reparto: {{department}}). I dati di fatturazione verranno ridefiniti a partire dal nuovo cliente. Responsabile, sede propria e posizione collegata restano invariati: verificali dopo il cambio. L’approvazione può tornare 'in attesa'. Continuare?",
       "none": "nessuno",
       "saveError": "Impossibile salvare la modifica.",
       "currentOwner": "Responsabile: {{owner}}",
@@ -177,7 +177,7 @@
       "deprecated": "Questo campo verrà rimosso. Sposta il testo su Note. Lì otterrà un autore, una data, un tipo e un canale, e comparirà nella cronologia.",
       "moveToNotes": "Sposta nelle note",
       "moving": "Spostamento in corso…",
-      "moved": "L'osservazione è stata spostata nelle note.",
+      "moved": "L’osservazione è stata spostata nelle note.",
       "moveError": "Lo spostamento nelle note non è riuscito. Il testo non è stato modificato.",
       "moveClearError": "La nota è stata salvata, ma non è stato possibile svuotare il vecchio campo. Il testo ora esiste in due posti."
     },
@@ -382,7 +382,7 @@
     "analyzing": "Koios AI sta analizzando il match…",
     "scoreLabel": "Punteggio",
     "scoreGood": "Match forte ({{score}}).",
-    "scoreAverage": "Match nella media ({{score}}). Verifica l'idoneità.",
+    "scoreAverage": "Match nella media ({{score}}). Verifica l’idoneità.",
     "scorePoor": "Match debole ({{score}}). Richiede attenzione.",
     "scoreUnknown": "Nessun punteggio disponibile ancora.",
     "windowLabel": "Periodo contrattuale",
@@ -413,9 +413,9 @@
     "viaCandidate": "Questo match non ha una propria candidatura; queste sono le sessioni IA del candidato.",
     "pause": "Metti in pausa agente IA",
     "resume": "Riprendi agente IA",
-    "pauseConfirmTitle": "Mettere in pausa l'agente IA?",
-    "pauseConfirm": "Hai ripreso questa conversazione. L'agente IA non invierà messaggi finché non lo riprenderai.",
+    "pauseConfirmTitle": "Mettere in pausa l’agente IA?",
+    "pauseConfirm": "Hai ripreso questa conversazione. L’agente IA non invierà messaggi finché non lo riprenderai.",
     "pauseConfirmAction": "Pausa",
-    "controlFailed": "Non è stato possibile regolare l'agente IA."
+    "controlFailed": "Non è stato possibile regolare l’agente IA."
   }
 }

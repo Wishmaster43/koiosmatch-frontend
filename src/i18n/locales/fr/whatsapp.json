@@ -2,7 +2,7 @@
   "tabs": {
     "overview": "Aperçu",
     "messages": "Messages",
-    "queue": "File d'attente",
+    "queue": "File d’attente",
     "escalations": "Escalades"
   },
   "drill": {
@@ -10,8 +10,8 @@
   },
   "overview": {
     "statusTitle": "Statut des messages",
-    "reasonsTitle": "Motifs d'escalade",
-    "channelTitle": "Par canal (aujourd'hui)",
+    "reasonsTitle": "Motifs d’escalade",
+    "channelTitle": "Par canal (aujourd’hui)",
     "channelActivityTitle": "Messages par canal, 14 derniers jours"
   },
   "title": "WhatsApp",
@@ -22,14 +22,14 @@
   "inbound": "Entrant",
   "chartTitle": "Activité des messages — 14 derniers jours",
   "kpi": {
-    "messagesToday": "Messages aujourd'hui",
+    "messagesToday": "Messages aujourd’hui",
     "candidatesContacted": "Candidats contactés",
     "shiftsFilled": "Missions pourvues via WA",
     "openEscalations": "Escalades ouvertes",
-    "sentToday": "Envoyés aujourd'hui",
-    "receivedToday": "Reçus aujourd'hui",
-    "queuedToday": "En attente (aujourd'hui)",
-    "failedToday": "Échecs d'envoi (aujourd'hui)",
+    "sentToday": "Envoyés aujourd’hui",
+    "receivedToday": "Reçus aujourd’hui",
+    "queuedToday": "En attente (aujourd’hui)",
+    "failedToday": "Échecs d’envoi (aujourd’hui)",
     "noReplyEscalations": "Escaladé, sans réponse"
   },
   "feed": {
@@ -47,7 +47,7 @@
   },
   "noConn": {
     "title": "Aucune connexion WhatsApp",
-    "desc": "Aucune connexion WhatsApp Business n'a encore été configurée pour ce locataire. Configurez une connexion via le backend pour voir les messages et les statistiques ici.",
+    "desc": "Aucune connexion WhatsApp Business n’a encore été configurée pour ce locataire. Configurez une connexion via le backend pour voir les messages et les statistiques ici.",
     "hintLabel": "Comment corriger",
     "hint": "Créez une connexion Business via Paramètres → WhatsApp, ou demandez à l’administrateur de cette agence de le faire."
   },
@@ -80,10 +80,10 @@
     "active": "Actif",
     "finished": "Terminé",
     "loading": "Chargement de la file…",
-    "empty": "Aucun message dans la file aujourd'hui.",
+    "empty": "Aucun message dans la file aujourd’hui.",
     "notAvailable": "File pas encore disponible",
     "notAvailableDesc": "Cette fonctionnalité sera bientôt fournie par le backend.",
-    "error": "La file n'a pas pu être chargée.",
+    "error": "La file n’a pas pu être chargée.",
     "priority": "Priorité",
     "tempo": "Tempo",
     "sent": "envoyés",
@@ -94,7 +94,7 @@
       "normal": "Normale",
       "low": "Faible"
     },
-    "wabaTitle": "File d'attente WABA"
+    "wabaTitle": "File d’attente WABA"
   },
   "messages": {
     "date": "Date",
@@ -116,7 +116,7 @@
     "priority": "Priorité"
   },
   "waWebQueue": {
-    "title": "File d'attente WhatsApp Web",
+    "title": "File d’attente WhatsApp Web",
     "filterStatus": "Statut",
     "status": {
       "queued": "En attente",
@@ -132,7 +132,7 @@
       "type": "Type",
       "priority": "Priorité",
       "status": "Statut",
-      "holdReason": "Raison d'attente",
+      "holdReason": "Raison d’attente",
       "scheduledAt": "Programmé le",
       "attempts": "Tentatives",
       "actions": "Actions"
@@ -141,11 +141,11 @@
     "reason": {
       "scheduled": "Programmé dans le futur",
       "rate_limit": "Limite du numéro atteinte",
-      "priority_wait": "En attente d'une priorité plus élevée",
-      "ready": "Prêt à l'envoi",
-      "new_number_hourly": "Limite d'échauffement (horaire)",
-      "new_number_daily": "Limite d'échauffement (journalière)",
-      "new_number_weekly": "Limite d'échauffement (hebdomadaire)"
+      "priority_wait": "En attente d’une priorité plus élevée",
+      "ready": "Prêt à l’envoi",
+      "new_number_hourly": "Limite d’échauffement (horaire)",
+      "new_number_daily": "Limite d’échauffement (journalière)",
+      "new_number_weekly": "Limite d’échauffement (hebdomadaire)"
     },
     "action": {
       "sendNow": "Envoyer maintenant",
@@ -159,9 +159,9 @@
     "estDrain": "± {{hours}} h pour vider",
     "rateAndDrain": "{{rate}} par heure · ± {{hours}} h pour se vider",
     "rateLimit": "{{rate}} par heure",
-    "loading": "Chargement de la file d'attente…",
-    "error": "Impossible de charger la file d'attente.",
-    "empty": "Rien dans la file d'attente."
+    "loading": "Chargement de la file d’attente…",
+    "error": "Impossible de charger la file d’attente.",
+    "empty": "Rien dans la file d’attente."
   },
   "conversations": {
     "title": "Conversations",
@@ -193,15 +193,15 @@
     "windowClosesIn": "La fenêtre se ferme dans {{time}}",
     "countdownHours": "{{hours}} h {{minutes}} min",
     "countdownMinutes": "{{minutes}} min",
-    "pauseAgent": "Mettre l'agent IA en pause",
-    "resumeAgent": "Reprendre l'agent IA",
-    "pauseConfirmTitle": "Mettre l'agent IA en pause ?",
-    "pauseConfirm": "Vous reprenez cette conversation. L'agent IA n'envoie plus de messages tant que vous ne le relancez pas.",
+    "pauseAgent": "Mettre l’agent IA en pause",
+    "resumeAgent": "Reprendre l’agent IA",
+    "pauseConfirmTitle": "Mettre l’agent IA en pause ?",
+    "pauseConfirm": "Vous reprenez cette conversation. L’agent IA n’envoie plus de messages tant que vous ne le relancez pas.",
     "pauseConfirmAction": "Mettre en pause",
-    "agentControlFailed": "Impossible de modifier l'agent IA."
+    "agentControlFailed": "Impossible de modifier l’agent IA."
   },
   "embeddedSignup": {
-    "pending": "Numéro enregistré, en attente d'activation par Meta.",
+    "pending": "Numéro enregistré, en attente d’activation par Meta.",
     "pendingReasons": {
       "subscribed_apps": "Meta doit encore activer l’abonnement webhook de ce numéro.",
       "phone_numbers": "Meta doit encore synchroniser le numéro de téléphone."

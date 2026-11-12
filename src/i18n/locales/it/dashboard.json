@@ -15,7 +15,7 @@
       "dayOnlyMax": "{{value}}, massimo giornaliero {{target}}"
     },
     "candidatesTotal": "Totale candidati",
-    "inAts": "Nell'ATS",
+    "inAts": "Nell’ATS",
     "notContacted6m": "Non contattati >6 mesi",
     "neverContacted": "Mai contattati",
     "openTasks": "Attività aperte",
@@ -212,7 +212,7 @@
       "week": "Questa settimana",
       "maand": "Questo mese",
       "kwartaal": "Questo trimestre",
-      "jaar": "Quest'anno"
+      "jaar": "Quest’anno"
     }
   },
   "koiosForYou": {
@@ -222,7 +222,7 @@
     "breakdownTitle": "Per azione",
     "empty": "Koios non ha ancora fatto nulla per te",
     "emptySub": "Le azioni che Koios esegue per te appariranno qui.",
-    "loadError": "Impossibile caricare l'attività di Koios.",
+    "loadError": "Impossibile caricare l’attività di Koios.",
     "category": {
       "tasks": "Attività",
       "whatsapp": "WhatsApp",

@@ -1,10 +1,10 @@
 {
-  "changelogScrubbedErasure": "Dati cancellati su richiesta dell'interessato (GDPR)",
+  "changelogScrubbedErasure": "Dati cancellati su richiesta dell’interessato (GDPR)",
   "changelogScrubbed": "Dati cancellati (GDPR)",
   "trash": {
     "view": "Cestino",
     "markAction": "Elimina definitivamente",
-    "unmarkAction": "Ripristina nell'archivio",
+    "unmarkAction": "Ripristina nell’archivio",
     "pendingSince": "Nel cestino dal {{date}}",
     "eraseAround": "verrà eliminato definitivamente intorno al {{date}}",
     "eraseAutomatic": "verrà eliminato definitivamente in automatico dopo il periodo di conservazione",
@@ -37,7 +37,7 @@
       "conversion": "Conversione"
     },
     "marked": "Spostato nel cestino.",
-    "unmarked": "Ripristinato nell'archivio."
+    "unmarked": "Ripristinato nell’archivio."
   },
   "actionFailed": "Azione non riuscita. Riprova.",
   "consentState": {
@@ -56,12 +56,12 @@
   },
   "upload": {
     "tooLarge": "Questo file è troppo grande per il server. Scegli un file più piccolo.",
-    "storageUnavailable": "L'archiviazione non è temporaneamente disponibile. Riprova.",
+    "storageUnavailable": "L’archiviazione non è temporaneamente disponibile. Riprova.",
     "typeNotAllowed": "Questo tipo di file non è consentito. Consentiti: {{allowed}}.",
     "tooLargeMax": "Questo file è troppo grande. Massimo {{max}} MB.",
-    "rejectedByScanner": "Questo file è stato rifiutato dall'antivirus.",
+    "rejectedByScanner": "Questo file è stato rifiutato dall’antivirus.",
     "scanPending": "Scansione antivirus in corso",
-    "scanRejected": "Rifiutato dall'antivirus"
+    "scanRejected": "Rifiutato dall’antivirus"
   },
   "eraseDialog": {
     "password": "Password",
@@ -73,10 +73,10 @@
     "reason": "Motivo",
     "hint": "Cosa è successo? Questo viene registrato nel log di controllo.",
     "errors": {
-      "contract_not_in_flight": "Non c'è più nessun invio in corso.",
+      "contract_not_in_flight": "Non c’è più nessun invio in corso.",
       "contract_already_sent": "Il contratto è già stato inviato.",
       "invoice_already_sent": "La fattura è già stata inviata per email.",
-      "invoice_not_sending": "Non c'è nessun invio email in corso."
+      "invoice_not_sending": "Non c’è nessun invio email in corso."
     }
   },
   "save": "Salva",
@@ -229,20 +229,20 @@
     "newChatReady": "Nuova chat pronta, scrivi la tua domanda",
     "newChatShort": "Nuovo",
     "addContext": "Aggiungi contesto",
-    "taskPlaceholder": "Inserisci un'attività",
+    "taskPlaceholder": "Inserisci un’attività",
     "attachFile": "Allega file",
     "welcome": "Ciao {{name}}, cosa posso fare per te?",
     "newChatStarted": "Nuova chat avviata. Come posso aiutarti?",
     "stepsToggle": "Dettagli ({{count}})",
     "typing": "Koios sta scrivendo una risposta",
-    "refusedOrg": "Non consentito all'interno della tua organizzazione.",
+    "refusedOrg": "Non consentito all’interno della tua organizzazione.",
     "refusedRights": "Non hai permessi sufficienti per questa azione.",
     "stopRefused": "Rifiutato",
     "stopMaxSteps": "Non è stato possibile completare entro i passaggi previsti",
     "notConfigured": "Koios non è ancora collegato.",
     "errorReply": "Impossibile contattare Koios. Riprova.",
-    "budgetExceededDaily": "Il budget giornaliero di Koios è stato raggiunto. Domani Koios sarà di nuovo disponibile, oppure chiedi all'amministratore di aumentare il budget.",
-    "budgetExceededMonthly": "Il budget mensile di Koios di questa organizzazione è stato raggiunto. Dal 1° del mese prossimo Koios sarà di nuovo disponibile, oppure chiedi all'amministratore di aumentare il budget.",
+    "budgetExceededDaily": "Il budget giornaliero di Koios è stato raggiunto. Domani Koios sarà di nuovo disponibile, oppure chiedi all’amministratore di aumentare il budget.",
+    "budgetExceededMonthly": "Il budget mensile di Koios di questa organizzazione è stato raggiunto. Dal 1° del mese prossimo Koios sarà di nuovo disponibile, oppure chiedi all’amministratore di aumentare il budget.",
     "forbidden": "Non hai accesso a Koios.",
     "usageLine": "{{model}} · {{tokens}} token",
     "offline": "Non connesso",
@@ -293,9 +293,9 @@
       "refusedTitle": "Non eseguito completamente",
       "confirmDisabledConnection": "Il collegamento necessario non è attivo. Attivalo prima nelle impostazioni.",
       "connectionCheckLoading": "Verifica del collegamento in corso…",
-      "connectionCheckUnknown": "Stato del collegamento sconosciuto. Il server lo verifica al momento dell'esecuzione.",
+      "connectionCheckUnknown": "Stato del collegamento sconosciuto. Il server lo verifica al momento dell’esecuzione.",
       "reasons": {
-        "no_email_consent": "Il candidato non ha dato il consenso per l'e-mail. Il resto è stato eseguito.",
+        "no_email_consent": "Il candidato non ha dato il consenso per l’e-mail. Il resto è stato eseguito.",
         "no_mobile_or_consent": "Nessun numero di cellulare o nessun consenso per questo canale.",
         "no_active_connection": "Il collegamento necessario non è attivo.",
         "send_failed": "Invio non riuscito.",
@@ -451,7 +451,7 @@
       "none": "Ancora nessun consiglio riepilogativo",
       "generatedAt": "Generato il {{date}}",
       "pending": "Koios sta preparando il consiglio...",
-      "alreadyRunning": "Per questo record è già in corso un'elaborazione del consiglio.",
+      "alreadyRunning": "Per questo record è già in corso un’elaborazione del consiglio.",
       "unavailable": "Il consiglio IA non è abilitato per questa sezione.",
       "verdict": {
         "proceed": "Procedere",
@@ -470,7 +470,7 @@
       "timeout": "Il consiglio non è arrivato entro un minuto. Aggiorna la pagina o riprova più tardi."
     },
     "welcomeAnonymous": "Ciao, cosa posso fare per te?",
-    "welcomeAttention_one": "C'è 1 punto che richiede la tua attenzione.",
+    "welcomeAttention_one": "C’è 1 punto che richiede la tua attenzione.",
     "welcomeAttention_other": "Ci sono {{count}} punti che richiedono la tua attenzione."
   },
   "actionRules": {
@@ -507,7 +507,7 @@
     },
     "nextAction": {
       "auto_processing": "Verrà elaborato automaticamente.",
-      "check_followup_task": "Controlla l'attività di follow-up creata."
+      "check_followup_task": "Controlla l’attività di follow-up creata."
     },
     "askKoios": "Chiedi a Koios",
     "remove": "Rimuovi",
@@ -532,7 +532,7 @@
     "refresh": "Geocodifica di nuovo (OpenCage)",
     "started": "Nuovo recupero avviato…",
     "updated": "Coordinate aggiornate.",
-    "notFound": "Indirizzo non trovato. Controlla i dati dell'indirizzo."
+    "notFound": "Indirizzo non trovato. Controlla i dati dell’indirizzo."
   },
   "noAccess": "Nessun accesso",
   "noAccessDesc": "Non hai i permessi per visualizzare questa pagina.",
@@ -608,14 +608,14 @@
       "alt": "Logo OpenCage",
       "linked": "Collegato",
       "notGeocoded": "Non ancora geocodificato",
-      "autoInfo": "Le coordinate vengono aggiornate automaticamente quando l'indirizzo cambia.",
+      "autoInfo": "Le coordinate vengono aggiornate automaticamente quando l’indirizzo cambia.",
       "readOnly": "Le coordinate provengono dalla location cliente stessa; la ri-geocodifica non è ancora possibile qui."
     }
   },
   "breadcrumb": "Percorso di navigazione",
   "branchSection": {
-    "widenTitle": "Scollegare l'ultima sede?",
-    "widenMessage": "Questa è l'unica sede collegata. Scollegarla rende di nuovo questo record visibile a tutte le sedi."
+    "widenTitle": "Scollegare l’ultima sede?",
+    "widenMessage": "Questa è l’unica sede collegata. Scollegarla rende di nuovo questo record visibile a tutte le sedi."
   },
   "drillPager": {
     "prev": "Precedente",
@@ -624,20 +624,20 @@
     "nextAt": "Successivo ({{index}} di {{total}})"
   },
   "new": "Nuovo",
-  "aiGenerated": "Generato dall'AI",
-  "aiGeneratedHint": "Generato da Koios AI. Controlla prima dell'uso.",
+  "aiGenerated": "Generato dall’AI",
+  "aiGeneratedHint": "Generato da Koios AI. Controlla prima dell’uso.",
   "notesAssist": {
     "title": "Assistente Koios",
     "needsText": "Aggiungi prima del testo",
     "improve": "Migliora",
     "summarize": "Riassumi",
-    "actions": "Punti d'azione",
+    "actions": "Punti d’azione",
     "process": "Elabora",
     "summarizeProcess": "Riassumi",
-    "noItems": "Nessun punto d'azione trovato",
+    "noItems": "Nessun punto d’azione trovato",
     "apply": "Applica",
     "discard": "Scarta",
-    "error": "L'assistente Koios AI non è disponibile. Riprova.",
+    "error": "L’assistente Koios AI non è disponibile. Riprova.",
     "actionTypes": {
       "task": "Attività",
       "whatsapp": "WhatsApp",
@@ -649,7 +649,7 @@
     "proposeCv": {
       "label": "CV per la proposta",
       "placeholder": "Scegli un CV salvato",
-      "none": "Nessun CV salvato per ora. Koios crea il CV nello stile della casa all'esecuzione.",
+      "none": "Nessun CV salvato per ora. Koios crea il CV nello stile della casa all’esecuzione.",
       "preparing": "Creazione del CV nello stile della casa…",
       "prepareFailed": "Impossibile creare il CV nello stile della casa.",
       "loadError": "Impossibile caricare i CV."
@@ -715,7 +715,7 @@
     "diffRemoved": "Rimosso",
     "viewLabel": "Visualizzazione",
     "panel": {
-      "title": "Punti d'azione",
+      "title": "Punti d’azione",
       "edit": "Modifica",
       "statusProposed": "Proposto",
       "statusPending": "In attesa di conferma",
@@ -792,7 +792,7 @@
     "restoreConfirm": "Ripristinare la versione del {{date}}?",
     "restoreConfirmNoDate": "Ripristinare la versione precedente?",
     "restoreNotice": "Ripristinato. Puoi ancora annullare questa operazione una volta.",
-    "restoreUnavailable": "Non c'è una versione precedente da ripristinare.",
+    "restoreUnavailable": "Non c’è una versione precedente da ripristinare.",
     "links": {
       "title": "Collegamenti",
       "add": "Collega",
@@ -810,7 +810,7 @@
     }
   },
   "errors": {
-    "koiosCreditExhausted": "Il credito Koios di questa organizzazione è esaurito o non ancora attivato. Ricarica il saldo o contatta l'amministratore.",
+    "koiosCreditExhausted": "Il credito Koios di questa organizzazione è esaurito o non ancora attivato. Ricarica il saldo o contatta l’amministratore.",
     "koiosUnavailable": "Koios non è disponibile in questo momento. Riprova a breve.",
     "helloflexContractTypeUnmapped": "Nessun tipo di contratto HelloFlex collegato per questo tipo di contratto. Configuralo in Impostazioni → HelloFlex.",
     "recipientSuppressed": "Questo indirizzo è bloccato dopo un precedente bounce o reclamo; non verrà inviato di nuovo.",
@@ -818,14 +818,14 @@
     "inboundScenarioClash": "Un altro scenario attivo risponde già a questo numero e a questa lane: {{clash_name}}.",
     "inboundScenarioNumberMissing": "Questo scenario non indica alcun numero di questa agenzia sulla sua lane e non può essere attivato.",
     "contractInFlight": "Per questo match è già in corso un invio di contratto.",
-    "contractUnconfirmed": "L'invio precedente del contratto per questo match non è mai stato confermato. Un membro dell'agenzia è stato avvisato.",
+    "contractUnconfirmed": "L’invio precedente del contratto per questo match non è mai stato confermato. Un membro dell’agenzia è stato avvisato.",
     "contractSent": "Per questo match è già stato inviato un contratto di recente.",
     "twoWayOff": "Il collegamento con HelloFlex è a senso unico, quindi da qui non è possibile inviare contratti.",
     "idempotencyKeyReused": "Questa azione è già stata inviata con dati diversi. Riprova.",
-    "cvScanUnavailable": "L'antivirus non è raggiungibile. Il CV non è stato salvato e non è stato inviato nulla. Riprova più tardi.",
-    "cvInfected": "Il CV è stato respinto dall'antivirus ed eliminato. Non è stato inviato nulla.",
+    "cvScanUnavailable": "L’antivirus non è raggiungibile. Il CV non è stato salvato e non è stato inviato nulla. Riprova più tardi.",
+    "cvInfected": "Il CV è stato respinto dall’antivirus ed eliminato. Non è stato inviato nulla.",
     "documentNotAvailable": "Questo documento non è ancora disponibile: la scansione antivirus non è terminata o ha rifiutato il file.",
-    "tenantNotReady": "Questa agenzia è ancora in fase di configurazione o la configurazione è fallita. Riprova più tardi o scegli un'altra agenzia.",
+    "tenantNotReady": "Questa agenzia è ancora in fase di configurazione o la configurazione è fallita. Riprova più tardi o scegli un’altra agenzia.",
     "smCredentialsUnsatisfied": "La connessione Shiftmanager ha credenziali incomplete o non valide e non può recuperare nulla. Controlla la connessione in Impostazioni → Shiftmanager.",
     "numberingFrozen": "Questa serie ha già emesso un numero: prefisso, numero di cifre e valore iniziale sono bloccati.",
     "helloflexStartDateMissing": "Nel match manca la data di inizio.",
@@ -835,7 +835,7 @@
     "helloflexCandidateUnlinked": "Il candidato non è collegato a HelloFlex.",
     "helloflexBranchUnlinked": "La sede {{branch}} non è collegata a HelloFlex.",
     "helloflexModuleOff": "Il modulo HelloFlex non è attivo per questa agenzia.",
-    "aiDisclosureMissing": "Nell'introduzione del colloquio manca l'informativa obbligatoria sull'IA; modifica il modello prima di attivarlo.",
+    "aiDisclosureMissing": "Nell’introduzione del colloquio manca l’informativa obbligatoria sull’IA; modifica il modello prima di attivarlo.",
     "fieldRequired": "{{field}} è obbligatorio."
   },
   "timeline": {
@@ -860,7 +860,7 @@
   "koiosSuggested": "Suggerito da Koios AI in base alla cronologia del candidato",
   "koiosSuggestedOwnerAgent": "Suggerito da Koios AI in base al responsabile della posizione",
   "koiosSuggestedBranch": "Suggerito da Koios AI in base al cliente o alla propria filiale",
-  "koiosRejectAdvice": "Koios AI suggerisce di respingere. Scegli tu il motivo dall'elenco.",
+  "koiosRejectAdvice": "Koios AI suggerisce di respingere. Scegli tu il motivo dall’elenco.",
   "dragList": {
     "moveUp": "Sposta su",
     "moveDown": "Sposta giù"
@@ -975,7 +975,7 @@
       "cv": "CV",
       "diploma": "Diploma",
       "photo": "Foto",
-      "idDocument": "Documento d'identità",
+      "idDocument": "Documento d’identità",
       "other": "Altro",
       "certificateOfConductVOG": "Certificato di condotta (VOG)"
     },
@@ -1042,7 +1042,7 @@
       "forkliftDriver": "Carrellista",
       "careAssistant": "Assistente di cura",
       "careAssistantPlus": "Assistente di cura plus",
-      "packer": "Addetto all'imballaggio",
+      "packer": "Addetto all’imballaggio",
       "cook": "Cuoco/a",
       "logisticsEmployee": "Addetto alla logistica",
       "warehouseOperative": "Addetto al magazzino",
@@ -1337,7 +1337,7 @@
       "retentionPeriodExpiryNotification": "Notifica di scadenza del periodo di conservazione",
       "archiveOnExpiredRetentionPeriod": "Archivia alla scadenza del periodo di conservazione",
       "escalationFileArchivedTooLong": "Escalation: fascicolo archiviato da troppo tempo",
-      "emailBackofficeOnArchiving": "Invia e-mail al backoffice all'archiviazione",
+      "emailBackofficeOnArchiving": "Invia e-mail al backoffice all’archiviazione",
       "aiPlannerEmployeeStatusChange": "AI Planner - Employee status change",
       "aiPlannerOfferingShiftsActiveNEW": "AI Planner - Offering Shifts - Attivo - NUOVO",
       "aiPlannerOfferingShiftsActive": "AI Planner - Offering Shifts - Attivo",
@@ -1348,7 +1348,7 @@
       "aiPlannerNoResponseEscalation72h": "AI Planner - Escalation nessuna risposta (>72h)",
       "aiPlannerWorkedShifts": "AI Planner - Worked Shifts",
       "aiPlannerResponse": "AI Planner - Response",
-      "aiRecruiterPicksUpANewApplication": "L'AI recruiter prende in carico una nuova candidatura",
+      "aiRecruiterPicksUpANewApplication": "L’AI recruiter prende in carico una nuova candidatura",
       "syncAll": "Sincronizza tutto",
       "syncCandidates": "Sincronizza candidati",
       "syncCustomers": "Sincronizza clienti",
@@ -1459,7 +1459,7 @@
       "updated": "Impostazione livello fatturazione modificata"
     },
     "branch_assignment": {
-      "updated": "Sedi assegnate all'utente aggiornate"
+      "updated": "Sedi assegnate all’utente aggiornate"
     },
     "build_documents_zip_export": {
       "completed": "Export ZIP completato: documenti",
@@ -1523,7 +1523,7 @@
       "bulk_updated": "Clienti aggiornati in blocco",
       "created": "Cliente creato da Koios",
       "merged": "Cliente unito",
-      "restored": "Cliente ripristinato dall'archivio",
+      "restored": "Cliente ripristinato dall’archivio",
       "updated": "Cliente aggiornato"
     },
     "customer_contact": {
@@ -1555,7 +1555,7 @@
       "cleared": "Dati personali cancellati per conformità"
     },
     "deletion_guard": {
-      "marked": "Contrassegnato per l'eliminazione",
+      "marked": "Contrassegnato per l’eliminazione",
       "unmarked": "Contrassegno di eliminazione rimosso"
     },
     "document_zip_import": {

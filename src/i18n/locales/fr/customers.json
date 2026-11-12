@@ -123,7 +123,7 @@
     "blacklistReasonTitle": "Raison de la liste noire",
     "blacklistReasonLabel": "Raison",
     "blacklistReasonPick": "Choisir une raison…",
-    "blacklistReasonNone": "Aucun motif de liste noire n'est encore configuré pour ce client.",
+    "blacklistReasonNone": "Aucun motif de liste noire n’est encore configuré pour ce client.",
     "blacklistReasonSetup": "Configurer les motifs",
     "blacklistReasonOptionalHint": "Une raison est facultative pour ce locataire"
   },
@@ -164,9 +164,9 @@
     "billingAddress": {
       "title": "Adresse de facturation",
       "poBox": "Boîte postale",
-      "usesVisitAddress": "Vide. La facture est envoyée à l'adresse de visite.",
+      "usesVisitAddress": "Vide. La facture est envoyée à l’adresse de visite.",
       "visitEmpty": "Aucune adresse de visite renseignée",
-      "hint": "Laissez vide pour facturer à l'adresse de visite. À remplir uniquement en cas d'adresse différente ou de boîte postale."
+      "hint": "Laissez vide pour facturer à l’adresse de visite. À remplir uniquement en cas d’adresse différente ou de boîte postale."
     },
     "blacklistReason": "Motif de liste noire"
   },
@@ -181,9 +181,9 @@
   },
   "vacancySettings": {
     "title": "Visibilité des postes",
-    "subtitle": "Comment ce client apparaît dans les postes et le sourcing. La valeur par défaut se trouve dans Paramètres → Clients ; chaque client peut s'en écarter.",
+    "subtitle": "Comment ce client apparaît dans les postes et le sourcing. La valeur par défaut se trouve dans Paramètres → Clients ; chaque client peut s’en écarter.",
     "fields": {
-      "hideCompanyName": "Masquer le nom de l'entreprise",
+      "hideCompanyName": "Masquer le nom de l’entreprise",
       "showInVacancies": "Afficher dans mes postes",
       "excludeFromSourcing": "Exclure du sourcing"
     },
@@ -258,7 +258,7 @@
       "setPrimaryContact": "Définir comme contact principal de ce site",
       "setPrimaryContactDone": "{{name}} est désormais le contact principal de ce site.",
       "setPrimaryContactFailed": "Impossible de définir le contact principal.",
-      "setPrimaryContactUnavailable": "Le serveur n'a pas encore appliqué cette modification. Réessayez une fois la base de données mise à jour.",
+      "setPrimaryContactUnavailable": "Le serveur n’a pas encore appliqué cette modification. Réessayez une fois la base de données mise à jour.",
       "createContactFailed": "Impossible de créer le contact.",
       "primaryContactTitle": "Contact principal",
       "noPrimaryContact": "Pas encore de contact principal pour ce site",
@@ -271,7 +271,7 @@
       "mergeLocation": "Fusionner le site",
       "archiveLocation": "Archiver le site",
       "confirmArchive": "Archiver {{name}} ? Vous pourrez le restaurer plus tard via « Archivé ».",
-      "archiveFailed": "L'archivage a échoué.",
+      "archiveFailed": "L’archivage a échoué.",
       "restoreFailed": "La restauration a échoué.",
       "tasks": {
         "newTask": "Nouvelle tâche",
@@ -283,7 +283,7 @@
       },
       "billingEmail": "E-mail de facturation"
     },
-    "saveFailed": "L'enregistrement a échoué.",
+    "saveFailed": "L’enregistrement a échoué.",
     "deleteFailed": "La suppression a échoué.",
     "deleteInUse": "Suppression impossible. Ce site est encore utilisé.",
     "archivedBanner": {
@@ -296,7 +296,7 @@
       "intro": "Choisissez le site en double chez ce client, puis décidez quelle fiche est conservée. {{name}} est la fiche ouverte.",
       "searchPlaceholder": "Rechercher par nom ou numéro de référence…",
       "noResults": "Aucun site trouvé.",
-      "noOthers": "Ce client n'a pas d'autre site avec lequel fusionner.",
+      "noOthers": "Ce client n’a pas d’autre site avec lequel fusionner.",
       "stays": "Cette fiche est conservée",
       "thisRecord": "Fiche ouverte",
       "otherRecord": "Fiche trouvée",
@@ -305,7 +305,7 @@
       "cancel": "Annuler",
       "confirm": "Fusionner",
       "done": "Sites fusionnés.",
-      "errForbidden": "Vous n'êtes pas autorisé à fusionner des sites.",
+      "errForbidden": "Vous n’êtes pas autorisé à fusionner des sites.",
       "errFailed": "Échec de la fusion. Veuillez réessayer."
     }
   },
@@ -350,7 +350,7 @@
       "mergeDepartment": "Fusionner le service",
       "archiveDepartment": "Archiver le service",
       "confirmArchive": "Archiver {{name}} ? Vous pourrez le restaurer plus tard via « Archivé ».",
-      "archiveFailed": "L'archivage a échoué.",
+      "archiveFailed": "L’archivage a échoué.",
       "restoreFailed": "La restauration a échoué.",
       "isPrimaryContact": "Contact principal de ce service",
       "setPrimaryContact": "Définir comme contact principal de ce service",
@@ -358,7 +358,7 @@
       "billingEmail": "E-mail de facturation"
     },
     "deleteConfirm": "Supprimer ce service ?",
-    "saveFailed": "L'enregistrement a échoué.",
+    "saveFailed": "L’enregistrement a échoué.",
     "deleteFailed": "La suppression a échoué.",
     "deleteInUse": "Suppression impossible. Ce service est encore utilisé.",
     "archivedBanner": {
@@ -371,7 +371,7 @@
       "intro": "Choisissez le service en double chez ce client, puis décidez quelle fiche est conservée. {{name}} est la fiche ouverte.",
       "searchPlaceholder": "Rechercher par nom ou numéro de référence…",
       "noResults": "Aucun service trouvé.",
-      "noOthers": "Ce client n'a pas d'autre service avec lequel fusionner.",
+      "noOthers": "Ce client n’a pas d’autre service avec lequel fusionner.",
       "stays": "Cette fiche est conservée",
       "thisRecord": "Fiche ouverte",
       "otherRecord": "Fiche trouvée",
@@ -380,7 +380,7 @@
       "cancel": "Annuler",
       "confirm": "Fusionner",
       "done": "Services fusionnés.",
-      "errForbidden": "Vous n'êtes pas autorisé à fusionner des services.",
+      "errForbidden": "Vous n’êtes pas autorisé à fusionner des services.",
       "errFailed": "Échec de la fusion. Veuillez réessayer."
     }
   },
@@ -429,7 +429,7 @@
       "gender": "Genre",
       "archiveContact": "Archiver le contact",
       "confirmArchive": "Archiver {{name}} ? Vous pourrez le restaurer plus tard via « Archivé ».",
-      "archiveFailed": "L'archivage a échoué.",
+      "archiveFailed": "L’archivage a échoué.",
       "restoreFailed": "La restauration a échoué.",
       "linkedin": "LinkedIn",
       "openLinkedin": "Ouvrir sur LinkedIn",
@@ -441,7 +441,7 @@
       "eraseDone": "Données personnelles effacées."
     },
     "deleteConfirm": "Supprimer ce contact ?",
-    "saveFailed": "L'enregistrement a échoué.",
+    "saveFailed": "L’enregistrement a échoué.",
     "deleteFailed": "La suppression a échoué.",
     "deleteInUse": "Suppression impossible. Ce contact est encore utilisé.",
     "archivedBanner": {
@@ -468,7 +468,7 @@
       "intro": "Choisissez le contact en double chez ce client, puis quelle fiche est conservée. {{name}} est la fiche ouverte.",
       "searchPlaceholder": "Rechercher par nom, numéro ou e-mail…",
       "noResults": "Aucun contact trouvé.",
-      "noOthers": "Ce client n'a pas d'autre contact avec lequel fusionner.",
+      "noOthers": "Ce client n’a pas d’autre contact avec lequel fusionner.",
       "stays": "Cette fiche est conservée",
       "thisRecord": "Fiche ouverte",
       "otherRecord": "Fiche trouvée",
@@ -477,7 +477,7 @@
       "cancel": "Annuler",
       "confirm": "Fusionner",
       "done": "Contacts fusionnés.",
-      "errForbidden": "Vous n'êtes pas autorisé à fusionner des contacts.",
+      "errForbidden": "Vous n’êtes pas autorisé à fusionner des contacts.",
       "errFailed": "Échec de la fusion. Veuillez réessayer."
     },
     "primaryCustomerChip": "Principal chez le client",
@@ -497,7 +497,7 @@
     "add": "Nouvelle offre",
     "searchPlaceholder": "Rechercher une offre…",
     "showUnpublished": "Inclure non publiées",
-    "editVacancy": "Modifier l'offre"
+    "editVacancy": "Modifier l’offre"
   },
   "opportunities": {
     "title": "Opportunités",
@@ -521,7 +521,7 @@
       "department": "Service"
     },
     "searchPlaceholder": "Rechercher une opportunité…",
-    "notConfigured": "Le planning n'est pas encore connecté pour cette agence.",
+    "notConfigured": "Le planning n’est pas encore connecté pour cette agence.",
     "openShiftsError": "Impossible de charger les données de planning."
   },
   "planning": {
@@ -532,7 +532,7 @@
     "upcomingEmpty": "Aucune mission à venir.",
     "off": "Les informations de planning apparaissent dès que le module Planning est actif.",
     "open": "Ouvert",
-    "notConfigured": "Le planning n'est pas encore connecté pour cette agence.",
+    "notConfigured": "Le planning n’est pas encore connecté pour cette agence.",
     "loadError": "Impossible de charger les données de planning."
   },
   "statistics": {
@@ -583,10 +583,10 @@
     "cao": "Convention collective",
     "scale": "Échelon",
     "step": "Niveau",
-    "purchaseRate": "Tarif d'achat",
+    "purchaseRate": "Tarif d’achat",
     "saleRate": "Tarif de vente",
     "validFrom": "Valide à partir du",
-    "validUntil": "Valide jusqu'au",
+    "validUntil": "Valide jusqu’au",
     "indefinite": "durée indéterminée",
     "remarks": "Remarques",
     "margin": "marge",
@@ -594,7 +594,7 @@
     "confirmDelete": "Supprimer cet accord tarifaire ?",
     "deleteFailed": "La suppression a échoué.",
     "deleteInUse": "Suppression impossible. Cet accord est encore utilisé.",
-    "saveFailed": "L'enregistrement a échoué.",
+    "saveFailed": "L’enregistrement a échoué.",
     "loading": "Chargement des accords tarifaires…",
     "loadError": "Le chargement des accords tarifaires a échoué.",
     "retry": "Réessayer",
@@ -631,7 +631,7 @@
     },
     "newNoteFor": "Nouvelle note pour {{name}}",
     "timelineLoading": "Chargement de la chronologie…",
-    "timelineLoadError": "La chronologie n'a pas pu être chargée."
+    "timelineLoadError": "La chronologie n’a pas pu être chargée."
   },
   "bulk": {
     "selected": "{{count}} sélectionné(s)",
@@ -643,9 +643,9 @@
     "changeStatus": "Changer le statut",
     "searchStatus": "Rechercher un statut…",
     "addTag": "Ajouter une étiquette",
-    "tagPlaceholder": "Nom de l'étiquette",
+    "tagPlaceholder": "Nom de l’étiquette",
     "tagSubmit": "Ajouter",
-    "removeTag": "Retirer l'étiquette",
+    "removeTag": "Retirer l’étiquette",
     "searchTag": "Rechercher une étiquette…",
     "noTags": "Aucune étiquette",
     "addNote": "Ajouter une note",
@@ -654,18 +654,18 @@
     "archive": "Archiver",
     "archiveConfirm": "Archiver {{count}} client(s) ?",
     "archived": "{{count}} client(s) archivé(s).",
-    "archiveError": "Échec de l'archivage.",
+    "archiveError": "Échec de l’archivage.",
     "ownerChanged": "Gestionnaire changé en {{name}} ({{count}}).",
     "statusChanged": "Statut changé en {{value}} ({{count}}).",
     "tagAdded": "Étiquette « {{tag}} » ajoutée ({{count}}).",
     "tagRemoved": "Étiquette « {{tag}} » retirée ({{count}}).",
     "noteAdded": "Note ajoutée ({{count}}).",
-    "mutateError": "L'action a échoué.",
+    "mutateError": "L’action a échoué.",
     "couple": "Coupler au backoffice",
     "coupleQueued": "{{count}} client(s) mis en file pour le couplage avec {{target}}.",
     "coupleQueuedPartial": "{{queued}} sur {{total}} mis en file pour le couplage avec {{target}} ; {{skipped}} ignoré(s).",
     "coupleQueuedPartialAlreadyQueued": "{{queued}} sur {{total}} mis en file pour le couplage avec {{target}} ; {{already}} déjà en cours, {{skipped}} ignoré(s).",
-    "coupleUnavailable": "Le couplage backoffice n'est pas encore disponible."
+    "coupleUnavailable": "Le couplage backoffice n’est pas encore disponible."
   },
   "modal": {
     "title": "Nouveau client",
@@ -692,12 +692,12 @@
     },
     "import": {
       "title": "Client depuis un fichier",
-      "intro": "L'import d'un fichier crée ce client (avec ses sites, services et contacts) immédiatement. Il ne remplit pas le formulaire ci-dessous ; vérifiez l'aperçu avant de confirmer."
+      "intro": "L’import d’un fichier crée ce client (avec ses sites, services et contacts) immédiatement. Il ne remplit pas le formulaire ci-dessous ; vérifiez l’aperçu avant de confirmer."
     }
   },
   "duplicate": {
     "blockedTitle": "Ce client existe déjà",
-    "blockedBody": "Rien n'a été créé : un client avec les mêmes informations existe déjà.",
+    "blockedBody": "Rien n’a été créé : un client avec les mêmes informations existe déjà.",
     "warningTitle": "Client existant possible",
     "warningBody": "Ces informations figurent déjà chez un client existant.",
     "unnamed": "Client sans nom",
@@ -709,57 +709,57 @@
     "restoring": "Restauration…",
     "restored": "Client restauré.",
     "restoreFailed": "Échec de la restauration. Veuillez réessayer.",
-    "restoreForbidden": "Vous n'avez pas les droits pour restaurer un client.",
+    "restoreForbidden": "Vous n’avez pas les droits pour restaurer un client.",
     "editData": "Modifier les données",
     "locations": {
       "blockedTitle": "Ce site existe déjà",
-      "blockedBody": "Rien n'a été créé : un site avec les mêmes informations existe déjà.",
+      "blockedBody": "Rien n’a été créé : un site avec les mêmes informations existe déjà.",
       "warningTitle": "Site existant possible",
       "warningBody": "Ces informations existent déjà pour un site existant.",
       "unnamed": "Site sans nom",
       "stateActive": "Site actif",
       "stateArchived": "Site archivé",
-      "archivedHint": "Ce site est archivé. Restaurez-le pour pouvoir à nouveau l'utiliser.",
+      "archivedHint": "Ce site est archivé. Restaurez-le pour pouvoir à nouveau l’utiliser.",
       "open": "Ouvrir le site existant",
       "restoreAndOpen": "Restaurer et ouvrir",
       "restoring": "Restauration…",
       "restored": "Site restauré.",
       "restoreFailed": "Échec de la restauration. Veuillez réessayer.",
-      "restoreForbidden": "Vous n'êtes pas autorisé à restaurer ce site.",
+      "restoreForbidden": "Vous n’êtes pas autorisé à restaurer ce site.",
       "editData": "Modifier les informations"
     },
     "departments": {
       "blockedTitle": "Ce service existe déjà",
-      "blockedBody": "Rien n'a été créé : un service avec les mêmes informations existe déjà.",
+      "blockedBody": "Rien n’a été créé : un service avec les mêmes informations existe déjà.",
       "warningTitle": "Service existant possible",
       "warningBody": "Ces informations existent déjà pour un service existant.",
       "unnamed": "Service sans nom",
       "stateActive": "Service actif",
       "stateArchived": "Service archivé",
-      "archivedHint": "Ce service est archivé. Restaurez-le pour pouvoir à nouveau l'utiliser.",
+      "archivedHint": "Ce service est archivé. Restaurez-le pour pouvoir à nouveau l’utiliser.",
       "open": "Ouvrir le service existant",
       "restoreAndOpen": "Restaurer et ouvrir",
       "restoring": "Restauration…",
       "restored": "Service restauré.",
       "restoreFailed": "Échec de la restauration. Veuillez réessayer.",
-      "restoreForbidden": "Vous n'êtes pas autorisé à restaurer ce service.",
+      "restoreForbidden": "Vous n’êtes pas autorisé à restaurer ce service.",
       "editData": "Modifier les informations"
     },
     "contacts": {
       "blockedTitle": "Ce contact existe déjà",
-      "blockedBody": "Rien n'a été créé : un contact avec les mêmes informations existe déjà.",
+      "blockedBody": "Rien n’a été créé : un contact avec les mêmes informations existe déjà.",
       "warningTitle": "Contact existant possible",
       "warningBody": "Ces informations existent déjà pour un contact existant.",
       "unnamed": "Contact sans nom",
       "stateActive": "Contact actif",
       "stateArchived": "Contact archivé",
-      "archivedHint": "Ce contact est archivé. Restaurez-le pour pouvoir à nouveau l'utiliser.",
+      "archivedHint": "Ce contact est archivé. Restaurez-le pour pouvoir à nouveau l’utiliser.",
       "open": "Ouvrir le contact existant",
       "restoreAndOpen": "Restaurer et ouvrir",
       "restoring": "Restauration…",
       "restored": "Contact restauré.",
       "restoreFailed": "Échec de la restauration. Veuillez réessayer.",
-      "restoreForbidden": "Vous n'êtes pas autorisé à restaurer ce contact.",
+      "restoreForbidden": "Vous n’êtes pas autorisé à restaurer ce contact.",
       "editData": "Modifier les informations"
     }
   },
@@ -777,8 +777,8 @@
     "description": "Description",
     "selectLocation": "Site",
     "selectDepartment": "Service",
-    "noLocationsFirst": "Créez d'abord un site",
-    "pickLocationFirst": "Sélectionnez d'abord un site",
+    "noLocationsFirst": "Créez d’abord un site",
+    "pickLocationFirst": "Sélectionnez d’abord un site",
     "noneOption": "Aucun",
     "firstName": "Prénom",
     "lastName": "Nom",
@@ -836,20 +836,20 @@
     "gender": "Genre",
     "import": {
       "title": "{{entity}} depuis un fichier",
-      "intro": "L'importation d'un fichier crée directement {{entity}}. Le formulaire ci-dessous n'est pas rempli. Vérifiez d'abord l'aperçu avant de confirmer.",
-      "parentWarning": "Le nom du client dans le fichier détermine quel client reçoit les lignes. Ce n'est pas forcément « {{customerName}} ». Vérifiez l'aperçu.",
+      "intro": "L’importation d’un fichier crée directement {{entity}}. Le formulaire ci-dessous n’est pas rempli. Vérifiez d’abord l’aperçu avant de confirmer.",
+      "parentWarning": "Le nom du client dans le fichier détermine quel client reçoit les lignes. Ce n’est pas forcément « {{customerName}} ». Vérifiez l’aperçu.",
       "mismatchWarning": "{{count}} ligne(s) de ce fichier appartiennent à un client différent de celui-ci ({{names}}). Ces lignes seront créées là-bas, pas ici.",
       "mismatchConfirm": "{{count}} ligne(s) de ce fichier seront créées ou mises à jour chez un autre client ({{names}}), pas chez le client actuellement ouvert. Continuer quand même ?",
       "mismatchTitle": "Client différent dans le fichier",
       "mismatchProceed": "Importer quand même"
     },
     "contactPersonHint": "Choisissez un contact existant de ce client, ou saisissez un nouveau nom.",
-    "contactCouplingFailed": "L'établissement « {{name}} » a été créé, mais la liaison avec le contact a échoué. Liez-le manuellement plus tard depuis l'établissement.",
-    "contactCreateFailed": "L'établissement « {{name}} » a été créé, mais la création du nouveau contact a échoué. Ajoutez-le manuellement et liez-le depuis l'établissement plus tard.",
+    "contactCouplingFailed": "L’établissement « {{name}} » a été créé, mais la liaison avec le contact a échoué. Liez-le manuellement plus tard depuis l’établissement.",
+    "contactCreateFailed": "L’établissement « {{name}} » a été créé, mais la création du nouveau contact a échoué. Ajoutez-le manuellement et liez-le depuis l’établissement plus tard.",
     "linkedin": "LinkedIn",
     "linkedinPlaceholder": "linkedin.com/in/nomdutilisateur",
     "preferredLanguage": "Langue préférée",
-    "preferredLanguageDefault": "Valeur par défaut de l'agence"
+    "preferredLanguageDefault": "Valeur par défaut de l’agence"
   },
   "changelog": {
     "loading": "Chargement…",
@@ -873,7 +873,7 @@
   },
   "map": {
     "pointCount": "{{count}} clients sur la carte",
-    "pendingGeocode_one": "{{count}} client n'est pas encore sur la carte. L'adresse est traitée automatiquement.",
+    "pendingGeocode_one": "{{count}} client n’est pas encore sur la carte. L’adresse est traitée automatiquement.",
     "pendingGeocode_other": "{{count}} clients ne sont pas encore sur la carte. Les adresses sont traitées automatiquement."
   },
   "ai": {
@@ -883,7 +883,7 @@
     "analyzing": "Koios AI analyse le profil client…",
     "completeness": "Exhaustivité",
     "completeGood": "Profil client bien rempli. Aucun champ essentiel manquant détecté.",
-    "completePartial": "Profil client complété à {{pct}}%. Ajoutez le numéro d'immatriculation, le numéro de TVA, le secteur et les coordonnées pour une vue plus complète.",
+    "completePartial": "Profil client complété à {{pct}}%. Ajoutez le numéro d’immatriculation, le numéro de TVA, le secteur et les coordonnées pour une vue plus complète.",
     "relationshipLabel": "Relation",
     "relationshipActive": "{{vacancies}} poste(s) ouvert(s) · {{matches}} match(es) actif(s).",
     "relationshipNone": "Aucun poste ouvert ni match actif enregistré.",
@@ -910,7 +910,7 @@
   "scopedList": {
     "vacanciesEmpty": "Aucun poste pour le moment.",
     "matchesEmpty": "Aucun match pour le moment.",
-    "loadError": "Le chargement a échoué. Vous n'avez peut-être pas accès à ce site.",
+    "loadError": "Le chargement a échoué. Vous n’avez peut-être pas accès à ce site.",
     "opportunitiesEmpty": "Aucune opportunité pour le moment.",
     "loadErrorGeneric": "Échec du chargement."
   },
@@ -930,12 +930,12 @@
     "searchError": "Échec de la recherche. Veuillez réessayer.",
     "staysLabel": "Reste (cette fiche)",
     "duplicateLabel": "Fusionné et supprimé",
-    "warning": "Les sites, départements, contacts, offres d'emploi, matches et autres données de {{source}} sont transférés vers {{target}}. {{source}} est ensuite supprimé. Cette action est irréversible.",
+    "warning": "Les sites, départements, contacts, offres d’emploi, matches et autres données de {{source}} sont transférés vers {{target}}. {{source}} est ensuite supprimé. Cette action est irréversible.",
     "back": "Retour",
     "cancel": "Annuler",
     "confirm": "Fusionner",
     "done": "Client fusionné.",
-    "errForbidden": "Vous n'êtes pas autorisé à fusionner des clients.",
+    "errForbidden": "Vous n’êtes pas autorisé à fusionner des clients.",
     "errFailed": "Échec de la fusion. Veuillez réessayer."
   },
   "communication": {
@@ -943,17 +943,17 @@
     "consentGivenAt": "Consentement donné le {{date}}",
     "consentRetentionOptIn": "Peut être conservé",
     "retentionTitle": "Durée de conservation RGPD",
-    "retentionUntil": "Conservé jusqu'au {{date}}",
+    "retentionUntil": "Conservé jusqu’au {{date}}",
     "retentionUnlimited": "Conservé indéfiniment (consentement du {{date}})",
     "retentionUnknown": "Durée de conservation inconnue",
     "retentionConsentNone": "Aucun consentement de conservation donné",
     "retentionConsentLoading": "Validation en cours…",
-    "retentionConsentWindowUnknown": "Validité inconnue. Les paramètres n'ont pas pu être chargés",
-    "retentionConsentValidUntil": "Consentement valide jusqu'au {{date}}",
-    "retentionConsentIndefinite": "Le consentement n'expire pas (paramètre organisationnel)",
+    "retentionConsentWindowUnknown": "Validité inconnue. Les paramètres n’ont pas pu être chargés",
+    "retentionConsentValidUntil": "Consentement valide jusqu’au {{date}}",
+    "retentionConsentIndefinite": "Le consentement n’expire pas (paramètre organisationnel)",
     "retentionConsentUndated": "Consentement sans date. Traité comme expiré",
     "retentionConsentLapsed": "Consentement expiré le {{date}}",
-    "retentionConsentExpiryNote": "Le consentement de conservation expire automatiquement. Un workflow peut demander à la personne de contact de le renouveler ; l'expiration a lieu dans tous les cas.",
+    "retentionConsentExpiryNote": "Le consentement de conservation expire automatiquement. Un workflow peut demander à la personne de contact de le renouveler ; l’expiration a lieu dans tous les cas.",
     "messagingLanguage": "Langue de messagerie : {{language}}"
   },
   "koios": {
@@ -966,7 +966,7 @@
   },
   "popout": {
     "windowTitle": "Notes — {{name}}",
-    "loadError": "Ce client n'a pas pu être chargé.",
+    "loadError": "Ce client n’a pas pu être chargé.",
     "companyTextWindowTitle": "Texte entreprise — {{name}}",
     "departmentTextWindowTitle": "Texte du département — {{name}}",
     "contactTextWindowTitle": "Texte du contact: {{name}}"
@@ -994,7 +994,7 @@
     }
   },
   "appointmentsTab": {
-    "noPermission": "Vous n'avez pas l'autorisation de voir les rendez-vous.",
+    "noPermission": "Vous n’avez pas l’autorisation de voir les rendez-vous.",
     "loadError": "Impossible de charger les rendez-vous.",
     "empty": "Pas encore de rendez-vous chez ce client."
   }

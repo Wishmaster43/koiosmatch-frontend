@@ -601,8 +601,8 @@
     "target": "obiettivo {{value}}",
     "warn": "attenzione {{value}}",
     "status": {
-      "ok": "nell'obiettivo",
-      "warn": "vicino all'obiettivo",
+      "ok": "nell’obiettivo",
+      "warn": "vicino all’obiettivo",
       "alert": "fuori obiettivo"
     }
   }

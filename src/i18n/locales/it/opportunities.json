@@ -53,13 +53,13 @@
     "archive": "Archivia",
     "archiveConfirm": "Archiviare questa opportunità? Potrai ripristinarla in seguito.",
     "archived": "Opportunità archiviata.",
-    "archiveFailed": "Impossibile archiviare l'opportunità.",
+    "archiveFailed": "Impossibile archiviare l’opportunità.",
     "archivedBanner": {
       "since": "Archiviata dal {{date}}",
       "flag": "Archiviata",
       "restore": "Ripristina",
       "restored": "Opportunità ripristinata.",
-      "restoreFailed": "Impossibile ripristinare l'opportunità."
+      "restoreFailed": "Impossibile ripristinare l’opportunità."
     },
     "markWon": "Vinta",
     "markLost": "Persa",
@@ -81,7 +81,7 @@
     },
     "statistics": {
       "empty": "Nessuna statistica sulle opportunità disponibile ancora.",
-      "onlyOpportunity": "Nessun'altra opportunità trovata.",
+      "onlyOpportunity": "Nessun’altra opportunità trovata.",
       "openOpportunity": "Apri opportunità"
     }
   },
@@ -239,7 +239,7 @@
     "title": "Koios AI consiglia",
     "beta": "Beta",
     "refresh": "Aggiorna",
-    "analyzing": "Koios AI sta analizzando l'opportunità…",
+    "analyzing": "Koios AI sta analizzando l’opportunità…",
     "dealHealthLabel": "Entità trattativa",
     "dealHealthSet": "Un valore o un numero di ore sono stati registrati.",
     "dealHealthMissing": "Nessun valore o numero di ore ancora registrato.",

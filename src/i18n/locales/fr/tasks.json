@@ -26,7 +26,7 @@
   "kpi": {
     "open": "Ouvertes",
     "overdue": "En retard",
-    "dueToday": "À échéance aujourd'hui",
+    "dueToday": "À échéance aujourd’hui",
     "completed": "Terminées",
     "unassigned": "Non attribué"
   },
@@ -61,12 +61,12 @@
     },
     "markDone": "Marquer comme terminé",
     "tags": "Tags",
-    "lookupNotReady": "Impossible d'enregistrer pour l'instant. Cette option n'est pas encore disponible. Veuillez réessayer dans un instant.",
+    "lookupNotReady": "Impossible d’enregistrer pour l’instant. Cette option n’est pas encore disponible. Veuillez réessayer dans un instant.",
     "scheduleAppointment": "Planifier un rendez-vous"
   },
   "details": {
     "title": "Détails de la tâche",
-    "type": "Type d'activité",
+    "type": "Type d’activité",
     "status": "Statut",
     "priority": "Priorité",
     "due": "Échéance",
@@ -112,7 +112,7 @@
     "loadError": "Impossible de charger les résultats.",
     "linkType": "Type de lien",
     "opportunity": "Opportunité",
-    "outreach_campaign": "Liste d'appels",
+    "outreach_campaign": "Liste d’appels",
     "conversation": "Conversation",
     "reference": "Référence",
     "task": "Tâche"
@@ -121,7 +121,7 @@
     "title": "Nouvelle tâche",
     "editTitle": "Modifier la tâche",
     "loadingTask": "Chargement de la tâche…",
-    "type": "Type d'activité",
+    "type": "Type d’activité",
     "typePlaceholder": "Choisir le type",
     "titleLabel": "Titre",
     "titlePlaceholder": "Saisir…",
@@ -152,15 +152,15 @@
     "cardAssignment": "Attribution",
     "duePlaceholder": "jj-mm-aaaa",
     "otherLinks": "Autres liens",
-    "assigneeUnassigned": "Agence (personne d'assigné)",
-    "assigneeUnassignedHint": "Personne n'est responsable : la tâche reste à l'agence jusqu'à ce qu'un collègue la prenne en charge.",
+    "assigneeUnassigned": "Agence (personne d’assigné)",
+    "assigneeUnassignedHint": "Personne n’est responsable : la tâche reste à l’agence jusqu’à ce qu’un collègue la prenne en charge.",
     "assigneeWithRole": "{{name}} · {{role}}",
-    "assigneeEmpty": "Aucun collègue à qui assigner pour l'instant. Seule l'agence peut être choisie.",
+    "assigneeEmpty": "Aucun collègue à qui assigner pour l’instant. Seule l’agence peut être choisie.",
     "assigneeLoadError": "Impossible de charger les collègues.",
     "team": "Service",
     "teamPlaceholder": "Choisir un service",
-    "teamHint": "Où la tâche attend, par exemple le Backoffice. Le service reste en place dès qu'un collègue prend la tâche en charge.",
-    "teamEmpty": "Aucun service interne n'a encore été configuré.",
+    "teamHint": "Où la tâche attend, par exemple le Backoffice. Le service reste en place dès qu’un collègue prend la tâche en charge.",
+    "teamEmpty": "Aucun service interne n’a encore été configuré.",
     "teamLoadError": "Impossible de charger les services internes.",
     "addSubtaskTitle": "Nouvelle sous-tâche"
   },
@@ -177,8 +177,8 @@
     "noUsers": "Aucun utilisateur",
     "archive": "Archiver",
     "done": "{{count}} tâches mises à jour",
-    "partialFailed": "{{failed}} tâches sur {{total}} n'ont pas été modifiées, les autres ont été enregistrées.",
-    "allFailed": "Aucune des {{count}} tâches n'a été modifiée."
+    "partialFailed": "{{failed}} tâches sur {{total}} n’ont pas été modifiées, les autres ont été enregistrées.",
+    "allFailed": "Aucune des {{count}} tâches n’a été modifiée."
   },
   "page": {
     "searchPlaceholder": "Rechercher une tâche, une description, un commentaire…"
@@ -211,7 +211,7 @@
     "cancel": "Annuler",
     "searchPlaceholder": "Rechercher des notes…",
     "loading": "Chargement des notes…",
-    "loadError": "Les notes n'ont pas pu être chargées.",
+    "loadError": "Les notes n’ont pas pu être chargées.",
     "edit": "Modifier",
     "deleteNote": "Supprimer la note",
     "deleteConfirm": "Supprimer cette note ?"
@@ -227,15 +227,15 @@
     "refresh": "Actualiser",
     "analyzing": "Koios AI analyse cette tâche…",
     "dueLabel": "Échéance",
-    "dueUnset": "Aucune échéance n'est encore définie pour cette tâche.",
-    "dueToday": "Cette tâche arrive à échéance aujourd'hui.",
+    "dueUnset": "Aucune échéance n’est encore définie pour cette tâche.",
+    "dueToday": "Cette tâche arrive à échéance aujourd’hui.",
     "dueOverdue": "Cette tâche est en retard de {{count}} jour(s).",
     "dueUpcoming": "Cette tâche arrive à échéance dans {{count}} jour(s).",
     "assigneeLabel": "Affectation",
-    "unassigned": "Cette tâche reste au niveau de l'agence. Pas encore affectée à un collaborateur précis.",
+    "unassigned": "Cette tâche reste au niveau de l’agence. Pas encore affectée à un collaborateur précis.",
     "assignedTo": "Affectée à {{name}}.",
     "linksLabel": "Lien",
-    "noLinks": "Cette tâche n'est liée à aucun enregistrement. Associez un candidat, un client ou un autre enregistrement pour plus de contexte.",
+    "noLinks": "Cette tâche n’est liée à aucun enregistrement. Associez un candidat, un client ou un autre enregistrement pour plus de contexte.",
     "linked": "Liée à {{count}} enregistrement(s)."
   },
   "filters": {
@@ -251,11 +251,11 @@
   },
   "popout": {
     "textWindowTitle": "Description de la tâche — {{name}}",
-    "loadError": "Cette tâche n'a pas pu être chargée."
+    "loadError": "Cette tâche n’a pas pu être chargée."
   },
   "changelog": {
-    "loading": "Chargement de l'historique…",
-    "error": "Impossible de charger l'historique.",
+    "loading": "Chargement de l’historique…",
+    "error": "Impossible de charger l’historique.",
     "empty": "Aucune modification enregistrée.",
     "system": "Système",
     "emptyValue": "Vide",
@@ -280,7 +280,7 @@
   },
   "timeline": {
     "loading": "Chargement…",
-    "error": "Impossible de charger l'historique",
-    "empty": "Pas d'historique"
+    "error": "Impossible de charger l’historique",
+    "empty": "Pas d’historique"
   }
 }

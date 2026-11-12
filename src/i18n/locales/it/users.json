@@ -16,13 +16,13 @@
   "pwPlaceholder": "Almeno 8 caratteri",
   "changeRole": "Cambia ruolo",
   "changeRoleFailed": "Impossibile cambiare il ruolo. Riprova.",
-  "avatarColor": "Colore dell'icona",
+  "avatarColor": "Colore dell’icona",
   "avatarColorAuto": "Automatico",
   "title": "Utenti",
   "summary": "{{shown}} di {{total}} utenti",
   "loading": "Caricamento utenti…",
   "empty": "Nessun utente trovato",
-  "noAccess": "Nessun accesso all'elenco utenti.",
+  "noAccess": "Nessun accesso all’elenco utenti.",
   "loadError": "Impossibile caricare gli utenti.",
   "you": "tu",
   "system": "sistema",
@@ -97,8 +97,8 @@
   "delete": {
     "action": "Elimina utente",
     "title": "Elimina utente",
-    "explain_one": "{{name}} è ancora responsabile di {{count}} record. Scegli un collega che se ne faccia carico. Solo dopo l'utente potrà essere eliminato.",
-    "explain_other": "{{name}} è ancora responsabile di {{count}} record. Scegli un collega che se ne faccia carico. Solo dopo l'utente potrà essere eliminato.",
+    "explain_one": "{{name}} è ancora responsabile di {{count}} record. Scegli un collega che se ne faccia carico. Solo dopo l’utente potrà essere eliminato.",
+    "explain_other": "{{name}} è ancora responsabile di {{count}} record. Scegli un collega che se ne faccia carico. Solo dopo l’utente potrà essere eliminato.",
     "ownedTitle": "Cosa verrà trasferito",
     "successor": "Trasferisci a",
     "successorPlaceholder": "Scegli un collega",
@@ -138,7 +138,7 @@
   },
   "rolesModal": {
     "title": "Assegna ruoli",
-    "hint": "Scegli uno o più ruoli. Verrà salvato l'intero set. I ruoli che rimuovi verranno revocati.",
+    "hint": "Scegli uno o più ruoli. Verrà salvato l’intero set. I ruoli che rimuovi verranno revocati.",
     "none": "Nessun ruolo scelto ancora",
     "add": "Aggiungi ruolo",
     "remove": "Rimuovi {{role}}"
@@ -151,8 +151,8 @@
     "unlockThrottled": "Troppi tentativi. Riprova più tardi."
   },
   "resetMfa": "Ripristina MFA",
-  "resetMfaConfirm": "Ripristinare l'MFA per {{name}}? L'utente dovrà configurare di nuovo un autenticatore al prossimo accesso.",
-  "resetMfaDone": "L'MFA per {{name}} è stato ripristinato.",
+  "resetMfaConfirm": "Ripristinare l’MFA per {{name}}? L’utente dovrà configurare di nuovo un autenticatore al prossimo accesso.",
+  "resetMfaDone": "L’MFA per {{name}} è stato ripristinato.",
   "invite": {
     "label": "Invia l’invito via e-mail",
     "help": "L’utente sceglie la propria password tramite un link valido per 7 giorni.",
