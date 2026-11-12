@@ -5,6 +5,7 @@
  */
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { render, screen, waitFor, fireEvent } from '@testing-library/react'
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import AppsSettings from './AppsSettings'
 
 const mockPut = vi.fn()
@@ -13,7 +14,8 @@ const mockNotifyError = vi.fn()
 vi.mock('@/lib/notify', () => ({ notifyError: (...a: unknown[]) => mockNotifyError(...a) }))
 vi.mock('@/lib/extractApiError', () => ({ extractApiError: (err: { response?: { data?: { message?: string } } }, fb: string) => err?.response?.data?.message ?? fb }))
 vi.mock('react-i18next', () => ({ useTranslation: () => ({ t: (k: string) => k }) }))
-vi.mock('@/context/AuthContext', () => ({ useAuth: () => ({ hasPermission: () => true, hasModule: () => true, isSuperAdmin: () => true }) }))
+const mockRefreshUser = vi.fn(() => Promise.resolve({}))
+vi.mock('@/context/AuthContext', () => ({ useAuth: () => ({ hasPermission: () => true, hasModule: () => true, isSuperAdmin: () => true, refreshUser: mockRefreshUser }) }))
 vi.mock('@/lib/access', () => ({ canAccessPage: () => true }))
 
 // Real AVAILABLE_APPS ride along; only the enabled-state hook is stubbed.
@@ -24,12 +26,22 @@ vi.mock('@/context/AppsContext', async (importOriginal) => {
   return { ...actual, useApps: () => ({ enabled: mockEnabled, setApps: mockSetApps, isAppEnabled: () => false }) }
 })
 
-beforeEach(() => { mockPut.mockReset(); mockNotifyError.mockReset(); mockSetApps.mockClear(); mockEnabled = [] })
+// Render inside a QueryClientProvider whose invalidation is observed (the Pakket test idiom).
+const invalidate = vi.fn()
+const withClient = (qc: QueryClient) => <QueryClientProvider client={qc}><AppsSettings /></QueryClientProvider>
+function renderApps() {
+  const qc = new QueryClient()
+  qc.invalidateQueries = ((...a: unknown[]) => { invalidate(...a); return Promise.resolve() }) as never
+  const utils = render(withClient(qc))
+  return { ...utils, rerenderApps: () => utils.rerender(withClient(qc)) }
+}
+
+beforeEach(() => { mockPut.mockReset(); mockNotifyError.mockReset(); mockSetApps.mockClear(); mockRefreshUser.mockClear(); invalidate.mockClear(); mockEnabled = [] })
 
 describe('AppsSettings', () => {
   it("enabling HelloFlex PUTs the backend 'hf' slug, never 'helloflex'", async () => {
     mockPut.mockResolvedValue({})
-    render(<AppsSettings />)
+    renderApps()
     // APPS-GROUPS-3: HelloFlex lives under the internal Backoffice line-tab.
     fireEvent.click(screen.getByRole('tab', { name: 'apps.tabBackoffice' }))
     // Click every ENABLED toggle on this tab (coming-soon toggles are disabled by
@@ -52,7 +64,7 @@ describe('AppsSettings', () => {
 
   it('surfaces the server message on a failed toggle instead of silently swallowing it', async () => {
     mockPut.mockRejectedValue({ response: { data: { message: 'Ongeldige app(s): x' } } })
-    render(<AppsSettings />)
+    renderApps()
     fireEvent.click(screen.getAllByTitle('apps.enable')[0])
     // DRY round 11 SETTINGS2: SaveButton's own default face resolves 'save' from
     // the 'common' namespace (identical text under real i18n) — this file's
@@ -66,7 +78,7 @@ describe('AppsSettings', () => {
   // nothing back — "nothing else is built", so the cards must render as an honest
   // coming-soon gate (§3), never a clickable toggle a tenant could switch on.
   it('renders the KvK and BTW cards as coming-soon, never toggleable', async () => {
-    render(<AppsSettings />)
+    renderApps()
     fireEvent.click(screen.getByRole('tab', { name: 'apps.tabVerificatie' }))
 
     // D5 fix: the descriptive kvk/vat labels now route through i18n (appsCatalogLabels.*)
@@ -88,7 +100,7 @@ describe('AppsSettings', () => {
   // MODULES-SAVE-FEEDBACK-1: the chip and green face follow the SAVED state, not the pending toggle.
   it('shows the unsaved caption without the active chip until Save, then the chip and no caption', async () => {
     mockPut.mockResolvedValue({})
-    const { rerender } = render(<AppsSettings />)
+    const { rerenderApps } = renderApps()
     fireEvent.click(screen.getByRole('tab', { name: 'apps.tabBackoffice' }))
     expect(screen.queryByText('apps.unsaved')).toBeNull()
     fireEvent.click(screen.getAllByTitle('apps.enable')[0])
@@ -101,8 +113,30 @@ describe('AppsSettings', () => {
     expect(url).toBe('/settings/apps')
     expect(body.enabled).toHaveLength(1)
     await waitFor(() => expect(mockSetApps).toHaveBeenCalledWith(body.enabled))
-    rerender(<AppsSettings />)
+    rerenderApps()
     expect(screen.getAllByText('apps.active')).toHaveLength(1)
     expect(screen.queryByText('apps.unsaved')).toBeNull()
+  })
+
+  // APPS-SAVE-REFRESH-1: a saved connector refreshes the session (tenant modules) and drops
+  // the integrations caches, so the connector's settings menu appears without a reload.
+  it('refreshes the session and invalidates the integrations caches after a successful save', async () => {
+    mockPut.mockResolvedValue({})
+    renderApps()
+    fireEvent.click(screen.getByRole('tab', { name: 'apps.tabBackoffice' }))
+    fireEvent.click(screen.getAllByTitle('apps.enable')[0])
+    fireEvent.click(screen.getByRole('button', { name: /^save$/ }))
+    await waitFor(() => expect(mockRefreshUser).toHaveBeenCalledTimes(1))
+    await waitFor(() => expect(invalidate).toHaveBeenCalledWith({ queryKey: ['integrations'] }))
+  })
+
+  it('neither refreshes the session nor touches the caches when the save fails', async () => {
+    mockPut.mockRejectedValue({ response: { data: { message: 'nope' } } })
+    renderApps()
+    fireEvent.click(screen.getAllByTitle('apps.enable')[0])
+    fireEvent.click(screen.getByRole('button', { name: /^save$/ }))
+    await waitFor(() => expect(mockNotifyError).toHaveBeenCalledWith('nope'))
+    expect(mockRefreshUser).not.toHaveBeenCalled()
+    expect(invalidate).not.toHaveBeenCalled()
   })
 })

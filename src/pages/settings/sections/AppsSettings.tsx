@@ -13,6 +13,7 @@ import CalloutBox from '@/components/ui/CalloutBox'
 import { Caption } from '@/components/ui/typography'
 import SubTabBar from '@/components/drawer/SubTabBar'
 import { readableOn } from '@/hooks/useTenantTheme'
+import { useQueryClient } from '@tanstack/react-query'
 
 // Connector toggles gated on super-admin + package: shows an honest disabled state, never a clickable 403.
 export default function AppsSettings() {
@@ -21,6 +22,7 @@ export default function AppsSettings() {
   // route — defaulted to an empty/no-op shape so the destructure stays type-safe.
   const { enabled, setApps } = useApps() ?? { enabled: [] as string[], setApps: (() => {}) as (next: string[]) => void }
   const auth                        = useAuth()
+  const queryClient                 = useQueryClient()
   // Settings routes only render once authenticated — auth is never null here in
   // practice, but hasPermission stays a safe no-op if it ever were.
   const hasPermission               = auth?.hasPermission ?? (() => false)
@@ -55,6 +57,11 @@ export default function AppsSettings() {
     try {
       await api.put('/settings/apps', { enabled: draft })
       setApps(draft)
+      // APPS-SAVE-REFRESH-1 (INV-1211-6 sibling, mirrors the Pakket page): a saved connector
+      // changes the tenant's modules and the Integrations screens, so refresh the session and
+      // drop the integrations caches; the menu then appears without a reload.
+      await auth?.refreshUser?.()
+      await queryClient.invalidateQueries({ queryKey: ['integrations'] })
       setSaved(true); setTimeout(() => setSaved(false), 2000)
     } catch (err) {
       // Surface the real reason (422 invalid slug / 403 no super-admin/package) —
