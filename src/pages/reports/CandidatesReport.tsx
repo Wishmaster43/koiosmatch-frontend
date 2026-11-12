@@ -209,7 +209,9 @@ export default function CandidatesReport({ period, filters = EMPTY_REPORT_FILTER
     const lk = data?.lead_kpis
     const totalSub = totalCompare ? <ReportCompareMetric metric={totalCompare} polarity="up-good" /> : undefined
     if (lk) {
-      // Server strip: total (drills the lead phase) + stale (no drill) + branch cards.
+      // Server strip: total (drills the lead phase) + stale (no drill) + branch cards. The stale
+      // threshold is the card's sub-caption, not part of the label: a long label clamps to two
+      // lines in the nine-card strip and lost the threshold (screen check 12-11).
       const branchCards: KpiSpec[] = lk.by_branch.slice(0, 7).map(b => ({
         key: `branch:${b.value}`, label: b.label, value: b.count,
         active: openKpiParams?.branch === b.value,
@@ -221,7 +223,8 @@ export default function CandidatesReport({ period, filters = EMPTY_REPORT_FILTER
           onClick: leadPhaseValue
             ? gateDrillClick('candidates', () => openSegment('phase', { label: t('leads.total'), count: lk.total }, { phase: leadPhaseValue }))
             : undefined },
-        { key: 'stale', label: Number.isFinite(lk.stale_days_threshold) ? t('leads.kpis.stale', { days: lk.stale_days_threshold }) : t('leads.kpis.staleNoThreshold'), value: lk.stale_count },
+        { key: 'stale', label: Number.isFinite(lk.stale_days_threshold) ? t('leads.kpis.stale') : t('leads.kpis.staleNoThreshold'), value: lk.stale_count,
+          sub: Number.isFinite(lk.stale_days_threshold) ? t('leads.kpis.staleThreshold', { days: lk.stale_days_threshold }) : undefined },
       ]
       const fill = buildAxisKpis(axisConfigs.filter(c => c.axis !== 'branch'), Math.max(0, 9 - head.length - branchCards.length),
         (axis, key) => onAxisKpiPick?.(axis, key), (axis, key) => openKpiParams?.[axis] === key)

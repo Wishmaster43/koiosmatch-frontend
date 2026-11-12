@@ -528,7 +528,7 @@
     "error": "Leads konnten nicht geladen werden",
     "empty": "Keine Leads in diesem Zeitraum",
     "total": "Leads gesamt",
-    "kpis": { "stale": "Leads ohne Kontakt > {{days}} Werktage", "staleNoThreshold": "Leads ohne aktuellen Kontakt" },
+    "kpis": { "stale": "Ohne Kontakt", "staleThreshold": "> {{days}} Werktage", "staleNoThreshold": "Ohne aktuellen Kontakt" },
     "series": "Leads im Zeitverlauf",
     "window": "Leads {{from}} bis {{to}}",
     "kpiOrderFellBack": "Eine in den Einstellungen konfigurierte KPI-Karte existiert nicht mehr und wurde auf den Standard zurückgesetzt."

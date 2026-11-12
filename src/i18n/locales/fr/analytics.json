@@ -528,7 +528,7 @@
     "error": "Impossible de charger les leads",
     "empty": "Aucun lead sur cette période",
     "total": "Total des leads",
-    "kpis": { "stale": "Leads sans contact > {{days}} jours ouvrés", "staleNoThreshold": "Leads sans contact récent" },
+    "kpis": { "stale": "Sans contact", "staleThreshold": "> {{days}} jours ouvrés", "staleNoThreshold": "Sans contact récent" },
     "series": "Leads dans le temps",
     "window": "Leads du {{from}} au {{to}}",
     "kpiOrderFellBack": "Une carte KPI configurée dans les paramètres n'existe plus et a été réinitialisée par défaut."

@@ -528,7 +528,7 @@
     "error": "Could not load the leads",
     "empty": "No leads in this period",
     "total": "Total leads",
-    "kpis": { "stale": "Leads without contact > {{days}} working days", "staleNoThreshold": "Leads without recent contact" },
+    "kpis": { "stale": "Without contact", "staleThreshold": "> {{days}} working days", "staleNoThreshold": "Without recent contact" },
     "series": "Leads over time",
     "window": "Leads {{from}} through {{to}}",
     "kpiOrderFellBack": "A KPI card configured in Settings no longer exists and was reset to the default."

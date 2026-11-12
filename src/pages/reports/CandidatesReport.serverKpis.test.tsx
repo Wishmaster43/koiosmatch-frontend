@@ -74,13 +74,14 @@ describe('CandidatesReport · server lead_kpis strip (SERVER-KPIS-1)', () => {
   const card = (label: string) => screen.getByText(label).parentElement as HTMLElement
   const open = () => render(<QueryClientProvider client={new QueryClient()}><CandidatesReport period="month" initialView="leads" /></QueryClientProvider>)
 
-  it('renders total, the stale card with the days threshold and one branch card from lead_kpis', () => {
+  it('renders total, the stale card with the days threshold as its caption and one branch card from lead_kpis', () => {
     mockUseCandidatesReport.mockReturnValue({ data: withKpis, loading: false, error: false })
     open()
     expect(screen.getByText(i18n.t('analytics:leads.total'))).toBeInTheDocument()
     expect(within(card(i18n.t('analytics:leads.total'))).getByText('41')).toBeInTheDocument()
-    expect(screen.getByText(i18n.t('analytics:leads.kpis.stale', { days: 30 }))).toBeInTheDocument()
-    expect(within(card(i18n.t('analytics:leads.kpis.stale', { days: 30 }))).getByText('7')).toBeInTheDocument()
+    const stale = card(i18n.t('analytics:leads.kpis.stale'))
+    expect(within(stale).getByText('7')).toBeInTheDocument()
+    expect(within(stale).getByText(i18n.t('analytics:leads.kpis.staleThreshold', { days: 30 }))).toBeInTheDocument()
     expect(screen.getByText('Amersfoort')).toBeInTheDocument()
   })
 

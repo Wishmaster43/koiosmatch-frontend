@@ -528,7 +528,7 @@
     "error": "Kon de leads niet laden",
     "empty": "Geen leads in deze periode",
     "total": "Totaal leads",
-    "kpis": { "stale": "Leads zonder contact > {{days}} werkdagen", "staleNoThreshold": "Leads zonder recent contact" },
+    "kpis": { "stale": "Zonder contact", "staleThreshold": "> {{days}} werkdagen", "staleNoThreshold": "Zonder recent contact" },
     "series": "Leads over tijd",
     "window": "Leads {{from}} tot {{to}}",
     "kpiOrderFellBack": "Een in Instellingen ingestelde KPI-kaart bestaat niet meer en is teruggezet naar de standaard."

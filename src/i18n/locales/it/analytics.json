@@ -528,7 +528,7 @@
     "error": "Impossibile caricare i lead",
     "empty": "Nessun lead in questo periodo",
     "total": "Totale lead",
-    "kpis": { "stale": "Lead senza contatto > {{days}} giorni lavorativi", "staleNoThreshold": "Lead senza contatto recente" },
+    "kpis": { "stale": "Senza contatto", "staleThreshold": "> {{days}} giorni lavorativi", "staleNoThreshold": "Senza contatto recente" },
     "series": "Lead nel tempo",
     "window": "Lead {{from}} - {{to}}",
     "kpiOrderFellBack": "Una scheda KPI configurata in Impostazioni non esiste più ed è stata ripristinata al valore predefinito."
