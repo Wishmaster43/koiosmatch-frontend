@@ -35,6 +35,7 @@
     "whatsapp": "WhatsApp"
   },
   "candidates": {
+    "kpiSuiteError": "De KPI-kaarten konden niet worden geladen.",
     "loading": "Kandidaten laden…",
     "error": "Kon de kandidaten niet laden",
     "empty": "Geen kandidaten in deze periode",
@@ -234,6 +235,8 @@
     "series": "Bellijst-targets over tijd",
     "window": "Bellijst-targets {{from}} t/m {{to}}",
     "axes": {
+      "assignee": "Toegewezen aan",
+      "status": "Status",
       "campaign": "Bellijst",
       "channel": "Kanaal",
       "outcome": "Uitkomst"
@@ -400,6 +403,10 @@
     "forecastValue": "Verwachte waarde",
     "kpiOrderFellBack": "Een in Instellingen ingestelde KPI-kaart bestaat niet meer en is teruggezet naar de standaard.",
     "axes": {
+      "stage": "Fase",
+      "customer": "Klant",
+      "owner": "Eigenaar",
+      "branch": "Vestiging",
       "value": "Pipelinewaarde"
     },
     "kpi": {
@@ -543,6 +550,7 @@
     "kpiOrderFellBack": "Een in Instellingen ingestelde KPI-kaart bestaat niet meer en is teruggezet naar de standaard."
   },
   "compare": {
+    "customRangeIncomplete": "Kies een begin- en einddatum om te vergelijken.",
     "label": "Vergelijk met",
     "mode": {
       "off": "Geen vergelijking",

@@ -9,6 +9,7 @@
  * applications.created_at while the applications LIST is not — an invisible
  * window reads as "counts don't match the list" instead of the deliberate split.
  */
+import { renderKpiValue } from './renderKpiValue'
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import ReportKpiBand from './ReportKpiBand'
@@ -30,7 +31,7 @@ import BarChartCard from '@/components/charts/BarChartCard'
 import type { ChartDatum } from '@/components/charts/chartTypes'
 import { useDateFormat } from '@/lib/datetime'
 import { useNumberFormat } from '@/lib/formatters'
-import { Caption } from '@/components/ui/typography'
+import { Caption, tableHeadStyle } from '@/components/ui/typography'
 import type {
   ReportPeriod, CandidateSegment, CandidateOwnerSegment,
   ApplicationTopSegment, ApplicationBucketCounts, ApplicationStageDurationSegment, ApplicationStageSegment,
@@ -93,7 +94,7 @@ const KPI_COLOR: Partial<Record<string, string>> = {
 export default function ApplicationsReport({ period, filters = EMPTY_REPORT_FILTERS, compare = COMPARE_OFF }: { period: ReportPeriod; filters?: ReportFilterState; compare?: ReportCompareMode }) {
   const { t } = useTranslation('analytics')
   const { formatDate } = useDateFormat()
-  const { formatNumber } = useNumberFormat()
+  const { formatNumber, formatPercent } = useNumberFormat()
   const { data, loading, error, refetch } = useApplicationsReport(period, filters)
 
   const total   = data?.total ?? 0
@@ -101,7 +102,7 @@ export default function ApplicationsReport({ period, filters = EMPTY_REPORT_FILT
 
   // RAPPORT-COMPARE-1: year-on-year / period-on-period, reference adoption
   // (§reportCompareSupport.ts) — mirrors CandidatesReport's hosting exactly.
-  const { totalCompare } = useReportCompareData(period, 'applications', filters, data, compare)
+  const { totalCompare, loading: compareLoading, error: compareError, refetch: refetchCompare } = useReportCompareData(period, 'applications', filters, data, compare)
 
   // One shared drawer for the whole page — a KPI-card click and an axis/bucket/
   // timeseries click both open the SAME drawer (replacing whatever was open
@@ -214,7 +215,7 @@ export default function ApplicationsReport({ period, filters = EMPTY_REPORT_FILT
     t,
     openKpiDrill,
     valueFor: (serverKey, raw) =>
-      raw == null ? '—' : serverKey === 'conversion_pct' ? `${formatNumber(raw)}%` : formatNumber(raw),
+      raw != null && serverKey === 'conversion_pct' ? formatPercent(raw) : raw == null ? renderKpiValue(raw, false, undefined) : formatNumber(raw),
     subFor: (serverKey, raw) =>
       raw != null && serverKey === 'avg_days_to_match' ? t('applications.kpi.daysUnit') : undefined,
   })
@@ -240,6 +241,7 @@ export default function ApplicationsReport({ period, filters = EMPTY_REPORT_FILT
           to={formatDate(data.to)}
           reportKey="applications"
           totalCompare={totalCompare}
+          compareStatus={{ compare, loading: compareLoading, error: compareError, onRetry: refetchCompare }}
         />
       )}
 
@@ -302,7 +304,7 @@ export default function ApplicationsReport({ period, filters = EMPTY_REPORT_FILT
                           openIntakeDrill('state', t('applications.intakes.doneInPeriod'), data.intakes.done_in_period, 'done')) : undefined} />
                     </div>
                     <div>
-                      <Caption style={{ fontWeight: 600, marginBottom: 4, display: 'block' }}>{t('applications.intakes.byRecruiter')}</Caption>
+                      <Caption as="div" style={{ ...tableHeadStyle, marginBottom: 4 }}>{t('applications.intakes.byRecruiter')}</Caption>
                       <SegmentBars
                         max={data.intakes.by_recruiter.reduce((m, s) => Math.max(m, s.count), 0)}
                         items={data.intakes.by_recruiter.map(s => ({ key: s.owner_id, label: s.name, count: s.count, color: null }))}
@@ -313,7 +315,7 @@ export default function ApplicationsReport({ period, filters = EMPTY_REPORT_FILT
                       />
                     </div>
                     <div>
-                      <Caption style={{ fontWeight: 600, marginBottom: 4, display: 'block' }}>{t('applications.intakes.byBranch')}</Caption>
+                      <Caption as="div" style={{ ...tableHeadStyle, marginBottom: 4 }}>{t('applications.intakes.byBranch')}</Caption>
                       <SegmentBars
                         max={data.intakes.by_branch.reduce((m, s) => Math.max(m, s.count), 0)}
                         items={data.intakes.by_branch.map(s => ({ key: s.value, label: s.label, count: s.count, color: null }))}

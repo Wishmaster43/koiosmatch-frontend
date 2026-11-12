@@ -13,13 +13,14 @@ import { useTranslation } from 'react-i18next'
 import { AlertTriangle, Inbox } from 'lucide-react'
 import Button from '@/components/ui/Button'
 import Spinner from '@/components/ui/Spinner'
+import { BodyText } from '@/components/ui/typography'
 
 // One centred layout shared by all three non-success states; only icon/color/message differ.
 function StateRow({ icon, color, message, action }: { icon: ReactNode; color: string; message: string; action?: ReactNode }) {
   return (
     <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 10, padding: 40, textAlign: 'center' }}>
       <div style={{ color }}>{icon}</div>
-      <div style={{ fontSize: 13, color: 'var(--text-muted)' }}>{message}</div>
+      <BodyText as="div" style={{ color: 'var(--text-muted)' }}>{message}</BodyText>
       {action}
     </div>
   )

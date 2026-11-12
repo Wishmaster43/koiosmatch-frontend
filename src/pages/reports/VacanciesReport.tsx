@@ -20,7 +20,7 @@ import ReportGrid, { ReportGridItem } from './ReportGrid'
 import DataTable from '@/components/ui/DataTable'
 import type { Column } from '@/components/ui/DataTable'
 import SoftChip from '@/components/ui/SoftChip'
-import { Caption, Mono, groupLabelStyle } from '@/components/ui/typography'
+import { Caption, Mono, groupLabelStyle, pageSubtitleStyle } from '@/components/ui/typography'
 import ReportDrillDrawer from './ReportDrillDrawer'
 import type { DrillSpec } from './ReportDrillDrawer'
 import VacancyReportAxes from './VacancyReportAxes'
@@ -60,7 +60,7 @@ export default function VacanciesReport({ period, filters = EMPTY_REPORT_FILTERS
   const hasData = !loading && !error && (data?.total ?? 0) > 0
 
   // RAPPORT-COMPARE-1: mirrors CandidatesReport's hosting exactly.
-  const { totalCompare } = useReportCompareData(period, 'vacancies', filters, data, compare)
+  const { totalCompare, loading: compareLoading, error: compareError, refetch: refetchCompare } = useReportCompareData(period, 'vacancies', filters, data, compare)
 
   // One drawer for every drill source: KPI tiles, table rows, axis bars, buckets —
   // ALWAYS layered on top of the report's own active panel filters (`baseParams`),
@@ -192,7 +192,7 @@ export default function VacanciesReport({ period, filters = EMPTY_REPORT_FILTERS
     },
     {
       key: 'customer', header: t('vacancies.cols.customer'), sortable: true, sortValue: v => v.customer?.name ?? '',
-      cellStyle: { color: 'var(--text-muted)', fontSize: 12, maxWidth: 200, overflow: 'hidden', textOverflow: 'ellipsis' },
+      cellStyle: { ...pageSubtitleStyle, maxWidth: 200, overflow: 'hidden', textOverflow: 'ellipsis' },
       render: v => v.customer?.name ?? '—',
     },
     {
@@ -228,6 +228,7 @@ export default function VacanciesReport({ period, filters = EMPTY_REPORT_FILTERS
           to={formatDate(data.to)}
           reportKey="vacancies"
           totalCompare={totalCompare}
+          compareStatus={{ compare, loading: compareLoading, error: compareError, onRetry: refetchCompare }}
         />
       )}
 

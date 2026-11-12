@@ -62,7 +62,7 @@ export default function OpportunitiesReport({ period, filters = EMPTY_REPORT_FIL
 
   // RAPPORT-COMPARE-1: mirrors CandidatesReport's hosting exactly.
   const compareSlug = getCompareSlug('opportunities')
-  const totalCompare = useTotalCompare(compareSlug, data?.period.from, data?.period.to, compare, { period })
+  const { totalCompare, loading: compareLoading, error: compareError, refetch: refetchCompare } = useTotalCompare(compareSlug, data?.period.from, data?.period.to, compare, { period })
 
   // Drill-down: one shared drawer for the whole page — a segment/bucket click
   // opens it fresh, replacing whatever was open before. Exactly one XOR param
@@ -156,6 +156,7 @@ export default function OpportunitiesReport({ period, filters = EMPTY_REPORT_FIL
           to={formatDate(data.period.to)}
           reportKey="opportunities"
           totalCompare={totalCompare}
+          compareStatus={{ compare, loading: compareLoading, error: compareError, onRetry: refetchCompare }}
         />
       )}
 
@@ -177,18 +178,18 @@ export default function OpportunitiesReport({ period, filters = EMPTY_REPORT_FIL
 
           {/* Stage axis — a lookup axis with its own colour per value → donut,
               always sums to total ('none' + orphan-uuid rows included). */}
-          <ReportChartCard title={t('applications.axes.stage')} chart={stageDonut(data.by_stage)} />
+          <ReportChartCard title={t('opportunities.axes.stage')} chart={stageDonut(data.by_stage)} />
 
           {/* Top-20 customers + 'others' + 'none' — a ranking axis → bar; a
               hard-deleted customer's "Onbekend" bar still drills on its raw uuid. */}
-          <ReportChartCard title={t('applications.axes.customer')} chart={bars('customer', data.by_customer)} />
+          <ReportChartCard title={t('opportunities.axes.customer')} chart={bars('customer', data.by_customer)} />
 
-          <ReportChartCard title={t('customers.axes.owner')} chart={ownerBars(data.by_owner)} />
+          <ReportChartCard title={t('opportunities.axes.owner')} chart={ownerBars(data.by_owner)} />
 
           {/* Branch axis on the deal's OWN location_id column (unlike vacancies,
               no customer detour) — a ranking axis → bar; drills via the report
               `branch` param. */}
-          <ReportChartCard title={t('customers.axes.branch')} chart={bars('branch', data.by_branch)} />
+          <ReportChartCard title={t('opportunities.axes.branch')} chart={bars('branch', data.by_branch)} />
         </ReportGrid>
       )}
 

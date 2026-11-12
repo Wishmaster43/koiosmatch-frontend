@@ -35,6 +35,7 @@
     "whatsapp": "WhatsApp"
   },
   "candidates": {
+    "kpiSuiteError": "The KPI cards could not be loaded.",
     "loading": "Loading candidates…",
     "error": "Could not load candidates",
     "empty": "No candidates in this period",
@@ -234,6 +235,8 @@
     "series": "Call-list targets over time",
     "window": "Call-list targets {{from}} through {{to}}",
     "axes": {
+      "assignee": "Assigned to",
+      "status": "Status",
       "campaign": "Call list",
       "channel": "Channel",
       "outcome": "Outcome"
@@ -400,6 +403,10 @@
     "forecastValue": "Forecasted value",
     "kpiOrderFellBack": "A KPI card configured in Settings no longer exists and was reset to the default.",
     "axes": {
+      "stage": "Stage",
+      "customer": "Customer",
+      "owner": "Owner",
+      "branch": "Branch",
       "value": "Pipeline value"
     },
     "kpi": {
@@ -543,6 +550,7 @@
     "kpiOrderFellBack": "A KPI card configured in Settings no longer exists and was reset to the default."
   },
   "compare": {
+    "customRangeIncomplete": "Choose a start and end date to compare.",
     "label": "Compare with",
     "mode": {
       "off": "No comparison",

@@ -17,7 +17,8 @@ export function useTotalCompare(
   to: string | undefined,
   compare: ReportCompareMode,
   extraParams: Record<string, unknown> = {},
-): CompareMetric | undefined {
-  const { data: compareData } = useReportCompare(compareSlug, from, to, compare, extraParams)
-  return compare.kind !== 'off' ? (compareData?.total as CompareMetric | undefined) : undefined
+): { totalCompare: CompareMetric | undefined; loading: boolean; error: boolean; refetch: () => void } {
+  const { data: compareData, loading, error, refetch } = useReportCompare(compareSlug, from, to, compare, extraParams)
+  const totalCompare = compare.kind !== 'off' ? (compareData?.total as CompareMetric | undefined) : undefined
+  return { totalCompare, loading, error, refetch: () => refetch() }
 }

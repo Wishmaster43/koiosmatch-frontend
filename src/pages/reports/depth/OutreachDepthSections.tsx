@@ -1,5 +1,6 @@
 import { Fragment, useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
+import { labelOrRaw } from '../lib/labelOrRaw'
 import ReportChartCard from '../ReportChartCard'
 import WeeklyBarChartCard from '@/components/charts/WeeklyBarChartCard'
 import type { BarSeries } from '@/components/charts/WeeklyBarChartCard'
@@ -63,7 +64,7 @@ export default function OutreachDepthSections({ data, onChannel }: {
             data={data.channel_funnel!.map((c): ChartDatum => ({
               // Unknown channel value: fall back to the raw channel string
               // rather than rendering a bare untranslated i18n key.
-              name: t(`outreach.depth.channel.${c.channel}`, { defaultValue: c.channel }), key: c.channel,
+              name: labelOrRaw(t, i18n, `outreach.depth.channel.${c.channel}`, c.channel), key: c.channel,
               value: c.total, total: c.total, reached: c.reached, applied: c.applied, placed: c.placed,
             }))}
             series={[

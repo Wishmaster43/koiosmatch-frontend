@@ -35,6 +35,7 @@
     "whatsapp": "WhatsApp"
   },
   "candidates": {
+    "kpiSuiteError": "Não foi possível carregar os cartões de KPI.",
     "loading": "A carregar candidatos…",
     "error": "Não foi possível carregar os candidatos",
     "empty": "Sem candidatos neste período",
@@ -234,6 +235,8 @@
     "series": "Alvos de lista de chamadas ao longo do tempo",
     "window": "Alvos de lista de chamadas de {{from}} a {{to}}",
     "axes": {
+      "assignee": "Atribuído a",
+      "status": "Estado",
       "campaign": "Lista de chamadas",
       "channel": "Canal",
       "outcome": "Resultado"
@@ -400,6 +403,10 @@
     "forecastValue": "Valor previsto",
     "kpiOrderFellBack": "Um cartão de KPI configurado em Definições já não existe e foi reposto para o padrão.",
     "axes": {
+      "stage": "Etapa",
+      "customer": "Cliente",
+      "owner": "Responsável",
+      "branch": "Filial",
       "value": "Valor do pipeline"
     },
     "kpi": {
@@ -543,6 +550,7 @@
     "kpiOrderFellBack": "Um cartão de KPI configurado nas Definições já não existe e foi reposto para o padrão."
   },
   "compare": {
+    "customRangeIncomplete": "Escolha uma data de início e de fim para comparar.",
     "label": "Comparar com",
     "mode": {
       "off": "Sem comparação",

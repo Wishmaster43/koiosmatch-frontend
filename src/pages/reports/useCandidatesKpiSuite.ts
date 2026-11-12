@@ -15,7 +15,7 @@ import type { ReportPeriod } from '@/types/analytics'
 
 interface SuiteCard { key: string; label?: string; count: number | null }
 
-// Fetches the nine-KPI suite for the given period+filters (see the module doc above): a card the server honestly omits simply has no entry, never a fabricated zero.
+// Fetches the nine-KPI suite for the given period+filters (see the module doc above): values by key plus an error flag and retry; a card the server honestly omits simply has no entry, never a fabricated zero.
 export function useCandidatesKpiSuite(period: ReportPeriod, filters: ReportFilterState, enabled: boolean) {
   const params = buildReportQueryParams(period, 'candidates', filters)
   const query = useQuery({
@@ -28,6 +28,8 @@ export function useCandidatesKpiSuite(period: ReportPeriod, filters: ReportFilte
       return Array.isArray(cards) ? cards : []
     },
   })
-  // A Map keyed on the server key; error/loading read as "no entries" → dashes.
-  return new Map((query.data ?? []).map(c => [c.key, c.count]))
+  // A Map keyed on the server key; loading reads as "no entries" → dashes. A failed
+  // fetch is reported separately so the strip can say so instead of showing dashes alone.
+  const values = new Map((query.data ?? []).map(c => [c.key, c.count]))
+  return { values, error: enabled && query.isError, refetch: () => query.refetch() }
 }

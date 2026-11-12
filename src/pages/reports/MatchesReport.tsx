@@ -58,7 +58,7 @@ export default function MatchesReport({ period, filters = EMPTY_REPORT_FILTERS, 
   const isEmpty = !loading && !error && (!data || data.total === 0)
 
   // RAPPORT-COMPARE-1: mirrors CandidatesReport's hosting exactly.
-  const { totalCompare } = useReportCompareData(period, 'matches', filters, data, compare)
+  const { totalCompare, loading: compareLoading, error: compareError, refetch: refetchCompare } = useReportCompareData(period, 'matches', filters, data, compare)
 
   // Drill-down: clicking a KPI/segment/tile/bucket explains it (breakdown + the
   // matches behind it + Koios advice). Exactly one XOR param per open drill —
@@ -211,6 +211,7 @@ export default function MatchesReport({ period, filters = EMPTY_REPORT_FILTERS, 
           to={formatDate(data.to)}
           reportKey="matches"
           totalCompare={totalCompare}
+          compareStatus={{ compare, loading: compareLoading, error: compareError, onRetry: refetchCompare }}
         />
       )}
 

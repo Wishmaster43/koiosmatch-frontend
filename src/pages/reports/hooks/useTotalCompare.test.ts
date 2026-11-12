@@ -23,13 +23,22 @@ describe('useTotalCompare', () => {
     const total = { current: 10, previous: 8, delta: 2, delta_pct: 25 }
     mockUseReportCompare.mockReturnValue({ data: { total } })
     const { result } = renderHook(() => useTotalCompare('outreach', '2026-08-01', '2026-08-31', { kind: 'previous_year' }))
-    expect(result.current).toEqual(total)
+    expect(result.current.totalCompare).toEqual(total)
   })
 
   it('returns undefined when compare is off, even with data present', () => {
     mockUseReportCompare.mockReturnValue({ data: { total: { current: 1, previous: 1, delta: 0, delta_pct: 0 } } })
     const { result } = renderHook(() => useTotalCompare('outreach', '2026-08-01', '2026-08-31', { kind: 'off' }))
-    expect(result.current).toBeUndefined()
+    expect(result.current.totalCompare).toBeUndefined()
+  })
+
+  it('passes the loading and error state through with a bound refetch', () => {
+    const refetch = vi.fn()
+    mockUseReportCompare.mockReturnValue({ data: null, loading: false, error: true, refetch })
+    const { result } = renderHook(() => useTotalCompare('outreach', '2026-08-01', '2026-08-31', { kind: 'previous_period' }))
+    expect(result.current.error).toBe(true)
+    result.current.refetch()
+    expect(refetch).toHaveBeenCalledTimes(1)
   })
 
   it('defaults extraParams to an empty object', () => {

@@ -15,6 +15,7 @@
  * stale count, one card per branch); when the response lacks it (older BE) the
  * strip falls back to the axis top-segment cards.
  */
+import { renderKpiValue } from './renderKpiValue'
 import { useState, useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
 import ReportKpiBand from './ReportKpiBand'
@@ -48,7 +49,6 @@ import { ReportDataWindow } from './components/ReportDataWindow'
 import { donutData, barData, ownerBarData } from './lib/chartData'
 import { segmentClick, ownerClick } from './lib/drillClick'
 import { reportWindowLabel } from './lib/reportWindowLabel'
-import { Caption } from '@/components/ui/typography'
 import ErrorBanner from '@/components/ui/ErrorBanner'
 import { useReportCustomKpis } from './hooks/useReportCustomKpis'
 
@@ -99,7 +99,7 @@ export default function CandidatesReport({ period, filters = EMPTY_REPORT_FILTER
 
   const { data, loading, error, refetch } = useCandidatesReport(period, filters, phaseFilter)
   // The real KPI suite — only fetched on the Kandidaten position (see file-top).
-  const suite = useCandidatesKpiSuite(period, filters, !isLeads)
+  const { values: suite, error: suiteError, refetch: refetchSuite } = useCandidatesKpiSuite(period, filters, !isLeads)
 
   const total   = data?.total ?? 0
   const hasData = !loading && !error && total > 0
@@ -108,15 +108,6 @@ export default function CandidatesReport({ period, filters = EMPTY_REPORT_FILTER
   // panel (ReportsPage). Same window + same filters as the plain report call.
   const { totalCompare, loading: compareLoading, error: compareError, refetch: refetchCompare } =
     useReportCompareData(period, 'candidates', filters, data, compare, phaseFilter ? { phase: [phaseFilter] } : undefined, view)
-  // An explicitly requested comparison must not fail silently (§3A four states) —
-  // a small honest state next to the window line when compare mode is active.
-  const compareActive = compare.kind !== 'off'
-  const compareStatus = compareActive && (compareLoading || compareError) ? (
-    compareLoading
-      ? <Caption style={{ display: 'inline-flex' }}>{t('compare.compareLoading')}</Caption>
-      : <ErrorBanner variant="subtle" onRetry={() => refetchCompare()} style={{ padding: 0 }}>{t('compare.compareError')}</ErrorBanner>
-  ) : null
-
   // Drill-down: one shared drawer for the whole page. Exactly one XOR param per
   // open drill, always layered on the report's own active filters, and every
   // candidates drill deep-links its rows to the candidate drilldown (entityPage,
@@ -242,7 +233,7 @@ export default function CandidatesReport({ period, filters = EMPTY_REPORT_FILTER
       const raw = suite.get(key)
       const has = raw != null
       return [{
-        key, label, value: has ? raw : '—',
+        key, label, value: renderKpiValue(raw, has, undefined),
         color: has && raw !== 0 ? SUITE_COLOR[key] : undefined,
         active: openKpiParams?.kpi === key,
         onClick: has ? openSuiteDrill(key, label, raw) : undefined,
@@ -258,7 +249,11 @@ export default function CandidatesReport({ period, filters = EMPTY_REPORT_FILTER
           { value: 'leads', label: t('candidates.viewSwitch.leads') },
         ]} />
 
-      {/* KPI strip — the real suite (Kandidaten) / server lead cards (Leads) */}
+      {/* KPI strip — the real suite (Kandidaten) / server lead cards (Leads). A failed
+          suite fetch says so with a retry; the cards below keep their honest dashes. */}
+      {hasData && !isLeads && suiteError && (
+        <ErrorBanner variant="subtle" onRetry={() => refetchSuite()} style={{ marginBottom: 8 }}>{t('candidates.kpiSuiteError')}</ErrorBanner>
+      )}
       {hasData && (
         <ReportKpiBand kpis={kpis} notice={fellBack ? t(isLeads ? 'leads.kpiOrderFellBack' : 'candidates.kpiOrderFellBack') : undefined}
           extraKpis={customKpis} extraTitle={customKpiTitle} />
@@ -274,14 +269,12 @@ export default function CandidatesReport({ period, filters = EMPTY_REPORT_FILTER
           reportKey={isLeads ? 'leads' : 'candidates'}
           isLeads={isLeads}
           totalCompare={!isLeads ? totalCompare : undefined}
+          compareStatus={{ compare, loading: compareLoading, error: compareError, onRetry: refetchCompare }}
         />
       )}
       {/* Compare loading/error — an explicitly requested comparison never fails
           silently (§3A four states); shown once regardless of which position
           (candidates window line / leads KPI sub) the delta would have landed on. */}
-      {!loading && !error && data && compareStatus && (
-        <div style={{ marginTop: -8, marginBottom: 12 }}>{compareStatus}</div>
-      )}
 
       <ReportStateFlow
         loading={loading}

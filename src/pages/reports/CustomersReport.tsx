@@ -18,6 +18,7 @@
  * PROSPECT-DEDUP-1 rule above. The default Klanten position is BYTE-IDENTICAL to the
  * pre-existing standalone customers report (no filter added).
  */
+import { renderKpiValue } from './renderKpiValue'
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { BodyText } from '@/components/ui/typography'
@@ -50,6 +51,7 @@ import ReportCompareMetric from './ReportCompareMetric'
 import { COMPARE_OFF } from './reportCompareMode'
 import type { ReportCompareMode } from './reportCompareMode'
 import { ReportStateFlow } from './components/ReportStateFlow'
+import { ReportCompareStatus } from './components/ReportCompareStatus'
 import { useNavigation } from '@/context/NavigationContext'
 import CustomerDepthSections from './depth/CustomerDepthSections'
 import { barData, ownerBarData } from './lib/chartData'
@@ -118,7 +120,7 @@ export default function CustomersReport({ period, filters = EMPTY_REPORT_FILTERS
   const showBand = hasData || (!loading && !error && isProspects && pkSignal)
 
   // RAPPORT-COMPARE-1: mirrors CandidatesReport's hosting exactly.
-  const { totalCompare } = useReportCompareData(period, 'customers', filters, data, compare, phaseFilter ? { phase: [phaseFilter] } : undefined, view)
+  const { totalCompare, loading: compareLoading, error: compareError, refetch: refetchCompare } = useReportCompareData(period, 'customers', filters, data, compare, phaseFilter ? { phase: [phaseFilter] } : undefined, view)
 
   // Drill-down: one shared drawer for the whole page — a segment/bucket click
   // opens it fresh, replacing whatever was open before. Exactly one XOR param
@@ -213,7 +215,7 @@ export default function CustomersReport({ period, filters = EMPTY_REPORT_FILTERS
       const raw = kpiByServerKey.get(key)
       const has = raw != null
       return [key, {
-        key, label, value: has ? raw : '—',
+        key, label, value: renderKpiValue(raw, has, undefined),
         // STANDING signal, not a windowed count — every card says so (§SCHERMWAARHEID).
         sub: t('customers.signalSnapshot'),
         color: has && raw !== 0 ? SIGNAL_COLOR[key] : undefined,
@@ -258,7 +260,7 @@ export default function CustomersReport({ period, filters = EMPTY_REPORT_FILTERS
       const raw = serverCounts.get(key)
       const has = raw != null
       return {
-        key, label, value: has ? raw : '—',
+        key, label, value: renderKpiValue(raw, has, undefined),
         // Compare belongs on the windowed prospect total (same population as the compare call).
         sub: key === 'customers_prospect'
           ? (totalCompare ? <ReportCompareMetric metric={totalCompare} polarity="up-good" /> : undefined)
@@ -312,6 +314,11 @@ export default function CustomersReport({ period, filters = EMPTY_REPORT_FILTERS
             : t('customers.windowWithTotal', { from: formatDate(data.from), to: formatDate(data.to), total })}
           {!isProspects && totalCompare && <ReportCompareMetric metric={totalCompare} polarity="up-good" />}
         </BodyText>
+      )}
+
+      {/* An explicitly requested comparison never fails silently (§3A four states). */}
+      {!loading && !error && data && (
+        <ReportCompareStatus compare={compare} loading={compareLoading} error={compareError} onRetry={refetchCompare} />
       )}
 
       <ReportStateFlow

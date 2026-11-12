@@ -48,6 +48,8 @@ import type { ReportCompareMode } from './reportCompareMode'
 import type { ReportFilterState } from './reportFilterParams'
 import OutreachDepthSections from './depth/OutreachDepthSections'
 import { ReportStateFlow } from './components/ReportStateFlow'
+import { labelOrRaw } from './lib/labelOrRaw'
+import { renderKpiValue } from './renderKpiValue'
 import { ReportDataWindow } from './components/ReportDataWindow'
 import { reportWindowLabel } from './lib/reportWindowLabel'
 
@@ -60,7 +62,7 @@ type AxisSeg = { value: string; label: string; count: number }
 
 // See the file's top doc above for the chart-mix rule and the six-way drill contract this report renders against.
 export default function OutreachReport({ period, filters, compare = COMPARE_OFF }: { period: ReportPeriod; filters?: ReportFilterState; compare?: ReportCompareMode }) {
-  const { t } = useTranslation('analytics')
+  const { t, i18n } = useTranslation('analytics')
   const { formatDate } = useDateFormat()
   const { data, loading, error, refetch } = useOutreachReport(period, filters)
   // RAPPORT-FILTERS-2: every drill/advice call carries the SAME panel filters the
@@ -73,7 +75,7 @@ export default function OutreachReport({ period, filters, compare = COMPARE_OFF 
 
   // RAPPORT-COMPARE-1: mirrors CandidatesReport's hosting exactly.
   const compareSlug = getCompareSlug('outreach')
-  const totalCompare = useTotalCompare(compareSlug, data?.from, data?.to, compare, { period })
+  const { totalCompare, loading: compareLoading, error: compareError, refetch: refetchCompare } = useTotalCompare(compareSlug, data?.from, data?.to, compare, { period })
 
   // One shared drawer for the whole page — a KPI-card click and an axis/bucket
   // click both open the SAME drawer (replacing whatever was open before). Exactly
@@ -123,7 +125,7 @@ export default function OutreachReport({ period, filters, compare = COMPARE_OFF 
   const kpiByKey = serverKpiSpecs({
     data, drill, labelKeys: SUITE_LABEL_KEY, colors: KPI_COLOR, t, openKpiDrill,
     // conversion_pct is a float percentage, not a row count.
-    valueFor: (key, raw, has) => (!has ? '—' : key === 'conversion_pct' ? formatPercent(raw as number) : (raw as number)),
+    valueFor: (key, raw, has) => (has && key === 'conversion_pct' ? formatPercent(raw as number) : renderKpiValue(raw, has, undefined)),
     subFor: totalCompareSubFor(totalCompare, 'total_targets'),
   })
   // Which nine keys render, and in what order, is the tenant's Settings → Reports
@@ -152,6 +154,7 @@ export default function OutreachReport({ period, filters, compare = COMPARE_OFF 
           to={formatDate(data.to)}
           reportKey="outreach"
           totalCompare={totalCompare}
+          compareStatus={{ compare, loading: compareLoading, error: compareError, onRetry: refetchCompare }}
         />
       )}
 
@@ -176,7 +179,7 @@ export default function OutreachReport({ period, filters, compare = COMPARE_OFF 
               name and drills on its uuid. */}
           <ReportChartCard title={t('outreach.axes.campaign')} chart={
             <BarChartCard data={barData(data.by_campaign)} onBarClick={pickBar('campaign', data.by_campaign)} />} />
-          <ReportChartCard title={t('tasks.axes.assignee')} chart={
+          <ReportChartCard title={t('outreach.axes.assignee')} chart={
             <BarChartCard data={assigneeBarData(data.by_assignee)} onBarClick={pickAssigneeBar(data.by_assignee)} />} />
 
           {/* Channel axis, zero-filled over the tenant channels + 'none' — few
@@ -185,7 +188,7 @@ export default function OutreachReport({ period, filters, compare = COMPARE_OFF 
 
           {/* Status axis — the fase-1 breakdown, now summing to total with
               value/label pairs ("Onbekend" orphan bars included) → donut. */}
-          <PieAxisCard title={t('customers.axes.status')} segments={data.by_status} onItemClick={pickSegment('status', data.by_status)} />
+          <PieAxisCard title={t('outreach.axes.status')} segments={data.by_status} onItemClick={pickSegment('status', data.by_status)} />
 
           {/* Outcome axis — incl. the "Geen uitkomst" sentinel so it sums to
               total → donut. Last odd card spans the full row (no grid hole). */}
@@ -194,7 +197,7 @@ export default function OutreachReport({ period, filters, compare = COMPARE_OFF 
           {/* DASH-FEEDS-V3 depth: channel funnel + best-contact heatmap (halves,
               even parity) + the campaign timeseries last, span 2. */}
           <OutreachDepthSections data={data}
-            onChannel={gateDrillClick('outreach', (channel: string, total: number) => openSegment({ label: t(`outreach.depth.channel.${channel}`, { defaultValue: channel }), count: total }, { channel }))} />
+            onChannel={gateDrillClick('outreach', (channel: string, total: number) => openSegment({ label: labelOrRaw(t, i18n, `outreach.depth.channel.${channel}`, channel), count: total }, { channel }))} />
         </ReportGrid>
       )}
 

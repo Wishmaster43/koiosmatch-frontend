@@ -23,6 +23,7 @@
  * entityPage is deliberately NOT set on any drill here: conversation rows carry
  * masked numbers, no unambiguous single record page to deep-link into.
  */
+import { renderKpiValue } from './renderKpiValue'
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import ReportKpiBand from './ReportKpiBand'
@@ -36,7 +37,7 @@ import PieChartCard from '@/components/charts/PieChartCard'
 import { CHART_SERIES_COLORS } from '@/components/charts/chartTypes'
 import type { ChartDatum } from '@/components/charts/chartTypes'
 import ReportTimeseriesChart from './ReportTimeseriesChart'
-import { BodyText, Caption, Mono } from '@/components/ui/typography'
+import { BodyText, Caption, Mono, tableHeadStyle } from '@/components/ui/typography'
 import { useDateFormat } from '@/lib/datetime'
 import { useNumberFormat } from '@/lib/formatters'
 import type { ReportPeriod, WhatsappReportData, WhatsappSegment } from '@/types/analytics'
@@ -44,6 +45,7 @@ import { useOrderedReportKpis } from './hooks/useOrderedReportKpis'
 import { EMPTY_REPORT_FILTERS, buildReportQueryParams } from './reportFilterParams'
 import type { ReportFilterState } from './reportFilterParams'
 import { ReportStateFlow } from './components/ReportStateFlow'
+import { labelOrRaw } from './lib/labelOrRaw'
 import { ReportDataWindow } from './components/ReportDataWindow'
 import { camelKpiSpecs } from './lib/kpiSpecs'
 import { reportWindowLabel } from './lib/reportWindowLabel'
@@ -74,7 +76,7 @@ const KPI_LABEL_KEYS: Record<string, string> = {
 // WhatsApp conversations report: nine fixed KPI cards, timeseries + categorical
 // donuts and a top-conversations table, each surface drilling into the shared drawer.
 export default function WhatsappReport({ period, filters }: { period: ReportPeriod; filters?: ReportFilterState }) {
-  const { t } = useTranslation('analytics')
+  const { t, i18n } = useTranslation('analytics')
   const { formatDate } = useDateFormat()
   const { formatNumber } = useNumberFormat()
   const { data, loading, error, refetch } = useWhatsappReport(period, true, filters)
@@ -136,7 +138,7 @@ export default function WhatsappReport({ period, filters }: { period: ReportPeri
   // WA-REPORT-TOLERANT-1: an axis the envelope leaves out (measured on the demo
   // tenant, 10-09: no by_type) draws an empty donut instead of crashing the page.
   const donutData = (axis: 'direction' | 'type' | 'escalated', segs: WhatsappSegment[] = []): { data: ChartDatum[]; colors: string[] } => ({
-    data: segs.map(s => ({ name: t(`whatsapp.axes.${axis}Values.${s.value}`, { defaultValue: s.label }), value: s.count, key: s.value })),
+    data: segs.map(s => ({ name: labelOrRaw(t, i18n, `whatsapp.axes.${axis}Values.${s.value}`, s.label), value: s.count, key: s.value })),
     colors: segs.map((_, i) => CHART_SERIES_COLORS[i % CHART_SERIES_COLORS.length]),
   })
   const pickSegment = (axis: 'direction' | 'type' | 'escalated' | 'channel', segs: WhatsappSegment[] = []) =>
@@ -145,13 +147,13 @@ export default function WhatsappReport({ period, filters }: { period: ReportPeri
       const seg = segs.find(s => s.value === key)
       // Every axis titles its drawer with the same translated label its donut shows.
       const translatedKey = axis === 'channel' ? `whatsapp.channel.${seg?.value}` : `whatsapp.axes.${axis}Values.${seg?.value}`
-      if (seg) openAxisDrill(axis, t(translatedKey, { defaultValue: seg.label }), seg.count, seg.value)
+      if (seg) openAxisDrill(axis, labelOrRaw(t, i18n, translatedKey, seg.label), seg.count, seg.value)
     })
   // Channel donut labels: per-enum-value translation (nl "WABA" / "WABA · lokaal"
   // / "WA Web"), falling back to the server's own label only when a locale key
   // is missing — never the raw server value verbatim (§ contract discipline).
   const channelDonutData = (segs: WhatsappSegment[] = []): { data: ChartDatum[]; colors: string[] } => ({
-    data: segs.map(s => ({ name: t(`whatsapp.channel.${s.value}`, { defaultValue: s.label }), value: s.count, key: s.value })),
+    data: segs.map(s => ({ name: labelOrRaw(t, i18n, `whatsapp.channel.${s.value}`, s.label), value: s.count, key: s.value })),
     colors: segs.map((_, i) => CHART_SERIES_COLORS[i % CHART_SERIES_COLORS.length]),
   })
   // K-193: the channel card exists only when the envelope carries a NON-EMPTY
@@ -167,7 +169,7 @@ export default function WhatsappReport({ period, filters }: { period: ReportPeri
     t,
     openKpiDrill,
     valueFor: (serverKey, raw) =>
-      raw == null ? '—' : serverKey === 'avg_first_response_minutes' ? formatNumber(raw) : raw,
+      raw != null && serverKey === 'avg_first_response_minutes' ? formatNumber(raw) : renderKpiValue(raw, raw != null, undefined),
     subFor: (serverKey, raw) =>
       raw != null && serverKey === 'avg_first_response_minutes' ? t('whatsapp.kpi.minutesUnit') : undefined,
   })
@@ -225,7 +227,7 @@ export default function WhatsappReport({ period, filters }: { period: ReportPeri
                   drawer's rows span BOTH directions of the bucket; each chart's
                   title says which number the user clicked. */}
               <div>
-                <Caption style={{ fontWeight: 600, marginBottom: 4, display: 'block' }}>{t('whatsapp.inbound')}</Caption>
+                <Caption as="div" style={{ ...tableHeadStyle, marginBottom: 4 }}>{t('whatsapp.inbound')}</Caption>
                 <ReportTimeseriesChart series={timeseries.series.map(p => ({ date: p.date, label: p.date, value: p.inbound }))}
                   onPick={gateDrillClick('whatsapp', (dateKey: string) => {
                     const pt = timeseries.series.find(p => p.date === dateKey)
@@ -233,7 +235,7 @@ export default function WhatsappReport({ period, filters }: { period: ReportPeri
                   })} />
               </div>
               <div>
-                <Caption style={{ fontWeight: 600, marginBottom: 4, display: 'block' }}>{t('whatsapp.outbound')}</Caption>
+                <Caption as="div" style={{ ...tableHeadStyle, marginBottom: 4 }}>{t('whatsapp.outbound')}</Caption>
                 <ReportTimeseriesChart series={timeseries.series.map(p => ({ date: p.date, label: p.date, value: p.outbound }))}
                   onPick={gateDrillClick('whatsapp', (dateKey: string) => {
                     const pt = timeseries.series.find(p => p.date === dateKey)

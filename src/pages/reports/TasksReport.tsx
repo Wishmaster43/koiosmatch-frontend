@@ -11,6 +11,7 @@
  * is display-only: the XOR carries no open/done/overdue segment (no fake
  * affordances — a stat without a real drill path never looks clickable).
  */
+import { renderKpiValue } from './renderKpiValue'
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import ReportKpiBand from './ReportKpiBand'
@@ -59,7 +60,7 @@ export default function TasksReport({ period, filters = EMPTY_REPORT_FILTERS, co
   const hasData = !loading && !error && total > 0
 
   // RAPPORT-COMPARE-1: mirrors CandidatesReport's hosting exactly.
-  const { totalCompare } = useReportCompareData(period, 'tasks', filters, data, compare)
+  const { totalCompare, loading: compareLoading, error: compareError, refetch: refetchCompare } = useReportCompareData(period, 'tasks', filters, data, compare)
 
   // One shared drawer for the whole page — a KPI-card click and an axis/bucket
   // click both open the SAME drawer (replacing whatever was open before). Exactly
@@ -119,7 +120,7 @@ export default function TasksReport({ period, filters = EMPTY_REPORT_FILTERS, co
   const kpiByKey = serverKpiSpecs({
     data, drill, labelKeys: SUITE_LABEL_KEY, colors: KPI_COLOR, t, openKpiDrill,
     // avg_completion_days is a computed average in days, not a row count.
-    valueFor: (key, raw, has) => (!has ? '—' : key === 'avg_completion_days' ? t('tasks.kpi.daysValue', { days: Math.round(raw as number) }) : (raw as number)),
+    valueFor: (key, raw, has) => (has && key === 'avg_completion_days' ? t('tasks.kpi.daysValue', { days: Math.round(raw as number) }) : renderKpiValue(raw as number | null, has, undefined)),
     subFor: totalCompareSubFor(totalCompare),
   })
   // Which nine keys render, and in what order, is the tenant's Settings → Reports
@@ -149,6 +150,7 @@ export default function TasksReport({ period, filters = EMPTY_REPORT_FILTERS, co
           to={formatDate(data.to)}
           reportKey="tasks"
           totalCompare={totalCompare}
+          compareStatus={{ compare, loading: compareLoading, error: compareError, onRetry: refetchCompare }}
         />
       )}
 

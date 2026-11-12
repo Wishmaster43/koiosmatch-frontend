@@ -35,6 +35,7 @@
     "whatsapp": "WhatsApp"
   },
   "candidates": {
+    "kpiSuiteError": "Die KPI-Karten konnten nicht geladen werden.",
     "loading": "Kandidaten werden geladen…",
     "error": "Kandidaten konnten nicht geladen werden",
     "empty": "Keine Kandidaten in diesem Zeitraum",
@@ -234,6 +235,8 @@
     "series": "Anrufzielpersonen im Zeitverlauf",
     "window": "Anrufzielpersonen {{from}} bis {{to}}",
     "axes": {
+      "assignee": "Zugewiesen an",
+      "status": "Status",
       "campaign": "Anrufliste",
       "channel": "Kanal",
       "outcome": "Ergebnis"
@@ -400,6 +403,10 @@
     "forecastValue": "Prognostizierter Wert",
     "kpiOrderFellBack": "Eine in den Einstellungen konfigurierte KPI-Karte existiert nicht mehr und wurde auf den Standard zurückgesetzt.",
     "axes": {
+      "stage": "Phase",
+      "customer": "Kunde",
+      "owner": "Eigentümer",
+      "branch": "Niederlassung",
       "value": "Pipelinewert"
     },
     "kpi": {
@@ -543,6 +550,7 @@
     "kpiOrderFellBack": "Eine in den Einstellungen konfigurierte KPI-Karte existiert nicht mehr und wurde auf den Standard zurückgesetzt."
   },
   "compare": {
+    "customRangeIncomplete": "Wähle ein Start- und Enddatum für den Vergleich.",
     "label": "Vergleichen mit",
     "mode": {
       "off": "Kein Vergleich",

@@ -12,7 +12,7 @@ import { useReportDrill } from './useReportDrill'
 import RightDrawer from '@/components/ui/RightDrawer'
 import Avatar from '@/components/ui/Avatar'
 import EntityLink from '@/components/ui/EntityLink'
-import { GroupLabel, BodyText, Caption } from '@/components/ui/typography'
+import { GroupLabel, BodyText, Caption, SectionTitle, PageSubtitle, pageSubtitleStyle } from '@/components/ui/typography'
 import KoiosAiMark from '@/components/ui/KoiosAiMark'
 import KoiosFeedback from '@/components/layout/koios/KoiosFeedback'
 import ErrorBanner from '@/components/ui/ErrorBanner'
@@ -91,13 +91,13 @@ function DrillRecordsList({ rows, rowsTotal, entityPage, rowFields, formatDate }
         <Search size={13} color="var(--text-muted)" aria-hidden="true" />
         <input value={search} onChange={e => setSearch(e.target.value)}
           placeholder={t('drill.search')} aria-label={t('drill.search')}
-          style={{ flex: 1, border: 'none', background: 'transparent', outline: 'none', fontSize: 12, color: 'var(--text)' }} />
+          style={{ flex: 1, border: 'none', background: 'transparent', outline: 'none', ...pageSubtitleStyle, color: 'var(--text)' }} />
       </div>
       <div style={{ border: '1px solid var(--border)', borderRadius: 10, overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
         {/* Rows scroll in a capped region so breakdown/advice below stay reachable. */}
         <div style={{ overflowY: 'auto', maxHeight: 320 }}>
         {filtered.length === 0 && (
-          <div style={{ fontSize: 13, color: 'var(--text-muted)', padding: '10px 12px' }}>{t('drill.noRecords')}</div>
+          <BodyText as="div" style={{ color: 'var(--text-muted)', padding: '10px 12px' }}>{t('drill.noRecords')}</BodyText>
         )}
         {filtered.map((r, i) => {
           const title = rowTitle(r)
@@ -113,7 +113,7 @@ function DrillRecordsList({ rows, rowsTotal, entityPage, rowFields, formatDate }
                 ) : (
                   <BodyText as="div" style={{ fontWeight: 500, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{title}</BodyText>
                 )}
-                {sub && <div style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{sub}</div>}
+                {sub && <PageSubtitle as="div" style={{ marginTop: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{sub}</PageSubtitle>}
               </div>
             </div>
           )
@@ -160,11 +160,11 @@ export default function ReportDrillDrawer({ drill, onClose }: { drill: DrillSpec
           <div style={{ border: '1px solid var(--border)', borderRadius: 10, overflow: 'hidden' }}>
             {drill.breakdown.map((b, i) => (
               <div key={i} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center',
-                            padding: '9px 12px', borderTop: i ? '1px solid var(--border)' : 'none', fontSize: 13 }}>
-                <span style={{ color: 'var(--text)' }}>{b.label}</span>
-                <span style={{ color: 'var(--text)', fontWeight: 600, fontVariantNumeric: 'tabular-nums' }}>
+                            padding: '9px 12px', borderTop: i ? '1px solid var(--border)' : 'none' }}>
+                <BodyText>{b.label}</BodyText>
+                <SectionTitle as="span" style={{ fontVariantNumeric: 'tabular-nums' }}>
                   {typeof b.value === 'number' ? formatNumber(b.value) : b.value}
-                </span>
+                </SectionTitle>
               </div>
             ))}
           </div>
@@ -179,13 +179,13 @@ export default function ReportDrillDrawer({ drill, onClose }: { drill: DrillSpec
           <GroupLabel as="h4" style={{ marginBottom: 8 }}>
             {drill.entityLabel ?? t('drill.records')}
           </GroupLabel>
-          {rowsLoading && <div style={{ fontSize: 13, color: 'var(--text-muted)', padding: '8px 0' }}>{t('drill.loading')}</div>}
+          {rowsLoading && <BodyText as="div" style={{ color: 'var(--text-muted)', padding: '8px 0' }}>{t('drill.loading')}</BodyText>}
           {/* A failed fetch is a real error, never the calm empty line (§3A four states) */}
           {!rowsLoading && rowsError && (
             <ErrorBanner variant="subtle" onRetry={() => rowsRefetch()}>{t('drill.rowsError')}</ErrorBanner>
           )}
           {!rowsLoading && !rowsError && rows.length === 0 && (
-            <div style={{ fontSize: 13, color: 'var(--text-muted)', padding: '8px 0' }}>{t('drill.noRecords')}</div>
+            <BodyText as="div" style={{ color: 'var(--text-muted)', padding: '8px 0' }}>{t('drill.noRecords')}</BodyText>
           )}
           {!rowsLoading && !rowsError && rows.length > 0 && (
             <DrillRecordsList key={`${drill.title}-${JSON.stringify(drill.rowsParams ?? {})}`}
