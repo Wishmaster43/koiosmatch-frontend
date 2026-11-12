@@ -1,5 +1,5 @@
 import { useTranslation } from 'react-i18next'
-import { Pencil, Eye, X, RefreshCw, Link2, Download, GraduationCap, Award, Languages, Sparkles, UserCheck } from 'lucide-react'
+import { Check, Pencil, Eye, X, RefreshCw, Link2, Download, GraduationCap, Award, Languages, Sparkles, UserCheck } from 'lucide-react'
 import { resolveDocTypeIcon } from '@/lib/useDocumentTypes'
 import { useDateFormat } from '@/lib/datetime'
 import SoftChip from '@/components/ui/SoftChip'
@@ -43,6 +43,14 @@ interface DocumentRowProps extends DocumentLinkSources {
   downloadable: boolean
   onToggleSelect: () => void
   canManage: boolean
+  // F-004: staff may accept an unconfirmed applicant file
+  canConfirm?: boolean
+  // F-004: accept handler for an unconfirmed row
+  onConfirm?: () => void
+  // F-004: accept request in flight (disables the glyph)
+  confirming?: boolean
+  // F-004: true while the list holds an unconfirmed row, so every row reserves the accept glyph's slot.
+  confirmSlot?: boolean
   renaming: boolean
   renameValue: string
   onRenameStart: () => void
@@ -85,7 +93,7 @@ interface DocumentRowProps extends DocumentLinkSources {
  * renders props and fires the callbacks it was given.
  */
 export default function DocumentRow({
-  d, selected, downloadable, onToggleSelect, canManage,
+  d, selected, downloadable, onToggleSelect, canManage, canConfirm, onConfirm, confirming, confirmSlot = false,
   renaming, renameValue, onRenameStart, onRenameChange, onRenameCommit, onRenameCancel,
   onReplace, canReplace = true, onPreview, onDeleteRequest, docColor, docTypeLabel, docTypeIcon,
   linked, linking, linkValue, canLink, onLinkToggle, onLinkChange, educations, certifications, languages, skills, references,
@@ -110,6 +118,8 @@ export default function DocumentRow({
   const LinkKindIcon = linked ? LINK_KIND_ICON[linked.kind] : null
   const linkedTooltip = linked ? t('documents.linkedTo', { name: `${t(LINK_KIND_SECTION_KEY[linked.kind])} · ${linked.label}` }) : undefined
 
+  // F-004: the accept glyph renders only on an unconfirmed, persisted row for a user who may confirm.
+  const showConfirm = d.confirmed_at === null && canConfirm && isPersisted(d.id)
   return (
     <div style={{ display: 'grid', gridTemplateColumns: DOC_GRID_COLUMNS, alignItems: 'center', gap: 8, padding: '8px 10px', borderRadius: 8, border: '1px solid var(--border)', background: 'var(--bg)', marginBottom: 6 }}>
       {/* Row checkbox — disabled while the doc has no downloadable url yet (pending upload). */}
@@ -131,12 +141,14 @@ export default function DocumentRow({
               </div>
             : <span style={{ fontSize: 12, fontWeight: 500, color: 'var(--text)', display: 'block', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{displayName}</span>
           }
-          {(by || when || expiry || scan || linked || linking) && (
+          {(by || when || expiry || scan || d.confirmed_at === null || linked || linking) && (
             <div style={{ display: 'flex', alignItems: 'center', gap: 6, flexWrap: 'wrap' }}>
               {(by || when) && <span style={{ fontSize: 10, color: 'var(--text-muted)' }}>
                 {by}{by && when ? ' · ' : ''}{when ? formatDateTime(when) : ''}
               </span>}
               {scan && <SoftChip size={10} color={scan === 'pending' ? 'var(--color-warning)' : 'var(--color-danger)'} label={scanText} title={scanText} />}
+              {/* F-004: strict null check, undefined (older BE) renders nothing. */}
+              {d.confirmed_at === null && <SoftChip size={10} color="var(--color-warning)" label={t('documents.unconfirmed')} title={t('documents.unconfirmedHint')} />}
               {expiry && (
                 <SoftChip size={10}
                   color={expiry.kind === 'expired' ? 'var(--color-danger)' : 'var(--color-warning)'}
@@ -197,7 +209,18 @@ export default function DocumentRow({
             style={{ color: 'var(--text-muted)', opacity: 0.5, padding: '2px 3px', display: 'flex', cursor: 'not-allowed' }}><Download size={12} /></span>}
           {downloadable && !scan && <a href={docUrl(d)} download={displayName} aria-label={t('documents.download')} title={t('documents.download')}
             style={rowGlyphButtonStyle()}><Download size={12} /></a>}
-          {canManage && <button aria-label={t('common:remove')} onClick={onDeleteRequest} style={rowGlyphButtonStyle()}><X size={12} /></button>}
+          {/* F-004: accept an applicant file that awaits staff acceptance. The 18px slot is reserved on
+              every row while the list holds an unconfirmed one, so the `auto` actions column keeps the
+              type and size columns aligned across rows (screen check 12-11). */}
+          {(showConfirm || confirmSlot) && (
+            <span aria-hidden={showConfirm ? undefined : true} style={{ display: 'inline-flex', width: 18, justifyContent: 'center' }}>
+              {showConfirm && (
+                <button aria-label={t('documents.confirm')} title={t('documents.confirm')} onClick={onConfirm} disabled={confirming}
+                  style={rowGlyphButtonStyle(!!confirming)}><Check size={12} /></button>
+              )}
+            </span>
+          )}
+          {canManage && <button aria-label={d.confirmed_at === null ? t('documents.reject') : t('common:remove')} onClick={onDeleteRequest} style={rowGlyphButtonStyle()}><X size={12} /></button>}
         </div>
       </div>
       {/* eslint-enable huisstijlLegacy/no-restricted-syntax */}

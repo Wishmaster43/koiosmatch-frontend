@@ -136,3 +136,52 @@ describe('DocumentRow · UPLOADS-SCAN-1 scan state', () => {
     expect(screen.getByLabelText('documents.download')).toHaveAttribute('href', '/x')
   })
 })
+
+describe('DocumentRow · F-004 unconfirmed applicant file', () => {
+  it('shows the badge only when confirmed_at is null', () => {
+    const { rerender } = render(<DocumentRow {...defaultProps} d={{ ...baseDoc, confirmed_at: null }} />)
+    expect(screen.getByText('documents.unconfirmed')).toBeInTheDocument()
+    rerender(<DocumentRow {...defaultProps} d={baseDoc} />)
+    expect(screen.queryByText('documents.unconfirmed')).not.toBeInTheDocument()
+  })
+
+  it('offers accept only with canConfirm and an unconfirmed row; click fires, confirming disables', async () => {
+    const onConfirm = vi.fn()
+    const unconfirmed = { ...baseDoc, confirmed_at: null }
+    const { rerender } = render(<DocumentRow {...defaultProps} d={unconfirmed} />)
+    expect(screen.queryByLabelText('documents.confirm')).not.toBeInTheDocument()
+    rerender(<DocumentRow {...defaultProps} d={baseDoc} canConfirm onConfirm={onConfirm} />)
+    expect(screen.queryByLabelText('documents.confirm')).not.toBeInTheDocument()
+    rerender(<DocumentRow {...defaultProps} d={unconfirmed} canConfirm onConfirm={onConfirm} />)
+    await userEvent.click(screen.getByLabelText('documents.confirm'))
+    expect(onConfirm).toHaveBeenCalledTimes(1)
+    rerender(<DocumentRow {...defaultProps} d={unconfirmed} canConfirm onConfirm={onConfirm} confirming />)
+    expect(screen.getByLabelText('documents.confirm')).toBeDisabled()
+  })
+
+  it('reserves an empty accept slot on a confirmed row only while confirmSlot is set', () => {
+    const slot = (c: HTMLElement) => c.querySelector('span[aria-hidden="true"][style*="width: 18px"]')
+    const { container, rerender } = render(<DocumentRow {...defaultProps} d={baseDoc} canConfirm confirmSlot />)
+    expect(screen.queryByLabelText('documents.confirm')).not.toBeInTheDocument()
+    expect(slot(container)).toBeInTheDocument()
+    rerender(<DocumentRow {...defaultProps} d={baseDoc} canConfirm />)
+    expect(slot(container)).not.toBeInTheDocument()
+    rerender(<DocumentRow {...defaultProps} d={{ ...baseDoc, confirmed_at: null }} canConfirm confirmSlot />)
+    expect(screen.getByLabelText('documents.confirm')).toBeInTheDocument()
+    expect(slot(container)).not.toBeInTheDocument()
+  })
+
+  it('treats an ISO confirmed_at as confirmed: no badge, no accept glyph, remove name', () => {
+    render(<DocumentRow {...defaultProps} d={{ ...baseDoc, confirmed_at: '2026-11-12T10:00:00Z' }} canConfirm onConfirm={vi.fn()} />)
+    expect(screen.queryByText('documents.unconfirmed')).not.toBeInTheDocument()
+    expect(screen.queryByLabelText('documents.confirm')).not.toBeInTheDocument()
+    expect(screen.getByLabelText('common:remove')).toBeInTheDocument()
+  })
+
+  it('names the delete button reject on an unconfirmed row, remove otherwise', () => {
+    const { rerender } = render(<DocumentRow {...defaultProps} d={{ ...baseDoc, confirmed_at: null }} />)
+    expect(screen.getByLabelText('documents.reject')).toBeInTheDocument()
+    rerender(<DocumentRow {...defaultProps} d={baseDoc} />)
+    expect(screen.getByLabelText('common:remove')).toBeInTheDocument()
+  })
+})

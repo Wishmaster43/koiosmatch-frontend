@@ -10,6 +10,8 @@ interface DocumentDeleteDialogProps {
   onCancel: () => void
   selectedCount: number
   confirmDeleteName: string
+  // F-004: 'reject' words the one-row dialog for an unconfirmed applicant file
+  variant?: 'delete' | 'reject'
   // Caller's own t() (rule C: a shared unit never calls i18n itself) — the
   // candidate/customer/vacancy documents tabs each carry the same three keys
   // (documents.deleteTitle / deleteManyMessage / deleteOneMessage,
@@ -29,17 +31,19 @@ export default function DocumentDeleteDialog({
   onCancel,
   selectedCount,
   confirmDeleteName,
+  variant = 'delete',
   t,
 }: DocumentDeleteDialogProps) {
+  const reject = variant === 'reject' && open?.kind === 'one'
   return (
     <ConfirmDialog
       open={!!open}
       danger
-      title={t('documents.deleteTitle')}
+      title={reject ? t('documents.rejectTitle') : t('documents.deleteTitle')}
       message={open?.kind === 'many'
         ? t('documents.deleteManyMessage', { count: selectedCount })
-        : t('documents.deleteOneMessage', { name: confirmDeleteName })}
-      confirmLabel={t('common:remove')}
+        : reject ? t('documents.rejectOneMessage', { name: confirmDeleteName }) : t('documents.deleteOneMessage', { name: confirmDeleteName })}
+      confirmLabel={reject ? t('documents.reject') : t('common:remove')}
       onConfirm={onConfirm}
       onCancel={onCancel}
     />

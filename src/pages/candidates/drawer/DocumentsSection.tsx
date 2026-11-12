@@ -30,6 +30,7 @@ import { docKey, docUrl, splitExt, DOC_GRID_COLUMNS } from './documentHelpers'
 import type { DocItem } from './documentHelpers'
 import DocumentDeleteDialog from '@/components/drawer/DocumentDeleteDialog'
 import { useCandidateDocuments } from './hooks/useCandidateDocuments'
+import { useDocumentConfirm } from './hooks/useDocumentConfirm'
 import type { Candidate } from '@/types/candidate'
 import type { Id } from '@/types/common'
 
@@ -51,17 +52,23 @@ export default function DocumentsSection({ c, onRefresh }: { c: Candidate; onRef
   // Upload policy for the documents surface: accept attribute + refusal filter.
   const { accept: docsAccept, filterPicked } = useUploadPickFilter('documents')
   const canManage = useAuth()?.hasPermission('candidates.documents.manage') ?? false
+  // F-004: accepting an applicant's unconfirmed file needs candidate update rights.
+  const canConfirm = useAuth()?.hasPermission('candidates.update') ?? false
   // Document types + colours + icons from the tenant lookup (seed fallback until /document-types lands).
   // Candidate documents: this entity's types plus the global ones (see DocumentsTab).
   const { types: docTypes, labelOf: docTypeLabel, colorOf: docColor, iconOf: docTypeIcon } = useDocumentTypes('candidate')
   // Every persistence path (upload/rename/replace/delete/bulk-delete/re-link) +
   // the derived link-candidate lists live in this one hook.
   const {
-    docs, pending, setPending,
+    docs, setDocs, pending, setPending,
     educationsForLink, certificationsForLink, languagesForLink, skillsForLink, referencesForLink, linkableLists,
     uploadAll, setItemType, setAllTypes, setItemLink, setItemExpiry, removePending, cancelPending,
     replaceDoc, rename, removeDoc, removeSelected, relinkDocument, resolveDocLink,
   } = useCandidateDocuments(c, onRefresh)
+  // F-004: accept path for unconfirmed applicant files.
+  const { confirmDoc, confirmingId } = useDocumentConfirm(c, setDocs)
+  // F-004: while one row awaits acceptance, every row reserves the accept slot (aligned columns).
+  const confirmSlot = canConfirm && docs.some(x => x.confirmed_at === null)
   const [renamingDoc, setRenamingDoc] = useState<number | null>(null)
   const [renameValue, setRenameValue] = useState('')
   // DOC-LIST-LINK-1: which document row's inline "Koppelen aan" re-link picker is
@@ -189,6 +196,7 @@ export default function DocumentsSection({ c, onRefresh }: { c: Candidate; onRef
           return (
             <DocumentRow key={i} d={d} selected={selected.has(key)} downloadable={downloadable}
               onToggleSelect={() => toggleSelectedRow(key)} canManage={canManage}
+              canConfirm={canConfirm} onConfirm={() => { if (d.id) void confirmDoc(d.id) }} confirming={confirmingId === d.id} confirmSlot={confirmSlot}
               renaming={renamingDoc === i} renameValue={renameValue}
               onRenameStart={() => { setRenamingDoc(i); setRenameValue(splitExt(String(d.name ?? d.file_name ?? '')).base) }}
               onRenameChange={setRenameValue}
@@ -236,6 +244,8 @@ export default function DocumentsSection({ c, onRefresh }: { c: Candidate; onRef
           contract; nothing left to extract without changing the component. */}
       <DocumentDeleteDialog
         open={confirmDelete}
+        // Sound cast: kind 'one' always carries a non-optional doc, and DocItem is its row shape.
+        variant={confirmDelete?.kind === 'one' && (confirmDelete.doc as DocItem).confirmed_at === null ? 'reject' : 'delete'}
         onConfirm={confirmDeleteAction}
         onCancel={() => setConfirmDelete(null)}
         selectedCount={selected.size}

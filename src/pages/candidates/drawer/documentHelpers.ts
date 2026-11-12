@@ -28,6 +28,8 @@ export interface DocItem {
   expires_at?: string | null
   // DOC-VERSIE-1: superseded files from a prior /replace, newest first (index + replace responses only).
   versions?: DocVersion[]
+  // F-004: null = awaiting staff acceptance (applicant upload); absent = older BE.
+  confirmed_at?: string | null
   created_at?: string
   uploaded_at?: string
   uploaded_by?: string | { name?: string }
