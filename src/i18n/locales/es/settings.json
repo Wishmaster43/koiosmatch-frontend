@@ -3247,7 +3247,7 @@
   "numbering": {
     "title": "Numeración",
     "subtitle": "Número de secuencia automático por registro. Prefijo, cantidad de dígitos y valor inicial por entidad.",
-    "hint": "Los cambios solo se aplican a los números NUEVOS; los números existentes no cambian.",
+    "hint": "Los cambios solo se aplican a los números nuevos. Una serie que ya ha emitido un número está bloqueada: prefijo, número de dígitos y valor inicial.",
     "entity": "Entidad",
     "prefix": "Prefijo",
     "pad": "Dígitos",

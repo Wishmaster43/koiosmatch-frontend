@@ -3247,7 +3247,7 @@
   "numbering": {
     "title": "Nummerierung",
     "subtitle": "Automatische laufende Nummer je Datensatz. Präfix, Ziffernanzahl und Startwert je Entität.",
-    "hint": "Änderungen gelten nur für NEUE Nummern; bestehende Nummern bleiben unverändert.",
+    "hint": "Änderungen gelten nur für neue Nummern. Eine Reihe, die bereits eine Nummer vergeben hat, ist gesperrt: Präfix, Stellenanzahl und Startwert.",
     "entity": "Entität",
     "prefix": "Präfix",
     "pad": "Ziffern",

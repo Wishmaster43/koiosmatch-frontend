@@ -3247,7 +3247,7 @@
   "numbering": {
     "title": "Numerazione",
     "subtitle": "Numero progressivo automatico per record. Prefisso, numero di cifre e valore iniziale per tipo.",
-    "hint": "Le modifiche si applicano solo ai NUOVI numeri; i numeri esistenti restano invariati.",
+    "hint": "Le modifiche si applicano solo ai nuovi numeri. Una serie che ha già emesso un numero è bloccata: prefisso, numero di cifre e valore iniziale.",
     "entity": "Tipo",
     "prefix": "Prefisso",
     "pad": "Cifre",

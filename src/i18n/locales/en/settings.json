@@ -3247,7 +3247,7 @@
   "numbering": {
     "title": "Numbering",
     "subtitle": "Automatic sequence number per record. Prefix, digit padding and start value per entity.",
-    "hint": "Changes only apply to NEW numbers; existing numbers stay unchanged.",
+    "hint": "Changes only apply to new numbers. A series that has already issued a number is locked: prefix, digit count and start value.",
     "entity": "Entity",
     "prefix": "Prefix",
     "pad": "Digits",

@@ -30,6 +30,9 @@ const th: CSSProperties = { padding: '10px 12px', textAlign: 'left', fontSize: 1
 // The whole tenant settings blob (flat key/value store).
 type SettingsBlob = Record<string, unknown>
 
+// Id of the one page hint that every frozen prefix/pad input describes itself by.
+const FROZEN_HINT_ID = 'numbering-frozen-hint'
+
 interface EntityRowProps {
   entity: NumberingEntity
   settings: SettingsBlob
@@ -48,12 +51,13 @@ function EntityRow({ entity, settings }: EntityRowProps) {
   const savedPad    = settings?.[keys.pad]   != null ? Number(settings[keys.pad])   : entity.pad
   const savedStart  = settings?.[keys.start] != null ? Number(settings[keys.start]) : entity.start
 
-  // A series that has issued a number keeps its prefix and padding fixed; the hint is a
-  // visible Caption under the entity name (a disabled input takes no focus, so a title alone
-  // would never reach keyboard or screen-reader users), referenced by both inputs.
+  // A series that has issued a number keeps its prefix and padding fixed. The explanation is
+  // the ONE page hint above the table (FROZEN_HINT_ID), which both disabled inputs reference
+  // through aria-describedby (a disabled input takes no focus, so a title alone would never
+  // reach keyboard or screen-reader users); the title stays for the hover.
   const frozen = Boolean(entity.allocated)
   const frozenHint = frozen ? t('numbering.formatFrozenHint') : undefined
-  const frozenHintId = frozen ? `numbering-frozen-${entity.key}` : undefined
+  const frozenHintId = frozen ? FROZEN_HINT_ID : undefined
   // Disabled face from tokens (the browser default grey ignores the tenant theme and dark mode).
   const frozenFace: CSSProperties = frozen ? { background: 'var(--hover-bg)', color: 'var(--text-muted)', cursor: 'not-allowed' } : {}
 
@@ -87,9 +91,6 @@ function EntityRow({ entity, settings }: EntityRowProps) {
             honest graceful fallback for an entity whose key has no translation yet
             (mirrors ModulePicker's t(key, { defaultValue }) convention). */}
         {t(`numbering.entities.${entity.key}`, { defaultValue: entity.label })}
-        {frozen && (
-          <Caption as="div" id={frozenHintId} style={{ marginTop: 2 }}>{frozenHint}</Caption>
-        )}
       </td>
       <td style={{ padding: '8px 12px' }}>
         <div>
@@ -128,7 +129,7 @@ function EntityRow({ entity, settings }: EntityRowProps) {
           // Start is read-only once first number allocated — show current value + next number.
           <div style={{ display: 'flex', gap: 8, alignItems: 'center' }} title={t('numbering.startLocked')}>
             <Mono>{start}</Mono>
-            <Caption as="span">{t('numbering.nextValue', { n: entity.next_value })}</Caption>
+            <Caption as="span" style={{ whiteSpace: 'nowrap' }}>{t('numbering.nextValue', { n: entity.next_value })}</Caption>
           </div>
         ) : (
           <input type="number" min={1} value={start} aria-label={t('numbering.start')}
@@ -154,8 +155,9 @@ export default function NumberingSettings() {
     <div style={{ maxWidth: 640 }}>
       <PageTitle as="div" style={{ marginBottom: 4 }}>{t('numbering.title')}</PageTitle>
       <div style={{ fontSize: 12, color: 'var(--text-muted)', marginBottom: 6 }}>{t('numbering.subtitle')}</div>
-      {/* Hint: changes only affect NEW numbers — existing reference numbers never change. */}
-      <Caption as="div" style={{ fontStyle: 'italic', marginBottom: 14 }}>{t('numbering.hint')}</Caption>
+      {/* The one page hint: changes affect new numbers only, and a series that issued a number
+          is locked. Carries FROZEN_HINT_ID so the disabled inputs below describe themselves by it. */}
+      <Caption as="div" id={FROZEN_HINT_ID} style={{ marginBottom: 14 }}>{t('numbering.hint')}</Caption>
       <div style={{ border: '1px solid var(--border)', borderRadius: 10, overflow: 'hidden' }}>
         <table style={{ width: '100%', borderCollapse: 'collapse' }}>
           <thead>

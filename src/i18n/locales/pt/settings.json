@@ -3247,7 +3247,7 @@
   "numbering": {
     "title": "Numeração",
     "subtitle": "Número de sequência automático por registo. Prefixo, número de dígitos e valor inicial por tipo.",
-    "hint": "As alterações aplicam-se apenas a NOVOS números; os números existentes permanecem inalterados.",
+    "hint": "As alterações aplicam-se apenas a números novos. Uma série que já emitiu um número está bloqueada: prefixo, número de dígitos e valor inicial.",
     "entity": "Tipo",
     "prefix": "Prefixo",
     "pad": "Dígitos",

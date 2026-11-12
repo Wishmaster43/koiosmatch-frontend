@@ -3247,7 +3247,7 @@
   "numbering": {
     "title": "Nummering",
     "subtitle": "Automatisch reeksnummer per record. Prefix, aantal cijfers en startwaarde per type.",
-    "hint": "Wijzigingen gelden alleen voor NIEUWE nummers; bestaande nummers blijven ongewijzigd.",
+    "hint": "Wijzigingen gelden alleen voor nieuwe nummers. Een reeks die al een nummer heeft uitgegeven ligt vast: prefix, aantal cijfers en startwaarde.",
     "entity": "Type",
     "prefix": "Prefix",
     "pad": "Cijfers",

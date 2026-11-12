@@ -17,9 +17,9 @@
  * Invalid input shows an error and does not save. Valid input saves successfully.
  *
  * NUMBERING-FORMAT-AFTER-FIRST-1: prefix and padding freeze on the same `allocated`
- * signal as the start value (disabled inputs, a visible hint Caption both inputs
- * describe, never sent); a fresh series stays editable; a 422 numbering_frozen still
- * surfaces its message.
+ * signal as the start value (disabled inputs that describe themselves by the ONE page
+ * hint, never sent); a fresh series stays editable; a 422 numbering_frozen still surfaces
+ * its message.
  */
 import { describe, it, expect, afterEach, vi } from 'vitest'
 import { render, screen, waitFor, within, fireEvent } from '@testing-library/react'
@@ -190,11 +190,13 @@ describe('NumberingSettings — format freeze after the first issued number', ()
     expect(pad).toBeDisabled()
     expect(prefix).toHaveAttribute('title', hint)
     expect(pad).toHaveAttribute('title', hint)
-    // The hint is also a visible Caption in the row, and both inputs describe themselves by it (§6).
-    const caption = within(row).getByText(hint)
-    expect(caption).toHaveAttribute('id')
-    expect(prefix).toHaveAttribute('aria-describedby', caption.getAttribute('id'))
-    expect(pad).toHaveAttribute('aria-describedby', caption.getAttribute('id'))
+    // ONE visible page hint above the table (never one per row) that both inputs describe themselves by (§6).
+    const pageHint = screen.getAllByText(i18n.t('numbering.hint', { ns: 'settings' }))
+    expect(pageHint).toHaveLength(1)
+    expect(pageHint[0]).toHaveAttribute('id', 'numbering-frozen-hint')
+    expect(within(row).queryByText(hint)).toBeNull()
+    expect(prefix).toHaveAttribute('aria-describedby', 'numbering-frozen-hint')
+    expect(pad).toHaveAttribute('aria-describedby', 'numbering-frozen-hint')
     // Change to a different value first so commit() cannot exit on the unchanged-value check.
     fireEvent.change(prefix, { target: { value: 'ZZ' } })
     fireEvent.blur(prefix)
@@ -218,9 +220,9 @@ describe('NumberingSettings — format freeze after the first issued number', ()
     await userEvent.type(pad, '6')
     await userEvent.tab()
     await waitFor(() => expect(apiModule.post).toHaveBeenCalledWith('/settings', { 'numbering.candidate.pad': '6' }))
-    // No hint Caption and no description on a fresh row.
-    expect(within(row).queryByText(i18n.t('numbering.formatFrozenHint', { ns: 'settings' }))).toBeNull()
+    // A fresh row describes itself by nothing (the page hint is not about it).
     expect(prefix).not.toHaveAttribute('aria-describedby')
+    expect(pad).not.toHaveAttribute('aria-describedby')
     await userEvent.clear(prefix)
     await userEvent.type(prefix, 'KX')
     await userEvent.tab()

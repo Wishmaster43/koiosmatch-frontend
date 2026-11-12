@@ -3247,7 +3247,7 @@
   "numbering": {
     "title": "Numérotation",
     "subtitle": "Numéro de séquence automatique par enregistrement. Préfixe, nombre de chiffres et valeur de départ par entité.",
-    "hint": "Les changements ne s'appliquent qu'aux NOUVEAUX numéros ; les numéros existants restent inchangés.",
+    "hint": "Les changements ne s’appliquent qu’aux nouveaux numéros. Une série qui a déjà attribué un numéro est verrouillée : préfixe, nombre de chiffres et valeur de départ.",
     "entity": "Entité",
     "prefix": "Préfixe",
     "pad": "Chiffres",
