@@ -137,7 +137,7 @@ export default function LocationsTable({ isLocked, rows, page, totalPages, onPag
                       onSave={(v) => onSaveLink ? onSaveLink(loc.id, sys.id, v) : Promise.resolve()} />
                   </td>
                 ))}
-                <td style={{ ...TD, color: 'var(--text-muted)', fontSize: 12 }}>
+                <td style={{ ...TD, whiteSpace: 'nowrap', color: 'var(--text-muted)', fontSize: 12 }}>
                   {formatDateTime(loc.created_at as string)}
                 </td>
                 <td style={{ ...TD, textAlign: 'right' }}>
