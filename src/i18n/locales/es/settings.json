@@ -4840,6 +4840,13 @@
       "unknown": "Aún sin comprobar",
       "checkedAt": "comprobado a las {{time}}"
     },
+    "webhook": {
+      "registered": "Webhook registrado",
+      "paused": "Webhook en pausa",
+      "notRegistered": "Webhook no registrado",
+      "lastReceived": "última recepción {{date}}",
+      "nothingReceived": "aún no se ha recibido nada"
+    },
     "connection": {
       "saveBeforeTest": "Guarda primero; la prueba usa las credenciales guardadas.",
       "clientIdInvalid": "Introduce un GUID válido (por ejemplo 123e4567-e89b-12d3-a456-426614174000).",

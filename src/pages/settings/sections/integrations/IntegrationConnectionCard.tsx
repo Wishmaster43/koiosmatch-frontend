@@ -36,6 +36,7 @@ import IntegrationTestResults, { type TestOutcome } from './IntegrationTestResul
 import { FIELD_SPEC } from './connectionFieldSpec'
 import IntegrationConnectionFields, { type WorkingSettings, type SecretState } from './IntegrationConnectionFields'
 import IntegrationHealthBadge from './IntegrationHealthBadge'
+import IntegrationWebhookBlock from './IntegrationWebhookBlock'
 import { useIntegrationHealth } from './useIntegrationHealth'
 import { isUuid } from '@/lib/uuid'
 import {
@@ -54,7 +55,7 @@ export default function IntegrationConnectionCard({ connector }: { connector: Co
   // Shiftmanager only: the mirror's last sync time (no dashboard GET for other connectors).
   const smLastSync = useSmLastSync(connector === 'shiftmanager')
   // Permanent connection health (hourly BE probe + manual test), refreshed after save and test.
-  const { health, refresh: refreshHealth } = useIntegrationHealth(connector)
+  const { health, webhook, refresh: refreshHealth } = useIntegrationHealth(connector)
   const [settings, setSettings] = useState<WorkingSettings | null>(null)
   const [initial, setInitial] = useState<WorkingSettings | null>(null)
   const [secrets, setSecrets] = useState<Record<string, SecretState>>({})
@@ -206,6 +207,8 @@ export default function IntegrationConnectionCard({ connector }: { connector: Co
       <Caption as="p" style={{ marginTop: 2, marginBottom: 8 }}>{t('integrations.connection.subtitle')}</Caption>
       {/* Permanent connection status (HF-CONNECTION-STATUS-1): green / red with reason / grey, plus the check time. */}
       <IntegrationHealthBadge health={health} />
+      {/* HF-WEBHOOK-1: hidden until the BE row carries a webhook object. */}
+      <IntegrationWebhookBlock webhook={webhook} />
       {/* The freshest identity wins: a passed test's connected_as over the loaded one. */}
       <Caption>
         {(() => {

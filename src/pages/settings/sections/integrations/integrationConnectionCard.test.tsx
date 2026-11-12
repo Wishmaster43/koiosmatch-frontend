@@ -22,8 +22,9 @@ vi.mock('@/components/shiftmanager/useSmLastSync', () => ({ useSmLastSync: (enab
 
 // The health hook is mocked: no QueryClient; refresh is asserted in the health tests.
 const mockRefresh = vi.fn()
+let mockWebhook: unknown = null
 vi.mock('./useIntegrationHealth', () => ({
-  useIntegrationHealth: () => ({ health: { state: 'unknown', errorCode: null, errorMessage: null, checkedAt: null }, refresh: mockRefresh }),
+  useIntegrationHealth: () => ({ health: { state: 'unknown', errorCode: null, errorMessage: null, checkedAt: null }, webhook: mockWebhook, refresh: mockRefresh }),
 }))
 
 vi.mock('./integrationsApi', () => ({
@@ -37,13 +38,23 @@ const mockGet = getIntegrationSettings as unknown as ReturnType<typeof vi.fn>
 const mockPut = putIntegrationSettings as unknown as ReturnType<typeof vi.fn>
 const mockTest = testIntegration as unknown as ReturnType<typeof vi.fn>
 
-afterEach(() => vi.clearAllMocks())
+afterEach(() => { vi.clearAllMocks(); mockWebhook = null })
 
 // Waits out the load-once effect and returns once the title has rendered.
 async function renderCard(connector: 'shiftmanager' | 'helloflex' | 'werkzoeken') {
   render(<IntegrationConnectionCard connector={connector} />)
   await screen.findByText(t('integrations.connection.title'))
 }
+
+describe('webhook block', () => {
+  // A webhook object on the row renders its line; null keeps the card unchanged.
+  it('shows the webhook line when the row carries one', async () => {
+    mockGet.mockResolvedValue({ two_way: false, environment: 'uat', client_id: null, has_client_secret: false, connected_as: null })
+    mockWebhook = { registered: true, last_received_at: null, paused: false }
+    await renderCard('helloflex')
+    expect(screen.getByText(t('integrations.webhook.registered'))).toBeInTheDocument()
+  })
+})
 
 describe('per-connector field spec', () => {
   // shiftmanager: two_way + base_url + api_key (secret) — no environment picker.

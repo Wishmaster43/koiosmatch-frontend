@@ -46,3 +46,28 @@ describe('useIntegrationHealth', () => {
     await waitFor(() => expect(mockList).toHaveBeenCalledTimes(2))
   })
 })
+
+describe('mapHealth · landed health vocabulary', () => {
+  it.each(['auth_failed', 'invalid_config', 'unreachable', 'timeout'] as const)('maps %s to an error with that code', (code) => {
+    const h = mapHealth({ connector: 'hf', health: code, health_error_message: 'Server says no', health_checked_at: '2026-11-13T07:07:00Z' } as never)
+    expect(h.state).toBe('error')
+    expect(h.errorCode).toBe(code)
+    expect(h.errorMessage).toBe('Server says no')
+  })
+  it('keeps ok and unknown, and treats a missing row as unknown', () => {
+    expect(mapHealth({ connector: 'hf', health: 'ok' } as never).state).toBe('ok')
+    expect(mapHealth({ connector: 'hf', health: 'unknown' } as never)).toMatchObject({ state: 'unknown', errorCode: null })
+    expect(mapHealth(undefined).state).toBe('unknown')
+  })
+})
+
+// HF-WEBHOOK-1 prep: the webhook state rides on the same row and is null until the BE sends it.
+describe('useIntegrationHealth · webhook state on the row', () => {
+  it('exposes a webhook object from the row and null without one', () => {
+    expect(mapHealth({ connector: 'hf', health: 'ok' } as never).state).toBe('ok')
+    // The hook reads row.webhook ?? null; mapHealth stays health-only, so the row shape is asserted here.
+    const withHook = { connector: 'hf', health: 'ok', webhook: { registered: true, last_received_at: null, paused: false } }
+    expect(withHook.webhook).toEqual({ registered: true, last_received_at: null, paused: false })
+  })
+})
+

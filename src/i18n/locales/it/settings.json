@@ -4841,6 +4841,13 @@
       "unknown": "Non ancora verificato",
       "checkedAt": "verificato alle {{time}}"
     },
+    "webhook": {
+      "registered": "Webhook registrato",
+      "paused": "Webhook in pausa",
+      "notRegistered": "Webhook non registrato",
+      "lastReceived": "ultima ricezione {{date}}",
+      "nothingReceived": "ancora nulla ricevuto"
+    },
     "connection": {
       "saveBeforeTest": "Salva prima; il test usa le credenziali salvate.",
       "clientIdInvalid": "Inserisci un GUID valido (ad esempio 123e4567-e89b-12d3-a456-426614174000).",

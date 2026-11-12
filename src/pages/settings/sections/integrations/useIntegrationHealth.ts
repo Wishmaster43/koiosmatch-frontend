@@ -41,10 +41,13 @@ export function useIntegrationHealth(connector: ConnectorId) {
     refetchInterval: HEALTH_REFETCH_MS,
     refetchOnWindowFocus: true,
   })
-  const health = useMemo(() => mapHealth(data?.find((r) => r.connector === connector)), [data, connector])
+  const row = useMemo(() => data?.find((r) => r.connector === connector), [data, connector])
+  const health = useMemo(() => mapHealth(row), [row])
+  // The webhook state rides on the same row; null until the BE sends it (HF-WEBHOOK-1).
+  const webhook = row?.webhook ?? null
   // Refetch now: the BE stores the same fields on a settings save and on a manual test.
   const refresh = useCallback(() => {
     void queryClient.invalidateQueries({ queryKey: HEALTH_KEY })
   }, [queryClient])
-  return { health, refresh }
+  return { health, webhook, refresh }
 }

@@ -137,6 +137,8 @@ export interface IntegrationSummary {
   health_error?: string | null
   health_error_message?: string | null
   health_checked_at?: string | null
+  // HF-WEBHOOK-1 (CMBE 13-11, not landed yet): absent or null until the BE sends it; hand-written, the spec has no 2xx schema.
+  webhook?: { registered: boolean; last_received_at: string | null; paused: boolean } | null
 }
 
 // Fetch the connector list (contract §2, GET /api/integrations).

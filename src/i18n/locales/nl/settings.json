@@ -4840,6 +4840,13 @@
       "unknown": "Nog niet gecontroleerd",
       "checkedAt": "gecontroleerd om {{time}}"
     },
+    "webhook": {
+      "registered": "Webhook geregistreerd",
+      "paused": "Webhook gepauzeerd",
+      "notRegistered": "Webhook niet geregistreerd",
+      "lastReceived": "laatste ontvangst {{date}}",
+      "nothingReceived": "nog niets ontvangen"
+    },
     "connection": {
       "saveBeforeTest": "Sla eerst op; de test gebruikt de opgeslagen gegevens.",
       "clientIdInvalid": "Voer een geldige GUID in (bijvoorbeeld 123e4567-e89b-12d3-a456-426614174000).",
