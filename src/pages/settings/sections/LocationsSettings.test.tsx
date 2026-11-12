@@ -15,17 +15,26 @@
 import { describe, it, expect, vi, afterEach } from 'vitest'
 import { render, screen, waitFor, within, fireEvent } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import i18n from '@/i18n'
 import api from '@/lib/api'
 // vi.mocked() gives the mocked-module factory's plain vi.fn()s their real Mock typing at every call site.
 const mockedApi = vi.mocked(api, true)
 import LocationsSettings from './LocationsSettings'
 
+// Every render gets its own QueryClient (the connector columns read through react-query).
+const renderPage = () => render(<QueryClientProvider client={new QueryClient({ defaultOptions: { queries: { retry: false } } })}><LocationsSettings /></QueryClientProvider>)
+
 // Keep the real unwrap/unwrapList (importActual) — only the default client is stubbed.
 vi.mock('@/lib/api', async () => {
   const actual = await vi.importActual('@/lib/api')
-  return { ...actual, default: { get: vi.fn(), post: vi.fn(), patch: vi.fn(), delete: vi.fn() } }
+  return { ...actual, default: { get: vi.fn(), post: vi.fn(), patch: vi.fn(), put: vi.fn(), delete: vi.fn() } }
 })
+// Connector modules switchable per test; permissions all granted.
+const mockModules = vi.hoisted(() => ({ on: new Set<string>() }))
+vi.mock('@/context/AuthContext', () => ({
+  useAuth: () => ({ hasModule: (k: string) => mockModules.on.has(k), hasPermission: () => true }),
+}))
 vi.mock('@/lib/notify', () => ({ notifyError: vi.fn(), notifySuccess: vi.fn() }))
 
 // Resolve the active locale's own copy so assertions never guess/hardcode a language.
@@ -52,12 +61,12 @@ const location = (over: Record<string, unknown> = {}) => ({
   ...over,
 })
 
-afterEach(() => { vi.clearAllMocks(); vi.restoreAllMocks() })
+afterEach(() => { vi.clearAllMocks(); vi.restoreAllMocks(); mockModules.on.clear() })
 
 describe('LocationsSettings', () => {
   it('shows the loading state, then the error state on a failed fetch', async () => {
     mockedApi.get.mockRejectedValue(new Error('network down'))
-    render(<LocationsSettings />)
+    renderPage()
     expect(screen.getByText(st('common.loadingShort'))).toBeInTheDocument()
     await waitFor(() => expect(screen.getByText(st('locations.loadError'))).toBeInTheDocument())
   })
@@ -86,7 +95,7 @@ describe('LocationsSettings', () => {
       })
     })
 
-    render(<LocationsSettings />)
+    renderPage()
 
     // Verify both pages were fetched.
     await waitFor(() => {
@@ -107,7 +116,7 @@ describe('LocationsSettings', () => {
         meta: { total: 1, current_page: 1, per_page: 100, last_page: 1 },
       },
     })
-    render(<LocationsSettings />)
+    renderPage()
     await waitFor(() => expect(screen.getByText('Kantoor Rotterdam')).toBeInTheDocument())
     // Only page 1 is fetched when lastPage is 1.
     expect(mockedApi.get).toHaveBeenCalledTimes(1)
@@ -116,20 +125,20 @@ describe('LocationsSettings', () => {
 
   it('shows the empty state when the backend returns no locations', async () => {
     mockedApi.get.mockResolvedValue({ data: { data: [] } })
-    render(<LocationsSettings />)
+    renderPage()
     await waitFor(() => expect(screen.getByText(st('locations.empty'))).toBeInTheDocument())
   })
 
   it('renders the location row with its address', async () => {
     mockedApi.get.mockResolvedValue({ data: { data: [location()] } })
-    render(<LocationsSettings />)
+    renderPage()
     await waitFor(() => expect(screen.getByText('Kantoor Rotterdam')).toBeInTheDocument())
     expect(screen.getByText('Coolsingel 1, 3011AD Rotterdam')).toBeInTheDocument()
   })
 
   it('a location already flagged in_use by the list keeps delete disabled with a tooltip', async () => {
     mockedApi.get.mockResolvedValue({ data: { data: [location({ in_use: true })] } })
-    render(<LocationsSettings />)
+    renderPage()
     await waitFor(() => expect(screen.getByText('Kantoor Rotterdam')).toBeInTheDocument())
 
     const deleteBtn = screen.getByRole('button', { name: st('locations.deleteBlockedTooltip') })
@@ -141,7 +150,7 @@ describe('LocationsSettings', () => {
     mockedApi.delete.mockResolvedValue({})
     const { notifySuccess } = await import('@/lib/notify')
     const user = userEvent.setup()
-    render(<LocationsSettings />)
+    renderPage()
     await waitFor(() => expect(screen.getByText('Kantoor Rotterdam')).toBeInTheDocument())
 
     await confirmDelete(user, 'Kantoor Rotterdam')
@@ -154,7 +163,7 @@ describe('LocationsSettings', () => {
   it('declining the house confirm dialog never calls DELETE', async () => {
     mockedApi.get.mockResolvedValue({ data: { data: [location()] } })
     const user = userEvent.setup()
-    render(<LocationsSettings />)
+    renderPage()
     await waitFor(() => expect(screen.getByText('Kantoor Rotterdam')).toBeInTheDocument())
 
     await confirmDelete(user, 'Kantoor Rotterdam', { accept: false })
@@ -168,7 +177,7 @@ describe('LocationsSettings', () => {
     mockedApi.delete.mockRejectedValue({ response: { status: 409, data: { in_use: true, counts: { candidates: 3, tasks: 1 } } } })
     const { notifyError } = await import('@/lib/notify')
     const user = userEvent.setup()
-    render(<LocationsSettings />)
+    renderPage()
     await waitFor(() => expect(screen.getByText('Kantoor Rotterdam')).toBeInTheDocument())
 
     await confirmDelete(user, 'Kantoor Rotterdam')
@@ -189,7 +198,7 @@ describe('LocationsSettings', () => {
     mockedApi.delete.mockRejectedValue({ response: { status: 409, data: { in_use: true, counts: { staff_couplings: 2, role_couplings: 1, api_keys: 1 } } } })
     const { notifyError } = await import('@/lib/notify')
     const user = userEvent.setup()
-    render(<LocationsSettings />)
+    renderPage()
     await waitFor(() => expect(screen.getByText('Kantoor Rotterdam')).toBeInTheDocument())
 
     await confirmDelete(user, 'Kantoor Rotterdam')
@@ -209,7 +218,7 @@ describe('LocationsSettings', () => {
     mockedApi.delete.mockRejectedValue({ response: { status: 409, data: { in_use: true, counts: { outreach_campaigns: 1, branch_links: 2, customer_locations: 3 } } } })
     const { notifyError } = await import('@/lib/notify')
     const user = userEvent.setup()
-    render(<LocationsSettings />)
+    renderPage()
     await waitFor(() => expect(screen.getByText('Kantoor Rotterdam')).toBeInTheDocument())
 
     await confirmDelete(user, 'Kantoor Rotterdam')
@@ -228,7 +237,7 @@ describe('LocationsSettings', () => {
     mockedApi.delete.mockRejectedValue(new Error('network down'))
     const { notifyError } = await import('@/lib/notify')
     const user = userEvent.setup()
-    render(<LocationsSettings />)
+    renderPage()
     await waitFor(() => expect(screen.getByText('Kantoor Rotterdam')).toBeInTheDocument())
 
     await confirmDelete(user, 'Kantoor Rotterdam')
@@ -241,7 +250,7 @@ describe('LocationsSettings', () => {
     mockedApi.get.mockResolvedValue({ data: { data: [location()] } })
     mockedApi.patch.mockResolvedValue({ data: { data: location({ name: 'Kantoor Rotterdam Centrum' }) } })
     const user = userEvent.setup()
-    render(<LocationsSettings />)
+    renderPage()
     await waitFor(() => expect(screen.getByText('Kantoor Rotterdam')).toBeInTheDocument())
 
     await user.click(screen.getByRole('button', { name: st('locations.edit') }))
@@ -268,7 +277,7 @@ describe('LocationsSettings', () => {
     mockedApi.patch.mockRejectedValue(new Error('network down'))
     const { notifyError } = await import('@/lib/notify')
     const user = userEvent.setup()
-    render(<LocationsSettings />)
+    renderPage()
     await waitFor(() => expect(screen.getByText('Kantoor Rotterdam')).toBeInTheDocument())
 
     await user.click(screen.getByRole('button', { name: st('locations.edit') }))
@@ -281,7 +290,7 @@ describe('LocationsSettings', () => {
     mockedApi.get.mockResolvedValue({ data: { data: [] } })
     mockedApi.post.mockResolvedValue({ data: { data: location({ id: 'loc2', name: 'Nieuwe vestiging' }) } })
     const user = userEvent.setup()
-    render(<LocationsSettings />)
+    renderPage()
     await waitFor(() => expect(screen.getByText(st('locations.empty'))).toBeInTheDocument())
 
     await user.click(screen.getByRole('button', { name: st('locations.create') }))
@@ -298,7 +307,7 @@ describe('LocationsSettings', () => {
     // Neither `location()` factory row sets color/icon — mirrors an older row saved
     // before these columns existed on `locations`.
     mockedApi.get.mockResolvedValue({ data: { data: [location(), location({ id: 'loc2', name: 'Vestiging Utrecht' })] } })
-    render(<LocationsSettings />)
+    renderPage()
     await waitFor(() => expect(screen.getByText('Kantoor Rotterdam')).toBeInTheDocument())
 
     // The badge sits next to the name; querying via the name text keeps this test
@@ -322,7 +331,7 @@ describe('LocationsSettings', () => {
   it('VESTIGING-ICOON-1: a row WITH a stored colour/icon renders those instead of the hash fallback', async () => {
     // eslint-disable-next-line no-restricted-syntax -- DATA: mock API row colour, not UI styling
     mockedApi.get.mockResolvedValue({ data: { data: [location({ color: '#059669', icon: 'store' })] } })
-    render(<LocationsSettings />)
+    renderPage()
     await waitFor(() => expect(screen.getByText('Kantoor Rotterdam')).toBeInTheDocument())
 
     const badge = screen.getByText('Kantoor Rotterdam').querySelector('span[aria-hidden="true"]') as HTMLElement
@@ -339,7 +348,7 @@ describe('LocationsSettings', () => {
     // eslint-disable-next-line no-restricted-syntax -- DATA: mock API row colour, not UI styling
     mockedApi.post.mockResolvedValue({ data: { data: location({ id: 'loc2', name: 'Nieuwe vestiging', color: '#059669', icon: 'store' }) } })
     const user = userEvent.setup()
-    render(<LocationsSettings />)
+    renderPage()
     await waitFor(() => expect(screen.getByText(st('locations.empty'))).toBeInTheDocument())
 
     await user.click(screen.getByRole('button', { name: st('locations.create') }))
@@ -364,7 +373,7 @@ describe('LocationsSettings', () => {
     // eslint-disable-next-line no-restricted-syntax -- DATA: mock API row colour, not UI styling
     mockedApi.patch.mockResolvedValue({ data: { data: location({ color: '#059669', icon: 'building' }) } })
     const user = userEvent.setup()
-    render(<LocationsSettings />)
+    renderPage()
     await waitFor(() => expect(screen.getByText('Kantoor Rotterdam')).toBeInTheDocument())
 
     await user.click(screen.getByRole('button', { name: st('locations.edit') }))
@@ -385,7 +394,7 @@ describe('LocationsSettings', () => {
   it('SETTINGS-INCON-B2: the create dialog is the shared FloatingPanel — draggable header, resizable, wide-form width (no longer a fixed, undraggable popup)', async () => {
     mockedApi.get.mockResolvedValue({ data: { data: [] } })
     const user = userEvent.setup()
-    render(<LocationsSettings />)
+    renderPage()
     await waitFor(() => expect(screen.getByText(st('locations.empty'))).toBeInTheDocument())
 
     await user.click(screen.getByRole('button', { name: st('locations.create') }))
@@ -405,7 +414,7 @@ describe('LocationsSettings', () => {
     // at page mount with a null ref and never attached a keydown listener at all.
     mockedApi.get.mockResolvedValue({ data: { data: [] } })
     const user = userEvent.setup()
-    render(<LocationsSettings />)
+    renderPage()
     await waitFor(() => expect(screen.getByText(st('locations.empty'))).toBeInTheDocument())
 
     const createBtn = screen.getByRole('button', { name: st('locations.create') })
@@ -430,7 +439,7 @@ describe('LocationsSettings', () => {
     mockedApi.get.mockResolvedValue({ data: { data: rows } })
     mockedApi.delete.mockResolvedValue({})
     const user = userEvent.setup()
-    render(<LocationsSettings />)
+    renderPage()
     await waitFor(() => expect(screen.getByText('Vestiging 1')).toBeInTheDocument())
 
     // Move to page 2, which holds only the last row.
@@ -451,7 +460,7 @@ describe('LocationsSettings', () => {
     mockedApi.get.mockResolvedValue({ data: { data: rows } })
     mockedApi.patch.mockResolvedValue({ data: { data: { ...rows[0], is_default: true } } })
     const user = userEvent.setup()
-    render(<LocationsSettings />)
+    renderPage()
     await waitFor(() => expect(screen.getByText('Rotterdam')).toBeInTheDocument())
 
     // Click Edit on Rotterdam

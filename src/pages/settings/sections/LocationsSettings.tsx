@@ -9,7 +9,12 @@ import QuickViewToggle from '@/components/ui/QuickViewToggle'
 import { useConfirm } from '@/hooks/useConfirm'
 import { DEFAULT_LOCATION_COLOR, DEFAULT_LOCATION_ICON } from '@/lib/locationIcons'
 import LocationsTable from './locations/LocationsTable'
+import { useBranchLinks } from './locations/useBranchLinks'
+import type { LinkSystem } from './locations/useBranchLinks'
+import { useAuth } from '@/context/AuthContext'
+import { apiErrorMessage } from '@/lib/extractApiError'
 import LocationFormModal from './locations/LocationFormModal'
+import ErrorBanner from '@/components/ui/ErrorBanner'
 import DrawerAddButton from '@/components/drawer/DrawerAddButton'
 import { PageTitle } from '@/components/ui/typography'
 
@@ -92,6 +97,7 @@ function formatUsageCounts(counts: Record<string, number> | undefined, t: (key: 
  */
 export default function LocationsSettings() {
   const { t } = useTranslation(['settings', 'common'])
+  const auth = useAuth()
   const [locations, setLocations] = useState<LocationRow[]>([])
   const [loading,   setLoading]   = useState(true)
   const [loadError, setLoadError] = useState(false)
@@ -207,6 +213,23 @@ export default function LocationsSettings() {
   const safePage = Math.min(page, totalPages) || 1
   const paginated = locations.slice((safePage - 1) * PER_PAGE, safePage * PER_PAGE)
 
+  // Optional HelloFlex / Shiftmanager id columns, visible only when that connector module is on.
+  // The BE reads a branch mapping with settings.update, so the columns and the reads need it too.
+  const canLinks = auth?.hasPermission('settings.update') ?? false
+  const showHelloflex = canLinks && (auth?.hasModule('hf') ?? false)
+  const showShiftmanager = canLinks && (auth?.hasModule('sm') ?? false)
+  const branchLinks = useBranchLinks(paginated.map(l => l.id), showHelloflex || showShiftmanager)
+  // Save one external id; toast the outcome and rethrow so the cell keeps its draft on failure.
+  const saveLink = async (id: string, system: LinkSystem, value: string | null) => {
+    try {
+      await branchLinks.save(id, system, value)
+      notifySuccess(t('locations.linkSaved'))
+    } catch (err) {
+      notifyError(apiErrorMessage(err, t, t('locations.linkSaveFailed')))
+      throw err
+    }
+  }
+
   return (
     <div>
       <div className="flex items-center justify-between mb-5">
@@ -233,8 +256,14 @@ export default function LocationsSettings() {
           <LocationsMapView locations={locations} />
         </Suspense>
       ) : (
+        <>
+        {/* A failed mapping read is shown once, so empty cells are never read as "unlinked". */}
+        {branchLinks.error && <ErrorBanner style={{ marginBottom: 12 }}>{t('locations.linksLoadFailed')}</ErrorBanner>}
         <LocationsTable isLocked={inUse} rows={paginated} page={safePage} totalPages={totalPages} onPageChange={setPage}
-          onEdit={openEdit} onDelete={remove} deletingId={deletingId} />
+          onEdit={openEdit} onDelete={remove} deletingId={deletingId}
+          showHelloflex={showHelloflex} showShiftmanager={showShiftmanager} links={branchLinks.get}
+          onSaveLink={saveLink} linksLoading={branchLinks.loading} canEditLinks={canLinks} />
+        </>
       )}
 
       {showModal && (

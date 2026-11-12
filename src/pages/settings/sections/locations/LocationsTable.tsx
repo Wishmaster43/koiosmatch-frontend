@@ -18,7 +18,9 @@ import Button from '@/components/ui/Button'
 import LocationBadge from './LocationBadge'
 import CopyIconButton from '@/components/ui/CopyIconButton'
 import SoftChip from '@/components/ui/SoftChip'
+import ExternalIdCell from '@/components/ui/ExternalIdCell'
 import type { LocationRow } from '../LocationsSettings'
+import type { BranchLinks, LinkSystem } from './useBranchLinks'
 
 // Props: the container owns data/paging/mutation state, this table is presentational.
 interface LocationsTableProps {
@@ -30,6 +32,15 @@ interface LocationsTableProps {
   onEdit: (loc: LocationRow) => void
   onDelete: (loc: LocationRow) => void
   deletingId?: string | null
+  // Optional connector columns: shown only when that module is on.
+  showHelloflex?: boolean
+  showShiftmanager?: boolean
+  // External ids per branch, the save handler and the edit permission (settings.update).
+  links?: (id: string) => BranchLinks
+  onSaveLink?: (id: string, system: LinkSystem, value: string | null) => Promise<void>
+  canEditLinks?: boolean
+  // True while the mappings load (cells show a spinner) and when the read failed (one banner).
+  linksLoading?: boolean
 }
 
 // NECESSITY: these are shared `<th>`/`<td>` cell styles (not standalone text), spread
@@ -59,10 +70,20 @@ function formatAddress(loc: LocationRow): string {
 }
 
 // Settings locations table: paginated rows with edit/delete actions, disabled while isLocked (a delete in flight).
-export default function LocationsTable({ isLocked, rows, page, totalPages, onPageChange, onEdit, onDelete, deletingId }: LocationsTableProps) {
+export default function LocationsTable({ isLocked, rows, page, totalPages, onPageChange, onEdit, onDelete, deletingId, showHelloflex = false, showShiftmanager = false, links, onSaveLink, canEditLinks = false, linksLoading = false }: LocationsTableProps) {
   const { t } = useTranslation(['settings', 'common'])
+  // Real column count for the empty row: name, address, created, actions + visible connector columns.
+  const colCount = 4 + (showHelloflex ? 1 : 0) + (showShiftmanager ? 1 : 0)
   // DATUM-1: DD-MM-YYYY HH:mm in every app language, never a hardcoded locale.
   const { formatDateTime } = useDateFormat()
+  // Translated link status for the cell hover title (literal keys so the key guards see them).
+  const statusText = (st: BranchLinks['hf']['status']) => (st === 'linked' ? t('locations.linkStatus.linked') : st === 'failed' ? t('locations.linkStatus.failed') : st === 'unlinked' ? t('locations.linkStatus.unlinked') : null)
+
+  // Connector columns as config (literal keys stay greppable): one cell block per visible system.
+  const systems: { id: LinkSystem; show: boolean; column: string; placeholder: string }[] = [
+    { id: 'hf', show: showHelloflex, column: t('locations.colHelloflex'), placeholder: t('locations.helloflexIdPlaceholder') },
+    { id: 'sm', show: showShiftmanager, column: t('locations.colShiftmanager'), placeholder: t('locations.shiftmanagerIdPlaceholder') },
+  ]
 
   return (
     <div style={{ background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 10, overflow: 'hidden' }}>
@@ -71,13 +92,14 @@ export default function LocationsTable({ isLocked, rows, page, totalPages, onPag
           <tr>
             <th style={TH}>{t('locations.colName')}</th>
             <th style={TH}>{t('locations.colAddress')}</th>
+            {systems.filter((sys) => sys.show).map((sys) => <th key={sys.id} style={TH}>{sys.column}</th>)}
             <th style={TH}>{t('locations.colCreated')}</th>
             <th style={{ ...TH, textAlign: 'right' }}>{t('locations.colActions')}</th>
           </tr>
         </thead>
         <tbody>
           {rows.length === 0 ? (
-            <tr><td colSpan={4} style={{ ...TD, textAlign: 'center', color: 'var(--text-muted)', padding: '32px 0' }}>{t('locations.empty')}</td></tr>
+            <tr><td colSpan={colCount} style={{ ...TD, textAlign: 'center', color: 'var(--text-muted)', padding: '32px 0' }}>{t('locations.empty')}</td></tr>
           ) : rows.map((loc, i) => {
             // Whether this branch is still referenced comes from the CONTAINER, which owns
             // that rule and also guards the delete handler with it. Re-deriving it here
@@ -85,6 +107,8 @@ export default function LocationsTable({ isLocked, rows, page, totalPages, onPag
             // only one of them follows, leaving an enabled button whose handler silently
             // does nothing (verification finding, 28-07).
             const locked = isLocked(loc)
+            // One links lookup per row (empty faces when the connector columns are off).
+            const link = links?.(loc.id) ?? { hf: { id: null, status: null, error: null }, sm: { id: null, status: null, error: null } }
             return (
               <tr key={loc.id ?? i}>
                 <td style={{ ...TD, fontWeight: 500, color: 'var(--text)' }}>
@@ -104,6 +128,15 @@ export default function LocationsTable({ isLocked, rows, page, totalPages, onPag
                     {formatAddress(loc) && <CopyIconButton value={formatAddress(loc)} label={t('common:copyAddress.copy')} copiedLabel={t('common:copyAddress.copied')} />}
                   </span>
                 </td>
+                {systems.filter((sys) => sys.show).map((sys) => (
+                  <td key={sys.id} style={TD}>
+                    <ExternalIdCell value={link[sys.id].id} statusLabel={statusText(link[sys.id].status)}
+                      failed={link[sys.id].status === 'failed'} error={link[sys.id].error} loading={linksLoading}
+                      canEdit={canEditLinks} label={`${loc.name} · ${sys.column}`} copyLabel={`${loc.name} · ${sys.column}`}
+                      placeholder={sys.placeholder}
+                      onSave={(v) => onSaveLink ? onSaveLink(loc.id, sys.id, v) : Promise.resolve()} />
+                  </td>
+                ))}
                 <td style={{ ...TD, color: 'var(--text-muted)', fontSize: 12 }}>
                   {formatDateTime(loc.created_at as string)}
                 </td>
