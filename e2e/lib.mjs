@@ -73,6 +73,13 @@ export async function boot({ tenant = 'demo' } = {}) {
     }
   })
 
+  // API-CREDITS-1: a report drill drawer auto-loads Koios AI advice (GET /reports/{r}/advice,
+  // a live generation unless the 24 h cache hits). The smoke must never spend credits, so the
+  // route is answered locally with the "no advice" shape the drawer renders as drill.noAdvice;
+  // the drill rows and everything else still hit the real API.
+  await page.route(/\/api\/reports\/[a-z_-]+\/advice(\?|$)/, route => route.fulfill({
+    status: 200, contentType: 'application/json', body: JSON.stringify({ advice: null, prompt_log_id: null }),
+  }))
   // Log in through the real UI form; pre-seed only the (non-credential) tenant choice.
   await page.addInitScript(t => localStorage.setItem('active_tenant', t), tenant)
   await page.goto(`${APP}/`, { waitUntil: 'networkidle' })
