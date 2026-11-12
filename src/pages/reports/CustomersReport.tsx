@@ -61,15 +61,15 @@ import { useReportCustomKpis } from './hooks/useReportCustomKpis'
 // Deliberately no 'source' — see the header comment.
 type Axis = 'status' | 'phase' | 'industry' | 'branch'
 
-// KPI-CUSTOMERS-SIGNALS-1: CUSTOMERS_SIGNAL_LABEL_KEYS's nine keys are now the
-// Klanten position's ENTIRE fixed KPI-strip catalog (kpiCatalog.ts,
-// REPORT_KPI_FAMILY.customers = 'fixed') — every one of them has its own
-// GET /reports/customers/kpi-drill endpoint (measured, api-generated.ts::
-// getReportsCustomersKpiDrill), so all nine are drillable, no separate
-// "which of these nine" set needed any more. A separate GET
-// /reports/customers/kpi-signal-drill endpoint also landed for
-// customers_active/customers_prospect/customers_at_risk (getReportsCustomersKpiSignalDrill),
-// but this page renders no cards for those three keys, so that endpoint stays unwired here.
+// KPI-CUSTOMERS-SIGNALS-1: the nine CUSTOMERS_SIGNAL_LABEL_KEYS are the Klanten position's
+// fixed strip and drill via GET /reports/customers/kpi-drill (nine KD10 keys only). The three
+// Prospects server cards (customers_prospect + two standing keys) drill via the separate
+// GET /reports/customers/kpi-signal-drill, which takes the window params but no phase_filter.
+// Server prospect card key -> its label key; an unknown server key is skipped, never shown in server English.
+const PROSPECT_KPI_LABEL_KEYS: Record<string, string> = {
+  customers_prospect: 'prospects.total',
+  prospects_no_contact: 'customers.kpis.prospectsNoContact', prospects_task_overdue: 'customers.kpis.prospectsTaskOverdue',
+}
 
 // Semantic colour per signal key, applied only when the count is non-zero
 // (§4: colour carries meaning — a calm zero stays uncoloured). Mirrors
@@ -167,6 +167,15 @@ export default function CustomersReport({ period, filters = EMPTY_REPORT_FILTERS
     rowsEndpoint: '/reports/customers/kpi-drill', rowsParams: { kpi },
   })
 
+  // Prospect server cards drill via kpi-signal-drill: window + panel filters + kpi, no phase_filter.
+  const openProspectKpiDrill = (label: string, count: number, kpi: string) => setDrill({
+    title: label, value: count,
+    subtitle: kpi === 'customers_prospect' ? windowSub() : t('customers.signalSnapshot'),
+    entityPage: 'customers',
+    rowsEndpoint: '/reports/customers/kpi-signal-drill',
+    rowsParams: { ...buildReportQueryParams(period, 'customers', filters), kpi },
+  })
+
   const onSeriesPick = gateDrillClick('customers', (dateKey: string) => {
     const pt = data?.timeseries.series.find(p => p.date === dateKey)
     if (pt) openBucket(pt)
@@ -174,7 +183,7 @@ export default function CustomersReport({ period, filters = EMPTY_REPORT_FILTERS
 
   // Klanten and Prospects keep independently configurable catalogs/orders
   // (`kpiScope`) — Klanten's cards 2-9 are the fixed signal suite below,
-  // Prospects' stay the axis-topsegment strip (unaffected by the conversion).
+  // Prospects reads prospect_kpis (server cards) with the axis fill behind it.
   const allAxisConfigs: Record<Axis | 'owner', AxisKpiConfig> = {
     status:   { axis: 'status',   axisLabel: t('customers.axes.status'),   segs: (data?.by_status ?? []).map(s => ({ key: s.value, label: s.label, count: s.count })) },
     phase:    { axis: 'phase',    axisLabel: t('customers.axes.phase'),    segs: (data?.by_phase ?? []).map(s => ({ key: s.value, label: s.label, count: s.count })) },
@@ -213,7 +222,7 @@ export default function CustomersReport({ period, filters = EMPTY_REPORT_FILTERS
   // because the Prospects strip below consumes the same order a second time.
   const signalKpis: KpiSpec[] = orderKpis(kpiOrder, signalKpiByKey)
 
-  // Prospects keeps the axis-topsegment strip: buildAxisKpis round-robins the
+  // Prospects fallback strip (and fill): buildAxisKpis round-robins the
   // five configured axes' top segments in, a KPI-card click opening the SAME
   // shared drawer as clicking the underlying bar/donut segment.
   const axisConfigs: AxisKpiConfig[] = isProspects
@@ -232,8 +241,41 @@ export default function CustomersReport({ period, filters = EMPTY_REPORT_FILTERS
   // nine ARE the fixed signal suite (KPI-CUSTOMERS-SIGNALS-1) — no separate pinned
   // "total" card any more, mirroring outreach/tasks (their own total lives inside
   // their nine-key suite; the windowed inflow total + compare moved INTO the
-  // window line below the strip). Prospects is untouched: total + eight axis cards.
-  const kpis: KpiSpec[] = isProspects
+  // window line below the strip). Prospects reads the server prospect_kpis when present (axis fill tops up to nine), else total + eight axis cards.
+  const pk = data?.prospect_kpis
+  // SERVER-KPIS-1: the three server prospect cards (dash when missing) + branch cards + axis fill, up to nine (buildAxisKpis fills only while the axes allow).
+  // The stored KPI order applies to the fill only; branch axes are dropped there (the server branch cards own them).
+  const prospectOpen = drill?.rowsParams as Record<string, unknown> | undefined
+  let serverProspectKpis: KpiSpec[] = []
+  if (pk) {
+    const serverCounts = new Map(pk.cards.map(c => [c.key, c.count]))
+    const cards = Object.entries(PROSPECT_KPI_LABEL_KEYS).map(([key, labelKey]): KpiSpec => {
+      const label = t(labelKey)
+      const raw = serverCounts.get(key)
+      const has = raw != null
+      return {
+        key, label, value: has ? raw : '—',
+        // Compare belongs on the windowed prospect total (same population as the compare call).
+        sub: key === 'customers_prospect'
+          ? (totalCompare ? <ReportCompareMetric metric={totalCompare} polarity="up-good" /> : undefined)
+          : t('customers.signalSnapshot'),
+        active: prospectOpen?.kpi === key,
+        onClick: has ? gateDrillClick('customers', () => openProspectKpiDrill(label, raw as number, key)) : undefined,
+      }
+    })
+    const branches = pk.by_branch.slice(0, Math.max(0, 9 - cards.length)).map((b): KpiSpec => ({
+      key: `branch:${b.value}`, label: b.label, value: b.count,
+      active: prospectOpen?.branch === b.value,
+      onClick: gateDrillClick('customers', () => openSegment({ label: b.label, count: b.count }, { branch: b.value })),
+    }))
+    const fill = buildAxisKpis(axisConfigs.filter(c => c.axis !== 'branch'), Math.max(0, 9 - cards.length - branches.length),
+      (axis, key) => onAxisKpiPick?.(axis, key),
+      (axis, key) => prospectOpen?.[axis] === key)
+    serverProspectKpis = [...cards, ...branches, ...fill]
+  }
+  const kpis: KpiSpec[] = isProspects && pk
+    ? serverProspectKpis
+    : isProspects
     ? [
         { key: 'total', label: t('prospects.total'), value: total,
           sub: totalCompare ? <ReportCompareMetric metric={totalCompare} polarity="up-good" /> : undefined },

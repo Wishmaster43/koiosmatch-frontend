@@ -490,7 +490,9 @@
       "departmentsWithoutPlacement": "Afdelingen zonder plaatsing",
       "customersWithoutVacancies": "Klanten zonder vacatures",
       "customersWithoutApplications": "Klanten zonder sollicitaties",
-      "matchesStoppedEarly": "Matches voortijdig gestopt"
+      "matchesStoppedEarly": "Matches voortijdig gestopt",
+      "prospectsNoContact": "Prospects zonder recent contact",
+      "prospectsTaskOverdue": "Prospects met verlopen taken"
     },
     "signalSnapshot": "Actuele stand",
     "depth": {
@@ -526,6 +528,7 @@
     "error": "Kon de leads niet laden",
     "empty": "Geen leads in deze periode",
     "total": "Totaal leads",
+    "kpis": { "stale": "Leads zonder contact > {{days}} werkdagen", "staleNoThreshold": "Leads zonder recent contact" },
     "series": "Leads over tijd",
     "window": "Leads {{from}} tot {{to}}",
     "kpiOrderFellBack": "Een in Instellingen ingestelde KPI-kaart bestaat niet meer en is teruggezet naar de standaard."

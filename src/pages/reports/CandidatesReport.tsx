@@ -11,10 +11,9 @@
  *
  * The Kandidaten position reads the REAL suite (GET /reports/candidates/kpis:
  * inflow/outflow + seven attention KPIs, each sharing its predicate with its
- * own drill). The Leads position keeps the axis strip: the suite endpoint's
- * validation does not yet accept the `phase` narrowing Leads needs (asked CMBE,
- * WAVE-1B-CONTRACTVRAGEN-CMBE punt 4) — an unnarrowed suite under a Leads
- * heading would pair all-candidate numbers with leads-only charts.
+ * own drill). The Leads position reads the server's own `lead_kpis` (total,
+ * stale count, one card per branch); when the response lacks it (older BE) the
+ * strip falls back to the axis top-segment cards.
  */
 import { useState, useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
@@ -79,7 +78,7 @@ const SUITE_LABEL_KEY: Record<string, string> = {
   active_conversations: 'candidates.kpi.activeConversations',
 }
 
-// Candidates/leads report and the house reference face for reports: real KPI suite for Candidates, the older axis strip for Leads until its endpoint accepts a phase narrowing (see file header).
+// Candidates/leads report and the house reference face for reports: real KPI suite for Candidates, the server lead_kpis strip for Leads (axis strip fallback on an older BE).
 export default function CandidatesReport({ period, filters = EMPTY_REPORT_FILTERS, initialView = 'candidates', compare = COMPARE_OFF }: {
   period: ReportPeriod
   filters?: ReportFilterState
@@ -94,7 +93,7 @@ export default function CandidatesReport({ period, filters = EMPTY_REPORT_FILTER
 
   // Flag-driven, never a hardcoded slug (§3B) — mirrors the backend's own
   // "which phase counts as a lead" resolution exactly.
-  const leadPhaseValue = phases.find(p => p.is_default && !p.is_applicant)?.value
+  const leadPhaseValue = phases.find(p => p.is_default)?.value
     ?? phases.find(p => !p.is_applicant)?.value ?? null
   const phaseFilter = isLeads ? leadPhaseValue : null
 
@@ -178,8 +177,8 @@ export default function CandidatesReport({ period, filters = EMPTY_REPORT_FILTER
     if (pt) openBucket(pt)
   })
 
-  // Leads position: the axis strip (see file-top for why the suite can't narrow
-  // to leads yet) — total + eight axis cards, exactly the pre-wave-2 machinery.
+  // Leads axis cards: the fill under the server lead_kpis strip, and the whole strip
+  // (total + axis cards) when an older BE sends no lead_kpis; with lead_kpis the strip is server cards (total, stale, branches) and the axis cards only fill behind them.
   // Only consumed on the Leads position (isLeads branch below) — memoized so it
   // isn't rebuilt on the Kandidaten position where it's never read.
   const allAxisConfigs: Record<string, AxisKpiConfig> = useMemo(() => ({
@@ -207,11 +206,29 @@ export default function CandidatesReport({ period, filters = EMPTY_REPORT_FILTER
     const axisKpis = buildAxisKpis(axisConfigs, 8,
       (axis, key) => onAxisKpiPick?.(axis, key),
       (axis, key) => openKpiParams?.[axis] === key)
-    kpis = [
-      { key: 'total', label: t('leads.total'), value: total,
-        sub: totalCompare ? <ReportCompareMetric metric={totalCompare} polarity="up-good" /> : undefined },
-      ...axisKpis,
-    ]
+    const lk = data?.lead_kpis
+    const totalSub = totalCompare ? <ReportCompareMetric metric={totalCompare} polarity="up-good" /> : undefined
+    if (lk) {
+      // Server strip: total (drills the lead phase) + stale (no drill) + branch cards.
+      const branchCards: KpiSpec[] = lk.by_branch.slice(0, 7).map(b => ({
+        key: `branch:${b.value}`, label: b.label, value: b.count,
+        active: openKpiParams?.branch === b.value,
+        onClick: gateDrillClick('candidates', () => openSegment('branch', { label: b.label, count: b.count }, { branch: b.value })),
+      }))
+      const head: KpiSpec[] = [
+        { key: 'total', label: t('leads.total'), value: lk.total, sub: totalSub,
+          active: openKpiParams?.phase === leadPhaseValue,
+          onClick: leadPhaseValue
+            ? gateDrillClick('candidates', () => openSegment('phase', { label: t('leads.total'), count: lk.total }, { phase: leadPhaseValue }))
+            : undefined },
+        { key: 'stale', label: Number.isFinite(lk.stale_days_threshold) ? t('leads.kpis.stale', { days: lk.stale_days_threshold }) : t('leads.kpis.staleNoThreshold'), value: lk.stale_count },
+      ]
+      const fill = buildAxisKpis(axisConfigs.filter(c => c.axis !== 'branch'), Math.max(0, 9 - head.length - branchCards.length),
+        (axis, key) => onAxisKpiPick?.(axis, key), (axis, key) => openKpiParams?.[axis] === key)
+      kpis = [...head, ...branchCards, ...fill]
+    } else {
+      kpis = [{ key: 'total', label: t('leads.total'), value: total, sub: totalSub }, ...axisKpis]
+    }
   } else {
     // Kandidaten position: the real suite, in the tenant's stored order. A key
     // the server omitted renders the house dash with no drill (STATS-HONEST-1).
@@ -238,7 +255,7 @@ export default function CandidatesReport({ period, filters = EMPTY_REPORT_FILTER
           { value: 'leads', label: t('candidates.viewSwitch.leads') },
         ]} />
 
-      {/* KPI strip — the real suite (Kandidaten) / axis cards (Leads) */}
+      {/* KPI strip — the real suite (Kandidaten) / server lead cards (Leads) */}
       {hasData && (
         <ReportKpiBand kpis={kpis} notice={fellBack ? t(isLeads ? 'leads.kpiOrderFellBack' : 'candidates.kpiOrderFellBack') : undefined}
           extraKpis={customKpis} extraTitle={customKpiTitle} />

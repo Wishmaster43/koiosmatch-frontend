@@ -490,7 +490,9 @@
       "departmentsWithoutPlacement": "Departments without a placement",
       "customersWithoutVacancies": "Customers without vacancies",
       "customersWithoutApplications": "Customers without applications",
-      "matchesStoppedEarly": "Matches stopped early"
+      "matchesStoppedEarly": "Matches stopped early",
+      "prospectsNoContact": "Prospects without recent contact",
+      "prospectsTaskOverdue": "Prospects with overdue tasks"
     },
     "signalSnapshot": "Current snapshot",
     "depth": {
@@ -526,6 +528,7 @@
     "error": "Could not load the leads",
     "empty": "No leads in this period",
     "total": "Total leads",
+    "kpis": { "stale": "Leads without contact > {{days}} working days", "staleNoThreshold": "Leads without recent contact" },
     "series": "Leads over time",
     "window": "Leads {{from}} through {{to}}",
     "kpiOrderFellBack": "A KPI card configured in Settings no longer exists and was reset to the default."

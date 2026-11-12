@@ -490,7 +490,9 @@
       "departmentsWithoutPlacement": "Departamentos sin colocación",
       "customersWithoutVacancies": "Clientes sin vacantes",
       "customersWithoutApplications": "Clientes sin candidaturas",
-      "matchesStoppedEarly": "Matches finalizados antes de tiempo"
+      "matchesStoppedEarly": "Matches finalizados antes de tiempo",
+      "prospectsNoContact": "Prospectos sin contacto reciente",
+      "prospectsTaskOverdue": "Prospectos con tareas vencidas"
     },
     "signalSnapshot": "Estado actual",
     "depth": {
@@ -526,6 +528,7 @@
     "error": "No se pudieron cargar los leads",
     "empty": "Sin leads en este período",
     "total": "Total de leads",
+    "kpis": { "stale": "Leads sin contacto > {{days}} días laborables", "staleNoThreshold": "Leads sin contacto reciente" },
     "series": "Leads a lo largo del tiempo",
     "window": "Leads del {{from}} al {{to}}",
     "kpiOrderFellBack": "Una tarjeta KPI configurada en Ajustes ya no existe y se restableció al valor predeterminado."

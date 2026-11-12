@@ -307,6 +307,8 @@ export interface CandidatesReportData {
   by_source: CandidateSegment[]
   by_owner: CandidateOwnerSegment[]
   by_branch: CandidateSegment[]
+  // SERVER-KPIS-1 (BE DANNY-0511-D): additive Leads strip; hand-written, the spec carries no 2xx schema.
+  lead_kpis?: { total: number; stale_days_threshold: number; stale_count: number; by_branch: Array<{ value: string; label: string; count: number }> }
   // KPI-BUILDER-FE-1: tenant-defined KPI cards for this entity, rendered as a second band row.
   custom_kpis?: CustomKpiCard[]
 }
@@ -390,6 +392,8 @@ export interface CustomersReportData {
   by_industry: CandidateSegment[]
   by_owner: CandidateOwnerSegment[]
   by_branch: CandidateSegment[]
+  // SERVER-KPIS-1 (BE DANNY-0511-D): additive Prospects strip; hand-written, the spec carries no 2xx schema.
+  prospect_kpis?: { cards: Array<{ key: string; label: string; count: number }>; by_branch: Array<{ value: string; label: string; count: number }> }
   // KD10 punt 21 (REPORTS-KPI-SPARE-2): nine STANDING signal counts over the whole
   // live customer base (contract ending, no contact, …) — CustomersReport::signalKpis(),
   // never windowed on created_at like the axes above. Previously typed nowhere on the
