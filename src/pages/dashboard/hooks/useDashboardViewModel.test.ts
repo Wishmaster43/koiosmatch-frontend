@@ -11,6 +11,27 @@ import i18n from '@/i18n'
 import { useDashboardViewModel } from './useDashboardViewModel'
 import { baseArgs } from './useDashboardViewModel.testKit'
 
+describe('useDashboardViewModel · STATUS-LEAD-2 status buckets', () => {
+  it('resolves a status bucket the status lookup does not know through the phase lookup', () => {
+    const unknown = (v?: string | null) => ({ value: v ?? '', label: v ?? '', color: '#999' })
+    const { result } = renderHook(() => useDashboardViewModel(baseArgs({
+      stats: { by_status: [{ value: 'lead', count: 3 }, { value: 'available', count: 2 }] },
+      statusMeta: (v?: string | null) => (v === 'available' ? { value: 'available', label: 'Beschikbaar', color: '#0f0' } : unknown(v)),
+      phaseMeta: (v?: string | null) => (v === 'lead' ? { value: 'lead', label: 'Lead', color: '#00f' } : unknown(v)),
+    })))
+    expect(result.current.statusData.find(d => d.filterValue === 'lead')).toMatchObject({ name: 'Lead', color: '#00f', value: 3 })
+    expect(result.current.statusData.find(d => d.filterValue === 'available')).toMatchObject({ color: '#0f0', value: 2 })
+  })
+
+  it('keeps the raw value when neither lookup knows it', () => {
+    const unknown = (v?: string | null) => ({ value: v ?? '', label: v ?? '', color: '#999' })
+    const { result } = renderHook(() => useDashboardViewModel(baseArgs({
+      stats: { by_status: [{ value: 'mystery', count: 1 }] }, statusMeta: unknown, phaseMeta: unknown,
+    })))
+    expect(result.current.statusData[0]).toMatchObject({ name: 'mystery', color: '#999' })
+  })
+})
+
 describe('useDashboardViewModel · K-168 rights-gated tiles always render (null → dash)', () => {
   it('renders the D6 tiles with an honest dash when their key is null (viewer lacks the right)', () => {
     const { result } = renderHook(() => useDashboardViewModel(baseArgs({

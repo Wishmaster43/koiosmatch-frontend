@@ -235,6 +235,15 @@ describe('buildDashboardKpis · KPI-TARGETS-ALERT-1 target lines', () => {
     expect(k.tasks.targetLine).toEqual({ text: 'kpi.target.monthOnlyMax|23|30', tone: 'muted' })
     expect(k.candidatesNew.targetLine?.text).toBe('kpi.target.reached|22|10')
   })
+  it('drops every target line under a personal scope and keeps them under the tenant scope', () => {
+    const targets = { new_candidates_target: tgt({}), placements_target: tgt({}), fill_rate_target: tgt({ value: 40, target: 85 }), open_tasks_target: tgt({ comparison: 'lte' }), uncalled_warning_threshold: tgt({ comparison: 'lte' }) }
+    const mine = buildDashboardKpis({ ...args(targets), scope: { owner_dimension: 'candidate' } })
+    expect(Object.values(mine).every(k => k.targetLine === undefined)).toBe(true)
+    expect(mine.tasks.value).toBe('5')
+    const tenant = buildDashboardKpis({ ...args(targets), scope: { owner_dimension: null } })
+    expect(tenant.candidatesNew.targetLine).toBeDefined()
+    expect(tenant.tasks.targetLine).toBeDefined()
+  })
   it('renders exactly today\'s tiles when kpi_targets is absent', () => {
     const k = buildDashboardKpis(args(undefined))
     expect(Object.values(k).every(t => t.targetLine === undefined)).toBe(true)

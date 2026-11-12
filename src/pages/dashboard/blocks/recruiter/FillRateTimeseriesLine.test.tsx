@@ -8,14 +8,17 @@ import FillRateTimeseriesLine from './FillRateTimeseriesLine'
 import type { FillRatePoint } from '@/types/dashboard'
 
 vi.mock('react-i18next', () => ({ useTranslation: () => ({ t: (k: string) => k }) }))
+vi.mock('@/lib/formatters', () => ({ useNumberFormat: () => ({ formatPercent: (v: number) => `${v}%` }) }))
 vi.mock('@/lib/datetime', () => ({ useDateFormat: () => ({ formatDate: (d: string) => d }) }))
 
 let capturedData: unknown
+let capturedFormatTick: ((v: number) => string) | undefined
 let capturedOnItemClick: (() => void) | undefined
 vi.mock('@/components/charts/LineChartCard', () => ({
-  default: (props: { data: unknown; onItemClick?: () => void }) => {
+  default: (props: { data: unknown; onItemClick?: () => void; formatTick?: (v: number) => string }) => {
     capturedData = props.data
     capturedOnItemClick = props.onItemClick
+    capturedFormatTick = props.formatTick
     return <div data-testid="line" />
   },
 }))
@@ -41,5 +44,10 @@ describe('FillRateTimeseriesLine', () => {
     render(<FillRateTimeseriesLine rows={points} onNavigate={onNavigate} />)
     capturedOnItemClick?.()
     expect(onNavigate).toHaveBeenCalledWith('reports', { report: 'vacancies' })
+  })
+
+  it('formats y-axis ticks as a percentage', () => {
+    render(<FillRateTimeseriesLine rows={points} />)
+    expect(capturedFormatTick?.(40)).toBe('40%')
   })
 })

@@ -101,7 +101,7 @@ export default function Dashboard({ onNavigate, viewType }: { onNavigate?: (page
 
   // Status/funnel labels + colours come from the tenant lookups (NL, configurable)
   // — never humanised backend slugs. Mirrors how the Candidates page renders them.
-  const { statusMeta, funnelMeta, funnelTypes } = useLookups()
+  const { statusMeta, phaseMeta, funnelMeta, funnelTypes } = useLookups()
 
   // Every chart/list/KPI derived from the raw server state (§0.3 size split).
   const {
@@ -111,7 +111,7 @@ export default function Dashboard({ onNavigate, viewType }: { onNavigate?: (page
     expiringMatchesRows, staleVacanciesRows, koiosSuggestionsRows,
     oppAgingRows = [],
   } = useDashboardViewModel({
-    t, formatNumber, stats, opp, dash, dashCharts, statusMeta, funnelMeta, funnelTypes,
+    t, formatNumber, stats, opp, dash, dashCharts, statusMeta, phaseMeta, funnelMeta, funnelTypes,
     activeType, hiddenBlocks, hiddenKpis, kpiOrder, hasPlanning,
     onNavigate,
   })

@@ -10,6 +10,7 @@ import { useTranslation } from 'react-i18next'
 import LineChartCard from '@/components/charts/LineChartCard'
 import { Panel } from '@/pages/dashboard/DashboardPrimitives'
 import { useDateFormat } from '@/lib/datetime'
+import { useNumberFormat } from '@/lib/formatters'
 import type { FillRatePoint } from '@/types/dashboard'
 import type { FeedTileContext } from '../feedTileKit'
 
@@ -21,6 +22,7 @@ export default function FillRateTimeseriesLine({ rows, onNavigate }: {
 }) {
   const { t } = useTranslation('dashboard')
   const { formatDate } = useDateFormat()
+  const { formatPercent } = useNumberFormat()
   // Skip days with no cohort — a null rate has nothing to plot, not a zero.
   const data = rows
     .filter(p => p.rate != null)
@@ -33,6 +35,8 @@ export default function FillRateTimeseriesLine({ rows, onNavigate }: {
         title={t('block.fillRateTimeseries')}
         data={data}
         unit="%"
+        // Axis ticks carry the unit through the house percent formatter.
+        formatTick={formatPercent}
         onItemClick={onNavigate ? () => onNavigate('reports', { report: 'vacancies' }) : undefined}
       />
     </Panel>

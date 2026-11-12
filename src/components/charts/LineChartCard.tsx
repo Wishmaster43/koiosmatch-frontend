@@ -31,11 +31,13 @@ function LineTooltip({ active, payload, label, onItemClick, unit, t, formatNumbe
 
 // `unit` is the noun shown after the value in the tooltip; the caller passes it
 // (the chart is generic), e.g. t('common:units.candidates').
-export default function LineChartCard({ title, data = [], color = 'var(--color-primary)', height = 220, onItemClick, unit = '', formatValue }: {
+export default function LineChartCard({ title, data = [], color = 'var(--color-primary)', height = 220, onItemClick, unit = '', formatValue, formatTick }: {
   title?: ReactNode; data?: ChartDatum[]; color?: string; height?: number; onItemClick?: (d: unknown) => void; unit?: string
   // Full value formatter for the tooltip (a currency, a percentage) — wins over
   // `unit`, which is only a noun appended after a plain number.
   formatValue?: (v: number) => string
+  // Y-axis tick formatter (a percentage axis); defaults to the plain locale number.
+  formatTick?: (v: number) => string
 }) {
   const { t } = useTranslation('common')
   // Locale-aware grouping (§ FMT-GETAL-1) — never a hardcoded 'nl-NL' toLocaleString.
@@ -62,7 +64,7 @@ export default function LineChartCard({ title, data = [], color = 'var(--color-p
           <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" vertical={false} />
           <XAxis dataKey="name" tick={{ fontSize: 10, fill: 'var(--text-muted)' }} axisLine={false} tickLine={false} />
           <YAxis tick={{ fontSize: 10, fill: 'var(--text-muted)' }} axisLine={false} tickLine={false} allowDecimals={false}
-            tickFormatter={v => formatNumber(Number(v))} />
+            tickFormatter={v => (formatTick ?? formatNumber)(Number(v))} />
           <Tooltip content={<LineTooltip onItemClick={onItemClick} unit={unit} t={t} formatNumber={formatNumber} formatValue={formatValue} />} />
           <Line
             type="monotone"

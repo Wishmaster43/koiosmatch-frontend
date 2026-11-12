@@ -5,7 +5,7 @@
  * split) so the container stays declarative; every computation is verbatim from the
  * original inline useMemo blocks — no behaviour change.
  */
-import { useMemo } from 'react'
+import { useCallback, useMemo } from 'react'
 import { useDateFormat } from '@/lib/datetime'
 import { formatPercent } from '@/lib/formatters'
 import { initialsOf } from '@/lib/initials'
@@ -31,6 +31,8 @@ interface UseDashboardViewModelArgs {
   dash: DashData | null
   dashCharts: { timeseries?: Record<string, unknown>; net?: unknown } | null
   statusMeta: (v?: string | null) => LookupItem
+  // Optional: resolves a status bucket the status lookup does not know (the lead phase value, STATUS-LEAD-2).
+  phaseMeta?: (v?: string | null) => LookupItem
   funnelMeta: (v?: string | null) => LookupItem
   funnelTypes: LookupItem[]
   activeType: DashboardType
@@ -48,7 +50,7 @@ interface UseDashboardViewModelArgs {
 // Derives every chart/list/KPI shape the dashboard renders from the raw server state;
 // For why this lives outside Dashboard.tsx.
 export function useDashboardViewModel({
-  t, formatNumber, stats, opp, dash, dashCharts, statusMeta, funnelMeta, funnelTypes,
+  t, formatNumber, stats, opp, dash, dashCharts, statusMeta, phaseMeta, funnelMeta, funnelTypes,
   activeType, hiddenBlocks, hiddenKpis, kpiOrder = {}, hasPlanning,
   onNavigate,
 }: UseDashboardViewModelArgs) {
@@ -59,6 +61,16 @@ export function useDashboardViewModel({
   // a tenant rename/creation passes through untouched.
   const seedLabel = useSeedLabel()
 
+  // STATUS-LEAD-2: the BE files status-less candidates under the lead PHASE value inside the
+  // status buckets (CandidateQuery), so a value the status lookup does not know resolves through
+  // the phase lookup before the raw slug would show (the donut legend read "lead", 12-11).
+  const statusOrPhaseMeta = useCallback((v?: string | null) => {
+    const m = statusMeta(v)
+    if (!phaseMeta || m.label !== (v ?? '')) return m
+    const p = phaseMeta(v)
+    return p.label !== (v ?? '') ? p : m
+  }, [statusMeta, phaseMeta])
+
   // Is a chart/list block visible for the active role, and not switched off in Settings?
   // K-173 fase 6 — every planning-gated block (shifts + the five v3 planning
   // feeds) shares one gate (PLANNING_BLOCKS), not a single 'block.shifts' literal.
@@ -68,7 +80,7 @@ export function useDashboardViewModel({
   // `name` (display) runs through seedLabel; `filterValue` stays the raw lookup
   // value so a donut click still filters on it, never on the translated text.
   const statusData = useMemo(() =>
-    (stats?.by_status ?? []).map(o => { const v = o.value ?? o.status; const m = statusMeta(v); return { name: seedLabel('statuses', { value: v, label: m.label }), value: o.count ?? 0, color: m.color, filterValue: v } }).filter(d => d.value) as ChartDatum[], [stats, statusMeta, seedLabel])
+    (stats?.by_status ?? []).map(o => { const v = o.value ?? o.status; const m = statusOrPhaseMeta(v); return { name: seedLabel('statuses', { value: v, label: m.label }), value: o.count ?? 0, color: m.color, filterValue: v } }).filter(d => d.value) as ChartDatum[], [stats, statusOrPhaseMeta, seedLabel])
   // Per-recruiter counts for the donut; filterValue keeps the raw owner id for click-to-filter.
   const recruiterData = useMemo(() =>
     (stats?.by_owner ?? []).map(o => ({ name: o.name || '—', value: o.count ?? 0, filterValue: o.id ?? o.owner_id })).filter(d => d.value) as ChartDatum[], [stats])
@@ -88,10 +100,10 @@ export function useDashboardViewModel({
   // Status/stage labels + colours come from the tenant lookups (never raw slugs);
   // LOOKUP-I18N-1 translates the seeded default, a tenant rename passes through.
   const recentCandidates = useMemo(() => (dash?.recent?.candidates ?? []).map(c => {
-    const m = statusMeta(c.status_value)
+    const m = statusOrPhaseMeta(c.status_value)
     return { id: c.id, name: c.name, initials: initialsOf(c.name, '–'), role: c.role || '—',
       status: seedLabel('statuses', { value: c.status_value, label: m.label }), statusColor: m.color, time: fmtWhen(c.last_activity_at, locale) }
-  }), [dash, statusMeta, seedLabel, locale])
+  }), [dash, statusOrPhaseMeta, seedLabel, locale])
 
   // Same lookup-backed mapping as recentCandidates above, for the applications feed.
   const recentApplications = useMemo(() => (dash?.recent?.applications ?? []).map(a => {
@@ -217,7 +229,7 @@ export function useDashboardViewModel({
     // AUDIT-NAFIX-1: eur() now requires a locale — bind it here instead of
     // letting the builder default to nl-NL on an English tenant.
     t, kpis, drills: dash?.drills, num, eur: (v?: unknown) => eur(v, locale), opp, onNavigate,
-    targets: dash?.kpi_targets, pct: (v: number) => formatPercent(v, locale),
+    targets: dash?.kpi_targets, scope: dash?.scope ?? null, pct: (v: number) => formatPercent(v, locale),
   })
   // MODULE-gated tiles render NOTHING when their server key is ABSENT: K-168
   // only omits a key when the tenant lacks the module behind it (workflows /

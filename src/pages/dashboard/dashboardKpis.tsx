@@ -11,7 +11,7 @@ import type { ReactNode } from 'react'
 import { Users, CheckCircle, AlertCircle, AlertTriangle, Target, Euro, Briefcase, CalendarCheck, TrendingUp, MessageSquare, Zap, FileText, CalendarClock, Link2, PhoneOff, Hourglass, CalendarX2, Building2, ShieldAlert, Repeat, Timer, Ban, UserCheck } from 'lucide-react'
 import type { LucideIcon } from 'lucide-react'
 import { translateDrill } from './drillTranslate'
-import type { DashDrillDescriptor, KpiTarget } from '@/types/dashboard'
+import type { DashDrillDescriptor, DashScope, KpiTarget } from '@/types/dashboard'
 import { TILE_TARGET_KEY, PERCENT_TILES, targetLine, formatTargetLine, type TileTargetLine } from './kpiTargets'
 
 export interface DashboardKpi { id: string; label: string; value: ReactNode; sub: string; color: string; bg: string; Icon: LucideIcon; onClick?: () => void; targetLine?: TileTargetLine }
@@ -38,6 +38,8 @@ interface BuildArgs {
   // KPI-TARGETS-ALERT-1: GET /dashboard `kpi_targets` + a locale percent formatter; both optional (older server).
   targets?: Record<string, KpiTarget>
   pct: (v: number) => string
+  // The scope the figures were computed under; a personal scope (owner_dimension set) drops the tenant-wide target lines.
+  scope?: DashScope | null
 }
 
 // i18n-scan: dashboard — pure builder: `t` is a parameter, so the keysExist
@@ -45,7 +47,8 @@ interface BuildArgs {
 export function buildDashboardKpis(args: BuildArgs): Record<string, DashboardKpi> {
   const tiles = buildTiles(args)
   // Attach the target line to the five tiles that carry one; the big number stays the flat `kpis` value.
-  if (!args.targets) return tiles
+  // A tenant-wide target next to a personal count states something untrue, so a narrowed scope renders no target line.
+  if (!args.targets || args.scope?.owner_dimension) return tiles
   for (const [id, key] of Object.entries(TILE_TARGET_KEY)) {
     const line = targetLine(args.targets[key])
     const isPct = PERCENT_TILES.has(id)
