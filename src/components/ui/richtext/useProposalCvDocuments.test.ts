@@ -39,3 +39,35 @@ describe('useProposalCvDocuments', () => {
     await waitFor(() => expect(result.current.error).toBe(true))
   })
 })
+
+describe('useProposalCvDocuments · abort and filter', () => {
+  it('aborts the request on unmount', async () => {
+    vi.mocked(api.get).mockReturnValue(new Promise(() => {}))
+    const { unmount } = renderHook(() => useProposalCvDocuments('a1'))
+    await Promise.resolve()
+    const signal = (vi.mocked(api.get).mock.calls[0][1] as { signal: AbortSignal }).signal
+    expect(signal.aborted).toBe(false)
+    unmount()
+    expect(signal.aborted).toBe(true)
+  })
+
+  it('aborts the first request on an id change and GETs the new id', async () => {
+    vi.mocked(api.get).mockReturnValue(new Promise(() => {}))
+    const { rerender } = renderHook(({ id }) => useProposalCvDocuments(id), { initialProps: { id: 'a1' } })
+    await Promise.resolve()
+    const first = (vi.mocked(api.get).mock.calls[0][1] as { signal: AbortSignal }).signal
+    rerender({ id: 'a2' })
+    await Promise.resolve()
+    expect(first.aborted).toBe(true)
+    expect(vi.mocked(api.get).mock.calls[1][0]).toBe('/applications/a2/documents')
+  })
+
+  it('filters out a rejected scan row', async () => {
+    vi.mocked(api.get).mockResolvedValue({ data: { data: [
+      { id: 'd1', type: 'proposal_cv', name: 'Bad.pdf', scan_status: 'rejected' },
+    ] } })
+    const { result } = renderHook(() => useProposalCvDocuments('a1'))
+    await waitFor(() => expect(result.current.loading).toBe(false))
+    expect(result.current.docs).toEqual([])
+  })
+})
