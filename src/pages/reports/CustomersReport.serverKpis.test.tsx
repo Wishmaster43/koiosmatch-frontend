@@ -116,6 +116,17 @@ describe('CustomersReport · server prospect_kpis strip (SERVER-KPIS-1)', () => 
       expect.objectContaining({ params: expect.objectContaining({ branch: 'amersfoort', phase_filter: expect.any(Array) }) }))
   })
 
+  it('shows the strip for a standing signal even when the windowed prospect total is 0', () => {
+    const standing = { ...withKpis, total: 0, prospect_kpis: { ...withKpis.prospect_kpis, cards: [
+      { key: 'customers_prospect', label: 'x', count: 0 },
+      { key: 'prospects_no_contact', label: 'x', count: 2 },
+      { key: 'prospects_task_overdue', label: 'x', count: 0 },
+    ], by_branch: [] } }
+    mockUseCustomersReport.mockReturnValue({ data: standing, loading: false, error: false })
+    open()
+    expect(screen.getByText(i18n.t('analytics:customers.kpis.prospectsNoContact'))).toBeInTheDocument()
+  })
+
   it('without prospect_kpis the old axis cards render', () => {
     mockUseCustomersReport.mockReturnValue({ data, loading: false, error: false })
     open()

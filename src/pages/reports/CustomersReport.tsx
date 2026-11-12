@@ -112,6 +112,10 @@ export default function CustomersReport({ period, filters = EMPTY_REPORT_FILTERS
 
   const total   = data?.total ?? 0
   const hasData = !loading && !error && total > 0
+  // A standing prospect signal (no recent contact, overdue tasks, a branch count) is a snapshot,
+  // not a windowed count: the strip must show it even in a month without new prospects (12-11).
+  const pkSignal = !!data?.prospect_kpis && (data.prospect_kpis.cards.some(c => (c.count ?? 0) > 0) || data.prospect_kpis.by_branch.some(b => (b.count ?? 0) > 0))
+  const showBand = hasData || (!loading && !error && isProspects && pkSignal)
 
   // RAPPORT-COMPARE-1: mirrors CandidatesReport's hosting exactly.
   const { totalCompare } = useReportCompareData(period, 'customers', filters, data, compare, phaseFilter ? { phase: [phaseFilter] } : undefined, view)
@@ -294,8 +298,8 @@ export default function CustomersReport({ period, filters = EMPTY_REPORT_FILTERS
           { value: 'prospects', label: t('customers.viewSwitch.prospects') },
         ]} />
 
-      {/* KPI strip — total inflow, above the tabs (candidate-page order) */}
-      {hasData && (
+      {/* KPI strip — total inflow, above the tabs (candidate-page order); on Prospects also for a standing signal alone */}
+      {showBand && (
         <ReportKpiBand kpis={kpis} notice={fellBack ? t(isProspects ? 'prospects.kpiOrderFellBack' : 'customers.kpiOrderFellBack') : undefined}
           extraKpis={customKpis} extraTitle={customKpiTitle} />
       )}
