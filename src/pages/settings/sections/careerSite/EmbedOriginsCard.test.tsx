@@ -40,6 +40,12 @@ describe('EmbedOriginsCard', () => {
     expect(screen.getByText('https://a.nl')).toBeInTheDocument()
   })
 
+  it('associates the add label with the input and renders origins at the 13 px body size', () => {
+    render(<EmbedOriginsCard stored={['https://a.nl']} />)
+    expect(screen.getByLabelText(t('careerSite.embedOrigins.add'))).toHaveAttribute('type', 'url')
+    expect(screen.getByText('https://a.nl').parentElement).toHaveStyle({ fontSize: '13px' })
+  })
+
   it('shows the empty line when nothing is stored', () => {
     render(<EmbedOriginsCard stored={undefined} />)
     expect(screen.getByText(t('careerSite.embedOrigins.empty'))).toBeInTheDocument()

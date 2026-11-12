@@ -12,8 +12,9 @@ import { notifyError } from '@/lib/notify'
 import Button from '@/components/ui/Button'
 import DrawerAddButton from '@/components/drawer/DrawerAddButton'
 import { fieldInputStyle } from '@/components/forms/fieldMetrics'
+import { CANON_LABEL_STYLE, CANON_LABEL_WIDTH } from '@/components/drawer/fieldRowCanon'
 import { SettingCard } from '@/pages/settings/components/SettingsKit'
-import { SectionTitle, Caption, FormLabel, Mono } from '@/components/ui/typography'
+import { SectionTitle, Caption, BodyText, Mono } from '@/components/ui/typography'
 import { EMBED_ORIGINS_MAX, parseEmbedOrigins, addEmbedOrigin, type EmbedOriginError } from './embedOrigins'
 
 const SETTING_KEY = 'career_site_embed_origins'
@@ -64,7 +65,8 @@ export default function EmbedOriginsCard({ stored }: { stored: unknown }) {
         <ul style={{ listStyle: 'none', margin: 0, padding: 0 }}>
           {list.map(origin => (
             <li key={origin} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '4px 0', borderBottom: '1px solid var(--hover-bg)' }}>
-              <Mono>{origin}</Mono>
+              {/* BodyText sets the 13 px house size; Mono only swaps the family. */}
+              <BodyText as="span"><Mono>{origin}</Mono></BodyText>
               <Button variant="ghost" size="sm" iconOnly aria-label={t('careerSite.embedOrigins.remove', { origin })} onClick={() => remove(origin)}>
                 <X size={14} />
               </Button>
@@ -73,33 +75,35 @@ export default function EmbedOriginsCard({ stored }: { stored: unknown }) {
         </ul>
       )}
 
-      {/* Add row: Enter in the input adds as well. */}
+      {/* Add row, label LEFT at the canon width like the sibling cards; Enter in the input adds as well. */}
       <div style={{ marginTop: 12, display: 'flex', flexDirection: 'column', gap: 6 }}>
-        <FormLabel as="label" htmlFor={inputId}>{t('careerSite.embedOrigins.add')}</FormLabel>
-        <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
-          <input
-            id={inputId}
-            type="url"
-            value={draft}
-            disabled={full}
-            placeholder={t('careerSite.embedOrigins.placeholder')}
-            aria-invalid={error ? true : undefined}
-            aria-describedby={error ? errId : undefined}
-            onChange={e => { setDraft(e.target.value); setError(null) }}
-            onKeyDown={e => { if (e.key === 'Enter') { e.preventDefault(); add() } }}
-            style={{ ...fieldInputStyle, flex: 1, borderColor: error ? 'var(--color-danger)' : 'var(--border)' }}
-          />
-          <DrawerAddButton onClick={add} label={t('careerSite.embedOrigins.addAction')} disabled={full}
-            title={full ? tooMany : undefined} ariaDescription={full ? tooMany : undefined} />
+        <div style={{ display: 'flex', alignItems: 'flex-start', gap: 10 }}>
+          <label htmlFor={inputId} style={{ ...CANON_LABEL_STYLE, paddingTop: 8 }}>{t('careerSite.embedOrigins.add')}</label>
+          <div style={{ flex: 1, minWidth: 0, display: 'flex', gap: 8, alignItems: 'center' }}>
+            <input
+              id={inputId}
+              type="url"
+              value={draft}
+              disabled={full}
+              placeholder={t('careerSite.embedOrigins.placeholder')}
+              aria-invalid={error ? true : undefined}
+              aria-describedby={error ? errId : undefined}
+              onChange={e => { setDraft(e.target.value); setError(null) }}
+              onKeyDown={e => { if (e.key === 'Enter') { e.preventDefault(); add() } }}
+              style={{ ...fieldInputStyle, flex: 1, borderColor: error ? 'var(--color-danger)' : 'var(--border)' }}
+            />
+            <DrawerAddButton onClick={add} label={t('careerSite.embedOrigins.addAction')} disabled={full}
+              title={full ? tooMany : undefined} ariaDescription={full ? tooMany : undefined} />
+          </div>
         </div>
         {error && (
-          <span id={errId} role="alert">
+          <span id={errId} role="alert" style={{ marginLeft: CANON_LABEL_WIDTH + 10 }}>
             <Caption as="span" style={{ color: 'var(--color-danger-text)' }}>
               {t(`careerSite.embedOrigins.errors.${error}`, { max: EMBED_ORIGINS_MAX })}
             </Caption>
           </span>
         )}
-        <Caption>{t('careerSite.embedOrigins.counter', { n: list.length, max: EMBED_ORIGINS_MAX })}</Caption>
+        <Caption style={{ marginLeft: CANON_LABEL_WIDTH + 10 }}>{t('careerSite.embedOrigins.counter', { n: list.length, max: EMBED_ORIGINS_MAX })}</Caption>
       </div>
     </SettingCard>
   )
