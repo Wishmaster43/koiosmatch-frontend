@@ -28,6 +28,12 @@ describe('AssistDeclinedFace', () => {
     expect(screen.queryByRole('button', { name: 'notesAssist.execute.forceSend' })).toBeNull()
   })
 
+  it('renders the contact_required reason by code and offers no force-send button', () => {
+    render(<AssistDeclinedFace code="contact_required" reason="server text" onForceSend={vi.fn()} />)
+    expect(screen.getByText('notesAssist.execute.declined.contact_required')).toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: 'notesAssist.execute.forceSend' })).toBeNull()
+  })
+
   it('falls back to the server reason, then the forbidden text, for an unknown code', () => {
     const { rerender } = render(<AssistDeclinedFace code={null} reason="Own server reason" onForceSend={vi.fn()} />)
     expect(screen.getByText('Own server reason')).toBeInTheDocument()

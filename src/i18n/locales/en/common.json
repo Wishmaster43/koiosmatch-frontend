@@ -665,7 +665,8 @@
         "proposal_recently_sent": "Proposal was already sent recently",
         "duplicate": "Already exists",
         "duplicate_archived": "Already exists, archived",
-        "proposal_cv_required": "A proposal via Koios needs a stored CV of this application. Propose once from the application with a CV first; Koios can then pick that CV."
+        "proposal_cv_required": "A proposal via Koios needs a stored CV of this application. Propose once from the application with a CV first; Koios can then pick that CV.",
+        "contact_required": "This proposal needs a contact and the vacancy has none. Link a contact to the vacancy and try again."
       },
       "viewRun": "View workflow run",
       "confirm": "Confirm",

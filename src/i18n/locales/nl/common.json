@@ -665,7 +665,8 @@
         "proposal_recently_sent": "Voorstel is recent al verstuurd",
         "duplicate": "Bestaat al",
         "duplicate_archived": "Bestaat al, gearchiveerd",
-        "proposal_cv_required": "Een voorstel via Koios heeft een opgeslagen cv van deze sollicitatie nodig. Stel eerst één keer voor via de sollicitatie met cv; daarna kan Koios dat cv kiezen."
+        "proposal_cv_required": "Een voorstel via Koios heeft een opgeslagen cv van deze sollicitatie nodig. Stel eerst één keer voor via de sollicitatie met cv; daarna kan Koios dat cv kiezen.",
+        "contact_required": "Dit voorstel heeft een contactpersoon nodig en de vacature heeft er geen. Koppel een contactpersoon aan de vacature en probeer het opnieuw."
       },
       "viewRun": "Bekijk workflow-run",
       "confirm": "Bevestigen",

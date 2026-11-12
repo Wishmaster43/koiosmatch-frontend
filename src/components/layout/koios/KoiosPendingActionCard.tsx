@@ -190,6 +190,9 @@ export default function KoiosPendingActionCard({ action }: { action: KoiosPendin
           } else if (code === 'proposal_cv_required') {
             // Y-002: a browserless proposal needs a stored CV of the application.
             setRefusedReason(t('notesAssist.execute.declined.proposal_cv_required'))
+          } else if (code === 'contact_required') {
+            // PROPOSE-CONTACT-DEFAULT-1: no contact on the item and the vacancy has none to default to.
+            setRefusedReason(t('notesAssist.execute.declined.contact_required'))
           } else {
             // Any other decline: translate the stable reason slug, fall back to the server message.
             setRefusedReason(translateReason(code, body.message))

@@ -665,7 +665,8 @@
         "proposal_recently_sent": "Vorschlag wurde bereits kürzlich gesendet",
         "duplicate": "Existiert bereits",
         "duplicate_archived": "Existiert bereits, archiviert",
-        "proposal_cv_required": "Ein Vorschlag über Koios braucht einen gespeicherten Lebenslauf dieser Bewerbung. Schlagen Sie zuerst einmal aus der Bewerbung mit Lebenslauf vor; danach kann Koios diesen Lebenslauf wählen."
+        "proposal_cv_required": "Ein Vorschlag über Koios braucht einen gespeicherten Lebenslauf dieser Bewerbung. Schlagen Sie zuerst einmal aus der Bewerbung mit Lebenslauf vor; danach kann Koios diesen Lebenslauf wählen.",
+        "contact_required": "Dieser Vorschlag braucht eine Kontaktperson und die Stelle hat keine. Verknüpfen Sie eine Kontaktperson mit der Stelle und versuchen Sie es erneut."
       },
       "viewRun": "Workflow-Lauf ansehen",
       "confirm": "Bestätigen",

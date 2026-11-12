@@ -299,6 +299,17 @@ describe('KoiosPendingActionCard', () => {
     expect(screen.getByText('notesAssist.execute.declined.proposal_cv_required')).toBeInTheDocument()
     expect(screen.queryByText('CV required.')).not.toBeInTheDocument()
   })
+  it('renders the contact_required key on that decline code, not the BE prose', async () => {
+    mockConfirm.mockRejectedValue({
+      response: { status: 422, data: { status: 'declined', message: 'Contact required.', data: { ok: false, reason: 'contact_required', error: 'CV required.' } } },
+    })
+    const user = userEvent.setup()
+    renderCard(action())
+    await user.click(screen.getByText('koios.pendingAction.confirm'))
+    await waitFor(() => expect(screen.getByTestId('koios-pending-action')).toHaveAttribute('data-status', 'refused'))
+    expect(screen.getByText('notesAssist.execute.declined.contact_required')).toBeInTheDocument()
+    expect(screen.queryByText('CV required.')).not.toBeInTheDocument()
+  })
 
   // NOTE-TITLE-1: proposal_not_allowed refusal slug for blocked/archived candidates
   // KOIOS-DEDUPE-1: a duplicate-twin decline carries `data.code`/`data.ref` —

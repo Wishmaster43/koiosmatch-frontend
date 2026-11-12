@@ -665,7 +665,8 @@
         "proposal_recently_sent": "La propuesta ya se envió recientemente",
         "duplicate": "Ya existe",
         "duplicate_archived": "Ya existe, archivado",
-        "proposal_cv_required": "Una propuesta a través de Koios necesita un CV guardado de esta candidatura. Propón primero una vez desde la candidatura con CV; después Koios podrá elegir ese CV."
+        "proposal_cv_required": "Una propuesta a través de Koios necesita un CV guardado de esta candidatura. Propón primero una vez desde la candidatura con CV; después Koios podrá elegir ese CV.",
+        "contact_required": "Esta propuesta necesita un contacto y la vacante no tiene ninguno. Vincula un contacto a la vacante e inténtalo de nuevo."
       },
       "viewRun": "Ver ejecución del workflow",
       "confirm": "Confirmar",
