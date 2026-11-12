@@ -17,7 +17,7 @@ import type { Id } from '@/types/common'
 import type { operations } from '@/types/api-generated'
 
 // Request body typed from the generated spec where it carries the route.
-export type ContractSendBody = operations['postMatchesMatchContract']['requestBody']['content']['application/json']
+export type ContractSendBody = NonNullable<operations['postMatchesMatchContract']['requestBody']>['content']['application/json']
 
 // Hand-written: the spec carries no 2xx schema; the server answers status (+ GUID, never shown).
 export interface ContractSendResult { guid?: string | null; contract_status?: string | null }
