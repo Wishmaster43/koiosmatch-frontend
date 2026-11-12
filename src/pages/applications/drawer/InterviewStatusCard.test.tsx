@@ -83,6 +83,20 @@ describe('InterviewStatusCard · no session', () => {
     expect(screen.getByText('interview.status.none')).toBeInTheDocument()
   })
 
+  it('draws the placeholder through the Caption atom (11px, italic), not a 12px literal span', () => {
+    render(<InterviewStatusCard interview={null} />)
+    const el = screen.getByText('interview.status.none')
+    expect(el.style.fontSize).toBe('11px')
+    expect(el.style.fontStyle).toBe('italic')
+  })
+
+  it('draws the borrowed-session note through the Caption atom (11px, italic)', () => {
+    render(<InterviewStatusCard interview={fullInterview({ sessionScope: 'candidate' })} applicationId="app-1" />)
+    const el = screen.getByText('interview.status.borrowedFromSibling')
+    expect(el.style.fontSize).toBe('11px')
+    expect(el.style.fontStyle).toBe('italic')
+  })
+
   it('renders no takeover button when there is no session', () => {
     render(<InterviewStatusCard interview={null} />)
     expect(screen.queryByRole('button')).toBeNull()

@@ -123,7 +123,7 @@ export default function InterviewStatusCard({
   if (!interview) {
     return (
       <div style={cardStyle}>
-        <span style={{ fontSize: 12, color: 'var(--text-muted)', fontStyle: 'italic' }}>{t('interview.status.none')}</span>
+        <Caption style={{ fontStyle: 'italic' }}>{t('interview.status.none')}</Caption>
         {/* Calm plain-text skip reason (+ date); an unknown code reads generically, never raw. */}
         {skipReason && (
           <>
@@ -145,9 +145,9 @@ export default function InterviewStatusCard({
   if (interview.sessionScope === 'candidate') {
     return (
       <div style={cardStyle}>
-        <span style={{ fontSize: 12, color: 'var(--text-muted)', fontStyle: 'italic' }}>
+        <Caption style={{ fontStyle: 'italic' }}>
           {t('interview.status.borrowedFromSibling')}
-        </span>
+        </Caption>
         {workflowOverridePicker}
         {vacancyDefaultBlock}
       </div>
