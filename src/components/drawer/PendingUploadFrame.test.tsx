@@ -4,6 +4,7 @@ import {
   PendingUploadFrame, PendingUploadRows, PendingUploadRow,
   PendingUploadTypeSelect, PendingUploadRemoveButton, PendingUploadFooter,
 } from './PendingUploadFrame'
+import type { LookupOption } from '@/types/common'
 
 describe('PendingUploadFrame', () => {
   // The frame renders the caller-resolved title above its children — no i18n
@@ -61,6 +62,19 @@ describe('PendingUploadTypeSelect', () => {
     // sr-only label id is part of it, not the whole attribute value.
     const trigger = screen.getByText('CV').closest('button') as HTMLButtonElement
     expect(trigger.getAttribute('aria-labelledby')?.split(' ')).toContain('doc-0')
+  })
+})
+
+describe('PendingUploadTypeSelect icons', () => {
+  // A string icon slug from the docTypes lookup renders as a glyph, never as text.
+  it('renders the slug option as the label only plus an svg glyph', () => {
+    const options: LookupOption[] = [{ value: 'CV', label: 'CV', icon: 'file-text' }]
+    render(<PendingUploadTypeSelect labelId="doc-1" label="Type" value="CV" onChange={vi.fn()} options={options} />)
+    const trigger = screen.getByText('CV').closest('button') as HTMLButtonElement
+    expect(trigger.textContent).toBe('CV')
+    expect(trigger.textContent).not.toContain('file-text')
+    // Two svgs: the resolved document glyph plus the always-present chevron.
+    expect(trigger.querySelectorAll('svg').length).toBe(2)
   })
 })
 

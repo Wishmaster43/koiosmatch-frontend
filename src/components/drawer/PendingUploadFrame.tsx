@@ -1,8 +1,9 @@
-import type { ReactNode } from 'react'
+import { useMemo, type ReactNode } from 'react'
 import { X } from 'lucide-react'
 import { Caption } from '@/components/ui/typography'
 import SelectMenu from '@/components/ui/SelectMenu'
 import Button from '@/components/ui/Button'
+import { resolveDocTypeIcon } from '@/lib/useDocumentTypes'
 import type { LookupOption } from '@/types/common'
 
 interface PendingUploadFrameProps {
@@ -68,12 +69,22 @@ interface PendingUploadTypeSelectProps {
  * the caller's own t() (rule C).
  */
 export function PendingUploadTypeSelect({ labelId, label, value, onChange, options }: PendingUploadTypeSelectProps) {
+  // Turn string icon slugs from the lookup into glyphs, since SelectMenu would print the slug as text.
+  const glyphOptions = useMemo(
+    () => options.map((o) => {
+      const icon: unknown = o.icon
+      if (typeof icon !== 'string') return o
+      const Glyph = resolveDocTypeIcon(icon)
+      return { ...o, icon: <Glyph size={12} aria-hidden="true" /> }
+    }),
+    [options],
+  )
   return (
     <>
       <span id={labelId} className="sr-only">{label}</span>
       <div style={{ width: 130, flexShrink: 0 }}>
         <SelectMenu aria-labelledby={labelId} value={value} onChange={onChange}
-          options={options} menuWidth={160}
+          options={glyphOptions} menuWidth={160}
           style={{ fontSize: 11, padding: '4px 8px', border: '1px solid var(--border)', borderRadius: 6, background: 'var(--bg)', color: 'var(--text)' }} />
       </div>
     </>
