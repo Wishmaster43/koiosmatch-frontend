@@ -13,7 +13,7 @@ import SubTabBar from '@/components/drawer/SubTabBar'
 import TenantUsageKpiRow from './TenantUsageKpiRow'
 import TenantUsageDetailsTable from './TenantUsageDetailsTable'
 import TenantUsageBreakdownTable from './TenantUsageBreakdownTable'
-import { Mono, GroupLabel, SectionTitle, BodyText } from '@/components/ui/typography'
+import { Mono, GroupLabel, SectionTitle, BodyText, PageSubtitle } from '@/components/ui/typography'
 import { useNumberFormat } from '@/lib/formatters'
 import { card } from './usageCardStyles'
 import { fieldSelectStyle } from '@/components/forms/fieldMetrics'
@@ -69,13 +69,13 @@ export default function TenantUsageSettings() {
     <div style={{ maxWidth: 1080 }}>
       {/* Tenant + month selector — super-admin switches the tenant; the month picker is the history */}
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12, marginBottom: 18, flexWrap: 'wrap' }}>
-        <p style={{ fontSize: 12, color: 'var(--text-muted)', margin: 0 }}>
+        <PageSubtitle as="p" style={{ margin: 0 }}>
           {t('usage.subtitleTenant', {
             name: activeTenant?.name ?? '—',
           })}
-        </p>
+        </PageSubtitle>
         <label style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-          <span style={{ fontSize: 12, color: 'var(--text-muted)' }}>{t('usage.month')}</span>
+          <PageSubtitle as="span">{t('usage.month')}</PageSubtitle>
           <SearchSelect
             options={months.map(m => ({ value: m.value, label: m.label }))}
             selected={[month]}
@@ -118,10 +118,10 @@ export default function TenantUsageSettings() {
         {phase === 'ready' && (
           <>
             {nothingUsed && (
-              <p style={{ fontSize: 12, color: 'var(--text-muted)', margin: '0 0 14px', padding: '9px 12px',
+              <PageSubtitle as="p" style={{ margin: '0 0 14px', padding: '9px 12px',
                 background: 'var(--bg)', border: '1px solid var(--border)', borderRadius: 8 }}>
                 {t('usage.nothingUsed')}
-              </p>
+              </PageSubtitle>
             )}
 
             {/* BILLING-FACTUUR-1: the subscription split (package · users · add-ons

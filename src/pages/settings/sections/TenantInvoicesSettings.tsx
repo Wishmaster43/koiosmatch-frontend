@@ -23,7 +23,7 @@ import PaginationBar from '@/components/ui/PaginationBar'
 import { card, th as thBase, td as tdBase, numCell as numCellBase, notice } from './usageCardStyles'
 import type { CSSProperties } from 'react'
 import Button from '@/components/ui/Button'
-import { PageTitle } from '@/components/ui/typography'
+import { PageTitle, PageSubtitle } from '@/components/ui/typography'
 import type { TenantInvoice } from './invoiceTypes'
 // SMZ-13: InvoiceController::index paginates at a hardcoded 20 per page —
 // per_page is not honoured server-side, so the page-size selector is fixed.
@@ -111,7 +111,7 @@ export default function TenantInvoicesSettings() {
     <div style={{ maxWidth: 720 }}>
       <div style={{ marginBottom: 20 }}>
         <PageTitle>{t('billing.invoices.title')}</PageTitle>
-        <p style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 2 }}>{t('billing.invoices.desc')}</p>
+        <PageSubtitle as="p" style={{ marginTop: 2 }}>{t('billing.invoices.desc')}</PageSubtitle>
       </div>
 
       <div style={card}>

@@ -39,7 +39,7 @@ import { type CandidateLookupFlags, slugify } from './candidateLookupFlags'
 import CandidateLookupItemModal, { type LookupModalState } from './CandidateLookupItemModal'
 import DrawerAddButton from '@/components/drawer/DrawerAddButton'
 import Button from '@/components/ui/Button'
-import { Caption, BodyText } from '@/components/ui/typography'
+import { Caption, BodyText, PageSubtitle } from '@/components/ui/typography'
 
 const BASE = '/settings/candidate-lookups'
 
@@ -217,7 +217,7 @@ export function LookupBlock({ slug, title, subtitle, items, setItems, readOnly =
       <div className="flex items-center justify-between mb-3">
         <div>
           <h3 style={{ fontSize: 14, fontWeight: 600, color: 'var(--text)' }}>{title}</h3>
-          <p style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 2 }}>{subtitle}</p>
+          <PageSubtitle as="p" style={{ marginTop: 2 }}>{subtitle}</PageSubtitle>
           {/* KANDIDATEN-13 (Danny): everything hangs off these two phases (automation,
               KPIs) — reordering two fixed rows carries no meaning, so the list stays
               non-reorderable, and only the colour/icon mark is tenant-adjustable in
@@ -320,7 +320,7 @@ export function LookupBlock({ slug, title, subtitle, items, setItems, readOnly =
           </>
         )}
       />
-      {items.length === 0 && <p style={{ fontSize: 12, color: 'var(--text-muted)', padding: '8px 0' }}>{t('lookups.empty')}</p>}
+      {items.length === 0 && <PageSubtitle as="p" style={{ padding: '8px 0' }}>{t('lookups.empty')}</PageSubtitle>}
 
       {/* Add/edit modal — extracted to its own file once this block crossed the
           ~400-line split trigger (batch 12, P22-30). Thin container passes state

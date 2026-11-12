@@ -38,7 +38,7 @@ import ResultStep from './import/ResultStep'
 import { groupTemplates, importPermissionsFor, isWholeTreeTemplate } from './import/importTemplateShape'
 import { iconForTemplate } from './import/importEntityIcon'
 import type { ImportTemplateSummary } from './import/importApi'
-import { PageTitle } from '@/components/ui/typography'
+import { PageTitle, PageSubtitle } from '@/components/ui/typography'
 
 interface EntityWizardProps {
   entity: string
@@ -133,7 +133,7 @@ export default function ImportSettings() {
       <div style={{ flex: 1, minWidth: 0 }}>
         <div style={{ marginBottom: 20 }}>
           <PageTitle>{t('import.title')}</PageTitle>
-          <p style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 2 }}>{t('import.subtitle')}</p>
+          <PageSubtitle as="p" style={{ marginTop: 2 }}>{t('import.subtitle')}</PageSubtitle>
         </div>
 
         {/* IMPORT-WIZARD-1: a real link (never a fake affordance) to the full-screen
@@ -185,9 +185,9 @@ export default function ImportSettings() {
                 <div style={{ fontSize: 14, fontWeight: 600, color: 'var(--text)' }}>
                   {t(`import.entities.${selectedTemplate.entity}.label`, { defaultValue: selectedTemplate.entity })}
                 </div>
-                <div style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 2 }}>
+                <PageSubtitle as="div" style={{ marginTop: 2 }}>
                   {t(`import.entities.${selectedTemplate.entity}.desc`, { defaultValue: '' })}
-                </div>
+                </PageSubtitle>
               </div>
             </div>
             <EntityWizard key={selectedTemplate.entity} entity={selectedTemplate.entity} wholeTree={wholeTree}

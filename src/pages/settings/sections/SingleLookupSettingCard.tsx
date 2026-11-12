@@ -5,7 +5,7 @@
  * only owns the layout and the picker wiring (DRY round 11, SETTINGS2).
  */
 import SettingLookupPicker from '../components/SettingLookupPicker'
-import { SectionTitle } from '@/components/ui/typography'
+import { SectionTitle, PageSubtitle } from '@/components/ui/typography'
 import SettingsLoadBanner from '../components/SettingsLoadBanner'
 
 interface SingleLookupSettingCardProps {
@@ -25,7 +25,7 @@ export default function SingleLookupSettingCard({
     <div style={{ maxWidth: 560 }}>
       <SettingsLoadBanner />
       <SectionTitle as="div" style={{ marginBottom: 4 }}>{title}</SectionTitle>
-      <div style={{ fontSize: 12, color: 'var(--text-muted)', marginBottom: 12 }}>{subtitle}</div>
+      <PageSubtitle as="div" style={{ marginBottom: 12 }}>{subtitle}</PageSubtitle>
       {/* Searchable single-pick dropdown, like every other lookup filter (Danny 23-07). */}
       <SettingLookupPicker
         options={options}

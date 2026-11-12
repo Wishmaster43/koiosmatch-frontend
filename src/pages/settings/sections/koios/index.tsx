@@ -21,7 +21,7 @@ import KoiosBudgetCard from './KoiosBudgetCard'
 import KoiosLearningCard from './KoiosLearningCard'
 import KoiosCapabilitiesCard from './KoiosCapabilitiesCard'
 import KoiosFeedbackCard from './KoiosFeedbackCard'
-import { PageTitle } from '@/components/ui/typography'
+import { PageTitle, PageSubtitle } from '@/components/ui/typography'
 import SubTabBar from '@/components/drawer/SubTabBar'
 // KOIOS-DEFAULT-SYNC-1: the floating panel reads the same settings from the
 // shared query cache — invalidate it so its picker follows a new default.
@@ -71,7 +71,7 @@ export default function KoiosSettings() {
     <div style={{ maxWidth: tab === 'capabilities' ? TOOL_MATRIX_MAX_W : SETTINGS_MAX_W_WIDE }}>
       <div className="mb-6">
         <PageTitle>{t('title')}</PageTitle>
-        <p style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 2 }}>{t('subtitle')}</p>
+        <PageSubtitle as="p" style={{ marginTop: 2 }}>{t('subtitle')}</PageSubtitle>
       </div>
 
       {phase === 'loading'     && <p style={notice}>{t('loading')}</p>}

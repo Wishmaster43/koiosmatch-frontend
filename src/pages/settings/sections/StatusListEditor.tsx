@@ -63,7 +63,7 @@ import { useConfirm } from '@/hooks/useConfirm'
 import { deleteLookupRow } from '../lib/deleteLookupRow'
 import { DragList } from '../components/SettingsControls'
 import DrawerAddButton from '@/components/drawer/DrawerAddButton'
-import { PageTitle } from '@/components/ui/typography'
+import { PageTitle, PageSubtitle } from '@/components/ui/typography'
 import StatusListRow from './StatusListRow'
 import StatusListModal from './StatusListModal'
 import type { StatusListEditorProps, StatusListItem, StatusListDraft, DefaultFieldDef } from './statusListEditorTypes'
@@ -278,7 +278,7 @@ export default function StatusListEditor({
     return (
       <div style={{ maxWidth: 640 }}>
         {renderEditorTitle(title, compact)}
-        <p style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 8 }}>{notFoundNotice}</p>
+        <PageSubtitle as="p" style={{ marginTop: 8 }}>{notFoundNotice}</PageSubtitle>
       </div>
     )
   }
@@ -301,7 +301,7 @@ export default function StatusListEditor({
       <div className="flex items-start justify-between" style={{ marginBottom: 20, gap: 16 }}>
         <div style={{ minWidth: 0 }}>
           {renderEditorTitle(title, compact)}
-          <p style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 2 }}>{subtitle}</p>
+          <PageSubtitle as="p" style={{ marginTop: 2 }}>{subtitle}</PageSubtitle>
         </div>
         <div style={{ display: 'flex', gap: 8, flexShrink: 0 }}>
           {/* HUISSTIJL-1: the ONE "+ add" affordance, app-wide (§3A). readOnly (Danny

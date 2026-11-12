@@ -26,6 +26,7 @@ import LookupChipSelect from '../components/LookupChipSelect'
 import { notifyError } from '@/lib/notify'
 import { extractApiError } from '@/lib/extractApiError'
 import { makeToggleIn } from '@/lib/selectionSet'
+import { PageSubtitle } from '@/components/ui/typography'
 // audit r2-ui-states-3: a failed save must tell the admin, not silently revert (the api client's toast is DEV-only).
 
 const KEY = 'candidate_vacancy_tab'
@@ -81,7 +82,7 @@ function CandidateVacancyTabSettingsInner() {
   return (
     <div style={{ maxWidth: 720 }}>
       <h3 style={{ fontSize: 14, fontWeight: 600, color: 'var(--text)', marginBottom: 4 }}>{t('vacancyTab.title')}</h3>
-      <p style={{ fontSize: 12, color: 'var(--text-muted)', marginBottom: 14 }}>{t('vacancyTab.subtitle')}</p>
+      <PageSubtitle as="p" style={{ marginBottom: 14 }}>{t('vacancyTab.subtitle')}</PageSubtitle>
 
       <SubTabBar tabs={tabs} active={activeTab} onChange={setActiveTab} />
       <div style={{ marginTop: 14 }}>

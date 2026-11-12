@@ -14,6 +14,7 @@ import SoftChip from '@/components/ui/SoftChip'
 import { hasRemarks, needsAttention } from './importRowAttention'
 import type { ImportRowAction, ImportRunResult } from './importApi'
 import { tintBg, tintBorder } from '@/lib/tint'
+import { PageSubtitle } from '@/components/ui/typography'
 
 // Colour per outcome — carries meaning (§4), reused for both the summary chips and
 // the per-row badges so the same colour always means the same thing.
@@ -72,7 +73,7 @@ export default function ImportResultPanel({ result, showAllRows, onToggleShowAll
           <AlertTriangle size={14} style={{ color: 'var(--color-warning-text)', flexShrink: 0, marginTop: 1 }} />
           <div>
             <div style={{ fontSize: 12, fontWeight: 600, color: 'var(--text)' }}>{t('import.unknownColumns.title')}</div>
-            <div style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 2 }}>{t('import.unknownColumns.hint')}</div>
+            <PageSubtitle as="div" style={{ marginTop: 2 }}>{t('import.unknownColumns.hint')}</PageSubtitle>
             <div style={{ marginTop: 6, display: 'flex', gap: 6, flexWrap: 'wrap' }}>
               {unknownColumns.map((col) => <SoftChip key={col} label={col} color="var(--color-warning)" />)}
             </div>
@@ -98,7 +99,7 @@ export default function ImportResultPanel({ result, showAllRows, onToggleShowAll
       </div>
 
       {visibleRows.length === 0 ? (
-        <p style={{ fontSize: 12, color: 'var(--text-muted)' }}>{t('import.rows.noAttention')}</p>
+        <PageSubtitle as="p">{t('import.rows.noAttention')}</PageSubtitle>
       ) : (
         <div style={{ maxHeight: 260, overflowY: 'auto', border: '1px solid var(--border)', borderRadius: 8 }}>
           {visibleRows.map((row) => (

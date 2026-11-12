@@ -16,7 +16,7 @@ import { BTN_H } from '@/config/buttonMetrics'
 import SaveButton from '@/components/ui/SaveButton'
 import { useSettingsSectionState } from '@/hooks/useSettingsSectionState'
 import Button from '@/components/ui/Button'
-import { PageTitle, Caption } from '@/components/ui/typography'
+import { PageTitle, Caption, PageSubtitle } from '@/components/ui/typography'
 import { tintBg, tintBorder } from '@/lib/tint'
 import { notifyError } from '@/lib/notify'
 import { extractApiError } from '@/lib/extractApiError'
@@ -135,7 +135,7 @@ export default function BrandSettings() {
       <div className="flex items-center justify-between mb-5">
         <div>
           <PageTitle>{t('brand.title')}</PageTitle>
-          <p style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 2 }}>{t('brand.subtitle')}</p>
+          <PageSubtitle as="p" style={{ marginTop: 2 }}>{t('brand.subtitle')}</PageSubtitle>
         </div>
         {/* SaveButton — the ONE saved-state save action (§4 success token pair). */}
         <SaveButton saved={saved} saving={saving} onClick={save} disabled={saving} />
@@ -254,7 +254,7 @@ export default function BrandSettings() {
             )}
           </div>
           <div style={{ marginTop: 14, display: 'flex', gap: 8, alignItems: 'center' }}>
-            <span style={{ fontSize: 12, color: 'var(--text-muted)' }}>{t('brand.preview')}</span>
+            <PageSubtitle as="span">{t('brand.preview')}</PageSubtitle>
             {/* BTN_H (§4/§9): one explicit height for every text/action button, everywhere (incl. this live preview). */}
             {/* BRAND-TEXT-COLOR-1: this preview's background IS the tenant accent (primaryColor,
                 live-synced to --color-primary), so its label must read the same on-accent token the

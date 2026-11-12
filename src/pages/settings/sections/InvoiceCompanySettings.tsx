@@ -20,7 +20,7 @@ import Toggle from '@/components/ui/Toggle'
 import Spinner from '@/components/ui/Spinner'
 import SaveButton from '@/components/ui/SaveButton'
 import { card, notice } from './usageCardStyles'
-import { PageTitle, SectionTitle } from '@/components/ui/typography'
+import { PageTitle, SectionTitle, PageSubtitle } from '@/components/ui/typography'
 import { fieldInputStyle } from '@/components/forms/fieldMetrics'
 import { cardHead } from '@/components/ui/modalCards'
 import Row from './settingsFormRow'
@@ -106,7 +106,7 @@ export default function InvoiceCompanySettings() {
       <div className="flex items-center justify-between mb-5">
         <div>
           <PageTitle>{t('invoiceSettings.title')}</PageTitle>
-          <p style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 2 }}>{t('invoiceSettings.subtitle')}</p>
+          <PageSubtitle as="p" style={{ marginTop: 2 }}>{t('invoiceSettings.subtitle')}</PageSubtitle>
         </div>
         <SaveButton type="button" onClick={handleSave} disabled={saving || phase !== 'ready'} saved={justSaved}
           style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
@@ -126,7 +126,7 @@ export default function InvoiceCompanySettings() {
           <AlertTriangle size={15} style={{ color: 'var(--color-warning, var(--text-muted))', flexShrink: 0, marginTop: 1 }} aria-hidden="true" />
           <div>
             <SectionTitle as="div">{t('invoiceSettings.notReadyTitle')}</SectionTitle>
-            <div style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 2 }}>{t('invoiceSettings.notReadyDesc')}</div>
+            <PageSubtitle as="div" style={{ marginTop: 2 }}>{t('invoiceSettings.notReadyDesc')}</PageSubtitle>
           </div>
         </div>
       )}
@@ -176,7 +176,7 @@ export default function InvoiceCompanySettings() {
               <Row label={t('invoiceSettings.autoFinalize')} last>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
                   <Toggle checked={form.invoice_auto_finalize} onChange={(v: boolean) => set('invoice_auto_finalize', v)} ariaLabel={t('invoiceSettings.autoFinalize')} />
-                  <span style={{ fontSize: 12, color: 'var(--text-muted)' }}>{t('invoiceSettings.autoFinalizeHint')}</span>
+                  <PageSubtitle as="span">{t('invoiceSettings.autoFinalizeHint')}</PageSubtitle>
                 </div>
               </Row>
             </div>

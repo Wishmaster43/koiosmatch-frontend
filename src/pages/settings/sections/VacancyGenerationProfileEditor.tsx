@@ -31,7 +31,7 @@ import { useFunctions } from '@/lib/useFunctions'
 import { useIndustries } from '@/lib/useIndustries'
 import { useLanguageLookups } from '@/lib/useLanguageLookups'
 import Button from '@/components/ui/Button'
-import { SectionTitle } from '@/components/ui/typography'
+import { SectionTitle, tableHeadStyle } from '@/components/ui/typography'
 import type { CSSProperties, ReactNode, ChangeEvent, KeyboardEvent } from 'react'
 
 // Tone-of-voice and length are fixed prompt-engine parameters (like the custom-field
@@ -40,7 +40,7 @@ import type { CSSProperties, ReactNode, ChangeEvent, KeyboardEvent } from 'react
 const TONES = ['neutral', 'professional', 'friendly', 'enthusiastic', 'formal']
 const LENGTHS = ['short', 'medium', 'long']
 
-const labelStyle: CSSProperties = { fontSize: 11, fontWeight: 600, color: 'var(--text-muted)', display: 'block', marginBottom: 4 }
+const labelStyle: CSSProperties = { ...tableHeadStyle, display: 'block', marginBottom: 4 }
 // Canon field style (G33/fieldMetrics) — was its own padding-6/radius-6 copy.
 const inputStyle = fieldInputStyle
 const hintStyle: CSSProperties = { fontSize: 11, color: 'var(--text-muted)', marginTop: 3 }

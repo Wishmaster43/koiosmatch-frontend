@@ -14,7 +14,7 @@ import { iconForTemplate } from './importEntityIcon'
 import type { ImportTemplateSummary } from './importApi'
 import Spinner from '@/components/ui/Spinner'
 import Button from '@/components/ui/Button'
-import { GroupLabel } from '@/components/ui/typography'
+import { GroupLabel, PageSubtitle } from '@/components/ui/typography'
 import SubNavButton from '@/pages/settings/components/SubNavButton'
 
 interface ImportEntityNavProps {
@@ -65,7 +65,7 @@ export default function ImportEntityNav({ templates, phase, selected, onSelect, 
         </div>
       )}
       {phase === 'ready' && templates.length === 0 && (
-        <p style={{ fontSize: 12, color: 'var(--text-muted)', padding: '8px 10px' }}>{t('import.noTemplates')}</p>
+        <PageSubtitle as="p" style={{ padding: '8px 10px' }}>{t('import.noTemplates')}</PageSubtitle>
       )}
       {phase === 'ready' && templates.length > 0 && (
         <>

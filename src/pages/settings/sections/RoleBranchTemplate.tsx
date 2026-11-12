@@ -12,6 +12,7 @@ import ChipMultiSelect from '@/components/ui/ChipMultiSelect'
 import Spinner from '@/components/ui/Spinner'
 import { useLocations } from '@/lib/useLocations'
 import type { Role, UpdateBranchesBody } from './rolesTypes'
+import { PageSubtitle } from '@/components/ui/typography'
 
 // Edits one role's branch TEMPLATE only; existing users keep whatever set they already have, this never retroactively changes their branches (see file header).
 export function RoleBranchTemplate({ roleId }: { roleId: Role['id'] }) {
@@ -76,7 +77,7 @@ export function RoleBranchTemplate({ roleId }: { roleId: Role['id'] }) {
       </div>
       <p style={{ fontSize: 11, color: 'var(--text-muted)', marginBottom: 10 }}>{t('roles.branchesTemplateHint')}</p>
       {loading ? (
-        <p style={{ fontSize: 12, color: 'var(--text-muted)' }}>{t('common.loadingShort')}</p>
+        <PageSubtitle as="p">{t('common.loadingShort')}</PageSubtitle>
       ) : loadError ? (
         <p style={{ fontSize: 12, color: 'var(--color-danger-text)' }}>{t('roles.branchesLoadError')}</p>
       ) : (

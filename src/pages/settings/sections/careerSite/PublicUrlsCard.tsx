@@ -20,6 +20,7 @@ import SectionCard from '@/components/ui/SectionCard'
 import UrlRow from './UrlRow'
 import { buildCareerSitePublicUrls } from './publicUrls'
 import { publicApiBase } from '@/lib/publicApiUrl'
+import { PageSubtitle } from '@/components/ui/typography'
 
 
 interface PublicUrlsCardProps {
@@ -49,7 +50,7 @@ export default function PublicUrlsCard({ active }: PublicUrlsCardProps) {
 
   return (
     <SectionCard>
-      <p style={{ fontSize: 12, color: 'var(--text-muted)', margin: '0 0 4px' }}>{t('careerSite.urls.subtitle')}</p>
+      <PageSubtitle as="p" style={{ margin: '0 0 4px' }}>{t('careerSite.urls.subtitle')}</PageSubtitle>
       <div>
         {urls.map((u) => (
           <UrlRow key={u.id}

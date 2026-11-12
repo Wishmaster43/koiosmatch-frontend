@@ -8,7 +8,7 @@ import { useTranslation } from 'react-i18next'
 import SearchSelect from '@/components/ui/SearchSelect'
 import FloatingPanel from '@/components/ui/FloatingPanel'
 import ModalFooter from '@/components/ui/ModalFooter'
-import { BodyText } from '@/components/ui/typography'
+import { BodyText, PageSubtitle } from '@/components/ui/typography'
 import { ColorSwatch } from '../components/SettingsControls'
 import { Toggle } from '../components/SettingsKit'
 import IconPickerControl from './IconPickerControl'
@@ -46,7 +46,7 @@ export default function StatusListModal({
         </div>
         {withColor && (
           <div style={{ marginBottom: 14 }}>
-            <div style={{ fontSize: 12, color: 'var(--text-muted)', marginBottom: 5 }}>{t('statusList.colorLabel')}</div>
+            <PageSubtitle as="div" style={{ marginBottom: 5 }}>{t('statusList.colorLabel')}</PageSubtitle>
             <ColorSwatch color={draft.color as string} onChange={(c: string) => setDraft(d => ({ ...d, color: c }))} />
           </div>
         )}
@@ -54,7 +54,7 @@ export default function StatusListModal({
           // The bare free-text lucide-key input is retired (silently accepted wrong
           // keys) — the same curated IconPickerControl now backs create/edit too.
           <div style={{ marginBottom: 14 }}>
-            <div style={{ fontSize: 12, color: 'var(--text-muted)', marginBottom: 5 }}>{t('statusList.iconLabel')}</div>
+            <PageSubtitle as="div" style={{ marginBottom: 5 }}>{t('statusList.iconLabel')}</PageSubtitle>
             <IconPickerControl icons={resolvedIconPicker.icons} resolve={resolvedIconPicker.resolve} value={draft.icon as string | undefined}
               color={(draft.color as string) ?? FALLBACK_SWATCH} label={(draft.name as string) || t('statusList.iconLabel')}
               onPick={(icon: string) => setDraft(d => ({ ...d, icon }))} />
@@ -74,7 +74,7 @@ export default function StatusListModal({
           // SearchSelect (single-select via closeOnToggle) — extraField's prop API
           // (key/label/options/default) is unchanged.
           <div style={{ marginBottom: 14 }}>
-            <div style={{ fontSize: 12, color: 'var(--text-muted)', marginBottom: 5 }}>{extraField.label}</div>
+            <PageSubtitle as="div" style={{ marginBottom: 5 }}>{extraField.label}</PageSubtitle>
             {/* DROPDOWN-CLEAR-1: opt-out unless the field is nullable (default null, e.g. a nationality's country);
                 a required extra field (unit, modality) persists straight to the row and must never be empty. */}
             <SearchSelect closeOnToggle clearable={extraField.default == null} width={352}

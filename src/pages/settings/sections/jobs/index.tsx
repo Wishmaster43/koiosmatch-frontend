@@ -17,7 +17,7 @@ import JobsTab from './JobsTab'
 import RecentJobsTab from './RecentJobsTab'
 import FailedJobsTab from './FailedJobsTab'
 import MetricsTab from './MetricsTab'
-import { PageTitle } from '@/components/ui/typography'
+import { PageTitle, PageSubtitle } from '@/components/ui/typography'
 import type { QueueSummary } from './jobsApi'
 
 // useQueueSummary is still a plain .js hook (untyped); its shape matches jobsApi's own QueueSummary.
@@ -46,7 +46,7 @@ export default function JobQueueSettings() {
         <ListChecks size={18} style={{ color: 'var(--color-primary-text)' }} />
         <PageTitle>{t('jobs.title')}</PageTitle>
       </div>
-      <p style={{ fontSize: 12, color: 'var(--text-muted)', margin: '2px 0 16px' }}>{t('jobs.subtitle')}</p>
+      <PageSubtitle as="p" style={{ margin: '2px 0 16px' }}>{t('jobs.subtitle')}</PageSubtitle>
 
       {/* QUEUE-WATCH-1: Horizon/scheduler health strip + incident banner, above the tabs. */}
       <QueueHealthBlock queueStatus={summary?.queue_status} />

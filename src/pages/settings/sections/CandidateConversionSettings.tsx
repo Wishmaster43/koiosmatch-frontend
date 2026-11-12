@@ -10,7 +10,7 @@ import { useTranslation } from 'react-i18next'
 import SettingLookupPicker from '../components/SettingLookupPicker'
 import { useLookups } from '@/context/LookupsContext'
 import { useSettingKeyPick } from '../lib/useSettingKeyPick'
-import { SectionTitle } from '@/components/ui/typography'
+import { SectionTitle, PageSubtitle } from '@/components/ui/typography'
 import SettingsLoadBanner from '../components/SettingsLoadBanner'
 
 // The tenant-setting key; the BE first-application automation reads the SAME key
@@ -33,7 +33,7 @@ export function CandidateConversionSettings() {
     <div style={{ maxWidth: 560 }}>
       <SettingsLoadBanner />
       <SectionTitle as="div" style={{ marginBottom: 4 }}>{t('candidateConversion.title')}</SectionTitle>
-      <div style={{ fontSize: 12, color: 'var(--text-muted)', marginBottom: 12 }}>{t('candidateConversion.subtitle')}</div>
+      <PageSubtitle as="div" style={{ marginBottom: 12 }}>{t('candidateConversion.subtitle')}</PageSubtitle>
       {/* Searchable single-pick dropdown, like every other lookup filter (Danny 23-07). */}
       <SettingLookupPicker
         options={plainStatuses.map(s => ({ value: s.value, label: s.label }))}

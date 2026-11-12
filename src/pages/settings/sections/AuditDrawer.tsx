@@ -9,7 +9,7 @@ import { useFocusTrap } from '@/hooks/useFocusTrap'
 import { useDateFormat } from '@/lib/datetime'
 import { KPI_KEYS, LogBadge, isAccessEvent, buildFieldDiff, entityLabel, type AuditEntry } from './auditShared'
 import { isScrubbedActivity } from '@/components/drawer/tabs/changelogScrub'
-import { GroupLabel, Caption, PageTitle } from '@/components/ui/typography'
+import { GroupLabel, Caption, PageTitle, PageSubtitle } from '@/components/ui/typography'
 import Button from '@/components/ui/Button'
 import { DiffRow, DetailRow } from '@/pages/settings/shared/DetailRowLayout'
 
@@ -91,7 +91,7 @@ export function AuditDrawer({ entry, onClose }: AuditDrawerProps) {
               { label: t('audit.http.duration'), value: (p.duration as string) ?? '—' },
             ].map(row => (
               <Fragment key={row.label}>
-                <span style={{ fontSize: 12, color: 'var(--text-muted)', alignSelf: 'center' }}>{row.label}</span>
+                <PageSubtitle as="span" style={{ alignSelf: 'center' }}>{row.label}</PageSubtitle>
                 <span style={{ fontSize: 13, color: row.statusColor ?? 'var(--text)',
                                     background: row.statusBg ?? 'transparent',
                                     borderRadius: row.statusBg ? 6 : 0,
@@ -235,9 +235,9 @@ export function AuditDrawer({ entry, onClose }: AuditDrawerProps) {
       const keys = asArray(p.keys) as string[]
       return (
         <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
-          <p style={{ fontSize: 12, color: 'var(--text-muted)', marginBottom: 8 }}>
+          <PageSubtitle as="p" style={{ marginBottom: 8 }}>
             {t('audit.settingsUpdated', { count: keys.length })}
-          </p>
+          </PageSubtitle>
           {keys.map(k => (
             <div key={k} style={{ background: 'var(--hover-bg)', borderRadius: 8, padding: '8px 12px',
                                    fontSize: 12, color: 'var(--text)', fontFamily: 'monospace' }}>{kpiLabel(k)}</div>
@@ -274,7 +274,7 @@ export function AuditDrawer({ entry, onClose }: AuditDrawerProps) {
         {Object.entries(p).map(([k, v]) => (
           <div key={k} style={{ display: 'flex', justifyContent: 'space-between', background: 'var(--hover-bg)',
                                 borderRadius: 8, padding: '8px 12px' }}>
-            <span style={{ fontSize: 12, color: 'var(--text-muted)' }}>{k}</span>
+            <PageSubtitle as="span">{k}</PageSubtitle>
             <span style={{ fontSize: 12, color: 'var(--text)', fontWeight: 500 }}>
               {Array.isArray(v) ? v.join(', ') : String(v)}
             </span>
@@ -302,12 +302,12 @@ export function AuditDrawer({ entry, onClose }: AuditDrawerProps) {
                 <LogBadge logName={entry.log_name ?? ''} />
                 <PageTitle as="span">{entry.description}</PageTitle>
               </div>
-              <div style={{ fontSize: 12, color: 'var(--text-muted)' }}>
+              <PageSubtitle as="div">
                 {/* actor_label ("<name>-KoiosAI") wins over the human causer_name when present. */}
                 <strong style={{ color: 'var(--text)' }}>{entry.actor_label ?? entry.causer_name ?? t('audit.system')}</strong>
                 {entry.causer_email && <span> · {entry.causer_email}</span>}
                 <span> · {formatDateTime(entry.created_at)}</span>
-              </div>
+              </PageSubtitle>
             </div>
             <Button variant="ghost" size="sm" iconOnly onClick={onClose} aria-label={t('common.close')}>
               <X size={15} />

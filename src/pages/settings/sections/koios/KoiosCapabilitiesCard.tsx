@@ -36,7 +36,7 @@ import Button from '@/components/ui/Button'
 import SoftChip from '@/components/ui/SoftChip'
 import SubTabBar from '@/components/drawer/SubTabBar'
 import HeaderSearch from '@/components/ui/HeaderSearch'
-import { SectionTitle, GroupLabel, Caption, BodyText, bodyTextStyle } from '@/components/ui/typography'
+import { SectionTitle, GroupLabel, Caption, BodyText, bodyTextStyle, PageSubtitle } from '@/components/ui/typography'
 import KoiosCapabilityFacts from './KoiosCapabilityFacts'
 
 // A BE tool group the locale does not know yet (a new connector) reads as a humanised name, never as a raw key (Danny 29-09: "capabilities.groups.opencage").
@@ -182,7 +182,7 @@ export default function KoiosCapabilitiesCard() {
   return (
     <div style={card}>
       <SectionTitle style={{ marginBottom: 4 }}>{t('capabilities.title')}</SectionTitle>
-      <div style={{ fontSize: 12, color: 'var(--text-muted)', marginBottom: 8 }}>{t('capabilities.subtitle')}</div>
+      <PageSubtitle as="div" style={{ marginBottom: 8 }}>{t('capabilities.subtitle')}</PageSubtitle>
       <KoiosCapabilityFacts surfaces={data?.surfaces} limits={data?.limits} />
       <HeaderSearch onSearch={setQuery} placeholder={t('capabilities.searchPlaceholder')}
         ariaLabel={t('capabilities.searchPlaceholder')} width="100%" />

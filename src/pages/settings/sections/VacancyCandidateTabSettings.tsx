@@ -25,7 +25,7 @@
  */
 import { useState } from 'react'
 import type { ChangeEvent } from 'react'
-import { Caption, SectionTitle } from '@/components/ui/typography'
+import { Caption, SectionTitle, PageSubtitle } from '@/components/ui/typography'
 import { useTranslation } from 'react-i18next'
 import { useAllSettings, getJsonSetting, saveSettingsKeys } from '@/lib/settings/useAllSettings'
 import { useLookups } from '@/context/LookupsContext'
@@ -200,7 +200,7 @@ function VacancyCandidateTabSettingsInner() {
             tab's own candidate search — a change here changes both immediately. */}
         {activeTab === 'countable_statuses' && (
           <div>
-            <p style={{ fontSize: 12, color: 'var(--text-muted)', marginBottom: 12 }}>{t('candidateTab.leadsCriteria.subtitle')}</p>
+            <PageSubtitle as="p" style={{ marginBottom: 12 }}>{t('candidateTab.leadsCriteria.subtitle')}</PageSubtitle>
             {/* countable_vacancy_statuses — which vacancy statuses count toward the
                 leads counter; reuses the same vacancy-status list + checkbox affordance
                 as the vacancy-statuses sub-tab. Empty selection = every status counts. */}

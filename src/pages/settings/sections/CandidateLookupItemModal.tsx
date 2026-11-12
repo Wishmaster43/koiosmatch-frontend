@@ -18,7 +18,7 @@ import { GENERIC_LOOKUP_ICON_NAMES, resolveGenericLookupIcon } from './lookupIco
 import { type CandidateLookupFlags, slugify } from './candidateLookupFlags'
 import FloatingPanel from '@/components/ui/FloatingPanel'
 import ModalFooter from '@/components/ui/ModalFooter'
-import { Caption, BodyText, SectionTitle } from '@/components/ui/typography'
+import { Caption, BodyText, SectionTitle, PageSubtitle } from '@/components/ui/typography'
 
 // The backend's `value` rule on every candidate lookup (CandidateGenderController and its siblings: max:50).
 const LOOKUP_VALUE_MAX = 50
@@ -92,7 +92,7 @@ export default function CandidateLookupItemModal({
       scrollBody={false} width={400}>
       <div style={{ flex: 1, overflowY: 'auto', padding: '20px 24px 0' }}>
         <div style={{ marginBottom: 14 }}>
-          <div style={{ fontSize: 12, color: 'var(--text-muted)', marginBottom: 5 }}>{t('lookups.labelField')}</div>
+          <PageSubtitle as="div" style={{ marginBottom: 5 }}>{t('lookups.labelField')}</PageSubtitle>
           <input value={modal.label} autoFocus
             onChange={e => setModal(m => m && ({ ...m, label: e.target.value }))}
             placeholder={t('lookups.labelPlaceholder')}
@@ -102,7 +102,7 @@ export default function CandidateLookupItemModal({
         </div>
 
         <div style={{ marginBottom: 14 }}>
-          <div style={{ fontSize: 12, color: 'var(--text-muted)', marginBottom: 5 }}>{t('lookups.valueField')}</div>
+          <PageSubtitle as="div" style={{ marginBottom: 5 }}>{t('lookups.valueField')}</PageSubtitle>
           {/* LOOKUP-VALUE-MAX-1 (Danny 19-09, a 422 saying the value may not exceed 50 characters
               on the gender lookup): the backend caps every lookup value at 50 characters, so the
               input stops there and the hint says so — the server's own message never has to. */}
@@ -119,7 +119,7 @@ export default function CandidateLookupItemModal({
         </div>
 
         <div style={{ marginBottom: 14 }}>
-          <div style={{ fontSize: 12, color: 'var(--text-muted)', marginBottom: 5 }}>{t('lookups.colorField')}</div>
+          <PageSubtitle as="div" style={{ marginBottom: 5 }}>{t('lookups.colorField')}</PageSubtitle>
           <ColorSwatch color={modal.color} onChange={(c: string) => setModal(m => m && ({ ...m, color: c }))} />
         </div>
 
@@ -128,7 +128,7 @@ export default function CandidateLookupItemModal({
             reads identically wherever it later surfaces (row chip, avatar, …). */}
         {supportsIcon && (
           <div style={{ marginBottom: 14 }}>
-            <div style={{ fontSize: 12, color: 'var(--text-muted)', marginBottom: 5 }}>{t('lookups.iconField')}</div>
+            <PageSubtitle as="div" style={{ marginBottom: 5 }}>{t('lookups.iconField')}</PageSubtitle>
             {/* eslint-disable-next-line no-restricted-syntax -- DATA: fallback swatch colour for a lookup row without one stored yet, not UI chrome */}
             <IconPickerControl color={modal.color ?? '#6B7280'}
               icons={GENERIC_LOOKUP_ICON_NAMES} resolve={resolveGenericLookupIcon} value={modal.icon}

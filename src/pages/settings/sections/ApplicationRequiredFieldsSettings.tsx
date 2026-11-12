@@ -29,7 +29,7 @@ import { useFieldInventory } from '@/pages/settings/hooks/useFieldInventory'
 import { useSafePermission } from '@/hooks/useSafePermission'
 import ErrorBanner from '@/components/ui/ErrorBanner'
 import Spinner from '@/components/ui/Spinner'
-import { BodyText } from '@/components/ui/typography'
+import { BodyText, PageSubtitle } from '@/components/ui/typography'
 
 const KEY = 'application_required_fields'
 
@@ -46,9 +46,9 @@ export default function ApplicationRequiredFieldsSettings() {
       <h3 style={{ fontSize: 14, fontWeight: 600, color: 'var(--text)', marginBottom: 4 }}>
         {t('applicationRequiredFields.title')}
       </h3>
-      <p style={{ fontSize: 12, color: 'var(--text-muted)', marginBottom: 14 }}>
+      <PageSubtitle as="p" style={{ marginBottom: 14 }}>
         {t('applicationRequiredFields.subtitle')}
-      </p>
+      </PageSubtitle>
       {/* Four explicit states (§3): loading the inventory, a failed fetch with retry, an (unexpected but honest) empty inventory, and the real list. */}
       {isLoading && <Spinner label={t('common:loading')} />}
       {!isLoading && isError && (

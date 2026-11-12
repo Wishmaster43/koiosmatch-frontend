@@ -27,7 +27,7 @@ import SoftChip from '@/components/ui/SoftChip'
 import CalloutBox from '@/components/ui/CalloutBox'
 import DrawerAddButton from '@/components/drawer/DrawerAddButton'
 import { DefaultToggle } from '@/pages/settings/components/SettingsControls'
-import { PageTitle, SectionTitle, Caption, Mono } from '@/components/ui/typography'
+import { PageTitle, SectionTitle, Caption, Mono, PageSubtitle } from '@/components/ui/typography'
 import WhatsAppConnectionForm from './WhatsAppConnectionForm'
 import type { UseWhatsAppConnectionsResult } from './useWhatsAppConnections'
 import type { WhatsappConnectionRow } from '@/types/whatsapp'
@@ -119,7 +119,7 @@ export default function WhatsAppConnectionsList({
       <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 16, marginBottom: 16 }}>
         <div style={{ minWidth: 0 }}>
           <PageTitle>{t('whatsapp.connectionsTitle')}</PageTitle>
-          <p style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 2 }}>{t('whatsapp.connectionsSubtitle')}</p>
+          <PageSubtitle as="p" style={{ marginTop: 2 }}>{t('whatsapp.connectionsSubtitle')}</PageSubtitle>
         </div>
         {canManage && !formTarget && (
           <DrawerAddButton onClick={() => setFormTarget('create')} label={t('whatsapp.addConnection')} />
@@ -134,7 +134,7 @@ export default function WhatsAppConnectionsList({
       ) : connections.length === 0 && formTarget !== 'create' ? (
         <div style={{ padding: '16px 18px', background: 'var(--hover-bg)', border: '1px solid var(--border)', borderRadius: 12 }}>
           <SectionTitle as="div">{t('whatsapp.noConnections')}</SectionTitle>
-          <div style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 2 }}>{t('whatsapp.noConnectionsDesc')}</div>
+          <PageSubtitle as="div" style={{ marginTop: 2 }}>{t('whatsapp.noConnectionsDesc')}</PageSubtitle>
         </div>
       ) : (
         <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>

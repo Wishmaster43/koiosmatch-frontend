@@ -28,7 +28,7 @@ import PublicUrlsCard from './careerSite/PublicUrlsCard'
 import EmbedOriginsCard from './careerSite/EmbedOriginsCard'
 import BlurSaveField from '../components/BlurSaveField'
 import SubTabBar from '@/components/drawer/SubTabBar'
-import { PageTitle } from '@/components/ui/typography'
+import { PageTitle, PageSubtitle } from '@/components/ui/typography'
 
 // Settings values arrive untyped; anything but a string reads as empty.
 const str = (v: unknown) => (typeof v === 'string' ? v : '')
@@ -63,7 +63,7 @@ export default function CareerSiteSettings() {
   return (
     <div style={{ maxWidth: 640 }}>
       <PageTitle>{t('careerSite.title')}</PageTitle>
-      <p style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 2, marginBottom: 16 }}>{t('careerSite.subtitle')}</p>
+      <PageSubtitle as="p" style={{ marginTop: 2, marginBottom: 16 }}>{t('careerSite.subtitle')}</PageSubtitle>
 
       <SubTabBar tabs={tabs} active={activeTab} onChange={id => setActiveTab(id as CareerSiteTab)} />
 

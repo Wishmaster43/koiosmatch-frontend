@@ -10,7 +10,7 @@ import { useApps, AVAILABLE_APPS } from '@/context/AppsContext'
 import { canAccessPage } from '@/lib/access'
 import Toggle from '@/components/ui/Toggle'
 import CalloutBox from '@/components/ui/CalloutBox'
-import { Caption } from '@/components/ui/typography'
+import { Caption, PageSubtitle } from '@/components/ui/typography'
 import SubTabBar from '@/components/drawer/SubTabBar'
 import { readableOn } from '@/hooks/useTenantTheme'
 import { useQueryClient } from '@tanstack/react-query'
@@ -162,7 +162,7 @@ export default function AppsSettings() {
                   )}
                 </div>
                 {/* Every catalogue entry's description lives in i18n (appsCatalog.<id>), the only source (§5). */}
-                <div style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 3 }}>{t(`appsCatalog.${app.id}`)}</div>
+                <PageSubtitle as="div" style={{ marginTop: 3 }}>{t(`appsCatalog.${app.id}`)}</PageSubtitle>
               </div>
               {/* Shared house Toggle (audit finding, 05-08) — replaces the hand-rolled
                   44x24 success-green pill so every on/off control looks the same. */}

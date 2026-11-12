@@ -22,7 +22,7 @@ import { notifyError } from '@/lib/notify'
 import { extractApiError } from '@/lib/extractApiError'
 import SaveButton from '@/components/ui/SaveButton'
 import { fieldInputStyle } from '@/components/forms/fieldMetrics'
-import { PageTitle, Mono, BodyText } from '@/components/ui/typography'
+import { PageTitle, Mono, BodyText, PageSubtitle } from '@/components/ui/typography'
 import { tintBg, tintBorder } from '@/lib/tint'
 import type { User } from '@/types/api'
 
@@ -137,7 +137,7 @@ export default function ProposalSettings() {
   return (
     <div style={{ maxWidth: 720 }}>
       <PageTitle>{t('proposal.title')}</PageTitle>
-      <p style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 2, marginBottom: 16 }}>{t('proposal.subtitle')}</p>
+      <PageSubtitle as="p" style={{ marginTop: 2, marginBottom: 16 }}>{t('proposal.subtitle')}</PageSubtitle>
 
       {/* Honest notice — no fake affordance: Koios never sends this on its own yet. */}
       <div style={{ display: 'flex', gap: 8, alignItems: 'flex-start', padding: '10px 14px', borderRadius: 8, fontSize: 12,

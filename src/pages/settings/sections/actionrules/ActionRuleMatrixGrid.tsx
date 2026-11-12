@@ -7,6 +7,7 @@ import { useTranslation } from 'react-i18next'
 import type { Effect } from './types'
 import { ACTION_I18N_KEY, CONDITION_I18N_KEY, isLockedCell } from './catalogMeta'
 import ActionRuleCell from './ActionRuleCell'
+import { PageSubtitle } from '@/components/ui/typography'
 
 export interface SelectedCell { action: string; condition: string }
 
@@ -34,7 +35,7 @@ export default function ActionRuleMatrixGrid({
     <section style={{ marginBottom: 28 }}>
       {/* Section heading — one grid per axis, per the catalog's own §B/§C split. */}
       <h3 style={{ fontSize: 14, fontWeight: 600, color: 'var(--text)', marginBottom: 2 }}>{title}</h3>
-      <p style={{ fontSize: 12, color: 'var(--text-muted)', marginBottom: 12 }}>{subtitle}</p>
+      <PageSubtitle as="p" style={{ marginBottom: 12 }}>{subtitle}</PageSubtitle>
 
       <div style={{ overflowX: 'auto', border: '1px solid var(--border)', borderRadius: 10 }}>
         {/* `separate` border-collapse is required here — `collapse` breaks the sticky

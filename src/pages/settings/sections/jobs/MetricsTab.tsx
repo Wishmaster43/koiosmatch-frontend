@@ -9,7 +9,7 @@ import { useTranslation } from 'react-i18next'
 import type { TFunction } from 'i18next'
 import { fetchJobMetrics, type JobMetrics, type JobMetricRow } from './jobsApi'
 import { formatDuration } from '@/components/reports/runFormat'
-import { SectionTitle, Caption } from '@/components/ui/typography'
+import { SectionTitle, Caption, PageSubtitle } from '@/components/ui/typography'
 import { JobsRefreshButton, JobsErrorNotice } from './jobsShared'
 import { useVisiblePoll } from '@/hooks/useVisiblePoll'
 
@@ -27,7 +27,7 @@ interface MetricsTableProps {
 
 // One metrics table (jobs or queues) — same column shape either way.
 function MetricsTable({ rows, nameHeader, t }: MetricsTableProps) {
-  if (rows.length === 0) return <p style={{ fontSize: 12, color: 'var(--text-muted)', padding: 8 }}>{t('jobs.metrics.empty')}</p>
+  if (rows.length === 0) return <PageSubtitle as="p" style={{ padding: 8 }}>{t('jobs.metrics.empty')}</PageSubtitle>
 
   return (
     <div style={{ border: '1px solid var(--border)', borderRadius: 10, overflow: 'auto', background: 'var(--surface)' }}>

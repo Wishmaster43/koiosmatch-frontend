@@ -26,7 +26,7 @@ import Button from '@/components/ui/Button'
 import SaveButton from '@/components/ui/SaveButton'
 import Spinner from '@/components/ui/Spinner'
 import DrawerAddButton from '@/components/drawer/DrawerAddButton'
-import { GroupLabel } from '@/components/ui/typography'
+import { GroupLabel, PageSubtitle, tableHeadStyle } from '@/components/ui/typography'
 import {
   IDENTIFIER_VALIDATION_SETTING, SUPPORTED_IDENTIFIER_COUNTRIES,
   identifierExample, parseIdentifierValidationMode,
@@ -36,7 +36,7 @@ import {
 
 // Read-only rules table cell — mono for the format examples (§4: numbers/IDs).
 const cell: CSSProperties = { padding: '6px 10px', fontSize: 12, color: 'var(--text)', textAlign: 'left' }
-const headCell: CSSProperties = { ...cell, fontSize: 11, fontWeight: 600, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.04em' }
+const headCell: CSSProperties = { ...cell, ...tableHeadStyle, textTransform: 'uppercase', letterSpacing: '0.04em' }
 const monoCell: CSSProperties = { ...cell, fontFamily: 'JetBrains Mono, monospace' }
 
 export default function IdentifierValidationSettings() {
@@ -58,7 +58,7 @@ export default function IdentifierValidationSettings() {
   return (
     <div style={{ maxWidth: 720 }}>
       <h3 style={{ fontSize: 14, fontWeight: 600, color: 'var(--text)', marginBottom: 4 }}>{t('identifierValidation.title')}</h3>
-      <p style={{ fontSize: 12, color: 'var(--text-muted)', marginBottom: 14 }}>{t('identifierValidation.subtitle')}</p>
+      <PageSubtitle as="p" style={{ marginBottom: 14 }}>{t('identifierValidation.subtitle')}</PageSubtitle>
 
       {/* The one tenant decision on this screen — searchable picker (§4), never a native select. */}
       <SettingRow label={t('identifierValidation.modeLabel')} description={t('identifierValidation.modeHint')}>
@@ -153,7 +153,7 @@ function IdentifierRuleListEditor() {
   return (
     <div>
       <GroupLabel style={{ marginBottom: 6 }}>{t('identifierValidation.listTitle')}</GroupLabel>
-      <p style={{ fontSize: 12, color: 'var(--text-muted)', marginBottom: 10 }}>{t('identifierValidation.listSubtitle')}</p>
+      <PageSubtitle as="p" style={{ marginBottom: 10 }}>{t('identifierValidation.listSubtitle')}</PageSubtitle>
       <div style={{ border: '1px solid var(--border)', borderRadius: 10, overflowX: 'auto' }}>
         <table style={{ width: '100%', borderCollapse: 'collapse' }}>
           <caption style={{ position: 'absolute', width: 1, height: 1, overflow: 'hidden', clip: 'rect(0 0 0 0)' }}>

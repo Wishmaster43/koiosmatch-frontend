@@ -27,6 +27,7 @@ import { extractApiError } from '@/lib/extractApiError'
 import SettingsLoadBanner from '@/pages/settings/components/SettingsLoadBanner'
 import ErrorBanner from '@/components/ui/ErrorBanner'
 import Spinner from '@/components/ui/Spinner'
+import { PageSubtitle } from '@/components/ui/typography'
 // audit r2-ui-states-3: a failed save must tell the admin, not silently revert (the api client's toast is DEV-only).
 
 const KEY = 'customer_required_fields'
@@ -78,9 +79,9 @@ export default function CustomerPhaseRequiredFieldsMatrix() {
       <SettingsLoadBanner />
       {/* Explains the create/update semantics — an ordinary edit that never changes
           phase is never blocked, however incomplete the record already is otherwise. */}
-      <p style={{ fontSize: 12, color: 'var(--text-muted)', marginBottom: 14 }}>{t('customerRequiredFields.phaseHint')}</p>
+      <PageSubtitle as="p" style={{ marginBottom: 14 }}>{t('customerRequiredFields.phaseHint')}</PageSubtitle>
       {rows.length === 0 ? (
-        <p style={{ fontSize: 12, color: 'var(--text-muted)' }}>{t('customerRequiredFields.empty')}</p>
+        <PageSubtitle as="p">{t('customerRequiredFields.empty')}</PageSubtitle>
       ) : (
         <div style={{ border: '1px solid var(--border)', borderRadius: 10, overflow: 'auto' }}>
           <RequiredFieldsMatrixTable fields={rows} phases={phases.map(p => ({ value: String(p.value), label: p.label }))}

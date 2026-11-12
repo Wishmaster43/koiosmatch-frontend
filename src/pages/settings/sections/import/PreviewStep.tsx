@@ -11,6 +11,7 @@ import type { ImportRunResult } from './importApi'
 import Button from '@/components/ui/Button'
 import Spinner from '@/components/ui/Spinner'
 import CalloutBox from '@/components/ui/CalloutBox'
+import { PageSubtitle } from '@/components/ui/typography'
 
 interface PreviewStepProps {
   result: ImportRunResult
@@ -36,7 +37,7 @@ export default function PreviewStep({ result, runStatus, runError, canImport, on
     <div>
       <div style={{ marginBottom: 16 }}>
         <div style={{ fontSize: 14, fontWeight: 600, color: 'var(--text)' }}>{t('import.preview.title')}</div>
-        <div style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 2 }}>{t('import.preview.subtitle')}</div>
+        <PageSubtitle as="div" style={{ marginTop: 2 }}>{t('import.preview.subtitle')}</PageSubtitle>
       </div>
 
       <ImportResultPanel result={result} wholeTree={wholeTree}

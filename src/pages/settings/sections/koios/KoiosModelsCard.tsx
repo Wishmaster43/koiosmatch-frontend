@@ -27,7 +27,7 @@ import { useAuth } from '@/context/AuthContext'
 import SegmentedControl, { type SegmentedControlOption } from '@/components/ui/SegmentedControl'
 import Button from '@/components/ui/Button'
 import SaveButton from '@/components/ui/SaveButton'
-import { SectionTitle, Caption, Mono } from '@/components/ui/typography'
+import { SectionTitle, Caption, Mono, PageSubtitle } from '@/components/ui/typography'
 import type { TFn } from '@/types/koios'
 
 // Frozen empty lists so a missing payload keeps one stable identity (memo deps).
@@ -166,7 +166,7 @@ export default function KoiosModelsCard({ models, t, onChanged }: KoiosModelsCar
   return (
     <div style={card}>
       <SectionTitle style={{ marginBottom: 4 }}>{t('models.title')}</SectionTitle>
-      <div style={{ fontSize: 12, color: 'var(--text-muted)', marginBottom: 12 }}>{t('models.pickHint')}</div>
+      <PageSubtitle as="div" style={{ marginBottom: 12 }}>{t('models.pickHint')}</PageSubtitle>
 
       {activeUnknown && (
         <div role="status" style={{ fontSize: 12, color: 'var(--color-warning-text)', marginBottom: 8 }}>{t('models.activeUnknown')}</div>

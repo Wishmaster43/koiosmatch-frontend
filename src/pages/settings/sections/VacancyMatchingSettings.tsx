@@ -24,7 +24,7 @@ import { notifyError } from '@/lib/notify'
 import Slider from '@/components/ui/Slider'
 import SaveableSectionHeader from '@/components/ui/SaveableSectionHeader'
 import SelectMenu from '@/components/ui/SelectMenu'
-import { PageTitle, SectionTitle, Mono } from '@/components/ui/typography'
+import { PageTitle, SectionTitle, Mono, PageSubtitle } from '@/components/ui/typography'
 import { useQuery } from '@tanstack/react-query'
 import CatalogSection from './CatalogSection'
 import { SETTINGS_MAX_W_WIDE } from '@/pages/settings/components/settingsMetrics'
@@ -141,7 +141,7 @@ export default function VacancyMatchingSettings() {
 
       {/* Honest load states — a failed GET must never silently show the hardcoded
           defaults as if they were the tenant's saved values. */}
-      {loading && <p style={{ fontSize: 12, color: 'var(--text-muted)' }}>{t('common.loading')}</p>}
+      {loading && <PageSubtitle as="p">{t('common.loading')}</PageSubtitle>}
       {loadError && <p style={{ fontSize: 12, color: 'var(--color-danger-text)' }}>{t('statusList.loadError')}</p>}
 
       <div style={{ marginTop: 18, opacity: loading || loadError ? 0.5 : 1, pointerEvents: loading || loadError ? 'none' : 'auto' }}>
@@ -154,12 +154,12 @@ export default function VacancyMatchingSettings() {
           labels={[t('matching.lenient'), t('matching.balanced'), t('matching.strict')]} ariaLabel={t('matching.title')} />
       </div>
 
-      <p style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 22 }}>{t('matching.perVacancyHint')}</p>
+      <PageSubtitle as="p" style={{ marginTop: 22 }}>{t('matching.perVacancyHint')}</PageSubtitle>
 
       {/* Vacancy leads notification settings — who gets alerted when AI suggests new candidates. */}
       <div style={{ marginTop: 28, paddingTop: 20, borderTop: '1px solid var(--border)', opacity: loading || loadError ? 0.5 : 1, pointerEvents: loading || loadError ? 'none' : 'auto' }}>
         <SectionTitle>{t('matching.leads.title')}</SectionTitle>
-        <p style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 2, marginBottom: 12 }}>{t('matching.leads.subtitle')}</p>
+        <PageSubtitle as="p" style={{ marginTop: 2, marginBottom: 12 }}>{t('matching.leads.subtitle')}</PageSubtitle>
 
         {/* Notification mode picker — owner or team (the searchable single-pick atom, §3A). */}
         <div style={{ marginBottom: 16 }}>

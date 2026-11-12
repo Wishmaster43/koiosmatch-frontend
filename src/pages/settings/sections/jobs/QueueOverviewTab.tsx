@@ -11,7 +11,7 @@ import { Layers, Building2 } from 'lucide-react'
 import StatusPill from '@/components/ui/StatusPill'
 import { formatDuration } from '@/components/reports/runFormat'
 import Button from '@/components/ui/Button'
-import { Mono, SectionTitle, Caption, GroupLabel, monoStyle } from '@/components/ui/typography'
+import { Mono, SectionTitle, Caption, GroupLabel, monoStyle, PageSubtitle } from '@/components/ui/typography'
 import { tintBorder } from '@/lib/tint'
 import { JobsRefreshButton, JobsErrorNotice } from './jobsShared'
 import type { QueueSummary, QueueBucket } from './jobsApi'
@@ -99,8 +99,8 @@ export default function QueueOverviewTab({ summary, phase, onRefresh, onGoToFail
               <Layers size={12} /> {t('jobs.byQueue')}
             </GroupLabel>
             <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-              {phase === 'loading' && byQueue.length === 0 && <p style={{ fontSize: 12, color: 'var(--text-muted)' }}>{t('common.loadingShort')}</p>}
-              {phase === 'ready' && byQueue.length === 0 && <p style={{ fontSize: 12, color: 'var(--text-muted)' }}>{t('jobs.noQueues')}</p>}
+              {phase === 'loading' && byQueue.length === 0 && <PageSubtitle as="p">{t('common.loadingShort')}</PageSubtitle>}
+              {phase === 'ready' && byQueue.length === 0 && <PageSubtitle as="p">{t('jobs.noQueues')}</PageSubtitle>}
               {byQueue.map((b) => <BucketCard key={b.queue} t={t} name={b.queue} bucket={b} />)}
             </div>
           </div>
@@ -110,8 +110,8 @@ export default function QueueOverviewTab({ summary, phase, onRefresh, onGoToFail
               <Building2 size={12} /> {t('jobs.byTenant')}
             </GroupLabel>
             <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-              {phase === 'loading' && byTenant.length === 0 && <p style={{ fontSize: 12, color: 'var(--text-muted)' }}>{t('common.loadingShort')}</p>}
-              {phase === 'ready' && byTenant.length === 0 && <p style={{ fontSize: 12, color: 'var(--text-muted)' }}>{t('jobs.noTenants')}</p>}
+              {phase === 'loading' && byTenant.length === 0 && <PageSubtitle as="p">{t('common.loadingShort')}</PageSubtitle>}
+              {phase === 'ready' && byTenant.length === 0 && <PageSubtitle as="p">{t('jobs.noTenants')}</PageSubtitle>}
               {byTenant.map((b) => <BucketCard key={b.tenant_id} t={t} name={b.tenant_id === 'central' ? t('jobs.centralTenant') : b.tenant_id} bucket={b} />)}
             </div>
           </div>

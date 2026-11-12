@@ -24,7 +24,7 @@ import { loadSettings, saveSettings } from '../lib/settingsApi'
 import { notifyError } from '@/lib/notify'
 import { fieldInputStyle } from '@/components/forms/fieldMetrics'
 import Button from '@/components/ui/Button'
-import { PageTitle, formLabelStyle } from '@/components/ui/typography'
+import { PageTitle, formLabelStyle, PageSubtitle } from '@/components/ui/typography'
 
 const SETTINGS_KEY = 'helloflex_contract_type_map'
 
@@ -103,10 +103,10 @@ export default function HelloflexContractMapSettings() {
   return (
     <div style={{ maxWidth: 640 }}>
       <PageTitle>{t('helloflexContractMap.title')}</PageTitle>
-      <p style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 2, marginBottom: 20 }}>{t('helloflexContractMap.subtitle')}</p>
+      <PageSubtitle as="p" style={{ marginTop: 2, marginBottom: 20 }}>{t('helloflexContractMap.subtitle')}</PageSubtitle>
 
       {candidateTypes.length === 0 ? (
-        <p style={{ fontSize: 12, color: 'var(--text-muted)' }}>{t('helloflexContractMap.empty')}</p>
+        <PageSubtitle as="p">{t('helloflexContractMap.empty')}</PageSubtitle>
       ) : (
         <div style={{ display: 'flex', flexDirection: 'column', gap: 14, marginBottom: 20 }}>
           {candidateTypes.map((ct) => {

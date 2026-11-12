@@ -36,7 +36,7 @@ import SaveButton from '@/components/ui/SaveButton'
 // broke this task's own verification run. One-line fix: import the sibling component.
 import { ColorSwatch } from './SettingsControls'
 import { fieldInputStyle } from '@/components/forms/fieldMetrics'
-import { PageTitle, Caption } from '@/components/ui/typography'
+import { PageTitle, Caption, PageSubtitle } from '@/components/ui/typography'
 
 const CARD = {
   background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 10,
@@ -84,7 +84,7 @@ export function SettingsScaffold({ title, subtitle, form, maxWidth, actions, chi
             passes no title — the host screen already has one; the Save bar still renders. */}
         <div style={{ minWidth: 0 }}>
           {title && <PageTitle>{title}</PageTitle>}
-          {subtitle && <p style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 2 }}>{subtitle}</p>}
+          {subtitle && <PageSubtitle as="p" style={{ marginTop: 2 }}>{subtitle}</PageSubtitle>}
         </div>
         <div className="flex items-center" style={{ gap: 8, flexShrink: 0 }}>
           {actions}

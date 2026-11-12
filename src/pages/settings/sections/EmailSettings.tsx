@@ -23,7 +23,7 @@ import Button from '@/components/ui/Button'
 import SaveButton from '@/components/ui/SaveButton'
 import SegmentedControl from '@/components/ui/SegmentedControl'
 import { fieldInputStyle } from '@/components/forms/fieldMetrics'
-import { PageTitle, Caption } from '@/components/ui/typography'
+import { PageTitle, Caption, PageSubtitle } from '@/components/ui/typography'
 import { useAuth } from '@/context/AuthContext'
 import { useDateFormat } from '@/lib/datetime'
 import { getHashParams, oauthReasonKey, stripOauthParams } from '@/lib/hashQuery'
@@ -272,7 +272,7 @@ export default function EmailSettings({ context = 'klanten' }: EmailSettingsProp
       <div className="flex items-center justify-between" style={{ marginBottom: 20, gap: 16 }}>
         <div style={{ minWidth: 0 }}>
           <PageTitle>{t(`email.context.${context}.title`)}</PageTitle>
-          <p style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 2 }}>{t(`email.context.${context}.subtitle`)}</p>
+          <PageSubtitle as="p" style={{ marginTop: 2 }}>{t(`email.context.${context}.subtitle`)}</PageSubtitle>
         </div>
         <div style={{ display: 'flex', gap: 8, flexShrink: 0 }}>
           <Button variant="secondary" onClick={testConnection} disabled={testing || testSent}>

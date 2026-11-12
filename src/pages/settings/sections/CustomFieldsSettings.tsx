@@ -19,7 +19,7 @@ import SearchSelect from '@/components/ui/SearchSelect'
 import { DragList } from '../components/SettingsControls'
 import { fieldInputStyle } from '@/components/forms/fieldMetrics'
 import Button from '@/components/ui/Button'
-import { Caption, PageTitle } from '@/components/ui/typography'
+import { Caption, PageTitle, tableHeadStyle } from '@/components/ui/typography'
 import EditorRowFooter from '@/components/ui/EditorRowFooter'
 import AddFormFooter from '@/components/ui/AddFormFooter'
 import AddCardTrigger from '@/components/ui/AddCardTrigger'
@@ -92,7 +92,7 @@ const cardStyle = {
 }
 // Canon field style (G33/fieldMetrics) — was its own padding-6/radius-6 copy.
 const inputStyle = fieldInputStyle
-const labelStyle = { fontSize: 11, fontWeight: 600, color: 'var(--text-muted)', display: 'block', marginBottom: 4 }
+const labelStyle = { ...tableHeadStyle, display: 'block', marginBottom: 4 }
 
 // Props: which entity's custom-field set this tab renders (candidate/vacancy/…).
 interface CustomFieldsSettingsProps {

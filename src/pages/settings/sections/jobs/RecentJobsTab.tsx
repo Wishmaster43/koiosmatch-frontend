@@ -14,7 +14,7 @@ import StatusPill from '@/components/ui/StatusPill'
 import { formatDuration } from '@/components/reports/runFormat'
 import { BTN_H } from '@/config/buttonMetrics'
 import SearchSelect from '@/components/ui/SearchSelect'
-import { Caption, Mono } from '@/components/ui/typography'
+import { Caption, Mono, PageSubtitle } from '@/components/ui/typography'
 import { JobsRefreshButton, JobsErrorNotice } from './jobsShared'
 // House numeric shape (DATUM-1): digits only, so no locale is needed here.
 import { hhmmss } from '@/lib/localDate'
@@ -103,7 +103,7 @@ export default function RecentJobsTab() {
       </div>
 
       {phase === 'error' && <JobsErrorNotice label={t('jobs.loadError')} />}
-      {phase === 'ready' && rows.length === 0 && <p style={{ fontSize: 12, color: 'var(--text-muted)', padding: 8 }}>{t('jobs.recent.empty')}</p>}
+      {phase === 'ready' && rows.length === 0 && <PageSubtitle as="p" style={{ padding: 8 }}>{t('jobs.recent.empty')}</PageSubtitle>}
 
       {rows.length > 0 && (
         <div style={{ border: '1px solid var(--border)', borderRadius: 10, overflow: 'auto', background: 'var(--surface)' }}>

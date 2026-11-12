@@ -37,7 +37,7 @@ import type { FilterGroup } from '@/context/RightPanelContext'
 import Button from '@/components/ui/Button'
 import Spinner from '@/components/ui/Spinner'
 import SubTabBar from '@/components/drawer/SubTabBar'
-import { PageTitle } from '@/components/ui/typography'
+import { PageTitle, PageSubtitle } from '@/components/ui/typography'
 import type { BillingUsageResponse } from '@/types/billingUsage'
 import SubscriptionCard from './usage/SubscriptionCard'
 import UsageOverviewSection from './usage/UsageOverviewSection'
@@ -142,7 +142,7 @@ export default function BillingUsageSettings() {
       <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 12, marginBottom: 20 }}>
         <div>
           <PageTitle>{t('billing.usage.title')}</PageTitle>
-          <p style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 2 }}>{t('billing.usage.desc')}</p>
+          <PageSubtitle as="p" style={{ marginTop: 2 }}>{t('billing.usage.desc')}</PageSubtitle>
         </div>
         {/* EXCEL-1 — xlsx export of the current period's usage. */}
         <Button variant="secondary" onClick={handleExport} disabled={exporting}

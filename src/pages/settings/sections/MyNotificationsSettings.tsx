@@ -53,7 +53,7 @@ import Toggle from '@/components/ui/Toggle'
 import { isSupported as isPushSupported, permissionState, isSubscribed, subscribe, unsubscribe } from '@/lib/pushSubscription'
 import { SettingCardList, SettingRow, SkeletonRows } from '../components/SettingsKit'
 import { hasNoEmitterYet } from '../lib/notificationContexts'
-import { PageTitle } from '@/components/ui/typography'
+import { PageTitle, PageSubtitle } from '@/components/ui/typography'
 
 // The API's tri-state per context: null = inherit the tenant default, true/false
 // = an explicit personal override. A distinct type from plain boolean so a caller
@@ -219,7 +219,7 @@ export default function MyNotificationsSettings() {
     <div style={{ maxWidth: 960 }}>
       <div style={{ marginBottom: 20 }}>
         <PageTitle>{t('notifications.my.title')}</PageTitle>
-        <p style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 2 }}>{t('notifications.my.subtitle')}</p>
+        <PageSubtitle as="p" style={{ marginTop: 2 }}>{t('notifications.my.subtitle')}</PageSubtitle>
       </div>
 
       {/* Browser-push toggle (P11-FASE5). Unsupported browser or a denied OS/browser

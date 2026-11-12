@@ -31,7 +31,7 @@ import { useFieldInventory, type FieldInventoryEntity } from '@/pages/settings/h
 import { useSafePermission } from '@/hooks/useSafePermission'
 import ErrorBanner from '@/components/ui/ErrorBanner'
 import Spinner from '@/components/ui/Spinner'
-import { BodyText } from '@/components/ui/typography'
+import { BodyText, PageSubtitle } from '@/components/ui/typography'
 
 type TabId = 'customer' | 'location' | 'department' | 'contact'
 
@@ -69,7 +69,7 @@ export default function CustomerRequiredFieldsSettings() {
   return (
     <div style={{ maxWidth: 760 }}>
       <h3 style={{ fontSize: 14, fontWeight: 600, color: 'var(--text)', marginBottom: 4 }}>{t('customerRequiredFields.title')}</h3>
-      <p style={{ fontSize: 12, color: 'var(--text-muted)', marginBottom: 14 }}>{t('customerRequiredFields.subtitle')}</p>
+      <PageSubtitle as="p" style={{ marginBottom: 14 }}>{t('customerRequiredFields.subtitle')}</PageSubtitle>
 
       <SubTabBar tabs={tabs} active={active} onChange={id => setActive(id as TabId)} />
       <div style={{ marginTop: 14 }}>

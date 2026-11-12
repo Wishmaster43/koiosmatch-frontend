@@ -9,6 +9,7 @@ import { tintBorder } from '@/lib/tint'
 import JobsFilterBar from './JobsFilterBar'
 import JobsTableFrame from './JobsTableFrame'
 import { jobColumns } from './jobColumns'
+import { PageSubtitle } from '@/components/ui/typography'
 
 const STATE_COLOR: Record<string, string> = { pending: 'var(--text-muted)', reserved: 'var(--color-warning)' }
 
@@ -114,7 +115,7 @@ export default function JobsTab() {
           <Button variant="secondary" size="sm" disabled={page <= 1} onClick={() => setPage((p) => p - 1)}>
             {t('jobs.pagination.prev')}
           </Button>
-          <span style={{ fontSize: 12, color: 'var(--text-muted)' }}>{t('jobs.pagination.page', { page: result.page, last: result.lastPage })}</span>
+          <PageSubtitle as="span">{t('jobs.pagination.page', { page: result.page, last: result.lastPage })}</PageSubtitle>
           <Button variant="secondary" size="sm" disabled={page >= result.lastPage} onClick={() => setPage((p) => p + 1)}>
             {t('jobs.pagination.next')}
           </Button>

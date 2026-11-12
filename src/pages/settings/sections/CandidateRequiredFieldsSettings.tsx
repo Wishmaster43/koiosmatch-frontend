@@ -41,7 +41,7 @@ import { useFieldInventory } from '../hooks/useFieldInventory'
 import Button from '@/components/ui/Button'
 import Spinner from '@/components/ui/Spinner'
 import ErrorBanner from '@/components/ui/ErrorBanner'
-import { BodyText } from '@/components/ui/typography'
+import { BodyText, PageSubtitle } from '@/components/ui/typography'
 import { notifyError } from '@/lib/notify'
 import { extractApiError } from '@/lib/extractApiError'
 import SettingsLoadBanner from '../components/SettingsLoadBanner'
@@ -145,7 +145,7 @@ export default function CandidateRequiredFieldsSettings() {
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 14 }}>
         <div>
           <h3 style={{ fontSize: 14, fontWeight: 600, color: 'var(--text)', marginBottom: 4 }}>{t('requiredFields.title')}</h3>
-          <p style={{ fontSize: 12, color: 'var(--text-muted)' }}>{t('requiredFields.subtitle')}</p>
+          <PageSubtitle as="p">{t('requiredFields.subtitle')}</PageSubtitle>
         </div>
         {/* One toggle drives every built-in group at once (v1 scope only —
             CandidateCustomRequiredFields keeps its own open state). The label always

@@ -24,7 +24,7 @@ import { useCustomFields } from '@/lib/useCustomFields'
 import { PermissionToggle } from '@/pages/settings/components/SettingsControls'
 import CollapsibleFieldsBlock from './CollapsibleFieldsBlock'
 import type { PhaseColumn } from './RequiredFieldsGroup'
-import { Caption } from '@/components/ui/typography'
+import { Caption, PageSubtitle } from '@/components/ui/typography'
 
 // Custom-field × phase required matrix; each toggle PATCHes the field definition itself (never the built-in fields setting) since that is what the backend guard actually reads (see file header).
 export default function CandidateCustomRequiredFields({ phases }: { phases: PhaseColumn[] }) {
@@ -71,7 +71,7 @@ export default function CandidateCustomRequiredFields({ phases }: { phases: Phas
       <div style={{ padding: '10px 12px 0' }}>
         {/* Says out loud that these toggles are stored on the field definition — the
             two halves of this screen genuinely save to different places. */}
-        <p style={{ fontSize: 12, color: 'var(--text-muted)', margin: 0 }}>{t('requiredFields.customHint')}</p>
+        <PageSubtitle as="p" style={{ margin: 0 }}>{t('requiredFields.customHint')}</PageSubtitle>
         {error && (
           <p role="alert" style={{ fontSize: 12, color: 'var(--color-danger-text)', margin: '8px 0 0' }}>{error}</p>
         )}
@@ -79,7 +79,7 @@ export default function CandidateCustomRequiredFields({ phases }: { phases: Phas
 
       {/* Four states, explicitly (§3): loading · empty · error (above) · success. */}
       {loading && (
-        <p style={{ fontSize: 12, color: 'var(--text-muted)', padding: '12px' }}>{t('common:loading')}</p>
+        <PageSubtitle as="p" style={{ padding: '12px' }}>{t('common:loading')}</PageSubtitle>
       )}
 
       {!loading && fields.length === 0 && (

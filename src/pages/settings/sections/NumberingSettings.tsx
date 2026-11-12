@@ -19,13 +19,13 @@ import { useAllSettings, saveSettingsKeys, invalidateAllSettingsCache } from '@/
 import { useNumberingEntities, type NumberingEntity } from '@/lib/useNumberingEntities'
 import { notifyError } from '@/lib/notify'
 import { apiErrorMessage } from '@/lib/extractApiError'
-import { PageTitle, Caption, Mono } from '@/components/ui/typography'
+import { PageTitle, Caption, Mono, PageSubtitle, tableHeadStyle } from '@/components/ui/typography'
 
 const cellInput: CSSProperties = {
   height: 32, padding: '0 8px', fontSize: 13, color: 'var(--text)', boxSizing: 'border-box',
   border: '1px solid var(--border)', borderRadius: 6, outline: 'none', fontFamily: 'inherit',
 }
-const th: CSSProperties = { padding: '10px 12px', textAlign: 'left', fontSize: 11, fontWeight: 600, color: 'var(--text-muted)' }
+const th: CSSProperties = { padding: '10px 12px', textAlign: 'left', ...tableHeadStyle }
 
 // The whole tenant settings blob (flat key/value store).
 type SettingsBlob = Record<string, unknown>
@@ -154,7 +154,7 @@ export default function NumberingSettings() {
   return (
     <div style={{ maxWidth: 640 }}>
       <PageTitle as="div" style={{ marginBottom: 4 }}>{t('numbering.title')}</PageTitle>
-      <div style={{ fontSize: 12, color: 'var(--text-muted)', marginBottom: 6 }}>{t('numbering.subtitle')}</div>
+      <PageSubtitle as="div" style={{ marginBottom: 6 }}>{t('numbering.subtitle')}</PageSubtitle>
       {/* The one page hint: changes affect new numbers only, and a series that issued a number
           is locked. Carries FROZEN_HINT_ID so the disabled inputs below describe themselves by it. */}
       <Caption as="div" id={FROZEN_HINT_ID} style={{ marginBottom: 14 }}>{t('numbering.hint')}</Caption>

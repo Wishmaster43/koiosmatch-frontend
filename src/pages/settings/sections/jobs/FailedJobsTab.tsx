@@ -11,7 +11,7 @@ import { formatDT } from '@/components/reports/runFormat'
 import { useConfirm } from '@/hooks/useConfirm'
 import { useFailedJobs } from './useFailedJobs'
 import Button from '@/components/ui/Button'
-import { Mono } from '@/components/ui/typography'
+import { Mono, PageSubtitle } from '@/components/ui/typography'
 import { tintBorder } from '@/lib/tint'
 import { notify } from '@/lib/notify'
 import JobsFilterBar from './JobsFilterBar'
@@ -148,7 +148,7 @@ export default function FailedJobsTab() {
           <Button variant="secondary" disabled={page <= 1} onClick={() => setPage(page - 1)}>
             {t('jobs.pagination.prev')}
           </Button>
-          <span style={{ fontSize: 12, color: 'var(--text-muted)' }}>{t('jobs.pagination.page', { page: result.page, last: result.lastPage })}</span>
+          <PageSubtitle as="span">{t('jobs.pagination.page', { page: result.page, last: result.lastPage })}</PageSubtitle>
           <Button variant="secondary" disabled={page >= result.lastPage} onClick={() => setPage(page + 1)}>
             {t('jobs.pagination.next')}
           </Button>

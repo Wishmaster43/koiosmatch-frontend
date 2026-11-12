@@ -3,6 +3,7 @@
 import type { CSSProperties } from 'react'
 import { useTranslation } from 'react-i18next'
 import SortCaret from './SortCaret'
+import { tableHeadStyle } from './typography'
 import { checkboxCol, expandCol } from './dataTableUtils'
 import type { Column } from './DataTable'
 
@@ -42,9 +43,7 @@ export default function DataTableHead<Row>({
         {expandable && <th style={{ ...expandCol, ...stickyTh }} aria-hidden="true" />}
         {columns.map((col, i) => {
           const active = sort?.key === col.key
-          // eslint-disable-next-line huisstijlLegacy/no-restricted-syntax -- this IS the <th> element's own style object (padding/align/sticky-offset all mixed in), not a text node the Caption atom could wrap (§14 r7 necessity)
-          const baseStyle: CSSProperties = { padding: '8px 10px', textAlign: col.align ?? 'left', fontSize: 11,
-            fontWeight: 600, color: 'var(--text-muted)', whiteSpace: 'nowrap',
+          const baseStyle: CSSProperties = { padding: '8px 10px', textAlign: col.align ?? 'left', ...tableHeadStyle, whiteSpace: 'nowrap',
             ...(col.width ? { minWidth: col.width, width: col.width } : {}),
             ...stickyTh, ...stickyColStyle(i),
             // sticky header + sticky col: bump zIndex so corner cell stays above both axes.

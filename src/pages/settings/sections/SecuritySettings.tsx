@@ -10,7 +10,7 @@ import { ShieldCheck, ArrowLeft, Lock } from 'lucide-react'
 import { useAuth } from '@/context/AuthContext'
 import MfaSetupWizard from '@/components/auth/MfaSetupWizard'
 import RecoveryCodesPanel from '@/components/auth/RecoveryCodesPanel'
-import { SectionTitle } from '@/components/ui/typography'
+import { SectionTitle, PageSubtitle } from '@/components/ui/typography'
 import Button from '@/components/ui/Button'
 import { tintBorder } from '@/lib/tint'
 import { regenerateRecoveryCodes } from '@/lib/mfaApi'
@@ -137,9 +137,9 @@ export default function SecuritySettings() {
       headline={
         <div>
           <SectionTitle style={{ marginBottom: 6 }}>{t('security.newCodesTitle')}</SectionTitle>
-          <p style={{ fontSize: 12, color: 'var(--text-muted)', lineHeight: 1.6 }}>
+          <PageSubtitle as="p" style={{ lineHeight: 1.6 }}>
             {t('security.newCodesDesc')}
-          </p>
+          </PageSubtitle>
         </div>
       } />
   )

@@ -19,7 +19,7 @@ import { DragList } from '../components/SettingsControls'
 import CreatableSelect from '@/components/ui/CreatableSelect'
 import { REPORT_KPI_SCOPE_IDS, REPORT_KPI_FAMILY, resolveReportKpiOrder } from '@/pages/reports/shared'
 import type { ReportKpiScopeId } from '@/pages/reports/shared'
-import { Caption } from '@/components/ui/typography'
+import { Caption, PageSubtitle } from '@/components/ui/typography'
 import ErrorBanner from '@/components/ui/ErrorBanner'
 
 // Scope with a known family (axis or fixed) from the catalog.
@@ -171,20 +171,20 @@ function ReportKpiBlock({ scopeId, catalogData }: { scopeId: ReportKpiScopeId; c
   const items = order.map((key, i) => ({ id: `${key}-${i}`, key, index: i }))
 
   if (selectionLoading) {
-    return <p style={{ fontSize: 12, color: 'var(--text-muted)' }}>{t('reportKpis.loading')}</p>
+    return <PageSubtitle as="p">{t('reportKpis.loading')}</PageSubtitle>
   }
 
   return (
     <div>
       {pinnedFirst && (
-        <p style={{ fontSize: 12, color: 'var(--text-muted)', marginBottom: 8 }}>
+        <PageSubtitle as="p" style={{ marginBottom: 8 }}>
           {t('reportKpis.pinnedFirstNotice', { label: labelFor(pinnedFirst) })}
-        </p>
+        </PageSubtitle>
       )}
       {!hasSpares && (
-        <p style={{ fontSize: 12, color: 'var(--text-muted)', marginBottom: 8 }}>
+        <PageSubtitle as="p" style={{ marginBottom: 8 }}>
           {scopeCatalog.family === 'fixed' ? t('reportKpis.noSpareCards') : t('reportKpis.noSpareAxes')}
-        </p>
+        </PageSubtitle>
       )}
       {fellBack && (
         <p style={{ fontSize: 12, color: 'var(--color-warning-text)', marginBottom: 8 }}>

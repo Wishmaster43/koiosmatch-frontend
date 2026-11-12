@@ -26,6 +26,7 @@ import type { Role, PermissionsByGroup, UpdateRoleBody, UpdatePermissionsBody } 
 import Button from '@/components/ui/Button'
 import { tintBg } from '@/lib/tint'
 import { useEscapeLayer } from '@/hooks/useEscapeLayer'
+import { PageSubtitle } from '@/components/ui/typography'
 
 // True when two permission-name sets differ (used for the dirty check driving
 // the Save button + the SettingsDirtyContext report).
@@ -264,16 +265,16 @@ export function RoleDetail({ role, permissions, iconOptions, onBack, onUpdate }:
       <div style={{ display: 'flex', alignItems: 'center', gap: 20, marginBottom: 22, padding: '12px 16px',
         background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 10 }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-          <span style={{ fontSize: 12, color: 'var(--text-muted)' }}>{t('roles.color')}</span>
+          <PageSubtitle as="span">{t('roles.color')}</PageSubtitle>
           <ColorSwatch color={color} onChange={(c: string) => saveAppearance({ color: c })} />
         </div>
         <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-          <span style={{ fontSize: 12, color: 'var(--text-muted)' }}>{t('roles.icon')}</span>
+          <PageSubtitle as="span">{t('roles.icon')}</PageSubtitle>
           <IconPicker value={iconName} color={color} options={iconOptions} onPick={name => saveAppearance({ icon: name })} />
         </div>
         {/* Start dashboard — couples this role to a dashboard type (same labels as the switcher). */}
         <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-          <span style={{ fontSize: 12, color: 'var(--text-muted)' }}>{t('roles.startDashboard')}</span>
+          <PageSubtitle as="span">{t('roles.startDashboard')}</PageSubtitle>
           {/* Herhaal-audit r4 finding 6: SearchSelect's own default trigger face —
               triggerAriaLabel keeps the accessible name naming what it configures,
               since the adjacent label span is a separate element. */}

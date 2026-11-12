@@ -11,7 +11,7 @@ import { resolveGenericLookupIcon } from './lookupIcons'
 import { useAllSettings, saveSettingsKeys, invalidateAllSettingsCache, getJsonSetting } from '@/lib/settings/useAllSettings'
 import { notifyError } from '@/lib/notify'
 import { extractApiError } from '@/lib/extractApiError'
-import { SectionTitle } from '@/components/ui/typography'
+import { SectionTitle, PageSubtitle } from '@/components/ui/typography'
 import NumberSettingField from '../components/NumberSettingField'
 import SettingsLoadBanner from '../components/SettingsLoadBanner'
 
@@ -79,7 +79,7 @@ function DedupeKeysField() {
   return (
     <div style={{ marginBottom: 16, paddingBottom: 16, borderBottom: '1px solid var(--border)' }}>
       <SectionTitle as="div" style={{ marginBottom: 4 }}>{t('lastContactTypes.dedupeKeysTitle')}</SectionTitle>
-      <div style={{ fontSize: 12, color: 'var(--text-muted)', marginBottom: 8, maxWidth: 460 }}>{t('lastContactTypes.dedupeKeysHint')}</div>
+      <PageSubtitle as="div" style={{ marginBottom: 8, maxWidth: 460 }}>{t('lastContactTypes.dedupeKeysHint')}</PageSubtitle>
       {/* One block per field: the field name ABOVE its own switch (Danny 07-09). */}
       <div style={{ display: 'flex', flexWrap: 'wrap', gap: 'var(--space-6)' }}>
         {DEDUPE_FIELDS.map(field => (

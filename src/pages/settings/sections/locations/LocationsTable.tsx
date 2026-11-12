@@ -21,6 +21,7 @@ import SoftChip from '@/components/ui/SoftChip'
 import ExternalIdCell from '@/components/ui/ExternalIdCell'
 import type { LocationRow } from '../LocationsSettings'
 import type { BranchLinks, LinkSystem } from './useBranchLinks'
+import { tableHeadStyle } from '@/components/ui/typography'
 
 // Props: the container owns data/paging/mutation state, this table is presentational.
 interface LocationsTableProps {
@@ -43,14 +44,12 @@ interface LocationsTableProps {
   linksLoading?: boolean
 }
 
-// NECESSITY: these are shared `<th>`/`<td>` cell styles (not standalone text), spread
-// across every column of this table. Migrating them to the Caption/BodyText atoms
-// would mean restructuring every cell to wrap its content in a nested element — a
-// table-wide layout change unrelated to and riskier than this file's DATUM-1 date
-// fix; left as pre-existing debt (mirrors the documented allowlist in
-// typography.houseStyle.test.js for the same Caption/BodyText pattern elsewhere).
-// eslint-disable-next-line huisstijlLegacy/no-restricted-syntax
-const TH: CSSProperties = { padding: '8px 14px', fontSize: 11, fontWeight: 600, color: 'var(--text-muted)', textAlign: 'left', background: 'var(--hover-bg)', borderBottom: '1px solid var(--border)' }
+// The header identity comes from the shared tableHeadStyle (typography); only the layout is local.
+// NECESSITY (TD below): the body cell style is a shared `<td>` cell style (not standalone text),
+// spread across every column; migrating it to the BodyText atom would mean wrapping every cell's
+// content in a nested element, a table-wide layout change; left as pre-existing debt (mirrors the
+// documented allowlist in typography.houseStyle.test.js for the same pattern elsewhere).
+const TH: CSSProperties = { padding: '8px 14px', ...tableHeadStyle, textAlign: 'left', background: 'var(--hover-bg)', borderBottom: '1px solid var(--border)' }
 // eslint-disable-next-line huisstijlLegacy/no-restricted-syntax
 const TD: CSSProperties = { padding: '12px 14px', fontSize: 13, color: 'var(--text)', borderBottom: '1px solid var(--hover-bg)' }
 

@@ -22,7 +22,7 @@ import { useConfirm } from '@/hooks/useConfirm'
 import { useContractTypes } from '@/lib/useContractTypes'
 import { useFunctions } from '@/lib/useFunctions'
 import { cardStyle, labelStyle, inputStyle, useSettingsListUiState } from './settingsListCardStyles'
-import { Mono } from '@/components/ui/typography'
+import { Mono, PageSubtitle } from '@/components/ui/typography'
 import EditorRowFooter from '@/components/ui/EditorRowFooter'
 import AddFormFooter from '@/components/ui/AddFormFooter'
 import AddCardTrigger from '@/components/ui/AddCardTrigger'
@@ -231,7 +231,7 @@ export default function MatchTemplatesSettings() {
           })}
         </div>
       ) : (
-        <span style={{ fontSize: 12, color: 'var(--text-muted)' }}>{t('matchTemplatesSettings.employmentTypeNone')}</span>
+        <PageSubtitle as="span">{t('matchTemplatesSettings.employmentTypeNone')}</PageSubtitle>
       )}
     </div>
   )

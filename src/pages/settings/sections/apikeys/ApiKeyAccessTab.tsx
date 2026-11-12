@@ -9,6 +9,7 @@ import ScopeEditor from './ScopeEditor'
 import type { ScopeMap } from './ScopeEditor'
 import { useScopeEntityLevels } from './useScopeEntityLevels'
 import SaveButton from '@/components/ui/SaveButton'
+import { PageSubtitle } from '@/components/ui/typography'
 
 interface ApiKeyAccessTabProps {
   scopes?: ScopeMap
@@ -40,7 +41,7 @@ export default function ApiKeyAccessTab({ scopes, onSave }: ApiKeyAccessTabProps
     <div style={{ maxWidth: 680 }}>
       {/* Save bar */}
       <div className="flex items-center justify-between" style={{ marginBottom: 14 }}>
-        <p style={{ fontSize: 12, color: 'var(--text-muted)' }}>{t('apiKeys.access.subtitle')}</p>
+        <PageSubtitle as="p">{t('apiKeys.access.subtitle')}</PageSubtitle>
         <SaveButton onClick={save} disabled={!dirty || saving} saved={saved} saving={saving} />
       </div>
 

@@ -9,7 +9,7 @@ import DataTable, { type Column } from '@/components/ui/DataTable'
 import StatusBadge from '@/components/ui/StatusBadge'
 import { useDateFormat } from '@/lib/datetime'
 import Button from '@/components/ui/Button'
-import { PageTitle } from '@/components/ui/typography'
+import { PageTitle, PageSubtitle } from '@/components/ui/typography'
 
 // hand-written: mirrors WebhookDetail's own WebhookSubscription shape (the spec
 // carries no 2xx schema for GET /webhook-subscriptions).
@@ -68,7 +68,7 @@ export default function WebhookList({ subs, loading, error, onReload, onOpen, on
       <div className="flex items-center justify-between" style={{ marginBottom: 18, gap: 16 }}>
         <div>
           <PageTitle>{t('webhooks.outgoing.title')}</PageTitle>
-          <p style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 2 }}>{t('webhooks.outgoing.subtitle')}</p>
+          <PageSubtitle as="p" style={{ marginTop: 2 }}>{t('webhooks.outgoing.subtitle')}</PageSubtitle>
         </div>
         {/* BTN_H (§4/§9): one explicit height for every text/action button, everywhere. */}
         <Button variant="primary" onClick={onNew}>

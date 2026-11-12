@@ -27,7 +27,7 @@ import LogView from '@/components/ui/LogView'
 import type { LogExportCol } from '@/components/ui/LogView'
 import PaginationBar from '@/components/ui/PaginationBar'
 import Spinner from '@/components/ui/Spinner'
-import { Caption } from '@/components/ui/typography'
+import { Caption, PageSubtitle } from '@/components/ui/typography'
 import { DirectionPill, StatusPill, isInbound } from '@/components/ui/logChips'
 import type { Column } from '@/components/ui/DataTable'
 
@@ -129,7 +129,7 @@ function EmailLogDrawer({ entry, onClose }: { entry: EmailLogEntry; onClose: () 
           <div style={{ display: 'grid', gridTemplateColumns: '110px 1fr', gap: '8px 16px', marginBottom: 16 }}>
             {rows.map(([label, value]) => (
               <div key={label} style={{ display: 'contents' }}>
-                <span style={{ fontSize: 12, color: 'var(--text-muted)' }}>{label}</span>
+                <PageSubtitle as="span">{label}</PageSubtitle>
                 <span style={{ fontSize: 13, color: 'var(--text)' }}>{value}</span>
               </div>
             ))}

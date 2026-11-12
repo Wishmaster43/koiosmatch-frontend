@@ -4,6 +4,7 @@
  * danger/success tinting, mono fonts, multi-line values, and error styling.
  */
 import { ReactNode } from 'react'
+import { PageSubtitle } from '@/components/ui/typography'
 
 interface DetailRowLayoutProps {
   label: string
@@ -40,7 +41,7 @@ export function DiffRow({ label, before, after }: DetailRowLayoutProps) {
   return (
     <div style={{ display: 'grid', gridTemplateColumns: '140px 1fr 1fr', gap: 8,
                   padding: '7px 0', borderBottom: '1px solid var(--hover-bg)', alignItems: 'start' }}>
-      <span style={{ fontSize: 12, color: 'var(--text-muted)' }}>{label}</span>
+      <PageSubtitle as="span">{label}</PageSubtitle>
       <div style={{ fontSize: 12, background: changed ? 'var(--color-danger-bg)' : 'var(--hover-bg)',
                     borderRadius: 6, padding: '3px 8px', color: changed ? 'var(--color-danger)' : 'var(--text-muted)',
                     wordBreak: 'break-word', overflowWrap: 'anywhere' }}>

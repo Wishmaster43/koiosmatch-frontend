@@ -19,7 +19,7 @@ import { useState } from 'react'
 import type { CSSProperties } from 'react'
 import { useAllSettings, useSettingsLoaded, saveSettingsKeys, invalidateAllSettingsCache, getNumberSetting } from '@/lib/settings/useAllSettings'
 import { notifyError } from '@/lib/notify'
-import { SectionTitle, Caption } from '@/components/ui/typography'
+import { SectionTitle, Caption, PageSubtitle } from '@/components/ui/typography'
 
 export interface NumberSettingFieldProps {
   id: string
@@ -77,7 +77,7 @@ export default function NumberSettingField({
   return (
     <div style={wrapperStyle}>
       <SectionTitle as="div" style={{ marginBottom: 4 }}>{title}</SectionTitle>
-      <div style={{ fontSize: 12, color: 'var(--text-muted)', marginBottom: 8, maxWidth: 460 }}>{hint}</div>
+      <PageSubtitle as="div" style={{ marginBottom: 8, maxWidth: 460 }}>{hint}</PageSubtitle>
       {/* Caption atom (11/400 muted) — the house identity for a field label (§4). */}
       <Caption as="label" htmlFor={id} style={{ display: 'block', marginBottom: 4 }}>
         {label}

@@ -23,7 +23,7 @@ import { LANGUAGES as APP_LANGUAGES } from '@/pages/auth/shared'
 import { languageDisplayName } from '@/lib/languageNames'
 import Button from '@/components/ui/Button'
 import SaveButton from '@/components/ui/SaveButton'
-import { PageTitle } from '@/components/ui/typography'
+import { PageTitle, PageSubtitle } from '@/components/ui/typography'
 import { fieldSelectStyle, fieldInputStyle } from '@/components/forms/fieldMetrics'
 import { postcodePlaceholder } from '@/lib/postcode'
 import CatalogSection from './CatalogSection'
@@ -220,13 +220,13 @@ export default function CompanySettings() {
       <div className="flex items-center justify-between mb-5">
         <div>
           <PageTitle>{t('company.title')}</PageTitle>
-          <p style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 2 }}>{t('company.subtitle')}</p>
+          <PageSubtitle as="p" style={{ marginTop: 2 }}>{t('company.subtitle')}</PageSubtitle>
         </div>
         <SaveButton onClick={save} disabled={saving} saved={saved} saving={saving} />
       </div>
 
       {/* Company name & logo live under Brand — kept in one place to avoid duplicates. */}
-      <p style={{ fontSize: 12, color: 'var(--text-muted)', marginBottom: 12 }}>{t('company.managedUnder')}</p>
+      <PageSubtitle as="p" style={{ marginBottom: 12 }}>{t('company.managedUnder')}</PageSubtitle>
 
       {loading && <p style={{ fontSize: 13, color: 'var(--text-muted)' }}>{t('common.loading')}</p>}
 

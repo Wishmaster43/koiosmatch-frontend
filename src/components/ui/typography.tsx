@@ -4,7 +4,7 @@
  * 159 hand-styled headings, 371 inline-styled paragraphs and 601 caption
  * spans, all re-picking their own fontSize/fontWeight/colour.
  *
- * Four roles cover the app's real scale (§4: header/meta ~11px, body 12-13px,
+ * Six roles cover the app's real scale (§4: header/meta ~11px, body 12-13px,
  * weights 400-500 body / 600-700 titles, colour only via tokens):
  *   PageTitle    15/600  --text        screen & drawer titles
  *   SectionTitle 13/600  --text        card/section headings
@@ -51,12 +51,18 @@ export const captionStyle: CSSProperties = { fontSize: 11, fontWeight: 400, colo
 // eslint-disable-next-line huisstijlLegacy/no-restricted-syntax -- the canonical GroupLabel style identity itself, not a hand-styled copy
 export const groupLabelStyle: CSSProperties = { fontSize: 11, fontWeight: 600, color: 'var(--text-muted)',
   textTransform: 'uppercase', letterSpacing: '0.04em' }
+// The page/section subtitle under a PageTitle: the de-facto 12 px muted role of the settings screens (112 sites).
+export const pageSubtitleStyle: CSSProperties = { fontSize: 12, fontWeight: 400, color: 'var(--text-muted)' }
+// Table-head identity (11/600 muted): Caption plus weight, so DataTableHead and hand-rolled th constants share one source.
+export const tableHeadStyle: CSSProperties = { ...captionStyle, fontWeight: 600 }
 export const formLabelStyle: CSSProperties = { fontSize: 12, fontWeight: 500, color: 'var(--text-muted)' }
 
 export const PageTitle = make(pageTitleStyle, 'h2')
 export const SectionTitle = make(sectionTitleStyle, 'h3')
 export const BodyText = make(bodyTextStyle, 'p')
 export const Caption = make(captionStyle, 'span')
+// 12/400 muted page or section subtitle: the de-facto settings role (136 hand-written sites before this atom).
+export const PageSubtitle = make(pageSubtitleStyle, 'p')
 // Uppercase group label (the 11px/600 tracked heading the settings cards use).
 export const GroupLabel = make(groupLabelStyle, 'div')
 

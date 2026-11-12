@@ -16,7 +16,7 @@ import { AlertTriangle } from 'lucide-react'
 import api, { unwrap } from '@/lib/api'
 import { notifyError } from '@/lib/notify'
 import { runAliveGuarded } from '@/lib/aliveGuard'
-import { PageTitle } from '@/components/ui/typography'
+import { PageTitle, PageSubtitle } from '@/components/ui/typography'
 
 // hand-written: /settings/matching carries no 2xx schema in the generated spec —
 // the field is stripped server-side for callers without billing.view (S-1).
@@ -70,7 +70,7 @@ export default function MatchRatesSettings() {
   return (
     <div style={{ maxWidth: 560 }}>
       <PageTitle>{t('matchRates.title')}</PageTitle>
-      <p style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 2 }}>{t('matchRates.subtitle')}</p>
+      <PageSubtitle as="p" style={{ marginTop: 2 }}>{t('matchRates.subtitle')}</PageSubtitle>
       {loading ? (
         <p style={{ fontSize: 13, color: 'var(--text-muted)', marginTop: 14 }}>{t('common.loadingShort')}</p>
       ) : loadError ? (

@@ -8,12 +8,12 @@
    Tile itself is the shared StatTile atom since klus c (Tile-unificatie). */
 import type { CSSProperties, ReactNode } from 'react'
 import StatTile from '@/components/ui/StatTile'
+import { tableHeadStyle } from '@/components/ui/typography'
 export const card: CSSProperties = { border: '1px solid var(--border)', borderRadius: 10, padding: 16, marginBottom: 14, background: 'var(--surface)' }
 // HUISSTIJL-1: the card TITLE is the shared SectionTitle atom (13/600), not a
 // local re-declaration — consumers render <SectionTitle style={{ marginBottom: 4 }}>.
 export const sub: CSSProperties = { fontSize: 12, color: 'var(--text-muted)', marginBottom: 12 }
-// eslint-disable-next-line huisstijlLegacy/no-restricted-syntax -- th cell style OBJECT for the usage tables, not running text; the Caption/GroupLabel atoms are text components and cannot style a <th>
-export const th: CSSProperties = { textAlign: 'left', fontSize: 11, fontWeight: 600, color: 'var(--text-muted)', padding: '6px 8px', borderBottom: '1px solid var(--border)' }
+export const th: CSSProperties = { textAlign: 'left', ...tableHeadStyle, padding: '6px 8px', borderBottom: '1px solid var(--border)' }
 export const td: CSSProperties = { fontSize: 12, color: 'var(--text)', padding: '8px', borderBottom: '1px solid var(--border)' }
 export const numCell: CSSProperties = { ...td, fontFamily: 'monospace', textAlign: 'right' }
 export const notice: CSSProperties = { fontSize: 13, color: 'var(--text-muted)' }

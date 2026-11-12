@@ -21,7 +21,7 @@ import CatalogSection from './CatalogSection'
 import SubTabBar, { type SubTab } from '@/components/drawer/SubTabBar'
 import Button from '@/components/ui/Button'
 import SoftChip from '@/components/ui/SoftChip'
-import { BodyText, Caption, GroupLabel, Mono } from '@/components/ui/typography'
+import { BodyText, Caption, GroupLabel, Mono, PageSubtitle } from '@/components/ui/typography'
 
 // One phone number under a connection (GET /whatsapp/{id}'s phone_numbers).
 // `active` (WhatsappPhoneNumber::$casts) turns false when a WABA switch on the
@@ -250,9 +250,9 @@ export default function WhatsAppSettings() {
                       {p.name ?? p.display_number}
                     </div>
                     {p.display_number && (
-                      <div style={{ fontSize: 12, color: 'var(--text-muted)', fontFamily: 'monospace', marginTop: 1 }}>
+                      <PageSubtitle as="div" style={{ fontFamily: 'monospace', marginTop: 1 }}>
                         {p.display_number}
-                      </div>
+                      </PageSubtitle>
                     )}
                   </div>
                   {/* F2: a WABA switch deactivates every linked number server-side

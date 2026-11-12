@@ -15,6 +15,7 @@ import ImportResultPanel from './ImportResultPanel'
 import { countRemarkRows } from './importRowAttention'
 import type { ImportRunResult } from './importApi'
 import Button from '@/components/ui/Button'
+import { PageSubtitle } from '@/components/ui/typography'
 
 interface ResultStepProps {
   result: ImportRunResult
@@ -46,7 +47,7 @@ export default function ResultStep({ result, onReset, wholeTree = false }: Resul
           : <AlertTriangle size={18} style={{ color: 'var(--color-warning-text)', flexShrink: 0, marginTop: 1 }} aria-hidden="true" />}
         <div>
           <div style={{ fontSize: 14, fontWeight: 600, color: 'var(--text)' }}>{t('import.result.title')}</div>
-          <div style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 2 }}>{subtitle}</div>
+          <PageSubtitle as="div" style={{ marginTop: 2 }}>{subtitle}</PageSubtitle>
         </div>
       </div>
 

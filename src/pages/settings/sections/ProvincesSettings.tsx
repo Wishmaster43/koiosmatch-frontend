@@ -23,7 +23,7 @@ import { getCountryOptions } from '@/lib/countries'
 import { provinceFlagSrc } from '@/lib/provinceFlag'
 import Button from '@/components/ui/Button'
 import SaveButton from '@/components/ui/SaveButton'
-import { PageTitle } from '@/components/ui/typography'
+import { PageTitle, PageSubtitle } from '@/components/ui/typography'
 import FloatingPanel from '@/components/ui/FloatingPanel'
 import ModalFooter from '@/components/ui/ModalFooter'
 import LookupValueMark from './LookupValueMark'
@@ -140,7 +140,7 @@ export default function ProvincesSettings() {
       <div className="flex items-start justify-between" style={{ marginBottom: 20, gap: 16 }}>
         <div style={{ minWidth: 0 }}>
           <PageTitle>{t('provinces.title')}</PageTitle>
-          <p style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 2 }}>{t('provinces.subtitle')}</p>
+          <PageSubtitle as="p" style={{ marginTop: 2 }}>{t('provinces.subtitle')}</PageSubtitle>
         </div>
         <div style={{ display: 'flex', gap: 8, flexShrink: 0 }}>
           {/* SaveButton — the ONE saved-state save action (§4 success token pair). */}
@@ -155,7 +155,7 @@ export default function ProvincesSettings() {
 
       {/* Country picker — the list below always shows THIS country's provinces. */}
       <div style={{ marginBottom: 16 }}>
-        <div style={{ fontSize: 12, color: 'var(--text-muted)', marginBottom: 5 }}>{t('provinces.country')}</div>
+        <PageSubtitle as="div" style={{ marginBottom: 5 }}>{t('provinces.country')}</PageSubtitle>
         {/* DROPDOWN-CLEAR-1: an empty country would fetch /provinces?country= and POST an empty
             country on add; the picker's only legal state is a picked country. */}
         <SearchSelect closeOnToggle clearable={false} width={280}

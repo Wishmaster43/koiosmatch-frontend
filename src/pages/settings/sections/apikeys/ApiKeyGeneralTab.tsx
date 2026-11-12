@@ -15,7 +15,7 @@ import { KEY_TYPES, isValidIpOrCidr } from './constants'
 import SearchSelect from '@/components/ui/SearchSelect'
 import { fieldInputStyle } from '@/components/forms/fieldMetrics'
 import Button from '@/components/ui/Button'
-import { Mono } from '@/components/ui/typography'
+import { Mono, PageSubtitle } from '@/components/ui/typography'
 import type { ApiKey, ApiKeyPatch } from './ApiKeyDetail'
 
 // One field pair row's field description (organisation/description, contact name/email).
@@ -179,7 +179,7 @@ export default function ApiKeyGeneralTab({ apiKey, onSave, onMakePrimary }: ApiK
         <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--text)', marginBottom: 8 }}>{t('apiKeys.allowedIps')}</div>
         <p style={{ fontSize: 11, color: 'var(--text-muted)', marginBottom: 10 }}>{t('apiKeys.allowedIpsHint')}</p>
         <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6, marginBottom: editing ? 10 : 0 }}>
-          {ips.length === 0 && <span style={{ fontSize: 12, color: 'var(--text-muted)' }}>{t('apiKeys.noIps')}</span>}
+          {ips.length === 0 && <PageSubtitle as="span">{t('apiKeys.noIps')}</PageSubtitle>}
           {ips.map((ip) => (
             <Mono key={ip} style={{ display: 'inline-flex', alignItems: 'center', gap: 6, fontSize: 12, padding: '4px 10px', background: 'var(--hover-bg)', border: '1px solid var(--border)', borderRadius: 7, color: 'var(--text)' }}>
               {ip}

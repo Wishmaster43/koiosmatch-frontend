@@ -11,6 +11,7 @@ import StatusListEditor from './StatusListEditor'
 import { resolveGenericLookupIcon } from './lookupIcons'
 import SaveButton from '@/components/ui/SaveButton'
 import Button from '@/components/ui/Button'
+import { PageSubtitle } from '@/components/ui/typography'
 
 // Curated icon subset for job boards — channels are web portals/career listings,
 // so scope the picker to web/portal-ish glyphs instead of the full generic set
@@ -46,13 +47,13 @@ export function VacancyApplicationDefaultsSettings() {
   return (
     <div style={{ maxWidth: 640 }}>
       <h3 style={{ fontSize: 14, fontWeight: 600, color: 'var(--text)', marginBottom: 4 }}>{t('vacancy.appDefaultsTitle')}</h3>
-      <p style={{ fontSize: 12, color: 'var(--text-muted)', marginBottom: 4 }}>{t('vacancy.appDefaultsSubtitle')}</p>
+      <PageSubtitle as="p" style={{ marginBottom: 4 }}>{t('vacancy.appDefaultsSubtitle')}</PageSubtitle>
       {/* Row 36: the channel flags live one screen over — this is where Danny looked
           for them. A real link (§6) wearing the one Button identity (polymorphic href). */}
-      <p style={{ fontSize: 12, color: 'var(--text-muted)', marginBottom: 16, display: 'flex', alignItems: 'center', gap: 6, flexWrap: 'wrap' }}>
+      <PageSubtitle as="p" style={{ marginBottom: 16, display: 'flex', alignItems: 'center', gap: 6, flexWrap: 'wrap' }}>
         {t('vacancy.appDefaultsChannelsLink')}
         <Button variant="ghost" href="#settings/vacancies/vacancy_channels">{t('vacancy.appDefaultsChannelsLinkLabel')}</Button>
-      </p>
+      </PageSubtitle>
       <div style={{ display: 'flex', flexDirection: 'column', gap: 10, marginBottom: 16 }}>
         {APP_FIELDS.map(f => (
           <div key={f} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12 }}>

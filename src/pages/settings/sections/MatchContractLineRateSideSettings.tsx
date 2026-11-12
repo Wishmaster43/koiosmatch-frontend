@@ -23,7 +23,7 @@ import SegmentedControl from '@/components/ui/SegmentedControl'
 import SaveButton from '@/components/ui/SaveButton'
 import { notifyError } from '@/lib/notify'
 import { useAllSettings, getStringSetting, saveSettingsKeys } from '@/lib/settings/useAllSettings'
-import { PageTitle } from '@/components/ui/typography'
+import { PageTitle, PageSubtitle } from '@/components/ui/typography'
 
 const KEY = 'match_contract_line_rate_side'
 const SALE = 'sale'
@@ -80,7 +80,7 @@ export default function MatchContractLineRateSideSettings() {
   return (
     <div style={{ maxWidth: 640 }}>
       <PageTitle>{t('matchContractLineRateSide.title')}</PageTitle>
-      <p style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 2, marginBottom: 14 }}>{t('matchContractLineRateSide.subtitle')}</p>
+      <PageSubtitle as="p" style={{ marginTop: 2, marginBottom: 14 }}>{t('matchContractLineRateSide.subtitle')}</PageSubtitle>
       {/* SETTINGS-INCON-B1b: the chosen side reads as chosen via the §4 "aan/gelukt"
           success pair, same green as the super-admin package picker. */}
       <SegmentedControl ariaLabel={t('matchContractLineRateSide.title')} value={side} onChange={pick} options={options}

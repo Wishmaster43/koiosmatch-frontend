@@ -14,7 +14,7 @@ import api, { unwrap, unwrapList } from '@/lib/api'
 import { withIdempotencyKey } from '@/lib/idempotency'
 import { useConfirm } from '@/hooks/useConfirm'
 import Button from '@/components/ui/Button'
-import { PageTitle, SectionTitle, Caption, Mono } from '@/components/ui/typography'
+import { PageTitle, SectionTitle, Caption, Mono, PageSubtitle } from '@/components/ui/typography'
 import { fieldInputStyle } from '@/components/forms/fieldMetrics'
 import WebhookRequestsPanel from '@/components/webhooks/WebhookRequestsPanel'
 // OneTimeSecretReveal: the shared one-time-secret idiom (DL-02/WFB-06 adoption, ADOPT-A3b item 20).
@@ -160,7 +160,7 @@ export default function IncomingWebhooks() {
   return (
     <div style={{ maxWidth: 700 }}>
       <PageTitle style={{ marginBottom: 4 }}>{t('webhooks.incoming.title')}</PageTitle>
-      <p style={{ fontSize: 12, color: 'var(--text-muted)', marginBottom: 20 }}>{t('webhooks.incoming.subtitle')}</p>
+      <PageSubtitle as="p" style={{ marginBottom: 20 }}>{t('webhooks.incoming.subtitle')}</PageSubtitle>
 
       {/* One-time signing-secret reveal — from create or "Secret vernieuwen" (DL-02/WFB-06) */}
       {reveal && (
@@ -212,7 +212,7 @@ export default function IncomingWebhooks() {
                 ) : (
                   <div style={{ minWidth: 0 }}>
                     <SectionTitle as="div">{wh.name}</SectionTitle>
-                    {wh.description && <div style={{ fontSize: 12, color: 'var(--text-muted)' }}>{wh.description}</div>}
+                    {wh.description && <PageSubtitle as="div">{wh.description}</PageSubtitle>}
                   </div>
                 )}
                 <div style={{ display: 'flex', alignItems: 'center', gap: 6, flexShrink: 0 }}>

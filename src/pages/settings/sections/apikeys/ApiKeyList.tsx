@@ -11,7 +11,7 @@ import SoftChip from '@/components/ui/SoftChip'
 import { useDateFormat } from '@/lib/datetime'
 import { shortGuid } from './constants'
 import Button from '@/components/ui/Button'
-import { PageTitle } from '@/components/ui/typography'
+import { PageTitle, PageSubtitle } from '@/components/ui/typography'
 
 // One row of the API-key list — the fields this table renders.
 export interface ApiKeyRow {
@@ -73,9 +73,9 @@ export default function ApiKeyList({ keys, loading, error, onReload, onOpen, onN
       <div className="flex items-center justify-between" style={{ marginBottom: 18, gap: 16 }}>
         <div>
           <PageTitle>{t('apiKeys.title')}</PageTitle>
-          <p style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 2 }}>
+          <PageSubtitle as="p" style={{ marginTop: 2 }}>
             {t('apiKeys.count', { count: keys.length })}
-          </p>
+          </PageSubtitle>
         </div>
         {/* BTN_H (§4/§9): one explicit height for every text/action button, everywhere. */}
         <Button variant="primary" onClick={onNew}>

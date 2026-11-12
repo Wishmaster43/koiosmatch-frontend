@@ -12,7 +12,7 @@ import UsageTotalsRow from './UsageTotalsRow'
 import DataTable, { type Column } from '@/components/ui/DataTable'
 import TableScrollFrame from '@/components/ui/TableScrollFrame'
 import { useNumberFormat } from '@/lib/formatters'
-import { GroupLabel } from '@/components/ui/typography'
+import { GroupLabel, PageSubtitle } from '@/components/ui/typography'
 import { th, td, numCell } from './usageCardStyles'
 // App-wide active locale (DATUM-1/LANE-B) — feeds the per-month row label.
 import { useLocale } from '@/lib/datetime'
@@ -82,7 +82,7 @@ export default function TenantUsageDetailsTable({ history }: TenantUsageDetailsT
         <div>
           <GroupLabel style={{ marginBottom: 6 }}>{t('usage.details.workflowPerModule')}</GroupLabel>
           {perModule.length === 0
-            ? <p style={{ fontSize: 12, color: 'var(--text-muted)', margin: 0 }}>{t('usage.details.noData')}</p>
+            ? <PageSubtitle as="p" style={{ margin: 0 }}>{t('usage.details.noData')}</PageSubtitle>
             : (
               <table style={{ width: '100%', borderCollapse: 'collapse' }}>
                 <thead>
@@ -107,7 +107,7 @@ export default function TenantUsageDetailsTable({ history }: TenantUsageDetailsT
         <div>
           <GroupLabel style={{ marginBottom: 6 }}>{t('usage.col.connectors')}</GroupLabel>
           {connectors.length === 0
-            ? <p style={{ fontSize: 12, color: 'var(--text-muted)', margin: 0 }}>{t('usage.details.noData')}</p>
+            ? <PageSubtitle as="p" style={{ margin: 0 }}>{t('usage.details.noData')}</PageSubtitle>
             : (
               <table style={{ width: '100%', borderCollapse: 'collapse' }}>
                 <tbody>

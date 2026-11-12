@@ -18,7 +18,7 @@ import { loadSettings, saveSettings } from '../lib/settingsApi'
 import { fieldInputStyle } from '@/components/forms/fieldMetrics'
 import Button from '@/components/ui/Button'
 import CopyIconButton from '@/components/ui/CopyIconButton'
-import { PageTitle, formLabelStyle } from '@/components/ui/typography'
+import { PageTitle, formLabelStyle, PageSubtitle } from '@/components/ui/typography'
 import { publicApiUrl } from '@/lib/publicApiUrl'
 import SubTabBar from '@/components/drawer/SubTabBar'
 import { useHashViewParam } from '@/hooks/useHashViewParam'
@@ -153,7 +153,7 @@ function FacebookConnectionForm() {
 
   return (
     <div style={{ maxWidth: 560 }}>
-      <p style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 2, marginBottom: 20 }}>{t('facebookLeads.subtitle')}</p>
+      <PageSubtitle as="p" style={{ marginTop: 2, marginBottom: 20 }}>{t('facebookLeads.subtitle')}</PageSubtitle>
 
       <div style={{ display: 'flex', flexDirection: 'column', gap: 14, marginBottom: 20 }}>
         <SecretField id="fb-verify-token" label={t('facebookLeads.verifyToken')} value={verifyToken} onChange={setVerifyToken}

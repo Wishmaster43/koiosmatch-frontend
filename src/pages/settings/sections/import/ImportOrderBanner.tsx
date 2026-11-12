@@ -1,5 +1,6 @@
 import { useTranslation } from 'react-i18next'
 import { ArrowRight } from 'lucide-react'
+import { PageSubtitle } from '@/components/ui/typography'
 
 // Fixed order, independent of the API response — the DEPENDENCY order between these
 // four entities is a business rule, not something the backend's list order implies.
@@ -46,9 +47,9 @@ export default function ImportOrderBanner({ entity, wholeTreeEntity, onSelectEnt
       </div>
       {/* Per-entity hint (which link columns it needs); falls back to the generic
           hint for any future entity the backend adds that isn't in ORDER above. */}
-      <div style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 4 }}>
+      <PageSubtitle as="div" style={{ marginTop: 4 }}>
         {t(`import.order.${entity}Hint`, { defaultValue: t('import.order.hint') })}
-      </div>
+      </PageSubtitle>
 
       {/* The one-file alternative, offered rather than hidden — a user creating a
           brand-new customer should not have to run these four in sequence. */}

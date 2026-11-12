@@ -21,7 +21,7 @@ import Spinner from '@/components/ui/Spinner'
 import Toggle from '@/components/ui/Toggle'
 import SaveButton from '@/components/ui/SaveButton'
 import { useQueryClient } from '@tanstack/react-query'
-import { GroupLabel, Caption } from '@/components/ui/typography'
+import { GroupLabel, Caption, PageSubtitle } from '@/components/ui/typography'
 import PlatformPricingCard from './PlatformPricingCard'
 import BillingBudgetsCard from './BillingBudgetsCard'
 import BillingUsersCard from './BillingUsersCard'
@@ -258,7 +258,7 @@ export default function ModulesSettings() {
                 : AddonIcon ? <AddonIcon size={16} color={savedOn ? 'var(--color-success)' : 'var(--text-muted)'} style={{ flexShrink: 0 }} /> : null}
               <div style={{ flex: 1, minWidth: 0 }}>
                 <div style={{ fontSize: 14, fontWeight: 600, color: 'var(--text)' }}>{t(`modules.addon.${addon.id}`)}</div>
-                <div style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 2 }}>{t(`modules.addonDesc.${addon.id}`)}</div>
+                <PageSubtitle as="div" style={{ marginTop: 2 }}>{t(`modules.addonDesc.${addon.id}`)}</PageSubtitle>
               </div>
               {unsaved && <Caption>{t('modules.unsaved')}</Caption>}
               {/* Shared Toggle (audit finding, §4/§11) replaces the hand-rolled switch +

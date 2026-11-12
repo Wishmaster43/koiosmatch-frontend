@@ -55,6 +55,7 @@ import customerDisplayRaw from '../schemas/customerDisplay'
 const customerDisplay = customerDisplayRaw as Schema
 import { notifyError } from '@/lib/notify'
 import { extractApiError } from '@/lib/extractApiError'
+import { PageSubtitle } from '@/components/ui/typography'
 // audit r2-ui-states-3: a failed save must tell the admin, not silently revert (the api client's toast is DEV-only).
 
 // Build one tab's schema variant: same field definitions (customerDisplay stays the
@@ -151,9 +152,9 @@ function CustomerDisplaySettingsInner() {
             <h3 style={{ fontSize: 14, fontWeight: 600, color: 'var(--text)', marginBottom: 4 }}>
               {t('customerDisplay.tabs.vacancies.title')}
             </h3>
-            <p style={{ fontSize: 12, color: 'var(--text-muted)', marginBottom: 14 }}>
+            <PageSubtitle as="p" style={{ marginBottom: 14 }}>
               {t('customerDisplay.tabs.vacancies.subtitle')}
-            </p>
+            </PageSubtitle>
             <DefaultStatusFilterPicker statuses={vacancyStatuses}
               value={getStringSetting(settings, 'customer_vacancy_default_status_filter')}
               onChange={setDefaultFilter('customer_vacancy_default_status_filter')} />

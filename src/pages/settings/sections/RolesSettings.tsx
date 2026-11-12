@@ -17,7 +17,7 @@ import Button from '@/components/ui/Button'
 import Spinner from '@/components/ui/Spinner'
 import Toggle from '@/components/ui/Toggle'
 import { tintBg, tintBorder } from '@/lib/tint'
-import { PageTitle, SectionTitle, Caption } from '@/components/ui/typography'
+import { PageTitle, SectionTitle, Caption, PageSubtitle } from '@/components/ui/typography'
 import { fieldInputStyle } from '@/components/forms/fieldMetrics'
 import { notifyError } from '@/lib/notify'
 import { extractApiError } from '@/lib/extractApiError'
@@ -159,7 +159,7 @@ export default function RolesSettings() {
       <div className="flex items-center justify-between mb-5">
         <div>
           <PageTitle>{t('roles.title')}</PageTitle>
-          <p style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 2 }}>{t('roles.subtitle')}</p>
+          <PageSubtitle as="p" style={{ marginTop: 2 }}>{t('roles.subtitle')}</PageSubtitle>
         </div>
         {/* Create input and button hidden unless user is super-admin. */}
         {canEdit && (
@@ -205,9 +205,9 @@ export default function RolesSettings() {
               </div>
               <div style={{ flex: 1, minWidth: 0 }}>
                 <div style={{ fontSize: 14, fontWeight: 600, color: 'var(--text)' }}>{role.name}</div>
-                <div style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 2 }}>
+                <PageSubtitle as="div" style={{ marginTop: 2 }}>
                   {t('roles.rightsCount', { count: permCount })} · {t('roles.usersCount', { count: userCount })}
-                </div>
+                </PageSubtitle>
               </div>
               <div style={{ display: 'flex', gap: 8, flexShrink: 0 }}>
                 {/* PRIMAIR-VLAK-1: this row action wore the accent tint pre-migration — the accent action wears the trio, not neutral secondary (Opus-controle klus d). */}

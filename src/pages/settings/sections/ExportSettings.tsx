@@ -24,7 +24,7 @@ import { notifyError, notifySuccess } from '@/lib/notify'
 import { extractApiError } from '@/lib/extractApiError'
 import Button from '@/components/ui/Button'
 import Spinner from '@/components/ui/Spinner'
-import { PageTitle, BodyText, Caption } from '@/components/ui/typography'
+import { PageTitle, BodyText, Caption, PageSubtitle } from '@/components/ui/typography'
 import Toggle from '@/components/ui/Toggle'
 import SubNavButton from '../components/SubNavButton'
 import type { LucideIcon } from 'lucide-react'
@@ -182,7 +182,7 @@ export default function ExportSettings() {
       <div style={{ flex: 1 }}>
         <div style={{ marginBottom: 20 }}>
           <PageTitle>{t('export.title')}</PageTitle>
-          <p style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 2 }}>{t('export.subtitle')}</p>
+          <PageSubtitle as="p" style={{ marginTop: 2 }}>{t('export.subtitle')}</PageSubtitle>
         </div>
 
         <div style={{ background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 12, padding: 24 }}>
@@ -191,7 +191,7 @@ export default function ExportSettings() {
               <Icon size={16} style={{ color: 'var(--text-muted)', flexShrink: 0, marginTop: 2 }} />
               <div style={{ minWidth: 0 }}>
                 <div style={{ fontSize: 14, fontWeight: 600, color: 'var(--text)' }}>{t(`export.entities.${entity.id}.title`)}</div>
-                <div style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 2 }}>{t(`export.entities.${entity.id}.desc`)}</div>
+                <PageSubtitle as="div" style={{ marginTop: 2 }}>{t(`export.entities.${entity.id}.desc`)}</PageSubtitle>
               </div>
             </div>
             {/* FORMATEN (Danny 31-08 "csv en xlsx voor alles"): twin buttons, same gate. */}
