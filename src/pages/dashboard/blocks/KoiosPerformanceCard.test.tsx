@@ -85,4 +85,16 @@ describe('KoiosPerformanceCard', () => {
     await waitFor(() => expect(apiGet).toHaveBeenCalledWith('/ai/koios/performance', expect.anything()))
     expect(screen.queryByText('koiosPerformance.stripTitle')).not.toBeInTheDocument()
   })
+
+  it('renders without crashing when both endpoints answer an empty object', async () => {
+    apiGet.mockResolvedValue({ data: {} })
+    renderCard()
+    await waitFor(() => expect(screen.getByText('koiosForYou.empty')).toBeTruthy())
+    expect(screen.queryByText('koiosForYou.loadError')).toBeNull()
+    // The strip must survive {} too once opened: zero tiles and the no-trend caption.
+    fireEvent.click(await screen.findByRole('button', { name: 'koiosPerformance.expand' }))
+    expect(await screen.findByText('koiosPerformance.completed')).toBeInTheDocument()
+    expect(screen.getAllByText('0').length).toBeGreaterThanOrEqual(3)
+    expect(screen.getByText('koiosPerformance.noTrend')).toBeInTheDocument()
+  })
 })

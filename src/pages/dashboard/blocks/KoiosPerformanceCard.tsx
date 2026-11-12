@@ -25,17 +25,7 @@ import LineChartCard from '@/components/charts/LineChartCard'
 import { GroupLabel, BodyText, Caption, Mono } from '@/components/ui/typography'
 import { initialsOf } from '@/lib/initials'
 import KoiosForYouCard from '../KoiosForYouCard'
-
-// Hand-written shape (§10: no api-generated entry for this route yet).
-interface KoiosPerformanceReport {
-  period: string
-  actions_total: number
-  per_type: Record<string, number>
-  per_source: Record<string, number>
-  executed: { completed: number; failed: number; other: number }
-  top_users: { user_id: string | number; name: string; count: number }[]
-  timeseries: { date: string; count: number }[]
-}
+import { normalizePerformanceReport } from '../koiosForYou/normalizeKoiosReports'
 
 // The compact performance strip under the shared card — one disclosure.
 function PerformanceStrip() {
@@ -46,7 +36,7 @@ function PerformanceStrip() {
   const { data, isError } = useQuery({
     queryKey: ['koios', 'performance'],
     queryFn: async ({ signal }) =>
-      unwrap<KoiosPerformanceReport>(await api.get('/ai/koios/performance', { params: { days: 30 }, signal })),
+      normalizePerformanceReport(unwrap<unknown>(await api.get('/ai/koios/performance', { params: { days: 30 }, signal }))),
   })
 
   // No rights / no data → no strip; the shared card above stays intact (§3:

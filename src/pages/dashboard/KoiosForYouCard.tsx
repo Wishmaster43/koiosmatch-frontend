@@ -41,39 +41,10 @@ import {
   type Category,
   type PeriodPreset,
 } from './koiosForYou/koiosForYouHelpers'
+import { normalizeForYouReport, type NormalizedForYouAction } from './koiosForYou/normalizeKoiosReports'
 
-// One created record referenced by an action row (K-174: `created`), or null
-// when the action created nothing resolvable.
-interface KoiosForYouCreated {
-  entity_type: string
-  entity_id: string | number
-  // Nullable on the wire: the linked record may be deleted after creation
-  // (the backend plucks labels via whereIn — a miss stays null).
-  label: string | null
-}
-
-// One Koios-triggered action row, as returned in the `actions` array (K-174).
-interface KoiosForYouAction {
-  id: string | number
-  type: string
-  source: string
-  executed_at: string | null
-  status: string
-  created: KoiosForYouCreated | null
-}
-
-// The full report shape — hand-written (§10: no api-generated.ts entry for this
-// route yet; type what the spec gives, hand-write the rest).
-interface KoiosForYouReport {
-  from?: string
-  to?: string
-  period: string
-  actions_total: number
-  per_type: Record<string, number>
-  per_source: Record<string, number>
-  actions: KoiosForYouAction[]
-  actions_truncated: boolean
-}
+// The action row type comes from the normalizer, the single source of the report shape.
+type KoiosForYouAction = NormalizedForYouAction
 
 interface KoiosForYouCardProps {
   // Header title override — the management performance face reuses this exact
@@ -117,7 +88,7 @@ export default function KoiosForYouCard({ title, scope, scopeToggle = false, foo
     queryKey: ['koios', 'for-you', from, to, effectiveScope ?? 'all'],
     enabled: customReady,
     queryFn: async ({ signal }) =>
-      unwrap<KoiosForYouReport>(await api.get('/ai/koios/for-you', { params: { from, to, ...(effectiveScope ? { scope: effectiveScope } : {}) }, signal })),
+      normalizeForYouReport(unwrap<unknown>(await api.get('/ai/koios/for-you', { params: { from, to, ...(effectiveScope ? { scope: effectiveScope } : {}) }, signal }))),
   })
 
   // Known action type → translated label; unknown types (a future automation)
