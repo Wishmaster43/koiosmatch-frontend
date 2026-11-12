@@ -143,6 +143,13 @@
     "add": "Añadir rol",
     "remove": "Quitar {{role}}"
   },
+  "lockout": {
+    "lockedUntil": "Bloqueado hasta {{until}}",
+    "unlock": "Desbloquear inicio de sesión",
+    "unlocked": "Inicio de sesión de {{name}} desbloqueado",
+    "unlockFailed": "No se pudo desbloquear el inicio de sesión.",
+    "unlockThrottled": "Demasiados intentos. Inténtalo de nuevo más tarde."
+  },
   "resetMfa": "Restablecer MFA",
   "resetMfaConfirm": "¿Restablecer MFA para {{name}}? El usuario deberá configurar un autenticador nuevamente en su próximo inicio de sesión.",
   "resetMfaDone": "Se ha restablecido el MFA para {{name}}.",

@@ -143,6 +143,13 @@
     "add": "Aggiungi ruolo",
     "remove": "Rimuovi {{role}}"
   },
+  "lockout": {
+    "lockedUntil": "Bloccato fino a {{until}}",
+    "unlock": "Sblocca accesso",
+    "unlocked": "Accesso di {{name}} sbloccato",
+    "unlockFailed": "Impossibile sbloccare l’accesso.",
+    "unlockThrottled": "Troppi tentativi. Riprova più tardi."
+  },
   "resetMfa": "Ripristina MFA",
   "resetMfaConfirm": "Ripristinare l'MFA per {{name}}? L'utente dovrà configurare di nuovo un autenticatore al prossimo accesso.",
   "resetMfaDone": "L'MFA per {{name}} è stato ripristinato.",

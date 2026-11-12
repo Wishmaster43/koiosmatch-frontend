@@ -143,6 +143,13 @@
     "add": "Adicionar função",
     "remove": "Remover {{role}}"
   },
+  "lockout": {
+    "lockedUntil": "Bloqueado até {{until}}",
+    "unlock": "Desbloquear login",
+    "unlocked": "Login de {{name}} desbloqueado",
+    "unlockFailed": "Não foi possível desbloquear o login.",
+    "unlockThrottled": "Demasiadas tentativas. Tente novamente mais tarde."
+  },
   "resetMfa": "Redefinir MFA",
   "resetMfaConfirm": "Redefinir MFA para {{name}}? O usuário precisará configurar um autenticador novamente no próximo login.",
   "resetMfaDone": "MFA para {{name}} foi redefinido.",

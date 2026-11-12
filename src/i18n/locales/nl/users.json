@@ -143,6 +143,13 @@
     "add": "Rol toevoegen",
     "remove": "{{role}} verwijderen"
   },
+  "lockout": {
+    "lockedUntil": "Vergrendeld tot {{until}}",
+    "unlock": "Login ontgrendelen",
+    "unlocked": "Login van {{name}} ontgrendeld",
+    "unlockFailed": "Kon de login niet ontgrendelen.",
+    "unlockThrottled": "Te veel pogingen. Probeer het later opnieuw."
+  },
   "resetMfa": "MFA resetten",
   "resetMfaConfirm": "MFA van {{name}} resetten? De gebruiker moet bij de volgende login opnieuw een authenticator koppelen.",
   "resetMfaDone": "MFA van {{name}} is gereset.",

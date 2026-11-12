@@ -143,6 +143,13 @@
     "add": "Add role",
     "remove": "Remove {{role}}"
   },
+  "lockout": {
+    "lockedUntil": "Locked until {{until}}",
+    "unlock": "Unlock login",
+    "unlocked": "Login of {{name}} unlocked",
+    "unlockFailed": "Could not unlock the login.",
+    "unlockThrottled": "Too many attempts. Please try again later."
+  },
   "resetMfa": "Reset MFA",
   "resetMfaConfirm": "Reset MFA for {{name}}? They will need to set up an authenticator again at their next login.",
   "resetMfaDone": "MFA for {{name}} has been reset.",

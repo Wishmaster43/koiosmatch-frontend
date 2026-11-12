@@ -143,6 +143,13 @@
     "add": "Ajouter un rôle",
     "remove": "Retirer {{role}}"
   },
+  "lockout": {
+    "lockedUntil": "Verrouillé jusqu'au {{until}}",
+    "unlock": "Déverrouiller la connexion",
+    "unlocked": "Connexion de {{name}} déverrouillée",
+    "unlockFailed": "Impossible de déverrouiller la connexion.",
+    "unlockThrottled": "Trop de tentatives. Réessayez plus tard."
+  },
   "resetMfa": "Réinitialiser l'AMF",
   "resetMfaConfirm": "Réinitialiser l'AMF pour {{name}}? L'utilisateur devra configurer à nouveau un authentificateur lors de sa prochaine connexion.",
   "resetMfaDone": "L'AMF pour {{name}} a été réinitialisée.",

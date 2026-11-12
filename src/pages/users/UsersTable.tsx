@@ -9,7 +9,7 @@
  */
 import { useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Pencil, Trash2, UserCog, KeyRound } from 'lucide-react'
+import { Pencil, Trash2, UserCog, KeyRound, LockOpen } from 'lucide-react'
 import Button from '@/components/ui/Button'
 import DataTable from '@/components/ui/DataTable'
 import type { Column } from '@/components/ui/DataTable'
@@ -17,7 +17,8 @@ import SoftChip from '@/components/ui/SoftChip'
 import { useDateFormat } from '@/lib/datetime'
 import { RoleBadge, EditableAvatar, isSuperAdminUser, SUPER_ADMIN_COLOR } from './usersParts'
 import { InvitationIcon } from './InvitationStatus'
-import { isArchivedUser, userDisplayName } from './userRow'
+import { Caption } from '@/components/ui/typography'
+import { isArchivedUser, isLoginLocked, userDisplayName } from './userRow'
 import type { UserRow } from './userRow'
 
 interface UsersTableProps {
@@ -33,13 +34,14 @@ interface UsersTableProps {
   onEditRoles: (user: UserRow) => void
   onDelete: (user: UserRow) => void
   onResetMfa: (user: UserRow) => void
+  onUnlock: (user: UserRow) => void
   onPickColor: (user: UserRow, color: string | null) => void
 }
 
 // Presentational users table; edit/roles/delete/colour actions are all permission-gated by the caller, this component only renders them.
 export default function UsersTable({
   rows, loading, currentUserId, canUpdate, canDelete, canAssignRoles, canResetMfa,
-  onEdit, onEditRoles, onDelete, onResetMfa, onPickColor,
+  onEdit, onEditRoles, onDelete, onResetMfa, onUnlock, onPickColor,
 }: UsersTableProps) {
   const { t } = useTranslation('users')
   const { formatDateTime } = useDateFormat()
@@ -126,8 +128,20 @@ export default function UsersTable({
       // Status — active vs archived (soft-delete stamp), colour never the only signal.
       { key: 'status', header: t('cols.status'), width: 120, sortable: true,
         sortValue: u => (isArchivedUser(u) ? 1 : 0), render: u => (
-          <SoftChip round label={isArchivedUser(u) ? t('status.archived') : t('status.active')}
-            color={isArchivedUser(u) ? 'var(--text-muted)' : 'var(--color-success)'} />
+          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start', gap: 4 }}>
+            <SoftChip round label={isArchivedUser(u) ? t('status.archived') : t('status.active')}
+              color={isArchivedUser(u) ? 'var(--text-muted)' : 'var(--color-success)'} />
+            {/* C-004 lockout: text plus the unlock action, only with users.update. */}
+            {canUpdate && isLoginLocked(u) && (
+              <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                {/* nowrap: the table sizes to content, so the date never breaks across lines (screen check 12-11). */}
+                <Caption style={{ whiteSpace: 'nowrap' }}>{t('lockout.lockedUntil', { until: formatDateTime(u.login_locked_until ?? '') })}</Caption>
+                <Button variant="secondary" iconOnly onClick={() => onUnlock(u)} title={t('lockout.unlock')} aria-label={t('lockout.unlock')}>
+                  <LockOpen size={12} aria-hidden="true" />
+                </Button>
+              </div>
+            )}
+          </div>
         ) },
     ]
 
@@ -164,7 +178,7 @@ export default function UsersTable({
     }
 
     return cols
-  }, [t, formatDateTime, hasLastLogin, currentUserId, canUpdate, canDelete, canAssignRoles, canResetMfa, onEdit, onEditRoles, onDelete, onResetMfa, onPickColor])
+  }, [t, formatDateTime, hasLastLogin, currentUserId, canUpdate, canDelete, canAssignRoles, canResetMfa, onEdit, onEditRoles, onDelete, onResetMfa, onUnlock, onPickColor])
 
   return (
     <DataTable

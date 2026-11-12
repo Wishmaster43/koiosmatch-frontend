@@ -59,7 +59,8 @@ export function useUsersData() {
 
   // List helpers for the create/edit dialogs (server call lives in the modals).
   const addUser    = (u: ManagedUser) => setUsers(prev => [u, ...prev])
-  const updateUser = (u: ManagedUser) => setUsers(prev => prev.map(x => x.id === u.id ? u : x))
+  // Stable identity too: useUnlockLogin (C-004) memoises its handler on it, and UsersTable's column memo rides along.
+  const updateUser = useCallback((u: ManagedUser) => setUsers(prev => prev.map(x => x.id === u.id ? u : x)), [])
   // Drop a soft-deleted user from the list. Stable identity: it is handed to
   // useUserDeletion, which the page memoizes its row callbacks against.
   const removeUser = useCallback((id: string) => setUsers(prev => prev.filter(x => String(x.id) !== id)), [])

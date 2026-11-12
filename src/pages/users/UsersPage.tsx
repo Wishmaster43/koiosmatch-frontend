@@ -26,6 +26,7 @@ import type { UserRow } from './userRow'
 import { useUsersData } from './hooks/useUsersData'
 import { useUserDeletion } from './hooks/useUserDeletion'
 import { useUserMfaReset } from './hooks/useUserMfaReset'
+import { useUnlockLogin } from './hooks/useUnlockLogin'
 import { roleName } from './usersParts'
 import Button from '@/components/ui/Button'
 import { PageTitle } from '@/components/ui/typography'
@@ -51,6 +52,9 @@ export default function UsersPage() {
 
   // Reset MFA enrollment: confirm → API call → toast (no list change).
   const { dialog: mfaDialog, requestReset } = useUserMfaReset()
+
+  // C-004: clear a login lockout; the row drops its lock once the server confirms.
+  const handleUnlock = useUnlockLogin(updateUser)
 
   // UI gating only — mirrors the backend's permission middleware names.
   const can = auth?.hasPermission
@@ -139,7 +143,7 @@ export default function UsersPage() {
         ) : (
           <UsersTable rows={filtered} loading={loading} currentUserId={me?.id ?? null}
             canUpdate={canUpdate} canDelete={canDelete} canAssignRoles={canAssignRoles} canResetMfa={canResetMfa}
-            onEdit={handleEdit} onEditRoles={handleEditRoles} onDelete={handleDelete} onResetMfa={handleResetMfa} onPickColor={handlePickColor} />
+            onEdit={handleEdit} onEditRoles={handleEditRoles} onDelete={handleDelete} onResetMfa={handleResetMfa} onUnlock={handleUnlock} onPickColor={handlePickColor} />
         )}
       </div>
 

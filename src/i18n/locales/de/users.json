@@ -143,6 +143,13 @@
     "add": "Rolle hinzufügen",
     "remove": "{{role}} entfernen"
   },
+  "lockout": {
+    "lockedUntil": "Gesperrt bis {{until}}",
+    "unlock": "Login entsperren",
+    "unlocked": "Login von {{name}} entsperrt",
+    "unlockFailed": "Das Login konnte nicht entsperrt werden.",
+    "unlockThrottled": "Zu viele Versuche. Bitte später erneut versuchen."
+  },
   "resetMfa": "MFA zurücksetzen",
   "resetMfaConfirm": "MFA für {{name}} zurücksetzen? Der Benutzer muss sich beim nächsten Login erneut authentifizieren.",
   "resetMfaDone": "MFA für {{name}} wurde zurückgesetzt.",
