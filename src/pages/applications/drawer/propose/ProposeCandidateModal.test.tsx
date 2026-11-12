@@ -9,6 +9,7 @@ import userEvent from '@testing-library/user-event'
 import { render, screen } from '@testing-library/react'
 import ProposeCandidateModal from './ProposeCandidateModal'
 import type { ApplicationDetail } from '@/types/application'
+import type { ProposeDisabledReason } from './useProposeForm'
 
 vi.mock('react-i18next', () => ({ useTranslation: () => ({ t: (k: string, opts?: Record<string, unknown>) => (opts ? `${k}:${JSON.stringify(opts)}` : k) }) }))
 
@@ -46,7 +47,7 @@ const { formFixture } = vi.hoisted(() => ({
     subject: 'Voorstel Jan de Vries', setSubject: vi.fn(),
     body: '<p>Bericht</p>', setBody: vi.fn(),
     consentConfirmed: false, setConsentConfirmed: vi.fn(),
-    disabledReason: 'noConsent' as const, submitting: false, submit: vi.fn(() => Promise.resolve(true)),
+    disabledReason: 'noConsent' as ProposeDisabledReason, submitting: false, submit: vi.fn(() => Promise.resolve(true)),
     copyMessage: vi.fn(), copied: false,
     shareUrl: null as string | null, copyShareLink: vi.fn(), shareLinkCopied: false,
     // VOORSTEL-AFZENDER-FE-1: sender picker state + the tenant users it lists.
@@ -231,6 +232,25 @@ describe('ProposeCandidateModal · contacts fetch error', () => {
     render(<ProposeCandidateModal application={app()} onClose={vi.fn()} />)
     expect(screen.getByRole('alert')).toHaveTextContent('propose.contactsError')
     expect(screen.queryByText('propose.noContacts')).toBeNull()
+  })
+})
+
+// The disabled-reason caption: a missing pick and a customer without contacts read differently.
+describe('ProposeCandidateModal · disabled reason copy', () => {
+  afterEach(() => { formFixture.disabledReason = 'noConsent' })
+
+  it('asks for a pick when contacts exist but no recipient is chosen', () => {
+    formFixture.disabledReason = 'pickRecipient'
+    render(<ProposeCandidateModal application={app()} onClose={vi.fn()} />)
+    expect(screen.getByText('propose.pickRecipient')).toBeInTheDocument()
+    expect(screen.queryByText('propose.noContacts')).toBeNull()
+  })
+
+  it('says the customer has no contacts only for the noContact reason', () => {
+    formFixture.disabledReason = 'noContact'
+    render(<ProposeCandidateModal application={app()} onClose={vi.fn()} />)
+    expect(screen.getByText('propose.noContacts')).toBeInTheDocument()
+    expect(screen.queryByText('propose.pickRecipient')).toBeNull()
   })
 })
 

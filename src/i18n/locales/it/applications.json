@@ -527,6 +527,7 @@
     "recipientPlaceholder": "Seleziona un referente",
     "recipientMissingEmail": "Questo referente non ha un indirizzo e-mail.",
     "noContacts": "Nessun referente trovato per questo cliente.",
+    "pickRecipient": "Scegli prima un referente.",
 "contactsError": "Impossibile caricare i referenti. Riprova.",
     "documents": "Documenti",
     "cvHouseStyle": "CV con lo stile aziendale",

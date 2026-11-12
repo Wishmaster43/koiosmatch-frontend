@@ -507,6 +507,7 @@
     "recipientPlaceholder": "Ansprechpartner auswählen",
     "recipientMissingEmail": "Dieser Ansprechpartner hat keine E-Mail-Adresse.",
     "noContacts": "Keine Ansprechpartner bei diesem Kunden gefunden.",
+    "pickRecipient": "Wählen Sie zuerst eine Kontaktperson.",
 "contactsError": "Ansprechpartner konnten nicht geladen werden. Bitte erneut versuchen.",
     "documents": "Dokumente",
     "cvHouseStyle": "Lebenslauf im Hausdesign",

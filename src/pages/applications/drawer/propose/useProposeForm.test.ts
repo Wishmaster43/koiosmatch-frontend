@@ -169,6 +169,20 @@ describe('useProposeForm', () => {
     expect(result.current.body).toBe('')
   })
 
+  // Contacts exist but none is chosen yet: the reason asks for a pick, it never claims there are no contacts.
+  it('reports pickRecipient (not noContact) when the customer has contacts but no recipient is chosen', async () => {
+    apiGet.mockImplementation((url: string) => {
+      if (url.startsWith('/customers/')) return Promise.resolve({ data: { contacts: [{ id: 'ct9', name: 'Piet Klaassen', email: 'piet@example.nl' }] } })
+      if (url.startsWith('/candidates/')) return Promise.resolve({ data: { id: 'c1', name: 'Jan de Vries' } })
+      return Promise.resolve({ data: {} })
+    })
+    const noContact = app({ contact: null } as Partial<ApplicationDetail>)
+    const { result } = renderHook(() => useProposeForm(noContact), { wrapper })
+    await waitFor(() => expect(result.current.contactsLoading).toBe(false))
+    await waitFor(() => expect(result.current.candidateLoading).toBe(false))
+    expect(result.current.disabledReason).toBe('pickRecipient')
+  })
+
   it('does not PATCH the phase when application_proposal.sets_phase is off', async () => {
     settingsFixture = { application_proposal: JSON.stringify({ sets_phase: false }) }
     const { result } = renderHook(() => useProposeForm(app()), { wrapper })

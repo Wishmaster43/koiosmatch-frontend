@@ -106,6 +106,7 @@ export default function ProposeCandidateModal({ application: a, onClose, onOpenE
   const disabledText = form.disabledReason === 'loading' ? t('propose.loading')
     : form.disabledReason === 'noCandidate' ? t('candidateDetail.error')
     : form.disabledReason === 'noContact' ? t('propose.noContacts')
+    : form.disabledReason === 'pickRecipient' ? t('propose.pickRecipient')
     : form.disabledReason === 'noConsent' ? t('propose.consentRequired')
     : null
 

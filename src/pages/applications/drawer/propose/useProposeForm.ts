@@ -48,7 +48,7 @@ export interface ProposeConflict {
 // separator when it's absent.
 export interface ProposeContact { id: string; name: string; email: string; phone?: string; function?: string }
 export type CvVariant = 'proposal' | 'full'
-export type ProposeDisabledReason = 'loading' | 'noCandidate' | 'noContact' | 'noConsent' | null
+export type ProposeDisabledReason = 'loading' | 'noCandidate' | 'noContact' | 'pickRecipient' | 'noConsent' | null
 
 // Tenant settings for the propose flow — JSON group 'application_proposal',
 // shared contract with the sibling CV+SETTINGS agent (Settings screen owns writes).
@@ -251,7 +251,7 @@ export function useProposeForm(application: ApplicationDetail) {
   const disabledReason: ProposeDisabledReason =
     (candidateLoading || contactsLoading) ? 'loading'
     : !candidate ? 'noCandidate'
-    : !recipient ? 'noContact'
+    : !recipient ? (contacts.length > 0 ? 'pickRecipient' : 'noContact')
     : !consentConfirmed ? 'noConsent'
     : null
 

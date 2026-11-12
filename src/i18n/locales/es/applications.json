@@ -507,6 +507,7 @@
     "recipientPlaceholder": "Seleccione un contacto",
     "recipientMissingEmail": "Este contacto no tiene dirección de correo electrónico.",
     "noContacts": "No se encontraron contactos para este cliente.",
+    "pickRecipient": "Elige primero una persona de contacto.",
 "contactsError": "No se pudieron cargar los contactos. Inténtalo de nuevo.",
     "documents": "Documentos",
     "cvHouseStyle": "CV con estilo corporativo",
