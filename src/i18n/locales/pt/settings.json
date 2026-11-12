@@ -2294,6 +2294,7 @@
     "costDesc": "Ativar ou desativar apps afeta diretamente a sua fatura. Contacte o seu gestor de conta para os preços.",
     "adminOnly": "Apenas administradores podem ativar ou desativar apps.",
     "active": "Ativo",
+    "unsaved": "Ainda não guardado",
     "monthly": "Mensal",
     "noRights": "Sem permissões",
     "disable": "Desativar",
@@ -2337,6 +2338,7 @@
     "pkgCol": "Pacote",
     "current": "Atual",
     "savedActive": "Guardado e ativo",
+    "unsaved": "Ainda não guardado",
     "activate": "Ativar pacote",
     "changeFromTo": "Alteração de {{from}} para {{to}}",
     "groups": {

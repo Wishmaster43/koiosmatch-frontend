@@ -2294,6 +2294,7 @@
     "costDesc": "L'attivazione o disattivazione delle app influisce direttamente sulla fattura. Contatta il tuo account manager per le tariffe.",
     "adminOnly": "Solo gli admin possono attivare o disattivare le app.",
     "active": "Attivo",
+    "unsaved": "Non ancora salvato",
     "monthly": "Mensile",
     "noRights": "Nessun permesso",
     "disable": "Disattiva",
@@ -2337,6 +2338,7 @@
     "pkgCol": "Pacchetto",
     "current": "Attuale",
     "savedActive": "Salvato e attivo",
+    "unsaved": "Non ancora salvato",
     "activate": "Attiva pacchetto",
     "changeFromTo": "Modifica da {{from}} a {{to}}",
     "groups": {

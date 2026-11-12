@@ -10,6 +10,7 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import userEvent from '@testing-library/user-event'
 import { render, screen, waitFor, fireEvent } from '@testing-library/react'
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import ModulesSettings from './ModulesSettings'
 
 const mockGet = vi.fn()
@@ -22,12 +23,20 @@ vi.mock('@/i18n', () => ({ LOCALE_BY_LANG: { nl: 'nl-NL', en: 'en-GB' } }))
 const mockRefreshUser = vi.fn()
 vi.mock('@/context/AuthContext', () => ({ useAuth: () => ({ activeTenant: { id: 't1' }, refreshUser: mockRefreshUser }) }))
 
-beforeEach(() => { mockGet.mockReset(); mockPut.mockReset(); mockRefreshUser.mockReset() })
+const invalidate = vi.fn()
+// Render inside a QueryClientProvider whose invalidation is observed.
+const renderPage = () => {
+  const qc = new QueryClient()
+  qc.invalidateQueries = ((...a: unknown[]) => { invalidate(...a); return Promise.resolve() }) as never
+  return render(<QueryClientProvider client={qc}><ModulesSettings /></QueryClientProvider>)
+}
+
+beforeEach(() => { mockGet.mockReset(); mockPut.mockReset(); mockRefreshUser.mockReset(); invalidate.mockReset() })
 
 describe('ModulesSettings', () => {
   it('renders the seeded tier as the checked SegmentedControl radio', async () => {
     mockGet.mockResolvedValue({ data: { package: 'pro', addons: ['reports'] } })
-    render(<ModulesSettings />)
+    renderPage()
     // MODULES-SUBTABS-1: the package group sits behind its own sub-tab now.
     await userEvent.click(await screen.findByRole('tab', { name: 'modules.tabs.package' }))
 
@@ -39,7 +48,7 @@ describe('ModulesSettings', () => {
   it('picking a different tier and saving PUTs the new package', async () => {
     mockGet.mockResolvedValue({ data: { package: 'core', addons: [] } })
     mockPut.mockResolvedValue({ data: {} })
-    render(<ModulesSettings />)
+    renderPage()
     // MODULES-SUBTABS-1: the package group sits behind its own sub-tab now.
     await userEvent.click(await screen.findByRole('tab', { name: 'modules.tabs.package' }))
 
@@ -57,7 +66,7 @@ describe('ModulesSettings', () => {
   it('clicking the addon Toggle switch toggles it exactly once, not twice', async () => {
     mockGet.mockResolvedValue({ data: { package: 'core', addons: [] } })
     mockPut.mockResolvedValue({ data: {} })
-    render(<ModulesSettings />)
+    renderPage()
     // MODULES-SUBTABS-1: the package group sits behind its own sub-tab now.
     await userEvent.click(await screen.findByRole('tab', { name: 'modules.tabs.package' }))
 
@@ -73,7 +82,7 @@ describe('ModulesSettings', () => {
   // the five sub-tabs render in order pricing, tiers, budgets, package, users.
   it('renders the users sub-tab after package', async () => {
     mockGet.mockResolvedValue({ data: { package: 'core', addons: [] } })
-    render(<ModulesSettings />)
+    renderPage()
     const tabs = await screen.findAllByRole('tab')
     const labels = tabs.map((tab) => tab.textContent)
     expect(labels).toEqual([
@@ -85,7 +94,7 @@ describe('ModulesSettings', () => {
   // TASK F: the new 'tiers' sub-tab renders the (mocked) BillingTiersCard.
   it('renders BillingTiersCard on the tiers sub-tab', async () => {
     mockGet.mockResolvedValue({ data: { package: 'core', addons: [] } })
-    render(<ModulesSettings />)
+    renderPage()
     await userEvent.click(await screen.findByRole('tab', { name: 'modules.tabs.tiers' }))
     expect(await screen.findByTestId('billing-tiers-card')).toBeInTheDocument()
   })
@@ -95,7 +104,7 @@ describe('ModulesSettings', () => {
   // not a tenant add-on), so exactly four add-on switches remain.
   it('renders the four add-ons and no invoicing add-on (B-28)', async () => {
     mockGet.mockResolvedValue({ data: { package: 'pro', addons: [] } })
-    render(<ModulesSettings />)
+    renderPage()
     await userEvent.click(await screen.findByRole('tab', { name: 'modules.tabs.package' }))
 
     const switches = await screen.findAllByRole('switch')
@@ -106,7 +115,7 @@ describe('ModulesSettings', () => {
   // Legacy package notice: when package is null, display a migration prompt.
   it('renders a legacy package notice when package is null', async () => {
     mockGet.mockResolvedValue({ data: { package: null, addons: [] } })
-    render(<ModulesSettings />)
+    renderPage()
     await userEvent.click(await screen.findByRole('tab', { name: 'modules.tabs.package' }))
 
     expect(await screen.findByText('modules.legacyPackage')).toBeInTheDocument()
@@ -115,10 +124,32 @@ describe('ModulesSettings', () => {
   // No legacy notice when package is a valid tier.
   it('does not render legacy notice for valid packages', async () => {
     mockGet.mockResolvedValue({ data: { package: 'enterprise', addons: ['reports'] } })
-    render(<ModulesSettings />)
+    renderPage()
     await userEvent.click(await screen.findByRole('tab', { name: 'modules.tabs.package' }))
 
     const notices = screen.queryAllByText('modules.legacyPackage')
     expect(notices).toHaveLength(0)
+  })
+
+  // MODULES-SAVE-FEEDBACK-1: pending toggle shows the caption and keeps the saved face; saving flips it.
+  it('shows the unsaved caption until saved, then refreshes user and integrations caches', async () => {
+    mockGet.mockResolvedValue({ data: { package: 'core', addons: [] } })
+    mockPut.mockResolvedValue({ data: {} })
+    renderPage()
+    await userEvent.click(await screen.findByRole('tab', { name: 'modules.tabs.package' }))
+    const sw = await screen.findByRole('switch', { name: 'modules.addon.hf' })
+    const row = sw.closest('div[style*="cursor"]') as HTMLElement
+    expect(screen.queryByText('modules.unsaved')).toBeNull()
+    fireEvent.click(sw)
+    expect(screen.getByText('modules.unsaved')).toBeInTheDocument()
+    expect(row.style.background).toContain('--surface')
+    fireEvent.click(screen.getByText('modules.activate'))
+    await waitFor(() => expect(mockPut).toHaveBeenCalledWith(
+      '/tenant-modules', expect.objectContaining({ tenant_id: 't1', addons: ['hf'] })))
+    await waitFor(() => expect(screen.queryByText('modules.unsaved')).toBeNull())
+    expect(row.style.background).toContain('--color-success-bg')
+    expect(mockRefreshUser).toHaveBeenCalled()
+    expect(invalidate).toHaveBeenCalledWith({ queryKey: ['integrations'] })
+    expect(invalidate).toHaveBeenCalledWith({ queryKey: ['integrations', 'health'] })
   })
 })

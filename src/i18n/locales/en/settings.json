@@ -2294,6 +2294,7 @@
     "costDesc": "Enabling or disabling apps directly affects your invoice. Contact your account manager for pricing.",
     "adminOnly": "Only admins can enable or disable apps.",
     "active": "Active",
+    "unsaved": "Not saved yet",
     "monthly": "Monthly",
     "noRights": "No permission",
     "disable": "Disable",
@@ -2337,6 +2338,7 @@
     "pkgCol": "Package",
     "current": "Current",
     "savedActive": "Saved & active",
+    "unsaved": "Not saved yet",
     "activate": "Activate package",
     "changeFromTo": "Change from {{from}} to {{to}}",
     "groups": {

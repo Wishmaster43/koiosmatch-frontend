@@ -2034,6 +2034,7 @@
     "costDesc": "Das Aktivieren oder Deaktivieren von Apps wirkt sich direkt auf Ihre Rechnung aus. Wenden Sie sich für die Preise an Ihren Account Manager.",
     "adminOnly": "Nur Admins können Apps aktivieren oder deaktivieren.",
     "active": "Aktiv",
+    "unsaved": "Noch nicht gespeichert",
     "monthly": "Monatlich",
     "noRights": "Keine Berechtigung",
     "disable": "Deaktivieren",
@@ -2053,6 +2054,7 @@
     "pkgCol": "Paket",
     "current": "Aktuell",
     "savedActive": "Gespeichert & aktiv",
+    "unsaved": "Noch nicht gespeichert",
     "activate": "Paket aktivieren",
     "changeFromTo": "Änderung von {{from}} zu {{to}}",
     "groups": {

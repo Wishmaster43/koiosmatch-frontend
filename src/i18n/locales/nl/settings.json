@@ -2294,6 +2294,7 @@
     "costDesc": "Het in- of uitschakelen van apps heeft direct invloed op je factuur. Neem contact op met je accountmanager voor de tarieven.",
     "adminOnly": "Alleen admins kunnen apps in- of uitschakelen.",
     "active": "Actief",
+    "unsaved": "Nog niet opgeslagen",
     "monthly": "Maandelijks",
     "noRights": "Geen rechten",
     "disable": "Uitschakelen",
@@ -2337,6 +2338,7 @@
     "pkgCol": "Pakket",
     "current": "Huidig",
     "savedActive": "Opgeslagen & actief",
+    "unsaved": "Nog niet opgeslagen",
     "activate": "Pakket activeren",
     "changeFromTo": "Wijziging van {{from}} naar {{to}}",
     "groups": {

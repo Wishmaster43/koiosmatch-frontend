@@ -17,13 +17,14 @@ vi.mock('@/context/AuthContext', () => ({ useAuth: () => ({ hasPermission: () =>
 vi.mock('@/lib/access', () => ({ canAccessPage: () => true }))
 
 // Real AVAILABLE_APPS ride along; only the enabled-state hook is stubbed.
-const mockSetApps = vi.fn()
+let mockEnabled: string[] = []
+const mockSetApps = vi.fn((next: string[]) => { mockEnabled = next })
 vi.mock('@/context/AppsContext', async (importOriginal) => {
   const actual = await importOriginal() as Record<string, unknown>
-  return { ...actual, useApps: () => ({ enabled: [], setApps: mockSetApps, isAppEnabled: () => false }) }
+  return { ...actual, useApps: () => ({ enabled: mockEnabled, setApps: mockSetApps, isAppEnabled: () => false }) }
 })
 
-beforeEach(() => { mockPut.mockReset(); mockNotifyError.mockReset(); mockSetApps.mockReset() })
+beforeEach(() => { mockPut.mockReset(); mockNotifyError.mockReset(); mockSetApps.mockClear(); mockEnabled = [] })
 
 describe('AppsSettings', () => {
   it("enabling HelloFlex PUTs the backend 'hf' slug, never 'helloflex'", async () => {
@@ -82,5 +83,26 @@ describe('AppsSettings', () => {
 
     toggles.forEach(toggle => fireEvent.click(toggle))
     expect(mockPut).not.toHaveBeenCalled()
+  })
+
+  // MODULES-SAVE-FEEDBACK-1: the chip and green face follow the SAVED state, not the pending toggle.
+  it('shows the unsaved caption without the active chip until Save, then the chip and no caption', async () => {
+    mockPut.mockResolvedValue({})
+    const { rerender } = render(<AppsSettings />)
+    fireEvent.click(screen.getByRole('tab', { name: 'apps.tabBackoffice' }))
+    expect(screen.queryByText('apps.unsaved')).toBeNull()
+    fireEvent.click(screen.getAllByTitle('apps.enable')[0])
+    expect(screen.getAllByText('apps.unsaved')).toHaveLength(1)
+    expect(screen.queryByText('apps.active')).toBeNull()
+
+    fireEvent.click(screen.getByRole('button', { name: /^save$/ }))
+    await waitFor(() => expect(mockPut).toHaveBeenCalledTimes(1))
+    const [url, body] = mockPut.mock.calls[0] as [string, { enabled: string[] }]
+    expect(url).toBe('/settings/apps')
+    expect(body.enabled).toHaveLength(1)
+    await waitFor(() => expect(mockSetApps).toHaveBeenCalledWith(body.enabled))
+    rerender(<AppsSettings />)
+    expect(screen.getAllByText('apps.active')).toHaveLength(1)
+    expect(screen.queryByText('apps.unsaved')).toBeNull()
   })
 })

@@ -20,7 +20,8 @@ import SegmentedControl from '@/components/ui/SegmentedControl'
 import Spinner from '@/components/ui/Spinner'
 import Toggle from '@/components/ui/Toggle'
 import SaveButton from '@/components/ui/SaveButton'
-import { GroupLabel } from '@/components/ui/typography'
+import { useQueryClient } from '@tanstack/react-query'
+import { GroupLabel, Caption } from '@/components/ui/typography'
 import PlatformPricingCard from './PlatformPricingCard'
 import BillingBudgetsCard from './BillingBudgetsCard'
 import BillingUsersCard from './BillingUsersCard'
@@ -73,6 +74,7 @@ const sameSet = (a: string[], b: string[]) => a.length === b.length && [...a].so
 export default function ModulesSettings() {
   const { t } = useTranslation('settings')
   const auth = useAuth()
+  const queryClient = useQueryClient()
   const activeTenant = auth?.activeTenant
   const refreshUser = auth?.refreshUser
   const [pkg,     setPkg]     = useState('core')
@@ -141,7 +143,13 @@ export default function ModulesSettings() {
     try {
       await api.put('/tenant-modules', { tenant_id: activeTenant?.id, package: pkg, addons })
       setSavedAt({ pkg, addons })
+      // Refresh the session and any open Integrations screen (INV-1211-6).
       await refreshUser?.()
+      // The prefix key already covers the health key; both are listed so the intent stays explicit.
+      await Promise.all([
+        queryClient.invalidateQueries({ queryKey: ['integrations'] }),
+        queryClient.invalidateQueries({ queryKey: ['integrations', 'health'] }),
+      ])
       setSavedOk(true); setTimeout(() => setSavedOk(false), 2500)
     } catch { notifyError(t('statusList.saveFailed')) }
     setSaving(false)
@@ -226,7 +234,10 @@ export default function ModulesSettings() {
       </GroupLabel>
       <div style={{ display: 'flex', flexDirection: 'column', gap: 8, marginBottom: 28 }}>
         {ADDONS.map(addon => {
+          // The active face follows the SAVED state; the toggle shows the pending choice.
           const on = addons.includes(addon.id)
+          const savedOn = savedAt.addons.includes(addon.id)
+          const unsaved = on !== savedOn
           const disabled = addon.comingSoon
           const AddonIcon = addon.Icon
           return (
@@ -240,15 +251,16 @@ export default function ModulesSettings() {
                 // is visibly off — so it can only come from the token itself, which
                 // is why the package picker below reads the SAME two tokens instead
                 // of a color-mix approximation.
-                background: on ? 'var(--color-success-bg)' : 'var(--surface)',
-                border: `1px solid ${on ? 'var(--color-success)' : 'var(--border)'}` }}>
+                background: savedOn ? 'var(--color-success-bg)' : 'var(--surface)',
+                border: `1px solid ${savedOn ? 'var(--color-success)' : 'var(--border)'}` }}>
               {addon.image
                 ? <img src={addon.image} alt="" width={18} height={18} style={{ flexShrink: 0, objectFit: 'contain', borderRadius: 4 }} />
-                : AddonIcon ? <AddonIcon size={16} color={on ? 'var(--color-success)' : 'var(--text-muted)'} style={{ flexShrink: 0 }} /> : null}
+                : AddonIcon ? <AddonIcon size={16} color={savedOn ? 'var(--color-success)' : 'var(--text-muted)'} style={{ flexShrink: 0 }} /> : null}
               <div style={{ flex: 1, minWidth: 0 }}>
                 <div style={{ fontSize: 14, fontWeight: 600, color: 'var(--text)' }}>{t(`modules.addon.${addon.id}`)}</div>
                 <div style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 2 }}>{t(`modules.addonDesc.${addon.id}`)}</div>
               </div>
+              {unsaved && <Caption>{t('modules.unsaved')}</Caption>}
               {/* Shared Toggle (audit finding, §4/§11) replaces the hand-rolled switch +
                   hardcoded white thumb — same on/off semantics (toggleAddon). Wrapped with
                   its own stopPropagation so clicking the switch directly does not ALSO fire

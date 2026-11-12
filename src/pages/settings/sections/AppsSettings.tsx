@@ -10,6 +10,7 @@ import { useApps, AVAILABLE_APPS } from '@/context/AppsContext'
 import { canAccessPage } from '@/lib/access'
 import Toggle from '@/components/ui/Toggle'
 import CalloutBox from '@/components/ui/CalloutBox'
+import { Caption } from '@/components/ui/typography'
 import SubTabBar from '@/components/drawer/SubTabBar'
 import { readableOn } from '@/hooks/useTenantTheme'
 
@@ -97,7 +98,10 @@ export default function AppsSettings() {
 
       <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
         {AVAILABLE_APPS.filter(app => app.group === tab).map(app => {
+          // The toggle shows the pending draft; the active face and chip follow the SAVED state only (MODULES-SAVE-FEEDBACK-1).
           const on = draft.includes(app.id)
+          const savedOn = enabled.includes(app.id)
+          const unsaved = on !== savedOn
           const soon = !!app.comingSoon
           // Descriptive labels (verificatie group prose) route through i18n like description already does; brand names fall back to the raw catalogue label.
           const appLabel = t(`appsCatalogLabels.${app.id}`, { defaultValue: app.label })
@@ -105,10 +109,10 @@ export default function AppsSettings() {
             <div key={app.id} style={{
               display: 'flex', alignItems: 'center', gap: 16,
               padding: '16px 18px', borderRadius: 12,
-              border: `1.5px solid ${on ? 'var(--color-success)' : 'var(--border)'}`,
-              background: on ? 'var(--color-success-bg)' : 'var(--surface)',
+              border: `1.5px solid ${savedOn ? 'var(--color-success)' : 'var(--border)'}`,
+              background: savedOn ? 'var(--color-success-bg)' : 'var(--surface)',
               transition: 'all 0.15s',
-              opacity: !canEdit && !on ? 0.6 : 1,
+              opacity: !canEdit && !savedOn ? 0.6 : 1,
             }}>
               <div style={{ flexShrink: 0, width: 44, height: 44, borderRadius: 10, overflow: 'hidden',
                              background: (app.image || app.Mark) ? 'var(--surface)' : app.color,
@@ -129,12 +133,13 @@ export default function AppsSettings() {
               <div style={{ flex: 1, minWidth: 0 }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
                   <span style={{ fontSize: 14, fontWeight: 600, color: 'var(--text)' }}>{appLabel}</span>
-                  {on && (
+                  {savedOn && (
                     <span style={{ fontSize: 10, fontWeight: 600, color: 'var(--color-on-success-bg)',
                                    background: 'var(--color-success-bg)', borderRadius: 999, padding: '1px 7px' }}>
                       {t('apps.active')}
                     </span>
                   )}
+                  {unsaved && <Caption>{t('apps.unsaved')}</Caption>}
                   {soon && (
                     <span style={{ fontSize: 10, fontWeight: 600, color: 'var(--text-muted)',
                                    background: 'var(--hover-bg)', border: '1px solid var(--border)',

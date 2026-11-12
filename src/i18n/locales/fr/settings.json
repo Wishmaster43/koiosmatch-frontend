@@ -2034,6 +2034,7 @@
     "costDesc": "Activer ou désactiver des apps affecte directement votre facture. Contactez votre gestionnaire de compte pour les tarifs.",
     "adminOnly": "Seuls les admins peuvent activer ou désactiver des apps.",
     "active": "Actif",
+    "unsaved": "Pas encore enregistré",
     "monthly": "Mensuel",
     "noRights": "Aucune autorisation",
     "disable": "Désactiver",
@@ -2053,6 +2054,7 @@
     "pkgCol": "Forfait",
     "current": "Actuel",
     "savedActive": "Enregistré & actif",
+    "unsaved": "Pas encore enregistré",
     "activate": "Activer le forfait",
     "changeFromTo": "Changement de {{from}} à {{to}}",
     "groups": {
