@@ -52,7 +52,9 @@ export default function MatchContractSendModal({ match, onClose, onUpdate }: Pro
   // contract type from the CONTRACT FORM (the Contractvorm axis, ContractPayloadBuilder), never
   // from the separate contract_type "soort" axis, so that is the value the summary shows.
   const contractForm = data.contractForm?.label ?? match.contractForm?.label ?? null
-  const functionTitle = data.function_title ?? match.functionTitle ?? null
+  // The job title follows the BE's own fallback chain (ContractPayloadBuilder::requireJobTitle):
+  // the match's title, else the vacancy's, so the summary never warns about a title HelloFlex gets.
+  const functionTitle = data.function_title ?? match.functionTitle ?? match.vacancy ?? null
   const startDate = data.start_date ?? match.startDate ?? null
   const endDate = data.end_date ?? match.endDate ?? null
   const someMissing = !contractForm || !functionTitle || !startDate

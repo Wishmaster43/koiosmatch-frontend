@@ -46,6 +46,14 @@ describe('MatchContractSendModal', () => {
     expect(screen.queryByText(tm('drawer.contractSend.fillOnOverview'))).toBeNull()
   })
 
+  // The job title follows the BE fallback chain: a match without its own title shows the vacancy's.
+  it('falls back to the vacancy title for the function row instead of flagging it missing', () => {
+    detail = { ...detail, function_title: null }
+    renderModal({ vacancy: 'Verpleegkundige N5' })
+    expect(screen.getByText('Verpleegkundige N5')).toBeInTheDocument()
+    expect(screen.queryByText(tm('drawer.contractSend.missing'))).toBeNull()
+  })
+
   it('flags missing required values but keeps the send button enabled', () => {
     detail = { ...detail, start_date: null, function_title: null }
     renderModal({})
