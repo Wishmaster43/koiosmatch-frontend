@@ -7,6 +7,7 @@ import { render, screen, waitFor } from '@testing-library/react'
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import EntityChangelog from './EntityChangelog'
 import api from '@/lib/api'
+import i18n from '@/i18n'
 
 vi.mock('@/lib/api', () => ({
   default: { get: vi.fn() },
@@ -31,7 +32,8 @@ describe('EntityChangelog', () => {
   it('renders the empty state when the payload rows are not an array', async () => {
     vi.mocked(api.get).mockResolvedValue({ data: { data: { unexpected: 'object' } } })
     render(<EntityChangelog subjectType="Location" subjectId="loc-1" />)
-    await waitFor(() => expect(screen.getByText(/geen entries gevonden|no entries/i)).toBeInTheDocument())
+    // KEY-ECHO-TEST-1: the empty state is read through the real i18n instance, never a Dutch literal.
+    await waitFor(() => expect(screen.getByText(i18n.t('audit.noEntries', { ns: 'settings' }))).toBeInTheDocument())
   })
 
   // A failed fetch must render an error, never the same "no entries" state as
@@ -39,8 +41,8 @@ describe('EntityChangelog', () => {
   it('renders an error state, not "no entries", when the fetch fails', async () => {
     vi.mocked(api.get).mockRejectedValue(new Error('network error'))
     render(<EntityChangelog subjectType="Location" subjectId="loc-1" />)
-    await waitFor(() => expect(screen.getByText(/audit log niet beschikbaar|audit log unavailable/i)).toBeInTheDocument())
-    expect(screen.queryByText(/geen entries gevonden|no entries/i)).not.toBeInTheDocument()
+    await waitFor(() => expect(screen.getByText(i18n.t('audit.unavailable', { ns: 'settings' }))).toBeInTheDocument())
+    expect(screen.queryByText(i18n.t('audit.noEntries', { ns: 'settings' }))).not.toBeInTheDocument()
   })
 
   // F1c: an entity with a dedicated activity route passes it via `endpoint` —
