@@ -571,8 +571,6 @@
     "linkSaveFailed": "L’enregistrement de la liaison a échoué.",
     "linksLoadFailed": "Les liaisons n’ont pas pu être chargées.",
     "linkStatus": { "linked": "Lié", "failed": "Liaison échouée", "unlinked": "Non lié" },
-    "helloflexIdPlaceholder": "GUID",
-    "shiftmanagerIdPlaceholder": "ID",
     "colCreated": "Créé le",
     "colActions": "Actions",
     "empty": "Aucun emplacement.",

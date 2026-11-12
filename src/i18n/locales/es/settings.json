@@ -571,8 +571,6 @@
     "linkSaveFailed": "No se pudo guardar el vínculo.",
     "linksLoadFailed": "No se pudieron cargar los vínculos.",
     "linkStatus": { "linked": "Vinculado", "failed": "Vínculo fallido", "unlinked": "Sin vincular" },
-    "helloflexIdPlaceholder": "GUID",
-    "shiftmanagerIdPlaceholder": "ID",
     "colCreated": "Creado el",
     "colActions": "Acciones",
     "empty": "Aún no hay ubicaciones.",

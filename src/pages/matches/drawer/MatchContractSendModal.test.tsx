@@ -43,7 +43,7 @@ describe('MatchContractSendModal', () => {
       expect(screen.getByText(tm(`drawer.contractSend.${key}`))).toBeInTheDocument()
     }
     expect(screen.queryByRole('textbox')).toBeNull()
-    expect(screen.queryByText(tm('drawer.contractSend.fillOnOverview'))).toBeNull()
+    expect(screen.queryByText(tm('drawer.contractSend.missingTitle'))).toBeNull()
   })
 
   // The job title follows the BE fallback chain: a match without its own title shows the vacancy's.
@@ -58,7 +58,11 @@ describe('MatchContractSendModal', () => {
     detail = { ...detail, start_date: null, function_title: null }
     renderModal({})
     expect(screen.getAllByText(tm('drawer.contractSend.missing')).length).toBe(2)
-    expect(screen.getByText(tm('drawer.contractSend.fillOnOverview'))).toBeInTheDocument()
+    expect(screen.getByText(tm('drawer.contractSend.missingTitle'))).toBeInTheDocument()
+    // Each missing value names its own place: the job title on the contract tab, the start date on Overzicht.
+    expect(screen.getByText(i18n.t('drawer.contractSend.fillFunctionTitle', { ns: 'matches', tab: tm('drawer.contract.title') }))).toBeInTheDocument()
+    expect(screen.getByText(i18n.t('drawer.contractSend.fillStartDate', { ns: 'matches', tab: tm('drawer.tabs.overview') }))).toBeInTheDocument()
+    expect(screen.queryByText(tm('drawer.contractSend.fillContractForm'))).toBeNull()
     expect(screen.getByRole('button', { name: tm('drawer.contractSend.submit') })).toBeEnabled()
   })
 

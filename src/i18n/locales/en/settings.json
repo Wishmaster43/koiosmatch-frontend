@@ -593,8 +593,6 @@
     "linkSaveFailed": "Saving the link failed.",
     "linksLoadFailed": "The links could not be loaded.",
     "linkStatus": { "linked": "Linked", "failed": "Link failed", "unlinked": "Not linked" },
-    "helloflexIdPlaceholder": "GUID",
-    "shiftmanagerIdPlaceholder": "ID",
     "colCreated": "Created at",
     "colActions": "Actions",
     "empty": "No locations yet.",

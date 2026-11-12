@@ -593,8 +593,6 @@
     "linkSaveFailed": "Salvataggio del collegamento non riuscito.",
     "linksLoadFailed": "Impossibile caricare i collegamenti.",
     "linkStatus": { "linked": "Collegato", "failed": "Collegamento non riuscito", "unlinked": "Non collegato" },
-    "helloflexIdPlaceholder": "GUID",
-    "shiftmanagerIdPlaceholder": "ID",
     "colCreated": "Creata il",
     "colActions": "Azioni",
     "empty": "Nessuna sede ancora.",

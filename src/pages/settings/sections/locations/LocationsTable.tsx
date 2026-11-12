@@ -81,8 +81,8 @@ export default function LocationsTable({ isLocked, rows, page, totalPages, onPag
 
   // Connector columns as config (literal keys stay greppable): one cell block per visible system.
   const systems: { id: LinkSystem; show: boolean; column: string; placeholder: string }[] = [
-    { id: 'hf', show: showHelloflex, column: t('locations.colHelloflex'), placeholder: t('locations.helloflexIdPlaceholder') },
-    { id: 'sm', show: showShiftmanager, column: t('locations.colShiftmanager'), placeholder: t('locations.shiftmanagerIdPlaceholder') },
+    { id: 'hf', show: showHelloflex, column: t('locations.colHelloflex'), placeholder: t('locations.linkStatus.unlinked') },
+    { id: 'sm', show: showShiftmanager, column: t('locations.colShiftmanager'), placeholder: t('locations.linkStatus.unlinked') },
   ]
 
   return (

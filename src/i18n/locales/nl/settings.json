@@ -593,8 +593,6 @@
     "linkSaveFailed": "Opslaan van de koppeling is mislukt.",
     "linksLoadFailed": "De koppelingen konden niet worden geladen.",
     "linkStatus": { "linked": "Gekoppeld", "failed": "Koppeling mislukt", "unlinked": "Niet gekoppeld" },
-    "helloflexIdPlaceholder": "GUID",
-    "shiftmanagerIdPlaceholder": "ID",
     "colCreated": "Gemaakt op",
     "colActions": "Acties",
     "empty": "Nog geen locaties.",

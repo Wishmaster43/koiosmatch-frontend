@@ -571,8 +571,6 @@
     "linkSaveFailed": "Speichern der Verknüpfung ist fehlgeschlagen.",
     "linksLoadFailed": "Die Verknüpfungen konnten nicht geladen werden.",
     "linkStatus": { "linked": "Verknüpft", "failed": "Verknüpfung fehlgeschlagen", "unlinked": "Nicht verknüpft" },
-    "helloflexIdPlaceholder": "GUID",
-    "shiftmanagerIdPlaceholder": "ID",
     "colCreated": "Erstellt am",
     "colActions": "Aktionen",
     "empty": "Noch keine Standorte.",

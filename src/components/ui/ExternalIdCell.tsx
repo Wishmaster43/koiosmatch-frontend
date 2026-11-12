@@ -8,6 +8,7 @@
 import { useState } from 'react'
 import type { KeyboardEvent } from 'react'
 import { useTranslation } from 'react-i18next'
+import { monoStyle } from '@/components/ui/typography'
 import { Check } from 'lucide-react'
 import SaveButton from './SaveButton'
 import Spinner from './Spinner'
@@ -85,13 +86,21 @@ export default function ExternalIdCell({ value, onSave, canEdit, label, placehol
     else if (e.key === 'Escape') setDraft(null)
   }
 
+  // Edit face: a Mono id field wide enough for a pasted GUID, a copy button once a value is stored,
+  // and the save button only while there is something to save (an untouched row shows no dead control).
   return (
     <div title={title} style={{ display: 'flex', gap: 6, alignItems: 'center' }}>
-      <input maxLength={maxLength} aria-label={label} placeholder={placeholder} value={current} style={fieldInputStyle}
+      <input maxLength={maxLength} aria-label={label} placeholder={placeholder} value={current}
+        style={{ ...fieldInputStyle, ...monoStyle, minWidth: 220 }}
         onChange={(e) => setDraft(e.target.value)} onKeyDown={onKeyDown} />
-      <SaveButton iconOnly aria-label={`${t('save')} ${label}`} size="sm" saved={!dirty && value != null} disabled={!dirty || saving} onClick={() => void save()}>
-        {saving ? <Spinner size={14} /> : <Check size={14} />}
-      </SaveButton>
+      {value != null && !dirty && (
+        <CopyIconButton value={value} label={copyLabel ?? t('referenceNumber.copy')} copiedLabel={t('referenceNumber.copied')} />
+      )}
+      {(dirty || saving) && (
+        <SaveButton iconOnly aria-label={`${t('save')} ${label}`} size="sm" saved={false} disabled={!dirty || saving} onClick={() => void save()}>
+          {saving ? <Spinner size={14} /> : <Check size={14} />}
+        </SaveButton>
+      )}
     </div>
   )
 }

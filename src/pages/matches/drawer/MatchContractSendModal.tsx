@@ -10,6 +10,7 @@ import { FileText } from 'lucide-react'
 import FloatingPanel from '@/components/ui/FloatingPanel'
 import ReasonModalHeader from '@/components/ui/ReasonModalHeader'
 import ErrorBanner from '@/components/ui/ErrorBanner'
+import CalloutBox from '@/components/ui/CalloutBox'
 import Spinner from '@/components/ui/Spinner'
 import { BodyText, Caption } from '@/components/ui/typography'
 import { CANON_LABEL_STYLE } from '@/components/drawer/fieldRowCanon'
@@ -34,7 +35,7 @@ function SummaryRow({ label, value, missing, flagMissing }: { label: string; val
     <div style={{ display: 'flex', alignItems: 'baseline', gap: 10 }}>
       <span style={CANON_LABEL_STYLE}>{label}</span>
       <BodyText style={{ flex: 1, minWidth: 0 }}>
-        {value ?? (flagMissing ? <Caption style={{ fontStyle: 'italic' }}>{missing}</Caption> : '—')}
+        {value ?? (flagMissing ? <Caption style={{ fontStyle: 'italic' }}>{missing}</Caption> : '-')}
       </BodyText>
     </div>
   )
@@ -57,7 +58,13 @@ export default function MatchContractSendModal({ match, onClose, onUpdate }: Pro
   const functionTitle = data.function_title ?? match.functionTitle ?? match.vacancy ?? null
   const startDate = data.start_date ?? match.startDate ?? null
   const endDate = data.end_date ?? match.endDate ?? null
-  const someMissing = !contractForm || !functionTitle || !startDate
+  // Each missing required value names the ONE place it is filled in (the BE refuses without it):
+  // start date on the Overzicht card, job title on the contract tab, contract form in the match pop-up.
+  const missingHints = [
+    !contractForm && t('drawer.contractSend.fillContractForm'),
+    !functionTitle && t('drawer.contractSend.fillFunctionTitle', { tab: t('drawer.contract.title') }),
+    !startDate && t('drawer.contractSend.fillStartDate', { tab: t('drawer.tabs.overview') }),
+  ].filter((h): h is string => typeof h === 'string')
 
   // Sends the stored match (no body); success refreshes the row, failure shows the mapped sentence.
   const submit = async () => {
@@ -92,13 +99,17 @@ export default function MatchContractSendModal({ match, onClose, onUpdate }: Pro
             <SummaryRow label={t('drawer.contractSend.hoursPerWeek')} value={data.hours_per_week != null ? formatNumber(Number(data.hours_per_week)) : null} missing={missing} />
             <SummaryRow label={t('drawer.contractSend.costCenter')} value={data.cost_center} missing={missing} />
             <SummaryRow label={t('drawer.contractSend.purchaseOrderNumber')} value={data.purchase_order_number} missing={missing} />
-            {someMissing && <Caption>{t('drawer.contractSend.fillOnOverview')}</Caption>}
+            {missingHints.length > 0 && (
+              <CalloutBox variant="warning" title={t('drawer.contractSend.missingTitle')}>
+                <ul style={{ margin: 0, paddingLeft: 18 }}>{missingHints.map((h) => <li key={h}>{h}</li>)}</ul>
+              </CalloutBox>
+            )}
           </>
         )}
         {banner && <ErrorBanner>{banner}</ErrorBanner>}
       </div>
       <MatchConfirmFooter onCancel={onClose} cancelLabel={t('common:cancel')} onSubmit={submit}
-        submitLabel={t('drawer.contractSend.submit')} disabled={sending} />
+        submitLabel={t('drawer.contractSend.submit')} disabled={sending || error} />
     </FloatingPanel>
   )
 }

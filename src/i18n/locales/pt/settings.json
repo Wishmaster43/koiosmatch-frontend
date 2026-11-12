@@ -593,8 +593,6 @@
     "linkSaveFailed": "Falha ao guardar a ligação.",
     "linksLoadFailed": "Não foi possível carregar as ligações.",
     "linkStatus": { "linked": "Ligado", "failed": "Ligação falhada", "unlinked": "Não ligado" },
-    "helloflexIdPlaceholder": "GUID",
-    "shiftmanagerIdPlaceholder": "ID",
     "colCreated": "Criado em",
     "colActions": "Ações",
     "empty": "Ainda não há localizações.",
