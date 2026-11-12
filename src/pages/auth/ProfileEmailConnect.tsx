@@ -148,6 +148,7 @@ export default function ProfileEmailConnect() {
               </Button>
             )}
           </div>
+          {info.status_at && <Caption as="div" style={{ marginTop: 6 }}>{t('profile.email.statusAt', { date: formatDateTime(info.status_at) })}</Caption>}
         </CalloutBox>
       )}
 

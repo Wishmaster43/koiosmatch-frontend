@@ -12,9 +12,9 @@ import ProfileEmailConnect from './ProfileEmailConnect'
 import api from '@/lib/api'
 
 vi.mock('react-i18next', () => ({
-  useTranslation: () => ({ t: (key: string, opts?: { provider?: string }) => opts?.provider ? `${key}:${opts.provider}` : key }),
+  useTranslation: () => ({ t: (key: string, opts?: { provider?: string; date?: string }) => opts?.provider ? `${key}:${opts.provider}` : opts?.date ? `${key}:${opts.date}` : key }),
 }))
-vi.mock('@/lib/datetime', () => ({ useDateFormat: () => ({ formatDateTime: (v: string) => `dt(${v})` }) }))
+vi.mock('@/lib/datetime', () => ({ useDateFormat: () => ({ formatDateTime: (v: string) => (v === '2026-10-22T20:00:00Z' ? '22-10-2026 22:00' : `dt(${v})`) }) }))
 vi.mock('@/lib/api', () => ({ default: { get: vi.fn(), post: vi.fn() } }))
 
 describe('ProfileEmailConnect · connected mailbox', () => {
@@ -95,6 +95,21 @@ describe('ProfileEmailConnect · mailbox health', () => {
     expect(api.post).toHaveBeenCalledWith('/profile/email/connect', { provider: 'office' })
   })
 
+  it('tenant_policy shows the last-checked caption with the DD-MM-YYYY HH:mm date, never the ISO string', async () => {
+    vi.mocked(api.get).mockResolvedValueOnce({ data: { status: 'tenant_policy', provider: 'office', status_at: '2026-10-22T20:00:00Z' } })
+    render(<ProfileEmailConnect />)
+    expect(await screen.findByText('profile.email.tenantPolicy')).toBeInTheDocument()
+    expect(screen.getByText('profile.email.statusAt:22-10-2026 22:00')).toBeInTheDocument()
+    expect(screen.queryByText(/2026-10-22T/)).not.toBeInTheDocument()
+  })
+
+  it('tenant_policy without status_at renders no last-checked caption', async () => {
+    vi.mocked(api.get).mockResolvedValueOnce({ data: { status: 'tenant_policy', provider: 'office' } })
+    render(<ProfileEmailConnect />)
+    expect(await screen.findByText('profile.email.tenantPolicy')).toBeInTheDocument()
+    expect(screen.queryByText(/profile\.email\.statusAt/)).not.toBeInTheDocument()
+  })
+
   it('tenant_policy on an SMTP mailbox offers no OAuth button', async () => {
     vi.mocked(api.get).mockResolvedValueOnce({ data: { status: 'tenant_policy', provider: 'smtp' } })
     render(<ProfileEmailConnect />)
@@ -108,7 +123,7 @@ describe('ProfileEmailConnect · needs_reconnect detail (T-006)', () => {
     vi.mocked(api.get).mockResolvedValueOnce({ data: { status: 'needs_reconnect', provider: 'gmail', status_reason: 'smtp_auth_refused', status_at: '2026-10-22T20:00:00Z' } })
     render(<ProfileEmailConnect />)
     expect(await screen.findByText('profile.email.reasonSmtpAuthRefused')).toBeInTheDocument()
-    expect(screen.getByText('profile.email.statusAt')).toBeInTheDocument()
+    expect(screen.getByText('profile.email.statusAt:22-10-2026 22:00')).toBeInTheDocument()
     expect(screen.queryByText(/2026-10-22T/)).not.toBeInTheDocument()
   })
 
