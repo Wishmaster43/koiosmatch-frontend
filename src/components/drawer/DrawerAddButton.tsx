@@ -8,6 +8,7 @@
 import type { ComponentType, ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Plus } from 'lucide-react'
+import { BTN_H_SM } from '@/config/buttonMetrics'
 
 interface DrawerAddButtonProps {
   onClick: () => void
@@ -56,8 +57,9 @@ export default function DrawerAddButton({ onClick, label, icon: Icon = Plus, dis
     <button type="button" onClick={onClick} disabled={disabled} title={title ?? name} aria-label={name}
       aria-description={ariaDescription}
       style={{
-        display: 'inline-flex', alignItems: 'center', gap: 5, height: 26, padding: iconOnly ? '0 7px' : '0 10px',
-        whiteSpace: 'nowrap', flexShrink: 0, fontSize: 11.5, fontWeight: 500, borderRadius: 6,
+        // Button sm metrics (28px / 12px / r6): SM-STANDAARD, DRAWERADDBUTTON-SIZE-1.
+        display: 'inline-flex', alignItems: 'center', gap: 5, height: BTN_H_SM, padding: iconOnly ? '0 7px' : '0 10px',
+        whiteSpace: 'nowrap', flexShrink: 0, fontSize: 12, fontWeight: 500, borderRadius: 6,
         cursor: disabled ? 'not-allowed' : 'pointer',
         // Text-colour accent uses the AA-contrast text token, not the raw brand primary.
         color: disabled ? 'var(--text-muted)' : 'var(--button-ink)',

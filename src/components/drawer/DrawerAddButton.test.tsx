@@ -5,10 +5,11 @@
  * existing getByRole('button', { name: fullLabel }) query keeps matching. This
  * file covers the default (full) rendering plus the new `short` behaviour.
  */
-import { describe, it, expect } from 'vitest'
-import { render, screen } from '@testing-library/react'
+import { describe, it, expect, vi } from 'vitest'
+import { render, screen, fireEvent } from '@testing-library/react'
 import i18n from '@/i18n'
 import DrawerAddButton from './DrawerAddButton'
+import { BTN_H_SM } from '@/config/buttonMetrics'
 
 // Real, ACTIVE-locale strings (never hardcoded) — mirrors BranchSection.test.tsx's cm() helper.
 const cm = (key: string) => i18n.t(key, { ns: 'common' })
@@ -36,5 +37,21 @@ describe('DrawerAddButton · short (DRAWER-ADD-SHORT-1)', () => {
   it('never goes icon-only just because short is set — some text always stays visible', () => {
     render(<DrawerAddButton onClick={() => {}} label="Nieuwe afdeling" short />)
     expect(screen.getByText(cm('new')).textContent).not.toBe('')
+  })
+})
+
+describe('DrawerAddButton · Button sm metrics (DRAWERADDBUTTON-SIZE-1)', () => {
+  it('renders at the sm height and 12px text, with the plus icon, label, click and disabled', () => {
+    const onClick = vi.fn()
+    const { container, rerender } = render(<DrawerAddButton onClick={onClick} label="Nieuwe afdeling" />)
+    const btn = screen.getByRole('button', { name: 'Nieuwe afdeling' })
+    // Height comes from the shared constant, text is the Button sm 12px.
+    expect(btn.style.height).toBe(`${BTN_H_SM}px`)
+    expect(btn.style.fontSize).toBe('12px')
+    expect(container.querySelector('svg')).not.toBeNull()
+    fireEvent.click(btn)
+    expect(onClick).toHaveBeenCalledTimes(1)
+    rerender(<DrawerAddButton onClick={onClick} label="Nieuwe afdeling" disabled />)
+    expect(screen.getByRole('button', { name: 'Nieuwe afdeling' })).toBeDisabled()
   })
 })
