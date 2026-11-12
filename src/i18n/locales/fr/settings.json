@@ -3164,7 +3164,16 @@
     "loadError": "Impossible de charger le journal des e-mails.",
     "bodyLoading": "Chargement du contenu...",
     "pageScopedHint": "La recherche ne porte que sur la page chargée.",
-    "bodyError": "Impossible de charger le contenu."
+    "bodyError": "Impossible de charger le contenu.",
+    "status": {
+      "queued": "En file d'attente",
+      "sent": "Envoyé",
+      "delivered": "Distribué",
+      "bounced": "Rejeté",
+      "complained": "Plainte",
+      "failed": "Échec",
+      "suppressed": "Supprimé"
+    }
   },
   "waLog": {
     "contact": "Contact",

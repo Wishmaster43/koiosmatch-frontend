@@ -3164,7 +3164,16 @@
     "loadError": "Impossibile caricare il registro email.",
     "bodyLoading": "Caricamento del contenuto...",
     "pageScopedHint": "La ricerca copre solo la pagina caricata.",
-    "bodyError": "Impossibile caricare il contenuto."
+    "bodyError": "Impossibile caricare il contenuto.",
+    "status": {
+      "queued": "In coda",
+      "sent": "Inviato",
+      "delivered": "Consegnato",
+      "bounced": "Respinto",
+      "complained": "Reclamo",
+      "failed": "Non riuscito",
+      "suppressed": "Soppresso"
+    }
   },
   "waLog": {
     "contact": "Contatto",

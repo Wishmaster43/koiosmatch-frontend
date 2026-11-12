@@ -31,6 +31,13 @@ import { Caption } from '@/components/ui/typography'
 import { DirectionPill, StatusPill, isInbound } from '@/components/ui/logChips'
 import type { Column } from '@/components/ui/DataTable'
 
+// Translated status label; an unknown wire value falls back to itself, never a raw key.
+const KNOWN_STATUSES = ['queued', 'sent', 'delivered', 'bounced', 'complained', 'failed', 'suppressed']
+function statusLabel(t: TFunction, status?: string): string | undefined {
+  if (!status) return undefined
+  return KNOWN_STATUSES.includes(status) ? t(`emailLog.status.${status}`) : status
+}
+
 interface EmailLogEntry {
   id?: string | number
   direction?: string
@@ -103,7 +110,7 @@ function EmailLogDrawer({ entry, onClose }: { entry: EmailLogEntry; onClose: () 
     [t('emailLog.to'), entry.to ?? '—'],
     [t('emailLog.subject'), entry.subject ?? '—'],
     [t('audit.colEntity'), entityText(entry, t)],
-    [t('log.status'), entry.status ?? '—'],
+    [t('log.status'), statusLabel(t, entry.status) ?? '—'],
     [t('log.date'), formatDateTime(entry.created_at)],
   ]
   return (
@@ -204,7 +211,7 @@ export default function EmailLog() {
     { key: 'party', header: t('emailLog.party'), render: r => (isInbound(r.direction) ? r.from : r.to) ?? '—' },
     { key: 'subject', header: t('emailLog.subject'), render: r => r.subject ?? '—' },
     { key: 'entity', header: t('audit.colEntity'), render: r => entityText(r, t) },
-    { key: 'status', header: t('log.status'), width: 120, render: r => <StatusPill status={r.status} /> },
+    { key: 'status', header: t('log.status'), width: 120, render: r => <StatusPill status={r.status} label={statusLabel(t, r.status)} /> },
     { key: 'created_at', header: t('log.date'), width: 150, nowrap: true, render: r => formatDateTime(r.created_at) },
   ]
 
@@ -225,7 +232,7 @@ export default function EmailLog() {
     { header: t('emailLog.party'), value: r => (isInbound(r.direction) ? r.from : r.to) ?? '' },
     { header: t('emailLog.subject'), value: r => r.subject ?? '' },
     { header: t('audit.colEntity'), value: r => entityText(r, t) },
-    { header: t('log.status'), value: r => r.status ?? '' },
+    { header: t('log.status'), value: r => statusLabel(t, r.status) ?? '' },
     { header: t('log.date'), value: r => formatDateTime(r.created_at) },
   ]
 

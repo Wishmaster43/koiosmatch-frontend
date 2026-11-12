@@ -3164,7 +3164,16 @@
     "loadError": "No se pudo cargar el registro de correos.",
     "bodyLoading": "Cargando contenido...",
     "pageScopedHint": "La búsqueda solo abarca la página cargada.",
-    "bodyError": "No se pudo cargar el contenido."
+    "bodyError": "No se pudo cargar el contenido.",
+    "status": {
+      "queued": "En cola",
+      "sent": "Enviado",
+      "delivered": "Entregado",
+      "bounced": "Rebotado",
+      "complained": "Queja",
+      "failed": "Fallido",
+      "suppressed": "Suprimido"
+    }
   },
   "waLog": {
     "contact": "Contacto",

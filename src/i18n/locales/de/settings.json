@@ -3164,7 +3164,16 @@
     "loadError": "Das E-Mail-Protokoll konnte nicht geladen werden.",
     "bodyLoading": "Inhalt wird geladen...",
     "pageScopedHint": "Die Suche durchsucht nur die geladene Seite.",
-    "bodyError": "Der Inhalt konnte nicht geladen werden."
+    "bodyError": "Der Inhalt konnte nicht geladen werden.",
+    "status": {
+      "queued": "In Warteschlange",
+      "sent": "Gesendet",
+      "delivered": "Zugestellt",
+      "bounced": "Zurückgewiesen",
+      "complained": "Beschwerde",
+      "failed": "Fehlgeschlagen",
+      "suppressed": "Unterdrückt"
+    }
   },
   "waLog": {
     "contact": "Kontakt",

@@ -3164,7 +3164,16 @@
     "loadError": "Could not load the e-mail log.",
     "bodyLoading": "Loading content...",
     "pageScopedHint": "Search only searches the currently loaded page.",
-    "bodyError": "Could not load the content."
+    "bodyError": "Could not load the content.",
+    "status": {
+      "queued": "Queued",
+      "sent": "Sent",
+      "delivered": "Delivered",
+      "bounced": "Bounced",
+      "complained": "Complaint",
+      "failed": "Failed",
+      "suppressed": "Suppressed"
+    }
   },
   "waLog": {
     "contact": "Contact",

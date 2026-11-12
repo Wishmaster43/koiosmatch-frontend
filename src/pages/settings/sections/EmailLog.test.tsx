@@ -37,11 +37,12 @@ let lastGroups: FilterGroup[] = []
 // Minimal LogView stand-in: renders row buttons (for the onRowClick assertions)
 // and the loading/error text — the real table chrome is LogView's own concern.
 vi.mock('@/components/ui/LogView', () => ({
-  default: ({ rows, loading, error, onRowClick, emptyText, filterGroups, totalCount }: {
+  default: ({ rows, loading, error, onRowClick, emptyText, filterGroups, totalCount, columns }: {
     rows: Array<{ id?: string | number; subject?: string }>
     loading?: boolean; error?: string | null
     onRowClick?: (r: unknown) => void; emptyText?: string; filterGroups?: FilterGroup[]
     totalCount?: number
+    columns?: Array<{ key: string; render?: (r: never) => React.ReactNode }>
   }) => {
     lastGroups = filterGroups ?? []
     return (
@@ -52,7 +53,11 @@ vi.mock('@/components/ui/LogView', () => ({
         {/* Renders the server total handed to LogView — proves the "50 van 50" bug is fixed (DL-05). */}
         <span>total {totalCount}</span>
         {rows.map(r => (
-          <button key={r.id} type="button" onClick={() => onRowClick?.(r)}>{r.subject}</button>
+          <div key={r.id}>
+            <button type="button" onClick={() => onRowClick?.(r)}>{r.subject}</button>
+            {/* Status cell as the real column renders it. */}
+            <span data-testid="status-cell">{columns?.find(c => c.key === 'status')?.render?.(r as never)}</span>
+          </div>
         ))}
       </div>
     )
@@ -207,5 +212,37 @@ describe('EmailLog · lazy body fetch (DL-04)', () => {
 
     await user.click(await screen.findByText('Vraag over tarief'))
     await waitFor(() => expect(screen.getByText(i18n.t('settings:emailLog.bodyError'))).toBeInTheDocument())
+  })
+})
+
+describe('EmailLog · translated status', () => {
+  const STATUSES = ['queued', 'sent', 'delivered', 'bounced', 'complained', 'failed', 'suppressed']
+
+  it.each(STATUSES)('renders the translated label for %s in the Status column, never the raw wire value', async status => {
+    mockedGet.mockResolvedValue({ data: { data: [{ ...ROW, status }], total: 1, current_page: 1, last_page: 1, per_page: 50 } })
+    renderLog()
+    const cell = await screen.findByTestId('status-cell')
+    expect(cell).toHaveTextContent(i18n.t(`settings:emailLog.status.${status}`))
+    expect(cell).not.toHaveTextContent(new RegExp(`^${status}$`))
+  })
+
+  it('falls back to the raw value for an unknown status, never a raw key', async () => {
+    mockedGet.mockResolvedValue({ data: { data: [{ ...ROW, status: 'mystery' }], total: 1, current_page: 1, last_page: 1, per_page: 50 } })
+    renderLog()
+    const cell = await screen.findByTestId('status-cell')
+    expect(cell).toHaveTextContent('mystery')
+    expect(cell).not.toHaveTextContent('emailLog.status')
+  })
+
+  it('shows the translated status in the detail row too', async () => {
+    mockedGet.mockImplementation(async (url: string) => {
+      if (url === '/email-log') return { data: { data: [ROW], total: 1, current_page: 1, last_page: 1, per_page: 50 } }
+      return { data: { data: { ...ROW, body: 'x' } } }
+    })
+    const user = userEvent.setup()
+    renderLog()
+    await user.click(await screen.findByText('Vraag over tarief'))
+    const dialog = await screen.findByRole('dialog')
+    expect(dialog).toHaveTextContent(i18n.t('settings:emailLog.status.delivered'))
   })
 })

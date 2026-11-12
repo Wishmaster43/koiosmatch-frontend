@@ -3164,7 +3164,16 @@
     "loadError": "Não foi possível carregar o registo de e-mail.",
     "bodyLoading": "A carregar o conteúdo...",
     "pageScopedHint": "A pesquisa abrange apenas a página carregada.",
-    "bodyError": "Não foi possível carregar o conteúdo."
+    "bodyError": "Não foi possível carregar o conteúdo.",
+    "status": {
+      "queued": "Na fila",
+      "sent": "Enviado",
+      "delivered": "Entregue",
+      "bounced": "Devolvido",
+      "complained": "Reclamação",
+      "failed": "Falhou",
+      "suppressed": "Suprimido"
+    }
   },
   "waLog": {
     "contact": "Contacto",

@@ -3164,7 +3164,16 @@
     "loadError": "Kon het e-maillog niet laden.",
     "bodyLoading": "Inhoud laden...",
     "pageScopedHint": "Zoeken doorzoekt alleen de geladen pagina.",
-    "bodyError": "Kon de inhoud niet laden."
+    "bodyError": "Kon de inhoud niet laden.",
+    "status": {
+      "queued": "In wachtrij",
+      "sent": "Verzonden",
+      "delivered": "Afgeleverd",
+      "bounced": "Gebounced",
+      "complained": "Klacht",
+      "failed": "Mislukt",
+      "suppressed": "Geblokkeerd"
+    }
   },
   "waLog": {
     "contact": "Contact",
