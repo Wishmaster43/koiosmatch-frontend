@@ -344,3 +344,20 @@ describe('AdminInvoicesSettings · resolve a stuck mail claim (CLAIM-RESOLVE-1)'
     window.removeEventListener('km:toast', onToast)
   })
 })
+
+describe('AdminInvoicesSettings face', () => {
+  it('renders the month picker as a field-face trigger, not a Button, and the subtitle as a Caption', async () => {
+    api.get.mockResolvedValue({ data: [] })
+    renderScreen()
+    const subtitle = await screen.findByText(i18n.t('adminInvoices.subtitle', { ns: 'settings' }))
+    expect(subtitle.tagName).toBe('SPAN')
+    expect(subtitle.style.display).toBe('block')
+    expect(subtitle.style.fontSize).not.toBe('12px')
+    const generate = screen.getByRole('button', { name: i18n.t('adminInvoices.generate', { ns: 'settings' }) })
+    const picker = generate.parentElement!.querySelector('button')!
+    expect(picker).not.toBe(generate)
+    expect(picker.style.border).toContain('1px solid')
+    expect(picker.style.borderRadius).toBe('6px')
+    expect(picker.style.height).toBe('')
+  })
+})

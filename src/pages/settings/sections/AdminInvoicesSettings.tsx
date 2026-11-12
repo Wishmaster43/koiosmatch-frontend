@@ -196,28 +196,27 @@ export default function AdminInvoicesSettings() {
     }
   }
 
-  const monthOptions = months.map((m) => ({ value: m.value, label: m.label }))
   const selectedMonthLabel = months.find((m) => m.value === month)?.label ?? month
+  const monthOptions = months.map((m) => ({ value: m.value, label: m.label }))
 
   return (
     <div style={{ maxWidth: 900 }}>
       <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 16, marginBottom: 20 }}>
         <div>
           <PageTitle>{t('adminInvoices.title')}</PageTitle>
-          <p style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 2 }}>{t('adminInvoices.subtitle')}</p>
+          <Caption style={{ display: 'block', marginTop: 2 }}>{t('adminInvoices.subtitle')}</Caption>
         </div>
         <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexShrink: 0 }}>
           {/* Searchable month picker (§4 — never a bare native select). */}
           <SearchSelect
+            triggerLabel={selectedMonthLabel}
             options={monthOptions}
             selected={[month]}
             onToggle={(v: string) => setMonth(v)}
             closeOnToggle
-            renderTrigger={(toggle: () => void) => (
-              <Button variant="secondary" onClick={toggle}>
-                {selectedMonthLabel}
-              </Button>
-            )}
+            // DROPDOWN-CLEAR-1: an empty month is invalid, there is no
+            // invoice period to list, generate or export without one.
+            clearable={false}
           />
           <Button variant="primary" onClick={handleGenerate} disabled={generating}>
             {generating ? <Spinner size={13} /> : <RefreshCw size={13} aria-hidden="true" />}
