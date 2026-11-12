@@ -3269,6 +3269,7 @@
     },
     "nextValue": "Next: {{n}}",
     "startLocked": "Start value is locked once the first number has been allocated.",
+    "formatFrozenHint": "Locked after the first number: prefix and digit count can no longer change.",
     "prefixInvalid": "Letters and digits only (max. 10 characters)"
   },
   "vacancyDisplay": {

@@ -824,7 +824,7 @@
     "documentNotAvailable": "Dit document is nog niet beschikbaar: de virusscan is niet afgerond of heeft het bestand geweigerd.",
     "tenantNotReady": "Dit bureau wordt nog ingericht of de inrichting is mislukt. Probeer het later opnieuw of kies een ander bureau.",
     "smCredentialsUnsatisfied": "De Shiftmanager-koppeling heeft onvolledige of ongeldige inloggegevens en kan niets ophalen. Controleer de koppeling bij Instellingen → Shiftmanager.",
-    "numberingFrozen": "De startwaarde kan niet meer gewijzigd worden: er is al een nummer uitgegeven.",
+    "numberingFrozen": "Deze reeks heeft al een nummer uitgegeven: prefix, aantal cijfers en startwaarde liggen vast.",
     "aiDisclosureMissing": "De interview-intro mist de verplichte AI-vermelding; pas de template aan voordat je dit activeert.",
     "fieldRequired": "{{field}} is verplicht."
   },

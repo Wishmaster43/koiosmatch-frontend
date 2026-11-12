@@ -824,7 +824,7 @@
     "documentNotAvailable": "Questo documento non è ancora disponibile: la scansione antivirus non è terminata o ha rifiutato il file.",
     "tenantNotReady": "Questa agenzia è ancora in fase di configurazione o la configurazione è fallita. Riprova più tardi o scegli un'altra agenzia.",
     "smCredentialsUnsatisfied": "La connessione Shiftmanager ha credenziali incomplete o non valide e non può recuperare nulla. Controlla la connessione in Impostazioni → Shiftmanager.",
-    "numberingFrozen": "Il valore iniziale non può più essere modificato: è già stato emesso un numero.",
+    "numberingFrozen": "Questa serie ha già emesso un numero: prefisso, numero di cifre e valore iniziale sono bloccati.",
     "aiDisclosureMissing": "Nell'introduzione del colloquio manca l'informativa obbligatoria sull'IA; modifica il modello prima di attivarlo.",
     "fieldRequired": "{{field}} è obbligatorio."
   },

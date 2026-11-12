@@ -48,6 +48,15 @@ function EntityRow({ entity, settings }: EntityRowProps) {
   const savedPad    = settings?.[keys.pad]   != null ? Number(settings[keys.pad])   : entity.pad
   const savedStart  = settings?.[keys.start] != null ? Number(settings[keys.start]) : entity.start
 
+  // A series that has issued a number keeps its prefix and padding fixed; the hint is a
+  // visible Caption under the entity name (a disabled input takes no focus, so a title alone
+  // would never reach keyboard or screen-reader users), referenced by both inputs.
+  const frozen = Boolean(entity.allocated)
+  const frozenHint = frozen ? t('numbering.formatFrozenHint') : undefined
+  const frozenHintId = frozen ? `numbering-frozen-${entity.key}` : undefined
+  // Disabled face from tokens (the browser default grey ignores the tenant theme and dark mode).
+  const frozenFace: CSSProperties = frozen ? { background: 'var(--hover-bg)', color: 'var(--text-muted)', cursor: 'not-allowed' } : {}
+
   const [prefix, setPrefix] = useState(savedPrefix)
   const [pad,    setPad]    = useState(savedPad)
   const [start,  setStart]  = useState(savedStart)
@@ -59,6 +68,8 @@ function EntityRow({ entity, settings }: EntityRowProps) {
   // Persist one field — optimistic, revert + toast on failure (house pattern).
   const commit = async <T extends string | number>(key: string, value: T, prevValue: T, setter: (v: T) => void) => {
     if (value === prevValue) return
+    // Frozen series: prefix/pad are never sent, so a stale form cannot trigger the BE 422.
+    if (frozen && key !== keys.start) return
     setter(value)
     try {
       await saveSettingsKeys({ [key]: value })
@@ -76,10 +87,13 @@ function EntityRow({ entity, settings }: EntityRowProps) {
             honest graceful fallback for an entity whose key has no translation yet
             (mirrors ModulePicker's t(key, { defaultValue }) convention). */}
         {t(`numbering.entities.${entity.key}`, { defaultValue: entity.label })}
+        {frozen && (
+          <Caption as="div" id={frozenHintId} style={{ marginTop: 2 }}>{frozenHint}</Caption>
+        )}
       </td>
       <td style={{ padding: '8px 12px' }}>
         <div>
-          <input value={prefix} maxLength={10} aria-label={t('numbering.prefix')}
+          <input value={prefix} maxLength={10} disabled={frozen} title={frozenHint} aria-describedby={frozenHintId} aria-label={t('numbering.prefix')}
             onChange={(e: ChangeEvent<HTMLInputElement>) => {
               setPrefix(e.target.value)
               setPrefixError(null)
@@ -94,7 +108,7 @@ function EntityRow({ entity, settings }: EntityRowProps) {
               setPrefixError(null)
               commit(keys.prefix, val, savedPrefix, setPrefix)
             }}
-            style={{ ...cellInput, width: 70, borderColor: prefixError ? 'var(--color-danger)' : 'var(--border)' }} />
+            style={{ ...cellInput, ...frozenFace, width: 70, borderColor: prefixError ? 'var(--color-danger)' : 'var(--border)' }} />
           {/* Inline validation line (B-35): the field alone cannot say why the value was refused. */}
           {prefixError && (
             <span role="alert" style={{ display: 'block', marginTop: 4 }}>
@@ -104,10 +118,10 @@ function EntityRow({ entity, settings }: EntityRowProps) {
         </div>
       </td>
       <td style={{ padding: '8px 12px' }}>
-        <input type="number" min={1} max={8} value={pad} aria-label={t('numbering.pad')}
+        <input type="number" min={1} max={8} value={pad} disabled={frozen} title={frozenHint} aria-describedby={frozenHintId} aria-label={t('numbering.pad')}
           onChange={(e: ChangeEvent<HTMLInputElement>) => setPad(Number(e.target.value))}
           onBlur={(e: FocusEvent<HTMLInputElement>) => commit(keys.pad, Math.min(8, Math.max(1, Number(e.target.value) || entity.pad)), savedPad, setPad)}
-          style={{ ...cellInput, width: 64, textAlign: 'right' }} />
+          style={{ ...cellInput, ...frozenFace, width: 64, textAlign: 'right' }} />
       </td>
       <td style={{ padding: '8px 12px' }}>
         {entity.allocated ? (

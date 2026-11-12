@@ -824,7 +824,7 @@
     "documentNotAvailable": "Ce document n'est pas encore disponible : l'analyse antivirus n'est pas terminée ou a rejeté le fichier.",
     "tenantNotReady": "Cette agence est en cours de configuration ou sa configuration a échoué. Réessayez plus tard ou choisissez une autre agence.",
     "smCredentialsUnsatisfied": "La connexion Shiftmanager a des identifiants incomplets ou invalides et ne peut rien récupérer. Vérifiez la connexion dans Paramètres → Shiftmanager.",
-    "numberingFrozen": "La valeur de départ ne peut plus être modifiée : un numéro a déjà été attribué.",
+    "numberingFrozen": "Cette série a déjà attribué un numéro : le préfixe, le nombre de chiffres et la valeur de départ sont verrouillés.",
     "aiDisclosureMissing": "L'introduction de l'entretien ne contient pas la mention IA obligatoire ; modifiez le modèle avant de l'activer.",
     "fieldRequired": "{{field}} est obligatoire."
   },

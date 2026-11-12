@@ -15,10 +15,18 @@
  *
  * B-35 (Lane SETTINGS-G2): prefix validation — alphanumeric only, max 10 chars.
  * Invalid input shows an error and does not save. Valid input saves successfully.
+ *
+ * NUMBERING-FORMAT-AFTER-FIRST-1: prefix and padding freeze on the same `allocated`
+ * signal as the start value (disabled inputs, a visible hint Caption both inputs
+ * describe, never sent); a fresh series stays editable; a 422 numbering_frozen still
+ * surfaces its message.
  */
 import { describe, it, expect, afterEach, vi } from 'vitest'
-import { render, screen, waitFor } from '@testing-library/react'
+import { render, screen, waitFor, within, fireEvent } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
+
+// Toaster is not mounted in this tree: capture the error toast instead.
+vi.mock('@/lib/notify', () => ({ notifyError: vi.fn(), notifySuccess: vi.fn(), notify: vi.fn() }))
 
 vi.mock('@/lib/api', async () => {
   const actual = await vi.importActual('@/lib/api')
@@ -162,5 +170,74 @@ describe('NumberingSettings — B-35 prefix validation (alphanumeric, max 10)', 
 
     await waitFor(() => expect(apiModule.post).toHaveBeenCalledWith('/settings', { 'numbering.candidate.prefix': 'KX' }))
     expect(screen.queryByRole('alert')).not.toBeInTheDocument()
+  })
+})
+
+describe('NumberingSettings — format freeze after the first issued number', () => {
+  // Row lookup by the entity label shown in the first cell.
+  const rowOf = (label: string) => screen.getAllByRole('row').find(r => r.textContent?.includes(label))!
+
+  it('renders prefix and padding disabled with the hint for a series that issued a number, and never saves them', async () => {
+    await renderNumbering(TWELVE)
+    const apiModule = await mockedApi()
+    const i18n = (await import('@/i18n')).default
+    await screen.findByText('Klant')
+    const hint = i18n.t('numbering.formatFrozenHint', { ns: 'settings' })
+    const row = rowOf('Klant')
+    const prefix = within(row).getByLabelText(i18n.t('numbering.prefix', { ns: 'settings' }))
+    const pad = within(row).getByLabelText(i18n.t('numbering.pad', { ns: 'settings' }))
+    expect(prefix).toBeDisabled()
+    expect(pad).toBeDisabled()
+    expect(prefix).toHaveAttribute('title', hint)
+    expect(pad).toHaveAttribute('title', hint)
+    // The hint is also a visible Caption in the row, and both inputs describe themselves by it (§6).
+    const caption = within(row).getByText(hint)
+    expect(caption).toHaveAttribute('id')
+    expect(prefix).toHaveAttribute('aria-describedby', caption.getAttribute('id'))
+    expect(pad).toHaveAttribute('aria-describedby', caption.getAttribute('id'))
+    // Change to a different value first so commit() cannot exit on the unchanged-value check.
+    fireEvent.change(prefix, { target: { value: 'ZZ' } })
+    fireEvent.blur(prefix)
+    fireEvent.change(pad, { target: { value: '7' } })
+    fireEvent.blur(pad)
+    expect(apiModule.post).not.toHaveBeenCalled()
+  })
+
+  it('keeps prefix and padding editable for a fresh series and sends them on save', async () => {
+    await renderNumbering(TWELVE)
+    const apiModule = await mockedApi()
+    apiModule.post.mockResolvedValue({ data: {} })
+    const i18n = (await import('@/i18n')).default
+    await screen.findByText('Kandidaat')
+    const row = rowOf('Kandidaat')
+    const prefix = within(row).getByLabelText(i18n.t('numbering.prefix', { ns: 'settings' }))
+    const pad = within(row).getByLabelText(i18n.t('numbering.pad', { ns: 'settings' }))
+    expect(prefix).toBeEnabled()
+    expect(pad).toBeEnabled()
+    await userEvent.clear(pad)
+    await userEvent.type(pad, '6')
+    await userEvent.tab()
+    await waitFor(() => expect(apiModule.post).toHaveBeenCalledWith('/settings', { 'numbering.candidate.pad': '6' }))
+    // No hint Caption and no description on a fresh row.
+    expect(within(row).queryByText(i18n.t('numbering.formatFrozenHint', { ns: 'settings' }))).toBeNull()
+    expect(prefix).not.toHaveAttribute('aria-describedby')
+    await userEvent.clear(prefix)
+    await userEvent.type(prefix, 'KX')
+    await userEvent.tab()
+    await waitFor(() => expect(apiModule.post).toHaveBeenCalledWith('/settings', { 'numbering.candidate.prefix': 'KX' }))
+  })
+
+  it('shows the numbering_frozen message when the server still answers 422', async () => {
+    await renderNumbering(TWELVE)
+    const apiModule = await mockedApi()
+    apiModule.post.mockRejectedValue({ response: { status: 422, data: { code: 'numbering_frozen' } } })
+    const i18n = (await import('@/i18n')).default
+    await screen.findByText('Kandidaat')
+    const prefix = within(rowOf('Kandidaat')).getByLabelText(i18n.t('numbering.prefix', { ns: 'settings' }))
+    await userEvent.clear(prefix)
+    await userEvent.type(prefix, 'KX')
+    await userEvent.tab()
+    const notify = await import('@/lib/notify')
+    await waitFor(() => expect(notify.notifyError).toHaveBeenCalledWith(i18n.t('errors.numberingFrozen', { ns: 'common' })))
   })
 })

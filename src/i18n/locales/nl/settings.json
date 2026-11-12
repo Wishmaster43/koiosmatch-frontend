@@ -3269,6 +3269,7 @@
     },
     "nextValue": "Volgende: {{n}}",
     "startLocked": "Startwaarde ligt vast zodra het eerste nummer is uitgegeven.",
+    "formatFrozenHint": "Vast na het eerste nummer: prefix en aantal cijfers kunnen niet meer wijzigen.",
     "prefixInvalid": "Alleen letters en cijfers toegestaan (max. 10 tekens)"
   },
   "vacancyDisplay": {

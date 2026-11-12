@@ -824,7 +824,7 @@
     "documentNotAvailable": "Dieses Dokument ist noch nicht verfügbar: Die Virenprüfung ist nicht abgeschlossen oder hat die Datei abgelehnt.",
     "tenantNotReady": "Diese Agentur wird noch eingerichtet oder die Einrichtung ist fehlgeschlagen. Versuchen Sie es später erneut oder wählen Sie eine andere Agentur.",
     "smCredentialsUnsatisfied": "Die Shiftmanager-Verbindung hat unvollständige oder ungültige Zugangsdaten und kann nichts abrufen. Prüfen Sie die Verbindung unter Einstellungen → Shiftmanager.",
-    "numberingFrozen": "Der Startwert kann nicht mehr geändert werden: Es wurde bereits eine Nummer vergeben.",
+    "numberingFrozen": "Diese Reihe hat bereits eine Nummer vergeben: Präfix, Stellenanzahl und Startwert sind gesperrt.",
     "aiDisclosureMissing": "Im Interview-Intro fehlt der verpflichtende KI-Hinweis; passen Sie die Vorlage an, bevor Sie dies aktivieren.",
     "fieldRequired": "{{field}} ist erforderlich."
   },

@@ -3269,6 +3269,7 @@
     },
     "nextValue": "Suivant: {{n}}",
     "startLocked": "La valeur de départ est verrouillée une fois que le premier numéro a été alloué.",
+    "formatFrozenHint": "Verrouillé après le premier numéro : le préfixe et le nombre de chiffres ne peuvent plus changer.",
     "prefixInvalid": "Lettres et chiffres uniquement (max. 10 caractères)"
   },
   "vacancyDisplay": {

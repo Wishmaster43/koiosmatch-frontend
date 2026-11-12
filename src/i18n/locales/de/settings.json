@@ -3269,6 +3269,7 @@
     },
     "nextValue": "Nächste: {{n}}",
     "startLocked": "Der Startwert wird gesperrt, sobald die erste Nummer vergeben ist.",
+    "formatFrozenHint": "Gesperrt nach der ersten Nummer: Präfix und Stellenanzahl sind nicht mehr änderbar.",
     "prefixInvalid": "Nur Buchstaben und Ziffern zulässig (max. 10 Zeichen)"
   },
   "vacancyDisplay": {

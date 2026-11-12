@@ -824,7 +824,7 @@
     "documentNotAvailable": "Este documento ainda não está disponível: a análise antivírus não terminou ou rejeitou o ficheiro.",
     "tenantNotReady": "Esta agência ainda está a ser configurada ou a configuração falhou. Tente novamente mais tarde ou escolha outra agência.",
     "smCredentialsUnsatisfied": "A ligação ao Shiftmanager tem credenciais incompletas ou inválidas e não consegue obter nada. Verifique a ligação em Definições → Shiftmanager.",
-    "numberingFrozen": "O valor inicial já não pode ser alterado: já foi emitido um número.",
+    "numberingFrozen": "Esta série já emitiu um número: o prefixo, o número de dígitos e o valor inicial estão bloqueados.",
     "aiDisclosureMissing": "A introdução da entrevista não tem a menção obrigatória de IA; ajuste o modelo antes de ativar.",
     "fieldRequired": "{{field}} é obrigatório."
   },

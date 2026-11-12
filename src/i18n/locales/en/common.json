@@ -824,7 +824,7 @@
     "documentNotAvailable": "This document is not available yet: the virus scan has not finished or has rejected the file.",
     "tenantNotReady": "This agency is still being set up, or its setup failed. Try again later or choose another agency.",
     "smCredentialsUnsatisfied": "The Shiftmanager connection has incomplete or invalid credentials and cannot fetch anything. Check the connection under Settings → Shiftmanager.",
-    "numberingFrozen": "The start value can no longer be changed: a number has already been issued.",
+    "numberingFrozen": "This series has already issued a number: prefix, digit count and start value are locked.",
     "aiDisclosureMissing": "The interview intro is missing the mandatory AI disclosure; adjust the template before you activate this.",
     "fieldRequired": "{{field}} is required."
   },
