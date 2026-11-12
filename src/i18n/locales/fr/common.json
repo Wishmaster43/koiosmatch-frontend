@@ -828,6 +828,13 @@
     "tenantNotReady": "Cette agence est en cours de configuration ou sa configuration a échoué. Réessayez plus tard ou choisissez une autre agence.",
     "smCredentialsUnsatisfied": "La connexion Shiftmanager a des identifiants incomplets ou invalides et ne peut rien récupérer. Vérifiez la connexion dans Paramètres → Shiftmanager.",
     "numberingFrozen": "Cette série a déjà attribué un numéro : le préfixe, le nombre de chiffres et la valeur de départ sont verrouillés.",
+    "helloflexStartDateMissing": "La date de début manque sur le match.",
+    "helloflexJobTitleMissing": "L’intitulé de poste manque sur le match.",
+    "helloflexZzpNotSupported": "Un contrat freelance (ZZP) ne peut pas être envoyé à HelloFlex.",
+    "helloflexEmployerUnlinked": "Le client n’est pas relié à HelloFlex.",
+    "helloflexCandidateUnlinked": "Le candidat n’est pas relié à HelloFlex.",
+    "helloflexBranchUnlinked": "L’agence {{branch}} n’est pas reliée à HelloFlex.",
+    "helloflexModuleOff": "Le module HelloFlex n’est pas activé pour ce bureau.",
     "aiDisclosureMissing": "L'introduction de l'entretien ne contient pas la mention IA obligatoire ; modifiez le modèle avant de l'activer.",
     "fieldRequired": "{{field}} est obligatoire."
   },

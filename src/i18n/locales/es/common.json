@@ -828,6 +828,13 @@
     "tenantNotReady": "Esta agencia aún se está configurando o su configuración ha fallado. Inténtalo más tarde o elige otra agencia.",
     "smCredentialsUnsatisfied": "La conexión con Shiftmanager tiene credenciales incompletas o no válidas y no puede obtener nada. Revisa la conexión en Configuración → Shiftmanager.",
     "numberingFrozen": "Esta serie ya ha emitido un número: el prefijo, el número de dígitos y el valor inicial están bloqueados.",
+    "helloflexStartDateMissing": "Falta la fecha de inicio en el match.",
+    "helloflexJobTitleMissing": "Falta el título del puesto en el match.",
+    "helloflexZzpNotSupported": "Un contrato de autónomo (ZZP) no se puede enviar a HelloFlex.",
+    "helloflexEmployerUnlinked": "El cliente no está vinculado a HelloFlex.",
+    "helloflexCandidateUnlinked": "El candidato no está vinculado a HelloFlex.",
+    "helloflexBranchUnlinked": "La sucursal {{branch}} no está vinculada a HelloFlex.",
+    "helloflexModuleOff": "El módulo HelloFlex no está activado para esta agencia.",
     "aiDisclosureMissing": "Falta la mención obligatoria de IA en la introducción de la entrevista; modifica la plantilla antes de activarlo.",
     "fieldRequired": "{{field}} es obligatorio."
   },

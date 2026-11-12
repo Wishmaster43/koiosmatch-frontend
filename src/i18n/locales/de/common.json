@@ -828,6 +828,13 @@
     "tenantNotReady": "Diese Agentur wird noch eingerichtet oder die Einrichtung ist fehlgeschlagen. Versuchen Sie es später erneut oder wählen Sie eine andere Agentur.",
     "smCredentialsUnsatisfied": "Die Shiftmanager-Verbindung hat unvollständige oder ungültige Zugangsdaten und kann nichts abrufen. Prüfen Sie die Verbindung unter Einstellungen → Shiftmanager.",
     "numberingFrozen": "Diese Reihe hat bereits eine Nummer vergeben: Präfix, Stellenanzahl und Startwert sind gesperrt.",
+    "helloflexStartDateMissing": "Auf dem Match fehlt das Startdatum.",
+    "helloflexJobTitleMissing": "Auf dem Match fehlt die Funktionsbezeichnung.",
+    "helloflexZzpNotSupported": "Ein Freelancer-Vertrag (ZZP) kann nicht an HelloFlex gesendet werden.",
+    "helloflexEmployerUnlinked": "Der Kunde ist nicht mit HelloFlex verknüpft.",
+    "helloflexCandidateUnlinked": "Der Kandidat ist nicht mit HelloFlex verknüpft.",
+    "helloflexBranchUnlinked": "Die Niederlassung {{branch}} ist nicht mit HelloFlex verknüpft.",
+    "helloflexModuleOff": "Das HelloFlex-Modul ist für diese Agentur nicht aktiviert.",
     "aiDisclosureMissing": "Im Interview-Intro fehlt der verpflichtende KI-Hinweis; passen Sie die Vorlage an, bevor Sie dies aktivieren.",
     "fieldRequired": "{{field}} ist erforderlich."
   },

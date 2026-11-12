@@ -11,7 +11,8 @@ import type { MatchRow } from '@/types/match'
 
 const mockHasPermission = vi.fn()
 const mockIsAppEnabled = vi.fn()
-vi.mock('@/context/AuthContext', () => ({ useAuth: () => ({ hasPermission: mockHasPermission }) }))
+const mockHasModule = vi.fn()
+vi.mock('@/context/AuthContext', () => ({ useAuth: () => ({ hasPermission: mockHasPermission, hasModule: mockHasModule }) }))
 vi.mock('@/context/AppsContext', () => ({ useApps: () => ({ isAppEnabled: mockIsAppEnabled }) }))
 vi.mock('./MatchContractSendModal', () => ({ default: () => null }))
 
@@ -20,7 +21,7 @@ const renderAction = (m: Partial<MatchRow> = {}) =>
   render(<I18nextProvider i18n={i18n}><MatchContractSendAction match={{ id: 'm1', ...m } as MatchRow} /></I18nextProvider>)
 
 describe('MatchContractSendAction', () => {
-  beforeEach(() => { vi.clearAllMocks(); i18n.changeLanguage('en'); mockHasPermission.mockReturnValue(true); mockIsAppEnabled.mockReturnValue(true) })
+  beforeEach(() => { vi.clearAllMocks(); i18n.changeLanguage('en'); mockHasPermission.mockReturnValue(true); mockIsAppEnabled.mockReturnValue(true); mockHasModule.mockReturnValue(true) })
 
   it('shows the button with permission and the HelloFlex app', () => {
     renderAction()
@@ -31,6 +32,12 @@ describe('MatchContractSendAction', () => {
     mockHasPermission.mockReturnValue(false)
     renderAction()
     expect(screen.queryByRole('button')).toBeNull()
+  })
+  it('is hidden without the hf module', () => {
+    mockHasModule.mockReturnValue(false)
+    renderAction()
+    expect(screen.queryByRole('button')).toBeNull()
+    expect(mockHasModule).toHaveBeenCalledWith('hf')
   })
   it('is hidden without the HelloFlex app', () => {
     mockIsAppEnabled.mockReturnValue(false)

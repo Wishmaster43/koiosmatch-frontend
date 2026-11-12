@@ -60,6 +60,13 @@ const ERROR_CODE_KEYS: Record<string, string> = {
   // match's contract form has no row in Settings → HelloFlex → Contractmap yet —
   // an honest "not configured" notice, never a raw server message.
   helloflex_contract_type_unmapped: 'errors.helloflexContractTypeUnmapped',
+  // HF-CONTRACT-1: the 409 refusals of the contract built from the STORED match (priority order).
+  helloflex_start_date_missing: 'errors.helloflexStartDateMissing',
+  helloflex_job_title_missing: 'errors.helloflexJobTitleMissing',
+  helloflex_zzp_not_supported: 'errors.helloflexZzpNotSupported',
+  helloflex_employer_unlinked: 'errors.helloflexEmployerUnlinked',
+  helloflex_candidate_unlinked: 'errors.helloflexCandidateUnlinked',
+  helloflex_branch_unlinked: 'errors.helloflexBranchUnlinked',
   // HF-CONTRACT-SEND-1: the manual contract send's coded 409 refusals.
   contract_in_flight: 'errors.contractInFlight',
   contract_unconfirmed: 'errors.contractUnconfirmed',
@@ -103,7 +110,7 @@ export function apiErrorKey(err: unknown): string | null {
  */
 export function apiErrorMessage(
   err: unknown,
-  t: (key: string, options?: { ns: string; clash_name?: string }) => string,
+  t: (key: string, options?: { ns: string; clash_name?: string; branch?: string }) => string,
   fallback: string,
 ): string {
   const key = apiErrorKey(err)
@@ -112,6 +119,11 @@ export function apiErrorMessage(
     const body = (err as { response?: { data?: ServerErrorBody } })?.response?.data
     const name = body?.clash_name ?? body?.params?.clash_name ?? body?.meta?.clash_name
     return name ? t(key, { ns: 'common', clash_name: name }) : extractApiError(err, fallback)
+  }
+  if (key === ERROR_CODE_KEYS.helloflex_branch_unlinked) {
+    // The branch refusal names the unlinked branch; without a name the generic chain is more honest.
+    const name = (err as { response?: { data?: ServerErrorBody & { branch_name?: string } } })?.response?.data?.branch_name
+    return name ? t(key, { ns: 'common', branch: name }) : extractApiError(err, fallback)
   }
   return key ? t(key, { ns: 'common' }) : extractApiError(err, fallback)
 }

@@ -1,6 +1,6 @@
 /**
  * MatchContractSendAction — HF-CONTRACT-SEND-1: the "send contract to HelloFlex"
- * button beside the match's contract status. Visible only with matches.update AND
+ * button beside the match's contract status. Visible only with matches.update, the HelloFlex module (the route is module-gated) AND
  * the HelloFlex app (id 'hf') enabled, and only while the contract status is none/failed and no
  * HelloFlex contract exists (the resolve action owns the stuck case).
  */
@@ -24,7 +24,7 @@ export default function MatchContractSendAction({ match, onUpdate }: Props) {
   const apps = useApps()
   const [open, setOpen] = useState(false)
 
-  const allowed = !!auth?.hasPermission?.('matches.update') && !!apps?.isAppEnabled('hf')
+  const allowed = !!auth?.hasPermission?.('matches.update') && !!auth?.hasModule?.('hf') && !!apps?.isAppEnabled('hf')
   // Complementary to the resolve action (only on 'sending'): sendable from none/failed, with no GUID yet.
   const sendable = (!match.contractStatus || ['none', 'failed'].includes(match.contractStatus)) && !match.helloflexContractGuid
   if (!allowed || !sendable || match.archived) return null

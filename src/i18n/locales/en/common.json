@@ -828,6 +828,13 @@
     "tenantNotReady": "This agency is still being set up, or its setup failed. Try again later or choose another agency.",
     "smCredentialsUnsatisfied": "The Shiftmanager connection has incomplete or invalid credentials and cannot fetch anything. Check the connection under Settings → Shiftmanager.",
     "numberingFrozen": "This series has already issued a number: prefix, digit count and start value are locked.",
+    "helloflexStartDateMissing": "The match has no start date.",
+    "helloflexJobTitleMissing": "The match has no job title.",
+    "helloflexZzpNotSupported": "A freelance (ZZP) contract cannot be sent to HelloFlex.",
+    "helloflexEmployerUnlinked": "The customer is not linked to HelloFlex.",
+    "helloflexCandidateUnlinked": "The candidate is not linked to HelloFlex.",
+    "helloflexBranchUnlinked": "Branch {{branch}} is not linked to HelloFlex.",
+    "helloflexModuleOff": "The HelloFlex module is not enabled for this agency.",
     "aiDisclosureMissing": "The interview intro is missing the mandatory AI disclosure; adjust the template before you activate this.",
     "fieldRequired": "{{field}} is required."
   },

@@ -1,6 +1,7 @@
 /**
- * MatchContractSendModal — required fields and end >= start block submit; a valid
- * form POSTs through the hook with the exact body (HF-CONTRACT-SEND-1).
+ * MatchContractSendModal — HF-CONTRACT-1 confirm face: renders the stored values
+ * (DD-MM-YYYY), flags missing ones without blocking, sends with no body and shows
+ * the mapped refusal in a banner.
  */
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { render, screen, waitFor } from '@testing-library/react'
@@ -11,11 +12,12 @@ import MatchContractSendModal from './MatchContractSendModal'
 import type { MatchRow } from '@/types/match'
 
 const mockSend = vi.fn()
+let detail: Record<string, unknown> = {}
 vi.mock('../hooks/useContractSend', () => ({ useContractSend: () => ({ send: mockSend, sending: false }) }))
-vi.mock('@/lib/useContractTypes', () => ({ useContractTypes: () => ({ types: ['flex'], options: [] }) }))
+vi.mock('../hooks/useMatchContract', () => ({ useMatchContract: () => ({ data: detail, loading: false, error: false }) }))
 vi.mock('@/lib/notify', () => ({ notifySuccess: vi.fn(), notifyError: vi.fn() }))
 
-const submitName = () => i18n.t('drawer.contractSend.submit', { ns: 'matches' })
+const tm = (k: string) => i18n.t(k, { ns: 'matches' })
 function renderModal(match: Partial<MatchRow>) {
   const onClose = vi.fn(); const onUpdate = vi.fn()
   render(<I18nextProvider i18n={i18n}><MatchContractSendModal match={{ id: 'm1', ...match } as MatchRow} onClose={onClose} onUpdate={onUpdate} /></I18nextProvider>)
@@ -23,47 +25,50 @@ function renderModal(match: Partial<MatchRow>) {
 }
 
 describe('MatchContractSendModal', () => {
-  beforeEach(() => { vi.clearAllMocks(); i18n.changeLanguage('en') })
+  beforeEach(() => {
+    vi.clearAllMocks(); i18n.changeLanguage('nl')
+    detail = { contractForm: { value: 'flex', label: 'Flex', color: 'var(--color-primary)' }, contract_type: 'flex', function_title: 'Driver', start_date: '2026-11-01', end_date: null, hours_per_week: 37.5, cost_center: 'CC1', purchase_order_number: 'PO-7' }
+  })
 
-  it('shows required errors only after a submit attempt and never posts', async () => {
+  it('renders the stored values with DD-MM-YYYY dates and no form fields', () => {
     renderModal({})
-    expect(screen.queryByRole('alert')).toBeNull()
-    await userEvent.click(screen.getByRole('button', { name: submitName() }))
-    expect(screen.getAllByRole('alert').length).toBeGreaterThan(0)
-    expect(mockSend).not.toHaveBeenCalled()
+    expect(screen.getByText('Driver')).toBeInTheDocument()
+    expect(screen.getByText('01-11-2026')).toBeInTheDocument()
+    expect(screen.getByText('PO-7')).toBeInTheDocument()
+    expect(screen.getByText('37,5')).toBeInTheDocument()
+    // The contract FORM (Contractvorm) is the row HelloFlex resolves its contract type from.
+    expect(screen.getByText('Flex')).toBeInTheDocument()
+    // Exactly the rows HelloFlex receives (ContractPayloadBuilder): no rate, no scale/step/remarks.
+    for (const key of ['contractForm', 'functionTitle', 'startDate', 'endDate', 'hoursPerWeek', 'costCenter', 'purchaseOrderNumber']) {
+      expect(screen.getByText(tm(`drawer.contractSend.${key}`))).toBeInTheDocument()
+    }
+    expect(screen.queryByRole('textbox')).toBeNull()
+    expect(screen.queryByText(tm('drawer.contractSend.fillOnOverview'))).toBeNull()
   })
 
-  it('labels resolve to their controls (a11y)', () => {
+  it('flags missing required values but keeps the send button enabled', () => {
+    detail = { ...detail, start_date: null, function_title: null }
     renderModal({})
-    expect(screen.getByLabelText(new RegExp(i18n.t('drawer.contractSend.functionTitle', { ns: 'matches' })))).toBeInTheDocument()
-    expect(screen.getByLabelText(new RegExp(i18n.t('drawer.contract.contractType', { ns: 'matches' })))).toBeInTheDocument()
+    expect(screen.getAllByText(tm('drawer.contractSend.missing')).length).toBe(2)
+    expect(screen.getByText(tm('drawer.contractSend.fillOnOverview'))).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: tm('drawer.contractSend.submit') })).toBeEnabled()
   })
 
-  it('blocks submit when the end date is before the start date', async () => {
-    renderModal({ contractType: 'flex', functionTitle: 'Driver', startDate: '2026-11-10', endDate: '2026-11-01' })
-    await userEvent.click(screen.getByRole('button', { name: submitName() }))
-    expect(mockSend).not.toHaveBeenCalled()
-    expect(screen.getByText(i18n.t('drawer.contractSend.endBeforeStart', { ns: 'matches' }))).toBeInTheDocument()
-  })
-
-  it('POSTs a valid prefilled form with the exact body and refreshes the row', async () => {
+  it('sends with no body, refreshes the row and closes on success', async () => {
     mockSend.mockResolvedValue({ ok: true, data: { contract_status: 'sent' } })
-    const { onClose, onUpdate } = renderModal({ contractType: 'flex', functionTitle: 'Driver', startDate: '2026-11-01' })
-    await userEvent.click(screen.getByRole('button', { name: submitName() }))
-    await waitFor(() => expect(mockSend).toHaveBeenCalledWith({ function_title: 'Driver', start_date: '2026-11-01', contract_type: 'flex' }))
+    const { onClose, onUpdate } = renderModal({})
+    await userEvent.click(screen.getByRole('button', { name: tm('drawer.contractSend.submit') }))
+    await waitFor(() => expect(mockSend).toHaveBeenCalledWith())
     expect(onUpdate).toHaveBeenCalledWith('m1', { contractStatus: 'sent', helloflexContractGuid: null })
     expect(onClose).toHaveBeenCalled()
   })
 
-  it('sends numbers as numbers and omits untouched optional keys', async () => {
-    mockSend.mockResolvedValue({ ok: true, data: { contract_status: 'sent', guid: 'g1' } })
-    renderModal({ contractType: 'flex', functionTitle: 'Driver', startDate: '2026-11-01' })
-    await userEvent.type(screen.getByLabelText(new RegExp(i18n.t('drawer.contractSend.hourlyRate', { ns: 'matches' }))), '18.50')
-    await userEvent.type(screen.getByLabelText(new RegExp(i18n.t('drawer.contractSend.hoursPerWeek', { ns: 'matches' }))), '32')
-    await userEvent.type(screen.getByLabelText(new RegExp(i18n.t('drawer.contractSend.remarks', { ns: 'matches' }))), 'Note')
-    await userEvent.click(screen.getByRole('button', { name: submitName() }))
-    await waitFor(() => expect(mockSend).toHaveBeenCalled())
-    const body = mockSend.mock.calls[0][0]
-    expect(body).toEqual({ function_title: 'Driver', start_date: '2026-11-01', contract_type: 'flex', hourly_rate: 18.5, hours_per_week: 32, remarks: 'Note' })
+  it('shows the mapped refusal in an alert banner and stays open', async () => {
+    mockSend.mockResolvedValue({ ok: false, message: 'Mapped refusal', fieldErrors: {} })
+    const { onClose } = renderModal({})
+    await userEvent.click(screen.getByRole('button', { name: tm('drawer.contractSend.submit') }))
+    expect(await screen.findByText('Mapped refusal')).toBeInTheDocument()
+    expect(screen.getByRole('alert')).toHaveTextContent('Mapped refusal')
+    expect(onClose).not.toHaveBeenCalled()
   })
 })

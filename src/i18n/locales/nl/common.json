@@ -828,6 +828,13 @@
     "tenantNotReady": "Dit bureau wordt nog ingericht of de inrichting is mislukt. Probeer het later opnieuw of kies een ander bureau.",
     "smCredentialsUnsatisfied": "De Shiftmanager-koppeling heeft onvolledige of ongeldige inloggegevens en kan niets ophalen. Controleer de koppeling bij Instellingen → Shiftmanager.",
     "numberingFrozen": "Deze reeks heeft al een nummer uitgegeven: prefix, aantal cijfers en startwaarde liggen vast.",
+    "helloflexStartDateMissing": "Startdatum ontbreekt op de match.",
+    "helloflexJobTitleMissing": "Functietitel ontbreekt op de match.",
+    "helloflexZzpNotSupported": "Een zzp-contract kan niet naar HelloFlex.",
+    "helloflexEmployerUnlinked": "De klant is niet gekoppeld aan HelloFlex.",
+    "helloflexCandidateUnlinked": "De kandidaat is niet gekoppeld aan HelloFlex.",
+    "helloflexBranchUnlinked": "Vestiging {{branch}} is niet gekoppeld aan HelloFlex.",
+    "helloflexModuleOff": "De HelloFlex-module staat niet aan voor dit bureau.",
     "aiDisclosureMissing": "De interview-intro mist de verplichte AI-vermelding; pas de template aan voordat je dit activeert.",
     "fieldRequired": "{{field}} is verplicht."
   },
