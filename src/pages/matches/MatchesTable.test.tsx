@@ -54,7 +54,7 @@ describe('MatchesTable · reference number column (JOB1)', () => {
     const withoutRef = { ...baseRow, id: 21, referenceNumber: '' }
     const { container } = render(<MatchesTable rows={[withRef, withoutRef]} />)
 
-    const headerCell = screen.getByText('Referentienr.').closest('th') as HTMLElement
+    const headerCell = screen.getByText(i18n.t('matches:cols.referenceNumber')).closest('th') as HTMLElement
     const colIndex = Array.from(headerCell.parentElement?.children ?? []).indexOf(headerCell)
     const rows = container.querySelectorAll('tbody tr')
     const values = Array.from(rows).map(r => r.children[colIndex].textContent)
@@ -69,7 +69,7 @@ describe('MatchesTable · reference number column (JOB1)', () => {
     const rowC = { ...baseRow, id: 32, referenceNumber: 'M-00002' }
     const { container } = render(<MatchesTable rows={[rowA, rowB, rowC]} />)
 
-    const headerCell = screen.getByText('Referentienr.').closest('th') as HTMLElement
+    const headerCell = screen.getByText(i18n.t('matches:cols.referenceNumber')).closest('th') as HTMLElement
     const colIndex = Array.from(headerCell.parentElement?.children ?? []).indexOf(headerCell)
     await user.click(within(headerCell).getByRole('button'))
 
@@ -88,7 +88,7 @@ describe('MatchesTable · vacancy column em-dash (SWEEP-TABLES)', () => {
     const withoutVacancy = { ...baseRow, id: 23, vacancy: '' }
     const { container } = render(<MatchesTable rows={[withVacancy, withoutVacancy]} />)
 
-    const headerCell = screen.getByText('Vacature').closest('th') as HTMLElement
+    const headerCell = screen.getByText(i18n.t('matches:cols.vacancy')).closest('th') as HTMLElement
     const colIndex = Array.from(headerCell.parentElement?.children ?? []).indexOf(headerCell)
     const rows = container.querySelectorAll('tbody tr')
     const values = Array.from(rows).map(r => r.children[colIndex].textContent)
@@ -106,9 +106,9 @@ describe('MatchesTable · backoffice coupling indicator (JOB2)', () => {
     const notLinked = { ...baseRow, id: 42, helloflexLink: null, shiftmanagerLink: null }
     render(<MatchesTable rows={[linked, failed, notLinked]} />)
 
-    expect(screen.getByRole('img', { name: 'HelloFlex: Gekoppeld' })).toBeInTheDocument()
-    expect(screen.getByRole('img', { name: 'HelloFlex: Mislukt' })).toBeInTheDocument()
-    expect(screen.getByRole('img', { name: 'Niet gekoppeld aan HelloFlex' })).toBeInTheDocument()
+    expect(screen.getByRole('img', { name: `${i18n.t('common:backofficeLinks.helloflex.name')}: ${i18n.t('common:backofficeLinks.common.statusLinked')}` })).toBeInTheDocument()
+    expect(screen.getByRole('img', { name: `${i18n.t('common:backofficeLinks.helloflex.name')}: ${i18n.t('common:backofficeLinks.common.statusFailed')}` })).toBeInTheDocument()
+    expect(screen.getByRole('img', { name: i18n.t('common:backofficeLinks.helloflex.notLinked') })).toBeInTheDocument()
   })
 
   it('hides a system entirely when the tenant never enabled its app — never a fake "not linked"', () => {
@@ -135,9 +135,9 @@ describe('MatchesTable · type column (MATCH-ORIGIN-1)', () => {
     const unknown = { ...baseRow, id: 72 }
     render(<MatchesTable rows={[viaApplication, direct, unknown]} />)
 
-    expect(screen.getByText('Via sollicitatie')).toBeInTheDocument()
-    expect(screen.getByText('Direct')).toBeInTheDocument()
-    const headerCell = screen.getByText('Type').closest('th') as HTMLElement
+    expect(screen.getByText(i18n.t('matches:type.application'))).toBeInTheDocument()
+    expect(screen.getByText(i18n.t('matches:type.direct'))).toBeInTheDocument()
+    const headerCell = screen.getByText(i18n.t('matches:cols.type')).closest('th') as HTMLElement
     const colIndex = Array.from(headerCell.parentElement?.children ?? []).indexOf(headerCell)
     const rows = document.querySelectorAll('tbody tr')
     expect(rows[2].children[colIndex].textContent).toBe('—')
@@ -149,14 +149,14 @@ describe('MatchesTable · type column (MATCH-ORIGIN-1)', () => {
     const viaApplication = { ...baseRow, id: 81, origin: 'application' as const }
     const { container } = render(<MatchesTable rows={[direct, viaApplication]} />)
 
-    const headerCell = screen.getByText('Type').closest('th') as HTMLElement
+    const headerCell = screen.getByText(i18n.t('matches:cols.type')).closest('th') as HTMLElement
     const colIndex = Array.from(headerCell.parentElement?.children ?? []).indexOf(headerCell)
     await user.click(within(headerCell).getByRole('button'))
 
     const rows = container.querySelectorAll('tbody tr')
     const values = Array.from(rows).map(r => r.children[colIndex].textContent)
     // "Direct" sorts before "Via sollicitatie" alphabetically.
-    expect(values).toEqual(['Direct', 'Via sollicitatie'])
+    expect(values).toEqual([i18n.t('matches:type.direct'), i18n.t('matches:type.application')])
   })
 
   // Eindcontrole 22-08 (finding 6): the undefined-origin branch sorts as '' and
@@ -167,13 +167,13 @@ describe('MatchesTable · type column (MATCH-ORIGIN-1)', () => {
     const direct = { ...baseRow, id: 83, origin: 'direct' as const }
     const { container } = render(<MatchesTable rows={[direct, unknown]} />)
 
-    const headerCell = screen.getByText('Type').closest('th') as HTMLElement
+    const headerCell = screen.getByText(i18n.t('matches:cols.type')).closest('th') as HTMLElement
     const colIndex = Array.from(headerCell.parentElement?.children ?? []).indexOf(headerCell)
     await user.click(within(headerCell).getByRole('button'))
 
     const rows = container.querySelectorAll('tbody tr')
     const values = Array.from(rows).map(r => r.children[colIndex].textContent)
-    expect(values).toEqual(['Direct', '—'])
+    expect(values).toEqual([i18n.t('matches:type.direct'), '—'])
   })
 })
 
@@ -186,7 +186,7 @@ describe('MatchesTable · type column deep-link (TYPE-KOLOM-ROUTE, Danny 17-09: 
     const viaApplication = { ...baseRow, id: 90, origin: 'application' as const, applicationId: 'app-1' }
     render(<MatchesTable rows={[viaApplication]} onRowClick={onRowClick} />)
 
-    const chipButton = screen.getByText('Via sollicitatie').closest('button') as HTMLElement
+    const chipButton = screen.getByText(i18n.t('matches:type.application')).closest('button') as HTMLElement
     await user.click(chipButton)
 
     expect(mockOpenEntity).toHaveBeenCalledWith('matches', 90)
@@ -199,7 +199,7 @@ describe('MatchesTable · type column deep-link (TYPE-KOLOM-ROUTE, Danny 17-09: 
     const direct = { ...baseRow, id: 91, origin: 'direct' as const }
     render(<MatchesTable rows={[direct]} />)
 
-    const chipButton = screen.getByText('Direct').closest('button') as HTMLElement
+    const chipButton = screen.getByText(i18n.t('matches:type.direct')).closest('button') as HTMLElement
     await user.click(chipButton)
 
     expect(mockOpenEntity).toHaveBeenCalledWith('matches', 91)
@@ -216,7 +216,7 @@ describe('MatchesTable · Koios column (Danny 05-08)', () => {
     render(<MatchesTable rows={[approaching, openEnded]} />)
 
     expect(screen.getByRole('img', { name: 'Koios AI' })).toBeInTheDocument()
-    expect(screen.getByText('Verlengen?')).toBeInTheDocument()
+    expect(screen.getByText(i18n.t('common:koios.actions.renew'))).toBeInTheDocument()
   })
 
   it('renders an honest dash for an open-ended match (no end date)', () => {

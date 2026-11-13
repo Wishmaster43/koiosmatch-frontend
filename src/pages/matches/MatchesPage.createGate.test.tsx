@@ -7,7 +7,7 @@
  */
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { render, screen, waitFor } from '@testing-library/react'
-import '@/i18n'
+import i18n from '@/i18n'
 import MatchesPage from './MatchesPage'
 
 // The rendered tree fires lookup requests this test never awaits; the real client would reject them with a
@@ -68,13 +68,13 @@ describe('MatchesPage · create gate (OPENERS-HIDE-1)', () => {
     canManage = false
     render(<MatchesPage />)
     await waitFor(() => expect(screen.getByTestId('table-rows')).toBeInTheDocument())
-    expect(screen.queryByText('Nieuwe match')).toBeNull()
+    expect(screen.queryByText(i18n.t('matches:add.button'))).toBeNull()
   })
 
   it('shows the opener with matches.update', async () => {
     canManage = true
     render(<MatchesPage />)
     await waitFor(() => expect(screen.getByTestId('table-rows')).toBeInTheDocument())
-    expect(screen.getByText('Nieuwe match')).toBeInTheDocument()
+    expect(screen.getByText(i18n.t('matches:add.button'))).toBeInTheDocument()
   })
 })

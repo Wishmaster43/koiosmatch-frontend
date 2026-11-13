@@ -7,7 +7,7 @@
 import { describe, it, expect, vi } from 'vitest'
 import { render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
-import '@/i18n'
+import i18n from '@/i18n'
 import OpportunityDescriptionCard from './OpportunityDescriptionCard'
 
 // Stand-in for the Tiptap editor — `assistModes` surfaced as a data attribute,
@@ -26,7 +26,7 @@ describe('OpportunityDescriptionCard · Koios assist (TASK-ASSIST-ACTIONS-1)', (
 
     // Starts collapsed (CollapsibleRichText ghost) — reveal the editor first.
     expect(screen.queryByTestId('rte')).toBeNull()
-    await user.click(screen.getByRole('button', { name: 'Omschrijving' }))
+    await user.click(screen.getByRole('button', { name: i18n.t('opportunities:modal.groups.description') }))
 
     expect(screen.getByTestId('rte')).toHaveAttribute('data-assist-modes', 'improve,summarize,actions')
   })

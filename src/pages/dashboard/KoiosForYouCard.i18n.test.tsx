@@ -65,12 +65,12 @@ describe('KoiosForYouCard (real i18n — NL default)', () => {
     await waitFor(() => expect(screen.getByText('2')).toBeInTheDocument())
 
     // KPI tiles: NL category labels + counts.
-    expect(screen.getByText('Taken')).toBeInTheDocument()
+    expect(screen.getByText(i18n.t('dashboard:koiosForYou.category.tasks'))).toBeInTheDocument()
     expect(screen.getByText('WhatsApp')).toBeInTheDocument()
     expect(screen.queryByText('Create Task')).not.toBeInTheDocument()
     expect(screen.queryByText('Send Whatsapp')).not.toBeInTheDocument()
 
-    fireEvent.click(screen.getByText('Taken'))
+    fireEvent.click(screen.getByText(i18n.t('dashboard:koiosForYou.category.tasks')))
 
     // Table: NL action label — the raw English humanize output never appears.
     expect(screen.getByText(i18n.t('dashboard:koiosForYou.actionType.create_task'))).toBeInTheDocument()
