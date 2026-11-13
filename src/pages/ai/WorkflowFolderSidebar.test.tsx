@@ -52,7 +52,7 @@ describe('WorkflowFolderSidebar — folder delete is keyboard-reachable', () => 
 
   it('exposes an accessible name on the "new folder" button', () => {
     render(<WorkflowFolderSidebar {...baseProps} />)
-    expect(screen.getByRole('button', { name: 'Nieuwe folder' })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: i18n.t('workflows:page.newFolder') })).toBeInTheDocument()
   })
 })
 
@@ -142,22 +142,22 @@ describe('WorkflowFolderSidebar — folder creation flow via dialog', () => {
 
   it('opens the dialog when the "new folder" button is clicked', () => {
     render(<WorkflowFolderSidebar {...baseProps} />)
-    const newFolderBtn = screen.getByRole('button', { name: 'Nieuwe folder' })
+    const newFolderBtn = screen.getByRole('button', { name: i18n.t('workflows:page.newFolder') })
     fireEvent.click(newFolderBtn)
 
     // Dialog should open — look for the title and input field
-    expect(screen.getByText('Nieuwe map')).toBeInTheDocument()
-    expect(screen.getByLabelText('Naam')).toBeInTheDocument()
+    expect(screen.getByText(i18n.t('workflows:page.newFolderTitle'))).toBeInTheDocument()
+    expect(screen.getByLabelText(i18n.t('workflows:page.newFolderLabel'))).toBeInTheDocument()
   })
 
   it('calls createFolder with the trimmed input when confirmed', () => {
     createFolder.mockClear()
     render(<WorkflowFolderSidebar {...baseProps} />)
 
-    const newFolderBtn = screen.getByRole('button', { name: 'Nieuwe folder' })
+    const newFolderBtn = screen.getByRole('button', { name: i18n.t('workflows:page.newFolder') })
     fireEvent.click(newFolderBtn)
 
-    const input = screen.getByLabelText('Naam') as HTMLInputElement
+    const input = screen.getByLabelText(i18n.t('workflows:page.newFolderLabel')) as HTMLInputElement
     fireEvent.change(input, { target: { value: '  Test Folder  ' } })
 
     // Use Dutch translation for confirm button
@@ -171,10 +171,10 @@ describe('WorkflowFolderSidebar — folder creation flow via dialog', () => {
     createFolder.mockClear()
     render(<WorkflowFolderSidebar {...baseProps} />)
 
-    const newFolderBtn = screen.getByRole('button', { name: 'Nieuwe folder' })
+    const newFolderBtn = screen.getByRole('button', { name: i18n.t('workflows:page.newFolder') })
     fireEvent.click(newFolderBtn)
 
-    const input = screen.getByLabelText('Naam') as HTMLInputElement
+    const input = screen.getByLabelText(i18n.t('workflows:page.newFolderLabel')) as HTMLInputElement
     fireEvent.change(input, { target: { value: '   ' } })
 
     const confirmBtn = screen.getByRole('button', { name: 'Bevestigen' })
@@ -187,16 +187,16 @@ describe('WorkflowFolderSidebar — folder creation flow via dialog', () => {
     createFolder.mockClear()
     render(<WorkflowFolderSidebar {...baseProps} />)
 
-    const newFolderBtn = screen.getByRole('button', { name: 'Nieuwe folder' })
+    const newFolderBtn = screen.getByRole('button', { name: i18n.t('workflows:page.newFolder') })
     fireEvent.click(newFolderBtn)
 
-    expect(screen.getByText('Nieuwe map')).toBeInTheDocument()
+    expect(screen.getByText(i18n.t('workflows:page.newFolderTitle'))).toBeInTheDocument()
 
-    const cancelBtn = screen.getByRole('button', { name: 'Annuleren' })
+    const cancelBtn = screen.getByRole('button', { name: i18n.t('common:cancel') })
     fireEvent.click(cancelBtn)
 
     // Dialog should close (title no longer visible)
-    expect(screen.queryByText('Nieuwe map')).not.toBeInTheDocument()
+    expect(screen.queryByText(i18n.t('workflows:page.newFolderTitle'))).not.toBeInTheDocument()
     expect(createFolder).not.toHaveBeenCalled()
   })
 })

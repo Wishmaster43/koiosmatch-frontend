@@ -10,7 +10,7 @@
 import { describe, it, expect, vi } from 'vitest'
 import { render, screen, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
-import '@/i18n'
+import i18n from '@/i18n'
 import WhatsAppPage from './WhatsAppPage'
 import type { WaStats, WaMessage, WaEscalation, WaActivityDatum, WaQueueBatch } from '@/types/whatsapp'
 import type { WaMessageFilters } from './hooks/useWhatsAppData'
@@ -119,7 +119,7 @@ describe('WhatsAppPage · nine-card KPI band (WA-KPI9-1)', () => {
     mockUseWhatsAppData.mockReturnValue(dataFixture({ noConnection: true }))
     mockUseWhatsAppQueue.mockReturnValue(queueFixture({ notAvailable: true }))
     render(<WhatsAppPage />)
-    expect(screen.getByText('Geen WhatsApp-verbinding')).toBeInTheDocument()
+    expect(screen.getByText(i18n.t('whatsapp:noConn.title'))).toBeInTheDocument()
     expect(cardValue(LABELS.today).getByText('—')).toBeInTheDocument()
     expect(cardValue(LABELS.queuedToday).getByText('—')).toBeInTheDocument()
   })

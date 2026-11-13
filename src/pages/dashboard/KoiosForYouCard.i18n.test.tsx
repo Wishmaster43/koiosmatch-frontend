@@ -10,7 +10,7 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import type { ReactNode } from 'react'
 // Importing the real i18n runtime initializes it (side-effect import) — mirrors
 // how the app itself boots translations; no provider wrapper needed (singleton).
-import '@/i18n'
+import i18n from '@/i18n'
 import KoiosForYouCard from './KoiosForYouCard'
 
 // Preserve the real `unwrap` — only the network call is stubbed.
@@ -73,7 +73,7 @@ describe('KoiosForYouCard (real i18n — NL default)', () => {
     fireEvent.click(screen.getByText('Taken'))
 
     // Table: NL action label — the raw English humanize output never appears.
-    expect(screen.getByText('Taak aangemaakt')).toBeInTheDocument()
+    expect(screen.getByText(i18n.t('dashboard:koiosForYou.actionType.create_task'))).toBeInTheDocument()
     expect(screen.queryByText('Create Task')).not.toBeInTheDocument()
   })
   // K-182 scope toggle: the manager control renders the REAL NL labels through
@@ -85,8 +85,8 @@ describe('KoiosForYouCard (real i18n — NL default)', () => {
         per_type: {}, per_source: {}, actions: [], actions_truncated: false },
     })
     renderCardWithToggle()
-    await waitFor(() => expect(screen.getByText('Mij')).toBeInTheDocument())
-    expect(screen.getByText('Mijn team')).toBeInTheDocument()
+    await waitFor(() => expect(screen.getByText(i18n.t('dashboard:koiosForYou.scope.me'))).toBeInTheDocument())
+    expect(screen.getByText(i18n.t('dashboard:koiosForYou.scope.team'))).toBeInTheDocument()
     // No element renders a raw dotted key from this namespace.
     expect(document.body.textContent).not.toMatch(/koiosForYou\./)
   })

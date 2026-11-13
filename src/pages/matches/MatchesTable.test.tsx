@@ -35,7 +35,7 @@ vi.mock('@/context/NavigationContext', () => ({ useNavigation: () => ({ openEnti
 beforeEach(() => { mockOpenEntity.mockClear() })
 // Real (nl) translations, since mocking '@/lib/datetime' above removes the
 // transitive '@/i18n' side-effect import the production component relies on.
-import '@/i18n'
+import i18n from '@/i18n'
 
 const link = (overrides: Partial<BackofficeLink> = {}): BackofficeLink => ({
   status: null, externalId: null, lastError: null, lastSyncedAt: null, linkedAt: null, linkedBy: null, ...overrides,
@@ -255,7 +255,7 @@ describe('MatchesTable · cell deep-links (CEL-DOORKLIK-CANON)', () => {
     const row = { ...baseRow, id: 71, vacancyId: 'vac-7' }
     render(<MatchesTable rows={[row]} onRowClick={onRowClick} />)
 
-    expect(screen.queryByRole('button', { name: /Vacature openen/ })).toBeNull()
+    expect(screen.queryByRole('button', { name: new RegExp(i18n.t('candidates:work.openVacancy')) })).toBeNull()
     await user.click(screen.getByText(row.vacancy))
 
     expect(mockOpenEntity).not.toHaveBeenCalled()
@@ -269,7 +269,7 @@ describe('MatchesTable · cell deep-links (CEL-DOORKLIK-CANON)', () => {
     const row = { ...baseRow, id: 71, clientId: 'cust-7', client: 'Rivas Zorggroep' }
     render(<MatchesTable rows={[row]} onRowClick={onRowClick} />)
 
-    expect(screen.queryByRole('button', { name: /Klant openen/ })).toBeNull()
+    expect(screen.queryByRole('button', { name: new RegExp(i18n.t('matches:drawer.openClient')) })).toBeNull()
     await user.click(screen.getByText('Rivas Zorggroep'))
 
     expect(mockOpenEntity).not.toHaveBeenCalled()
@@ -294,12 +294,12 @@ describe('MatchesTable · cell deep-links (CEL-DOORKLIK-CANON)', () => {
   it('renders the vacancy cell unwrapped (dash) when vacancyId is present but the name is empty', () => {
     const row = { ...baseRow, id: 75, vacancyId: 'vac-75', vacancy: '' }
     render(<MatchesTable rows={[row]} />)
-    expect(screen.queryByRole('button', { name: /Vacature openen/ })).toBeNull()
+    expect(screen.queryByRole('button', { name: new RegExp(i18n.t('candidates:work.openVacancy')) })).toBeNull()
   })
 
   it('renders the client cell unwrapped when clientId is present but the name is empty', () => {
     const row = { ...baseRow, id: 76, clientId: 'cust-76', client: '' }
     render(<MatchesTable rows={[row]} />)
-    expect(screen.queryByRole('button', { name: /Klant openen/ })).toBeNull()
+    expect(screen.queryByRole('button', { name: new RegExp(i18n.t('matches:drawer.openClient')) })).toBeNull()
   })
 })

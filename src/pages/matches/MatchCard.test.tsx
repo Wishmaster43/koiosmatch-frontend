@@ -200,7 +200,7 @@ describe('MatchCard · flatRow column split (Danny 09-08 second look)', () => {
 describe('MatchCard · icon-only glyphs have accessible names', () => {
   it('names the open-vacancy link and the backoffice-linked glyph', () => {
     render(<MatchCard {...base} vacancyUrl="https://example.com/vacatures/1" helloflexGuid="hf-1" />)
-    expect(screen.getByRole('link', { name: 'Vacature openen' })).toHaveAttribute('href', 'https://example.com/vacatures/1')
+    expect(screen.getByRole('link', { name: i18n.t('candidates:work.openVacancy') })).toHaveAttribute('href', 'https://example.com/vacatures/1')
     expect(screen.getByRole('img', { name: 'Gekoppeld met backoffice (HelloFlex)' })).toBeInTheDocument()
   })
 })

@@ -2,6 +2,7 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
+import i18n from '@/i18n'
 import MatchDrawer from './MatchDrawer'
 import type { MatchRow } from '@/types/match'
 import { match, COLOR_A, COLOR_B } from './MatchDrawer.testKit'
@@ -80,7 +81,7 @@ describe('MatchDrawer · owner picker (MATCH-OWNER-1)', () => {
 
   it('shows the placeholder, not a blank box, on an ownerless match', () => {
     render(<MatchDrawer match={owned({ owner: '', ownerId: null, ownerInitials: '' })} onClose={vi.fn()} onSetOwner={vi.fn()} />)
-    expect(screen.getByRole('button', { name: /Geen eigenaar/ })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: new RegExp(i18n.t('matches:drawer.ownerUnassigned')) })).toBeInTheDocument()
   })
 
   it('keeps an owner who is no longer in /users visible, and picking that entry is a no-op', async () => {
@@ -122,6 +123,6 @@ describe('MatchDrawer · owner picker clear (DROPDOWN-CLEAR-1)', () => {
   it('shows no clear X on an ownerless match (placeholder state)', () => {
     render(<MatchDrawer match={owned({ owner: '', ownerId: null, ownerInitials: '' })} onClose={vi.fn()} onSetOwner={vi.fn()} />)
     expect(screen.queryByRole('button', { name: /wissen$/ })).toBeNull()
-    expect(screen.getByRole('button', { name: /Geen eigenaar/ })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: new RegExp(i18n.t('matches:drawer.ownerUnassigned')) })).toBeInTheDocument()
   })
 })

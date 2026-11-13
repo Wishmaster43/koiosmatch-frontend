@@ -80,7 +80,7 @@ describe('WorkflowQueueView', () => {
     await screen.findByText('Welcome flow')
     // Pending/waiting/retrying rows each carry the "open runs" link; the
     // PENDING one (first rendered) belongs to wf-1.
-    const links = screen.getAllByRole('link', { name: 'Open uitvoeringen' })
+    const links = screen.getAllByRole('link', { name: i18n.t('workflows:queue.openRuns') })
     expect(links[0]).toHaveAttribute('href', '#details.runs?workflow_id=wf-1')
   })
 })

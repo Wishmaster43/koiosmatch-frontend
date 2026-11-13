@@ -10,6 +10,7 @@
  */
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 import { render, screen, fireEvent, waitFor, act } from '@testing-library/react'
+import i18n from '@/i18n'
 import WorkflowsPage from './WorkflowsPage'
 import type { Workflow } from '@/types/workflow'
 
@@ -83,7 +84,7 @@ describe('WorkflowsPage · URL-driven editor (WF-EDITOR-DEEPLINK-1)', () => {
     render(<WorkflowsPage />)
     // Real i18next runs in this file's import graph (mirrors the not-found copy
     // rendering translated, not a raw key) — assert the actual nl text.
-    expect(await screen.findByText('Workflow niet gevonden')).toBeInTheDocument()
+    expect(await screen.findByText(i18n.t('workflows:notFound.title'))).toBeInTheDocument()
     expect(screen.queryByText(/editor-open/)).not.toBeInTheDocument()
   })
 })
