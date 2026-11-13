@@ -11,6 +11,8 @@ import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { render, screen, fireEvent, waitFor } from '@testing-library/react'
 import KoiosModelsCard, { type KoiosModelsData } from './KoiosModelsCard'
 import type { TFn } from '@/types/koios'
+// Real i18n init so the component's useTranslation yields a working key checker.
+import '@/i18n'
 
 // The API call itself is mocked — no live /api/ai/koios/* call ever fires (API-CREDITS-1).
 const mockUpdateKoiosModel = vi.fn()

@@ -7,6 +7,7 @@
 import { useState } from 'react'
 import type { ChangeEvent, ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
+import { labelOrRaw } from '@/lib/labelOrRaw'
 import { Pencil, Plus, Save, X } from 'lucide-react'
 import DetailTable from '@/components/ui/DetailTable'
 import Spinner from '@/components/ui/Spinner'
@@ -52,7 +53,7 @@ interface ApiKeyGeneralTabProps {
 }
 // See the file's top doc above; read mode via the shared DetailTable, Edit flips to an inline form; the secret can only ever be masked here.
 export default function ApiKeyGeneralTab({ apiKey, onSave, onMakePrimary }: ApiKeyGeneralTabProps) {
-  const { t } = useTranslation('settings')
+  const { t, i18n } = useTranslation('settings')
   const { formatDate } = useDateFormat()
   const [editing, setEditing] = useState(false)
   const [saving, setSaving]   = useState(false)
@@ -96,7 +97,7 @@ export default function ApiKeyGeneralTab({ apiKey, onSave, onMakePrimary }: ApiK
 
   // Read-only field rows for DetailTable.
   const rows: [string, ReactNode][] = [
-    [t('apiKeys.field.type'), t(`apiKeys.type.${apiKey.type ?? 'additional'}`, { defaultValue: apiKey.type })],
+    [t('apiKeys.field.type'), labelOrRaw(t, i18n, `apiKeys.type.${apiKey.type ?? 'additional'}`, apiKey.type ?? '', 'settings')],
     [t('apiKeys.field.name'), apiKey.friendly_name ?? apiKey.name],
     [t('apiKeys.field.organisation'), apiKey.organisation],
     [t('apiKeys.field.description'), apiKey.description],

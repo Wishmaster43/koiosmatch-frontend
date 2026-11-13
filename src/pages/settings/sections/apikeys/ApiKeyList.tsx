@@ -4,6 +4,7 @@
  * row opens the detail. Handles the loading / error / empty / success states.
  */
 import { useTranslation } from 'react-i18next'
+import { labelOrRaw } from '@/lib/labelOrRaw'
 import { Plus, RefreshCw } from 'lucide-react'
 import DataTable from '@/components/ui/DataTable'
 import StatusBadge from '@/components/ui/StatusBadge'
@@ -35,7 +36,7 @@ interface ApiKeyListProps {
 }
 // API-key list table; see the module doc comment above for the shared SM-style columns it mirrors.
 export default function ApiKeyList({ keys, loading, error, onReload, onOpen, onNew }: ApiKeyListProps) {
-  const { t } = useTranslation('settings')
+  const { t, i18n } = useTranslation('settings')
   const { formatDate } = useDateFormat()
 
   // Status pill colours for active / disabled keys (shared StatusBadge override).
@@ -58,7 +59,7 @@ export default function ApiKeyList({ keys, loading, error, onReload, onOpen, onN
     { key: 'type', header: t('apiKeys.col.type'),
       render: (r: ApiKeyRow) => (r.type ?? 'additional') === 'primary'
         ? <SoftChip label={t('apiKeys.type.primary')} color="var(--color-primary)" round />
-        : t(`apiKeys.type.${r.type ?? 'additional'}`, { defaultValue: r.type ?? '—' }) },
+        : labelOrRaw(t, i18n, `apiKeys.type.${r.type ?? 'additional'}`, r.type ?? '—', 'settings') },
     { key: 'guid', header: t('apiKeys.col.guid'), nowrap: true,
       render: (r: ApiKeyRow) => <code style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: 12, color: 'var(--text-muted)' }}>{shortGuid(r.guid)}</code> },
     { key: 'created_at', header: t('apiKeys.col.created'), nowrap: true, sortable: true,

@@ -5,7 +5,7 @@
  * of inventing a label.
  */
 import { describe, it, expect } from 'vitest'
-import { tierKeyForModel } from './koiosModelTiers'
+import { tierKeyForModel, resolveModelHint } from './koiosModelTiers'
 
 describe('tierKeyForModel', () => {
   it('maps haiku ids to fast', () => {
@@ -26,5 +26,20 @@ describe('tierKeyForModel', () => {
     expect(tierKeyForModel(null)).toBeNull()
     expect(tierKeyForModel(undefined)).toBeNull()
     expect(tierKeyForModel('')).toBeNull()
+  })
+})
+
+describe('resolveModelHint', () => {
+  // Key-echo t: returns the key so the branch taken is visible.
+  const t = (key: string) => key
+  const options = [{ id: 'smart', label: 'S', hint: 'server hint' }]
+
+  it('uses the translated hint key when it exists', () => {
+    expect(resolveModelHint('smart', options, t, { exists: () => true })).toBe('models.tierHint.smart')
+  })
+
+  it('falls back to the server hint, then the generic tier description, when the key is missing', () => {
+    expect(resolveModelHint('smart', options, t, { exists: () => false })).toBe('server hint')
+    expect(resolveModelHint('smart', [], t, { exists: () => false })).toBe('models.tierDesc.smart')
   })
 })

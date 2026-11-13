@@ -22,6 +22,7 @@
 import { useState, useMemo } from 'react'
 import { Zap, Sparkles, Crown, Check, type LucideIcon } from 'lucide-react'
 import { updateKoiosModel } from './koiosApi'
+import { useTranslation } from 'react-i18next'
 import { tierKeyForModel, findModelOption, resolveModelLabel, resolveModelHint, type KoiosModelOption } from '@/lib/koiosModelTiers'
 import { useAuth } from '@/context/AuthContext'
 import SegmentedControl, { type SegmentedControlOption } from '@/components/ui/SegmentedControl'
@@ -66,6 +67,8 @@ interface KoiosModelsCardProps {
 // Tenant-facing model-tier picker (Snel/Slim/Max); the raw vendor id stays
 // super-admin-only (see the module doc comment above).
 export default function KoiosModelsCard({ models, t, onChanged }: KoiosModelsCardProps) {
+  // The key checker for model hints; t still arrives from the settings index (same koios namespace).
+  const { i18n } = useTranslation('koios')
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [pendingPick, setPendingPick] = useState<string | null>(null)
@@ -156,12 +159,12 @@ export default function KoiosModelsCard({ models, t, onChanged }: KoiosModelsCar
     // A truly unmapped id (no flavour, no option, no tier) keeps the honest
     // super-admin-only raw id / generic "unknown tier" copy for anyone else.
     const label = (flavorTier || option || key) ? resolveModelLabel(m, serverOptions, t) : (isSuperAdmin ? m : t('models.unknownTier'))
-    const hint = resolveModelHint(m, serverOptions, t) ?? (key ? t(`models.tierDesc.${key}`) : null)
+    const hint = resolveModelHint(m, serverOptions, t, i18n) ?? (key ? t(`models.tierDesc.${key}`) : null)
     const description = isSuperAdmin
       ? (hint ? <>{hint} · <Mono>{m}</Mono></> : <Mono>{m}</Mono>)
       : hint
     return { value: m, label, description, icon: Icon }
-  }), [selectable, serverOptions, maxRank, t, isSuperAdmin])
+  }), [selectable, serverOptions, maxRank, t, i18n, isSuperAdmin])
 
   return (
     <div style={card}>

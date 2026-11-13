@@ -5,6 +5,7 @@
  * Render nothing for absent data; apply the card's own container style (§4 calm).
  */
 import { useTranslation } from 'react-i18next'
+import { labelOrRaw } from '@/lib/labelOrRaw'
 import { useNumberFormat } from '@/lib/formatters'
 import { formatCurrency } from '@/lib/formatters'
 import SoftChip from '@/components/ui/SoftChip'
@@ -21,7 +22,7 @@ const rowStyle = { display: 'flex', alignItems: 'center', justifyContent: 'space
 const SURFACE_CHIP_COLOR = 'var(--color-primary)'
 
 function SurfacesBlock({ surfaces }: { surfaces: KoiosSurface[] }) {
-  const { t } = useTranslation('koios')
+  const { t, i18n } = useTranslation('koios')
   if (!surfaces || surfaces.length === 0) return null
   return (
     <div style={sectionStyle}>
@@ -29,7 +30,7 @@ function SurfacesBlock({ surfaces }: { surfaces: KoiosSurface[] }) {
       <div style={chipsRowStyle}>
         {surfaces.map((surface) => {
           // Fall back to the API's label_nl only if the i18n key is missing.
-          const label = t(`capabilities.surfaces.${surface.key}`, { defaultValue: surface.label_nl })
+          const label = labelOrRaw(t, i18n, `capabilities.surfaces.${surface.key}`, surface.label_nl, 'koios')
           return <SoftChip key={surface.key} label={label} color={SURFACE_CHIP_COLOR} />
         })}
       </div>

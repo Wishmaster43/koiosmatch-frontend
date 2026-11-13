@@ -12,6 +12,7 @@
  */
 import { useEffect, useRef, useState } from 'react'
 import { ChevronDown, Check } from 'lucide-react'
+import { useTranslation } from 'react-i18next'
 import { resolveModelLabel, resolveModelHint, type KoiosModelOption } from '@/lib/koiosModelTiers'
 import type { TFn } from '@/types/koios'
 // PORTAL-MARKER-1: a click inside an open portalled picker menu is never "outside".
@@ -22,6 +23,8 @@ import { isInsideDropdownPortal } from '@/lib/useDropdownPlacement'
 export default function KoiosModelPicker({ models, options, value, onChange, t }: {
   models?: string[]; options?: KoiosModelOption[]; value?: string | null; onChange: (m: string) => void; t: TFn
 }) {
+  // The key checker for model hints; t still arrives from the panel (same koios namespace).
+  const { i18n } = useTranslation('koios')
   const [open, setOpen] = useState(false)
   const ref = useRef<HTMLDivElement>(null)
 
@@ -57,7 +60,7 @@ export default function KoiosModelPicker({ models, options, value, onChange, t }
           {models.map((m) => {
             // AI-MODELS-1: the tenant-facing cost hint (calm caption, never a number) —
             // translated for a known flavour, the server's own hint otherwise.
-            const hint = resolveModelHint(m, options, t)
+            const hint = resolveModelHint(m, options, t, i18n)
             return (
               <button key={m} role="option" aria-selected={m === value} onClick={() => { onChange(m); setOpen(false) }}
                 // eslint-disable-next-line huisstijlLegacy/no-restricted-syntax -- menu OPTION row: selected-list-row idiom (§4 PRIMAIR-VLAK-1, tint/hover language), a face Button deliberately does not model

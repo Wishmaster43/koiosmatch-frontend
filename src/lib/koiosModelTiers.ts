@@ -18,6 +18,8 @@
  * display string, so every consumer stays one `t(key, { ns: 'koios' })` away from
  * full translation with zero new keys.
  */
+import type { KeyChecker } from '@/lib/labelOrRaw'
+
 type ModelTierKey = 'fast' | 'smart' | 'max'
 
 // Substring match against the raw model id — never an exact-id map, so a future
@@ -91,15 +93,19 @@ export function resolveModelLabel(id: string | null | undefined, options: KoiosM
 
 // Resolve a model/flavour id to its display hint: a known flavour's translated
 // `models.tierHint.<flavor>` key first, falling back to the server's own hint as
-// the i18next `defaultValue` (so an un-translated flavour still shows something),
+// the fallback (so an un-translated flavour still shows something),
 // then the server hint for an unlisted id, then null.
 // Normalizes legacy flavor keys (snel/slim) before lookup for display robustness.
-export function resolveModelHint(id: string | null | undefined, options: KoiosModelOption[] | null | undefined, t: TranslateFn): string | null {
+export function resolveModelHint(id: string | null | undefined, options: KoiosModelOption[] | null | undefined, t: TranslateFn, i18n: KeyChecker): string | null {
   const normalizedId = normalizeFlavorKey(id) || id
   const option = findModelOption(normalizedId, options)
   const flavorTier = normalizedId ? FLAVOR_TIER_MAP[normalizedId] : undefined
   if (flavorTier) {
-    return t(`models.tierHint.${normalizedId}`, { ns: 'koios', defaultValue: option?.hint ?? t(`models.tierDesc.${flavorTier}`, { ns: 'koios' }) })
+    // Translated hint when the key exists, else the server hint, else the generic tier description
+    // (the exists guard mirrors labelOrRaw: a tree without an i18n instance falls back, never throws).
+    return typeof i18n?.exists === 'function' && i18n.exists(`models.tierHint.${normalizedId}`, { ns: 'koios' })
+      ? t(`models.tierHint.${normalizedId}`, { ns: 'koios' })
+      : (option?.hint ?? t(`models.tierDesc.${flavorTier}`, { ns: 'koios' }))
   }
   return option?.hint ?? null
 }

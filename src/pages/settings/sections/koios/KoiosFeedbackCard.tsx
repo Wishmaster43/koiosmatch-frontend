@@ -9,6 +9,7 @@
  */
 import { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
+import { labelOrRaw } from '@/lib/labelOrRaw'
 import { ThumbsUp, ThumbsDown } from 'lucide-react'
 import Button from '@/components/ui/Button'
 import Spinner from '@/components/ui/Spinner'
@@ -48,7 +49,7 @@ type Phase = 'loading' | 'error' | 'ready'
 
 // The admin feedback card: summary block + a paginated read-only row list.
 export default function KoiosFeedbackCard() {
-  const { t } = useTranslation('koios')
+  const { t, i18n } = useTranslation('koios')
   const { t: tc } = useTranslation('common')
   const { formatDateTime } = useDateFormat()
   const { formatNumber, formatPercent } = useNumberFormat()
@@ -119,7 +120,7 @@ export default function KoiosFeedbackCard() {
               {rows.map((row) => (
                 <li key={row.id} style={{ display: 'flex', flexDirection: 'column', gap: 4, paddingBottom: 10, borderBottom: '1px solid var(--border)' }}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
-                    <SoftChip color="var(--color-primary)" label={t(`feedbackAdmin.surfaces.${row.surface}`, { defaultValue: row.surface })} />
+                    <SoftChip color="var(--color-primary)" label={labelOrRaw(t, i18n, `feedbackAdmin.surfaces.${row.surface}`, row.surface, 'koios')} />
                     <span role="img" aria-label={row.rating === 'up' ? tc('koios.feedback.up') : tc('koios.feedback.down')} title={row.rating === 'up' ? tc('koios.feedback.up') : tc('koios.feedback.down')}>
                       {row.rating === 'up' ? <ThumbsUp size={14} color="var(--color-success)" /> : <ThumbsDown size={14} color="var(--color-danger)" />}
                     </span>

@@ -23,6 +23,7 @@
  */
 import { useLayoutEffect, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
+import { labelOrRaw } from '@/lib/labelOrRaw'
 import { updateKoiosCapabilityTool } from './koiosApi'
 import { useQueryClient } from '@tanstack/react-query'
 import {
@@ -123,7 +124,7 @@ function KindSection({ kind, tools, t, onToggle, onReset }: {
 // filters flat across every domain, and PATCHes one tool at a time (optimistic,
 // reverts on failure).
 export default function KoiosCapabilitiesCard() {
-  const { t } = useTranslation('koios')
+  const { t, i18n } = useTranslation('koios')
   // The shared capabilities cache (one GET app-wide: this card + the pending-action
   // gate read the same entry); optimistic patches write it via setQueryData below.
   const queryClient = useQueryClient()
@@ -197,7 +198,7 @@ export default function KoiosCapabilitiesCard() {
           {groups.length > 1 && (
             <div style={{ margin: '10px 0 4px' }}>
               <SubTabBar active={activeId ?? groups[0].id} onChange={(id) => setActiveId(id as typeof activeId)}
-                tabs={groups.map((g) => ({ id: g.id, label: `${t(`capabilities.groups.${g.id}`, { defaultValue: humaniseGroupId(g.id) })} (${g.tools.length})` }))} />
+                tabs={groups.map((g) => ({ id: g.id, label: `${labelOrRaw(t, i18n, `capabilities.groups.${g.id}`, humaniseGroupId(g.id), 'koios')} (${g.tools.length})` }))} />
             </div>
           )}
           <KindSection kind="read" tools={kindsOf('read')} t={t} onToggle={onToggle} onReset={onReset} />
