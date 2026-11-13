@@ -43,11 +43,11 @@ const mapOutreachStatuses = (res: AxiosResponse): OutreachStatus[] | null => {
 
 // Tenant outreach-status lookup, cached with a seed fallback so the picker never renders empty before the API answers.
 export function useOutreachStatuses() {
-  const { t } = useTranslation('common')
+  const { t, i18n } = useTranslation('common')
   // The endpoint now exists (item 11) — a real 404 should surface in the dev log again.
   const { data: rawStatuses } = useCachedLookup('/outreach-statuses?active=1', mapOutreachStatuses, DEFAULT_OUTREACH_STATUSES)
   // Seeded defaults render in the user language; a tenant value stays as typed (LOOKUP-I18N-1).
-  const statuses = useMemo(() => translateSeedList(t, 'outreachStatuses', rawStatuses), [rawStatuses, t])
+  const statuses = useMemo(() => translateSeedList(t, 'outreachStatuses', rawStatuses, i18n), [rawStatuses, t, i18n])
 
   // Resolve a stored slug to its meta; tolerant of label-stored values
   // useCallback: consumers hang this in memo/effect deps — it must be stable.

@@ -64,7 +64,7 @@ export default function ScopedVacanciesTab({ scope, id, customerId, customerName
   customerName?: string
   scopeName?: string
 }) {
-  const { t } = useTranslation('customers')
+  const { t, i18n } = useTranslation('customers')
   const { openEntity } = useNavigation()
   const auth = useAuth()
   // K7b: same permission the Vacancies page itself gates editing on.
@@ -77,7 +77,7 @@ export default function ScopedVacanciesTab({ scope, id, customerId, customerName
   const paramName = scope === 'department' ? 'customer_department_id' : 'customer_location_id'
   const [adding, setAdding] = useState(false)
   // Seeded-until-resolved status state, shared with VacanciesTab (DRY round 11, CUSTTABS2).
-  const { statusOptions, setStatusOptions, resolved, setResolved } = useSeedVacancyStatusOptions(t, SEED_STATUSES)
+  const { statusOptions, setStatusOptions, resolved, setResolved } = useSeedVacancyStatusOptions(t, i18n, SEED_STATUSES)
   // Tenant default for this filter — the same setting the customer-level tab reads.
   const settings = useAllSettings()
   const settingsLoaded = useSettingsLoaded()

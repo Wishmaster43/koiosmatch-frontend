@@ -9,6 +9,7 @@
  */
 import { useState } from 'react'
 import type { TFunction } from 'i18next'
+import type { KeyChecker } from '@/lib/labelOrRaw'
 import { translateSeedLabel } from '@/lib/lookupSeedI18n'
 
 interface SeedStatus { value: string; label: string }
@@ -18,9 +19,9 @@ interface SeedStatus { value: string; label: string }
 // from the LABEL, not `s.value` — the seed's placeholder slug never lines up with the
 // catalogue's English key), Dutch literal as fallback so a failed/empty lookup never
 // leaves an island, and the map runs once instead of on every render.
-export function useSeedVacancyStatusOptions<T extends SeedStatus>(t: TFunction, seedStatuses: T[]) {
+export function useSeedVacancyStatusOptions<T extends SeedStatus>(t: TFunction, i18n: KeyChecker, seedStatuses: T[]) {
   const [statusOptions, setStatusOptions] = useState<T[]>(() =>
-    seedStatuses.map(s => ({ ...s, label: translateSeedLabel(t, 'vacancyStatuses', s) })))
+    seedStatuses.map(s => ({ ...s, label: translateSeedLabel(t, 'vacancyStatuses', s, i18n) })))
   // Has the REAL lookup answered? The seed list must never decide the default
   // selection (uuid vs seed-slug mismatch — see VacanciesTab's own BUG FIX note).
   const [resolved, setResolved] = useState(false)

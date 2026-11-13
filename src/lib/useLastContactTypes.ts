@@ -44,11 +44,11 @@ export type LastContactScope = 'candidate' | 'contact'
 // The last-contact-type tenant lookup, translating seeded defaults into the user language while a tenant's own value stays exactly as typed.
 // `scope` narrows the list to that entity's global + tagged rows (LAATSTE-CONTACT-SCOPE-1).
 export function useLastContactTypes(scope?: LastContactScope) {
-  const { t } = useTranslation('common')
+  const { t, i18n } = useTranslation('common')
   const url = scope ? `/last-contact-types?active=1&applies_to=${scope}` : '/last-contact-types?active=1'
   const { data: rawTypes } = useCachedLookup(url, mapLastContactTypes, DEFAULT_LAST_CONTACT_TYPES)
   // Seeded defaults render in the user language; a tenant value stays as typed (LOOKUP-I18N-1).
-  const types = useMemo(() => translateSeedList(t, 'lastContactTypes', rawTypes), [rawTypes, t])
+  const types = useMemo(() => translateSeedList(t, 'lastContactTypes', rawTypes, i18n), [rawTypes, t, i18n])
 
   // Resolve a stored value/slug to its label. NEVER prefix `icon` as text: the
   // backend sends lucide icon NAMES ("building"), which rendered as literal words

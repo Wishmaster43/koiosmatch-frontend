@@ -52,10 +52,10 @@ const mapEscalationReasons = (res: AxiosResponse): LookupOption[] | null => mapL
 
 // Tenant escalation-reason lookup, cached with a seed fallback so the picker never renders empty before the API answers.
 export function useEscalationReasons() {
-  const { t } = useTranslation('common')
+  const { t, i18n } = useTranslation('common')
   const { data: rawReasons, loading } = useCachedLookup('/escalation-reasons', mapEscalationReasons, DEFAULT_ESCALATION_REASONS)
   // Seeded defaults render in the user language; a tenant value stays as typed (LOOKUP-I18N-1).
-  const reasons = useMemo(() => translateSeedList(t, 'escalationReasons', rawReasons), [rawReasons, t])
+  const reasons = useMemo(() => translateSeedList(t, 'escalationReasons', rawReasons, i18n), [rawReasons, t, i18n])
 
   // Resolve a stored id/name to its meta (label + colour) — tolerant of either,
   // mirrors useOutreachOutcomes.metaOf. Undefined when nothing matches (the

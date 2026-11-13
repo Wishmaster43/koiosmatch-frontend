@@ -76,12 +76,12 @@ const mapAppointmentTypes = (res: AxiosResponse): AppointmentType[] | null => {
 // `audience` narrows the server list to types plannable for that subject (rows
 // 2/102: GET /appointment-types?audience=candidate|contact); omitted = unfiltered.
 export function useAppointmentTypes(audience?: AppointmentAudience) {
-  const { t } = useTranslation('common')
+  const { t, i18n } = useTranslation('common')
   // The endpoint now exists (item 11) — a real 404 should surface in the dev log again.
   const url = audience ? `/appointment-types?active=1&audience=${audience}` : '/appointment-types?active=1'
   const { data: rawTypes } = useCachedLookup(url, mapAppointmentTypes, DEFAULT_APPOINTMENT_TYPES)
   // Seeded defaults render in the user language; a tenant value stays as typed (LOOKUP-I18N-1).
-  const types = useMemo(() => translateSeedList(t, 'appointmentTypes', rawTypes), [rawTypes, t])
+  const types = useMemo(() => translateSeedList(t, 'appointmentTypes', rawTypes, i18n), [rawTypes, t, i18n])
 
   // Resolve a stored slug to its meta; tolerant of label-stored values.
   const metaOf = (v?: string | null): AppointmentType | undefined =>

@@ -99,7 +99,7 @@ const SEED_STATUSES: StatusOpt[] = [
 // above); the Vacatures list carries its own status filter, seeded until the
 // tenant lookup answers.
 export default function VacanciesTab({ customerId, customerName, params }: { customerId?: Id; customerName?: string; params?: Record<string, unknown> }) {
-  const { t } = useTranslation(['customers', 'applications'])
+  const { t, i18n } = useTranslation(['customers', 'applications'])
   const { openEntity } = useNavigation()
   const auth = useAuth()
   // K7b: same permission the Vacancies page itself gates editing on.
@@ -127,7 +127,7 @@ export default function VacanciesTab({ customerId, customerName, params }: { cus
   // Seeded-until-resolved status state, shared with ScopedVacanciesTab (DRY round 11,
   // CUSTTABS2). `resolved` gates deciding a default before the real lookup answers —
   // see the id/name bug documented below.
-  const { statusOptions, setStatusOptions, resolved, setResolved } = useSeedVacancyStatusOptions(t, SEED_STATUSES)
+  const { statusOptions, setStatusOptions, resolved, setResolved } = useSeedVacancyStatusOptions(t, i18n, SEED_STATUSES)
 
   // Load the tenant vacancy-status lookup once.
   // BUG FIX (Danny 28-07: "Open shows, but it isn't checked??" — while the table said
