@@ -2,9 +2,9 @@ import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { render, screen, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 // Real i18n (this tab has no datetime import to trigger it transitively) —
-// explicit side-effect import so t() resolves real Dutch text, like the rest
+// default import so t() resolves real Dutch text, like the rest
 // of this drawer's tests (never raw keys).
-import '@/i18n'
+import i18n from '@/i18n'
 import ProfileContactTab from './ProfileContactTab'
 import { useProfileRequiredKeys } from './useProfileRequiredKeys'
 import type { Candidate } from '@/types/candidate'
@@ -28,12 +28,12 @@ describe('ProfileContactTab · own fields, own pencil, own request shape', () =>
 
   it('renders exactly its own four fields, nothing from Personal/Address', () => {
     render(<ProfileContactTab c={candidate} />)
-    expect(screen.getByText('E-mailadres')).toBeInTheDocument()
-    expect(screen.getByText('Mobiel')).toBeInTheDocument()
-    expect(screen.getByText('Telefoon')).toBeInTheDocument()
+    expect(screen.getByText(i18n.t('candidates:profile.email'))).toBeInTheDocument()
+    expect(screen.getByText(i18n.t('candidates:profile.mobile'))).toBeInTheDocument()
+    expect(screen.getByText(i18n.t('candidates:profile.phone'))).toBeInTheDocument()
     expect(screen.getByText('LinkedIn')).toBeInTheDocument()
-    expect(screen.queryByText('Geslacht')).toBeNull()
-    expect(screen.queryByText('Straat')).toBeNull()
+    expect(screen.queryByText(i18n.t('candidates:profile.gender'))).toBeNull()
+    expect(screen.queryByText(i18n.t('candidates:profile.street'))).toBeNull()
   })
 
   it('renders the mobile value with only a WhatsApp shortcut (wa.me)', () => {
@@ -61,7 +61,7 @@ describe('ProfileContactTab · own fields, own pencil, own request shape', () =>
     render(<ProfileContactTab c={candidate} />)
     expect(screen.getAllByTitle('Bewerken')).toHaveLength(1)
     await user.click(screen.getByTitle('Bewerken'))
-    expect(screen.getByTitle('Opslaan')).toBeInTheDocument()
+    expect(screen.getByTitle(i18n.t('common:save'))).toBeInTheDocument()
     expect(screen.queryByTitle('Bewerken')).toBeNull()
   })
 
@@ -75,7 +75,7 @@ describe('ProfileContactTab · own fields, own pencil, own request shape', () =>
     // A pasted full profile URL is normalised down to its bare slug AT THE SAVE
     // BOUNDARY (CONTACT-LINKEDIN-1) — the request carries `test`, not the raw typed URL.
     await user.type(linkedinInput, 'linkedin.com/in/test')
-    await user.click(screen.getByTitle('Opslaan'))
+    await user.click(screen.getByTitle(i18n.t('common:save')))
     expect(onSave).toHaveBeenCalledTimes(1)
     expect(onSave).toHaveBeenCalledWith({ email: 'a@b.nl', mobile: '0612345678', phone: '0301234567', linkedin: 'test' })
   })
@@ -87,9 +87,9 @@ describe('ProfileContactTab · own fields, own pencil, own request shape', () =>
     const onSave = vi.fn()
     render(<ProfileContactTab c={empty} onSave={onSave} />)
     await user.click(screen.getByTitle('Bewerken'))
-    await user.click(screen.getByTitle('Opslaan'))
+    await user.click(screen.getByTitle(i18n.t('common:save')))
     expect(onSave).not.toHaveBeenCalled()
-    expect(screen.getAllByText('Verplicht veld').length).toBe(2)
+    expect(screen.getAllByText(i18n.t('common:required')).length).toBe(2)
   })
 })
 
@@ -107,7 +107,7 @@ describe('ProfileContactTab · live format validation (VALIDATIE-LIVE-1)', () =>
     const onSave = vi.fn()
     render(<ProfileContactTab c={candidate} onSave={onSave} />)
     await user.click(screen.getByTitle('Bewerken'))
-    const emailRow = screen.getByText('E-mailadres').parentElement as HTMLElement
+    const emailRow = screen.getByText(i18n.t('candidates:profile.email')).parentElement as HTMLElement
     const emailInput = within(emailRow).getByRole('textbox')
     await user.clear(emailInput)
     await user.type(emailInput, 'not-an-email')
@@ -120,23 +120,23 @@ describe('ProfileContactTab · live format validation (VALIDATIE-LIVE-1)', () =>
     const onSave = vi.fn()
     render(<ProfileContactTab c={candidate} onSave={onSave} />)
     await user.click(screen.getByTitle('Bewerken'))
-    const phoneRow = screen.getByText('Telefoon').parentElement as HTMLElement
+    const phoneRow = screen.getByText(i18n.t('candidates:profile.phone')).parentElement as HTMLElement
     const phoneInput = within(phoneRow).getByRole('textbox') as HTMLInputElement
     await user.clear(phoneInput)
     await user.type(phoneInput, '06-12')
-    await user.click(screen.getByTitle('Opslaan'))
+    await user.click(screen.getByTitle(i18n.t('common:save')))
     expect(onSave).not.toHaveBeenCalled()
     expect(phoneInput.value).toBe('06-12')
     expect(await screen.findByText(/validation.phoneFormat|Voer een geldig telefoonnummer/)).toBeInTheDocument()
     // Still in edit mode — nothing was silently discarded.
-    expect(screen.getByTitle('Opslaan')).toBeInTheDocument()
+    expect(screen.getByTitle(i18n.t('common:save'))).toBeInTheDocument()
   })
 
   it('the error clears live as soon as the value becomes valid again, without a second blur', async () => {
     const user = userEvent.setup()
     render(<ProfileContactTab c={candidate} onSave={vi.fn()} />)
     await user.click(screen.getByTitle('Bewerken'))
-    const mobileRow = screen.getByText('Mobiel').parentElement as HTMLElement
+    const mobileRow = screen.getByText(i18n.t('candidates:profile.mobile')).parentElement as HTMLElement
     const mobileInput = within(mobileRow).getByRole('textbox')
     await user.clear(mobileInput)
     await user.type(mobileInput, '123')
@@ -155,7 +155,7 @@ describe('ProfileContactTab · live format validation (VALIDATIE-LIVE-1)', () =>
     const linkedinRow = screen.getByText('LinkedIn').parentElement as HTMLElement
     const linkedinInput = within(linkedinRow).getByRole('textbox')
     await user.type(linkedinInput, 'jane doe')
-    await user.click(screen.getByTitle('Opslaan'))
+    await user.click(screen.getByTitle(i18n.t('common:save')))
     expect(onSave).not.toHaveBeenCalled()
     expect(await screen.findByText(/validation.linkedinFormat|geldige LinkedIn|LinkedIn-/)).toBeInTheDocument()
   })

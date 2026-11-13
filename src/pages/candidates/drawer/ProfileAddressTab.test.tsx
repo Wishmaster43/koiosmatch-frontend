@@ -2,9 +2,9 @@ import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { render, screen, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 // Real i18n (this tab has no datetime import to trigger it transitively, unlike
-// Personal) — explicit side-effect import so t() resolves real Dutch text, like
+// Personal) — default import so t() resolves real Dutch text, like
 // the rest of this drawer's tests (never raw keys).
-import '@/i18n'
+import i18n from '@/i18n'
 import ProfileAddressTab from './ProfileAddressTab'
 import { useProfileRequiredKeys } from './useProfileRequiredKeys'
 import type { Candidate } from '@/types/candidate'
@@ -33,7 +33,7 @@ describe('ProfileAddressTab · own fields, composed line, own request shape', ()
     render(<ProfileAddressTab c={candidate} />)
     expect(screen.getByText('Kerkstraat 12-a, 1234 AB Utrecht')).toBeInTheDocument()
     // The structured child fields aren't separately visible in read mode.
-    expect(screen.queryByText('Huisnummer')).toBeNull()
+    expect(screen.queryByText(i18n.t('candidates:profile.houseNumber'))).toBeNull()
   })
 
   // I18N-1: the optional second line shows in read mode too, between the street
@@ -47,7 +47,7 @@ describe('ProfileAddressTab · own fields, composed line, own request shape', ()
     const user = userEvent.setup()
     const writeTextSpy = vi.spyOn(navigator.clipboard, 'writeText')
     render(<ProfileAddressTab c={candidate} />)
-    await user.click(screen.getByTitle('Kopieer adres'))
+    await user.click(screen.getByTitle(i18n.t('common:copyAddress.copy')))
     expect(writeTextSpy).toHaveBeenCalledWith('Kerkstraat 12-a, 1234 AB Utrecht')
   })
 
@@ -55,13 +55,13 @@ describe('ProfileAddressTab · own fields, composed line, own request shape', ()
     const user = userEvent.setup()
     render(<ProfileAddressTab c={candidate} />)
     await user.click(screen.getByTitle('Bewerken'))
-    expect(screen.getByText('Straat')).toBeInTheDocument()
-    expect(screen.getByText('Huisnummer')).toBeInTheDocument()
-    expect(screen.getByText('Toevoeging')).toBeInTheDocument()
-    expect(screen.getByText('Postcode')).toBeInTheDocument()
-    expect(screen.getByText('Plaats')).toBeInTheDocument()
-    expect(screen.getByText('Provincie')).toBeInTheDocument()
-    expect(screen.getByText('Land')).toBeInTheDocument()
+    expect(screen.getByText(i18n.t('candidates:profile.street'))).toBeInTheDocument()
+    expect(screen.getByText(i18n.t('candidates:profile.houseNumber'))).toBeInTheDocument()
+    expect(screen.getByText(i18n.t('candidates:profile.houseNumberSuffix'))).toBeInTheDocument()
+    expect(screen.getByText(i18n.t('candidates:profile.postalCode'))).toBeInTheDocument()
+    expect(screen.getByText(i18n.t('candidates:profile.city'))).toBeInTheDocument()
+    expect(screen.getByText(i18n.t('candidates:profile.province'))).toBeInTheDocument()
+    expect(screen.getByText(i18n.t('candidates:profile.country'))).toBeInTheDocument()
     // The composed read-only line is gone while editing.
     expect(screen.queryByText('Kerkstraat 12-a, 1234 AB Utrecht')).toBeNull()
   })
@@ -71,7 +71,7 @@ describe('ProfileAddressTab · own fields, composed line, own request shape', ()
     render(<ProfileAddressTab c={candidate} />)
     expect(screen.getAllByTitle('Bewerken')).toHaveLength(1)
     await user.click(screen.getByTitle('Bewerken'))
-    expect(screen.getByTitle('Opslaan')).toBeInTheDocument()
+    expect(screen.getByTitle(i18n.t('common:save'))).toBeInTheDocument()
     expect(screen.queryByTitle('Bewerken')).toBeNull()
   })
 
@@ -80,11 +80,11 @@ describe('ProfileAddressTab · own fields, composed line, own request shape', ()
     const onSave = vi.fn()
     render(<ProfileAddressTab c={candidate} onSave={onSave} />)
     await user.click(screen.getByTitle('Bewerken'))
-    const cityRow = screen.getByText('Plaats').parentElement as HTMLElement
+    const cityRow = screen.getByText(i18n.t('candidates:profile.city')).parentElement as HTMLElement
     const cityInput = within(cityRow).getByRole('textbox') as HTMLInputElement
     await user.clear(cityInput)
     await user.type(cityInput, 'Amersfoort')
-    await user.click(screen.getByTitle('Opslaan'))
+    await user.click(screen.getByTitle(i18n.t('common:save')))
     expect(onSave).toHaveBeenCalledTimes(1)
     expect(onSave).toHaveBeenCalledWith({
       street: 'Kerkstraat', houseNumber: '12', houseNumberSuffix: 'a', addressLine2: '',
@@ -96,7 +96,7 @@ describe('ProfileAddressTab · own fields, composed line, own request shape', ()
     const user = userEvent.setup()
     render(<ProfileAddressTab c={candidate} />)
     await user.click(screen.getByTitle('Bewerken'))
-    const provinceRow = screen.getByText('Provincie').parentElement as HTMLElement
+    const provinceRow = screen.getByText(i18n.t('candidates:profile.province')).parentElement as HTMLElement
     // DROPDOWN-CLEAR-1: filter to the trigger button (has aria-haspopup), not the clear X.
     const provinceButtons = within(provinceRow).getAllByRole('button')
     const provinceTrigger = provinceButtons.find(btn => btn.hasAttribute('aria-haspopup'))!
@@ -110,9 +110,9 @@ describe('ProfileAddressTab · own fields, composed line, own request shape', ()
     const onSave = vi.fn()
     render(<ProfileAddressTab c={empty} onSave={onSave} />)
     await user.click(screen.getByTitle('Bewerken'))
-    await user.click(screen.getByTitle('Opslaan'))
+    await user.click(screen.getByTitle(i18n.t('common:save')))
     expect(onSave).not.toHaveBeenCalled()
-    expect(screen.getAllByText('Verplicht veld').length).toBe(3)
+    expect(screen.getAllByText(i18n.t('common:required')).length).toBe(3)
   })
 
   it('province picker is searchable and pick-only (allowCreate=false)', async () => {
@@ -120,9 +120,9 @@ describe('ProfileAddressTab · own fields, composed line, own request shape', ()
     const { container } = render(<ProfileAddressTab c={{ ...candidate, province: '' } as unknown as Candidate} />)
     await user.click(screen.getByTitle('Bewerken'))
     expect(container.querySelectorAll('select')).toHaveLength(0)
-    const provinceRow = screen.getByText('Provincie').parentElement as HTMLElement
+    const provinceRow = screen.getByText(i18n.t('candidates:profile.province')).parentElement as HTMLElement
     await user.click(within(provinceRow).getByRole('button'))
-    await user.type(screen.getByPlaceholderText('Selecteer'), 'Utr')
+    await user.type(screen.getByPlaceholderText(i18n.t('common:select')), 'Utr')
     expect(screen.getByRole('button', { name: 'Utrecht' })).toBeInTheDocument()
     expect(screen.queryByRole('button', { name: 'Zuid-Holland' })).toBeNull()
   })

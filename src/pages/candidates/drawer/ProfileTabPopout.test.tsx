@@ -13,6 +13,7 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
+import i18n from '@/i18n'
 import ProfileTab from './ProfileTab'
 import { notifyError } from '@/lib/notify'
 import type { Candidate } from '@/types/candidate'
@@ -41,7 +42,7 @@ describe('ProfileTab · profile-text pop-out', () => {
     const open = vi.fn(() => ({}) as Window)
     vi.stubGlobal('open', open)
     render(<ProfileTab c={candidate} />)
-    await user.click(screen.getByTitle('Open op tweede scherm'))
+    await user.click(screen.getByTitle(i18n.t('common:openSecondScreen')))
     expect(open).toHaveBeenCalledWith('/popout/text/candidate/c1/summary', 'koios-text-candidate-c1-summary', expect.any(String))
     vi.unstubAllGlobals()
   })
@@ -51,7 +52,7 @@ describe('ProfileTab · profile-text pop-out', () => {
     vi.stubGlobal('open', vi.fn(() => ({}) as Window))
     render(<ProfileTab c={candidate} />)
     expect(screen.queryByTestId('summary-editor')).toBeNull()
-    await user.click(screen.getByTitle('Open op tweede scherm'))
+    await user.click(screen.getByTitle(i18n.t('common:openSecondScreen')))
     expect(screen.getByTestId('summary-editor')).toBeInTheDocument()
     vi.unstubAllGlobals()
   })
@@ -60,7 +61,7 @@ describe('ProfileTab · profile-text pop-out', () => {
     const user = userEvent.setup()
     vi.stubGlobal('open', vi.fn(() => null))
     render(<ProfileTab c={candidate} />)
-    await user.click(screen.getByTitle('Open op tweede scherm'))
+    await user.click(screen.getByTitle(i18n.t('common:openSecondScreen')))
     expect(notifyError).toHaveBeenCalled()
     vi.unstubAllGlobals()
   })

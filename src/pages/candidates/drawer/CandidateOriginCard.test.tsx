@@ -54,9 +54,9 @@ describe('CandidateOriginCard · the three Herkomst lines', () => {
     const { container } = render(<CandidateOriginCard c={candidate({
       source: 'werkzoeken', createdBy: { id: 7, name: 'Laura Yesway' }, created: '2025-10-29T16:03:57',
     })} />)
-    expect(screen.queryByTitle('Bewerken')).toBeNull()
-    expect(screen.queryByTitle('Opslaan')).toBeNull()
-    expect(screen.queryByTitle('Annuleren')).toBeNull()
+    expect(screen.queryByTitle(i18n.t('common:edit'))).toBeNull()
+    expect(screen.queryByTitle(i18n.t('common:save'))).toBeNull()
+    expect(screen.queryByTitle(i18n.t('common:cancel'))).toBeNull()
     expect(container.querySelectorAll('button')).toHaveLength(0)
     expect(container.querySelectorAll('input, textarea, select')).toHaveLength(0)
   })

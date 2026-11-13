@@ -40,17 +40,17 @@ describe('ProfilePersonalTab · own fields, own pencil, own request shape', () =
 
   it('renders exactly its own five fields, no bron and nothing from Address/Contact', () => {
     render(<ProfilePersonalTab c={candidate} />)
-    expect(screen.getByText('Geslacht')).toBeInTheDocument()
+    expect(screen.getByText(i18n.t('candidates:profile.gender'))).toBeInTheDocument()
     // AVG-RET-2-TAAL-1: the additive preferred-language row (empty = agency default).
-    expect(screen.getByText('Voorkeurstaal')).toBeInTheDocument()
-    expect(screen.getByText('Bureaustandaard')).toBeInTheDocument()
-    expect(screen.getByText('Nationaliteit')).toBeInTheDocument()
-    expect(screen.getByText('Geboortedatum')).toBeInTheDocument()
-    expect(screen.getByText('Geboorteplaats')).toBeInTheDocument()
+    expect(screen.getByText(i18n.t('candidates:profile.preferredLanguage'))).toBeInTheDocument()
+    expect(screen.getByText(i18n.t('candidates:profile.preferredLanguageDefault'))).toBeInTheDocument()
+    expect(screen.getByText(i18n.t('candidates:profile.nationality'))).toBeInTheDocument()
+    expect(screen.getByText(i18n.t('candidates:profile.dob'))).toBeInTheDocument()
+    expect(screen.getByText(i18n.t('candidates:profile.placeOfBirth'))).toBeInTheDocument()
     // Bron is gone from this tab entirely — it lives in CandidateOriginCard now.
     expect(screen.queryByText(SOURCE_LABEL)).toBeNull()
-    expect(screen.queryByText('Straat')).toBeNull()
-    expect(screen.queryByText('E-mailadres')).toBeNull()
+    expect(screen.queryByText(i18n.t('candidates:profile.street'))).toBeNull()
+    expect(screen.queryByText(i18n.t('candidates:profile.email'))).toBeNull()
   })
 
   it('the pencil flips only this tab into edit mode (save/cancel replace it)', async () => {
@@ -58,8 +58,8 @@ describe('ProfilePersonalTab · own fields, own pencil, own request shape', () =
     render(<ProfilePersonalTab c={candidate} />)
     expect(screen.getAllByTitle('Bewerken')).toHaveLength(1)
     await user.click(screen.getByTitle('Bewerken'))
-    expect(screen.getByTitle('Opslaan')).toBeInTheDocument()
-    expect(screen.getByTitle('Annuleren')).toBeInTheDocument()
+    expect(screen.getByTitle(i18n.t('common:save'))).toBeInTheDocument()
+    expect(screen.getByTitle(i18n.t('common:cancel'))).toBeInTheDocument()
     expect(screen.queryByTitle('Bewerken')).toBeNull()
   })
 
@@ -68,11 +68,11 @@ describe('ProfilePersonalTab · own fields, own pencil, own request shape', () =
     const onSave = vi.fn()
     render(<ProfilePersonalTab c={candidate} onSave={onSave} />)
     await user.click(screen.getByTitle('Bewerken'))
-    const placeRow = screen.getByText('Geboorteplaats').parentElement as HTMLElement
+    const placeRow = screen.getByText(i18n.t('candidates:profile.placeOfBirth')).parentElement as HTMLElement
     const placeInput = within(placeRow).getByRole('textbox') as HTMLInputElement
     await user.clear(placeInput)
     await user.type(placeInput, 'Amsterdam')
-    await user.click(screen.getByTitle('Opslaan'))
+    await user.click(screen.getByTitle(i18n.t('common:save')))
     expect(onSave).toHaveBeenCalledTimes(1)
     // KANDIDAAT-PERSOONLIJK-422: untouched keys stay out of the PATCH, so a seeded value
     // that drifted from its lookup can no longer block an unrelated edit. No `source` key
@@ -85,7 +85,7 @@ describe('ProfilePersonalTab · own fields, own pencil, own request shape', () =
     const onSave = vi.fn()
     render(<ProfilePersonalTab c={candidate} onSave={onSave} />)
     await user.click(screen.getByTitle('Bewerken'))
-    await user.click(screen.getByTitle('Opslaan'))
+    await user.click(screen.getByTitle(i18n.t('common:save')))
     expect(onSave).not.toHaveBeenCalled()
     expect(screen.getByTitle('Bewerken')).toBeInTheDocument()
   })
@@ -96,9 +96,9 @@ describe('ProfilePersonalTab · own fields, own pencil, own request shape', () =
     const onSave = vi.fn()
     render(<ProfilePersonalTab c={candidate} onSave={onSave} />)
     await user.click(screen.getByTitle('Bewerken'))
-    await user.click(screen.getByRole('button', { name: 'Bureaustandaard' }))
+    await user.click(screen.getByRole('button', { name: i18n.t('candidates:profile.preferredLanguageDefault') }))
     await user.click(await screen.findByRole('button', { name: /^Pools \(PL\)/ }))
-    await user.click(screen.getByTitle('Opslaan'))
+    await user.click(screen.getByTitle(i18n.t('common:save')))
     // Only the language travels; nationality/gender/dob stay out of the body.
     expect(onSave).toHaveBeenCalledWith({ preferredLanguage: 'pl' })
   })
@@ -111,7 +111,7 @@ describe('ProfilePersonalTab · own fields, own pencil, own request shape', () =
     expect(screen.getByText('Pools (PL)')).toBeInTheDocument()
     await user.click(screen.getByTitle('Bewerken'))
     await user.click(screen.getByRole('button', { name: 'Voorkeurstaal wissen' }))
-    await user.click(screen.getByTitle('Opslaan'))
+    await user.click(screen.getByTitle(i18n.t('common:save')))
     expect(onSave).toHaveBeenCalledWith(expect.objectContaining({ preferredLanguage: '' }))
   })
 
@@ -120,11 +120,11 @@ describe('ProfilePersonalTab · own fields, own pencil, own request shape', () =
     const onSave = vi.fn()
     render(<ProfilePersonalTab c={candidate} onSave={onSave} />)
     await user.click(screen.getByTitle('Bewerken'))
-    const placeRow = screen.getByText('Geboorteplaats').parentElement as HTMLElement
+    const placeRow = screen.getByText(i18n.t('candidates:profile.placeOfBirth')).parentElement as HTMLElement
     const placeInput = within(placeRow).getByRole('textbox') as HTMLInputElement
     await user.clear(placeInput)
     await user.type(placeInput, 'Rotterdam')
-    await user.click(screen.getByTitle('Annuleren'))
+    await user.click(screen.getByTitle(i18n.t('common:cancel')))
     expect(onSave).not.toHaveBeenCalled()
     expect(screen.getByText('Utrecht')).toBeInTheDocument()
   })
@@ -136,9 +136,9 @@ describe('ProfilePersonalTab · own fields, own pencil, own request shape', () =
     const onSave = vi.fn()
     render(<ProfilePersonalTab c={empty} onSave={onSave} />)
     await user.click(screen.getByTitle('Bewerken'))
-    await user.click(screen.getByTitle('Opslaan'))
+    await user.click(screen.getByTitle(i18n.t('common:save')))
     expect(onSave).not.toHaveBeenCalled()
-    expect(screen.getAllByText('Verplicht veld').length).toBeGreaterThanOrEqual(1)
+    expect(screen.getAllByText(i18n.t('common:required')).length).toBeGreaterThanOrEqual(1)
   })
 
   it('searchable dropdowns are pick-only (allowCreate=false) — no plain <select>, no create-on-type', async () => {
@@ -146,9 +146,9 @@ describe('ProfilePersonalTab · own fields, own pencil, own request shape', () =
     const { container } = render(<ProfilePersonalTab c={{ ...candidate, gender: '', nationality: '' } as unknown as Candidate} />)
     await user.click(screen.getByTitle('Bewerken'))
     expect(container.querySelectorAll('select')).toHaveLength(0)
-    const natField = screen.getByText('Nationaliteit').parentElement as HTMLElement
+    const natField = screen.getByText(i18n.t('candidates:profile.nationality')).parentElement as HTMLElement
     await user.click(within(natField).getByRole('button'))
-    await user.type(screen.getByPlaceholderText('Selecteer'), 'Belg')
+    await user.type(screen.getByPlaceholderText(i18n.t('common:select')), 'Belg')
     expect(screen.getByRole('button', { name: 'Belgisch' })).toBeInTheDocument()
     expect(screen.queryByRole('button', { name: 'Nederlands' })).toBeNull()
   })
@@ -184,13 +184,13 @@ describe('ProfilePersonalTab · dob field sends the LOCAL calendar day, never UT
     const noDob = { id: 3, gender: 'male', nationality: 'Nederlands', dob: '', placeOfBirth: '', phase: 'candidate' } as unknown as Candidate
     render(<ProfilePersonalTab c={noDob} onSave={onSave} />)
     await user.click(screen.getByTitle('Bewerken'))
-    const dobRow = screen.getByText('Geboortedatum').parentElement as HTMLElement
+    const dobRow = screen.getByText(i18n.t('candidates:profile.dob')).parentElement as HTMLElement
     await user.click(within(dobRow).getByRole('textbox'))
     // The calendar renders into the shared datepicker-portal, outside this row.
     const todayCell = document.querySelector('.react-datepicker__day--today') as HTMLElement
     expect(todayCell).toBeTruthy()
     await user.click(todayCell)
-    await user.click(screen.getByTitle('Opslaan'))
+    await user.click(screen.getByTitle(i18n.t('common:save')))
     expect(onSave).toHaveBeenCalledWith(expect.objectContaining({ dob: '2026-01-15' }))
   })
 })

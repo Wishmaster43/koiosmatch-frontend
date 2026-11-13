@@ -2,7 +2,7 @@ import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 import { render, screen, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 // Real i18n so t()/defaultValue resolve real Dutch text, like the rest of this drawer's tests.
-import '@/i18n'
+import i18n from '@/i18n'
 import WorkPermitBlock from './WorkPermitBlock'
 import { useWorkPermitVisibility } from './useWorkPermitVisibility'
 import type { Candidate } from '@/types/candidate'
@@ -42,9 +42,9 @@ describe('WorkPermitBlock · rendering + save (KAND-WERKVERGUNNING-2)', () => {
 
   it('shows the group title and both fields when visible', () => {
     render(<WorkPermitBlock c={candidate} />)
-    expect(screen.getByText('Werkvergunning')).toBeInTheDocument()
-    expect(screen.getByText('Type werkvergunning')).toBeInTheDocument()
-    expect(screen.getByText('Geldig tot')).toBeInTheDocument()
+    expect(screen.getByText(i18n.t('candidates:profile.groupWorkPermit'))).toBeInTheDocument()
+    expect(screen.getByText(i18n.t('candidates:profile.workPermitType'))).toBeInTheDocument()
+    expect(screen.getByText(i18n.t('candidates:profile.workPermitValidUntil'))).toBeInTheDocument()
   })
 
   it('the pencil flips the card into edit mode (save/cancel replace it)', async () => {
@@ -52,8 +52,8 @@ describe('WorkPermitBlock · rendering + save (KAND-WERKVERGUNNING-2)', () => {
     render(<WorkPermitBlock c={candidate} />)
     expect(screen.getAllByTitle('Bewerken')).toHaveLength(1)
     await user.click(screen.getByTitle('Bewerken'))
-    expect(screen.getByTitle('Opslaan')).toBeInTheDocument()
-    expect(screen.getByTitle('Annuleren')).toBeInTheDocument()
+    expect(screen.getByTitle(i18n.t('common:save'))).toBeInTheDocument()
+    expect(screen.getByTitle(i18n.t('common:cancel'))).toBeInTheDocument()
     expect(screen.queryByTitle('Bewerken')).toBeNull()
   })
 
@@ -65,9 +65,9 @@ describe('WorkPermitBlock · rendering + save (KAND-WERKVERGUNNING-2)', () => {
     const { container } = render(<WorkPermitBlock c={candidate} />)
     await user.click(screen.getByTitle('Bewerken'))
     expect(container.querySelectorAll('select')).toHaveLength(0)
-    const typeField = screen.getByText('Type werkvergunning').parentElement as HTMLElement
+    const typeField = screen.getByText(i18n.t('candidates:profile.workPermitType')).parentElement as HTMLElement
     await user.click(within(typeField).getByRole('button'))
-    await user.type(screen.getByPlaceholderText('Selecteer'), 'Gecombineerde')
+    await user.type(screen.getByPlaceholderText(i18n.t('common:select')), 'Gecombineerde')
     expect(screen.getByRole('button', { name: 'Gecombineerde vergunning (GVVA)' })).toBeInTheDocument()
     expect(screen.queryByRole('button', { name: 'Tewerkstellingsvergunning (TWV)' })).toBeNull()
   })
@@ -80,10 +80,10 @@ describe('WorkPermitBlock · rendering + save (KAND-WERKVERGUNNING-2)', () => {
     const onSave = vi.fn()
     render(<WorkPermitBlock c={candidate} onSave={onSave} />)
     await user.click(screen.getByTitle('Bewerken'))
-    const typeField = screen.getByText('Type werkvergunning').parentElement as HTMLElement
+    const typeField = screen.getByText(i18n.t('candidates:profile.workPermitType')).parentElement as HTMLElement
     await user.click(within(typeField).getByRole('button'))
     await user.click(screen.getByRole('button', { name: 'Gecombineerde vergunning (GVVA)' }))
-    await user.click(screen.getByTitle('Opslaan'))
+    await user.click(screen.getByTitle(i18n.t('common:save')))
     expect(onSave).toHaveBeenCalledTimes(1)
     expect(onSave).toHaveBeenCalledWith({ workPermitType: 'gvva', workPermitValidUntil: '' })
   })
@@ -96,15 +96,15 @@ describe('WorkPermitBlock · rendering + save (KAND-WERKVERGUNNING-2)', () => {
     const onSave = vi.fn()
     render(<WorkPermitBlock c={candidate} onSave={onSave} />)
     await user.click(screen.getByTitle('Bewerken'))
-    const typeField = screen.getByText('Type werkvergunning').parentElement as HTMLElement
+    const typeField = screen.getByText(i18n.t('candidates:profile.workPermitType')).parentElement as HTMLElement
     await user.click(within(typeField).getAllByRole('button')[0])
     await user.click(screen.getByRole('button', { name: 'Gecombineerde vergunning (GVVA)' }))
     // Real i18n resolves clearField('...') to Dutch "<field> wissen" here (unlike
     // PlanIntakeModal.test.tsx, which mocks t() to the raw key).
     const clear = await screen.findByTitle(/wissen/i)
     await user.click(clear)
-    expect(screen.getByText('Selecteer')).toBeInTheDocument()
-    await user.click(screen.getByTitle('Opslaan'))
+    expect(screen.getByText(i18n.t('common:select'))).toBeInTheDocument()
+    await user.click(screen.getByTitle(i18n.t('common:save')))
     expect(onSave).toHaveBeenCalledWith(expect.objectContaining({ workPermitType: '' }))
   })
 
@@ -116,12 +116,12 @@ describe('WorkPermitBlock · rendering + save (KAND-WERKVERGUNNING-2)', () => {
     const withValue = { ...candidate, work_permit_type: 'twv' } as unknown as Candidate
     render(<WorkPermitBlock c={withValue} onSave={onSave} />)
     await user.click(screen.getByTitle('Bewerken'))
-    const typeField = screen.getByText('Type werkvergunning').parentElement as HTMLElement
+    const typeField = screen.getByText(i18n.t('candidates:profile.workPermitType')).parentElement as HTMLElement
     // CLEAR-SWEEP note: with a value already set (twv), the field now also renders a
     // clear cross alongside its trigger — index [0] is always the trigger itself.
     await user.click(within(typeField).getAllByRole('button')[0])
     await user.click(screen.getByRole('button', { name: 'Gecombineerde vergunning (GVVA)' }))
-    await user.click(screen.getByTitle('Annuleren'))
+    await user.click(screen.getByTitle(i18n.t('common:cancel')))
     expect(onSave).not.toHaveBeenCalled()
     expect(screen.getByText('Tewerkstellingsvergunning (TWV)')).toBeInTheDocument()
   })
@@ -212,13 +212,13 @@ describe('WorkPermitBlock · valid-until field sends the LOCAL calendar day, nev
     const candidate = { id: 1, nationality: 'Marokkaans' } as unknown as Candidate
     render(<WorkPermitBlock c={candidate} onSave={onSave} />)
     await user.click(screen.getByTitle('Bewerken'))
-    const validUntilRow = screen.getByText('Geldig tot').parentElement as HTMLElement
+    const validUntilRow = screen.getByText(i18n.t('candidates:profile.workPermitValidUntil')).parentElement as HTMLElement
     await user.click(within(validUntilRow).getByRole('textbox'))
     // The calendar renders into the shared datepicker-portal, outside this row.
     const todayCell = document.querySelector('.react-datepicker__day--today') as HTMLElement
     expect(todayCell).toBeTruthy()
     await user.click(todayCell)
-    await user.click(screen.getByTitle('Opslaan'))
+    await user.click(screen.getByTitle(i18n.t('common:save')))
     expect(onSave).toHaveBeenCalledWith(expect.objectContaining({ workPermitValidUntil: '2026-01-15' }))
   })
 })

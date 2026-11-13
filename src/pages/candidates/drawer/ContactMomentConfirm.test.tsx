@@ -6,7 +6,7 @@
  */
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { render, screen, fireEvent, waitFor } from '@testing-library/react'
-import '@/i18n'
+import i18n from '@/i18n'
 import ProfileContactTab from './ProfileContactTab'
 import { useProfileRequiredKeys } from './useProfileRequiredKeys'
 import type { Candidate } from '@/types/candidate'
@@ -48,7 +48,7 @@ describe('ProfileContactTab · B15-flow contact-moment confirm', () => {
   it('dismissing the banner never fires a request', () => {
     render(<ProfileContactTab c={candidate} />)
     fireEvent.click(screen.getByText('a@b.nl'))
-    fireEvent.click(screen.getByText('Niet nu'))
+    fireEvent.click(screen.getByText(i18n.t('candidates:profile.contactMomentDismiss')))
     expect(screen.queryByTestId('contact-moment-confirm-email')).toBeNull()
     expect(postMock).not.toHaveBeenCalled()
   })

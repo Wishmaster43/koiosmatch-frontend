@@ -1,6 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { render, screen, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
+import i18n from '@/i18n'
 import ProfileTab from './ProfileTab'
 import { useWorkPermitVisibility } from './useWorkPermitVisibility'
 import type { Candidate } from '@/types/candidate'
@@ -48,19 +49,19 @@ describe('ProfileTab · one tab, one pencil per card', () => {
   it('shows all three field cards at once — no sub-tab strip', () => {
     render(<ProfileTab c={candidate} />)
     expect(screen.queryAllByRole('tab')).toHaveLength(0)
-    expect(screen.getByText('Geslacht')).toBeInTheDocument()
+    expect(screen.getByText(i18n.t('candidates:profile.gender'))).toBeInTheDocument()
     expect(screen.getByText('Kerkstraat 12, 1234 AB Utrecht')).toBeInTheDocument()
-    expect(screen.getByText('E-mailadres')).toBeInTheDocument()
+    expect(screen.getByText(i18n.t('candidates:profile.email'))).toBeInTheDocument()
   })
 
   it('gives each card its own pencil, plus one for the profile text — Herkomst adds a card but no pencil', () => {
     render(<ProfileTab c={{ ...candidate, summary: '<p>Hello</p>' } as unknown as Candidate} />)
-    expect(screen.getByText('Profieltekst')).toBeInTheDocument()
+    expect(screen.getByText(i18n.t('candidates:profile.summary'))).toBeInTheDocument()
     // Herkomst (CandidateOriginCard) is mounted too, but it is read-only by
     // design (Danny 09-08, "Herkomst geen potloodje") — it adds a CARD, not a
     // pencil, so the count stays exactly what it was before it existed:
     // Persoonlijk + Adres + Contact + de profieltekst.
-    expect(screen.getByText('Herkomst')).toBeInTheDocument()
+    expect(screen.getByText(i18n.t('candidates:profile.groupOrigin'))).toBeInTheDocument()
     expect(screen.getAllByTitle('Bewerken')).toHaveLength(4)
   })
 
@@ -108,7 +109,7 @@ describe('ProfileTab · one tab, one pencil per card', () => {
   // labels, so it survives a label rewording.
   it('renders source, creator and creation date together in the Herkomst block', () => {
     render(<ProfileTab c={{ ...candidate, source: 'werkzoeken', createdBy: { id: 7, name: 'Laura Yesway' }, created: '2025-10-29T16:03:57' } as unknown as Candidate} />)
-    expect(screen.getByText('Herkomst')).toBeInTheDocument()
+    expect(screen.getByText(i18n.t('candidates:profile.groupOrigin'))).toBeInTheDocument()
     expect(screen.getByText('werkzoeken')).toBeInTheDocument()
     expect(screen.getByText('Laura Yesway')).toBeInTheDocument()
     expect(screen.getByText(/29-10-2025/)).toBeInTheDocument()
@@ -119,7 +120,7 @@ describe('ProfileTab · one tab, one pencil per card', () => {
     const onEditSave = vi.fn()
     render(<ProfileTab c={candidate} onEditSave={onEditSave} />)
     await user.click(screen.getAllByTitle('Bewerken')[0])
-    const placeRow = screen.getByText('Geboorteplaats').parentElement as HTMLElement
+    const placeRow = screen.getByText(i18n.t('candidates:profile.placeOfBirth')).parentElement as HTMLElement
     const placeInput = within(placeRow).getByRole('textbox') as HTMLInputElement
     await user.clear(placeInput)
     await user.type(placeInput, 'Amsterdam')
@@ -144,13 +145,13 @@ describe('ProfileTab · WorkPermitBlock (KAND-WERKVERGUNNING-2)', () => {
     render(<ProfileTab c={candidate} />)
     // Persoonlijk + Adres + Contact + de profieltekst.
     expect(screen.getAllByTitle('Bewerken')).toHaveLength(4)
-    expect(screen.queryByText('Werkvergunning')).toBeNull()
+    expect(screen.queryByText(i18n.t('candidates:profile.groupWorkPermit'))).toBeNull()
   })
 
   it('shows an extra card when the rule says the permit question is relevant', () => {
     vi.mocked(useWorkPermitVisibility).mockReturnValue(true)
     render(<ProfileTab c={candidate} />)
-    expect(screen.getByText('Werkvergunning')).toBeInTheDocument()
+    expect(screen.getByText(i18n.t('candidates:profile.groupWorkPermit'))).toBeInTheDocument()
     // Persoonlijk + Werkvergunning + Adres + Contact + de profieltekst.
     expect(screen.getAllByTitle('Bewerken')).toHaveLength(5)
   })

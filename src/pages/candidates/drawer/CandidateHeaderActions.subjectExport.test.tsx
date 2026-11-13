@@ -24,7 +24,7 @@ describe('CandidateHeaderActions — right-of-access export', () => {
 
   it('is absent without the permission', () => {
     render(<CandidateHeaderActions {...base} />)
-    expect(screen.queryByRole('button', { name: 'Exporteer persoonsgegevens (inzagerecht)' })).toBeNull()
+    expect(screen.queryByRole('button', { name: i18n.t('candidates:drawer.subjectExport') })).toBeNull()
   })
 
   it('POSTs the exact subject-access request and opens the signed download', async () => {
@@ -35,7 +35,7 @@ describe('CandidateHeaderActions — right-of-access export', () => {
     Object.defineProperty(window, 'location', { configurable: true, value: { ...realLocation, assign } })
     const user = userEvent.setup()
     render(<CandidateHeaderActions {...base} canSubjectExport />)
-    await user.click(screen.getByRole('button', { name: 'Exporteer persoonsgegevens (inzagerecht)' }))
+    await user.click(screen.getByRole('button', { name: i18n.t('candidates:drawer.subjectExport') }))
     expect(api.post).toHaveBeenCalledWith('/exports/subject-access', { subject_type: 'candidate', subject_id: 'cand-1' })
     // Same-tab navigation (popup-blocker safe); window.open is never used after the await.
     expect(assign).toHaveBeenCalledWith('https://api.test/exports/signed/abc')
@@ -49,7 +49,7 @@ describe('CandidateHeaderActions — right-of-access export', () => {
     vi.mocked(api.post).mockRejectedValue({ response: { status: 403, data: { message: 'Geen recht op inzage-export.' } } })
     const user = userEvent.setup()
     render(<CandidateHeaderActions {...base} canSubjectExport />)
-    await user.click(screen.getByRole('button', { name: 'Exporteer persoonsgegevens (inzagerecht)' }))
+    await user.click(screen.getByRole('button', { name: i18n.t('candidates:drawer.subjectExport') }))
     expect(notifyError).toHaveBeenCalledWith('Geen recht op inzage-export.')
   })
 
@@ -57,7 +57,7 @@ describe('CandidateHeaderActions — right-of-access export', () => {
     vi.mocked(api.post).mockResolvedValue({ data: { data: { expires: '2026-10-16T01:00:00Z' } } })
     const user = userEvent.setup()
     render(<CandidateHeaderActions {...base} canSubjectExport />)
-    await user.click(screen.getByRole('button', { name: 'Exporteer persoonsgegevens (inzagerecht)' }))
+    await user.click(screen.getByRole('button', { name: i18n.t('candidates:drawer.subjectExport') }))
     expect(notifyError).toHaveBeenCalledWith('De export van persoonsgegevens is mislukt.')
     expect(notify).not.toHaveBeenCalled()
   })
