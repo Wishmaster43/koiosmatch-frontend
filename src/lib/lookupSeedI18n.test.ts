@@ -4,7 +4,7 @@
  * tenant created or renamed may not. These tests pin that boundary in both directions,
  * for both keying schemes (stable slug and uuid-with-label).
  */
-import { describe, it, expect } from 'vitest'
+import { describe, it, expect, vi } from 'vitest'
 import { seedKeyFor, labelKey, translateSeedLabel, translateSeedList } from './lookupSeedI18n'
 import { SEED_LABELS, LABEL_KEYED, SEED_LABEL_KEYS } from './lookupSeedCatalogue'
 import nlCommon from '../i18n/locales/nl/common.json'
@@ -237,5 +237,38 @@ describe('records that embed only the flat label (no lookup value)', () => {
   it('prefers the value when both are present and they disagree', () => {
     // A renamed row: the value is seeded but the label is the tenant's own word.
     expect(seedKeyFor('funnelTypes', { value: 'hired', label: 'Aan de slag' })).toBeNull()
+  })
+})
+
+// LOOKUPSEED-EXISTS-1 step 1: with a checker the label resolves through labelOrRaw in the namespace the
+// caller's t is bound to (useTranslation stamps `ns` on its fixed t); without one the old path stays.
+describe('translateSeedLabel / translateSeedList with a KeyChecker', () => {
+  // Echo t that carries the namespace it was given and the namespace it is bound to.
+  const boundT = Object.assign((key: string, o?: { ns?: string; defaultValue?: string }) => `${o?.ns ?? ''}:${key}`, { ns: 'common' })
+  const seeded = { value: 'available', label: 'Beschikbaar' }
+  const key = 'lookupSeeds.statuses.available'
+
+  it('translates in the bound namespace when the checker knows the key', () => {
+    const exists = vi.fn().mockReturnValue(true)
+    expect(translateSeedLabel(boundT, 'statuses', seeded, { exists })).toBe(`common:${key}`)
+    expect(exists).toHaveBeenCalledWith(key, { ns: 'common' })
+  })
+
+  it('keeps the seeded label as data when the checker does not know the key, and a renamed value as typed', () => {
+    expect(translateSeedLabel(boundT, 'statuses', seeded, { exists: () => false })).toBe('Beschikbaar')
+    expect(translateSeedLabel(boundT, 'statuses', { value: 'own', label: 'Eigen waarde' }, { exists: () => true })).toBe('Eigen waarde')
+  })
+
+  it('maps a list with the checker and keeps the untouched rows by identity', () => {
+    const rows = [seeded, { value: 'own', label: 'Eigen waarde' }]
+    const out = translateSeedList(boundT, 'statuses', rows, { exists: () => true })
+    expect(out[0].label).toBe(`common:${key}`)
+    expect(out[1]).toBe(rows[1])
+  })
+
+  it('falls back to common for a stub t without a bound namespace', () => {
+    const exists = vi.fn().mockReturnValue(true)
+    translateSeedLabel(t, 'statuses', seeded, { exists })
+    expect(exists).toHaveBeenCalledWith(key, { ns: 'common' })
   })
 })
