@@ -20,7 +20,7 @@ import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 import { render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 // Real i18next instance so t() resolves actual locale strings, not raw keys.
-import '@/i18n'
+import i18n from '@/i18n'
 import VacancySearchFilters, { VacancySearchActiveFilters } from './VacancySearchFilters'
 
 // This project ships no @types/node; process.env.TZ is a genuine Node global at
@@ -65,7 +65,7 @@ const chipsBaseProps = {
 // Both secondary filters now live behind the "Meer filters" popover trigger —
 // open it before reaching their controls (mirrors how a real user gets there).
 const openMoreFilters = async (user: ReturnType<typeof userEvent.setup>) => {
-  await user.click(screen.getByRole('button', { name: 'Meer filters' }))
+  await user.click(screen.getByRole('button', { name: i18n.t('candidates:vacancySearch.moreFilters') }))
 }
 
 describe('VacancySearchFilters · no native browser controls (COMPACT-1 regression)', () => {
@@ -133,7 +133,7 @@ describe('VacancySearchFilters · no native browser controls (COMPACT-1 regressi
 describe('VacancySearchFilters · gated filters stay gated', () => {
   it('omits the "Meer filters" trigger entirely when neither secondary filter is offered', () => {
     render(<VacancySearchFilters {...filtersBaseProps} />)
-    expect(screen.queryByRole('button', { name: 'Meer filters' })).toBeNull()
+    expect(screen.queryByRole('button', { name: i18n.t('candidates:vacancySearch.moreFilters') })).toBeNull()
   })
 
   it('the badge on "Meer filters" counts exactly the active secondary filters', () => {
@@ -183,8 +183,8 @@ describe('VacancySearchFilters · single-row structure (FILTER-VLAK-1)', () => {
   it('renders no bare field labels beside the three fixed triggers — the label lives inside the trigger', () => {
     render(<VacancySearchFilters {...filtersBaseProps} statuses={['open']} />)
     // The trigger carries the label + a count badge, never a separate label span.
-    const trigger = screen.getByRole('button', { name: 'Vacaturestatus (1)' })
-    expect(trigger).toHaveTextContent('Vacaturestatus')
+    const trigger = screen.getByRole('button', { name: `${i18n.t('candidates:vacancySearch.statuses')} (1)` })
+    expect(trigger).toHaveTextContent(i18n.t('candidates:vacancySearch.statuses'))
     expect(trigger).toHaveTextContent('1')
   })
 })
@@ -193,21 +193,21 @@ describe('VacancySearchActiveFilters · situational row (FILTER-VLAK-1)', () => 
   it('renders nothing at all while every filter is at rest', () => {
     const { container } = render(<VacancySearchActiveFilters {...chipsBaseProps} />)
     expect(container).toBeEmptyDOMElement()
-    expect(screen.queryByRole('button', { name: 'Filters herstellen' })).toBeNull()
+    expect(screen.queryByRole('button', { name: i18n.t('candidates:vacancySearch.resetFilters') })).toBeNull()
     expect(screen.queryByText(/uur\/week/)).toBeNull()
   })
 
   it('the active hours chip and the reset link appear TOGETHER once a filter narrows the search', () => {
     render(<VacancySearchActiveFilters {...chipsBaseProps} hasHoursData hoursRange={[8, 32]} filtersDirty />)
     expect(screen.getByText('8–32 uur/week')).toBeInTheDocument()
-    expect(screen.getByRole('button', { name: 'Filters herstellen' })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: i18n.t('candidates:vacancySearch.resetFilters') })).toBeInTheDocument()
   })
 })
 
 describe('VacancySearchActiveFilters · reset button only shows when something actually changed', () => {
   it('is absent while filtersDirty is false', () => {
     render(<VacancySearchActiveFilters {...chipsBaseProps} filtersDirty={false} />)
-    expect(screen.queryByRole('button', { name: 'Filters herstellen' })).toBeNull()
+    expect(screen.queryByRole('button', { name: i18n.t('candidates:vacancySearch.resetFilters') })).toBeNull()
   })
 
   it('appears once filtersDirty flips true and calls onReset on click', async () => {
@@ -215,7 +215,7 @@ describe('VacancySearchActiveFilters · reset button only shows when something a
     const user = userEvent.setup()
     render(<VacancySearchActiveFilters {...chipsBaseProps} filtersDirty onReset={onReset} />)
 
-    const button = screen.getByRole('button', { name: 'Filters herstellen' })
+    const button = screen.getByRole('button', { name: i18n.t('candidates:vacancySearch.resetFilters') })
     expect(button).toBeInTheDocument()
     await user.click(button)
     expect(onReset).toHaveBeenCalledTimes(1)

@@ -5,7 +5,7 @@
  */
 import { describe, it, expect, vi, afterEach } from 'vitest'
 import { render, screen } from '@testing-library/react'
-import '@/i18n'
+import i18n from '@/i18n'
 import { NavigationProvider } from '@/context/NavigationContext'
 import CouplingErrorsPage from './CouplingErrorsPage'
 import { useCouplingErrors } from './hooks/useCouplingErrors'
@@ -32,19 +32,19 @@ describe('CouplingErrorsPage — four UI states', () => {
   it('loading state', () => {
     mockedUseCouplingErrors.mockReturnValue({ rows: [], loading: true, error: false, refetch: vi.fn() })
     renderPage()
-    expect(screen.getByText('Koppelfouten laden…')).toBeInTheDocument()
+    expect(screen.getByText(i18n.t('candidates:couplingErrors.loading'))).toBeInTheDocument()
   })
 
   it('error state renders ErrorBanner, never the loading/empty text', () => {
     mockedUseCouplingErrors.mockReturnValue({ rows: [], loading: false, error: true, refetch: vi.fn() })
     renderPage()
-    expect(screen.getByRole('alert')).toHaveTextContent('De koppelfouten konden niet worden geladen.')
+    expect(screen.getByRole('alert')).toHaveTextContent(i18n.t('candidates:couplingErrors.error'))
   })
 
   it('empty state — no rows, no error', () => {
     mockedUseCouplingErrors.mockReturnValue({ rows: [], loading: false, error: false, refetch: vi.fn() })
     renderPage()
-    expect(screen.getByText('Geen koppelfouten. Elke koppeling is succesvol gesynchroniseerd.')).toBeInTheDocument()
+    expect(screen.getByText(i18n.t('candidates:couplingErrors.empty'))).toBeInTheDocument()
   })
 
   it('success state renders a row with its reason and system chip', () => {
@@ -85,7 +85,7 @@ describe('CouplingErrorsPage — downstream-erasure rows', () => {
     expect(await screen.findByText('Verwijderde kandidaat')).toBeInTheDocument()
     expect(screen.queryByRole('link')).toBeNull()
     // The real nl bundle renders here (the file's other cases assert 'Shiftmanager' the same way).
-    expect(screen.getByText('Wisverzoek vraagt handmatige afhandeling')).toBeInTheDocument()
+    expect(screen.getByText(i18n.t('candidates:couplingErrors.erasure.manual_required'))).toBeInTheDocument()
     expect(screen.queryByText('manual_required')).toBeNull()
   })
 
@@ -95,14 +95,14 @@ describe('CouplingErrorsPage — downstream-erasure rows', () => {
     renderPage()
     expect(await screen.findByText('Verwijderd contact')).toBeInTheDocument()
     expect(screen.queryByRole('link')).toBeNull()
-    expect(screen.getByText('Wisverzoek wacht op bevestiging van het ontvangende systeem')).toBeInTheDocument()
+    expect(screen.getByText(i18n.t('candidates:couplingErrors.erasure.pending'))).toBeInTheDocument()
   })
 
   it('renders the translated sentence for a failed erasure status', async () => {
     mockedUseCouplingErrors.mockReturnValue({ rows: [{ entity_type: 'erasure_candidate', entity_id: 'req-11', entity_label: 'Kandidaat X',
       system: 'webhook', error: 'failed', synced_at: null }], loading: false, error: false, refetch: vi.fn() })
     renderPage()
-    expect(await screen.findByText('Wisverzoek is mislukt')).toBeInTheDocument()
+    expect(await screen.findByText(i18n.t('candidates:couplingErrors.erasure.failed'))).toBeInTheDocument()
   })
 
   it('shows an unknown erasure status as plain text without crashing', async () => {

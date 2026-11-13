@@ -295,7 +295,7 @@ describe('VacancySearchTab · error + retry', () => {
     })
     render(<VacancySearchTab candidate={candidateWithLocation} />)
 
-    const retryBtn = await screen.findByRole('button', { name: 'Probeer opnieuw' })
+    const retryBtn = await screen.findByRole('button', { name: i18n.t('common:error.retry') })
     await userEvent.click(retryBtn)
 
     await waitFor(() => expect(matchCalls).toBe(2))

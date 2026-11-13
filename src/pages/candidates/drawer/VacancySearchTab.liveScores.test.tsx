@@ -200,7 +200,7 @@ describe('VacancySearchTab · live scores (CMBE MATCH-EXPLORER-1 fase 2+3 mirror
     // read-only score block received the inline criteria (no edit/adjust pencil,
     // since VacancySearchTab passes no onSave).
     await waitFor(() => expect(screen.getByText('Reisafstand')).toBeInTheDocument())
-    expect(screen.queryByTitle('Aanpassen')).not.toBeInTheDocument()
+    expect(screen.queryByTitle(i18n.t('applications:matchScore.edit'))).not.toBeInTheDocument()
     // The AI advice reason renders as its own one-line note under the score block.
     expect(screen.getByText('Beste match binnen 5 km en juiste functie.')).toBeInTheDocument()
   })
@@ -209,7 +209,7 @@ describe('VacancySearchTab · live scores (CMBE MATCH-EXPLORER-1 fase 2+3 mirror
     stubApi({ matches: () => Promise.reject(new Error('scores unavailable')) })
     render(<VacancySearchTab candidate={candidateWithLocation} />)
 
-    expect(await screen.findByRole('button', { name: 'Probeer opnieuw' })).toBeInTheDocument()
+    expect(await screen.findByRole('button', { name: i18n.t('common:error.retry') })).toBeInTheDocument()
     expect(screen.queryAllByText(/^\d+%$/)).toHaveLength(0)
   })
 })
@@ -289,15 +289,15 @@ describe('VacancySearchTab · browsing the open panel with prev/next (Danny 05-0
 
     // Select the FIRST row (v1) — prev disabled (first record), next enabled.
     await userEvent.click(screen.getByText('Zorggroep B · Amersfoort'))
-    expect(screen.getByRole('button', { name: 'Vorige' })).toBeDisabled()
-    const nextBtn = screen.getByRole('button', { name: 'Volgende' })
+    expect(screen.getByRole('button', { name: i18n.t('common:drillPager.prev') })).toBeDisabled()
+    const nextBtn = screen.getByRole('button', { name: i18n.t('common:drillPager.next') })
     expect(nextBtn).not.toBeDisabled()
 
     // Next -> v2 becomes the open panel's vacancy; now the LAST record (next disabled).
     await userEvent.click(nextBtn)
     await waitFor(() => expect(screen.getAllByText('Verpleegkundige | Utrecht')).toHaveLength(1))
-    expect(screen.getByRole('button', { name: 'Volgende' })).toBeDisabled()
-    const prevBtn = screen.getByRole('button', { name: 'Vorige' })
+    expect(screen.getByRole('button', { name: i18n.t('common:drillPager.next') })).toBeDisabled()
+    const prevBtn = screen.getByRole('button', { name: i18n.t('common:drillPager.prev') })
     expect(prevBtn).not.toBeDisabled()
 
     // Prev -> back to v1, never cycling past the first/last record.

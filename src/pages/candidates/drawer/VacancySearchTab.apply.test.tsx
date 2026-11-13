@@ -196,7 +196,7 @@ describe('VacancySearchTab · "Solliciteren" action (Danny 06-08 screenshot)', (
     // proving the prefill (not a manual re-pick) is what lands in the request body.
     await userEvent.click(screen.getByText('Zorggroep B · Amersfoort'))
     await userEvent.click(screen.getByRole('button', { name: 'Solliciteren' }))
-    await userEvent.click(screen.getByRole('button', { name: 'Sollicitatie aanmaken' }))
+    await userEvent.click(screen.getByRole('button', { name: i18n.t('candidates:work.createApplication') }))
 
     expect(mockPost).toHaveBeenCalledWith('/applications', {
       candidate_id: 'cand1', vacancy_id: 'v1', owner_id: 'u1', application_stage_id: 'stage-applied',
@@ -209,11 +209,11 @@ describe('VacancySearchTab · "Solliciteren" action (Danny 06-08 screenshot)', (
 
     await waitFor(() => expect(screen.getByText('Verzorgende IG | Amersfoort')).toBeInTheDocument())
     await userEvent.click(screen.getByText('Zorggroep B · Amersfoort'))
-    await userEvent.click(screen.getByRole('button', { name: 'Volgende' }))
+    await userEvent.click(screen.getByRole('button', { name: i18n.t('common:drillPager.next') }))
     await waitFor(() => expect(screen.getAllByText('Verpleegkundige | Utrecht')).toHaveLength(1))
 
     await userEvent.click(screen.getByRole('button', { name: 'Solliciteren' }))
-    await userEvent.click(screen.getByRole('button', { name: 'Sollicitatie aanmaken' }))
+    await userEvent.click(screen.getByRole('button', { name: i18n.t('candidates:work.createApplication') }))
 
     expect(mockPost).toHaveBeenCalledWith('/applications', expect.objectContaining({ vacancy_id: 'v2' }))
   })

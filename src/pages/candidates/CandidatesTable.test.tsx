@@ -4,6 +4,7 @@ import userEvent from '@testing-library/user-event'
 import CandidatesTable from './CandidatesTable'
 import { CANDIDATE_SORT_KEYS } from './hooks/useCandidatesData'
 import type { Candidate, CandidateBackofficeLink } from '@/types/candidate'
+import i18n from '@/i18n'
 
 // Controlled lookup metas — flags drive the deep-link, never the label/slug
 // (mirrors the sibling agents' contract). funnelTypes stays empty (sort order only).
@@ -142,7 +143,7 @@ describe('CandidatesTable · SORT-OFF-1 lookup-backed columns are not sortable',
       expect(within(th).queryByRole('button')).toBeNull()
       expect(th).not.toHaveAttribute('aria-sort')
     }
-    const nameTh = screen.getByText('Naam').closest('th') as HTMLElement
+    const nameTh = screen.getByText(i18n.t('candidates:columns.name')).closest('th') as HTMLElement
     expect(within(nameTh).getByRole('button')).toBeInTheDocument()
     expect(nameTh).toHaveAttribute('aria-sort', 'none')
   })
@@ -198,7 +199,7 @@ describe('CandidatesTable · backoffice coupling indicator (JOB2)', () => {
     // Three real, distinct accessible names — never colour alone (§6) — one per state.
     expect(screen.getByRole('img', { name: 'HelloFlex: Gekoppeld' })).toBeInTheDocument()
     expect(screen.getByRole('img', { name: 'HelloFlex: Mislukt' })).toBeInTheDocument()
-    expect(screen.getByRole('img', { name: 'Niet gekoppeld aan HelloFlex' })).toBeInTheDocument()
+    expect(screen.getByRole('img', { name: i18n.t('common:backofficeLinks.helloflex.notLinked') })).toBeInTheDocument()
   })
 
   it('hides a system entirely when the tenant never enabled its app — never a fake "not linked"', () => {
@@ -263,6 +264,6 @@ describe('CandidatesTable · missing-appointment flag stays off the name cell', 
   it('renders no icon even when the flag is set', () => {
     const row = { ...baseCandidate, id: 2, missingAppointment: true } as Candidate
     render(<CandidatesTable rows={[row]} />)
-    expect(screen.queryByRole('img', { name: 'Afspraak ontbreekt' })).toBeNull()
+    expect(screen.queryByRole('img', { name: i18n.t('candidates:columns.missingAppointment') })).toBeNull()
   })
 })
