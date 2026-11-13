@@ -12,7 +12,7 @@ import { describe, it, expect, vi } from 'vitest'
 import { render, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
-import '@/i18n'
+import i18n from '@/i18n'
 import AppointmentsTab from './AppointmentsTab'
 import type { VacancyAppointmentRow } from '@/types/vacancyAppointment'
 
@@ -122,7 +122,7 @@ describe('AppointmentsTab (vacancy drawer) · four UI states + permission gate',
     renderTab()
     // Real i18n resources are loaded here (unlike the applications-tab sibling
     // test) — the tab's default locale is nl, so assert the translated value.
-    expect(screen.getByText('Op afstand')).toBeInTheDocument()
+    expect(screen.getByText(i18n.t('common:appointmentModality.remote'))).toBeInTheDocument()
   })
 })
 

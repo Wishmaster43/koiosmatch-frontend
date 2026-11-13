@@ -7,7 +7,7 @@
  */
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { render, screen, fireEvent, waitFor } from '@testing-library/react'
-import '@/i18n'
+import i18n from '@/i18n'
 import PickCandidateForAppointmentModal from './PickCandidateForAppointmentModal'
 
 // Keep the REAL unwrapList (the paginator envelope math matters for the cap
@@ -72,7 +72,7 @@ describe('PickCandidateForAppointmentModal · candidate search (step 1)', () => 
   it('reports a failed search instead of silently showing an empty list', async () => {
     getMock.mockRejectedValue(new Error('boom'))
     render(<PickCandidateForAppointmentModal vacancyId="v-1" onClose={vi.fn()} onCreated={vi.fn()} />)
-    await waitFor(() => expect(screen.getByText('Kandidaten konden niet worden geladen.')).toBeInTheDocument())
+    await waitFor(() => expect(screen.getByText(i18n.t('vacancies:appointmentsTab.pickCandidate.error'))).toBeInTheDocument())
   })
 
   it('closes on Cancel without picking anyone', async () => {

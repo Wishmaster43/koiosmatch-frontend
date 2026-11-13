@@ -3,7 +3,7 @@ import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { render, screen, waitFor, fireEvent } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 // Real i18next instance so t() resolves actual locale strings, not raw keys.
-import '@/i18n'
+import i18n from '@/i18n'
 import CandidateSearchTab from './CandidateSearchTab'
 import { mapVacancyDetail } from '../data/mapVacancy'
 import api from '@/lib/api'
@@ -148,7 +148,7 @@ describe('CandidateSearchTab · status toggle via the searchable dropdown', () =
     // count visually, mirrors candidates/drawer/VacancySearchFilters). LEADS-
     // PARITY-1: no status is preselected any more, so the trigger's name carries
     // no count badge until a status is actively picked.
-    await userEvent.click(screen.getByRole('button', { name: 'Inzetbaarheid' }))
+    await userEvent.click(screen.getByRole('button', { name: i18n.t('vacancies:candidateSearch.statuses') }))
     await userEvent.click(screen.getByRole('button', { name: 'Niet beschikbaar' }))
 
     await waitFor(() => expect(mockGet).toHaveBeenCalledTimes(2))
@@ -165,7 +165,7 @@ describe('CandidateSearchTab · contract-form filter (new third dropdown)', () =
     render(<CandidateSearchTab vacancy={vacancyWithLocation} />)
     await waitFor(() => expect(mockGet).toHaveBeenCalledTimes(1))
 
-    await userEvent.click(screen.getByRole('button', { name: 'Contractvorm' }))
+    await userEvent.click(screen.getByRole('button', { name: i18n.t('vacancies:candidateSearch.contractForms') }))
     await userEvent.click(screen.getByRole('button', { name: 'ZZP' }))
 
     await waitFor(() => expect(mockGet).toHaveBeenCalledTimes(2))
@@ -214,7 +214,7 @@ describe('CandidateSearchTab · active-filter chips (GEOSEARCH-1)', () => {
     render(<CandidateSearchTab vacancy={vacancyWithLocation} />)
     await waitFor(() => expect(mockGet).toHaveBeenCalledTimes(1))
 
-    await userEvent.click(screen.getByRole('button', { name: 'Contractvorm' }))
+    await userEvent.click(screen.getByRole('button', { name: i18n.t('vacancies:candidateSearch.contractForms') }))
     await userEvent.click(screen.getByRole('button', { name: 'ZZP' }))
     await waitFor(() => expect(mockGet).toHaveBeenCalledTimes(2))
     // Close the still-open multi-select popover — its own "ZZP" option button
@@ -241,7 +241,7 @@ describe('CandidateSearchTab · error + retry', () => {
     mockGet.mockRejectedValueOnce(new Error('network down'))
     render(<CandidateSearchTab vacancy={vacancyWithLocation} />)
 
-    const retryBtn = await screen.findByRole('button', { name: 'Probeer opnieuw' })
+    const retryBtn = await screen.findByRole('button', { name: i18n.t('common:error.retry') })
     mockGet.mockResolvedValueOnce({ data: { data: [] } })
     await userEvent.click(retryBtn)
 

@@ -131,7 +131,7 @@ describe('VacancyAgentTab · picker → PATCH ai_agent_id + read-only interview 
     // fallback only — no contract-form default exists yet), and since this
     // vacancy carries no contract form, the fallback note shows too.
     expect(screen.getByText('Overgenomen van de gekoppelde agent (Kelly). Er is nog geen standaard per contractvorm beschikbaar.')).toBeInTheDocument()
-    expect(screen.getByText("Deze vacature heeft geen contractvorm ingesteld, dus de eigen flow van de agent wordt als terugval gebruikt.")).toBeInTheDocument()
+    expect(screen.getByText(i18n.t('vacancies:aiagent.flowSource.noContractType'))).toBeInTheDocument()
   })
 
   it('unlinking (clearing to none) sends ai_agent_id: null and the flow hint returns', async () => {
@@ -210,7 +210,7 @@ describe('VacancyAgentTab · backfill existing applicants (INTERVIEW-BACKFILL-1)
     expect(screen.getByText(/Dit stuurt WhatsApp-berichten\.$/)).toBeInTheDocument()
 
     mockPost.mockResolvedValueOnce({ data: { data: { started: 3, skipped: [], eligible_total: 3 } } })
-    await user.click(screen.getByRole('button', { name: 'Bevestigen' }))
+    await user.click(screen.getByRole('button', { name: i18n.t('common:confirm') }))
 
     expect(mockPost).toHaveBeenCalledWith('/vacancies/v1/start-interviews', undefined, expect.objectContaining({ headers: expect.objectContaining({ 'Idempotency-Key': expect.any(String) }) }))
     await waitFor(() => expect(mockNotifySuccess).toHaveBeenCalledWith('3 van 3 gestart.'))
@@ -232,7 +232,7 @@ describe('VacancyAgentTab · backfill existing applicants (INTERVIEW-BACKFILL-1)
         { application_id: 'app-3', reason: 'already_has_session' },
       ],
     } } })
-    await user.click(screen.getByRole('button', { name: 'Bevestigen' }))
+    await user.click(screen.getByRole('button', { name: i18n.t('common:confirm') }))
 
     await waitFor(() => expect(mockNotifySuccess).toHaveBeenCalledWith(
       '2 van 5 gestart, 3 overgeslagen: 2 geen WhatsApp-toestemming, 1 loopt al.',
@@ -246,7 +246,7 @@ describe('VacancyAgentTab · backfill existing applicants (INTERVIEW-BACKFILL-1)
     const user = userEvent.setup()
     await user.click(screen.getByRole('button', { name: BACKFILL_BUTTON }))
     mockPost.mockResolvedValueOnce({ data: { data: { started: 2, queued: 1, skipped: [], eligible_total: 3 } } })
-    await user.click(screen.getByRole('button', { name: 'Bevestigen' }))
+    await user.click(screen.getByRole('button', { name: i18n.t('common:confirm') }))
     await waitFor(() => expect(mockNotifySuccess).toHaveBeenCalledWith(
       '2 van 3 gestart.' + i18n.t('vacancies:aiagent.backfill.queuedClause', { queued: 1 }),
     ))
@@ -263,7 +263,7 @@ describe('VacancyAgentTab · backfill existing applicants (INTERVIEW-BACKFILL-1)
       started: 1, eligible_total: 2,
       skipped: [{ application_id: 'app-9', reason: 'some_future_reason' }],
     } } })
-    await user.click(screen.getByRole('button', { name: 'Bevestigen' }))
+    await user.click(screen.getByRole('button', { name: i18n.t('common:confirm') }))
 
     await waitFor(() => expect(mockNotifySuccess).toHaveBeenCalledWith(
       '1 van 2 gestart, 1 overgeslagen: 1 onbekende fout.',
@@ -284,7 +284,7 @@ describe('VacancyAgentTab · backfill existing applicants (INTERVIEW-BACKFILL-1)
     await waitFor(() => screen.getByText('Zorgintake (9 stappen)'))
     const user = userEvent.setup()
     await user.click(screen.getByRole('button', { name: BACKFILL_BUTTON }))
-    await user.click(screen.getByRole('button', { name: 'Annuleren' }))
+    await user.click(screen.getByRole('button', { name: i18n.t('common:cancel') }))
     expect(mockPost).not.toHaveBeenCalled()
   })
 
@@ -295,7 +295,7 @@ describe('VacancyAgentTab · backfill existing applicants (INTERVIEW-BACKFILL-1)
     const user = userEvent.setup()
     await user.click(screen.getByRole('button', { name: BACKFILL_BUTTON }))
     mockPost.mockRejectedValueOnce({ response: { status: 404 } })
-    await user.click(screen.getByRole('button', { name: 'Bevestigen' }))
+    await user.click(screen.getByRole('button', { name: i18n.t('common:confirm') }))
 
     await waitFor(() => expect(mockNotifyError).toHaveBeenCalledWith('Interview starten voor bestaande sollicitanten is nog niet beschikbaar. Wacht op de backend-koppeling.'))
     expect(screen.getByRole('button', { name: BACKFILL_BUTTON })).toBeDisabled()
@@ -324,7 +324,7 @@ describe('VacancyAgentTab · interview-workflow link (INTERVIEW-WORKFLOW-1)', ()
   it('presence gate present, unlinked: picking a workflow PATCHes exactly { interview_workflow_id }, clearing sends null', async () => {
     mockGet.mockImplementation(routeGet(rawDetail({ interview_workflow_id: null }), [mockAgent], [mockFlow], [mockWorkflow]))
     renderHarness()
-    const trigger = await screen.findByRole('button', { name: 'Selecteer een interview-workflow' })
+    const trigger = await screen.findByRole('button', { name: i18n.t('vacancies:aiagent.workflow.placeholder') })
 
     // THIN response on purpose (no nested interview_workflow): the derived lines must
     // resolve from the fetched workflow list, never from the PATCH echo (Opus round 2).

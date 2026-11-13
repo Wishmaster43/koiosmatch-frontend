@@ -17,6 +17,7 @@
  */
 import { describe, it, expect, vi } from 'vitest'
 import { render, screen } from '@testing-library/react'
+import i18n from '@/i18n'
 import DetailsLocationTab from './DetailsLocationTab'
 import type { VacancyDetail } from '@/types/vacancy'
 import type { LocationSection } from '../hooks/useVacancyDetailsForm'
@@ -47,7 +48,7 @@ describe('DetailsLocationTab · address canon (V9)', () => {
     render(<DetailsLocationTab vacancy={vacancy} location={makeLocation()} />)
     expect(screen.getByText('Kerkstraat 12-a, 1234 AB Utrecht')).toBeInTheDocument()
     // The loose per-field labels never show in read mode — only the composed line.
-    expect(screen.queryByText('Straat')).not.toBeInTheDocument()
+    expect(screen.queryByText(i18n.t('vacancies:details.street'))).not.toBeInTheDocument()
   })
 
   // I18N-1: the optional second line shows in read mode too, between the street line
@@ -59,12 +60,12 @@ describe('DetailsLocationTab · address canon (V9)', () => {
 
   it('edit mode shows SIX separate address rows, never a paired houseNumber+suffix row', () => {
     render(<DetailsLocationTab vacancy={vacancy} location={makeLocation({ editing: true })} />)
-    expect(screen.getByText('Straat')).toBeInTheDocument()
-    expect(screen.getByText('Huisnummer')).toBeInTheDocument()
-    expect(screen.getByText('Toevoeging')).toBeInTheDocument()
-    expect(screen.getByText('Adresregel 2')).toBeInTheDocument()
-    expect(screen.getByText('Postcode')).toBeInTheDocument()
-    expect(screen.getByText('Plaats')).toBeInTheDocument()
+    expect(screen.getByText(i18n.t('vacancies:details.street'))).toBeInTheDocument()
+    expect(screen.getByText(i18n.t('vacancies:details.houseNumber'))).toBeInTheDocument()
+    expect(screen.getByText(i18n.t('vacancies:details.houseNumberSuffix'))).toBeInTheDocument()
+    expect(screen.getByText(i18n.t('vacancies:details.addressLine2'))).toBeInTheDocument()
+    expect(screen.getByText(i18n.t('vacancies:details.postalCode'))).toBeInTheDocument()
+    expect(screen.getByText(i18n.t('vacancies:details.city'))).toBeInTheDocument()
     // The OLD combined "Huisnummer / Toevoeging" label must be gone.
     expect(screen.queryByText('Huisnummer / Toevoeging')).not.toBeInTheDocument()
     expect(screen.queryByText(/\/ Toevoeging/)).not.toBeInTheDocument()
