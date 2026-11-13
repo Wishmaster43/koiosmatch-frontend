@@ -111,13 +111,13 @@ describe('CandidatesReport (RAPPORTEN-SUITE-1 inflow report)', () => {
   it('shows the error state', () => {
     mockUseCandidatesReport.mockReturnValue({ data: null, loading: false, error: true })
     renderReport()
-    expect(screen.getByText('Kon de kandidaten niet laden')).toBeInTheDocument()
+    expect(screen.getByText(i18n.t('analytics:candidates.error'))).toBeInTheDocument()
   })
 
   it('shows the empty state when there is no inflow', () => {
     mockUseCandidatesReport.mockReturnValue({ data: { ...data, total: 0, by_status: [], by_phase: [], by_source: [], by_owner: [], by_branch: [], timeseries: { bucket: 'week', series: [] } }, loading: false, error: false })
     renderReport()
-    expect(screen.getByText('Geen kandidaten in deze periode')).toBeInTheDocument()
+    expect(screen.getByText(i18n.t('analytics:candidates.empty'))).toBeInTheDocument()
   })
 
   it('renders the axis bars on success', () => {

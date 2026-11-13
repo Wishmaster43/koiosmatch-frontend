@@ -9,6 +9,7 @@ import userEvent from '@testing-library/user-event'
 import { render, screen } from '@testing-library/react'
 import { I18nextProvider } from 'react-i18next'
 import i18next from 'i18next'
+import i18n from '@/i18n'
 import ReportDrillDrawer from './ReportDrillDrawer'
 import type { DrillSpec } from './ReportDrillDrawer'
 
@@ -190,8 +191,8 @@ describe('ReportDrillDrawer — a real error is never the calm "no records"/"no 
       advice: 'Advice still renders.', adviceLoading: false,
     })
     render(<ReportDrillDrawer drill={baseDrill} onClose={() => {}} />)
-    expect(screen.queryByText('Geen onderliggende records.')).not.toBeInTheDocument()
-    expect(screen.getByText('Onderliggende records konden niet worden geladen.')).toBeInTheDocument()
+    expect(screen.queryByText(i18n.t('analytics:drill.noRecords'))).not.toBeInTheDocument()
+    expect(screen.getByText(i18n.t('analytics:drill.rowsError'))).toBeInTheDocument()
     await user.click(screen.getByRole('button', { name: 'Probeer opnieuw' }))
     expect(rowsRefetch).toHaveBeenCalledTimes(1)
   })
@@ -204,8 +205,8 @@ describe('ReportDrillDrawer — a real error is never the calm "no records"/"no 
       advice: null, adviceLoading: false, adviceError: true, adviceRefetch, advicePromptLogId: 'log-123',
     })
     render(<ReportDrillDrawer drill={baseDrill} onClose={() => {}} />)
-    expect(screen.queryByText('Koios heeft nog geen advies voor dit getal.')).not.toBeInTheDocument()
-    expect(screen.getByText('Koios-advies kon niet worden geladen.')).toBeInTheDocument()
+    expect(screen.queryByText(i18n.t('analytics:drill.noAdvice'))).not.toBeInTheDocument()
+    expect(screen.getByText(i18n.t('analytics:drill.adviceError'))).toBeInTheDocument()
     // Even with a fresh advicePromptLogId, the feedback widget must not mount on an error.
     expect(screen.queryByRole('button', { name: 'Nuttig' })).not.toBeInTheDocument()
     await user.click(screen.getByRole('button', { name: 'Probeer opnieuw' }))
@@ -221,7 +222,7 @@ describe('ReportDrillDrawer — null advice with populated rows', () => {
     })
     render(<ReportDrillDrawer drill={baseDrill} onClose={() => {}} />)
     expect(screen.getByText('Candidate A')).toBeInTheDocument()
-    expect(screen.getByText('Koios heeft nog geen advies voor dit getal.')).toBeInTheDocument()
+    expect(screen.getByText(i18n.t('analytics:drill.noAdvice'))).toBeInTheDocument()
   })
 })
 

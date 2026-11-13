@@ -2,6 +2,7 @@ import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
+import i18n from '@/i18n'
 import MatchesReport from './MatchesReport'
 import { data } from './MatchesReport.testKit'
 
@@ -80,7 +81,7 @@ describe('MatchesReport (MATCH-SOORT-1, by_contract_form axis)', () => {
   it('shows the error state', () => {
     mockUseMatchesReport.mockReturnValue({ data: null, loading: false, error: true })
     renderReport()
-    expect(screen.getByText('Kon de matches niet laden')).toBeInTheDocument()
+    expect(screen.getByText(i18n.t('analytics:matches.error'))).toBeInTheDocument()
   })
 
   // The shared ReportStateBlock retry button must call the hook's own refetch.
@@ -95,7 +96,7 @@ describe('MatchesReport (MATCH-SOORT-1, by_contract_form axis)', () => {
   it('shows the empty state when there are no matches', () => {
     mockUseMatchesReport.mockReturnValue({ data: { ...data, total: 0 }, loading: false, error: false })
     renderReport()
-    expect(screen.getByText('Geen matches in deze periode')).toBeInTheDocument()
+    expect(screen.getByText(i18n.t('analytics:matches.empty'))).toBeInTheDocument()
   })
 
   // As-rendering: every by_contract_form segment renders its own bar with the

@@ -93,7 +93,7 @@ describe('CustomersReport (RAPPORTEN-SUITE-1 portie 3, customers inflow report)'
   it('shows the error state', () => {
     mockUseCustomersReport.mockReturnValue({ data: null, loading: false, error: true })
     renderReport()
-    expect(screen.getByText('Kon de klanten niet laden')).toBeInTheDocument()
+    expect(screen.getByText(i18n.t('analytics:customers.error'))).toBeInTheDocument()
   })
 
   it('shows the empty state when there are no customers', () => {
@@ -102,7 +102,7 @@ describe('CustomersReport (RAPPORTEN-SUITE-1 portie 3, customers inflow report)'
       loading: false, error: false,
     })
     renderReport()
-    expect(screen.getByText('Geen klanten in deze periode')).toBeInTheDocument()
+    expect(screen.getByText(i18n.t('analytics:customers.empty'))).toBeInTheDocument()
   })
 
   it('renders the axis bars on success', () => {

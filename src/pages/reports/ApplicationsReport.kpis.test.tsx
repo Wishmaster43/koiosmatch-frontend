@@ -116,9 +116,9 @@ describe('ApplicationsReport (RAPPORTEN-SUITE-1 portie 2)', () => {
   it('renders the intake block from the fixture', () => {
     mockUseApplicationsReport.mockReturnValue({ data, loading: false, error: false })
     renderReport()
-    expect(screen.getByText('Gepland')).toBeInTheDocument()
+    expect(screen.getByText(i18n.t('analytics:applications.intakes.planned'))).toBeInTheDocument()
     expect(screen.getByText('13')).toBeInTheDocument()
-    expect(screen.getByText('Afgerond in periode')).toBeInTheDocument()
+    expect(screen.getByText(i18n.t('analytics:applications.intakes.doneInPeriod'))).toBeInTheDocument()
     expect(screen.getByText('11')).toBeInTheDocument()
     expect(screen.getByText('Per recruiter')).toBeInTheDocument()
     expect(screen.getByText('Bram Smit')).toBeInTheDocument()
@@ -158,7 +158,7 @@ describe('ApplicationsReport (RAPPORTEN-SUITE-1 portie 2)', () => {
     mockUseApplicationsReport.mockReturnValue({ data, loading: false, error: false })
     renderReport()
     getSpy.mockClear()
-    await user.click(screen.getByText('Gepland'))
+    await user.click(screen.getByText(i18n.t('analytics:applications.intakes.planned')))
     expect(getSpy).toHaveBeenCalledWith('/reports/applications/intakes/drill',
       expect.objectContaining({ params: { axis: 'state', value: 'planned', period: 'month' } }))
   })
@@ -169,7 +169,7 @@ describe('ApplicationsReport (RAPPORTEN-SUITE-1 portie 2)', () => {
     mockUseApplicationsReport.mockReturnValue({ data, loading: false, error: false })
     renderReport()
     getSpy.mockClear()
-    await user.click(screen.getByText('Afgerond in periode'))
+    await user.click(screen.getByText(i18n.t('analytics:applications.intakes.doneInPeriod')))
     expect(getSpy).toHaveBeenCalledWith('/reports/applications/intakes/drill',
       expect.objectContaining({ params: { axis: 'state', value: 'done', period: 'month' } }))
   })
@@ -186,7 +186,7 @@ describe('ApplicationsReport (RAPPORTEN-SUITE-1 portie 2)', () => {
       </QueryClientProvider>,
     )
     getSpy.mockClear()
-    await user.click(screen.getByText('Gepland'))
+    await user.click(screen.getByText(i18n.t('analytics:applications.intakes.planned')))
     expect(getSpy).not.toHaveBeenCalled()
   })
 

@@ -92,7 +92,7 @@ describe('OutreachReport (RAPPORTEN-SUITE-1 portie 6, bellijsten report)', () =>
   it('shows the error state', () => {
     mockUseOutreachReport.mockReturnValue({ data: null, loading: false, error: true })
     renderReport()
-    expect(screen.getByText('Kon de outreach niet laden')).toBeInTheDocument()
+    expect(screen.getByText(i18n.t('analytics:outreach.error'))).toBeInTheDocument()
   })
 
   it('shows the empty state when there are no targets', () => {
@@ -103,7 +103,7 @@ describe('OutreachReport (RAPPORTEN-SUITE-1 portie 6, bellijsten report)', () =>
       loading: false, error: false,
     })
     renderReport()
-    expect(screen.getByText('Geen bellijst-targets in deze periode')).toBeInTheDocument()
+    expect(screen.getByText(i18n.t('analytics:outreach.empty'))).toBeInTheDocument()
   })
 
   // Contract: every axis (fase-1 status/outcome included) renders every segment
@@ -133,7 +133,7 @@ describe('OutreachReport (RAPPORTEN-SUITE-1 portie 6, bellijsten report)', () =>
     mockUseOutreachReport.mockReturnValue({ data: dataWithSuite, loading: false, error: false })
     renderReport()
     expect(screen.getByText('Totaal doelen')).toBeInTheDocument()
-    expect(screen.getByText('Open te doen')).toBeInTheDocument()
+    expect(screen.getByText(i18n.t('analytics:outreach.kpi.openTodo'))).toBeInTheDocument()
     expect(screen.getByText('Gebeld in periode')).toBeInTheDocument()
     expect(screen.getByText('Bereikt')).toBeInTheDocument()
     expect(screen.getByText('Niet bereikt')).toBeInTheDocument()

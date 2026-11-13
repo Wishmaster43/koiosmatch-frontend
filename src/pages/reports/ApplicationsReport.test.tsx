@@ -83,7 +83,7 @@ describe('ApplicationsReport (RAPPORTEN-SUITE-1 portie 2)', () => {
   it('shows the error state', () => {
     mockUseApplicationsReport.mockReturnValue({ data: null, loading: false, error: true })
     renderReport()
-    expect(screen.getByText('Kon de sollicitaties niet laden')).toBeInTheDocument()
+    expect(screen.getByText(i18n.t('analytics:applications.error'))).toBeInTheDocument()
   })
 
   // The shared ReportStateBlock retry button must call the hook's own refetch,
@@ -104,7 +104,7 @@ describe('ApplicationsReport (RAPPORTEN-SUITE-1 portie 2)', () => {
       loading: false, error: false,
     })
     renderReport()
-    expect(screen.getByText('Geen sollicitaties in deze periode')).toBeInTheDocument()
+    expect(screen.getByText(i18n.t('analytics:applications.empty'))).toBeInTheDocument()
   })
 
   it('renders the axis bars on success, including the sentinel rows', () => {

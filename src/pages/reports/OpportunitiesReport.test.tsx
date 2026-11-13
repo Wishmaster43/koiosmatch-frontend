@@ -2,6 +2,7 @@ import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { render, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
+import i18n from '@/i18n'
 import OpportunitiesReport from './OpportunitiesReport'
 import { EMPTY_REPORT_FILTERS } from './reportFilterParams'
 import { data, opportunityKpis } from './OpportunitiesReport.testKit'
@@ -122,7 +123,7 @@ describe('OpportunitiesReport (RAPPORTEN-SUITE-1 portie 5, kansen pipeline repor
   it('shows the error state', () => {
     mockUseOpportunitiesReport.mockReturnValue({ data: null, loading: false, error: true })
     renderReport()
-    expect(screen.getByText('Kon de kansen niet laden')).toBeInTheDocument()
+    expect(screen.getByText(i18n.t('analytics:opportunities.error'))).toBeInTheDocument()
   })
 
   it('shows the empty state when there are no opportunities', () => {
@@ -134,7 +135,7 @@ describe('OpportunitiesReport (RAPPORTEN-SUITE-1 portie 5, kansen pipeline repor
       loading: false, error: false,
     })
     renderReport()
-    expect(screen.getByText('Geen kansen in deze periode')).toBeInTheDocument()
+    expect(screen.getByText(i18n.t('analytics:opportunities.empty'))).toBeInTheDocument()
   })
 
   // Contract: every axis renders every segment (incl. 'none'/'others'/orphans) and
