@@ -26,9 +26,9 @@ let tenantSeq = 0
 
 // LOOKUP-I18N-1: `sources` is `{ value, label }[]`, not a bare string[] — value is
 // the untranslated backend name, label the (possibly translated) display text. This
-// test suite never initialises react-i18next, so `t(key, { defaultValue })` falls
-// back to `defaultValue` verbatim, i.e. label === value here (real-locale translation
-// is covered by lookupSeedI18n.test.ts, the pure helper's own suite).
+// test suite never initialises react-i18next: the seed-label helper's labelOrRaw path then
+// returns the raw label through its empty-i18n guard, i.e. label === value here (real-locale
+// translation is covered by lookupSeedI18n.test.ts, the pure helper's own suite).
 // KEY-ADOPTION: each option now carries a `key` field (null for seeds).
 const asOptions = (names: string[]) => names.map(name => ({ value: name, label: name, key: null }))
 

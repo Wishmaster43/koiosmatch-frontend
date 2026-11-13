@@ -61,11 +61,11 @@ const mapEmergencyContactRelations = (res: AxiosResponse): EmergencyContactRelat
 
 // must send the option's `id`, never its `value`/`label` (see the ID-vs-slug note above).
 export function useEmergencyContactRelations() {
-  const { t } = useTranslation('common')
+  const { t, i18n } = useTranslation('common')
   const { data: rawRelations } = useCachedLookup(
     '/emergency-contact-relations', mapEmergencyContactRelations, DEFAULT_EMERGENCY_CONTACT_RELATIONS,
   )
   // Seeded defaults render in the user language; a tenant value stays as typed (LOOKUP-I18N-1).
-  const emergencyContactRelations = useMemo(() => translateSeedList(t, 'emergencyRelations', rawRelations), [rawRelations, t])
+  const emergencyContactRelations = useMemo(() => translateSeedList(t, 'emergencyRelations', rawRelations, i18n), [rawRelations, t, i18n])
   return { emergencyContactRelations }
 }

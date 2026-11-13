@@ -65,13 +65,13 @@ function mapEntities(res: AxiosResponse): NumberingEntity[] | null {
 
 // All twelve numbering entities from the backend config, translating each seeded label while a tenant rename passes through as typed (see file header).
 export function useNumberingEntities() {
-  const { t } = useTranslation('common')
+  const { t, i18n } = useTranslation('common')
   const { data: rawEntities, loading } = useCachedLookup('/numbering-entities', mapEntities, FALLBACK)
   // Seeded defaults render in the user language; a tenant value stays as typed (LOOKUP-I18N-1).
   // The row's stable `key` (candidate/customer/…) is the family's slug — passed as `value`.
   const entities = useMemo(
-    () => rawEntities.map(e => ({ ...e, label: translateSeedLabel(t, 'numberingEntities', { value: e.key, label: e.label }) })),
-    [rawEntities, t],
+    () => rawEntities.map(e => ({ ...e, label: translateSeedLabel(t, 'numberingEntities', { value: e.key, label: e.label }, i18n) })),
+    [rawEntities, t, i18n],
   )
   return { entities, loading }
 }

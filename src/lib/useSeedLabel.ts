@@ -14,9 +14,9 @@ import type { SeedTranslatable } from './lookupSeedI18n'
 
 // Stable label-translator callback for records that embed a lookup label directly, so a column config depending on it never rebuilds every render (see file header).
 export function useSeedLabel() {
-  const { t } = useTranslation('common')
+  const { t, i18n } = useTranslation('common')
   return useCallback(
-    (family: string, item: SeedTranslatable): string => translateSeedLabel(t, family, item),
-    [t],
+    (family: string, item: SeedTranslatable): string => translateSeedLabel(t, family, item, i18n),
+    [t, i18n],
   )
 }

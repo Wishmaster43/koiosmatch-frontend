@@ -113,7 +113,7 @@ const mapSources = (res: AxiosResponse): SourcesLookupData => {
 
 // Tenant candidate-source lookup with its own free-entry toggle, defaulting to strict when the response omits the flag.
 export function useApplicationSources() {
-  const { t } = useTranslation('common')
+  const { t, i18n } = useTranslation('common')
   const { data, invalidate } = useCachedLookup('/candidate-sources?active=1', mapSources, FALLBACK)
   // Seeded defaults render in the user language; a tenant value stays as typed
   // (LOOKUP-I18N-1). VALUE stays the raw backend name (never translated) so the
@@ -121,8 +121,8 @@ export function useApplicationSources() {
   // recognises; only LABEL is translated for display.
   // KEY-ADOPTION: each source option carries its stable key from the API (null for seeds).
   const sources = useMemo(
-    () => translateSeedList(t, 'candidateSources', data.sources.map(name => ({ value: name, label: name, key: data.sourceKeys[name] ?? null }))),
-    [data.sources, data.sourceKeys, t],
+    () => translateSeedList(t, 'candidateSources', data.sources.map(name => ({ value: name, label: name, key: data.sourceKeys[name] ?? null })), i18n),
+    [data.sources, data.sourceKeys, t, i18n],
   )
   return { sources, allowFreeEntry: data.apiFreeEntry, invalidate }
 }

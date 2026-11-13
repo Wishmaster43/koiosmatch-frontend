@@ -56,7 +56,7 @@ const mapSkillLevels = (res: AxiosResponse): SkillLevelItem[] | null => {
 // resolved items as both the full-object `levels` and the legacy plain-string
 // `names`, so neither caller shape breaks.
 export function useSkillLevels() {
-  const { t } = useTranslation('common')
+  const { t, i18n } = useTranslation('common')
   // The endpoint now exists (item 11) — a real 404 should surface in the dev log again.
   const { data: rawLevels } = // LOOKUP-ACTIVE-FLIP-1 (BE G2 e6cb4760): the picker reads only active levels; the settings
   // screen keeps the bare route so inactive rows stay manageable there.
@@ -66,8 +66,8 @@ export function useSkillLevels() {
   // backward-compatible plain-string list for any old string[]-only call-site.
   // Both are derived inside the same memo so `names` shares levelItems' stable identity.
   const { levelItems, names } = useMemo(() => {
-    const items = translateSeedList(t, 'skillLevels', rawLevels)
+    const items = translateSeedList(t, 'skillLevels', rawLevels, i18n)
     return { levelItems: items, names: items.map(l => l.label) }
-  }, [rawLevels, t])
+  }, [rawLevels, t, i18n])
   return { levels: levelItems, names }
 }

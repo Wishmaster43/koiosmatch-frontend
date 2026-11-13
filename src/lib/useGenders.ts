@@ -39,10 +39,10 @@ const mapGenders = (res: AxiosResponse): LookupOption[] | null => {
 // Tenant gender lookup + colour resolver (see file docblock above), seed-labelled
 // and cached so every mounted consumer shares one fetch.
 export function useGenders() {
-  const { t } = useTranslation('common')
+  const { t, i18n } = useTranslation('common')
   const { data: rawGenders } = useCachedLookup('/genders?active=1', mapGenders, DEFAULT_GENDERS)
   // Seeded defaults render in the user language; a tenant value stays as typed (LOOKUP-I18N-1).
-  const genders = useMemo(() => translateSeedList(t, 'genders', rawGenders), [rawGenders, t])
+  const genders = useMemo(() => translateSeedList(t, 'genders', rawGenders, i18n), [rawGenders, t, i18n])
 
   // value/label → colour (case-insensitive); null when unknown so callers can skip
   // useCallback: CandidatesTable hangs this in its columns useMemo deps (audit item
