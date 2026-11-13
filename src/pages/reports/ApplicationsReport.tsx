@@ -214,8 +214,7 @@ export default function ApplicationsReport({ period, filters = EMPTY_REPORT_FILT
     labelKeys: KPI_LABEL_KEYS,
     colors: KPI_COLOR,
     t,
-    // stage_dwell has no drill: the BE ApplicationsKpiDrillRequest `kpi` enum does not accept it (no fake affordance).
-    openKpiDrill: (serverKey, label, value) => (serverKey === 'stage_dwell' ? undefined : openKpiDrill(serverKey, label, value)),
+    openKpiDrill,
     valueFor: (serverKey, raw) =>
       raw != null && serverKey === 'conversion_pct' ? formatPercent(raw) : raw == null ? renderKpiValue(raw, false, undefined) : formatNumber(raw),
     subFor: (serverKey, raw) =>

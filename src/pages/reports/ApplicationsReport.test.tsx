@@ -421,17 +421,17 @@ describe('ApplicationsReport (RAPPORTEN-SUITE-1 portie 2)', () => {
   })
 
   // RAPPORT-APPS-VERDIEPING-1 + REPORT-KPI-CARDS-MISSING-1: the catalogue is the nine fixed
-  // server keys (snake_case) plus the stage_dwell spare appended last.
-  it('the applications KPI catalogue is the nine fixed server keys plus the stage_dwell spare', () => {
+  // server keys (snake_case) plus stage_dwell, the tenth key, appended last.
+  it('the applications KPI catalogue is the nine fixed server keys plus stage_dwell appended last', () => {
     const keys = getReportKpiCatalog('applications').map(c => c.key)
     expect(keys).toEqual(['total', 'new', 'active', 'matched', 'rejected', 'conversion_pct',
       'avg_days_to_match', 'too_long_in_stage', 'missing_appointment', 'stage_dwell'])
   })
 
   // REPORT-KPI-CARDS-MISSING-1: a stored selection with stage_dwell renders its card (workdays
-  // formatted in nl, caption from i18n), does not fall back, and the card has NO drill because
-  // the BE ApplicationsKpiDrillRequest `kpi` enum does not accept stage_dwell.
-  it('renders the stage_dwell card in workdays without a drill and without falling back', async () => {
+  // formatted in nl, caption from i18n), does not fall back, and the card drills like
+  // its siblings (REPORT-KPI-DRILL-KEYS-1: the BE accepts kpi=stage_dwell).
+  it('renders the stage_dwell card in workdays and drills with kpi=stage_dwell', async () => {
     const user = userEvent.setup()
     mockUseReportKpiSelection.mockReturnValue({ data: ['stage_dwell', 'total'], isLoading: false })
     mockUseApplicationsReport.mockReturnValue({
@@ -445,9 +445,30 @@ describe('ApplicationsReport (RAPPORTEN-SUITE-1 portie 2)', () => {
     expect(screen.queryByText(i18n.t('applications.kpiOrderFellBack', { ns: 'analytics' }))).not.toBeInTheDocument()
     getSpy.mockClear()
     await user.click(screen.getByText('7,5'))
-    expect(getSpy).not.toHaveBeenCalledWith('/reports/applications/kpis/drill', expect.anything())
-    // No fake affordance: the card exposes no button role while the BE drill refuses the key.
-    expect(screen.queryByRole('button', { name: i18n.t('applications.kpi.stageDwell', { ns: 'analytics' }) })).toBeNull()
+    expect(getSpy).toHaveBeenCalledWith('/reports/applications/kpis/drill',
+      expect.objectContaining({ params: { kpi: 'stage_dwell', period: 'month' } }))
+    expect(screen.getByRole('button', { name: (n: string) => n.includes(i18n.t('applications.kpi.stageDwell', { ns: 'analytics' })) })).toBeInTheDocument()
+    mockUseReportKpiSelection.mockReset()
+  })
+
+  // REPORT-KPI-DRILL-KEYS-1 (BE 254ba4200): the stage_dwell drill layers the panel
+  // filters on top of its kpi key like every sibling card (one shared baseParams).
+  it('the stage_dwell drill carries the active panel filters next to its kpi key', async () => {
+    const user = userEvent.setup()
+    mockUseReportKpiSelection.mockReturnValue({ data: ['stage_dwell', 'total'], isLoading: false })
+    mockUseApplicationsReport.mockReturnValue({
+      data: { ...data, kpis: [...(data.kpis ?? []), { key: 'stage_dwell', label: 'ignored', count: 7.5 }] },
+      loading: false, error: false,
+    })
+    render(
+      <QueryClientProvider client={new QueryClient()}>
+        <ApplicationsReport period="month" filters={{ ...EMPTY_REPORT_FILTERS, status: ['active'], ownerId: ['u1'] }} />
+      </QueryClientProvider>,
+    )
+    getSpy.mockClear()
+    await user.click(screen.getByText('7,5'))
+    expect(getSpy).toHaveBeenCalledWith('/reports/applications/kpis/drill',
+      expect.objectContaining({ params: expect.objectContaining({ kpi: 'stage_dwell', period: 'month', status: ['active'], owner_id: ['u1'] }) }))
     mockUseReportKpiSelection.mockReset()
   })
 

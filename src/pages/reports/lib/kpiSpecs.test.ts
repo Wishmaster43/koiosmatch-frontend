@@ -152,8 +152,9 @@ describe('unitMapFor', () => {
     expect(unitMapFor(undefined, {})).toEqual(new Map())
   })
 
-  // The BE writes 'percent' on verdict_distribution; the formatter word is 'pct'.
-  it("maps the BE unit word 'percent' to the formatter word 'pct'", () => {
+  // The BE sends 'pct' (passes through unchanged); the legacy word 'percent' from a cached envelope still maps to 'pct'.
+  it("passes 'pct' through and maps the legacy unit word 'percent' to 'pct'", () => {
     expect(unitMapFor([{ key: 'v', unit: 'percent' }], {}).get('v')).toBe('pct')
+    expect(unitMapFor([{ key: 'v', unit: 'pct' }], {}).get('v')).toBe('pct')
   })
 })

@@ -5,6 +5,7 @@ import userEvent from '@testing-library/user-event'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import VacanciesReport from './VacanciesReport'
 import { data, dataWithKpis } from './VacanciesReport.testKit'
+import { EMPTY_REPORT_FILTERS } from './reportFilterParams'
 import i18n from '@/i18n'
 
 // Data layer under test control (loading/error/empty/success — the four UI states).
@@ -183,16 +184,16 @@ describe('VacanciesReport (RAPPORTEN-SUITE-1 portie 4, additive on C-34)', () =>
   })
 
   // REPORT-KPI-CARDS-MISSING-1: the three Koios-advice cards render from the measured payload
-  // (counts plus verdict_distribution as unit 'percent', 0..100), do not fall back, and carry no
-  // drill because VacanciesKpiDrillRequest does not accept those keys.
+  // (counts plus verdict_distribution as unit 'pct', 0..100), do not fall back, and drill like
+  // their siblings (REPORT-KPI-DRILL-KEYS-1: the BE accepts the three keys).
   describe('VacanciesReport (Koios-advice KPI cards)', () => {
-    it('renders the counts and the percentage in nl, no fallback notice, no drill request', async () => {
+    it('renders the counts and the percentage in nl, no fallback notice, one drill request per card', async () => {
       const user = userEvent.setup()
       mockUseReportKpiSelection.mockReturnValue({ data: ['without_advice', 'advice_stale', 'verdict_distribution'], isLoading: false })
       mockUseVacanciesReport.mockReturnValue({
         data: { ...dataWithKpis, kpis: [...(dataWithKpis.kpis ?? []),
           { key: 'without_advice', count: 61 }, { key: 'advice_stale', count: 47 },
-          { key: 'verdict_distribution', count: 62.5, unit: 'percent' }] },
+          { key: 'verdict_distribution', count: 62.5, unit: 'pct' }] },
         loading: false, error: false,
       })
       renderReport()
@@ -203,14 +204,37 @@ describe('VacanciesReport (RAPPORTEN-SUITE-1 portie 4, additive on C-34)', () =>
       expect(screen.getByText('47')).toBeInTheDocument()
       expect(screen.getByText('62,5%')).toBeInTheDocument()
       expect(screen.queryByText(i18n.t('vacancies.kpiOrderFellBack', { ns: 'analytics' }))).not.toBeInTheDocument()
+      for (const k of ['withoutAdvice', 'koiosAdviceStale', 'verdictDistribution']) {
+        expect(screen.getByRole('button', { name: (n: string) => n.includes(i18n.t(`vacancies.kpi.${k}`, { ns: 'analytics' })) })).toBeInTheDocument()
+      }
+      for (const [text, kpi] of [['62,5%', 'verdict_distribution'], ['61', 'without_advice'], ['47', 'advice_stale']]) {
+        getSpy.mockClear()
+        await user.click(screen.getByText(text))
+        expect(getSpy).toHaveBeenCalledWith('/reports/vacancies/kpis/drill',
+          expect.objectContaining({ params: expect.objectContaining({ kpi, period: 'month' }) }))
+      }
+    })
+
+    // REPORT-KPI-DRILL-KEYS-1: the three advice drills layer the panel filters on
+    // top of their kpi key like every sibling card (one shared baseParams).
+    it('the advice-card drills carry the active panel filters next to their kpi key', async () => {
+      const user = userEvent.setup()
+      mockUseReportKpiSelection.mockReturnValue({ data: ['without_advice', 'advice_stale', 'verdict_distribution', 'total'], isLoading: false })
+      mockUseVacanciesReport.mockReturnValue({
+        data: { ...dataWithKpis, kpis: [...(dataWithKpis.kpis ?? []),
+          { key: 'without_advice', count: 61 }, { key: 'advice_stale', count: 47 },
+          { key: 'verdict_distribution', count: 62.5, unit: 'pct' }] },
+        loading: false, error: false,
+      })
+      render(
+        <QueryClientProvider client={new QueryClient()}>
+          <VacanciesReport period="month" filters={{ ...EMPTY_REPORT_FILTERS, status: ['open'], ownerId: ['u1'] }} />
+        </QueryClientProvider>,
+      )
       getSpy.mockClear()
       await user.click(screen.getByText('62,5%'))
-      await user.click(screen.getByText('61'))
-      expect(getSpy).not.toHaveBeenCalledWith('/reports/vacancies/kpis/drill', expect.anything())
-      // No fake affordance: none of the three cards exposes a button role while the BE drill refuses the keys.
-      for (const k of ['withoutAdvice', 'koiosAdviceStale', 'verdictDistribution']) {
-        expect(screen.queryByRole('button', { name: i18n.t(`vacancies.kpi.${k}`, { ns: 'analytics' }) })).toBeNull()
-      }
+      expect(getSpy).toHaveBeenCalledWith('/reports/vacancies/kpis/drill',
+        expect.objectContaining({ params: expect.objectContaining({ kpi: 'verdict_distribution', period: 'month', status: ['open'], owner_id: ['u1'] }) }))
     })
   })
 
