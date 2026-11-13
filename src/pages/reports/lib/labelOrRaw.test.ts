@@ -7,12 +7,19 @@ import type { TFunction } from 'i18next'
 import { labelOrRaw } from './labelOrRaw'
 
 describe('labelOrRaw', () => {
-  const t = ((k: string) => `T:${k}`) as unknown as TFunction
+  // The stub echoes the namespace t() was given, so a wrong-namespace resolution would show.
+  const t = ((k: string, o?: { ns?: string }) => `T:${o?.ns}:${k}`) as unknown as TFunction
 
-  it('translates when the key exists (checked in the analytics namespace)', () => {
+  it('translates when the key exists (checked AND resolved in the analytics namespace)', () => {
     const exists = vi.fn().mockReturnValue(true)
-    expect(labelOrRaw(t, { exists }, 'a.b', 'raw')).toBe('T:a.b')
+    expect(labelOrRaw(t, { exists }, 'a.b', 'raw')).toBe('T:analytics:a.b')
     expect(exists).toHaveBeenCalledWith('a.b', { ns: 'analytics' })
+  })
+
+  it('passes an explicit namespace to both the existence check and t(), whatever t is bound to', () => {
+    const exists = vi.fn().mockReturnValue(true)
+    expect(labelOrRaw(t, { exists }, 'x.y', 'raw', 'settings')).toBe('T:settings:x.y')
+    expect(exists).toHaveBeenCalledWith('x.y', { ns: 'settings' })
   })
 
   it('falls back to the raw server text when the key is missing', () => {

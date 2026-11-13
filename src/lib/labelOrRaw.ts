@@ -6,10 +6,12 @@
  */
 import type { TFunction } from 'i18next'
 
-// The one i18n member used here, kept structural so tests can pass a plain stub.
-interface KeyChecker { exists: (key: string, options?: { ns?: string }) => boolean }
+// The one i18n member used here, kept structural so tests can pass a plain stub; exported so a
+// helper that receives `t` as a parameter can take the checker next to it (never `@/i18n` itself).
+export interface KeyChecker { exists: (key: string, options?: { ns?: string }) => boolean }
 
-// Returns the translated label when the key exists in the active namespace, else the raw fallback text.
+// Returns the translated label when the key exists in `ns`, else the raw fallback text. The `ns`
+// goes to t() as well, so the caller's t may be bound to any namespace.
 export function labelOrRaw(t: TFunction, i18n: KeyChecker, key: string, fallback: string, ns = 'analytics'): string {
-  return i18n.exists(key, { ns }) ? t(key) : fallback
+  return i18n.exists(key, { ns }) ? t(key, { ns }) : fallback
 }
