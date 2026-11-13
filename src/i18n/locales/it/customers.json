@@ -988,7 +988,7 @@
     "vacancyStatuses": {
       "open": "Aperta",
       "online": "Online",
-      "concept": "Bozza",
+      "draft": "Bozza",
       "paused": "In pausa",
       "closed": "Chiusa"
     }

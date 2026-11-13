@@ -988,7 +988,7 @@
     "vacancyStatuses": {
       "open": "Abierta",
       "online": "En línea",
-      "concept": "Borrador",
+      "draft": "Borrador",
       "paused": "En pausa",
       "closed": "Cerrado"
     }
