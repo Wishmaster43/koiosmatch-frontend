@@ -39,9 +39,9 @@ const baseOpportunity = { id: 'opp-1', title: 'Deal A', description: '' } as unk
 // no longer the generic "Omschrijving" (details.groups.description stays as-is
 // for the popout/other consumers — see OpportunityDescriptionBlock.tsx).
 const descriptionEditButton = () =>
-  within(screen.getByText('Kansomschrijving').parentElement as HTMLElement).getByTitle('Bewerken')
+  within(screen.getByText(i18n.t('opportunities:details.groups.opportunityDescription')).parentElement as HTMLElement).getByTitle('Bewerken')
 const descriptionSaveButton = () =>
-  within(screen.getByText('Kansomschrijving').parentElement as HTMLElement).getByTitle('Opslaan')
+  within(screen.getByText(i18n.t('opportunities:details.groups.opportunityDescription')).parentElement as HTMLElement).getByTitle(i18n.t('common:save'))
 
 describe('DetailsTab · Kanstekst wiring (OPP-DESCRIPTION-1)', () => {
   it('renders the description block below the deal fields (DRILLDOWN-VOLGORDE-CANON)', () => {
@@ -49,7 +49,7 @@ describe('DetailsTab · Kanstekst wiring (OPP-DESCRIPTION-1)', () => {
     // Real nl translation for opportunities:details.groups.deal ("Deal") and
     // details.groups.opportunityDescription ("Kansomschrijving").
     const dealLabel = screen.getByText('Deal')
-    const descriptionLabel = screen.getByText('Kansomschrijving')
+    const descriptionLabel = screen.getByText(i18n.t('opportunities:details.groups.opportunityDescription'))
     expect(dealLabel).toBeInTheDocument()
     expect(descriptionLabel).toBeInTheDocument()
     // DOCUMENT_POSITION_FOLLOWING: the description card comes AFTER the deal

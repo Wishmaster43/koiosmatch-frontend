@@ -4,7 +4,7 @@
  */
 import { describe, it, expect, vi } from 'vitest'
 import { render, screen, fireEvent } from '@testing-library/react'
-import '@/i18n'
+import i18n from '@/i18n'
 import AssignTargetsBar from './AssignTargetsBar'
 
 vi.mock('@/lib/useTeams', () => ({ useTeams: () => ({ teams: [] }) }))
@@ -16,7 +16,7 @@ describe('AssignTargetsBar · cancel control (HUISSTIJL-1)', () => {
     render(<AssignTargetsBar selection={{ ids: ['t1'] }} count={1} recruiters={[]}
       onAssign={vi.fn()} onDone={onDone} />)
 
-    const cancel = screen.getByRole('button', { name: 'Annuleren' })
+    const cancel = screen.getByRole('button', { name: i18n.t('common:cancel') })
     fireEvent.click(cancel)
     expect(onDone).toHaveBeenCalled()
   })

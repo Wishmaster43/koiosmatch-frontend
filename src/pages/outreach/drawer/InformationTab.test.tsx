@@ -6,7 +6,7 @@
 import { describe, it, expect, vi } from 'vitest'
 import { render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
-import '@/i18n'
+import i18n from '@/i18n'
 import InformationTab from './InformationTab'
 import type { CampaignDetail } from '../hooks/useOutreachDetail'
 
@@ -48,7 +48,7 @@ describe('InformationTab', () => {
     const nameInput = screen.getByDisplayValue('Bellijst Zorg')
     await user.clear(nameInput)
     await user.type(nameInput, 'Nieuwe naam')
-    await user.click(screen.getByTitle('Opslaan'))
+    await user.click(screen.getByTitle(i18n.t('common:save')))
 
     expect(onSave).toHaveBeenCalledWith({ name: 'Nieuwe naam', channel: 'call' })
   })

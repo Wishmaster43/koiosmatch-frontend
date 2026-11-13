@@ -10,7 +10,7 @@
 import { describe, it, expect, vi } from 'vitest'
 import { render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
-import '@/i18n'
+import i18n from '@/i18n'
 import OpportunityDescriptionBlock from './OpportunityDescriptionBlock'
 
 // Minimal stand-in for the Tiptap editor — a plain textarea wired to value/onChange.
@@ -70,7 +70,7 @@ describe('OpportunityDescriptionBlock · pencil → edit → save/cancel', () =>
     const rte = screen.getByTestId('rte')
     await user.clear(rte)
     await user.type(rte, '<p>Bewerkt</p>')
-    await user.click(screen.getByTitle('Opslaan'))
+    await user.click(screen.getByTitle(i18n.t('common:save')))
     expect(onSave).toHaveBeenCalledWith('<p>Bewerkt</p>')
     expect(screen.queryByTestId('rte')).toBeNull()
   })
@@ -83,7 +83,7 @@ describe('OpportunityDescriptionBlock · pencil → edit → save/cancel', () =>
     const rte = screen.getByTestId('rte')
     await user.clear(rte)
     await user.type(rte, '<p>Weggegooid</p>')
-    await user.click(screen.getByTitle('Annuleren'))
+    await user.click(screen.getByTitle(i18n.t('common:cancel')))
     expect(onSave).not.toHaveBeenCalled()
     expect(screen.queryByTestId('rte')).toBeNull()
     // The read view still shows the ORIGINAL value, not the discarded draft.
@@ -96,14 +96,14 @@ describe('OpportunityDescriptionBlock · pencil → edit → save/cancel', () =>
 describe('OpportunityDescriptionBlock · second-screen pop-out', () => {
   it('does not render the pop-out icon without an opportunityId (no record to address)', () => {
     render(<OpportunityDescriptionBlock value="<p>Origineel</p>" onSave={() => {}} />)
-    expect(screen.queryByTitle('Open op tweede scherm')).toBeNull()
+    expect(screen.queryByTitle(i18n.t('common:openSecondScreen'))).toBeNull()
   })
 
   it('renders a pop-out icon that opens /popout/text/opportunity/{id}/description', async () => {
     const user = userEvent.setup()
     const openSpy = vi.spyOn(window, 'open').mockReturnValue({} as Window)
     render(<OpportunityDescriptionBlock opportunityId="opp-1" value="<p>Origineel</p>" onSave={() => {}} />)
-    await user.click(screen.getByTitle('Open op tweede scherm'))
+    await user.click(screen.getByTitle(i18n.t('common:openSecondScreen')))
     expect(openSpy).toHaveBeenCalledWith('/popout/text/opportunity/opp-1/description',
       expect.stringContaining('koios-text-opportunity-opp-1-description'), expect.any(String))
     // Opening it also starts an edit, same as the pencil.
@@ -115,7 +115,7 @@ describe('OpportunityDescriptionBlock · second-screen pop-out', () => {
     const user = userEvent.setup()
     const openSpy = vi.spyOn(window, 'open').mockReturnValue({} as Window)
     render(<OpportunityDescriptionBlock opportunityId="opp-1" value="<p>Origineel</p>" onSave={() => {}} />)
-    await user.click(screen.getByTitle('Open op tweede scherm'))
+    await user.click(screen.getByTitle(i18n.t('common:openSecondScreen')))
     const rte = screen.getByTestId('rte')
     await user.type(rte, 'x')
     expect(rte).toHaveValue('<p>Origineel</p>x')

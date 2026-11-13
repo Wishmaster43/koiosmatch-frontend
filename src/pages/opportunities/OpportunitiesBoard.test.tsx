@@ -7,7 +7,7 @@
 import { describe, it, expect, vi } from 'vitest'
 import { render, screen } from '@testing-library/react'
 // Real (nl) i18n — resolves opportunities:loading/error/empty/board.empty.
-import '@/i18n'
+import i18n from '@/i18n'
 import OpportunitiesBoard from './OpportunitiesBoard'
 import type { Opportunity } from '@/types/opportunity'
 
@@ -38,7 +38,7 @@ describe('OpportunitiesBoard · four UI states (F3)', () => {
 
   it('shows the error message instead of zero-count columns on a failed fetch', () => {
     render(<OpportunitiesBoard rows={[]} stages={stages} onMove={vi.fn()} onSelect={vi.fn()} error={new Error('boom')} />)
-    expect(screen.getByText('Kansen konden niet geladen worden.')).toBeInTheDocument()
+    expect(screen.getByText(i18n.t('opportunities:error'))).toBeInTheDocument()
     expect(screen.queryByText('Lead')).toBeNull()
   })
 
@@ -59,7 +59,7 @@ describe('OpportunitiesBoard · shared column atom (HUISSTIJL-1)', () => {
   it('renders the empty-column placeholder text from the shared BoardColumnShell', () => {
     render(<OpportunitiesBoard rows={[row({ stageValue: 'lead' })]} stages={stages} onMove={vi.fn()} onSelect={vi.fn()} />)
     // 'won' column has no rows → BoardColumnShell's own dashed empty-state text.
-    expect(screen.getByText('Geen kansen')).toBeInTheDocument()
+    expect(screen.getByText(i18n.t('opportunities:board.empty'))).toBeInTheDocument()
   })
 
   it('renders the owner avatar initials and the formatted date on a card', () => {

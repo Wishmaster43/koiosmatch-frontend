@@ -17,7 +17,7 @@
 import { describe, it, expect, vi } from 'vitest'
 import { render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
-import '@/i18n'
+import i18n from '@/i18n'
 import TargetNoteField from './TargetNoteField'
 
 vi.mock('@/components/ui/RichTextEditor', () => ({
@@ -47,7 +47,7 @@ describe('TargetNoteField · rich-note parity with the candidate note (NOTE-RICH
 
     await user.click(screen.getByRole('button', { name: 'Bewerken' }))
     await user.type(screen.getByLabelText('body'), 'Bel na 17u terug')
-    await user.click(screen.getByRole('button', { name: 'Opslaan' }))
+    await user.click(screen.getByRole('button', { name: i18n.t('common:save') }))
 
     // THE SEAM: onSave still receives a single trimmed note string — the PATCH
     // wrapper (useOutreachDetail.setTargetNote) is unchanged.

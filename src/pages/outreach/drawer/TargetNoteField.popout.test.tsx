@@ -17,7 +17,7 @@
 import { describe, it, expect, vi } from 'vitest'
 import { act, fireEvent, render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
-import '@/i18n'
+import i18n from '@/i18n'
 import TargetNoteField from './TargetNoteField'
 import { notifyError } from '@/lib/notify'
 
@@ -36,7 +36,7 @@ describe('TargetNoteField · second-screen pop-out', () => {
     vi.stubGlobal('open', open)
     render(<TargetNoteField note={null} onSave={vi.fn().mockResolvedValue(undefined)} targetId="t1" campaignId="camp-1" />)
 
-    await user.click(screen.getByTitle('Open op tweede scherm'))
+    await user.click(screen.getByTitle(i18n.t('common:openSecondScreen')))
 
     // THE SEAM: the real route + named window, so re-opening this same target
     // re-focuses one window instead of stacking a second one.
@@ -54,7 +54,7 @@ describe('TargetNoteField · second-screen pop-out', () => {
     render(<TargetNoteField note={null} onSave={vi.fn().mockResolvedValue(undefined)} targetId="t1" campaignId="camp-1" />)
 
     expect(screen.queryByLabelText('body')).toBeNull()
-    await user.click(screen.getByTitle('Open op tweede scherm'))
+    await user.click(screen.getByTitle(i18n.t('common:openSecondScreen')))
     expect(screen.getByLabelText('body')).toBeInTheDocument()
     vi.unstubAllGlobals()
   })
@@ -64,7 +64,7 @@ describe('TargetNoteField · second-screen pop-out', () => {
     vi.stubGlobal('open', vi.fn(() => null))
     render(<TargetNoteField note={null} onSave={vi.fn().mockResolvedValue(undefined)} targetId="t1" campaignId="camp-1" />)
 
-    await user.click(screen.getByTitle('Open op tweede scherm'))
+    await user.click(screen.getByTitle(i18n.t('common:openSecondScreen')))
     expect(notifyError).toHaveBeenCalled()
     vi.unstubAllGlobals()
   })
@@ -79,7 +79,7 @@ describe('TargetNoteField · second-screen pop-out', () => {
     vi.stubGlobal('open', vi.fn(() => fakeWin))
     render(<TargetNoteField note={null} onSave={vi.fn().mockResolvedValue(undefined)} targetId="t1" campaignId="camp-1" />)
 
-    fireEvent.click(screen.getByTitle('Open op tweede scherm'))
+    fireEvent.click(screen.getByTitle(i18n.t('common:openSecondScreen')))
     expect(screen.getByLabelText('body')).toBeInTheDocument()
 
     // Simulate the popout window closing on its own — the poll picks this up.

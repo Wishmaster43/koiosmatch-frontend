@@ -10,7 +10,7 @@ import { describe, it, expect, vi } from 'vitest'
 import { act, render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 // Real i18n (nl) side-effect init so t() resolves genuine Dutch copy.
-import '@/i18n'
+import i18n from '@/i18n'
 import nlOutreach from '@/i18n/locales/nl/outreach.json'
 import TargetsTab from './TargetsTab'
 import { useVacancyOptions } from '@/pages/candidates/hooks/useVacancyOptions'
@@ -111,7 +111,7 @@ describe('TargetsTab · selection + assign (G29)', () => {
     render(<TargetsTab targets={[target]} loading={false} error={false} onSetStatus={vi.fn()} onSetOutcome={vi.fn()}
       recruiters={[{ value: 'r1', label: 'Nora Recruiter' }]} onAssignTargets={onAssignTargets} />)
 
-    await user.click(screen.getByRole('checkbox', { name: 'Selecteer rij' }))
+    await user.click(screen.getByRole('checkbox', { name: i18n.t('common:selectRow') }))
     // The select-all bar swaps for the assign bar once ≥1 row is selected; the
     // default axis is Person, so the picker is the recruiters CreatableSelect.
     await user.click(screen.getByRole('button', { name: nlOutreach.drawer.assign.pickPerson }))
@@ -126,7 +126,7 @@ describe('TargetsTab · selection + assign (G29)', () => {
     const user = userEvent.setup()
     render(<TargetsTab targets={[target]} loading={false} error={false} onSetStatus={vi.fn()} onSetOutcome={vi.fn()}
       recruiters={[]} onAssignTargets={vi.fn()} />)
-    await user.click(screen.getByRole('checkbox', { name: 'Selecteer rij' }))
+    await user.click(screen.getByRole('checkbox', { name: i18n.t('common:selectRow') }))
     // No recruiters configured for this tenant → nothing to pick on the default
     // (Person) axis → confirm stays disabled, never a submit to an empty axis.
     expect(screen.getByRole('button', { name: nlOutreach.drawer.assign.confirm })).toBeDisabled()
@@ -167,7 +167,7 @@ describe('TargetsTab · per-target note (G30)', () => {
     render(<TargetsTab targets={[target]} loading={false} error={false} onSetStatus={vi.fn()} onSetOutcome={vi.fn()} onSetNote={onSetNote} />)
 
     // BELLIJST-SCALE-1: the note lives behind the row's expand toggle now.
-    await user.click(screen.getByLabelText('Klik voor details'))
+    await user.click(screen.getByLabelText(i18n.t('common:clickForDetails')))
     expect(screen.getByText(nlOutreach.drawer.note.empty)).toBeInTheDocument()
     await user.click(screen.getByRole('button', { name: 'Bewerken' }))
     // The Koios assist block (Verbeteren/Samenvatten/Actiepunten) is stubbed
@@ -175,7 +175,7 @@ describe('TargetsTab · per-target note (G30)', () => {
     // already proves the assist modes themselves.
     expect(screen.getByTestId('assist-stub')).toBeInTheDocument()
     await user.type(screen.getByLabelText('body'), 'Bel na 17u terug')
-    await user.click(screen.getByRole('button', { name: 'Opslaan' }))
+    await user.click(screen.getByRole('button', { name: i18n.t('common:save') }))
 
     // THE SEAM: exact target id + trimmed note text (still the same PATCH body key).
     expect(onSetNote).toHaveBeenCalledWith('t1', 'Bel na 17u terug')
@@ -186,7 +186,7 @@ describe('TargetsTab · per-target note (G30)', () => {
     render(<TargetsTab targets={[{ ...target, note: 'Al twee keer gemist' }]} loading={false} error={false}
       onSetStatus={vi.fn()} onSetOutcome={vi.fn()} onSetNote={vi.fn()} />)
     // BELLIJST-SCALE-1: expand the row first — the note is tucked behind it.
-    await user.click(screen.getByLabelText('Klik voor details'))
+    await user.click(screen.getByLabelText(i18n.t('common:clickForDetails')))
     expect(screen.getByText('Al twee keer gemist')).toBeInTheDocument()
   })
 
@@ -200,7 +200,7 @@ describe('TargetsTab · per-target note (G30)', () => {
     render(<TargetsTab targets={[{ ...target, note: 'Oude tekst' }]} loading={false} error={false}
       onSetStatus={vi.fn()} onSetOutcome={vi.fn()} onSetNote={vi.fn()}
       campaignId="camp-1" onApplyTargetNote={onApplyTargetNote} />)
-    await user.click(screen.getByLabelText('Klik voor details'))
+    await user.click(screen.getByLabelText(i18n.t('common:clickForDetails')))
     expect(screen.getByText('Oude tekst')).toBeInTheDocument()
 
     // Simulate the popout window's `saved` BroadcastChannel message arriving.
@@ -304,7 +304,7 @@ describe('TargetsTab · search + client-side filters (BELLIJST-SCALE-1)', () => 
     await user.type(screen.getByLabelText('Zoeken…'), 'jan')
     // Only Jan Jansen's row is visible now — one row checkbox + the select-all checkbox.
     expect(screen.getAllByRole('checkbox')).toHaveLength(2)
-    await user.click(screen.getByRole('checkbox', { name: 'Selecteer alles' }))
+    await user.click(screen.getByRole('checkbox', { name: i18n.t('common:selectAll') }))
     // The select-all bar swaps for the assign bar — confirms exactly 1 target got selected
     // (the row hidden by the search never enters the selection).
     expect(screen.getByText(nlOutreach.drawer.assign.selected.replace('{{count}}', '1'))).toBeInTheDocument()

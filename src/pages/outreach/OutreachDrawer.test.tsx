@@ -10,7 +10,7 @@
 import { describe, it, expect, vi, afterEach } from 'vitest'
 import { render, screen, fireEvent, act, renderHook } from '@testing-library/react'
 // Real i18n (nl) side-effect init so t() resolves genuine Dutch text.
-import '@/i18n'
+import i18n from '@/i18n'
 import nlCommon from '@/i18n/locales/nl/common.json'
 import nlOutreach from '@/i18n/locales/nl/outreach.json'
 
@@ -72,7 +72,7 @@ describe('OutreachDrawer — archived state', () => {
     expect(screen.getByText('Bellijst Zorg')).toBeInTheDocument()
     // No archivedAt passed → flag-only banner; the owner picker stays hidden.
     expect(screen.getByText('Gearchiveerd')).toBeInTheDocument()
-    expect(screen.queryByText('Eigenaar')).toBeNull()
+    expect(screen.queryByText(i18n.t('outreach:drawer.owner'))).toBeNull()
     fireEvent.click(screen.getByRole('button', { name: 'Herstellen' }))
     expect(onRestore).toHaveBeenCalledWith('c1')
   })
@@ -89,7 +89,7 @@ describe('OutreachDrawer — archived state', () => {
     render(<OutreachDrawer id="c2" onClose={() => {}} />)
     expect(detailMock).toHaveBeenLastCalledWith('c2')
     expect(screen.queryByText('Gearchiveerd')).toBeNull()
-    expect(screen.getByText('Eigenaar')).toBeInTheDocument()
+    expect(screen.getByText(i18n.t('outreach:drawer.owner'))).toBeInTheDocument()
     expect(screen.queryByRole('button', { name: 'Herstellen' })).toBeNull()
   })
 })
