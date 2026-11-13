@@ -11,7 +11,6 @@
  * DrawerAddApplicationModal (context 'drawer').
  */
 import { useState, useId } from 'react'
-import type { ComponentType, ReactNode, CSSProperties } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useUsers } from '@/lib/queries'
 import { useAuth } from '@/context/AuthContext'
@@ -26,14 +25,15 @@ import CreatableSelectJs from '@/components/ui/CreatableSelect'
 import FloatingPanel from '@/components/ui/FloatingPanel'
 import type { Application } from '@/types/application'
 import type { Id } from '@/types/common'
-// §0.3 split: server-searched picker field/hook + the tenant custom-field
+// §0.3 split: server-searched picker hook + the tenant custom-field
 // control now live in their own folder (mirrors the candidate addmodal/ folder).
-import SearchPickField from './SearchPickField'
 import { useSearchOptions } from './useSearchOptions'
-import type { PickOption, RawPickRow } from './types'
+import type { PickOption } from './types'
 import CustomFieldsSection from './CustomFieldsSection'
 import InterviewConsentRow from './InterviewConsentRow'
-import { requiredMark } from '@/components/forms/fields'
+import CandidateVacancyRow from './CandidateVacancyRow'
+import OwnerPhaseRow from './OwnerPhaseRow'
+import { mapCandidateRow, mapVacancyRow } from './pickRowMappers'
 // R6: owner-derivation/preflight/stage-seeding effects and the POST submit now
 // live in their own hooks (extracted verbatim, behaviour unchanged).
 import { useApplicationOwnerAndStage } from '../hooks/useApplicationOwnerAndStage'
@@ -41,79 +41,19 @@ import { useCreateApplication } from '../hooks/useCreateApplication'
 // NEWCAND-1 (register pt.4): reuse the real candidate create flow (incl. its own
 // CV-parse entry points) — never a second, thinner "create candidate" form here.
 import { AddCandidateModal } from '@/pages/candidates/shared'
-import { UserPlus } from 'lucide-react'
 import type { Candidate } from '@/types/candidate'
-import Button from '@/components/ui/Button'
 import ModalFooter from '@/components/ui/ModalFooter'
-import { BodyText } from '@/components/ui/typography'
 import { tintBorder } from '@/lib/tint'
 // LABEL-LEFT-1 (§3A: modals mirror the drill-down — label LEFT of the field,
 // canon label width ~120px). CLONE-BY-CONSTRUCTION-1 (§16): the shared row shell
 // (this file's twin, DrawerAddApplicationModal, and SearchPickField all adopt it).
 import { ApplicationFieldRow } from './ApplicationFieldRow'
 
-type AnyProps = Record<string, unknown>
-const CreatableSelect = CreatableSelectJs as unknown as ComponentType<AnyProps>
-
 interface AppUser { id: Id; name?: string }
-
-// ownerId/ownerName (APP-OWNER-1): both /candidates and /vacancies already carry
-// an `owner` object (CandidateListResource / VacancyListResource) — captured here
-// so the owner-derivation chain below can read it straight off the picked option,
-// no extra fetch for either the candidate or the non-locked vacancy pick.
-// SUBLINE-1 (register PDF-SOLLICITATIES pt.1, Danny 14-08): "vijf keer Blom"
-// (i.e. "five Bloms in the list") is unpickable by name alone — fold function
-// title + city into the label itself,
-// since the shared SearchSelect row only renders a plain string (no sub-line
-// slot). " · " is a value separator here, never sentence punctuation (§5).
-const mapCandidateRow = (c: RawPickRow): PickOption => {
-  const name = c.name ?? [c.first_name, c.last_name].filter(Boolean).join(' ')
-  const detail = [c.function_title, c.city].filter(Boolean).join(' · ')
-  return {
-    value: c.id ?? '', label: detail ? `${name} · ${detail}` : name,
-    ownerId: c.owner?.id, ownerName: c.owner?.name,
-  }
-}
-const mapVacancyRow = (v: RawPickRow): PickOption => ({
-  value: v.id ?? '', label: v.title ?? v.titel ?? '', client: v.client_name ?? v.client,
-  ownerId: v.owner?.id, ownerName: v.owner?.name,
-})
 
 // A submittable stage id is the uuid the backend validates against
 // (StoreApplicationRequest: uuid|exists:application_stages,id). useApplicationStages
 // seeds slug ids ("applied") until /application-stages resolves — those would 422.
-
-// Field label + shared searchable single-select (CreatableSelect) — replaces the
-// old inline SearchField dropdown (DUP-1). allowCreate off = pick-only. `style`
-// (e.g. a 422 field-error border) merges with the base width, it never replaces it.
-// S2 (Danny): comfortable menu width now that the panel is wide (mirrors
-// MatchModal's pickerMenuWidth) — the shared component's 220px default
-// read cramped for a full candidate/vacancy "title · client" label. `value || null`
-// (measured live, S2): this form's state starts at '' (empty string, not null/
-// undefined), and CreatableSelect's `value ?? placeholder` only falls through to
-// the placeholder on null/undefined — '' short-circuited it, so every picker
-// showed BLANK instead of the placeholder text (i.e. "Select a
-// candidate/vacancy/recruiter"). Mirrors MatchModal's own
-// `value={x || null}` pickers (job 17/18).
-function PickField({ label, style, value, ariaRequired, ...rest }: { label: ReactNode; style?: CSSProperties; value?: string; ariaRequired?: boolean } & AnyProps) {
-  // §6: a <button> trigger cannot be labelled by a bare <div>, so the picker used to
-  // announce only its value ("Piet Recruiter") with no field name. CreatableSelect
-  // prefixes aria-labelledby with the label, so it now reads "Recruiter, Piet Recruiter".
-  const fieldId = useId()
-  // CLONE-BY-CONSTRUCTION-1: the shared ApplicationFieldRow shell, same as the
-  // twin's (DrawerAddApplicationModal) phase/owner/source rows.
-  return (
-    // spacing="none": this row always sits inside a parent that already owns the
-    // vertical gap (ownerField's own wrapper row, or the owner|phase grid — both
-    // 16px gap); the row shell's own 14px margin would double up (verifier finding).
-    <ApplicationFieldRow fieldId={fieldId} label={label} spacing="none">
-      {/* REQUIRED-A11Y-4: forward the required-ness to CreatableSelect's own
-          'aria-required' prop, which already places it on the trigger button. */}
-      <CreatableSelect allowCreate={false} menuWidth={320} aria-labelledby={`${fieldId}-label`} aria-required={ariaRequired || undefined}
-        value={value || null} style={{ width: '100%', ...style }} {...rest} />
-    </ApplicationFieldRow>
-  )
-}
 
 /**
  * PageAddApplicationModal — create a new application by linking an existing
@@ -226,7 +166,6 @@ export default function PageAddApplicationModal({ onClose, onCreated, lockedVaca
   // useApplicationSources' doc comment for the full backend contract).
   const [source, setSource] = useState('')
   const sourceFieldId = useId()
-  const lockedVacancyFieldId = useId()
   const { sources: sourceOptions, allowFreeEntry: sourceAllowFreeEntry } = useApplicationSources()
   // K-277: the picked option's stable key rides along with the name (null for free entry).
   const sourceKey = (sourceOptions.find(o => o.value === source) as { key?: string | null } | undefined)?.key ?? null
@@ -250,23 +189,6 @@ export default function PageAddApplicationModal({ onClose, onCreated, lockedVaca
     appRuleBlocked, interviewConsent, onCreated,
   })
 
-  // Declared once — it renders either on its own row or paired with the phase picker.
-  // CLEAR-SWEEP (Danny 13-08): owner is optional (submitted as `owner_id: ownerId ||
-  // null` above) — once auto-seeded or manually picked, it must be releasable back
-  // to "let the server decide" rather than stuck on whatever was last chosen.
-  const ownerField = (
-    <div>
-      <PickField label={<>{t('add.owner')}{ownerRequired && requiredMark}</>} placeholder={t('add.ownerPlaceholder')}
-        clearable={!ownerRequired} clearLabel={t('add.owner')}
-        options={ownerOptions} value={ownerId} onChange={setOwnerId} ariaRequired={ownerRequired}
-        style={errors.ownerId ? { borderColor: 'var(--color-danger)' } : undefined} />
-      {errors.ownerId && !ownerId && ownerRequired && (
-        <div role="alert" style={{ fontSize: 11, color: 'var(--color-danger-text)', marginTop: 4 }}>
-          {t('common:errors.fieldRequired', { field: t('add.owner') })}
-        </div>
-      )}
-    </div>
-  )
 
   return (
     // NEWCAND-1: a fragment now wraps two sibling FloatingPanels (this modal +
@@ -285,76 +207,14 @@ export default function PageAddApplicationModal({ onClose, onCreated, lockedVaca
           {candidateId && appRuleDecision && appRuleDecision.effect !== 'allow' && (
             <ActionRuleBanner decision={appRuleDecision} />
           )}
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
-            <div>
-              {/* REQUIRED-A11Y-4: the candidate is ALWAYS required (useCreateApplication's
-                  `create` bails out on !candidateId before anything else runs). */}
-              <SearchPickField label={t('add.candidate')} placeholder={t('add.candidatePlaceholder')}
-                value={pickedCandidate} options={candidateSearch.options} onPick={pickCandidate}
-                onSearch={candidateSearch.setQuery} error={errors.candidateId}
-                searchError={candidateSearch.error} onRetry={candidateSearch.retry} ariaRequired />
-              {/* NEWCAND-1: a real button (§3A), never coloured text-as-link — opens the
-                  house AddCandidateModal (with its own CV-parse entry points) on top. */}
-              <Button variant="secondary" size="sm" style={{ marginTop: 6 }} onClick={() => setAddingCandidate(true)}>
-                <UserPlus size={12} /> {t('add.newCandidate')}
-              </Button>
-            </div>
-            {lockedVacancy ? (
-              // CLONE-BY-CONSTRUCTION-1: the shared field-row shell, read-only content.
-              // spacing="none": this cell sits in the candidate|vacancy grid (16px gap owns
-              // the vertical rhythm) — the row shell's own margin would double up.
-              <ApplicationFieldRow fieldId={lockedVacancyFieldId} label={t('add.vacancy')} spacing="none">
-                <div style={{ padding: '8px 10px', borderRadius: 8, border: '1px solid var(--border)', background: 'var(--bg)' }}>
-                  <BodyText as="span">
-                    {lockedVacancy.client ? `${lockedVacancy.title} · ${lockedVacancy.client}` : lockedVacancy.title}
-                  </BodyText>
-                </div>
-              </ApplicationFieldRow>
-            ) : (
-              // VACATURE-OPTIONEEL: labelled optional so the field's own placement never
-              // reads as a required step — an open application (no vacancy yet) is real.
-              // APP-REQUIRED-FE-1: once the tenant requires it, the honest "(optioneel)"
-              // hint is replaced by the same red-asterisk marker every other field uses.
-              <div>
-                <SearchPickField
-                  label={vacancyRequired
-                    ? <>{t('add.vacancy')}{requiredMark}</>
-                    : <><span>{t('add.vacancy')}</span> <span style={{ fontWeight: 400, color: 'var(--text-muted)' }}>{t('add.vacancyOptional')}</span></>}
-                  placeholder={t('add.vacancyPlaceholder')}
-                  value={pickedVacancy} options={vacancySearch.options} onPick={pickVacancy}
-                  onSearch={vacancySearch.setQuery} error={errors.vacancyId}
-                  searchError={vacancySearch.error} onRetry={vacancySearch.retry} ariaRequired={vacancyRequired} />
-                {errors.vacancyId && !vacancyId && vacancyRequired && (
-                  <div role="alert" style={{ fontSize: 11, color: 'var(--color-danger-text)', marginTop: 4 }}>
-                    {t('common:errors.fieldRequired', { field: t('add.vacancy') })}
-                  </div>
-                )}
-              </div>
-            )}
-          </div>
-          {/* Owner + start stage share a row (§3A: pair short fields into two columns).
-              The phase picker only exists when the tenant lookup gave us real, submittable
-              stages — otherwise owner keeps the full width and the server picks the stage. */}
-          {stageOptions.length > 0 ? (
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
-              {ownerField}
-              {/* CLEAR-SWEEP (Danny 13-08): start stage is optional too — omitted from
-                  the POST body entirely when empty (see `create` above), so the server's
-                  own default-stage fallback decides. Must be releasable, not sticky. */}
-              <div>
-                <PickField label={<>{t('add.phase')}{phaseRequired && requiredMark}</>} placeholder={t('add.phasePlaceholder')}
-                  clearable={!phaseRequired} clearLabel={t('add.phase')}
-                  options={stageOptions.map(s => ({ value: s.id, label: s.label }))}
-                  value={phaseId} onChange={setPhaseIdManual} ariaRequired={phaseRequired}
-                  style={errors.phase ? { borderColor: 'var(--color-danger)' } : undefined} />
-                {errors.phase && !phaseId && phaseRequired && (
-                  <div style={{ fontSize: 11, color: 'var(--color-danger-text)', marginTop: 4 }}>
-                    {t('common:errors.fieldRequired', { field: t('add.phase') })}
-                  </div>
-                )}
-              </div>
-            </div>
-          ) : ownerField}
+          <CandidateVacancyRow lockedVacancy={lockedVacancy} pickedCandidate={pickedCandidate} pickCandidate={pickCandidate}
+            candidateSearch={candidateSearch} pickedVacancy={pickedVacancy} pickVacancy={pickVacancy}
+            vacancySearch={vacancySearch} vacancyRequired={vacancyRequired} vacancyId={vacancyId}
+            errors={errors} onNewCandidate={() => setAddingCandidate(true)} />
+          <OwnerPhaseRow ownerOptions={ownerOptions} ownerId={ownerId} setOwnerId={setOwnerId} ownerRequired={ownerRequired}
+            stageOptions={stageOptions} phaseId={phaseId} setPhaseIdManual={setPhaseIdManual}
+            phaseRequired={phaseRequired} errors={errors} />
+
 
           {/* Acquisition source — S-SOURCE-1: a searchable/creatable picker over the
               real distinct source values already on applications (see useApplicationSources'

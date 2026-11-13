@@ -460,7 +460,6 @@
   "src/pages/outreach/drawer/TargetsActiveFilterChip.tsx": 1,
   "src/pages/outreach/drawer/TargetsFilterBar.tsx": 3,
   "src/pages/outreach/drawer/TargetsTab.test.tsx": 1,
-  "src/pages/outreach/drawer/TargetsTab.tsx": 7,
   "src/pages/outreach/hooks/useOutreachInsights.ts": 2,
   "src/pages/outreach/outreachChannelMeta.ts": 1,
   "src/pages/planning/AddShiftModalFields.tsx": 5,
