@@ -74,7 +74,7 @@ describe('settings search palette finds notif_conversations (§3A — always sea
 
   function entriesFor(lng: string, settingsRes: ResourceLanguage, settingsSearchRes: ResourceLanguage) {
     const i18n = makeI18n(lng, { [lng]: { settings: settingsRes, settingsSearch: settingsSearchRes } }, ['settings', 'settingsSearch'])
-    return buildSettingsSearchEntries(notifGroup ? [notifGroup] : [], i18n.t.bind(i18n))
+    return buildSettingsSearchEntries(notifGroup ? [notifGroup] : [], i18n.t.bind(i18n), i18n)
   }
 
   it('finds the tab in Dutch by its own translated label', () => {

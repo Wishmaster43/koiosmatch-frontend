@@ -3,18 +3,17 @@
  * for a label (CLAUDE.md §5 "one source per label"); it hides a missing key behind copy that
  * is never translated. This guard counts literal defaultValue fallbacks inside t() calls and
  * pins the count as a ratchet. Accepted leftovers are technical fallbacks on DYNAMIC keys:
- * most carry a non-literal value (a wire word, a column or permission name) and are not matched;
- * two carry a literal by design and ARE counted: the two empty search terms in settingsSearchIndex
- * (the ReportDataWindow date-range template dropped its fallback on 13-11, and DEFAULTVALUE-ROUNDS-1
- * moved ImportSettings' empty description to labelOrRaw the same day).
+ * since 13-11 none are left: the ReportDataWindow date-range template, ImportSettings' empty description
+ * and the two empty search terms in settingsSearchIndex all moved to labelOrRaw / i18n.exists that day,
+ * so any literal defaultValue inside a t() call is a new finding.
  *
  * Plain .js: the walker needs node:fs (no @types/node in this repo).
  */
 import { describe, it, expect } from 'vitest'
 import { readFileSync, readdirSync, statSync } from 'node:fs'
 
-// Pinned ceiling: only goes down, never raise it (13-11 evening: 2 sites, both technical).
-const CEILING = 2
+// Pinned ceiling: only goes down, never raise it (13-11: 0 sites, the class is closed).
+const CEILING = 0
 
 // Collects every non-test .ts/.tsx/.js/.jsx source file under src (the remaining .js files are in scope too).
 const sources = dir => readdirSync(dir).flatMap(name => {

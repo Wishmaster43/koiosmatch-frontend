@@ -30,7 +30,7 @@ const LISTBOX_ID = 'settings-search-results'
 
 export default function SettingsSearch({ open, onClose, groups, onSelect }: SettingsSearchProps) {
   // Two namespaces: `settings` for the visible labels, `settingsSearch` for the synonyms.
-  const { t } = useTranslation(['settings', 'settingsSearch'])
+  const { t, i18n } = useTranslation(['settings', 'settingsSearch'])
   const [query, setQuery] = useState('')
   const [active, setActive] = useState(0)
   const inputRef = useRef<HTMLInputElement>(null)
@@ -39,8 +39,8 @@ export default function SettingsSearch({ open, onClose, groups, onSelect }: Sett
 
   // Rebuild the searchable index whenever the visible registry or the language changes.
   const entries = useMemo(
-    () => buildSettingsSearchEntries(groups, t as SettingsTranslate),
-    [groups, t],
+    () => buildSettingsSearchEntries(groups, t as SettingsTranslate, i18n),
+    [groups, t, i18n],
   )
 
   // Normalised, ranked matching — see settingsSearchIndex.ts for the why.

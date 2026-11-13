@@ -11,10 +11,10 @@
 import { describe, it, expect } from 'vitest'
 import { readFileSync, readdirSync, statSync } from 'node:fs'
 
-// Pinned ceiling: only goes down, never raise it. Measured 13-11 after DEFAULTVALUE-ROUNDS-1 (109 → 4) and
-// LOOKUPSEED-EXISTS-1 (4 → 2): the two leftovers are the technical '' fallbacks in settingsSearchIndex behind
-// its SettingsTranslate type.
-const CEILING = 2
+// Pinned ceiling: only goes down, never raise it. Measured 13-11 after DEFAULTVALUE-ROUNDS-1 (109 → 4),
+// LOOKUPSEED-EXISTS-1 (4 → 2) and the settings search index (2 → 0): the class is closed; a new
+// `t(key, { defaultValue })` in production code fails this guard (use labelOrRaw or i18n.exists).
+const CEILING = 0
 
 // Collects every non-test .ts/.tsx/.js/.jsx source file under src.
 const sources = dir => readdirSync(dir).flatMap(name => {

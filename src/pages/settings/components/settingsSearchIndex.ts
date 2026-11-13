@@ -14,6 +14,8 @@
  * Kept deliberately dependency-free: the index is ~150 entries, so a normalised
  * substring scan per keystroke is far cheaper than any fuzzy-search library.
  */
+import type { TFunction } from 'i18next'
+import { labelOrRaw, type KeyChecker } from '@/lib/labelOrRaw'
 import type { ElementType } from 'react'
 
 /** A settings sub-tab as declared in the nav registry. */
@@ -44,7 +46,7 @@ export interface SettingsSearchEntry {
 }
 
 /** Minimal shape of i18next's `t` we rely on — keeps this module test-friendly. */
-export type SettingsTranslate = (key: string, options?: { defaultValue?: string }) => string
+export type SettingsTranslate = (key: string, options?: { ns?: string }) => string
 
 /**
  * Fold text to its comparable form: lowercase, diacritics removed, every
@@ -80,13 +82,15 @@ function collectTerms(text: string, into: string[]): void {
 export function buildSettingsSearchEntries(
   groups: SettingsNavGroup[],
   t: SettingsTranslate,
+  i18n: KeyChecker,
 ): SettingsSearchEntry[] {
   return groups.flatMap(group => {
     // Group-level synonyms are inherited by every sub-tab inside that group.
     const groupLabel = t(`groups.${group.key}`)
     const groupTerms: string[] = []
     collectTerms(group.key.replace(/_/g, ' '), groupTerms)
-    collectTerms(t(`settingsSearch:groups.${group.key}`, { defaultValue: '' }), groupTerms)
+    // A group or token without a synonym entry contributes nothing (labelOrRaw with '' as the data fallback).
+    collectTerms(labelOrRaw(t as unknown as TFunction, i18n, `groups.${group.key}`, '', 'settingsSearch'), groupTerms)
 
     return group.items.map(item => {
       const label = t(`nav.${item.id}`)
@@ -95,7 +99,7 @@ export function buildSettingsSearchEntries(
       // synonym list ("email" → mail/bericht/sjabloon, "klanten" → opdrachtgevers).
       collectTerms(item.id.replace(/_/g, ' '), terms)
       for (const token of item.id.split('_')) {
-        collectTerms(t(`settingsSearch:terms.${token}`, { defaultValue: '' }), terms)
+        collectTerms(labelOrRaw(t as unknown as TFunction, i18n, `terms.${token}`, '', 'settingsSearch'), terms)
       }
       return {
         groupKey: group.key,
