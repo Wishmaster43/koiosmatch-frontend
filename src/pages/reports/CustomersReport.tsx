@@ -269,7 +269,9 @@ export default function CustomersReport({ period, filters = EMPTY_REPORT_FILTERS
         onClick: has ? gateDrillClick('customers', () => openProspectKpiDrill(label, raw as number, key)) : undefined,
       }
     })
-    const branches = pk.by_branch.slice(0, Math.max(0, 9 - cards.length)).map((b): KpiSpec => ({
+    // A zero-count bucket (the BE's `none` bucket at 0, an empty branch) says nothing and would push a
+    // real branch off the nine-card strip (screen probe 13-11: 'Geen vestiging 0' as the ninth card).
+    const branches = pk.by_branch.filter(b => b.count > 0).slice(0, Math.max(0, 9 - cards.length)).map((b): KpiSpec => ({
       key: `branch:${b.value}`, label: b.label, value: b.count,
       active: prospectOpen?.branch === b.value,
       onClick: gateDrillClick('customers', () => openSegment({ label: b.label, count: b.count }, { branch: b.value })),

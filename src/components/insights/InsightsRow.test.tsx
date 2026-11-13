@@ -67,3 +67,21 @@ describe('InsightsRow · card minimum width (CMFE-KPI-1)', () => {
     expect(CARD_MIN_WIDTH).toBe(80)
   })
 })
+
+// Screen probe 13-11: a wrapped card label broke mid-word ("HOOFDKANTO / OR"). The wrap breaks on word
+// boundaries and leaves an over-long single word to hyphenation, never a hard cut as the first resort.
+describe('InsightsRow · wrapped label breaks on words (KPI band)', () => {
+  it('uses break-word with hyphenation on a wrapped label and keeps the full label in the tooltip', () => {
+    render(<InsightsRow wrapLabels kpis={[{ key: 'hq', label: 'Hoofdkantoor', value: 3 }]} />)
+    const label = screen.getByText('Hoofdkantoor') as HTMLElement
+    expect(label.style.overflowWrap).toBe('break-word')
+    expect(label.style.whiteSpace).toBe('normal')
+    expect(label.getAttribute('title')).toBe('Hoofdkantoor')
+  })
+
+  it('keeps the single-line ellipsis strip when wrapLabels is off', () => {
+    render(<InsightsRow kpis={[{ key: 'hq', label: 'Hoofdkantoor', value: 3 }]} />)
+    expect((screen.getByText('Hoofdkantoor') as HTMLElement).style.whiteSpace).toBe('nowrap')
+  })
+})
+

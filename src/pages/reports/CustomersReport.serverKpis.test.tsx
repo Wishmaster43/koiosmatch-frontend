@@ -92,6 +92,16 @@ describe('CustomersReport · server prospect_kpis strip (SERVER-KPIS-1)', () => 
     expect(screen.getByText('Amersfoort')).toBeInTheDocument()
   })
 
+  // Screen probe 13-11: the BE's `none` bucket at 0 rendered as a ninth card 'Geen vestiging 0'; a
+  // zero-count bucket never takes a slot (teller canon: a counter that says 0 renders nothing).
+  it('skips a zero-count by_branch bucket and keeps the real branch card', () => {
+    mockUseCustomersReport.mockReturnValue({ data: { ...withKpis, prospect_kpis: { ...withKpis.prospect_kpis,
+      by_branch: [{ value: 'none', label: 'Geen vestiging', count: 0 }, { value: 'amersfoort', label: 'Amersfoort', count: 9 }] } }, loading: false, error: false })
+    open()
+    expect(screen.getByText('Amersfoort')).toBeInTheDocument()
+    expect(screen.queryByText('Geen vestiging')).not.toBeInTheDocument()
+  })
+
   it('clicking prospects_no_contact requests the signal drill with kpi=prospects_no_contact', async () => {
     const user = userEvent.setup()
     mockUseCustomersReport.mockReturnValue({ data: withKpis, loading: false, error: false })

@@ -45,12 +45,14 @@ const TITLE: CSSProperties = {
 // into "TOTAAL MA…" / "BEËINDIGIN…". `wrapLabels` lets the title use two lines
 // instead (the same thing the dashboard's own cards do) — opt-in, so the entity
 // list pages with five or six wider cards keep their single-line strip.
-// `overflowWrap: 'anywhere'` matters as much as the wrap itself: Dutch labels are
-// long single words ("Beëindigingspercentage"), and a word with no break point
-// cannot use a second line — it would still ellipsise on line one.
+// The wrap breaks on word boundaries; a single word longer than the card (Dutch
+// compounds such as "Beëindigingspercentage", "Hoofdkantoor") hyphenates at a syllable
+// through `hyphens: 'auto'` (the document language drives the dictionary) and only
+// breaks hard as the last resort (`overflowWrap: 'break-word'`), so a label never reads
+// "HOOFDKANTO / OR" (screen probe 13-11). The full label stays in the title tooltip.
 const TITLE_WRAP: CSSProperties = {
   ...TITLE, whiteSpace: 'normal', display: '-webkit-box', WebkitLineClamp: 2,
-  WebkitBoxOrient: 'vertical', lineHeight: 1.25, overflowWrap: 'anywhere',
+  WebkitBoxOrient: 'vertical', lineHeight: 1.25, overflowWrap: 'break-word', hyphens: 'auto',
 }
 
 function DonutCard({ title, data, colors, onPick, active, onClear, picked, clearTitle }: Omit<DonutSpec, 'key'> & { clearTitle?: string }) {
