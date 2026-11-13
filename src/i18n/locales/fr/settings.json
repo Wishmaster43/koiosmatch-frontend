@@ -4836,7 +4836,8 @@
     "tabs": {
       "connection": "Connexion",
       "mapping": "Mapping",
-      "contractmap": "Table des contrats"
+      "contractmap": "Table des contrats",
+      "links": "Liaisons"
     },
     "health": {
       "unavailable": "Statut indisponible",
@@ -4903,6 +4904,43 @@
       "scope_missing": "Autorisations manquantes",
       "not_configured": "Pas encore configuré",
       "not_found": "Introuvable"
+    },
+    "links": {
+      "title": "Liaisons",
+      "subtitle": "Quels enregistrements Koios sont liés à quel identifiant externe.",
+      "searchPlaceholder": "Rechercher par identifiant externe ou nom",
+      "columns": {
+        "type": "Type",
+        "record": "Enregistrement",
+        "externalId": "Identifiant externe",
+        "status": "Statut",
+        "error": "Erreur",
+        "linked": "Lié",
+        "updated": "Mis à jour"
+      },
+      "types": {
+        "candidate": "Candidat",
+        "customer": "Client",
+        "customer_location": "Site",
+        "customer_department": "Service",
+        "customer_contact": "Personne de contact",
+        "match": "Match",
+        "branch": "Agence",
+        "user": "Utilisateur",
+        "cost_center": "Centre de coûts"
+      },
+      "status": {
+        "linked": "Lié",
+        "pending": "En attente",
+        "syncing": "Synchronisation en cours",
+        "failed": "Échec",
+        "unlinked": "Non lié"
+      },
+      "deleted": "Enregistrement supprimé",
+      "empty": "Aucune liaison trouvée.",
+      "loadError": "Les liaisons n’ont pas pu être chargées.",
+      "saveError": "La liaison n’a pas pu être enregistrée.",
+      "saved": "Liaison enregistrée."
     },
     "mappings": {
       "title": "Mapping",

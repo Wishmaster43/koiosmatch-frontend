@@ -22,17 +22,18 @@ vi.mock('@/context/AppsContext', () => ({ useApps: () => mockApps() }))
 vi.mock('../components/SchemaSection', () => ({ default: ({ schema }: { schema: { i18nKey: string } }) => <div>schema:{schema.i18nKey}</div> }))
 // The connector tabs' own behaviour is covered by their own suites — stubbed here.
 vi.mock('./integrations/IntegrationConnectionCard', () => ({ default: ({ connector }: { connector: string }) => <div>connection:{connector}</div> }))
+vi.mock('./integrations/links/IntegrationLinksPanel', () => ({ default: ({ system }: { system: string }) => <div>links:{system}</div> }))
 vi.mock('./integrations/IntegrationMappingsTable', () => ({ default: ({ connector, domains }: { connector: string; domains: string[] }) => <div>mappings:{connector}:{domains.join(',')}</div> }))
 
 afterEach(() => vi.clearAllMocks())
 
 describe('ShiftmanagerModuleSettings — module x app flag matrix', () => {
-  it('module on: three tabs (no Mapping), the connection front door renders first', () => {
+  it('module on: four tabs (no Mapping, with Links), the connection front door renders first', () => {
     mockAuth.mockReturnValue({ hasModule: (k: string) => k === 'sm' })
     mockApps.mockReturnValue({ isAppEnabled: () => false })
     render(<ShiftmanagerModuleSettings />)
 
-    expect(screen.getAllByRole('tab')).toHaveLength(3)
+    expect(screen.getAllByRole('tab')).toHaveLength(4)
     expect(screen.getByText('connection:shiftmanager')).toBeInTheDocument()
     expect(screen.queryByText(/^schema:/)).not.toBeInTheDocument()
   })
@@ -46,6 +47,16 @@ describe('ShiftmanagerModuleSettings — module x app flag matrix', () => {
 
     expect(screen.getByText('schema:smKpis')).toBeInTheDocument()
     expect(screen.queryByText('connection:shiftmanager')).not.toBeInTheDocument()
+  })
+
+  it('module on: the Links tab opens the links panel for the shiftmanager system', async () => {
+    mockAuth.mockReturnValue({ hasModule: (k: string) => k === 'sm' })
+    mockApps.mockReturnValue({ isAppEnabled: () => false })
+    render(<ShiftmanagerModuleSettings />)
+
+    await userEvent.click(screen.getByRole('tab', { name: st('integrations.tabs.links') }))
+
+    expect(screen.getByText('links:shiftmanager')).toBeInTheDocument()
   })
 
   it('module on: the Mapping tab is absent (ONIX G-012, no SM reader yet)', () => {

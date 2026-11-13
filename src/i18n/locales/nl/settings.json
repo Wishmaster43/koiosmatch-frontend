@@ -4836,7 +4836,8 @@
     "tabs": {
       "connection": "Koppeling",
       "mapping": "Mapping",
-      "contractmap": "Contractmap"
+      "contractmap": "Contractmap",
+      "links": "Koppelingen"
     },
     "health": {
       "unavailable": "Status niet beschikbaar",
@@ -4903,6 +4904,43 @@
       "scope_missing": "Rechten ontbreken",
       "not_configured": "Nog niet ingesteld",
       "not_found": "Niet gevonden"
+    },
+    "links": {
+      "title": "Koppelingen",
+      "subtitle": "Welke Koios-records aan welk extern id gekoppeld zijn.",
+      "searchPlaceholder": "Zoek op extern id of naam",
+      "columns": {
+        "type": "Type",
+        "record": "Record",
+        "externalId": "Extern id",
+        "status": "Status",
+        "error": "Fout",
+        "linked": "Gekoppeld",
+        "updated": "Bijgewerkt"
+      },
+      "types": {
+        "candidate": "Kandidaat",
+        "customer": "Klant",
+        "customer_location": "Locatie",
+        "customer_department": "Afdeling",
+        "customer_contact": "Contactpersoon",
+        "match": "Match",
+        "branch": "Vestiging",
+        "user": "Gebruiker",
+        "cost_center": "Kostenplaats"
+      },
+      "status": {
+        "linked": "Gekoppeld",
+        "pending": "In afwachting",
+        "syncing": "Bezig met synchroniseren",
+        "failed": "Mislukt",
+        "unlinked": "Niet gekoppeld"
+      },
+      "deleted": "Record verwijderd",
+      "empty": "Geen koppelingen gevonden.",
+      "loadError": "De koppelingen konden niet worden geladen.",
+      "saveError": "De koppeling kon niet worden opgeslagen.",
+      "saved": "Koppeling opgeslagen."
     },
     "mappings": {
       "title": "Mapping",

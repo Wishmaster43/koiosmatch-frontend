@@ -4836,7 +4836,8 @@
     "tabs": {
       "connection": "Verbindung",
       "mapping": "Mapping",
-      "contractmap": "Vertragszuordnung"
+      "contractmap": "Vertragszuordnung",
+      "links": "Verknüpfungen"
     },
     "health": {
       "unavailable": "Status nicht verfügbar",
@@ -4903,6 +4904,43 @@
       "scope_missing": "Berechtigungen fehlen",
       "not_configured": "Noch nicht konfiguriert",
       "not_found": "Nicht gefunden"
+    },
+    "links": {
+      "title": "Verknüpfungen",
+      "subtitle": "Welche Koios-Datensätze mit welcher externen ID verknüpft sind.",
+      "searchPlaceholder": "Nach externer ID oder Name suchen",
+      "columns": {
+        "type": "Typ",
+        "record": "Datensatz",
+        "externalId": "Externe ID",
+        "status": "Status",
+        "error": "Fehler",
+        "linked": "Verknüpft",
+        "updated": "Aktualisiert"
+      },
+      "types": {
+        "candidate": "Kandidat",
+        "customer": "Kunde",
+        "customer_location": "Standort",
+        "customer_department": "Abteilung",
+        "customer_contact": "Kontaktperson",
+        "match": "Match",
+        "branch": "Niederlassung",
+        "user": "Benutzer",
+        "cost_center": "Kostenstelle"
+      },
+      "status": {
+        "linked": "Verknüpft",
+        "pending": "Ausstehend",
+        "syncing": "Wird synchronisiert",
+        "failed": "Fehlgeschlagen",
+        "unlinked": "Nicht verknüpft"
+      },
+      "deleted": "Datensatz entfernt",
+      "empty": "Keine Verknüpfungen gefunden.",
+      "loadError": "Die Verknüpfungen konnten nicht geladen werden.",
+      "saveError": "Die Verknüpfung konnte nicht gespeichert werden.",
+      "saved": "Verknüpfung gespeichert."
     },
     "mappings": {
       "title": "Mapping",

@@ -63,16 +63,30 @@ describe('LocationsSettings connector columns', () => {
     await waitFor(() => expect(notifySuccess).toHaveBeenCalledWith(st('locations.linkSaved')))
   })
 
-  it('a settings.view-only user gets no connector columns and no mapping requests', async () => {
+  // MAPPING-TABLE-BE-1: reading a branch mapping needs settings.view, writing it settings.update.
+  it('a settings.view-only user sees the connector column read-only: the mapping is read, nothing is editable', async () => {
     mockModules.on.add('hf')
     mockModules.perms.clear()
     mockModules.perms.add('settings.view')
+    mockedApi.get.mockImplementation((url: string) => url === '/external-id-mappings'
+      ? Promise.resolve({ data: { entity_type: 'branch', entity_id: 'loc1', hf_id: 'guid-hf', hf_status: 'linked', sm_id: null } })
+      : Promise.resolve({ data: { data: [location()] } }))
+    renderPage()
+    await waitFor(() => expect(screen.getByText(NAME)).toBeInTheDocument())
+    expect(screen.getByText(st('locations.colHelloflex'))).toBeInTheDocument()
+    await waitFor(() => expect(mockedApi.get).toHaveBeenCalledWith('/external-id-mappings', expect.objectContaining({ params: { entity_type: 'branch', entity_id: 'loc1' } })))
+    expect(await screen.findByText('guid-hf')).toBeInTheDocument()
+    expect(screen.queryByRole('textbox', { name: /HelloFlex/ })).toBeNull()
+  })
+
+  it('a user with neither settings.view nor settings.update gets no connector columns and no mapping requests', async () => {
+    mockModules.on.add('hf')
+    mockModules.perms.clear()
     mockedApi.get.mockResolvedValue({ data: { data: [location()] } })
     renderPage()
     await waitFor(() => expect(screen.getByText(NAME)).toBeInTheDocument())
     expect(screen.queryByText(st('locations.colHelloflex'))).not.toBeInTheDocument()
     expect(mockedApi.get).not.toHaveBeenCalledWith('/external-id-mappings', expect.anything())
-    expect(screen.queryByText(st('locations.linksLoadFailed'))).not.toBeInTheDocument()
   })
 
   it('a failed PUT toasts the link-specific error and keeps the draft', async () => {

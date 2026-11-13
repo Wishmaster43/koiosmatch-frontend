@@ -1,18 +1,19 @@
 /**
  * Shiftmanager module settings — INTEGRATIONS-SETTINGS-1 (Danny 31-08: "under
  * the integrations heading, then a Shiftmanager heading with its own sub-tabs"): the section
- * fronts the CONNECTOR (Connection) plus the two reporting sub-tabs (KPI
- * targets, display limits — Danny 04-08). ONIX G-012: every tab keys on module
+ * fronts the CONNECTOR (Connection), the two reporting sub-tabs (KPI
+ * targets, display limits — Danny 04-08) and the Links table. ONIX G-012: every tab keys on module
  * 'sm' only (the legacy app arm is gone); module off = the calm empty state.
  */
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useAuth } from '@/context/AuthContext'
-import SubTabBar from '@/components/drawer/SubTabBar'
+import ConnectorTabsShell from './integrations/ConnectorTabsShell'
 import SchemaSection, { type Schema } from '../components/SchemaSection'
 import displaySchema from '../schemas/display'
 import smKpisSchema from '../schemas/smKpis'
 import IntegrationConnectionCard from './integrations/IntegrationConnectionCard'
+import IntegrationLinksPanel from './integrations/links/IntegrationLinksPanel'
 
 // Connector front door first; reporting tabs only with the module on.
 export default function ShiftmanagerModuleSettings() {
@@ -35,16 +36,17 @@ export default function ShiftmanagerModuleSettings() {
     { id: 'connection', label: t('integrations.tabs.connection') },
     { id: 'kpis', label: t('smKpis.title') },
     { id: 'display', label: t('display.title') },
+    { id: 'links', label: t('integrations.tabs.links') },
   ]
 
   // One sub-tab renders at a time, via the shared underline SubTabBar.
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
-      <SubTabBar tabs={tabs} active={activeTab} onChange={setActiveTab} />
+    <ConnectorTabsShell tabs={tabs} active={activeTab} onChange={setActiveTab}>
       {activeTab === 'connection' && <IntegrationConnectionCard connector="shiftmanager" />}
       {/* The .js schema literals are untyped and only structurally close to Schema — cast, don't retype the shared .js source (out of this task's scope). */}
       {activeTab === 'kpis' && <SchemaSection schema={smKpisSchema as Schema} />}
       {activeTab === 'display' && <SchemaSection schema={displaySchema as Schema} />}
-    </div>
+      {activeTab === 'links' && <IntegrationLinksPanel system="shiftmanager" />}
+    </ConnectorTabsShell>
   )
 }

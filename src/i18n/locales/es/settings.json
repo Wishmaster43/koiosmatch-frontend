@@ -4836,7 +4836,8 @@
     "tabs": {
       "connection": "Conexión",
       "mapping": "Mapping",
-      "contractmap": "Mapa de contratos"
+      "contractmap": "Mapa de contratos",
+      "links": "Vínculos"
     },
     "health": {
       "unavailable": "Estado no disponible",
@@ -4903,6 +4904,43 @@
       "scope_missing": "Faltan permisos",
       "not_configured": "Aún no configurado",
       "not_found": "No encontrado"
+    },
+    "links": {
+      "title": "Vínculos",
+      "subtitle": "Qué registros de Koios están vinculados a qué id externo.",
+      "searchPlaceholder": "Buscar por id externo o nombre",
+      "columns": {
+        "type": "Tipo",
+        "record": "Registro",
+        "externalId": "Id externo",
+        "status": "Estado",
+        "error": "Error",
+        "linked": "Vinculado",
+        "updated": "Actualizado"
+      },
+      "types": {
+        "candidate": "Candidato",
+        "customer": "Cliente",
+        "customer_location": "Ubicación",
+        "customer_department": "Departamento",
+        "customer_contact": "Persona de contacto",
+        "match": "Match",
+        "branch": "Sucursal",
+        "user": "Usuario",
+        "cost_center": "Centro de costes"
+      },
+      "status": {
+        "linked": "Vinculado",
+        "pending": "Pendiente",
+        "syncing": "Sincronizando",
+        "failed": "Fallido",
+        "unlinked": "No vinculado"
+      },
+      "deleted": "Registro eliminado",
+      "empty": "No se encontraron vínculos.",
+      "loadError": "No se pudieron cargar los vínculos.",
+      "saveError": "No se pudo guardar el vínculo.",
+      "saved": "Vínculo guardado."
     },
     "mappings": {
       "title": "Mapping",

@@ -214,8 +214,10 @@ export default function LocationsSettings() {
   const paginated = locations.slice((safePage - 1) * PER_PAGE, safePage * PER_PAGE)
 
   // Optional HelloFlex / Shiftmanager id columns, visible only when that connector module is on.
-  // The BE reads a branch mapping with settings.update, so the columns and the reads need it too.
-  const canLinks = auth?.hasPermission('settings.update') ?? false
+  // MAPPING-TABLE-BE-1: a branch mapping is READ with settings.view (viewPermissionFor) and
+  // WRITTEN with settings.update, so a viewer sees the ids read-only and an admin edits them.
+  const canEditLinks = auth?.hasPermission('settings.update') ?? false
+  const canLinks = canEditLinks || (auth?.hasPermission('settings.view') ?? false)
   const showHelloflex = canLinks && (auth?.hasModule('hf') ?? false)
   const showShiftmanager = canLinks && (auth?.hasModule('sm') ?? false)
   const branchLinks = useBranchLinks(paginated.map(l => l.id), showHelloflex || showShiftmanager)
@@ -262,7 +264,7 @@ export default function LocationsSettings() {
         <LocationsTable isLocked={inUse} rows={paginated} page={safePage} totalPages={totalPages} onPageChange={setPage}
           onEdit={openEdit} onDelete={remove} deletingId={deletingId}
           showHelloflex={showHelloflex} showShiftmanager={showShiftmanager} links={branchLinks.get}
-          onSaveLink={saveLink} linksLoading={branchLinks.loading} canEditLinks={canLinks} />
+          onSaveLink={saveLink} linksLoading={branchLinks.loading} canEditLinks={canEditLinks} />
         </>
       )}
 

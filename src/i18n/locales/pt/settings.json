@@ -4837,7 +4837,8 @@
     "tabs": {
       "connection": "Ligação",
       "mapping": "Mapeamento",
-      "contractmap": "Mapa de contrato"
+      "contractmap": "Mapa de contrato",
+      "links": "Ligações"
     },
     "health": {
       "unavailable": "Estado indisponível",
@@ -4904,6 +4905,43 @@
       "scope_missing": "Permissões em falta",
       "not_configured": "Ainda não configurado",
       "not_found": "Não encontrado"
+    },
+    "links": {
+      "title": "Ligações",
+      "subtitle": "Que registos do Koios estão ligados a que id externo.",
+      "searchPlaceholder": "Pesquisar por id externo ou nome",
+      "columns": {
+        "type": "Tipo",
+        "record": "Registo",
+        "externalId": "Id externo",
+        "status": "Estado",
+        "error": "Erro",
+        "linked": "Ligado",
+        "updated": "Atualizado"
+      },
+      "types": {
+        "candidate": "Candidato",
+        "customer": "Cliente",
+        "customer_location": "Local",
+        "customer_department": "Departamento",
+        "customer_contact": "Pessoa de contacto",
+        "match": "Match",
+        "branch": "Filial",
+        "user": "Utilizador",
+        "cost_center": "Centro de custo"
+      },
+      "status": {
+        "linked": "Ligado",
+        "pending": "Pendente",
+        "syncing": "A sincronizar",
+        "failed": "Falhou",
+        "unlinked": "Não ligado"
+      },
+      "deleted": "Registo removido",
+      "empty": "Nenhuma ligação encontrada.",
+      "loadError": "Não foi possível carregar as ligações.",
+      "saveError": "Não foi possível guardar a ligação.",
+      "saved": "Ligação guardada."
     },
     "mappings": {
       "title": "Mapeamento",

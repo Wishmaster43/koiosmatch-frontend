@@ -4836,7 +4836,8 @@
     "tabs": {
       "connection": "Connection",
       "mapping": "Mapping",
-      "contractmap": "Contract map"
+      "contractmap": "Contract map",
+      "links": "Links"
     },
     "health": {
       "unavailable": "Status unavailable",
@@ -4903,6 +4904,43 @@
       "scope_missing": "Missing permissions",
       "not_configured": "Not configured yet",
       "not_found": "Not found"
+    },
+    "links": {
+      "title": "Links",
+      "subtitle": "Which Koios records are linked to which external id.",
+      "searchPlaceholder": "Search by external id or name",
+      "columns": {
+        "type": "Type",
+        "record": "Record",
+        "externalId": "External id",
+        "status": "Status",
+        "error": "Error",
+        "linked": "Linked",
+        "updated": "Updated"
+      },
+      "types": {
+        "candidate": "Candidate",
+        "customer": "Customer",
+        "customer_location": "Location",
+        "customer_department": "Department",
+        "customer_contact": "Contact person",
+        "match": "Match",
+        "branch": "Branch",
+        "user": "User",
+        "cost_center": "Cost center"
+      },
+      "status": {
+        "linked": "Linked",
+        "pending": "Pending",
+        "syncing": "Syncing",
+        "failed": "Failed",
+        "unlinked": "Not linked"
+      },
+      "deleted": "Record removed",
+      "empty": "No links found.",
+      "loadError": "Links could not be loaded.",
+      "saveError": "The link could not be saved.",
+      "saved": "Link saved."
     },
     "mappings": {
       "title": "Mapping",
