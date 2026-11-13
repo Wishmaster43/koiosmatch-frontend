@@ -53,10 +53,10 @@ const mapLocations = (res: AxiosResponse): AppointmentLocation[] | null => {
 // The tenant's appointment-location lookup, translated for seeded defaults,
 // plus the tenant's default location and a slug/label-tolerant meta resolver.
 export function useAppointmentLocations() {
-  const { t } = useTranslation('common')
+  const { t, i18n } = useTranslation('common')
   const { data: rawLocations } = useCachedLookup('/appointment-locations?active=1', mapLocations, DEFAULT_APPOINTMENT_LOCATIONS)
   // Seeded defaults render in the user language; a tenant value stays as typed (LOOKUP-I18N-1).
-  const locations = useMemo(() => translateSeedList(t, 'appointmentLocations', rawLocations), [rawLocations, t])
+  const locations = useMemo(() => translateSeedList(t, 'appointmentLocations', rawLocations, i18n), [rawLocations, t, i18n])
 
   // The tenant's chosen modal default, falling back to the first entry.
   const defaultLocation = locations.find(x => x.is_default) ?? locations[0]

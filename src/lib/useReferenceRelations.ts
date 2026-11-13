@@ -65,11 +65,11 @@ const mapReferenceRelations = (res: AxiosResponse): ReferenceRelationOption[] | 
 // The tenant's reference-relation lookup (relation TOWARDS a referent, distinct
 // from emergency-contact relations), translated for seeded defaults.
 export function useReferenceRelations() {
-  const { t } = useTranslation('common')
+  const { t, i18n } = useTranslation('common')
   const { data: rawRelations } = useCachedLookup(
     '/reference-relations', mapReferenceRelations, DEFAULT_REFERENCE_RELATIONS,
   )
   // Seeded defaults render in the user language; a tenant value stays as typed (LOOKUP-I18N-1).
-  const referenceRelations = useMemo(() => translateSeedList(t, 'referenceRelations', rawRelations), [rawRelations, t])
+  const referenceRelations = useMemo(() => translateSeedList(t, 'referenceRelations', rawRelations, i18n), [rawRelations, t, i18n])
   return { referenceRelations }
 }

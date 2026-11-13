@@ -41,11 +41,11 @@ const mapReasons = (res: AxiosResponse): OpportunityLostReasonOption[] =>
 
 // Tenant opportunity lost-reason lookup (see file docblock above).
 export function useOpportunityLostReasons() {
-  const { t } = useTranslation('common')
+  const { t, i18n } = useTranslation('common')
   const { data, loading, invalidate } = useCachedLookup('/opportunity-lost-reasons?active=1', mapReasons, FALLBACK)
   // Seeded defaults would render translated (LOOKUP-I18N-1); there is no seed
   // here, so this only translates a tenant value if it happens to match a
   // known seed key elsewhere — harmless no-op for the common case (tenant-typed names).
-  const reasons = useMemo(() => translateSeedList(t, 'opportunityLostReasons', data), [data, t])
+  const reasons = useMemo(() => translateSeedList(t, 'opportunityLostReasons', data, i18n), [data, t, i18n])
   return { reasons, loading, invalidate }
 }

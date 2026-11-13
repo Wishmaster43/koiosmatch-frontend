@@ -32,14 +32,14 @@ const mapPools = (res: AxiosResponse): PoolsLookupData | null => {
 // Tenant pool lookup: flat translated names for chip/option lists plus the full
 // items (id + colour) for consumers that need more than a label.
 export function usePools() {
-  const { t } = useTranslation('common')
+  const { t, i18n } = useTranslation('common')
   const { data } = useCachedLookup('/pools?active=1', mapPools, FALLBACK)
   // Seeded defaults render in the user language; a tenant value stays as typed (LOOKUP-I18N-1).
   // PoolItem carries `name` (not `label`), so translate through a {label} shim and zip it back.
   const poolItems = useMemo(() => {
-    const translated = translateSeedList(t, 'pools', data.poolItems.map(p => ({ label: p.name })))
+    const translated = translateSeedList(t, 'pools', data.poolItems.map(p => ({ label: p.name })), i18n)
     return data.poolItems.map((p, i) => (translated[i].label === p.name ? p : { ...p, name: translated[i].label }))
-  }, [data.poolItems, t])
+  }, [data.poolItems, t, i18n])
   // Flat name list derived from the already-translated poolItems above, for simple chip/option consumers.
   const pools = useMemo(() => poolItems.map(p => p.name), [poolItems])
   return { pools, poolItems }

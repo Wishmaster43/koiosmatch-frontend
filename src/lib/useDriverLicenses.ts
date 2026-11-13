@@ -61,9 +61,9 @@ const mapDriverLicenses = (res: AxiosResponse): DriverLicenseItem[] | null => {
 
 // Cached tenant driver-licence lookup (see the module doc above for why each item carries its own optional icon rather than collapsing to a plain name).
 export function useDriverLicenses() {
-  const { t } = useTranslation('common')
+  const { t, i18n } = useTranslation('common')
   const { data: rawLicenses } = useCachedLookup('/driver-licenses?active=1', mapDriverLicenses, DEFAULT_DRIVER_LICENSES)
   // Seeded defaults render in the user language; a tenant value stays as typed (LOOKUP-I18N-1).
-  const licenses = useMemo(() => translateSeedList(t, 'driverLicenses', rawLicenses), [rawLicenses, t])
+  const licenses = useMemo(() => translateSeedList(t, 'driverLicenses', rawLicenses, i18n), [rawLicenses, t, i18n])
   return { licenses }
 }
