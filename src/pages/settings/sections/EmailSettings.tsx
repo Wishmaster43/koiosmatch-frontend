@@ -12,41 +12,23 @@
  */
 import { useState, useEffect, useCallback, useRef } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Check, Mail, AlertTriangle, Eye, EyeOff } from 'lucide-react'
+import { Check, Mail } from 'lucide-react'
 import api from '@/lib/api'
 import { notifyError } from '@/lib/notify'
 import { loadSettings, saveSettings } from '../lib/settingsApi'
-import RichTextEditor from '@/components/ui/RichTextEditor'
 import Spinner from '@/components/ui/Spinner'
-import CalloutBox from '@/components/ui/CalloutBox'
 import Button from '@/components/ui/Button'
 import SaveButton from '@/components/ui/SaveButton'
-import SegmentedControl from '@/components/ui/SegmentedControl'
-import { fieldInputStyle } from '@/components/forms/fieldMetrics'
-import { PageTitle, Caption, PageSubtitle } from '@/components/ui/typography'
+import { PageTitle, PageSubtitle } from '@/components/ui/typography'
 import { useAuth } from '@/context/AuthContext'
-import { useDateFormat } from '@/lib/datetime'
 import { getHashParams, oauthReasonKey, stripOauthParams } from '@/lib/hashQuery'
 import { SETTINGS_MAX_W_WIDE } from '@/pages/settings/components/settingsMetrics'
-
-// Email provider settings for one context (klanten/kandidaten); the context prefixes every settings key so the two contexts never share state.
-// Coupling state for this context's OAuth provider (Gmail/Office 365).
-interface EmailConnStatus {
-  connected?: boolean
-  provider?: string
-  address?: string
-  // BE health check: connected | needs_reconnect | tenant_policy | disconnected (+ bureau-language message).
-  status?: string
-  status_reason?: string | null
-  status_at?: string | null
-  status_message?: string | null
-}
-
-// One test-send or OAuth-callback outcome banner.
-interface OutcomeBanner {
-  ok: boolean
-  msg: string
-}
+import type { EmailConnStatus, OutcomeBanner } from './email/types'
+import EmailOutcomeBanner from './email/EmailOutcomeBanner'
+import EmailProviderCard from './email/EmailProviderCard'
+import EmailSenderCard from './email/EmailSenderCard'
+import EmailSmtpCard from './email/EmailSmtpCard'
+import EmailSignatureCard from './email/EmailSignatureCard'
 
 // Props: which context (klanten/kandidaten/planning) this tab configures.
 interface EmailSettingsProps {
@@ -55,7 +37,6 @@ interface EmailSettingsProps {
 
 export default function EmailSettings({ context = 'klanten' }: EmailSettingsProps) {
   const { t } = useTranslation('settings')
-  const { formatDateTime } = useDateFormat()
   const auth = useAuth()
   // DL-10: the OAuth Koppelen/Ontkoppelen actions both require settings.update on
   // the backend (route:list) — a settings.view-only caller must not see live buttons.
@@ -72,7 +53,6 @@ export default function EmailSettings({ context = 'klanten' }: EmailSettingsProp
   const [smtpPassSet,  setSmtpPassSet]   = useState(false)
   const [smtpSecure,   setSmtpSecure]    = useState('tls')
   const [signature,    setSignature]     = useState('')
-  const [sigExpanded,  setSigExpanded]    = useState(false)
   const [showPass,     setShowPass]      = useState(false)
   const [saved,        setSaved]         = useState(false)
   const [saving,       setSaving]        = useState(false)
@@ -245,19 +225,6 @@ export default function EmailSettings({ context = 'klanten' }: EmailSettingsProp
     if (testSentTimerRef.current) { clearTimeout(testSentTimerRef.current); testSentTimerRef.current = null }
   }, [context, provider, fromName, fromEmail, smtpHost, smtpPort, smtpUser, smtpPass, smtpSecure, signature])
 
-  // Canon field style (G33/fieldMetrics) — was its own height-34 copy, minus a background.
-  const inputStyle = fieldInputStyle
-  const labelStyle = { fontSize: 12, fontWeight: 500, color: 'var(--text)', marginBottom: 4, display: 'block' }
-  // Shared card chrome — matches the settings kit's SettingCard so this section
-  // reads at the same compact density as every other settings panel.
-  const cardStyle = { background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 10, padding: '14px 16px' }
-
-  const PROVIDERS = [
-    { id: 'gmail',  label: 'Gmail',                 desc: t('email.gmailDesc') },
-    { id: 'office', label: 'Office 365',            desc: t('email.officeDesc') },
-    { id: 'manual', label: t('email.manualLabel'),  desc: t('email.manualDesc') },
-  ]
-
   // T-009/T-006: translate the sentence from the reason code; the server text is only the fallback for an unknown code.
   const reasonSuffix = oauthReasonKey(connStatus?.status_reason ?? null)
   const statusSentence = reasonSuffix
@@ -286,28 +253,10 @@ export default function EmailSettings({ context = 'klanten' }: EmailSettingsProp
         </div>
       </div>
 
-      {testResult && (
-        <div style={{ marginBottom: 14 }}>
-          <CalloutBox variant={testResult.ok ? 'success' : 'danger'}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-              {testResult.ok ? <Check size={14} /> : <AlertTriangle size={14} />}
-              {testResult.msg}
-            </div>
-          </CalloutBox>
-        </div>
-      )}
+      {testResult && <EmailOutcomeBanner banner={testResult} />}
 
       {/* DL-10: the OAuth callback landing banner (connected/error), shown once. */}
-      {oauthBanner && (
-        <div style={{ marginBottom: 14 }}>
-          <CalloutBox variant={oauthBanner.ok ? 'success' : 'danger'}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-              {oauthBanner.ok ? <Check size={14} /> : <AlertTriangle size={14} />}
-              {oauthBanner.msg}
-            </div>
-          </CalloutBox>
-        </div>
-      )}
+      {oauthBanner && <EmailOutcomeBanner banner={oauthBanner} />}
 
       {loading && <p style={{ fontSize: 13, color: 'var(--text-muted)', marginBottom: 12 }}>{t('common.loading')}</p>}
       {loadError && <p style={{ fontSize: 13, color: 'var(--color-danger-text)', marginBottom: 12 }}>{t('statusList.loadError')}</p>}
@@ -320,145 +269,25 @@ export default function EmailSettings({ context = 'klanten' }: EmailSettingsProp
         <div className="flex flex-col gap-3">
 
         {/* Provider choice */}
-        <div style={cardStyle}>
-          <div style={{ fontSize: 13, fontWeight: 500, color: 'var(--text)', marginBottom: 10 }}>{t('email.provider')}</div>
-          {/* Provider choice — shared SegmentedControl option-card radiogroup, one group
-              for the three providers. SETTINGS-INCON-B1b: the chosen provider reads as
-              chosen via the §4 "aan/gelukt" success pair, same green as the super-admin
-              package picker. */}
-          <SegmentedControl
-            ariaLabel={t('email.provider')}
-            color="var(--color-success)"
-            activeOnly
-            activeFill="var(--color-success-bg)"
-            options={PROVIDERS.map(p => ({ value: p.id, label: p.label, description: p.desc }))}
-            value={provider}
-            onChange={setProvider}
-          />
-
-          {/* DL-10: real coupling state + connect/disconnect — the old copy claimed
-              this "must be configured via the backend", which was false: the whole
-              OAuth flow already exists and works, the FE simply never called it. */}
-          {(provider === 'gmail' || provider === 'office') && (
-            <div style={{ marginTop: 14 }}>
-              {connLoading ? (
-                <Caption>{t('common.loading')}</Caption>
-              ) : connStatus?.connected && (!connStatus.status || connStatus.status === 'connected') ? (
-                <CalloutBox variant="success" title={t('email.oauthConnectedTitle')}>
-                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12, flexWrap: 'wrap' }}>
-                    <span>{t('email.oauthConnected', { provider: connStatus.provider === 'gmail' ? 'Google' : 'Microsoft', address: connStatus.address || '—' })}</span>
-                    <Button variant="dangerSoft" size="sm" onClick={disconnectOauth} disabled={disconnecting || !canEditConn}>
-                      {disconnecting ? <Spinner size={12} /> : t('email.oauthDisconnect')}
-                    </Button>
-                  </div>
-                </CalloutBox>
-              ) : connStatus?.status === 'tenant_policy' || connStatus?.status === 'needs_reconnect' ? (
-                <CalloutBox variant="warning" title={t('email.oauthWarningTitle')}>
-                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12, flexWrap: 'wrap' }}>
-                    <div>
-                      {statusSentence}
-                      {connStatus.status_at && <Caption as="div">{t('email.statusAt', { date: formatDateTime(connStatus.status_at) })}</Caption>}
-                    </div>
-                    <Button variant="secondary" size="sm" onClick={connectOauth} disabled={connecting || !canEditConn}>
-                      {connecting ? <Spinner size={12} /> : t('email.oauthConnect')}
-                    </Button>
-                  </div>
-                </CalloutBox>
-              ) : (
-                <CalloutBox variant="warning" title={t('email.oauthWarningTitle')}>
-                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12, flexWrap: 'wrap' }}>
-                    <span>{t('email.oauthWarning', { provider: provider === 'gmail' ? 'Google' : 'Microsoft' })}</span>
-                    <Button variant="secondary" size="sm" onClick={connectOauth} disabled={connecting || !canEditConn}>
-                      {connecting ? <Spinner size={12} /> : t('email.oauthConnect')}
-                    </Button>
-                  </div>
-                </CalloutBox>
-              )}
-            </div>
-          )}
-        </div>
+        <EmailProviderCard provider={provider} onProviderChange={setProvider} connLoading={connLoading}
+          connStatus={connStatus} statusSentence={statusSentence} canEditConn={canEditConn}
+          connecting={connecting} disconnecting={disconnecting} onConnect={connectOauth} onDisconnect={disconnectOauth} />
 
         {/* Sender details */}
-        <div style={cardStyle}>
-          <div style={{ fontSize: 13, fontWeight: 500, color: 'var(--text)', marginBottom: 12 }}>{t('email.senderDetails')}</div>
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
-            <div>
-              <label htmlFor="email-sender-name" style={labelStyle}>{t('email.senderName')}</label>
-              <input id="email-sender-name" value={fromName} onChange={e => setFromName(e.target.value)} placeholder={t('email.senderNamePlaceholder')} style={inputStyle} />
-            </div>
-            <div>
-              <label htmlFor="email-from-address" style={labelStyle}>{t('email.fromAddress')}</label>
-              <input id="email-from-address" type="email" value={fromEmail} onChange={e => setFromEmail(e.target.value)} placeholder={t('email.fromPlaceholder')} style={inputStyle} />
-            </div>
-          </div>
-        </div>
+        <EmailSenderCard fromName={fromName} fromEmail={fromEmail} onFromNameChange={setFromName} onFromEmailChange={setFromEmail} />
 
         {/* SMTP (manual only) */}
         {provider === 'manual' && (
-          <div style={cardStyle}>
-            <div style={{ fontSize: 13, fontWeight: 500, color: 'var(--text)', marginBottom: 12 }}>{t('email.smtpConfig')}</div>
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 120px', gap: 12, marginBottom: 12 }}>
-              <div>
-                <label htmlFor="email-smtp-server" style={labelStyle}>{t('email.smtpServer')}</label>
-                <input id="email-smtp-server" value={smtpHost} onChange={e => setSmtpHost(e.target.value)} placeholder={t('email.smtpServerPlaceholder')} style={inputStyle} />
-              </div>
-              <div>
-                <label htmlFor="email-smtp-port" style={labelStyle}>{t('email.port')}</label>
-                <input id="email-smtp-port" type="number" value={smtpPort} onChange={e => setSmtpPort(e.target.value)} style={inputStyle} />
-              </div>
-            </div>
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12, marginBottom: 12 }}>
-              <div>
-                <label htmlFor="email-smtp-username" style={labelStyle}>{t('email.username')}</label>
-                <input id="email-smtp-username" value={smtpUser} onChange={e => setSmtpUser(e.target.value)} placeholder={t('email.usernamePlaceholder')} style={inputStyle} />
-              </div>
-              <div>
-                <label htmlFor="email-smtp-password" style={labelStyle}>
-                  {t('email.password')}
-                  {smtpPassSet && !smtpPass && (
-                    <span style={{ marginLeft: 6, fontSize: 11, color: 'var(--color-success-text)', fontWeight: 400 }}>{t('email.passwordSet')}</span>
-                  )}
-                </label>
-                <div style={{ position: 'relative' }}>
-                  <input id="email-smtp-password" type={showPass ? 'text' : 'password'} value={smtpPass}
-                    onChange={e => setSmtpPass(e.target.value)}
-                    placeholder={smtpPassSet ? t('email.passwordKeepPlaceholder') : t('email.passwordPlaceholder')}
-                    style={{ ...inputStyle, paddingRight: 36 }} />
-                  <Button variant="ghost" iconOnly onClick={() => setShowPass(s => !s)}
-                    aria-label={showPass ? t('email.hidePassword') : t('email.showPassword')}
-                    style={{ position: 'absolute', right: 10, top: '50%', transform: 'translateY(-50%)' }}>
-                    {showPass ? <EyeOff size={14} /> : <Eye size={14} />}
-                  </Button>
-                </div>
-              </div>
-            </div>
-            <div>
-              <label style={labelStyle}>{t('email.security')}</label>
-              {/* SMTP security pill row — shared SegmentedControl, compact size (§4 soft-tint pill). */}
-              <SegmentedControl
-                size="compact"
-                ariaLabel={t('email.security')}
-                options={[
-                  { value: 'tls',  label: t('email.secTls') },
-                  { value: 'ssl',  label: t('email.secSsl') },
-                  { value: 'none', label: t('email.secNone') },
-                ]}
-                value={smtpSecure}
-                onChange={setSmtpSecure}
-              />
-            </div>
-          </div>
+          <EmailSmtpCard smtpHost={smtpHost} smtpPort={smtpPort} smtpUser={smtpUser} smtpPass={smtpPass}
+            smtpPassSet={smtpPassSet} smtpSecure={smtpSecure} showPass={showPass}
+            onHostChange={setSmtpHost} onPortChange={setSmtpPort} onUserChange={setSmtpUser}
+            onPassChange={setSmtpPass} onSecureChange={setSmtpSecure} onToggleShowPass={() => setShowPass(s => !s)} />
         )}
 
         </div>{/* end left column */}
 
         {/* Right column — email signature (per context); fills the column height alongside the connection blocks */}
-        <div style={{ ...cardStyle, display: 'flex', flexDirection: 'column' }}>
-          <div style={{ fontSize: 13, fontWeight: 500, color: 'var(--text)', marginBottom: 2 }}>{t('email.signature')}</div>
-          <Caption as="div" style={{ marginBottom: 10 }}>{t('email.signatureHint')}</Caption>
-          <RichTextEditor value={signature} onChange={setSignature} fill
-            expanded={sigExpanded} onToggleExpand={() => setSigExpanded(e => !e)} />
-        </div>
+        <EmailSignatureCard signature={signature} onSignatureChange={setSignature} />
 
       </div>
     </div>

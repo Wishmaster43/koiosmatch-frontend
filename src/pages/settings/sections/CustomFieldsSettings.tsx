@@ -11,88 +11,16 @@
  */
 import { useState, useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
-import { ChevronDown, ChevronUp, Eye, EyeOff, Monitor, MonitorOff } from 'lucide-react'
 import api, { unwrap, unwrapList } from '@/lib/api'
 import { useCustomFields, type CustomFieldEntityType } from '@/lib/useCustomFields'
 import { notifyError } from '@/lib/notify'
-import SearchSelect from '@/components/ui/SearchSelect'
 import { DragList } from '../components/SettingsControls'
-import { fieldInputStyle } from '@/components/forms/fieldMetrics'
-import Button from '@/components/ui/Button'
-import { Caption, PageTitle, tableHeadStyle } from '@/components/ui/typography'
-import EditorRowFooter from '@/components/ui/EditorRowFooter'
-import AddFormFooter from '@/components/ui/AddFormFooter'
+import { PageTitle } from '@/components/ui/typography'
 import AddCardTrigger from '@/components/ui/AddCardTrigger'
-
-// Field types the backend supports.
-const FIELD_TYPES = ['text', 'textarea', 'number', 'date', 'boolean', 'select'] as const
-type FieldType = typeof FIELD_TYPES[number]
-
-// Raw definition as the unified /custom-fields endpoint returns it.
-interface CustomFieldDef {
-  id: string
-  key: string
-  type: FieldType
-  label_i18n?: Record<string, string>
-  options?: string[]
-  active?: boolean
-  in_use?: boolean
-  visible_in_ui?: boolean
-}
-
-// The mapped shape this editor renders — a raw def plus the resolved display label
-// and the has_data flag (in_use, renamed for the reader's benefit in this file).
-interface CustomField extends CustomFieldDef {
-  label: string
-  has_data: boolean
-}
-
-// Per-field draft while its edit card is expanded — every key optional since it
-// only carries what the user actually changed (falls back to the field's own value).
-interface EditForm {
-  label?: string
-  type?: FieldType
-  options?: string
-  optionError?: boolean
-  active?: boolean
-}
-
-// The add-new-field form's own draft state.
-interface NewFieldForm {
-  label: string
-  key: string
-  type: FieldType
-  options: string
-  optionError: boolean
-}
-
-// entity_type → the nav.<id> label already registered for its sub-tab (registry.jsx),
-// reused here as the human-readable entity name instead of a second hardcoded map.
-const ENTITY_NAV_ID: Record<string, string> = {
-  candidate: 'cf_candidate', application: 'cf_application', match: 'cf_match', vacancy: 'cf_vacancy',
-  task: 'cf_task', opportunity: 'cf_opportunity', outreach_campaign: 'cf_outreach_campaign',
-  customer: 'cf_customer', customer_location: 'cf_customer_location',
-  customer_department: 'cf_customer_department', customer_contact: 'cf_customer_contact',
-}
-
-// Generate a slug from a label (lowercase, letters/numbers/underscores only).
-const toSlug = (s: string): string => s.toLowerCase().replace(/[^a-z0-9]+/g, '_').replace(/^_|_$/g, '')
-
-// Pick a label for the active language (fallback lang-base → en → nl → any → key).
-const pickLabel = (l: Record<string, string> | undefined, lang: string, key: string): string =>
-  l ? (l[lang] ?? l[lang.split('-')[0]] ?? l.en ?? l.nl ?? Object.values(l)[0] ?? key) : key
-// Map a generic /custom-fields def to the shape this editor renders (label + has_data)
-// visible_in_ui defaults true (backend default) — worklist #44: API-only fields stay
-// listed and editable here, they only stop rendering on the entity's Extra tab.
-const toField = (d: CustomFieldDef, lang: string): CustomField =>
-  ({ ...d, label: pickLabel(d.label_i18n, lang, d.key), has_data: !!d.in_use, visible_in_ui: d.visible_in_ui !== false })
-
-const cardStyle = {
-  background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 10, padding: '14px 16px', marginBottom: 8,
-}
-// Canon field style (G33/fieldMetrics) — was its own padding-6/radius-6 copy.
-const inputStyle = fieldInputStyle
-const labelStyle = { ...tableHeadStyle, display: 'block', marginBottom: 4 }
+import type { CustomField, CustomFieldDef, EditForm, NewFieldForm } from './customfields/types'
+import { ENTITY_NAV_ID, toSlug, toField } from './customfields/helpers'
+import CustomFieldRow from './customfields/CustomFieldRow'
+import NewFieldCard from './customfields/NewFieldCard'
 
 // Props: which entity's custom-field set this tab renders (candidate/vacancy/…).
 interface CustomFieldsSettingsProps {
@@ -264,177 +192,26 @@ export default function CustomFieldsSettings({ entityType }: CustomFieldsSetting
       <DragList
         items={fields}
         onReorder={reorder}
-        renderItem={(field: CustomField) => {
-          const isOpen = expanded === field.id
-          const ef = editForms[field.id] ?? {}
-          const currentType = ef.type ?? field.type
-          return (
-            <div style={{ ...cardStyle, flex: 1, minWidth: 0, marginBottom: 0, opacity: field.active ? 1 : 0.6 }}>
-              {/* Row summary */}
-              <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                {/* Label + meta */}
-                <div style={{ flex: 1, minWidth: 0 }}>
-                  <div style={{ fontWeight: 500, fontSize: 13, color: 'var(--text)' }}>{field.label}</div>
-                  <Caption as="div">
-                    <code style={{ fontFamily: 'JetBrains Mono, monospace' }}>{field.key}</code>
-                    {' · '}{t(`customFieldsSettings.types.${field.type}`)}
-                    {field.has_data && <span style={{ color: 'var(--color-warning-text)', marginLeft: 6 }}>· {t('customFieldsSettings.hasData')}</span>}
-                    {/* Worklist #44: legible in words, not just icon colour — a tenant
-                        must understand WHY a field they configured isn't showing up. */}
-                    {!field.visible_in_ui && <span style={{ color: 'var(--color-info)', marginLeft: 6 }}>· {t('customFieldsSettings.apiOnly')}</span>}
-                  </Caption>
-                </div>
-
-                {/* Active toggle */}
-                <Button variant="ghost" iconOnly onClick={() => toggleActive(field)} title={field.active ? t('customFieldsSettings.deactivate') : t('customFieldsSettings.activate')}
-                  aria-label={field.active ? t('customFieldsSettings.deactivate') : t('customFieldsSettings.activate')}
-                  style={{ color: field.active ? 'var(--color-primary)' : 'var(--text-muted)' }}>
-                  {field.active ? <Eye size={14} /> : <EyeOff size={14} />}
-                </Button>
-
-                {/* Visible-in-UI toggle (worklist #44) — independent of active: the field
-                    stays reachable via the API/imports either way, this only hides it from
-                    the entity's rendered Extra tab. Monitor/MonitorOff so it reads as a
-                    distinct control from the Eye/EyeOff active toggle above. */}
-                <Button variant="ghost" iconOnly onClick={() => toggleVisibleInUi(field)} title={field.visible_in_ui ? t('customFieldsSettings.hideFromUi') : t('customFieldsSettings.showInUi')}
-                  aria-label={field.visible_in_ui ? t('customFieldsSettings.hideFromUi') : t('customFieldsSettings.showInUi')}
-                  style={{ color: field.visible_in_ui ? 'var(--color-primary)' : 'var(--text-muted)' }}>
-                  {field.visible_in_ui ? <Monitor size={14} /> : <MonitorOff size={14} />}
-                </Button>
-
-                {/* Expand / collapse */}
-                <Button variant="ghost" iconOnly onClick={() => setExpanded(isOpen ? null : field.id)}
-                  aria-label={isOpen ? t('common:collapse') : t('common:expand')}>
-                  {isOpen ? <ChevronUp size={14} /> : <ChevronDown size={14} />}
-                </Button>
-              </div>
-
-              {/* Expanded edit form */}
-              {isOpen && (
-                <div style={{ marginTop: 14, borderTop: '1px solid var(--border)', paddingTop: 14, display: 'flex', flexDirection: 'column', gap: 10 }}>
-                  {/* Label — placeholder mirrors the currently chosen type, so switching
-                      type (Danny 13-09, row 17) swaps the example without touching the value. */}
-                  <div>
-                    <label style={labelStyle}>{t('customFieldsSettings.label')}</label>
-                    <input value={ef.label ?? field.label} onChange={e => setEF(field.id, 'label', e.target.value)}
-                      placeholder={t(`customFieldsSettings.examples.${currentType}.label`)} style={inputStyle} />
-                  </div>
-
-                  {/* Key (immutable) */}
-                  <div>
-                    <label style={labelStyle}>{t('customFieldsSettings.key')} <span style={{ color: 'var(--text-muted)', fontWeight: 400 }}>({t('customFieldsSettings.immutable')})</span></label>
-                    <input value={field.key} disabled style={{ ...inputStyle, opacity: 0.5, cursor: 'not-allowed' }} />
-                  </div>
-
-                  {/* Type — locked once the field has data: switching type on stored
-                      values has no safe conversion (e.g. text -> number), so the
-                      selector goes inert via SearchSelect's own `disabled` prop
-                      (the single source of truth — no per-callsite guard/styling). */}
-                  <div>
-                    <label style={labelStyle}>{t('customFieldsSettings.type')} {field.has_data && <span style={{ color: 'var(--color-warning-text)', fontWeight: 400 }}>({t('customFieldsSettings.hasData')})</span>}</label>
-                    {/* Herhaal-audit r4 finding 5/6/7: SearchSelect's own default
-                        single-pick trigger face (closeOnToggle, no renderTrigger) —
-                        never a hand-painted trigger button per call site. */}
-                    <SearchSelect
-                      options={FIELD_TYPES.map(tp => ({ value: tp, label: t(`customFieldsSettings.types.${tp}`) }))}
-                      selected={[currentType]}
-                      onToggle={(v: string) => setEF(field.id, 'type', v as FieldType)}
-                      closeOnToggle
-                      searchable={false}
-                      disabled={field.has_data}
-                      triggerLabel={t(`customFieldsSettings.types.${currentType}`)}
-                    />
-                  </div>
-
-                  {/* Options — only for select type */}
-                  {currentType === 'select' && (
-                    <div>
-                      <label style={labelStyle}>{t('customFieldsSettings.options')} *</label>
-                      <input value={ef.options ?? (field.options ?? []).join(', ')} onChange={e => setEF(field.id, 'options', e.target.value)}
-                        placeholder={t('customFieldsSettings.optionsPlaceholder')} style={inputStyle} />
-                      {ef.optionError && (
-                        <p style={{ fontSize: 11, color: 'var(--color-danger-text)', marginTop: 3 }}>{t('customFieldsSettings.optionsRequired')}</p>
-                      )}
-                      <p style={{ fontSize: 11, color: 'var(--text-muted)', marginTop: ef.optionError ? 1 : 3 }}>{t('customFieldsSettings.optionsHint')}</p>
-                    </div>
-                  )}
-
-                  {/* Actions — herhaal-audit r4 finding 4: Button's own dangerSoft/
-                      secondary recipe covers the disabled look; no per-callsite
-                      background/colour ternary needed anymore. */}
-                  <div style={{ marginTop: 4 }}>
-                  <EditorRowFooter
-                    onDelete={() => handleDelete(field)}
-                    deleteLabel={t('customFieldsSettings.delete')}
-                    deleteDisabled={field.has_data}
-                    deleteTitle={field.has_data ? t('customFieldsSettings.deleteBlocked') : t('customFieldsSettings.delete')}
-                    onCancel={() => setExpanded(null)}
-                    cancelLabel={t('common.cancel')}
-                    onSave={() => handleSave(field)}
-                    saveLabel={t('common.save')}
-                    savingLabel={t('common.saving')}
-                    saving={saving === field.id}
-                  />
-                  </div>
-                </div>
-              )}
-            </div>
-          )
-        }}
+        renderItem={(field: CustomField) => (
+          <CustomFieldRow
+            field={field}
+            isOpen={expanded === field.id}
+            ef={editForms[field.id] ?? {}}
+            saving={saving === field.id}
+            onToggleActive={() => toggleActive(field)}
+            onToggleVisible={() => toggleVisibleInUi(field)}
+            onToggleOpen={() => setExpanded(expanded === field.id ? null : field.id)}
+            onClose={() => setExpanded(null)}
+            onEdit={(k, v) => setEF(field.id, k, v)}
+            onSave={() => handleSave(field)}
+            onDelete={() => handleDelete(field)}
+          />
+        )}
       />
 
       {/* Add new field */}
       {adding ? (
-        <div style={cardStyle}>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
-              <div>
-                <label style={labelStyle}>{t('customFieldsSettings.label')} *</label>
-                {/* Placeholder mirrors the chosen type (Danny 13-09, row 17) — switching
-                    type swaps the example immediately, never the typed value. */}
-                <input value={newForm.label} onChange={e => setNewForm(p => ({ ...p, label: e.target.value, key: toSlug(e.target.value) }))}
-                  placeholder={t(`customFieldsSettings.examples.${newForm.type}.label`)} style={inputStyle} autoFocus />
-              </div>
-              <div>
-                <label style={labelStyle}>{t('customFieldsSettings.key')}</label>
-                <input value={newForm.key} onChange={e => setNewForm(p => ({ ...p, key: e.target.value }))}
-                  placeholder={t(`customFieldsSettings.examples.${newForm.type}.key`)} style={{ ...inputStyle, fontFamily: 'JetBrains Mono, monospace' }} />
-              </div>
-            </div>
-            <div>
-              <label style={labelStyle}>{t('customFieldsSettings.type')}</label>
-              {/* Herhaal-audit r4 finding 5/6/7: SearchSelect's own default trigger face. */}
-              <SearchSelect
-                options={FIELD_TYPES.map(tp => ({ value: tp, label: t(`customFieldsSettings.types.${tp}`) }))}
-                selected={[newForm.type]}
-                onToggle={(v: string) => setNewForm(p => ({ ...p, type: v as FieldType }))}
-                closeOnToggle
-                searchable={false}
-                triggerLabel={t(`customFieldsSettings.types.${newForm.type}`)}
-              />
-            </div>
-            {newForm.type === 'select' && (
-              <div>
-                <label style={labelStyle}>{t('customFieldsSettings.options')} *</label>
-                <input value={newForm.options} onChange={e => setNewForm(p => ({ ...p, options: e.target.value, optionError: false }))}
-                  placeholder={t('customFieldsSettings.optionsPlaceholder')} style={inputStyle} />
-                {newForm.optionError && (
-                  <p style={{ fontSize: 11, color: 'var(--color-danger-text)', marginTop: 3 }}>{t('customFieldsSettings.optionsRequired')}</p>
-                )}
-                <p style={{ fontSize: 11, color: 'var(--text-muted)', marginTop: newForm.optionError ? 1 : 3 }}>{t('customFieldsSettings.optionsHint')}</p>
-              </div>
-            )}
-            <AddFormFooter
-              onCancel={() => setAdding(false)}
-              cancelLabel={t('common.cancel')}
-              onSubmit={handleCreate}
-              submitLabel={t('customFieldsSettings.add')}
-              savingLabel={t('common.saving')}
-              saving={saving === 'new'}
-              disabled={!newForm.label.trim()}
-            />
-          </div>
-        </div>
+        <NewFieldCard newForm={newForm} onChange={setNewForm} saving={saving === 'new'} onSubmit={handleCreate} onCancel={() => setAdding(false)} />
       ) : (
         <AddCardTrigger onClick={() => setAdding(true)} label={t('customFieldsSettings.add')} />
       )}
