@@ -237,8 +237,8 @@ describe('ConversationsSection · Koios AI conversation assist (G27)', () => {
 // K-193: the thread header shows the conversation's dominant channel, per enum value.
 describe('ConversationsSection · channel badge (K-193)', () => {
   // No i18next instance in this test file (see other tests asserting raw key text) —
-  // t(key, {defaultValue}) resolves to the defaultValue, so a distinct server label
-  // per channel proves the chip is wired to primary_channel/channel_label per row.
+  // labelOrRaw's guard on the empty i18n object returns the raw fallback, so a distinct
+  // server label per channel proves the chip is wired to primary_channel/channel_label per row.
   it.each(['waba', 'waba_coex', 'wa_web'])('renders a chip for known primary_channel "%s"', async (channel) => {
     vi.mocked(api.get).mockReset()
     vi.mocked(api.get).mockImplementation((url: string) => {

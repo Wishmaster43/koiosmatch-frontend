@@ -2,9 +2,9 @@
  * ConversationMessage — proves the K-193 channel chip renders per enum value
  * on the message bubble, stays silent for a null/unknown channel, and that
  * the purpose badge (the pre-existing seam) still renders alongside it.
- * No i18next instance is initialized in this test file, so t(key, {defaultValue})
- * resolves to the defaultValue — a distinct channel_label per case proves the
- * chip reads channel/channel_label off the message row.
+ * No i18next instance is initialized in this test file, so labelOrRaw's guard on the
+ * empty i18n object returns the raw fallback — a distinct channel_label per case proves
+ * the chip reads channel/channel_label off the message row.
  */
 import { describe, it, expect, vi } from 'vitest'
 import { render, screen } from '@testing-library/react'
