@@ -25,6 +25,7 @@ import { useDateFormat } from '@/lib/datetime'
 import { escapeCsvCell } from '@/lib/csv'
 import { isUuid } from '@/lib/uuid'
 import { describeChangelog } from './changelogDescription'
+import { labelOrRaw } from '@/lib/labelOrRaw'
 import { scrubbedBagOf, scrubReasonKey } from './changelogScrub'
 import { Caption } from '@/components/ui/typography'
 import Button from '@/components/ui/Button'
@@ -106,7 +107,7 @@ export default function EntityChangelogTab<E extends ChangelogEvent = ChangelogE
   items, loading, error, namespace, noiseFields, formatValue, filterEvent, extraCard, subjectLabel,
   fallbackDescription = false, wrapWhoAction = false, toolbar = false, exportFileNameBase = 'changelog',
 }: EntityChangelogTabProps<E>) {
-  const { t } = useTranslation(namespace)
+  const { t, i18n } = useTranslation(namespace)
   const { formatDate, formatDateTime } = useDateFormat()
   // Client-side date-range filter + free-text search (HelloFlex: "Datum van / t/m") —
   // only rendered/applied when the caller opts into the toolbar.
@@ -115,7 +116,7 @@ export default function EntityChangelogTab<E extends ChangelogEvent = ChangelogE
   const [q, setQ] = useState('')
 
   // Field key → translated label; unknown keys degrade to a humanized form.
-  const fieldLabel = (f: string) => t(`changelog.fields.${f}`, { defaultValue: humanizeField(f) })
+  const fieldLabel = (f: string) => labelOrRaw(t, i18n, `changelog.fields.${f}`, humanizeField(f), namespace)
 
   // Render a value in end-user terms: empty → "Leeg", booleans → Ja/Nee, ISO dates →
   // DD-MM-YYYY, plain objects/arrays → a compact summary. A raw uuid reference is
@@ -139,9 +140,9 @@ export default function EntityChangelogTab<E extends ChangelogEvent = ChangelogE
     const d = ev.description
     // CHANGELOG-DESC-I18N-1: a key-shaped description ("lookup.reordered") is
     // translated; a legacy Dutch literal ("Dossier geopend") renders as-is.
-    if (d && !['updated', 'created', 'deleted', 'restored', ev.log_name].includes(d)) return describeChangelog(d, t) ?? d
+    if (d && !['updated', 'created', 'deleted', 'restored', ev.log_name].includes(d)) return describeChangelog(d, t, i18n) ?? d
     const verb = ev.event ?? d ?? 'updated'
-    return t(`changelog.actions.${verb}`, { defaultValue: d ?? verb })
+    return labelOrRaw(t, i18n, `changelog.actions.${verb}`, d ?? verb, namespace)
   }
 
   // Per-field changes from the diff bag (Spatie { attributes, old } shape, the ONE
@@ -171,7 +172,7 @@ export default function EntityChangelogTab<E extends ChangelogEvent = ChangelogE
       if (extra) return [extra]
       const subject = subjectLabel?.(ev)
       const diffs = changesOf(ev)
-      if (!diffs.length) return [{ ...base, subject, fallback: fallbackDescription ? (describeChangelog(ev.description, t) ?? '—') : undefined }]
+      if (!diffs.length) return [{ ...base, subject, fallback: fallbackDescription ? (describeChangelog(ev.description, t, i18n) ?? '—') : undefined }]
       const isCreate = (ev.event ?? ev.description) === 'created'
       return diffs
         .map(ch => ({ ...base, subject, field: fieldLabel(ch.field), oldVal: fmtVal(ch.field, ch.old), newVal: fmtVal(ch.field, ch.next) }))

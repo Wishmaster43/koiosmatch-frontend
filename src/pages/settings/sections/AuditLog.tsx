@@ -26,7 +26,7 @@ type SortCol = 'created_at' | 'causer_name' | 'log_name' | 'description'
 // Thin container wiring the toolbar, table and drill-down drawer together (see
 // file docblock above); filtering and table markup live in their own modules.
 export default function AuditLog() {
-  const { t } = useTranslation('settings')
+  const { t, i18n } = useTranslation('settings')
   const settings = useAllSettings()
   const [logs,    setLogs]    = useState<AuditEntry[]>([])
   const [loading, setLoading] = useState(true)
@@ -87,7 +87,7 @@ export default function AuditLog() {
 
       {/* Toolbar: count summary + export — search/date/filters are in the right filter panel */}
       <LogCountToolbar loading={loading} shown={filteredAll.length} total={logs.length}
-        onExport={() => exportAuditCsv(filteredAll, t)} exportDisabled={filteredAll.length === 0} />
+        onExport={() => exportAuditCsv(filteredAll, t, i18n)} exportDisabled={filteredAll.length === 0} />
 
       {error && (
         <div style={{ marginBottom: 12 }}>

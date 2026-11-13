@@ -42,6 +42,19 @@ describe('EntityChangelogTab · CHANGELOG-3 uuid guard', () => {
     expect(screen.getByText('Nieuwe naam')).toBeInTheDocument()
   })
 
+  // DEFAULTVALUE-ROUNDS-1: the field label resolves `changelog.fields.<field>` in the drawer's own
+  // namespace through labelOrRaw; a field without a key renders the humanized field name as data.
+  it('renders a translated label for a known field and the humanized name for an unknown one', async () => {
+    const events: ChangelogEvent[] = [{
+      id: 'e2b', causer_name: 'Danny Polak', created_at: '2026-08-01T10:00:00Z', event: 'updated',
+      changes: { attributes: { first_name: 'B', shoe_size_eu: '43' }, old: { first_name: 'A', shoe_size_eu: '42' } },
+    }]
+    render(<EntityChangelogTab items={events} loading={false} error={false} namespace="candidates" />)
+    expect(await screen.findByText(nlCandidates.changelog.fields.first_name)).toBeInTheDocument()
+    expect(screen.getByText('Shoe size eu')).toBeInTheDocument()
+    expect(screen.queryByText('changelog.fields.shoe_size_eu')).not.toBeInTheDocument()
+  })
+
   it('shows the empty state when there are no items', () => {
     render(<EntityChangelogTab items={[]} loading={false} error={false} namespace="candidates" />)
     expect(screen.getByText(nlCandidates.changelog.empty)).toBeInTheDocument()

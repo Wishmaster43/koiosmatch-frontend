@@ -39,10 +39,10 @@ interface AuditLogTableProps {
 }
 
 export default function AuditLogTable({ rows, sortCol, sortDir, onSort, onRowClick }: AuditLogTableProps) {
-  const { t } = useTranslation('settings')
+  const { t, i18n } = useTranslation('settings')
   // Reuses the existing common.sort key for the sortable header's button tooltip
   // (mirrors DataTable's own sortable header — no new i18n keys needed).
-  const { t: tCommon } = useTranslation('common')
+  const { t: tCommon, i18n: i18nCommon } = useTranslation('common')
   // DATUM-1: DD-MM-YYYY date + HH:mm time in every app language, never a hardcoded locale.
   const { formatDate, formatTime } = useDateFormat()
 
@@ -105,7 +105,7 @@ export default function AuditLogTable({ rows, sortCol, sortDir, onSort, onRowCli
               </td>
             </tr>
           ) : rows.map((entry, i) => {
-            const { beforeCell, afterCell } = buildDiffCells(entry, t)
+            const { beforeCell, afterCell } = buildDiffCells(entry, t, i18n)
             // Access (read) rows render muted with a leading eye icon — visually
             // distinct from a write event at a glance, without hiding the row.
             const access = isAccessEvent(entry)
@@ -128,7 +128,7 @@ export default function AuditLogTable({ rows, sortCol, sortDir, onSort, onRowCli
                 <td style={TD}>
                   {entry.subject_type ? (
                     <>
-                      <div style={{ fontWeight: 500, color: 'var(--text)' }}>{entityLabel(entry.subject_type, t)}</div>
+                      <div style={{ fontWeight: 500, color: 'var(--text)' }}>{entityLabel(entry.subject_type, t, i18n)}</div>
                       {entry.subject_label && <Caption as="div">{entry.subject_label}</Caption>}
                     </>
                   ) : <span style={{ color: 'var(--text-muted)' }}>—</span>}
@@ -138,7 +138,7 @@ export default function AuditLogTable({ rows, sortCol, sortDir, onSort, onRowCli
                     {access && <Eye size={12} aria-label={t('audit.kind.access')} style={{ flexShrink: 0 }} />}
                     {/* AUDIT-SLEUTELS (BE AUDIT-bundel): a key-shaped description translates via
                         common:changelogDescriptions.<key>; unknown keys and legacy literals render raw. */}
-                    {describeChangelog(entry.description, tCommon)}
+                    {describeChangelog(entry.description, tCommon, i18nCommon)}
                   </span>
                 </td>
                 <td style={{ ...TD, fontSize: 11, color: 'var(--color-danger-text)' }}>{beforeCell}</td>

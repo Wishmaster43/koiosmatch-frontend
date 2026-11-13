@@ -5,6 +5,7 @@
  * column order can change without touching the screen.
  */
 import { escapeCsvCell } from '@/lib/csv'
+import { labelOrRaw } from '@/lib/labelOrRaw'
 import { describeChangelog } from '@/components/drawer/tabs/changelogDescription'
 import { entityLabel } from './auditShared'
 import { buildDiffCells } from './auditDiffCells'
@@ -16,23 +17,23 @@ import { ddmmyyyy, hhmm } from '@/lib/localDate'
 // Export the currently-filtered log to CSV (UTF-8 BOM for Excel; AVG accountability).
 // Cells go through the shared escapeCsvCell, which also guards against formula
 // injection (a leading =+-@ opened as a live formula in Excel/Sheets — C-14).
-export function exportAuditCsv(entries, t) {
+export function exportAuditCsv(entries, t, i18n) {
   // actor_label ("<name>-KoiosAI") wins over the human causer_name when present.
   const who = (e) => e.causer_email
     ? `${e.actor_label ?? e.causer_name ?? t('audit.system')} (${e.causer_email})`
     : (e.actor_label ?? e.causer_name ?? t('audit.system'))
   const header = [t('audit.colDate'), t('audit.colTime'), t('audit.colWho'), t('audit.colType'), t('audit.colEntity'), t('audit.colAction'), t('audit.colOldValue'), t('audit.colNewValue')]
   const rows = entries.map(e => {
-    const { beforeCell, afterCell } = buildDiffCells(e, t)
-    const entityStr = e.subject_type ? entityLabel(e.subject_type, t) + (e.subject_label ? ` · ${e.subject_label}` : '') : ''
+    const { beforeCell, afterCell } = buildDiffCells(e, t, i18n)
+    const entityStr = e.subject_type ? entityLabel(e.subject_type, t, i18n) + (e.subject_label ? ` · ${e.subject_label}` : '') : ''
     return [
       ddmmyyyy(new Date(e.created_at)),
       hhmm(new Date(e.created_at)),
       who(e),
-      t(`audit.logName.${e.log_name}`, { defaultValue: e.log_name }),
+      labelOrRaw(t, i18n, `audit.logName.${e.log_name}`, e.log_name, 'settings'),
       entityStr,
       // AUDIT-SLEUTELS: key-shaped descriptions export translated, legacy literals raw.
-      describeChangelog(e.description, t) ?? '', beforeCell, afterCell]
+      describeChangelog(e.description, t, i18n) ?? '', beforeCell, afterCell]
   })
   const csv = '﻿' + [header, ...rows].map(r => r.map(escapeCsvCell).join(',')).join('\r\n')
   const url = URL.createObjectURL(new Blob([csv], { type: 'text/csv;charset=utf-8;' }))

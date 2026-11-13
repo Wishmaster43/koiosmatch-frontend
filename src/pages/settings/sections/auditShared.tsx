@@ -7,6 +7,7 @@
  */
 import { useTranslation } from 'react-i18next'
 import type { TFunction } from 'i18next'
+import { labelOrRaw, type KeyChecker } from '@/lib/labelOrRaw'
 
 // One raw activity-log entry as the backend serialises it (Spatie activitylog shape,
 // generalised over CHANGELOG-3): only the fields this module actually reads are typed.
@@ -75,11 +76,12 @@ export function isAccessEvent(entry?: AuditEntry | null): boolean {
 }
 
 // Humanise a Spatie subject_type ("App\\Models\\Candidate") to a readable entity label.
-export function entityLabel(subjectType: string | null | undefined, t: TFunction): string | null {
+export function entityLabel(subjectType: string | null | undefined, t: TFunction, i18n: KeyChecker): string | null {
   if (!subjectType) return null
   const base = String(subjectType).split('\\').pop() ?? ''
   const key = base.replace(/([a-z0-9])([A-Z])/g, '$1_$2').toLowerCase()
-  return t(`audit.entity.${key}`, { defaultValue: base })
+  // An unknown entity class shows its raw class name as data.
+  return labelOrRaw(t, i18n, `audit.entity.${key}`, base, 'settings')
 }
 
 // The uniform CHANGELOG-3 diff (`entry.changes = {attributes, old}`) flattened to
@@ -87,7 +89,7 @@ export function entityLabel(subjectType: string | null | undefined, t: TFunction
 // noise fields dropped, unchanged values dropped, and a CREATE event only lists
 // fields that actually got a value. Sensitive/encrypted values already arrive masked
 // from the backend (Activity::changesForDisplay, §8/§9) — rendered verbatim here.
-export function buildFieldDiff(entry: AuditEntry | null | undefined, t: TFunction): FieldDiffRow[] {
+export function buildFieldDiff(entry: AuditEntry | null | undefined, t: TFunction, i18n: KeyChecker): FieldDiffRow[] {
   const changes = entry?.changes
   const attrs = changes?.attributes
   if (!attrs || typeof attrs !== 'object' || Array.isArray(attrs)) return []
@@ -106,7 +108,7 @@ export function buildFieldDiff(entry: AuditEntry | null | undefined, t: TFunctio
   }
   return Object.keys(attrs)
     .filter(field => !NOISE_FIELDS.has(field))
-    .map(field => ({ field, label: t(`audit.field.${field}`, { defaultValue: humanizeField(field) }), before: fmt(before[field]), after: fmt(attrs[field]) }))
+    .map(field => ({ field, label: labelOrRaw(t, i18n, `audit.field.${field}`, humanizeField(field), 'settings'), before: fmt(before[field]), after: fmt(attrs[field]) }))
     .filter(row => row.before !== row.after)
     .filter(row => !isCreate || row.after !== empty)
 }
@@ -118,12 +120,12 @@ interface LogBadgeProps {
 
 // Small tinted pill naming a log's source (e.g. system/user), coloured per LOG_NAME_META with a neutral fallback for an unknown log name.
 export function LogBadge({ logName }: LogBadgeProps) {
-  const { t } = useTranslation('settings')
+  const { t, i18n } = useTranslation('settings')
   const m = LOG_NAME_META[logName] ?? { bg: 'var(--border)', color: 'var(--text-muted)' }
   return (
     <span style={{ fontSize: 10, fontWeight: 600, padding: '2px 7px', borderRadius: 999,
                    background: m.bg, color: m.color, whiteSpace: 'nowrap' }}>
-      {t(`audit.logName.${logName}`, { defaultValue: logName })}
+      {labelOrRaw(t, i18n, `audit.logName.${logName}`, logName, 'settings')}
     </span>
   )
 }

@@ -6,7 +6,9 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { exportAuditCsv } from './auditCsvExport'
 
-const t = (key, opts) => opts?.defaultValue ?? key
+const t = (key) => key
+// Checker stub: no key exists, so every label falls back to its raw data.
+const i18n = { exists: () => false }
 
 // Capture the csv text handed to the Blob instead of downloading it.
 let captured
@@ -22,13 +24,13 @@ beforeEach(() => {
 
 describe('exportAuditCsv — who column', () => {
   it('prefers actor_label over causer_name, keeping the email suffix', () => {
-    exportAuditCsv([{ created_at: '2026-08-01T10:00:00Z', causer_name: 'Danny', causer_email: 'd@x.nl', actor_label: 'Flow-KoiosAI', log_name: 'candidate' }], t)
+    exportAuditCsv([{ created_at: '2026-08-01T10:00:00Z', causer_name: 'Danny', causer_email: 'd@x.nl', actor_label: 'Flow-KoiosAI', log_name: 'candidate' }], t, i18n)
     expect(captured).toContain('Flow-KoiosAI (d@x.nl)')
     expect(captured).not.toContain('Danny (')
   })
 
   it('falls back to causer_name when actor_label is absent', () => {
-    exportAuditCsv([{ created_at: '2026-08-01T10:00:00Z', causer_name: 'Danny', log_name: 'candidate' }], t)
+    exportAuditCsv([{ created_at: '2026-08-01T10:00:00Z', causer_name: 'Danny', log_name: 'candidate' }], t, i18n)
     expect(captured).toContain('Danny')
   })
 })
@@ -36,17 +38,18 @@ describe('exportAuditCsv — who column', () => {
 // AUDIT-SLEUTELS: the Action column translates a key-shaped description through
 // common:changelogDescriptions.<key>; an unknown key or legacy literal exports raw.
 describe('exportAuditCsv — action column', () => {
-  const tk = (key, opts) => key === 'common:changelogDescriptions.candidate.updated' ? 'Kandidaat bijgewerkt' : (opts?.defaultValue ?? key)
+  const tk = (key) => key === 'common:changelogDescriptions.candidate.updated' ? 'translated_action_label' : key
+  const i18nk = { exists: (key, o) => `${o?.ns}:${key}` === 'common:changelogDescriptions.candidate.updated' }
   it('translates a key-shaped description', () => {
-    exportAuditCsv([{ created_at: '2026-08-01T10:00:00Z', causer_name: 'Danny', log_name: 'candidate', description: 'candidate.updated' }], tk)
-    expect(captured).toContain('Kandidaat bijgewerkt')
+    exportAuditCsv([{ created_at: '2026-08-01T10:00:00Z', causer_name: 'Danny', log_name: 'candidate', description: 'candidate.updated' }], tk, i18nk)
+    expect(captured).toContain('translated_action_label')
     expect(captured).not.toContain('candidate.updated')
   })
   it('keeps an unknown key and a legacy literal as they are', () => {
     exportAuditCsv([
       { created_at: '2026-08-01T10:00:00Z', causer_name: 'Danny', log_name: 'candidate', description: 'match.renewed' },
       { created_at: '2026-08-01T10:00:00Z', causer_name: 'Danny', log_name: 'candidate', description: 'Kandidaat aangemaakt' },
-    ], tk)
+    ], tk, i18nk)
     expect(captured).toContain('match.renewed')
     expect(captured).toContain('Kandidaat aangemaakt')
   })

@@ -37,7 +37,7 @@ interface ActivityEntry {
 // subject_type is NULL — filtering on it returns nothing (verified 14-08,
 // ActivityLogController). Exactly one of the two must be given.
 export default function EntityChangelog({ subjectType, subjectId, logName, endpoint }: { subjectType?: string; subjectId?: Id; logName?: string; endpoint?: string }) {
-  const { t } = useTranslation('settings')
+  const { t, i18n } = useTranslation('settings')
   const { formatDateTime } = useDateFormat()
   const [items, setItems] = useState<ActivityEntry[]>([])
   const [loading, setLoading] = useState(false)
@@ -73,7 +73,7 @@ export default function EntityChangelog({ subjectType, subjectId, logName, endpo
   return (
     <>
       {items.map((entry, i) => {
-        const rows = buildFieldDiff(entry, t)
+        const rows = buildFieldDiff(entry, t, i18n)
         return (
           <div key={entry.id ?? i} style={{ border: '1px solid var(--border)', borderRadius: 8, background: 'var(--bg)', padding: '9px 12px', marginBottom: 8 }}>
             <Caption as="div">

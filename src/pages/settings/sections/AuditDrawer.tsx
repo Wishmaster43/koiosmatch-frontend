@@ -38,7 +38,7 @@ function AuditNotice({ icon, text }: { icon: ReactNode; text: string }) {
 // Drill-down for one audit log entry: dispatches to a per-log-type rendering
 // (access/http/auth/sync/roles/settings) or the generic before/after diff fallback.
 export function AuditDrawer({ entry, onClose }: AuditDrawerProps) {
-  const { t } = useTranslation('settings')
+  const { t, i18n } = useTranslation('settings')
   // DATUM-1: DD-MM-YYYY HH:mm in every app language, never the browser's own locale.
   const { formatDateTime } = useDateFormat()
   // Focus-trapped dialog (§6, WCAG 2.2 AA): Escape closes it, Tab stays inside,
@@ -57,7 +57,7 @@ export function AuditDrawer({ entry, onClose }: AuditDrawerProps) {
       return (
         <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
           <AuditNotice icon={<ShieldOff size={14} />} text={t('audit.scrubbedNotice')} />
-          <DetailRow label={t('audit.colEntity')} value={entry.subject_type ? [entityLabel(entry.subject_type, t), entry.subject_label].filter(Boolean).join(' · ') : '—'} />
+          <DetailRow label={t('audit.colEntity')} value={entry.subject_type ? [entityLabel(entry.subject_type, t, i18n), entry.subject_label].filter(Boolean).join(' · ') : '—'} />
         </div>
       )
     }
@@ -67,7 +67,7 @@ export function AuditDrawer({ entry, onClose }: AuditDrawerProps) {
       return (
         <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
           <AuditNotice icon={<Eye size={14} />} text={t('audit.accessNotice')} />
-          <DetailRow label={t('audit.colEntity')} value={entry.subject_type ? [entityLabel(entry.subject_type, t), entry.subject_label].filter(Boolean).join(' · ') : '—'} />
+          <DetailRow label={t('audit.colEntity')} value={entry.subject_type ? [entityLabel(entry.subject_type, t, i18n), entry.subject_label].filter(Boolean).join(' · ') : '—'} />
           <DetailRow label={t('audit.auth.ip')} value={(p.ip as string) ?? '—'} />
         </div>
       )
@@ -252,7 +252,7 @@ export function AuditDrawer({ entry, onClose }: AuditDrawerProps) {
     // "field: old → new" per changed field, noise fields dropped, CREATE only lists
     // fields that got a value. Covers every AuditsChanges model (candidate, vacancy,
     // task, opportunity, match, customer + locations/departments/contacts, …).
-    const diffRows = buildFieldDiff(entry, t)
+    const diffRows = buildFieldDiff(entry, t, i18n)
     if (diffRows.length > 0) {
       return (
         <div>

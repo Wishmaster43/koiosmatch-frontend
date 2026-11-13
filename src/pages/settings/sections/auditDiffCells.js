@@ -14,7 +14,7 @@ import { KPI_KEYS, isAccessEvent, buildFieldDiff } from './auditShared'
 // other write event (candidate/vacancy/task/opportunity/match/customer/…) uses the
 // uniform CHANGELOG-3 diff (`entry.changes`), generalised via buildFieldDiff so this
 // table renders exactly what the per-entity changelog popovers show.
-export function buildDiffCells(entry, t) {
+export function buildDiffCells(entry, t, i18n) {
   const p = entry.properties ?? {}
   const kpiLabel = (k) => KPI_KEYS.includes(k) ? t(`audit.kpi.${k}`) : k
 
@@ -56,7 +56,7 @@ export function buildDiffCells(entry, t) {
 
   // Generalised entity write (CHANGELOG-3): one compact "field: value" per changed
   // field, same field set/order as the per-entity changelog popover.
-  const diffRows = buildFieldDiff(entry, t)
+  const diffRows = buildFieldDiff(entry, t, i18n)
   if (diffRows.length) {
     return {
       beforeCell: diffRows.map(r => `${r.label}: ${r.before}`).join(' · '),
