@@ -15,7 +15,7 @@ import OneTimeSecretReveal from '@/pages/settings/components/OneTimeSecretReveal
 import SettingsDetailHeader from '@/pages/settings/components/SettingsDetailHeader'
 import { fieldInputStyle } from '@/components/forms/fieldMetrics'
 import Button from '@/components/ui/Button'
-import { formLabelStyle } from '@/components/ui/typography'
+import { formLabelStyle, PageSubtitle } from '@/components/ui/typography'
 import { useCreateForm } from '@/pages/settings/lib/useCreateForm'
 
 // hand-written: the spec carries no 2xx schema for POST /webhook-subscriptions
@@ -124,7 +124,7 @@ export default function WebhookCreate({ onBack, onCreated }: WebhookCreateProps)
               <EventCatalog value={events} onChange={setEvents} />
             </div>
 
-            {error && <div style={{ fontSize: 12, color: 'var(--color-danger-text)' }}>{error}</div>}
+            {error && <PageSubtitle as="div" style={{ color: 'var(--color-danger-text)' }}>{error}</PageSubtitle>}
 
             <div style={{ display: 'flex', gap: 10 }}>
               <Button variant="primary" onClick={submit} disabled={saving || !canSubmit}>

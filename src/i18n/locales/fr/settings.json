@@ -1430,6 +1430,7 @@
       "incoming": "Entrant"
     },
     "incoming": {
+      "loadError": "Les webhooks entrants n’ont pas pu être chargés.",
       "title": "Webhooks entrants",
       "subtitle": "Créez des URL de webhook entrantes pour déclencher des workflows depuis des systèmes externes.",
       "newWebhook": "Nouveau webhook",
@@ -2054,6 +2055,7 @@
     "tabVerificatie": "Vérification"
   },
   "modules": {
+    "refreshError": "Les modules n’ont pas pu être actualisés. Les réglages affichés peuvent être obsolètes.",
     "loading": "Chargement du forfait…",
     "superAdminTitle": "Visible uniquement par les super admins",
     "superAdminDesc": "Changer le forfait affecte directement la facture client. Chaque changement est enregistré.",
@@ -3543,6 +3545,7 @@
     "emptyFailed": "Aucune tâche échouée.",
     "cancel": "Annuler",
     "cancelReservedError": "Échec de l’annulation. Un worker exécute déjà cette tâche.",
+    "cancelGone": "Cette tâche n’existe plus. La liste a été actualisée.",
     "retry": "Réessayer",
     "retryAll": "Tout réessayer",
     "retryAllConfirm_one": "Remettre {{count}} tâche échouée dans la file d’attente ?",
@@ -4601,6 +4604,7 @@
     "resolved": "Marquée comme non envoyée."
   },
   "helloflexContractMap": {
+    "loadError": "Le mappage des contrats n’a pas pu être chargé.",
     "title": "Correspondance des contrats HelloFlex",
     "subtitle": "Associez chaque forme de contrat au type de contrat HelloFlex correspondant (nombre). Une correspondance vide est autorisée : la liaison avec HelloFlex est alors honnêtement bloquée pour cette forme de contrat.",
     "guid": "Identifiant du type de contrat HelloFlex (nombre)",
@@ -4835,6 +4839,7 @@
       "contractmap": "Table des contrats"
     },
     "health": {
+      "unavailable": "Statut indisponible",
       "ok": "La connexion fonctionne",
       "error": "Échec de la connexion",
       "unknown": "Pas encore vérifié",
@@ -4848,6 +4853,7 @@
       "nothingReceived": "rien reçu pour l’instant"
     },
     "connection": {
+      "testFailedDetail": "{{reason}} : {{message}}",
       "saveBeforeTest": "Enregistrez d’abord ; le test utilise les identifiants enregistrés.",
       "clientIdInvalid": "Saisissez un GUID valide (par exemple 123e4567-e89b-12d3-a456-426614174000).",
       "title": "Connexion",

@@ -47,6 +47,16 @@ describe('useIntegrationHealth', () => {
   })
 })
 
+describe('useIntegrationHealth · failed request', () => {
+  // A rejected GET /integrations exposes isError so the badge can say 'unavailable' instead of 'unknown'.
+  it('exposes isError when the list request fails and nothing is cached', async () => {
+    mockList.mockRejectedValue(new Error('boom'))
+    const { result } = renderHook(() => useIntegrationHealth('helloflex'), { wrapper: wrapper() })
+    await waitFor(() => expect(result.current.isError).toBe(true))
+    expect(result.current.health.state).toBe('unknown')
+  })
+})
+
 describe('mapHealth · landed health vocabulary', () => {
   it.each(['auth_failed', 'invalid_config', 'unreachable', 'timeout'] as const)('maps %s to an error with that code', (code) => {
     const h = mapHealth({ connector: 'hf', health: code, health_error_message: 'Server says no', health_checked_at: '2026-11-13T07:07:00Z' } as never)

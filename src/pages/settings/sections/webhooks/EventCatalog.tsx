@@ -6,14 +6,16 @@
  * Events come from the live GET /webhook-events catalog (useWebhookEventCatalog);
  * the static webhookEvents list is only its network-error fallback.
  */
-import { useState, useMemo } from 'react'
+import { useState, useMemo, type KeyboardEvent } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Search, ShieldAlert } from 'lucide-react'
 import { actionOf } from './webhookEvents'
+import { labelOrRaw } from '@/lib/labelOrRaw'
 import { useWebhookEventCatalog } from './useWebhookEventCatalog'
 import { PermissionToggle } from '@/pages/settings/components/SettingsControls'
 import Spinner from '@/components/ui/Spinner'
 import Button from '@/components/ui/Button'
+import { BodyText, Caption, SectionTitle, monoStyle } from '@/components/ui/typography'
 
 interface EventCatalogProps {
   /** Controlled list of selected event keys. */
@@ -22,10 +24,15 @@ interface EventCatalogProps {
   onChange: (next: string[]) => void
 }
 
+// Enter or Space activates a role=button text label, like a native button would.
+function activateOnKey(e: KeyboardEvent<HTMLSpanElement>, run: () => void) {
+  if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); run() }
+}
+
 // Controlled event-picker for a webhook subscription: grouped pill toggles with
 // search and per-group/global select-all (see file docblock above).
 export default function EventCatalog({ value = [], onChange }: EventCatalogProps) {
-  const { t } = useTranslation('settings')
+  const { t, i18n } = useTranslation('settings')
   const [query, setQuery] = useState('')
   const { groups: EVENT_GROUPS, isLoading, isFallback, meta } = useWebhookEventCatalog()
   const ALL_EVENTS = useMemo(() => EVENT_GROUPS.flatMap((g) => g.events), [EVENT_GROUPS])
@@ -34,8 +41,8 @@ export default function EventCatalog({ value = [], onChange }: EventCatalogProps
 
   // Honest fallback: an unlisted server group (a live catalogue can add one at any
   // time) shows its raw key instead of a leaked i18n path.
-  const groupLabel  = (g: string) => t(`webhooks.events.groups.${g}`, { defaultValue: g })
-  const actionLabel = (a: string) => t(`webhooks.events.actions.${a}`, { defaultValue: a })
+  const groupLabel  = (g: string) => labelOrRaw(t, i18n, `webhooks.events.groups.${g}`, g, 'settings')
+  const actionLabel = (a: string) => labelOrRaw(t, i18n, `webhooks.events.actions.${a}`, a, 'settings')
 
   // Filter events by raw key, group label or action label.
   const q = query.trim().toLowerCase()
@@ -70,14 +77,14 @@ export default function EventCatalog({ value = [], onChange }: EventCatalogProps
 
   // Loading state: the catalog request is still in flight (no fallback rendered yet).
   if (isLoading) {
-    return <p style={{ fontSize: 13, color: 'var(--text-muted)', display: 'flex', alignItems: 'center', gap: 8 }}><Spinner size={13} /> {t('common.loadingShort')}</p>
+    return <BodyText style={{ color: 'var(--text-muted)', display: 'flex', alignItems: 'center', gap: 8 }}><Spinner size={13} /> {t('common.loadingShort')}</BodyText>
   }
 
   return (
     <div>
       {/* Network-error notice: the live catalog failed, showing the bundled fallback list instead */}
       {isFallback && (
-        <p style={{ fontSize: 11, color: 'var(--color-warning-text)', marginBottom: 10 }}>{t('webhooks.events.catalogFallback')}</p>
+        <Caption as="p" style={{ color: 'var(--color-warning-text)', marginBottom: 10 }}>{t('webhooks.events.catalogFallback')}</Caption>
       )}
       {/* Toolbar: search + global select-all/clear + selected count */}
       <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 12 }}>
@@ -91,9 +98,9 @@ export default function EventCatalog({ value = [], onChange }: EventCatalogProps
           {allSelected ? t('webhooks.events.clear') : t('webhooks.events.selectAll')}
         </Button>
       </div>
-      <p style={{ fontSize: 11, color: 'var(--text-muted)', marginBottom: 12 }}>
+      <Caption as="p" style={{ marginBottom: 12 }}>
         {t('webhooks.events.selectedCount', { count: selected.size })}
-      </p>
+      </Caption>
 
       {/* Grouped event list */}
       <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
@@ -105,10 +112,11 @@ export default function EventCatalog({ value = [], onChange }: EventCatalogProps
               {/* Group header with a select-all toggle */}
               <div style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '10px 14px', background: 'var(--hover-bg)' }}>
                 <PermissionToggle checked={groupAllOn} onChange={() => toggleGroup(fullGroup)} />
-                <span onClick={() => toggleGroup(fullGroup)} style={{ fontSize: 12, fontWeight: 700, color: 'var(--text)', cursor: 'pointer' }}>{groupLabel(group)}</span>
-                <span style={{ fontSize: 11, color: 'var(--text-muted)', marginLeft: 'auto' }}>
+                <span role="button" tabIndex={0} onClick={() => toggleGroup(fullGroup)} onKeyDown={(e) => activateOnKey(e, () => toggleGroup(fullGroup))}
+                  style={{ cursor: 'pointer' }}><SectionTitle as="span">{groupLabel(group)}</SectionTitle></span>
+                <Caption style={{ marginLeft: 'auto' }}>
                   {fullGroup.filter((e: string) => selected.has(e)).length}/{fullGroup.length}
-                </span>
+                </Caption>
               </div>
               {/* Events in the group */}
               {events.map((ev: string) => {
@@ -122,9 +130,10 @@ export default function EventCatalog({ value = [], onChange }: EventCatalogProps
                 return (
                   <div key={ev} title={title} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '9px 14px', borderTop: '1px solid var(--border)' }}>
                     <PermissionToggle checked={selected.has(ev)} onChange={() => toggle(ev)} />
-                    <span onClick={() => toggle(ev)} style={{ fontSize: 13, color: 'var(--text)', cursor: 'pointer' }}>{actionLabel(actionOf(ev) ?? '')}</span>
+                    <span role="button" tabIndex={0} onClick={() => toggle(ev)} onKeyDown={(e) => activateOnKey(e, () => toggle(ev))}
+                      style={{ cursor: 'pointer' }}><BodyText as="span">{actionLabel(actionOf(ev) ?? '')}</BodyText></span>
                     {m?.pii && <ShieldAlert size={12} aria-label={piiTitle} style={{ color: 'var(--text-muted)', flexShrink: 0 }} />}
-                    <code style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: 11, color: 'var(--text-muted)', marginLeft: 'auto' }}>{ev}</code>
+                    <Caption as="code" style={{ ...monoStyle, marginLeft: 'auto' }}>{ev}</Caption>
                   </div>
                 )
               })}
@@ -132,7 +141,7 @@ export default function EventCatalog({ value = [], onChange }: EventCatalogProps
           )
         })}
         {groups.length === 0 && (
-          <p style={{ fontSize: 13, color: 'var(--text-muted)', padding: '16px 0' }}>{t('webhooks.events.noResults')}</p>
+          <BodyText style={{ color: 'var(--text-muted)', padding: '16px 0' }}>{t('webhooks.events.noResults')}</BodyText>
         )}
       </div>
     </div>

@@ -18,6 +18,7 @@ import {
   StickyNote, MessageSquare, FileText, FolderArchive, Mail,
 } from 'lucide-react'
 import api from '@/lib/api'
+import { withIdempotencyKey } from '@/lib/idempotency'
 import { triggerBlobDownload } from '@/lib/downloadBlob'
 import { useAuth } from '@/context/AuthContext'
 import { notifyError, notifySuccess } from '@/lib/notify'
@@ -129,8 +130,9 @@ export default function ExportSettings() {
     setZipPending(true)
     try {
       // The opt-in rides in the body only when on, so the default request stays byte-identical.
-      if (includeArchived) await api.post('/exports/documents-zip', { include_archived: 1 })
-      else await api.post('/exports/documents-zip')
+      // One Idempotency-Key per click: it protects the client's own re-send of the same request (e.g. the 419 re-prime retry); a double click is stopped by the pending button.
+      if (includeArchived) await api.post('/exports/documents-zip', { include_archived: 1 }, withIdempotencyKey())
+      else await api.post('/exports/documents-zip', undefined, withIdempotencyKey())
       notifySuccess(t('export.zipQueued'))
     } catch (err) {
       // A 422 carries the server's own honest reason (build already running, or

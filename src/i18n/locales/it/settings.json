@@ -1690,6 +1690,7 @@
       "incoming": "In entrata"
     },
     "incoming": {
+      "loadError": "Impossibile caricare i webhook in entrata.",
       "title": "Webhook in entrata",
       "subtitle": "Crea URL webhook in entrata per attivare workflow da sistemi esterni.",
       "newWebhook": "Nuovo webhook",
@@ -2314,6 +2315,7 @@
     "tabVerificatie": "Verifica"
   },
   "modules": {
+    "refreshError": "Impossibile aggiornare i moduli. Le impostazioni mostrate potrebbero essere obsolete.",
     "loading": "Recupero pacchetto…",
     "superAdminTitle": "Visibile solo ai super admin",
     "superAdminDesc": "Modificare il pacchetto influisce direttamente sulla fattura del cliente. Ogni modifica viene registrata.",
@@ -3543,6 +3545,7 @@
     "emptyFailed": "Nessuna attività non riuscita.",
     "cancel": "Annulla",
     "cancelReservedError": "Annullamento non riuscito. L’attività è già in esecuzione da un worker.",
+    "cancelGone": "Questa attività non esiste più. L’elenco è stato aggiornato.",
     "retry": "Riprova",
     "retryAll": "Riprova tutte",
     "retryAllConfirm_one": "Rimettere in coda {{count}} attività non riuscita?",
@@ -4602,6 +4605,7 @@
     "resolved": "Segnata come non inviata."
   },
   "helloflexContractMap": {
+    "loadError": "Impossibile caricare la mappatura dei contratti.",
     "title": "Mappa contratti HelloFlex",
     "subtitle": "Collega ogni tipo di contratto al tipo di contratto HelloFlex corrispondente (numero). Un collegamento vuoto è consentito: il collegamento a HelloFlex viene allora bloccato apertamente per quel tipo.",
     "guid": "ID del tipo di contratto HelloFlex (numero)",
@@ -4836,6 +4840,7 @@
       "contractmap": "Mappa contratti"
     },
     "health": {
+      "unavailable": "Stato non disponibile",
       "ok": "La connessione funziona",
       "error": "Connessione non riuscita",
       "unknown": "Non ancora verificato",
@@ -4849,6 +4854,7 @@
       "nothingReceived": "ancora nulla ricevuto"
     },
     "connection": {
+      "testFailedDetail": "{{reason}}: {{message}}",
       "saveBeforeTest": "Salva prima; il test usa le credenziali salvate.",
       "clientIdInvalid": "Inserisci un GUID valido (ad esempio 123e4567-e89b-12d3-a456-426614174000).",
       "title": "Connessione",

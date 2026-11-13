@@ -8,6 +8,7 @@
  * gives you, hand-write the rest).
  */
 import api, { unwrap } from '@/lib/api'
+import { withIdempotencyKey } from '@/lib/idempotency'
 
 // One row from GET /imports/templates — drives the entity sub-nav so a fifth entity
 // shows up here the day the backend adds an importer for it, never a hardcoded list.
@@ -95,8 +96,9 @@ export async function dryRunImport(entity: string, file: File): Promise<ImportRu
   return unwrap<ImportRunResult>(res)
 }
 
-// POST /imports/{entity} — the real run, transactional per row and idempotent.
+// POST /imports/{entity} — the real run, transactional per row: one Idempotency-Key per click
+// protects the client's own re-send of the same request (e.g. the 419 re-prime retry); the dry run sends none.
 export async function runImport(entity: string, file: File): Promise<ImportRunResult> {
-  const res = await api.post(`/imports/${entity}`, buildUploadForm(file))
+  const res = await api.post(`/imports/${entity}`, buildUploadForm(file), withIdempotencyKey())
   return unwrap<ImportRunResult>(res)
 }

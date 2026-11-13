@@ -99,3 +99,19 @@ describe('FacebookLeadsSettings — saving', () => {
     expect(await screen.findAllByText(t('facebookLeads.secretSet'))).toHaveLength(1)
   })
 })
+
+// The "saved" flash timer must be cleared when the screen unmounts, so it never fires on a dead component.
+describe('FacebookLeadsSettings - saved flash timer', () => {
+  it('clears the pending saved timer on unmount', async () => {
+    mockedApi.get.mockResolvedValue({ data: {} })
+    const { unmount } = render(<FacebookLeadsSettings />)
+    await userEvent.type(await screen.findByLabelText(t('facebookLeads.appSecret')), 'x')
+    await userEvent.click(screen.getByRole('button', { name: t('common.save') }))
+    await waitFor(() => expect(mockedApi.post).toHaveBeenCalled())
+    await screen.findByText(t('common.saved'))
+    const clearSpy = vi.spyOn(globalThis, 'clearTimeout')
+    unmount()
+    expect(clearSpy).toHaveBeenCalled()
+    clearSpy.mockRestore()
+  })
+})

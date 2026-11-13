@@ -6,6 +6,7 @@
  * and regenerate, and is never stored client-side beyond the one-time reveal.
  */
 import api, { unwrap, unwrapList } from '@/lib/api'
+import { withIdempotencyKey } from '@/lib/idempotency'
 
 // List all subscriptions for the active tenant (no signing secret).
 // J-014 (CONTRACT-CHANGELOG): the subscription url column and its validation are max:255; longer answers 422.
@@ -27,6 +28,22 @@ export const deleteSubscription = (id) => api.delete(`/webhook-subscriptions/${i
 
 // Rotate the signing secret; response carries the new plaintext secret once.
 export const regenerateSecret = (id) => api.post(`/webhook-subscriptions/${id}/regenerate-secret`).then((r) => r.data)
+
+// INBOUND webhooks (workflow trigger tokens, `/webhooks`): one adapter for the settings screen.
+// List the tenant's inbound webhooks.
+export const listInboundWebhooks = () => api.get('/webhooks').then(unwrapList)
+
+// Create an inbound webhook; the response carries the plaintext signing_secret exactly once.
+export const createInboundWebhook = (body) => api.post('/webhooks', body).then(unwrap)
+
+// Rename / re-describe an inbound webhook.
+export const updateInboundWebhook = (id, body) => api.patch(`/webhooks/${id}`, body)
+
+// Delete an inbound webhook.
+export const deleteInboundWebhook = (id) => api.delete(`/webhooks/${id}`)
+
+// Rotate the signing secret (click-triggered: a per-submit idempotency key, IDEMP-KEY-BODYLESS-1).
+export const regenerateInboundSecret = (id) => api.post(`/webhooks/${id}/regenerate-secret`, undefined, withIdempotencyKey()).then(unwrap)
 
 // INBOUND webhook request log (K-117): moved to components/webhooks (shared by
 // Settings and the workflow editor's config panel, WEBHOOK-LOG-FE-2) — re-exported

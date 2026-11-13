@@ -9,7 +9,7 @@
  * Persistence goes through the shared GET/POST /settings helpers (same
  * mechanism as MfaEnforcementSetting.jsx and every other settings screen).
  */
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Eye, EyeOff, Save, AlertTriangle, RefreshCw } from 'lucide-react'
 import { useAuth } from '@/context/AuthContext'
@@ -18,7 +18,7 @@ import { loadSettings, saveSettings } from '../lib/settingsApi'
 import { fieldInputStyle } from '@/components/forms/fieldMetrics'
 import Button from '@/components/ui/Button'
 import CopyIconButton from '@/components/ui/CopyIconButton'
-import { PageTitle, formLabelStyle, PageSubtitle } from '@/components/ui/typography'
+import { PageTitle, formLabelStyle, PageSubtitle, BodyText, Caption, monoStyle } from '@/components/ui/typography'
 import { publicApiUrl } from '@/lib/publicApiUrl'
 import SubTabBar from '@/components/drawer/SubTabBar'
 import { useHashViewParam } from '@/hooks/useHashViewParam'
@@ -59,7 +59,7 @@ function SecretField({ id, label, value, onChange, alreadySet, setBadge, placeho
       <label htmlFor={id} style={labelStyle}>
         {label}
         {alreadySet && !value && (
-          <span style={{ marginLeft: 6, fontSize: 11, color: 'var(--color-success-text)', fontWeight: 400 }}>{setBadge}</span>
+          <Caption style={{ marginLeft: 6, color: 'var(--color-success-text)' }}>{setBadge}</Caption>
         )}
       </label>
       <div style={{ position: 'relative' }}>
@@ -91,6 +91,9 @@ function FacebookConnectionForm() {
   const [reloadKey, setReloadKey] = useState(0)
   const [saving, setSaving] = useState(false)
   const [saved, setSaved] = useState(false)
+  // Pending "saved" flash timer, cleared on unmount so it never fires on a dead component.
+  const savedTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
+  useEffect(() => () => { if (savedTimer.current) clearTimeout(savedTimer.current) }, [])
 
   // Load the tenant's current values once; secrets arrive as the MASK (never the real value).
   useEffect(() => {
@@ -126,7 +129,8 @@ function FacebookConnectionForm() {
       setAppSecret('')
       setAccessToken('')
       setSaved(true)
-      setTimeout(() => setSaved(false), 2000)
+      if (savedTimer.current) clearTimeout(savedTimer.current)
+      savedTimer.current = setTimeout(() => setSaved(false), 2000)
     } catch {
       notifyError(t('facebookLeads.saveError'))
     } finally {
@@ -137,14 +141,14 @@ function FacebookConnectionForm() {
   // This tenant's own webhook URL — paste target for the Facebook app dashboard.
   const webhookUrl = activeTenant?.id ? publicApiUrl(`/facebook/webhook/${activeTenant.id}`) : null
 
-  if (loading) return <p style={{ fontSize: 13, color: 'var(--text-muted)' }}>{t('common.loadingShort')}</p>
+  if (loading) return <BodyText style={{ color: 'var(--text-muted)' }}>{t('common.loadingShort')}</BodyText>
 
   // Load failure gets an honest error + retry instead of a silently blank form (§9).
   if (loadError) return (
     <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start', gap: 10 }}>
-      <div style={{ display: 'flex', alignItems: 'center', gap: 8, color: 'var(--color-danger-text)', fontSize: 13 }}>
+      <BodyText as="div" style={{ display: 'flex', alignItems: 'center', gap: 8, color: 'var(--color-danger-text)' }}>
         <AlertTriangle size={14} /> {t('facebookLeads.loadError')}
-      </div>
+      </BodyText>
       <Button variant="secondary" onClick={() => setReloadKey(k => k + 1)}>
         <RefreshCw size={13} /> {t('facebookLeads.retry')}
       </Button>
@@ -188,10 +192,10 @@ function FacebookConnectionForm() {
       <div>
         <label style={labelStyle}>{t('facebookLeads.webhookUrl')}</label>
         <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-          <code style={{ flex: 1, fontSize: 11, fontFamily: "'JetBrains Mono', monospace", background: 'var(--hover-bg)',
+          <Caption as="code" style={{ ...monoStyle, flex: 1, background: 'var(--hover-bg)',
             border: '1px solid var(--border)', borderRadius: 6, padding: '6px 10px', color: 'var(--text)', wordBreak: 'break-all' }}>
             {webhookUrl ?? '—'}
-          </code>
+          </Caption>
           <CopyIconButton value={webhookUrl} label={t('facebookLeads.copyUrl')} copiedLabel={t('common.copied')}
             style={{ padding: '6px 10px', background: 'var(--hover-bg)', borderRadius: 6, fontSize: 11, fontWeight: 500 }}>
             {t('facebookLeads.copyUrl')}

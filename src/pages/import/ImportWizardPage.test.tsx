@@ -111,7 +111,8 @@ describe('ImportWizardPage — mapping + editable preview', () => {
     })
     await user.click(screen.getByRole('button', { name: t('import.preview.confirm') }))
 
-    await waitFor(() => expect(api.post).toHaveBeenCalledWith('/imports/customers', expect.any(FormData)))
+    // The REAL run carries an Idempotency-Key (the dry run above does not): a client re-send replays, never duplicates.
+    await waitFor(() => expect(api.post).toHaveBeenCalledWith('/imports/customers', expect.any(FormData), expect.objectContaining({ headers: expect.objectContaining({ 'Idempotency-Key': expect.any(String) }) })))
     expect(await screen.findByText(t('import.result.title'))).toBeInTheDocument()
   })
 
@@ -166,7 +167,7 @@ describe('ImportWizardPage — mapping + editable preview', () => {
     ;(api.post as MockFn).mockRejectedValueOnce({ response: { status: 413 } })
     await user.click(screen.getByRole('button', { name: t('import.preview.confirm') }))
     // REQUEST-ASSERT-1: the confirm went to the real import route with the upload body.
-    expect(api.post).toHaveBeenLastCalledWith('/imports/customers', expect.any(FormData))
+    expect(api.post).toHaveBeenLastCalledWith('/imports/customers', expect.any(FormData), expect.objectContaining({ headers: expect.objectContaining({ 'Idempotency-Key': expect.any(String) }) }))
     expect(await screen.findByText(i18n.t('upload.tooLarge', { ns: 'common' }))).toBeInTheDocument()
     expect(screen.queryByText(t('import.result.title'))).not.toBeInTheDocument()
   })

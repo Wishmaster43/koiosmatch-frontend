@@ -15,9 +15,22 @@ describe('UsageWhatsAppTab', () => {
     const whatsapp = {
       by_channel: [{ channel: 'wa_web', label: 'WhatsApp Web', messages: 5 }],
     }
-    render(<UsageWhatsAppTab whatsapp={whatsapp} />)
+    render(<UsageWhatsAppTab whatsapp={whatsapp} phase="ready" />)
     expect(screen.getByText('5')).toBeInTheDocument()
     expect(screen.queryByText(t('billing.usage.whatsapp.tokensMeterLabel'))).toBeNull()
     expect(screen.queryByText(/€/)).toBeNull()
+  })
+
+  // The shared billing-usage phase decides the body: a failed load must not read as "no usage yet".
+  it('shows the load error instead of the empty notice when the phase is error', () => {
+    render(<UsageWhatsAppTab whatsapp={undefined} phase="error" />)
+    expect(screen.getByText(t('billing.usage.whatsapp.loadError'))).toBeInTheDocument()
+    expect(screen.queryByText(t('billing.usage.whatsapp.empty'))).toBeNull()
+  })
+
+  it('shows the loading line while the phase is loading', () => {
+    render(<UsageWhatsAppTab whatsapp={undefined} phase="loading" />)
+    expect(screen.getByText(t('common.loadingShort'))).toBeInTheDocument()
+    expect(screen.queryByText(t('billing.usage.whatsapp.empty'))).toBeNull()
   })
 })

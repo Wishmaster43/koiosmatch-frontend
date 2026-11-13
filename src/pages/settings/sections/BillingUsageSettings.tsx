@@ -168,7 +168,7 @@ export default function BillingUsageSettings() {
         )}
         {tab === 'workflow' && <UsagePerWorkflowTab workflow={data?.workflow} phase={phase} />}
         {tab === 'user' && <UsagePerUserTab ai={data?.ai} phase={phase} />}
-        {tab === 'whatsapp' && <UsageWhatsAppTab whatsapp={data?.whatsapp} />}
+        {tab === 'whatsapp' && <UsageWhatsAppTab whatsapp={data?.whatsapp} phase={phase} />}
       </div>
     </div>
   )

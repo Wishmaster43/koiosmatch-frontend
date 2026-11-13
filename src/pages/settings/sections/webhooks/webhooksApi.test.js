@@ -5,12 +5,15 @@
  */
 import { describe, it, expect, vi, afterEach } from 'vitest'
 import api from '@/lib/api'
-import { listWebhookRequests, getWebhookRequest } from './webhooksApi'
+import {
+  listWebhookRequests, getWebhookRequest,
+  listInboundWebhooks, createInboundWebhook, updateInboundWebhook, deleteInboundWebhook, regenerateInboundSecret,
+} from './webhooksApi'
 
 // Keep the real unwrap/unwrapList (importActual) — only the default client is stubbed.
 vi.mock('@/lib/api', async () => {
   const actual = await vi.importActual('@/lib/api')
-  return { ...actual, default: { get: vi.fn() } }
+  return { ...actual, default: { get: vi.fn(), post: vi.fn(), patch: vi.fn(), delete: vi.fn() } }
 })
 
 afterEach(() => vi.clearAllMocks())
@@ -36,5 +39,43 @@ describe('webhooksApi — inbound request log', () => {
     const result = await getWebhookRequest('wh-1', 'req-1')
     expect(api.get).toHaveBeenCalledWith('/webhooks/wh-1/requests/req-1')
     expect(result).toEqual(record)
+  })
+})
+
+describe('webhooksApi - inbound webhooks adapter', () => {
+  it('listInboundWebhooks reads GET /webhooks and returns the rows', async () => {
+    vi.mocked(api.get).mockResolvedValue({ data: [{ id: 'wh-1', name: 'A', token: 't' }] })
+    const result = await listInboundWebhooks()
+    expect(api.get).toHaveBeenCalledWith('/webhooks')
+    expect(result.rows).toEqual([{ id: 'wh-1', name: 'A', token: 't' }])
+  })
+
+  it('createInboundWebhook POSTs /webhooks with the body and unwraps the created row', async () => {
+    vi.mocked(api.post).mockResolvedValue({ data: { id: 'wh-2', signing_secret: 's3cret' } })
+    const created = await createInboundWebhook({ name: 'N', description: null })
+    expect(api.post).toHaveBeenCalledWith('/webhooks', { name: 'N', description: null })
+    expect(created).toMatchObject({ id: 'wh-2', signing_secret: 's3cret' })
+  })
+
+  it('updateInboundWebhook PATCHes /webhooks/{id} with name and description', async () => {
+    vi.mocked(api.patch).mockResolvedValue({ data: {} })
+    await updateInboundWebhook('wh-1', { name: 'N2', description: 'D' })
+    expect(api.patch).toHaveBeenCalledWith('/webhooks/wh-1', { name: 'N2', description: 'D' })
+  })
+
+  it('deleteInboundWebhook DELETEs /webhooks/{id}', async () => {
+    vi.mocked(api.delete).mockResolvedValue({})
+    await deleteInboundWebhook('wh-1')
+    expect(api.delete).toHaveBeenCalledWith('/webhooks/wh-1')
+  })
+
+  it('regenerateInboundSecret POSTs the recovery route without a body and with an idempotency key header', async () => {
+    vi.mocked(api.post).mockResolvedValue({ data: { signing_secret: 'fresh' } })
+    const row = await regenerateInboundSecret('wh-1')
+    const [route, body, config] = vi.mocked(api.post).mock.calls[0]
+    expect(route).toBe('/webhooks/wh-1/regenerate-secret')
+    expect(body).toBeUndefined()
+    expect(Object.keys(config.headers).map((k) => k.toLowerCase())).toContain('idempotency-key')
+    expect(row).toMatchObject({ signing_secret: 'fresh' })
   })
 })

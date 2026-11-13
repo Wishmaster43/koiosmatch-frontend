@@ -18,6 +18,12 @@ interface Props {
   t: (key: string | string[], opts?: Record<string, unknown>) => string
 }
 
+// Failure sentence: the translated reason, plus the server message through one ICU key (no hand-built joiner).
+function failureText(t: Props['t'], outcome: DualTestOutcome): string {
+  const reason = t([`integrations.reason.${outcome.reason_code as TestReasonCode}`, 'integrations.connection.testFailed'])
+  return outcome.message ? t('integrations.connection.testFailedDetail', { reason, message: outcome.message }) : reason
+}
+
 // One dual-result line: ok/failed icon (house lucide pair, colour via §4
 // success/danger tokens — never ad-hoc hex), the API's own title, and either
 // the connected-as name or the translated reason + server message.
@@ -32,7 +38,7 @@ function ResultLine({ titleKey, outcome, t }: { titleKey: string; outcome: DualT
         <Caption as="p" style={{ margin: 0 }}>
           {outcome.ok
             ? (outcome.connected_as ? t('integrations.connection.testOk', { name: outcome.connected_as }) : t('integrations.connection.testOk', { name: '' }).trim())
-            : `${t([`integrations.reason.${outcome.reason_code as TestReasonCode}`, 'integrations.connection.testFailed'])}${outcome.message ? ` — ${outcome.message}` : ''}`}
+            : failureText(t, outcome)}
         </Caption>
       </div>
     </div>

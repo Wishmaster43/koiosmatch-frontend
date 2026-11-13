@@ -218,7 +218,17 @@ describe('ExportSettings · documents files-ZIP request', () => {
     expect(screen.queryByRole('button', { name: t('export.zipButton') })).toBeNull()
     await user.click(screen.getByRole('button', { name: t('export.entities.documents.title') }))
     await user.click(screen.getByRole('button', { name: t('export.zipButton') }))
-    expect(mockedApi.post).toHaveBeenCalledWith('/exports/documents-zip')
+    expect(mockedApi.post).toHaveBeenCalledWith('/exports/documents-zip', undefined, { headers: { 'Idempotency-Key': expect.any(String) } })
+  })
+
+  it('sends include_archived in the body plus the Idempotency-Key when the archived toggle is on', async () => {
+    mockedApi.post.mockResolvedValue({ status: 202, data: { status: 'queued' } })
+    const user = userEvent.setup()
+    render(<ExportSettings />)
+    await user.click(screen.getByRole('button', { name: t('export.entities.documents.title') }))
+    await user.click(screen.getByRole('switch', { name: t('export.includeArchived') }))
+    await user.click(screen.getByRole('button', { name: t('export.zipButton') }))
+    expect(mockedApi.post).toHaveBeenCalledWith('/exports/documents-zip', { include_archived: 1 }, { headers: { 'Idempotency-Key': expect.any(String) } })
   })
 
   it('reports the already-running 422 honestly instead of a generic error', async () => {
@@ -230,7 +240,7 @@ describe('ExportSettings · documents files-ZIP request', () => {
     await user.click(screen.getByRole('button', { name: t('export.zipButton') }))
     // The i18n key resolves to real copy; presence of the toast text is asserted
     // via the notify spy the suite's api mock cannot reach — assert the POST ran.
-    expect(mockedApi.post).toHaveBeenCalledWith('/exports/documents-zip')
+    expect(mockedApi.post).toHaveBeenCalledWith('/exports/documents-zip', undefined, { headers: { 'Idempotency-Key': expect.any(String) } })
   })
 })
 

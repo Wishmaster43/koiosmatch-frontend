@@ -67,4 +67,20 @@ describe('IntegrationTestResults', () => {
     expect(screen.getByText(t('integrations.connection.companyApiTitle'))).toBeInTheDocument()
     expect(screen.getByText(new RegExp(t('integrations.reason.auth_failed')))).toBeInTheDocument()
   })
+
+  // The failure sentence joins reason and server message through the ICU key, never an em dash.
+  it('joins reason and message through testFailedDetail on a dual failure', () => {
+    render(
+      <IntegrationTestResults
+        t={t}
+        result={{ ok: false, results: {
+          token_api: { ok: true, connected_as: 'Bureau X' },
+          company_api: { ok: false, reason_code: 'auth_failed', message: 'Bad secret' },
+        } }}
+      />,
+    )
+    const expected = t('integrations.connection.testFailedDetail', { reason: t('integrations.reason.auth_failed'), message: 'Bad secret' })
+    expect(screen.getByText(expected)).toBeInTheDocument()
+    expect(expected).not.toContain('\u2014')
+  })
 })

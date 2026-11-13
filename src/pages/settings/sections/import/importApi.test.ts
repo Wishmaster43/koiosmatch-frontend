@@ -3,10 +3,10 @@
  */
 import { describe, it, expect, vi, afterEach } from 'vitest'
 
-vi.mock('@/lib/api', () => ({ default: { get: vi.fn() }, unwrap: (r: unknown) => r }))
+vi.mock('@/lib/api', () => ({ default: { get: vi.fn(), post: vi.fn() }, unwrap: (r: unknown) => r }))
 
 import api from '@/lib/api'
-import { downloadImportTemplate } from './importApi'
+import { downloadImportTemplate, runImport, dryRunImport } from './importApi'
 
 afterEach(() => vi.restoreAllMocks())
 
@@ -21,5 +21,17 @@ describe('downloadImportTemplate', () => {
     await downloadImportTemplate('customers')
     expect(api.get).toHaveBeenCalledWith('/imports/customers/template.csv', { responseType: 'blob' })
     expect(downloaded).toBe('import-example-customers.csv')
+  })
+})
+
+describe('import runs', () => {
+  it('the real run sends an Idempotency-Key and the dry run sends none', async () => {
+    const post = vi.mocked(api.post)
+    post.mockResolvedValue({ data: {} })
+    const file = new File(['a'], 'a.csv')
+    await runImport('customers', file)
+    expect(post).toHaveBeenLastCalledWith('/imports/customers', expect.any(FormData), { headers: { 'Idempotency-Key': expect.any(String) } })
+    await dryRunImport('customers', file)
+    expect(post).toHaveBeenLastCalledWith('/imports/customers/dry-run', expect.any(FormData))
   })
 })

@@ -5,6 +5,7 @@
 import { useTranslation } from 'react-i18next'
 import { CheckCircle2, XCircle, HelpCircle } from 'lucide-react'
 import { BodyText, Caption } from '@/components/ui/typography'
+import ErrorBanner from '@/components/ui/ErrorBanner'
 import { useDateFormat } from '@/lib/datetime'
 import type { IntegrationHealth } from './useIntegrationHealth'
 
@@ -15,10 +16,22 @@ const TONE = {
 } as const
 
 // Icon + text (colour is never the only signal); the error detail sits under it as a Caption.
-export default function IntegrationHealthBadge({ health }: { health: IntegrationHealth }) {
+export default function IntegrationHealthBadge({ health, unavailable = false, onRetry }: {
+  health: IntegrationHealth
+  /** The health request itself failed: show an honest 'unavailable' line instead of 'not checked yet'. */
+  unavailable?: boolean
+  onRetry?: () => void
+}) {
   const { t, i18n } = useTranslation('settings')
   const { formatTime } = useDateFormat()
   const { color, Icon } = TONE[health.state]
+  if (unavailable) {
+    return (
+      <div data-testid="integration-health" style={{ marginBottom: 8 }}>
+        <ErrorBanner variant="subtle" onRetry={onRetry}>{t('integrations.health.unavailable')}</ErrorBanner>
+      </div>
+    )
+  }
   // Translated code label when known, else the server text.
   const codeKey = health.errorCode ? `integrations.reason.${health.errorCode}` : ''
   const detail = health.state === 'error'

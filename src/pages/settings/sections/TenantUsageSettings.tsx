@@ -13,7 +13,7 @@ import SubTabBar from '@/components/drawer/SubTabBar'
 import TenantUsageKpiRow from './TenantUsageKpiRow'
 import TenantUsageDetailsTable from './TenantUsageDetailsTable'
 import TenantUsageBreakdownTable from './TenantUsageBreakdownTable'
-import { Mono, GroupLabel, SectionTitle, BodyText, PageSubtitle } from '@/components/ui/typography'
+import { monoStyle, GroupLabel, SectionTitle, BodyText, PageSubtitle } from '@/components/ui/typography'
 import { useNumberFormat } from '@/lib/formatters'
 import { card } from './usageCardStyles'
 import { fieldSelectStyle } from '@/components/forms/fieldMetrics'
@@ -112,8 +112,8 @@ export default function TenantUsageSettings() {
         {/* KPI strip renders through the load too — its own skeleton state keeps
             the layout stable instead of popping in after the fetch. */}
         {phase !== 'error' && <TenantUsageKpiRow usage={usage} loading={phase === 'loading'} />}
-        {phase === 'loading' && <p style={{ fontSize: 13, color: 'var(--text-muted)', padding: 8 }}>{t('common.loadingShort')}</p>}
-        {phase === 'error'   && <p style={{ fontSize: 13, color: 'var(--text-muted)', padding: 8 }}>{t('usage.loadError')}</p>}
+        {phase === 'loading' && <BodyText style={{ color: 'var(--text-muted)', padding: 8 }}>{t('common.loadingShort')}</BodyText>}
+        {phase === 'error'   && <BodyText style={{ color: 'var(--text-muted)', padding: 8 }}>{t('usage.loadError')}</BodyText>}
 
         {phase === 'ready' && (
           <>
@@ -140,7 +140,7 @@ export default function TenantUsageSettings() {
                   <div key={c.key ?? i} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between',
                     padding: '9px 0', borderTop: i ? '1px solid var(--border)' : 'none' }}>
                     <BodyText as="span">{CONNECTOR_LABELS[c.key] ?? c.key}</BodyText>
-                    <Mono style={{ fontSize: 13 }}>{formatNumber(c.usage)}</Mono>
+                    <BodyText as="span" style={monoStyle}>{formatNumber(c.usage)}</BodyText>
                   </div>
                 ))}
             </div>
@@ -154,8 +154,8 @@ export default function TenantUsageSettings() {
         // breakdowns (§ usage details, 14-08). Same four-state handling as the
         // kpis tab: an error must never render as an innocent empty table (§3).
         <>
-          {phase === 'loading' && <p style={{ fontSize: 13, color: 'var(--text-muted)', padding: 8 }}>{t('common.loadingShort')}</p>}
-          {phase === 'error'   && <p style={{ fontSize: 13, color: 'var(--text-muted)', padding: 8 }}>{t('usage.loadError')}</p>}
+          {phase === 'loading' && <BodyText style={{ color: 'var(--text-muted)', padding: 8 }}>{t('common.loadingShort')}</BodyText>}
+          {phase === 'error'   && <BodyText style={{ color: 'var(--text-muted)', padding: 8 }}>{t('usage.loadError')}</BodyText>}
           {phase === 'ready' && (
             <>
               <GroupLabel style={{ marginBottom: 10 }}>

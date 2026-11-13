@@ -6,13 +6,17 @@
  * own message instead of a generic error — that message IS the explanation.
  * Uses shared useJobsQuery for the pagination/filtering/polling infrastructure.
  */
-import { useState } from 'react'
+import { useRef, useState } from 'react'
 import { fetchJobsList, cancelJob } from './jobsApi'
 import { useJobsQuery } from './useJobsQuery'
 
 // Owns filters, pagination, the 15s visible-tab poll and the cancel action for the pending/reserved jobs list.
 export function useJobsList() {
   const [cancelError, setCancelError] = useState(null)
+  // The job whose cancel is in flight: blocks a second click from sending a second DELETE.
+  const [cancellingId, setCancellingId] = useState(null)
+  // Synchronous guard: set in the handler so two calls from one render closure cannot both pass.
+  const cancelPending = useRef(false)
 
   // Use shared query infrastructure for filters, pagination, and polling.
   const query = useJobsQuery({
@@ -29,12 +33,24 @@ export function useJobsList() {
 
   // Cancel a pending job; a 409 (already reserved/running) shows the backend's own explanation.
   const cancel = async (id) => {
+    if (cancelPending.current) return
+    cancelPending.current = true
     setCancelError(null)
+    setCancellingId(id)
     try {
       await cancelJob(id)
       query.refetch()
     } catch (err) {
-      setCancelError({ id, message: err?.response?.data?.message ?? null })
+      // A 404 means the job is already gone (repeated cancel): refresh and say so honestly.
+      if (err?.response?.status === 404) {
+        query.refetch()
+        setCancelError({ id, message: null, gone: true })
+      } else {
+        setCancelError({ id, message: err?.response?.data?.message ?? null })
+      }
+    } finally {
+      cancelPending.current = false
+      setCancellingId(null)
     }
   }
 
@@ -49,5 +65,6 @@ export function useJobsList() {
     cancel,
     cancelError,
     setCancelError,
+    cancellingId,
   }
 }

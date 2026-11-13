@@ -14,6 +14,7 @@ import Spinner from '@/components/ui/Spinner'
 import { CredentialActionMenu } from '@/pages/settings/components/CredentialActionMenu'
 import CalloutBox from '@/components/ui/CalloutBox'
 import ErrorBanner from '@/components/ui/ErrorBanner'
+import { BodyText } from '@/components/ui/typography'
 import SubTabBar from '@/components/drawer/SubTabBar'
 import { useConfirm } from '@/hooks/useConfirm'
 import { getApiKey, updateApiKey, deleteApiKey, regenerateApiKey, setApiKeyPrimary } from './apiKeysApi'
@@ -134,7 +135,7 @@ export default function ApiKeyDetail({ keyId, listRow, onBack, onPatch, onDelete
   }
 
   if (!apiKey) {
-    return <p style={{ fontSize: 13, color: 'var(--text-muted)' }}>{t('common.loadingShort')}</p>
+    return <BodyText style={{ color: 'var(--text-muted)' }}>{t('common.loadingShort')}</BodyText>
   }
 
   const tabs = [

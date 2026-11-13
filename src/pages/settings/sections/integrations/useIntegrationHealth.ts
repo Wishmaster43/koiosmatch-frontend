@@ -35,7 +35,7 @@ export function mapHealth(row: IntegrationSummary | undefined): IntegrationHealt
 // Shared list query plus a per-connector selector and a refresh() for after save and test.
 export function useIntegrationHealth(connector: ConnectorId) {
   const queryClient = useQueryClient()
-  const { data } = useQuery({
+  const { data, isError } = useQuery({
     queryKey: HEALTH_KEY,
     queryFn: getIntegrations,
     refetchInterval: HEALTH_REFETCH_MS,
@@ -49,5 +49,6 @@ export function useIntegrationHealth(connector: ConnectorId) {
   const refresh = useCallback(() => {
     void queryClient.invalidateQueries({ queryKey: HEALTH_KEY })
   }, [queryClient])
-  return { health, webhook, refresh }
+  // A failed list with nothing cached must not read as 'unknown' (never probed): the badge shows 'status unavailable' + retry.
+  return { health, webhook, refresh, isError: isError && data === undefined }
 }

@@ -14,7 +14,7 @@ import SecretRevealBox from '@/pages/settings/components/SecretRevealBox'
 import { fieldInputStyle } from '@/components/forms/fieldMetrics'
 import Button from '@/components/ui/Button'
 import SaveButton from '@/components/ui/SaveButton'
-import { SectionTitle, BodyText, Mono } from '@/components/ui/typography'
+import { SectionTitle, BodyText, Mono, pageSubtitleStyle } from '@/components/ui/typography'
 import { notifyError } from '@/lib/notify'
 import { extractApiError } from '@/lib/extractApiError'
 // audit r2-ui-states-3: a failed save must tell the admin, not silently revert (the api client's toast is DEV-only).
@@ -121,12 +121,12 @@ export default function WebhookDetail({ subId, listRow, onBack, onPatch, onDelet
     }, { danger: true })
   }
 
-  if (!sub) return <p style={{ fontSize: 13, color: 'var(--text-muted)' }}>{t('common.loadingShort')}</p>
+  if (!sub) return <BodyText style={{ color: 'var(--text-muted)' }}>{t('common.loadingShort')}</BodyText>
 
   const eventsDirty = JSON.stringify([...events].sort()) !== JSON.stringify([...(sub.events ?? [])].sort())
   // Canon field style (G33/fieldMetrics) — already matched it exactly, now shared.
   const inputStyle = fieldInputStyle
-  const labelStyle = { fontSize: 12, color: 'var(--text-muted)', marginBottom: 4, display: 'block' }
+  const labelStyle = { ...pageSubtitleStyle, marginBottom: 4, display: 'block' }
 
   return (
     <div>
@@ -203,7 +203,7 @@ export default function WebhookDetail({ subId, listRow, onBack, onPatch, onDelet
           </div>
         ) : (
           <BodyText as="div" style={{ marginTop: 12 }}>
-            <Mono as="code" style={{ fontSize: 12, color: 'var(--text-muted)', wordBreak: 'break-all' }}>{sub.url}</Mono>
+            <Mono as="code" style={{ ...pageSubtitleStyle, wordBreak: 'break-all' }}>{sub.url}</Mono>
           </BodyText>
         )}
       </div>

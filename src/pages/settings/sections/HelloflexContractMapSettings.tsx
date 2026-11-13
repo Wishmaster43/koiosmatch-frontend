@@ -16,7 +16,7 @@
  * ('helloflex'), mirrors the sm/hf module-gated planning/whatsapp sections) — a tenant
  * without the HelloFlex module never sees this sub-tab.
  */
-import { useEffect, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Check, Save } from 'lucide-react'
 import { useLookups } from '@/context/LookupsContext'
@@ -24,7 +24,8 @@ import { loadSettings, saveSettings } from '../lib/settingsApi'
 import { notifyError } from '@/lib/notify'
 import { fieldInputStyle } from '@/components/forms/fieldMetrics'
 import Button from '@/components/ui/Button'
-import { PageTitle, formLabelStyle, PageSubtitle } from '@/components/ui/typography'
+import ErrorBanner from '@/components/ui/ErrorBanner'
+import { PageTitle, formLabelStyle, PageSubtitle, BodyText, FormLabel } from '@/components/ui/typography'
 
 const SETTINGS_KEY = 'helloflex_contract_type_map'
 
@@ -47,11 +48,21 @@ export default function HelloflexContractMapSettings() {
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
   const [saved, setSaved] = useState(false)
+  const [loadError, setLoadError] = useState(false)
+  // Bumped by the retry button to re-run the load effect.
+  const [reloadKey, setReloadKey] = useState(0)
+  // Pending "saved" flash timer, cleared on unmount so it never fires on a dead component.
+  const savedTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
+  useEffect(() => () => { if (savedTimer.current) clearTimeout(savedTimer.current) }, [])
+  const retryLoad = useCallback(() => setReloadKey((k) => k + 1), [])
 
-  // Load the stored JSON map once; a missing/corrupt value falls back to {} — every
+  // Load the stored JSON map; a missing/corrupt value falls back to {} — every
   // contract form then simply renders an empty (legal) row rather than crashing.
+  // A failed request shows an error with retry instead of a blank (empty-looking) form.
   useEffect(() => {
     let alive = true
+    setLoading(true)
+    setLoadError(false)
     loadSettings().then((s) => {
       if (!alive) return
       let parsed: ContractMap = {}
@@ -63,9 +74,10 @@ export default function HelloflexContractMapSettings() {
       }
       setMap(parsed)
       setInitial(parsed)
-    }).finally(() => { if (alive) setLoading(false) })
+    }).catch(() => { if (alive) setLoadError(true) })
+      .finally(() => { if (alive) setLoading(false) })
     return () => { alive = false }
-  }, [])
+  }, [reloadKey])
 
   const setRow = (slug: string, patch: Partial<MapRow>) =>
     setMap((prev) => ({ ...prev, [slug]: { ...prev[slug], guid: prev[slug]?.guid ?? '', label: prev[slug]?.label ?? '', ...patch } }))
@@ -89,7 +101,8 @@ export default function HelloflexContractMapSettings() {
       setMap(cleaned)
       setInitial(cleaned)
       setSaved(true)
-      setTimeout(() => setSaved(false), 2000)
+      if (savedTimer.current) clearTimeout(savedTimer.current)
+      savedTimer.current = setTimeout(() => setSaved(false), 2000)
     } catch {
       setMap(previous)
       notifyError(t('helloflexContractMap.saveError'))
@@ -98,7 +111,9 @@ export default function HelloflexContractMapSettings() {
     }
   }
 
-  if (loading) return <p style={{ fontSize: 13, color: 'var(--text-muted)' }}>{t('common.loadingShort')}</p>
+  if (loading) return <BodyText style={{ color: 'var(--text-muted)' }}>{t('common.loadingShort')}</BodyText>
+  // Error state: a failed load must never look like an empty (legal) mapping that could then be saved over the stored one.
+  if (loadError) return <ErrorBanner onRetry={retryLoad} style={{ maxWidth: 640 }}>{t('helloflexContractMap.loadError')}</ErrorBanner>
 
   return (
     <div style={{ maxWidth: 640 }}>
@@ -113,7 +128,7 @@ export default function HelloflexContractMapSettings() {
             const row: MapRow = map[ct.value] ?? { guid: '', label: '' }
             return (
               <div key={ct.value} style={{ display: 'grid', gridTemplateColumns: '120px 1fr 1fr', gap: 10, alignItems: 'end' }}>
-                <span style={{ fontSize: 12, fontWeight: 500, color: 'var(--text)', paddingBottom: 8 }}>{ct.label}</span>
+                <FormLabel as="span" style={{ color: 'var(--text)', paddingBottom: 8 }}>{ct.label}</FormLabel>
                 <div>
                   <label htmlFor={`hf-map-guid-${ct.value}`} style={labelStyle}>{t('helloflexContractMap.guid')}</label>
                   <input id={`hf-map-guid-${ct.value}`} value={row.guid} onChange={(e) => setRow(ct.value, { guid: e.target.value.replace(/\D/g, '') })}

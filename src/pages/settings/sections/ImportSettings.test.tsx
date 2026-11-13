@@ -79,7 +79,7 @@ describe('importApi (request shapes)', () => {
       data: { data: { entity: 'customers', dry_run: false, summary: { rows: 0, create: 0, update: 0, skip: 0, error: 0 }, unknown_columns: [], rows: [] } },
     })
     await runImport('customers', file)
-    expect(api.post).toHaveBeenCalledWith('/imports/customers', expect.any(FormData))
+    expect(api.post).toHaveBeenCalledWith('/imports/customers', expect.any(FormData), { headers: { 'Idempotency-Key': expect.any(String) } })
     const form = (api.post as MockFn).mock.calls[0][1] as FormData
     expect(Array.from(form.keys())).toEqual(['file'])
   })
@@ -151,7 +151,7 @@ describe('ImportSettings — the wizard never claims success it did not earn', (
     const confirmBtn = screen.getByRole('button', { name: t('import.preview.confirm') })
     expect(confirmBtn).toBeEnabled()
     await user.click(confirmBtn)
-    expect(api.post).toHaveBeenCalledWith('/imports/customers', expect.any(FormData))
+    expect(api.post).toHaveBeenCalledWith('/imports/customers', expect.any(FormData), { headers: { 'Idempotency-Key': expect.any(String) } })
 
     // Result step reports the partial outcome honestly — never a bare success message.
     expect(await screen.findByText(t('import.result.subtitlePartial', { errorCount: 1, total: 3 }))).toBeInTheDocument()

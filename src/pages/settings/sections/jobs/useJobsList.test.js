@@ -55,4 +55,27 @@ describe('useJobsList', () => {
     await act(async () => { await result.current.cancel(9) })
     expect(result.current.cancelError).toEqual({ id: 9, message: 'Job is momenteel in behandeling.' })
   })
+
+  it('cancel() shows the honest already-gone state on a 404', async () => {
+    vi.mocked(fetchJobsList).mockResolvedValue(page([{ id: 5 }]))
+    vi.mocked(cancelJob).mockRejectedValue({ response: { status: 404 } })
+    const { result } = renderHook(() => useJobsList())
+    await waitFor(() => expect(result.current.phase).toBe('ready'))
+    await act(async () => { await result.current.cancel(5) })
+    expect(result.current.cancelError).toEqual({ id: 5, message: null, gone: true })
+  })
+
+  it('a second cancel while the first is pending sends no second request', async () => {
+    vi.mocked(fetchJobsList).mockResolvedValue(page([{ id: 4 }]))
+    let release
+    vi.mocked(cancelJob).mockReturnValue(new Promise((r) => { release = r }))
+    const { result } = renderHook(() => useJobsList())
+    await waitFor(() => expect(result.current.phase).toBe('ready'))
+    let first
+    act(() => { first = result.current.cancel(4) })
+    await waitFor(() => expect(result.current.cancellingId).toBe(4))
+    await act(async () => { await result.current.cancel(4) })
+    expect(cancelJob).toHaveBeenCalledTimes(1)
+    await act(async () => { release({ data: {} }); await first })
+  })
 })

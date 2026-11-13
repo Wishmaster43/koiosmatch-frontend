@@ -1690,6 +1690,7 @@
       "incoming": "Incoming"
     },
     "incoming": {
+      "loadError": "The incoming webhooks could not be loaded.",
       "title": "Incoming webhooks",
       "subtitle": "Create incoming webhook URLs to trigger workflows from external systems.",
       "newWebhook": "New webhook",
@@ -2314,6 +2315,7 @@
     "tabVerificatie": "Verification"
   },
   "modules": {
+    "refreshError": "The modules could not be refreshed. The settings shown may be out of date.",
     "loading": "Loading package…",
     "superAdminTitle": "Visible to super admins only",
     "superAdminDesc": "Changing the package directly affects the customer invoice. Every change is logged.",
@@ -3543,6 +3545,7 @@
     "emptyFailed": "No failed jobs.",
     "cancel": "Cancel",
     "cancelReservedError": "Cancel failed. A worker is already running this job.",
+    "cancelGone": "This job is already gone. The list has been refreshed.",
     "retry": "Retry",
     "retryAll": "Retry all",
     "retryAllConfirm_one": "Re-queue {{count}} failed job?",
@@ -4601,6 +4604,7 @@
     "resolved": "Marked as not sent."
   },
   "helloflexContractMap": {
+    "loadError": "The contract map could not be loaded.",
     "title": "HelloFlex contract map",
     "subtitle": "Link each contract form to its matching HelloFlex contract type (number). An empty mapping is allowed: linking to HelloFlex is then honestly blocked for that contract form.",
     "guid": "HelloFlex contract type id (number)",
@@ -4835,6 +4839,7 @@
       "contractmap": "Contract map"
     },
     "health": {
+      "unavailable": "Status unavailable",
       "ok": "Connection works",
       "error": "Connection failed",
       "unknown": "Not checked yet",
@@ -4848,6 +4853,7 @@
       "nothingReceived": "nothing received yet"
     },
     "connection": {
+      "testFailedDetail": "{{reason}}: {{message}}",
       "saveBeforeTest": "Save first; the test uses the saved credentials.",
       "clientIdInvalid": "Enter a valid GUID (for example 123e4567-e89b-12d3-a456-426614174000).",
       "title": "Connection",

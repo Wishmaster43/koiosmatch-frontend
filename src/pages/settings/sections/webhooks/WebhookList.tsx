@@ -9,7 +9,7 @@ import DataTable, { type Column } from '@/components/ui/DataTable'
 import StatusBadge from '@/components/ui/StatusBadge'
 import { useDateFormat } from '@/lib/datetime'
 import Button from '@/components/ui/Button'
-import { PageTitle, PageSubtitle } from '@/components/ui/typography'
+import { PageTitle, PageSubtitle, BodyText, SectionTitle, Mono, pageSubtitleStyle } from '@/components/ui/typography'
 
 // hand-written: mirrors WebhookDetail's own WebhookSubscription shape (the spec
 // carries no 2xx schema for GET /webhook-subscriptions).
@@ -51,9 +51,9 @@ export default function WebhookList({ subs, loading, error, onReload, onOpen, on
   // Column model: name, url, status, event count, last triggered.
   const columns: Column<WebhookSubscriptionRow>[] = [
     { key: 'name', header: t('webhooks.outgoing.col.name'), sortable: true,
-      render: (r) => <span style={{ fontWeight: 600, color: 'var(--text)' }}>{r.name ?? '—'}</span> },
+      render: (r) => <SectionTitle as="span">{r.name ?? '—'}</SectionTitle> },
     { key: 'url', header: t('webhooks.outgoing.col.url'),
-      render: (r) => <code style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: 12, color: 'var(--text-muted)' }}>{r.url ?? '—'}</code> },
+      render: (r) => <Mono as="code" style={pageSubtitleStyle}>{r.url ?? '—'}</Mono> },
     { key: 'status', header: t('webhooks.outgoing.col.status'),
       render: (r) => <StatusBadge status={r.status ?? 'active'} map={statusMap} /> },
     { key: 'events', header: t('webhooks.outgoing.col.events'), align: 'center',
@@ -78,7 +78,7 @@ export default function WebhookList({ subs, loading, error, onReload, onOpen, on
 
       {error ? (
         <div style={{ padding: '32px 0', textAlign: 'center' }}>
-          <p style={{ fontSize: 13, color: 'var(--text-muted)', marginBottom: 12 }}>{t('webhooks.outgoing.loadError')}</p>
+          <BodyText style={{ color: 'var(--text-muted)', marginBottom: 12 }}>{t('webhooks.outgoing.loadError')}</BodyText>
           <Button variant="secondary" onClick={onReload}>
             <RefreshCw size={13} /> {t('webhooks.outgoing.retry')}
           </Button>

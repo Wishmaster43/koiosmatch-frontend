@@ -1,6 +1,7 @@
 /** IntegrationHealthBadge: three states, HH:mm check time, error code label or server text. */
-import { describe, it, expect } from 'vitest'
+import { describe, it, expect, vi } from 'vitest'
 import { render, screen } from '@testing-library/react'
+import userEvent from '@testing-library/user-event'
 import i18n from '@/i18n'
 import IntegrationHealthBadge from './IntegrationHealthBadge'
 
@@ -31,5 +32,15 @@ describe('IntegrationHealthBadge', () => {
     expect(screen.getByText(t('integrations.reason.auth_failed'))).toBeInTheDocument()
     rerender(<IntegrationHealthBadge health={{ state: 'error', errorCode: 'weird', errorMessage: 'Server says no', checkedAt: null }} />)
     expect(screen.getByText('Server says no')).toBeInTheDocument()
+  })
+
+  // A failed health request reads as 'unavailable' (never 'not checked yet') and offers a retry.
+  it('shows the unavailable line with a working retry', async () => {
+    const onRetry = vi.fn()
+    render(<IntegrationHealthBadge health={{ ...none, state: 'unknown' }} unavailable onRetry={onRetry} />)
+    expect(screen.getByText(t('integrations.health.unavailable'))).toBeInTheDocument()
+    expect(screen.queryByText(t('integrations.health.unknown'))).not.toBeInTheDocument()
+    await userEvent.click(screen.getByRole('button', { name: i18n.t('error.retry', { ns: 'common' }) }))
+    expect(onRetry).toHaveBeenCalledTimes(1)
   })
 })

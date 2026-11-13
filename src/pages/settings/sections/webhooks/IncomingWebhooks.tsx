@@ -10,11 +10,13 @@
 import { useState, useEffect, useRef } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Check, Copy, Inbox, KeyRound, Plus, Trash2, Edit2, Save, X } from 'lucide-react'
-import api, { unwrap, unwrapList } from '@/lib/api'
-import { withIdempotencyKey } from '@/lib/idempotency'
+import {
+  listInboundWebhooks, createInboundWebhook, updateInboundWebhook, deleteInboundWebhook, regenerateInboundSecret,
+} from './webhooksApi'
 import { useConfirm } from '@/hooks/useConfirm'
 import Button from '@/components/ui/Button'
-import { PageTitle, SectionTitle, Caption, Mono, PageSubtitle } from '@/components/ui/typography'
+import ErrorBanner from '@/components/ui/ErrorBanner'
+import { PageTitle, SectionTitle, Caption, PageSubtitle, monoStyle } from '@/components/ui/typography'
 import { fieldInputStyle } from '@/components/forms/fieldMetrics'
 import WebhookRequestsPanel from '@/components/webhooks/WebhookRequestsPanel'
 // OneTimeSecretReveal: the shared one-time-secret idiom (DL-02/WFB-06 adoption, ADOPT-A3b item 20).
@@ -60,6 +62,9 @@ export default function IncomingWebhooks() {
   const { formatDateTime } = useDateFormat()
   const [webhooks, setWebhooks] = useState<Webhook[]>([])
   const [loading,  setLoading]  = useState(true)
+  const [loadError, setLoadError] = useState(false)
+  // Bumped by the retry button to re-run the load effect.
+  const [reloadKey, setReloadKey] = useState(0)
   const [name,     setName]     = useState('')
   const [desc,     setDesc]     = useState('')
   const [creating, setCreating] = useState(false)
@@ -85,17 +90,21 @@ export default function IncomingWebhooks() {
     const description = editDesc.trim() || null
     setWebhooks((prev) => prev.map((w) => (w.id === id ? { ...w, name: nm, description } : w)))
     setEditId(null)
-    await api.patch(`/webhooks/${id}`, { name: nm, description }).catch((err) => notifyError(extractApiError(err, t('common:actionFailed'))))
+    await updateInboundWebhook(id, { name: nm, description }).catch((err) => notifyError(extractApiError(err, t('common:actionFailed'))))
   }
 
-  // Load the inbound webhooks for the active tenant.
+  // Load the inbound webhooks for the active tenant; an alive guard drops a stale response,
+  // a failure shows an error with retry instead of an innocent-looking empty list.
   useEffect(() => {
-    api.get('/webhooks')
-      .then((res) => setWebhooks(unwrapList<Webhook>(res).rows))
-      .catch((err) => notifyError(extractApiError(err, t('common:actionFailed'))))
-      .finally(() => setLoading(false))
-    // `t` is stable per language; a language switch re-runs the load, which is harmless.
-  }, [t])
+    let alive = true
+    setLoading(true)
+    setLoadError(false)
+    listInboundWebhooks()
+      .then((res) => { if (alive) setWebhooks(res.rows as Webhook[]) })
+      .catch(() => { if (alive) setLoadError(true) })
+      .finally(() => { if (alive) setLoading(false) })
+    return () => { alive = false }
+  }, [reloadKey])
 
   // Verifier fix: whenever a secret reveal appears (create or regenerate), scroll it
   // into view and focus it — the trigger for a regenerate is a row further down the list.
@@ -110,8 +119,7 @@ export default function IncomingWebhooks() {
     if (!name.trim()) return
     setCreating(true)
     try {
-      const res = await api.post('/webhooks', { name: name.trim(), description: desc.trim() || null })
-      const created = unwrap<Webhook>(res)
+      const created = (await createInboundWebhook({ name: name.trim(), description: desc.trim() || null })) as Webhook
       setWebhooks((prev) => [...prev, created])
       if (created.signing_secret) setReveal({ title: t('webhooks.incoming.secretOnce'), secret: created.signing_secret })
       setName('')
@@ -129,9 +137,7 @@ export default function IncomingWebhooks() {
   const regenerateSecret = (id: string) => {
     confirm(t('webhooks.incoming.regenerateConfirm'), async () => {
       try {
-        // IDEMP-KEY-BODYLESS-1: a click-triggered secret rotation — a per-submit key.
-        const res = await api.post(`/webhooks/${id}/regenerate-secret`, undefined, withIdempotencyKey())
-        const secret = unwrap<Webhook>(res)?.signing_secret
+        const secret = (await regenerateInboundSecret(id) as Webhook | undefined)?.signing_secret
         // Verifier fix: the server has already rotated the secret by the time it responds —
         // a 200 without the field must not read as "nothing happened" and leave it unknown.
         if (secret) setReveal({ title: t('webhooks.incoming.secretOnce'), secret })
@@ -145,7 +151,7 @@ export default function IncomingWebhooks() {
   // User asked to delete a webhook: confirms first (destructive), then removes it.
   const remove = (id: string) => {
     confirm(t('webhooks.incoming.removeConfirm'), async () => {
-      await api.delete(`/webhooks/${id}`).catch((err) => notifyError(extractApiError(err, t('common:actionFailed'))))
+      await deleteInboundWebhook(id).catch((err) => notifyError(extractApiError(err, t('common:actionFailed'))))
       setWebhooks((prev) => prev.filter((w) => w.id !== id))
     }, { danger: true })
   }
@@ -194,6 +200,8 @@ export default function IncomingWebhooks() {
       {/* List */}
       {loading ? (
         <Caption>{t('common.loadingShort')}</Caption>
+      ) : loadError ? (
+        <ErrorBanner onRetry={() => setReloadKey((k) => k + 1)}>{t('webhooks.incoming.loadError')}</ErrorBanner>
       ) : webhooks.length === 0 ? (
         <Caption>{t('webhooks.incoming.empty')}</Caption>
       ) : (
@@ -257,9 +265,9 @@ export default function IncomingWebhooks() {
                 </div>
               </div>
               <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-                <Mono as="code" style={{ flex: 1, fontSize: 11, background: 'var(--hover-bg)', border: '1px solid var(--border)', borderRadius: 6, padding: '6px 10px', color: 'var(--text)', wordBreak: 'break-all' }}>
+                <Caption as="code" style={{ ...monoStyle, flex: 1, background: 'var(--hover-bg)', border: '1px solid var(--border)', borderRadius: 6, padding: '6px 10px', color: 'var(--text)', wordBreak: 'break-all' }}>
                   {BASE_URL}/{wh.token}
-                </Mono>
+                </Caption>
                 <Button variant="secondary" size="sm" onClick={() => copyUrl(wh.token)}>
                   {copied === wh.token ? <Check size={11} /> : <Copy size={11} />} {copied === wh.token ? t('common.copied') : t('webhooks.incoming.copyUrl')}
                 </Button>

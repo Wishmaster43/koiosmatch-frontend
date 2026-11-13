@@ -88,7 +88,7 @@ export const fetchFailedJobs = (params: FailedJobsParams, signal?: AbortSignal):
   api.get('/admin/jobs/failed', { params, signal })
 
 // DELETE /admin/jobs/{id} — cancel a job that hasn't started running yet (409 if reserved).
-export const cancelJob = (id: string | number) => api.delete(`/admin/jobs/${id}`)
+export const cancelJob = (id: string | number) => api.delete(`/admin/jobs/${id}`, { quietStatuses: [404, 409] })
 
 // POST /admin/jobs/failed/{uuid}/retry — re-queue one failed job.
 // IDEMP-KEY-BODYLESS-1: a click-triggered retry — a per-submit key.

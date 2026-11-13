@@ -132,3 +132,19 @@ describe('HelloflexContractMapSettings — round trip and id input', () => {
     expect(guidInput).toHaveAccessibleName(t('helloflexContractMap.guid'))
   })
 })
+
+// Error state: a failed GET /settings must show an error with retry, never an empty (savable) mapping.
+describe('HelloflexContractMapSettings - load error', () => {
+  it('shows the error with retry and reloads GET /settings on retry', async () => {
+    vi.mocked(api.get).mockRejectedValueOnce(new Error('boom'))
+    vi.mocked(api.get).mockResolvedValueOnce({ data: {} })
+    const user = userEvent.setup()
+    render(<HelloflexContractMapSettings />)
+    expect(await screen.findByText(t('helloflexContractMap.loadError'))).toBeInTheDocument()
+    expect(screen.queryByText('Uitzend')).not.toBeInTheDocument()
+    await user.click(screen.getByRole('button', { name: i18n.t('error.retry', { ns: 'common' }) }))
+    expect(await screen.findByText('Uitzend')).toBeInTheDocument()
+    expect(api.get).toHaveBeenCalledTimes(2)
+    expect(api.get).toHaveBeenLastCalledWith('/settings')
+  })
+})

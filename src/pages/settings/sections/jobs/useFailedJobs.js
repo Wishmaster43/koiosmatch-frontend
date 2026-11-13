@@ -4,7 +4,7 @@
  * Uses shared useJobsQuery for the pagination/filtering/polling infrastructure.
  * Confirmation for destructive bulk actions lives in the tab component.
  */
-import { useState } from 'react'
+import { useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { fetchFailedJobs, retryFailedJob, forgetFailedJob, retryAllFailedJobs, flushFailedJobs } from './jobsApi'
 import { extractApiError } from '@/lib/extractApiError'
@@ -17,6 +17,8 @@ export function useFailedJobs() {
   const [busyId, setBusyId] = useState(null) // uuid being retried/forgotten
   const [bulkBusy, setBulkBusy] = useState(false) // retry-all / flush in flight
   const [actionError, setActionError] = useState(null)
+  // Synchronous re-entry guard for retry-all: a second call while the first is pending is ignored.
+  const retryAllPending = useRef(false)
 
   // Use shared query infrastructure; extract truncated from response.
   const query = useJobsQuery({
@@ -63,6 +65,8 @@ export function useFailedJobs() {
   // Resolves the server's {count, skipped, truncated, scope} so the caller can say what
   // happened and confirm the scope (B-53/I-2, X-41), or null when the request failed.
   const retryAll = async () => {
+    if (retryAllPending.current) return null
+    retryAllPending.current = true
     setActionError(null)
     setBulkBusy(true)
     try {
@@ -74,6 +78,7 @@ export function useFailedJobs() {
       setActionError(extractApiError(err, t('jobs.actionFailed')))
       return null
     } finally {
+      retryAllPending.current = false
       setBulkBusy(false)
     }
   }

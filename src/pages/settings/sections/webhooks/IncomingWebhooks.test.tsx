@@ -161,3 +161,19 @@ describe('IncomingWebhooks — Secret vernieuwen (regenerate)', () => {
     await waitFor(() => expect(notifyError).toHaveBeenCalledWith(expect.any(String)))
   })
 })
+
+// A failed load must show an error with retry (not an empty list), and retry repeats GET /webhooks.
+describe('IncomingWebhooks - load error state', () => {
+  it('shows the load error and retries GET /webhooks', async () => {
+    mockedApi.get.mockRejectedValueOnce(new Error('boom'))
+    mockedApi.get.mockResolvedValueOnce({ data: [{ id: 'wh-1', name: 'ATS integration', token: 'tok-1' }] })
+    const user = userEvent.setup()
+    render(<IncomingWebhooks />)
+    expect(await screen.findByText(st('webhooks.incoming.loadError'))).toBeInTheDocument()
+    expect(screen.queryByText(st('webhooks.incoming.empty'))).not.toBeInTheDocument()
+    await user.click(screen.getByRole('button', { name: i18n.t('error.retry', { ns: 'common' }) }))
+    expect(await screen.findByText('ATS integration')).toBeInTheDocument()
+    expect(mockedApi.get).toHaveBeenCalledTimes(2)
+    expect(mockedApi.get).toHaveBeenLastCalledWith('/webhooks')
+  })
+})

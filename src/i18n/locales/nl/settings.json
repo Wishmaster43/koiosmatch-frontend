@@ -1690,6 +1690,7 @@
       "incoming": "Inkomend"
     },
     "incoming": {
+      "loadError": "De inkomende webhooks konden niet worden geladen.",
       "title": "Inkomende webhooks",
       "subtitle": "Maak inkomende webhook-URLs aan om workflows te triggeren vanuit externe systemen.",
       "newWebhook": "Nieuwe webhook",
@@ -2314,6 +2315,7 @@
     "tabVerificatie": "Verificatie"
   },
   "modules": {
+    "refreshError": "De modules konden niet worden ververst. De getoonde instellingen kunnen verouderd zijn.",
     "loading": "Pakket ophalen…",
     "superAdminTitle": "Alleen zichtbaar voor super admins",
     "superAdminDesc": "Pakket wijzigen heeft direct invloed op de klantfactuur. Elke wijziging wordt gelogd.",
@@ -3543,6 +3545,7 @@
     "emptyFailed": "Geen mislukte taken.",
     "cancel": "Annuleren",
     "cancelReservedError": "Annuleren is mislukt. De taak wordt al door een worker uitgevoerd.",
+    "cancelGone": "Deze taak bestaat niet meer. De lijst is ververst.",
     "retry": "Opnieuw proberen",
     "retryAll": "Alles opnieuw proberen",
     "retryAllConfirm_one": "{{count}} mislukte taak opnieuw in de wachtrij zetten?",
@@ -4601,6 +4604,7 @@
     "resolved": "Gemarkeerd als niet verzonden."
   },
   "helloflexContractMap": {
+    "loadError": "De contractmap kon niet worden geladen.",
     "title": "HelloFlex contractmap",
     "subtitle": "Koppel elke contractvorm aan het bijbehorende HelloFlex-contracttype (nummer). Een lege koppeling is toegestaan: het koppelen naar HelloFlex wordt dan eerlijk geblokkeerd voor die soort.",
     "guid": "HelloFlex-contracttype-id (nummer)",
@@ -4835,6 +4839,7 @@
       "contractmap": "Contractmap"
     },
     "health": {
+      "unavailable": "Status niet beschikbaar",
       "ok": "Verbinding werkt",
       "error": "Verbinding mislukt",
       "unknown": "Nog niet gecontroleerd",
@@ -4848,6 +4853,7 @@
       "nothingReceived": "nog niets ontvangen"
     },
     "connection": {
+      "testFailedDetail": "{{reason}}: {{message}}",
       "saveBeforeTest": "Sla eerst op; de test gebruikt de opgeslagen gegevens.",
       "clientIdInvalid": "Voer een geldige GUID in (bijvoorbeeld 123e4567-e89b-12d3-a456-426614174000).",
       "title": "Koppeling",

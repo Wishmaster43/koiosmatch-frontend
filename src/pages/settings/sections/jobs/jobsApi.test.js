@@ -41,7 +41,7 @@ describe('jobsApi', () => {
   it('cancelJob sends DELETE /admin/jobs/{id}', async () => {
     vi.mocked(api.delete).mockResolvedValue({ data: {} })
     await cancelJob(42)
-    expect(api.delete).toHaveBeenCalledWith('/admin/jobs/42')
+    expect(api.delete).toHaveBeenCalledWith('/admin/jobs/42', { quietStatuses: [404, 409] })
   })
 
   it('retryFailedJob sends POST /admin/jobs/failed/{uuid}/retry with a per-click Idempotency-Key', async () => {

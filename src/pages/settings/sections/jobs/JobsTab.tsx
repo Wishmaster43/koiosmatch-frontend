@@ -22,7 +22,8 @@ interface UseJobsListResult {
   result: { rows: PendingJobRow[]; total: number; page: number; lastPage: number }
   phase: 'loading' | 'ready' | 'error'
   cancel: (id: string) => void
-  cancelError: { id: string; message: string | null } | null
+  cancelError: { id: string; message: string | null; gone?: boolean } | null
+  cancellingId: string | null
   setCancelError: (v: null) => void
 }
 
@@ -47,7 +48,7 @@ interface PendingJobRow {
  */
 export default function JobsTab() {
   const { t } = useTranslation('settings')
-  const { filters, setFilter, page, setPage, result, phase, cancel, cancelError, setCancelError } = useJobsList() as UseJobsListResult
+  const { filters, setFilter, page, setPage, result, phase, cancel, cancelError, setCancelError, cancellingId } = useJobsList() as UseJobsListResult
 
   // Shared columns (queue, tenant, job) + tab-specific columns.
   const columns = [
@@ -63,7 +64,7 @@ export default function JobsTab() {
       render: (r: PendingJobRow) => r.reserved_at ? formatDuration((r.runtime_seconds ?? 0) * 1000) : '—' },
     { key: 'actions', header: t('jobs.col.actions'), align: 'right' as const, nowrap: true,
       render: (r: PendingJobRow) => r.reserved_at ? null : (
-        <Button variant="dangerSoft" size="sm" onClick={() => cancel(r.id)}>{t('jobs.cancel')}</Button>
+        <Button variant="dangerSoft" size="sm" disabled={cancellingId != null} onClick={() => cancel(r.id)}>{t('jobs.cancel')}</Button>
       ) },
   ]
 
@@ -96,7 +97,7 @@ export default function JobsTab() {
       {cancelError && (
         <div style={{ display: 'flex', alignItems: 'flex-start', gap: 8, padding: '10px 12px', marginBottom: 12,
           borderRadius: 8, background: 'var(--color-warning-bg)', border: tintBorder('var(--color-warning)') }}>
-          <span style={{ fontSize: 12, color: 'var(--text)', flex: 1 }}>{cancelError.message ?? t('jobs.cancelReservedError')}</span>
+          <span style={{ fontSize: 12, color: 'var(--text)', flex: 1 }}>{cancelError.gone ? t('jobs.cancelGone') : (cancelError.message ?? t('jobs.cancelReservedError'))}</span>
           <Button variant="ghost" iconOnly onClick={() => setCancelError(null)} aria-label={t('common.close')}>
             <X size={13} />
           </Button>

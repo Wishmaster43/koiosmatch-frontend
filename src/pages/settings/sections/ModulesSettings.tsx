@@ -20,8 +20,9 @@ import SegmentedControl from '@/components/ui/SegmentedControl'
 import Spinner from '@/components/ui/Spinner'
 import Toggle from '@/components/ui/Toggle'
 import SaveButton from '@/components/ui/SaveButton'
+import ErrorBanner from '@/components/ui/ErrorBanner'
 import { useQueryClient } from '@tanstack/react-query'
-import { GroupLabel, Caption, PageSubtitle } from '@/components/ui/typography'
+import { GroupLabel, Caption, PageSubtitle, BodyText } from '@/components/ui/typography'
 import PlatformPricingCard from './PlatformPricingCard'
 import BillingBudgetsCard from './BillingBudgetsCard'
 import BillingUsersCard from './BillingUsersCard'
@@ -31,15 +32,15 @@ import BillingTiersCard from './tiers/BillingTiersCard'
 type ModulesSubTab = 'pricing' | 'tiers' | 'budgets' | 'package' | 'users'
 
 // Base package option ("size bar" cards) / add-on toggle row.
-interface PackageOption { id: string; name: string; desc: string; Icon: typeof Package; }
+interface PackageOption { id: string; name: string; Icon: typeof Package; }
 // Add-on rows carry only an id and an icon: name/desc are i18n keys (modules.addon.<id> / modules.addonDesc.<id>).
 interface AddonOption { id: string; Icon?: typeof BarChart2; image?: string; comingSoon?: boolean }
 
 // Base packages (the "size bar"). `desc` lists what each adds over the previous one.
 const PACKAGES: PackageOption[] = [
-  { id: 'core',       name: 'Koios Core',       desc: 'ATS + CRM + Koios Assist',                               Icon: Package },
-  { id: 'pro',        name: 'Koios Pro',        desc: '+ Koios AI + AI Agents + Workflows + WhatsApp Business', Icon: Rocket },
-  { id: 'enterprise', name: 'Koios Enterprise', desc: '+ REST API + Insights+ + Connectors + SLA',              Icon: Crown },
+  { id: 'core',       name: 'Koios Core',       Icon: Package },
+  { id: 'pro',        name: 'Koios Pro',        Icon: Rocket },
+  { id: 'enterprise', name: 'Koios Enterprise', Icon: Crown },
 ]
 
 // Add-ons (toggle on top of any tier). Each id maps 1:1 to a module key the backend must
@@ -86,6 +87,8 @@ export default function ModulesSettings() {
   const [saving,  setSaving]  = useState(false)
   const [savedOk, setSavedOk] = useState(false)
   const [loadError, setLoadError] = useState(false)
+  // A failed focus refetch (the screen keeps its last data, so it is a banner, not the full error state).
+  const [refreshError, setRefreshError] = useState(false)
   const [isLegacy, setIsLegacy] = useState(false) // Package is null (legacy tenant)
 
   // Load the tenant's current package + add-ons. An alive guard stops a stale
@@ -121,6 +124,7 @@ export default function ModulesSettings() {
       if (!activeTenant?.id) return
       api.get('/tenant-modules', { params: { tenant_id: activeTenant.id } })
         .then(res => {
+          setRefreshError(false)
           const tier = LEGACY_TO_TIER[res.data?.package] ?? 'core'
           const ad   = Array.isArray(res.data?.addons) ? res.data.addons : []
           const legacy = !res.data?.package
@@ -130,7 +134,7 @@ export default function ModulesSettings() {
           if (!dirty) { setPkg(tier); setAddons(ad) }
           setSavedAt({ pkg: tier, addons: ad }); setIsLegacy(legacy)
         })
-        .catch(() => {})
+        .catch(() => setRefreshError(true))
     }
     window.addEventListener('focus', onFocus)
     return () => window.removeEventListener('focus', onFocus)
@@ -157,17 +161,20 @@ export default function ModulesSettings() {
 
   if (loading) return (
     <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: 160 }}>
-      <p style={{ fontSize: 13, color: 'var(--text-muted)' }}>{t('modules.loading')}</p>
+      <BodyText style={{ color: 'var(--text-muted)' }}>{t('modules.loading')}</BodyText>
     </div>
   )
   if (loadError) return (
     <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: 160 }}>
-      <p style={{ fontSize: 13, color: 'var(--color-danger-text)' }}>{t('statusList.loadError')}</p>
+      <BodyText style={{ color: 'var(--color-danger-text)' }}>{t('statusList.loadError')}</BodyText>
     </div>
   )
 
   return (
     <div style={{ maxWidth: 720 }}>
+      {refreshError && (
+        <ErrorBanner variant="subtle" onDismiss={() => setRefreshError(false)} style={{ marginBottom: 12 }}>{t('modules.refreshError')}</ErrorBanner>
+      )}
       {/* MODULES-SUBTABS-1 (Danny 24-08 "3 subtabjes aub"): grew to five tabs (users 25-08, tiers 30-08) — SubTabBar is the one shared switcher (roving tabindex, §6). */}
       <div style={{ marginBottom: 20 }}>
         <SubTabBar active={subTab} onChange={(id) => setSubTab(id as ModulesSubTab)} tabs={[
@@ -196,10 +203,10 @@ export default function ModulesSettings() {
       {subTab === 'package' && (<>
       {/* Legacy package notice: when package is null, show a migration prompt */}
       {isLegacy && (
-        <div style={{ fontSize: 13, color: 'var(--text-muted)', marginBottom: 20, padding: '12px 14px',
+        <BodyText as="div" style={{ color: 'var(--text-muted)', marginBottom: 20, padding: '12px 14px',
           background: 'var(--color-info-bg)', borderRadius: 8, border: '1px solid var(--color-info)' }}>
           {t('modules.legacyPackage')}
-        </div>
+        </BodyText>
       )}
       {/* Base package (one of three) */}
       <GroupLabel style={{ marginBottom: 10 }}>
@@ -222,7 +229,7 @@ export default function ModulesSettings() {
           options={PACKAGES.map(tier => ({
             value: tier.id,
             label: tier.name,
-            description: t(`modules.tierDesc.${tier.id}`, { defaultValue: tier.desc }),
+            description: t(`modules.tierDesc.${tier.id}`),
             icon: tier.Icon,
           }))}
         />

@@ -152,4 +152,24 @@ describe('ModulesSettings', () => {
     expect(invalidate).toHaveBeenCalledWith({ queryKey: ['integrations'] })
     expect(invalidate).toHaveBeenCalledWith({ queryKey: ['integrations', 'health'] })
   })
+
+  // A failed focus refetch is no longer swallowed: the screen keeps its data and shows a dismissible banner.
+  it('shows a refresh banner when the focus refetch fails, and clears it on the next success', async () => {
+    // Route-based mock: child cards also GET other routes; only /tenant-modules is scripted per call.
+    let modulesOutcome: 'ok' | 'fail' = 'ok'
+    mockGet.mockImplementation((url: string) => {
+      if (url !== '/tenant-modules') return Promise.resolve({ data: {} })
+      return modulesOutcome === 'ok' ? Promise.resolve({ data: { package: 'core', addons: [] } }) : Promise.reject(new Error('offline'))
+    })
+    renderPage()
+    await screen.findByRole('tab', { name: 'modules.tabs.package' })
+    expect(screen.queryByText('modules.refreshError')).toBeNull()
+    modulesOutcome = 'fail'
+    fireEvent.focus(window)
+    expect(await screen.findByText('modules.refreshError')).toBeInTheDocument()
+    expect(mockGet).toHaveBeenCalledWith('/tenant-modules', { params: { tenant_id: 't1' } })
+    modulesOutcome = 'ok'
+    fireEvent.focus(window)
+    await waitFor(() => expect(screen.queryByText('modules.refreshError')).toBeNull())
+  })
 })

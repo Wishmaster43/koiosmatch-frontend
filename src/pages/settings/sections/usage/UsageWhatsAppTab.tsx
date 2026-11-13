@@ -5,6 +5,7 @@
  * `workflow` block instead).
  */
 import { useTranslation } from 'react-i18next'
+import { labelOrRaw } from '@/lib/labelOrRaw'
 import { useNumberFormat } from '@/lib/formatters'
 import DataTable from '@/components/ui/DataTable'
 import type { Column } from '@/components/ui/DataTable'
@@ -14,12 +15,14 @@ import type { BillingUsageWhatsapp, BillingUsageWhatsappChannel } from '@/types/
 
 interface UsageWhatsAppTabProps {
   whatsapp: BillingUsageWhatsapp | undefined
+  // Load phase of the shared billing-usage request; required, like the sibling per-user tab.
+  phase: 'loading' | 'ready' | 'empty' | 'error' | 'unavailable'
 }
 
 // Usage settings' WhatsApp tab: per-channel message count breakdown from the billing-usage payload.
-export default function UsageWhatsAppTab({ whatsapp }: UsageWhatsAppTabProps) {
+export default function UsageWhatsAppTab({ whatsapp, phase }: UsageWhatsAppTabProps) {
   const { t } = useTranslation('settings')
-  const { t: tc } = useTranslation('candidates')
+  const { t: tc, i18n: ci18n } = useTranslation('candidates')
   const { formatNumber } = useNumberFormat()
 
   // The backend always sends all three Channel rows (zeros when a channel is
@@ -27,7 +30,7 @@ export default function UsageWhatsAppTab({ whatsapp }: UsageWhatsAppTabProps) {
   const hasChannelData = (whatsapp?.by_channel ?? []).some((c) => (c.messages ?? 0) > 0)
 
   const channelColumns: Column<BillingUsageWhatsappChannel>[] = [
-    { key: 'channel', header: t('billing.usage.whatsapp.colChannel'), render: (r) => tc(`conversations.channel.${r.channel}`, { defaultValue: r.label ?? r.channel }) },
+    { key: 'channel', header: t('billing.usage.whatsapp.colChannel'), render: (r) => labelOrRaw(tc, ci18n, `conversations.channel.${r.channel}`, r.label ?? r.channel, 'candidates') },
     { key: 'messages', header: t('billing.usage.whatsapp.colMessages'), align: 'right', render: (r) => formatNumber(r.messages) },
   ]
 
@@ -36,12 +39,15 @@ export default function UsageWhatsAppTab({ whatsapp }: UsageWhatsAppTabProps) {
       <SectionTitle style={{ marginBottom: 4 }}>{t('billing.usage.whatsapp.title')}</SectionTitle>
       <div style={sub}>{t('billing.usage.whatsapp.subtitle')}</div>
 
-      {hasChannelData && whatsapp?.by_channel ? (
+      {phase === 'loading' && <p style={notice}>{t('common.loadingShort')}</p>}
+      {phase === 'error' && <p style={notice}>{t('billing.usage.whatsapp.loadError')}</p>}
+      {phase === 'unavailable' && <p style={notice}>{t('billing.usage.whatsapp.unavailable')}</p>}
+      {(phase === 'ready' || phase === 'empty') && (hasChannelData && whatsapp?.by_channel ? (
         <DataTable columns={channelColumns} rows={whatsapp.by_channel} getRowId={(r) => r.channel}
           emptyText={t('billing.usage.whatsapp.empty')} />
       ) : (
         <p style={notice}>{t('billing.usage.whatsapp.empty')}</p>
-      )}
+      ))}
     </div>
   )
 }

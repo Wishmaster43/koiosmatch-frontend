@@ -123,4 +123,19 @@ describe('useFailedJobs', () => {
     await act(async () => { await result.current.flush() })
     expect(flushFailedJobs).toHaveBeenCalledWith('workflows', 'yesway')
   })
+
+  it('retryAll() ignores a second call while the first is pending and sends no key', async () => {
+    vi.mocked(fetchFailedJobs).mockResolvedValue(page([{ uuid: 'a' }]))
+    let release = () => {}
+    vi.mocked(retryAllFailedJobs).mockReturnValue(new Promise((r) => { release = () => r({ data: { count: 1 } }) }))
+    const { result } = renderHook(() => useFailedJobs())
+    await waitFor(() => expect(result.current.phase).toBe('ready'))
+    let first
+    act(() => { first = result.current.retryAll(); result.current.retryAll() })
+    expect(retryAllFailedJobs).toHaveBeenCalledTimes(1)
+    expect(retryAllFailedJobs).toHaveBeenCalledWith(undefined, undefined)
+    await waitFor(() => expect(result.current.bulkBusy).toBe(true))
+    await act(async () => { release(); await first })
+    expect(result.current.bulkBusy).toBe(false)
+  })
 })

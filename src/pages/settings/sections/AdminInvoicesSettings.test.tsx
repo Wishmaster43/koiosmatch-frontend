@@ -46,6 +46,20 @@ describe('AdminInvoicesSettings', () => {
     await waitFor(() => expect(api.post).toHaveBeenCalledWith('/admin/invoices/generate', expect.objectContaining({ month: expect.any(String) })))
   })
 
+  it('generate sends no Idempotency-Key and ignores a second click while pending', async () => {
+    api.get.mockResolvedValue({ data: [] })
+    let release: (v: unknown) => void = () => {}
+    api.post.mockReturnValueOnce(new Promise((r) => { release = r }))
+    renderScreen()
+    const btn = await screen.findByRole('button', { name: i18n.t('adminInvoices.generate', { ns: 'settings' }) })
+    await userEvent.click(btn)
+    await userEvent.click(btn)
+    expect(api.post).toHaveBeenCalledTimes(1)
+    expect(api.post).toHaveBeenCalledWith('/admin/invoices/generate', { month: expect.any(String) })
+    release({ data: {} })
+    await waitFor(() => expect(btn).not.toBeDisabled())
+  })
+
   it('partial failure raises the failed toast naming the bureaus and still reloads', async () => {
     const events: Array<{ type: string; message: string }> = []
     const handler = (e: Event) => events.push((e as CustomEvent).detail)

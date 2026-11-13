@@ -1430,6 +1430,7 @@
       "incoming": "Eingehend"
     },
     "incoming": {
+      "loadError": "Die eingehenden Webhooks konnten nicht geladen werden.",
       "title": "Eingehende Webhooks",
       "subtitle": "Erstellen Sie eingehende Webhook-URLs, um Workflows aus externen Systemen auszulösen.",
       "newWebhook": "Neuer Webhook",
@@ -2054,6 +2055,7 @@
     "tabVerificatie": "Überprüfung"
   },
   "modules": {
+    "refreshError": "Die Module konnten nicht aktualisiert werden. Die angezeigten Einstellungen sind möglicherweise veraltet.",
     "loading": "Paket wird geladen…",
     "superAdminTitle": "Nur für Super-Admins sichtbar",
     "superAdminDesc": "Eine Paketänderung wirkt sich direkt auf die Kundenrechnung aus. Jede Änderung wird protokolliert.",
@@ -3543,6 +3545,7 @@
     "emptyFailed": "Keine fehlgeschlagenen Aufgaben.",
     "cancel": "Abbrechen",
     "cancelReservedError": "Abbrechen fehlgeschlagen. Die Aufgabe wird bereits von einem Worker ausgeführt.",
+    "cancelGone": "Diese Aufgabe existiert nicht mehr. Die Liste wurde aktualisiert.",
     "retry": "Erneut versuchen",
     "retryAll": "Alle erneut versuchen",
     "retryAllConfirm_one": "{{count}} fehlgeschlagene Aufgabe erneut in die Warteschlange stellen?",
@@ -4601,6 +4604,7 @@
     "resolved": "Als nicht gesendet markiert."
   },
   "helloflexContractMap": {
+    "loadError": "Die Vertragszuordnung konnte nicht geladen werden.",
     "title": "HelloFlex-Vertragszuordnung",
     "subtitle": "Verknüpfe jede Vertragsform mit dem passenden HelloFlex-Vertragstyp (Zahl). Eine leere Zuordnung ist erlaubt: Die Verknüpfung mit HelloFlex wird für diese Vertragsform dann ehrlich blockiert.",
     "guid": "HelloFlex-Vertragstyp-ID (Zahl)",
@@ -4835,6 +4839,7 @@
       "contractmap": "Vertragszuordnung"
     },
     "health": {
+      "unavailable": "Status nicht verfügbar",
       "ok": "Verbindung funktioniert",
       "error": "Verbindung fehlgeschlagen",
       "unknown": "Noch nicht geprüft",
@@ -4848,6 +4853,7 @@
       "nothingReceived": "noch nichts empfangen"
     },
     "connection": {
+      "testFailedDetail": "{{reason}}: {{message}}",
       "saveBeforeTest": "Bitte zuerst speichern; der Test verwendet die gespeicherten Zugangsdaten.",
       "clientIdInvalid": "Geben Sie eine gültige GUID ein (zum Beispiel 123e4567-e89b-12d3-a456-426614174000).",
       "title": "Verbindung",
