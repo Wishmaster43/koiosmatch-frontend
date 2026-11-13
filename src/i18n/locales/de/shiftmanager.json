@@ -345,6 +345,10 @@
     "empty": "Keine Standorte gefunden",
     "count": "{{count}} Standorte",
     "statusUnknown": "Unbekannt",
+    "status": {
+      "active": "Aktiv",
+      "inactive": "Inaktiv"
+    },
     "drawer": {
       "customer": "Kunde",
       "linkedCustomer": "Verknüpfter Kunde",

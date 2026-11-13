@@ -345,6 +345,10 @@
     "empty": "No locations found",
     "count": "{{count}} locations",
     "statusUnknown": "Unknown",
+    "status": {
+      "active": "Active",
+      "inactive": "Inactive"
+    },
     "drawer": {
       "customer": "Customer",
       "linkedCustomer": "Linked customer",

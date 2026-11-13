@@ -345,6 +345,10 @@
     "empty": "Nessuna sede trovata",
     "count": "{{count}} sedi",
     "statusUnknown": "Sconosciuto",
+    "status": {
+      "active": "Attivo",
+      "inactive": "Inattivo"
+    },
     "drawer": {
       "customer": "Cliente",
       "linkedCustomer": "Cliente collegato",

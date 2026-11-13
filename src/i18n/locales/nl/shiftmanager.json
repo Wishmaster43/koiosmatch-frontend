@@ -345,6 +345,10 @@
     "empty": "Geen locaties gevonden",
     "count": "{{count}} locaties",
     "statusUnknown": "Onbekend",
+    "status": {
+      "active": "Actief",
+      "inactive": "Inactief"
+    },
     "drawer": {
       "customer": "Klant",
       "linkedCustomer": "Gekoppelde klant",

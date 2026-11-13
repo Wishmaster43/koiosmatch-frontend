@@ -345,6 +345,10 @@
     "empty": "Nenhuma filial encontrada",
     "count": "{{count}} filiais",
     "statusUnknown": "Desconhecido",
+    "status": {
+      "active": "Ativo",
+      "inactive": "Inativo"
+    },
     "drawer": {
       "customer": "Cliente",
       "linkedCustomer": "Cliente associado",

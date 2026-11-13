@@ -345,6 +345,10 @@
     "empty": "No se encontraron ubicaciones",
     "count": "{{count}} ubicaciones",
     "statusUnknown": "Desconocido",
+    "status": {
+      "active": "Activo",
+      "inactive": "Inactivo"
+    },
     "drawer": {
       "customer": "Cliente",
       "linkedCustomer": "Cliente vinculado",

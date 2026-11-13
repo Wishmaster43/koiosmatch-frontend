@@ -345,6 +345,10 @@
     "empty": "Aucun site trouvé",
     "count": "{{count}} sites",
     "statusUnknown": "Inconnu",
+    "status": {
+      "active": "Actif",
+      "inactive": "Inactif"
+    },
     "drawer": {
       "customer": "Client",
       "linkedCustomer": "Client lié",
