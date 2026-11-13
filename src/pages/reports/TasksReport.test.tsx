@@ -3,6 +3,7 @@ import { render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import TasksReport from './TasksReport'
+import i18n from '@/i18n'
 import type { TasksReportData } from '@/types/analytics'
 import { data, dataWithSuite } from './TasksReport.testKit'
 
@@ -75,13 +76,13 @@ describe('TasksReport (RAPPORTEN-SUITE-1 portie 6, tasks report)', () => {
   it('shows the loading state', () => {
     mockUseTasksReport.mockReturnValue({ data: null, loading: true, error: false })
     renderReport()
-    expect(screen.getByText('Taken laden…')).toBeInTheDocument()
+    expect(screen.getByText(i18n.t('analytics:tasks.loading'))).toBeInTheDocument()
   })
 
   it('shows the error state', () => {
     mockUseTasksReport.mockReturnValue({ data: null, loading: false, error: true })
     renderReport()
-    expect(screen.getByText('Kon de taken niet laden')).toBeInTheDocument()
+    expect(screen.getByText(i18n.t('analytics:tasks.error'))).toBeInTheDocument()
   })
 
   it('shows the empty state when there are no tasks', () => {
@@ -92,7 +93,7 @@ describe('TasksReport (RAPPORTEN-SUITE-1 portie 6, tasks report)', () => {
       loading: false, error: false,
     })
     renderReport()
-    expect(screen.getByText('Geen taken in deze periode')).toBeInTheDocument()
+    expect(screen.getByText(i18n.t('analytics:tasks.empty'))).toBeInTheDocument()
   })
 
   // Contract: every axis renders every segment (incl. 'none' foldings + orphans)
@@ -120,7 +121,7 @@ describe('TasksReport (RAPPORTEN-SUITE-1 portie 6, tasks report)', () => {
     mockUseTasksReport.mockReturnValue({ data: dataWithSuite, loading: false, error: false })
     renderReport()
     expect(screen.getByText('Totaal taken')).toBeInTheDocument()
-    expect(screen.getByText('Afgerond in periode')).toBeInTheDocument()
+    expect(screen.getByText(i18n.t('analytics:tasks.kpi.doneInPeriod'))).toBeInTheDocument()
     expect(screen.getByText('Aangemaakt in periode')).toBeInTheDocument()
     expect(screen.getByText('Vervalt vandaag')).toBeInTheDocument()
     expect(screen.getByText('Vervalt deze week')).toBeInTheDocument()

@@ -12,6 +12,7 @@ import { screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { data, FULL_NUMBER, MASKED_NUMBER, renderReport } from './WhatsappReport.testKit'
 import type { WhatsappReportData } from '@/types/analytics'
+import i18n from '@/i18n'
 
 // Data layer under test control (loading/error/empty/success — the four UI states).
 const mockUseWhatsappReport = vi.fn()
@@ -78,7 +79,7 @@ describe('WhatsappReport (RAPPORTEN-WHATSAPP-FE-1)', () => {
   it('shows the error state (calm degrade)', () => {
     mockUseWhatsappReport.mockReturnValue({ data: null, loading: false, error: true })
     renderReport()
-    expect(screen.getByText('Kon WhatsApp niet laden')).toBeInTheDocument()
+    expect(screen.getByText(i18n.t('analytics:whatsapp.error'))).toBeInTheDocument()
   })
 
   it('shows the empty state when there are no conversations', () => {
@@ -88,7 +89,7 @@ describe('WhatsappReport (RAPPORTEN-WHATSAPP-FE-1)', () => {
       loading: false, error: false,
     })
     renderReport()
-    expect(screen.getByText('Geen WhatsApp-gesprekken in deze periode')).toBeInTheDocument()
+    expect(screen.getByText(i18n.t('analytics:whatsapp.empty'))).toBeInTheDocument()
   })
 
   // WA-REPORT-TOLERANT-1: the demo envelope carried no by_type (10-09 sweep) and the
@@ -99,7 +100,7 @@ describe('WhatsappReport (RAPPORTEN-WHATSAPP-FE-1)', () => {
     const flat = { ...partial, timeseries: data.timeseries.series }
     mockUseWhatsappReport.mockReturnValue({ data: flat as unknown as WhatsappReportData, loading: false, error: false })
     expect(() => renderReport()).not.toThrow()
-    expect(screen.queryByText(/Er ging iets mis/)).toBeNull()
+    expect(screen.queryByText(i18n.t('common:error.title'))).toBeNull()
   })
 
   it('renders without crashing when the envelope leaves out an axis', () => {
@@ -144,7 +145,7 @@ describe('WhatsappReport (RAPPORTEN-WHATSAPP-FE-1)', () => {
     const user = userEvent.setup()
     mockUseWhatsappReport.mockReturnValue({ data, loading: false, error: false })
     renderReport()
-    await user.click(screen.getByText('Open escalaties'))
+    await user.click(screen.getByText(i18n.t('analytics:whatsapp.kpi.escalationsOpen')))
     expect(getSpy.mock.calls.length).toBeGreaterThan(0)
     expect(getSpy.mock.calls.every(c => c[0] === '/reports/whatsapp/kpis/drill')).toBe(true)
   })
@@ -167,7 +168,7 @@ describe('WhatsappReport (RAPPORTEN-WHATSAPP-FE-1)', () => {
     })
     mockUseWhatsappReport.mockReturnValue({ data, loading: false, error: false })
     renderReport()
-    expect(screen.getByText('Actief (7 dagen)')).toBeInTheDocument()
+    expect(screen.getByText(i18n.t('analytics:whatsapp.kpi.active7d'))).toBeInTheDocument()
     expect(screen.getByText('Totaal gesprekken')).toBeInTheDocument()
   })
 

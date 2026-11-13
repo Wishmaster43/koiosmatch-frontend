@@ -83,7 +83,7 @@ describe('VacanciesReport (RAPPORTEN-SUITE-1 portie 4, additive on C-34)', () =>
   it('shows the error state', () => {
     mockUseVacanciesReport.mockReturnValue({ data: null, loading: false, error: true })
     renderReport()
-    expect(screen.getByText('Kon de vacatures niet laden')).toBeInTheDocument()
+    expect(screen.getByText(i18n.t('analytics:vacancies.error'))).toBeInTheDocument()
   })
 
   // The shared ReportStateBlock retry button must call the hook's own refetch.
@@ -104,7 +104,7 @@ describe('VacanciesReport (RAPPORTEN-SUITE-1 portie 4, additive on C-34)', () =>
       loading: false, error: false,
     })
     renderReport()
-    expect(screen.getByText('Geen vacatures in deze periode')).toBeInTheDocument()
+    expect(screen.getByText(i18n.t('analytics:vacancies.empty'))).toBeInTheDocument()
   })
 
   // Contract: every axis renders every segment (incl. 'none'/'others'/orphans) and

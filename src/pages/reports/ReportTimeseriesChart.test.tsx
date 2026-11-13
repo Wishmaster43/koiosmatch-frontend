@@ -11,11 +11,12 @@
 import { describe, it, expect } from 'vitest'
 import { render, screen } from '@testing-library/react'
 import ReportTimeseriesChart from './ReportTimeseriesChart'
+import i18n from '@/i18n'
 
 describe('ReportTimeseriesChart', () => {
   it('shows the shared empty state for zero points', () => {
     render(<ReportTimeseriesChart series={[]} />)
-    expect(screen.getByText('Geen data')).toBeInTheDocument()
+    expect(screen.getByText(i18n.t('common:noData'))).toBeInTheDocument()
   })
 
   it('takes the chart branch (not the empty state) for a populated fixture', () => {
@@ -23,6 +24,6 @@ describe('ReportTimeseriesChart', () => {
       { date: '2026-08-03', label: 'Wk 32', value: 5 },
       { date: '2026-08-10', label: 'Wk 33', value: 7 },
     ]} />)
-    expect(screen.queryByText('Geen data')).not.toBeInTheDocument()
+    expect(screen.queryByText(i18n.t('common:noData'))).not.toBeInTheDocument()
   })
 })

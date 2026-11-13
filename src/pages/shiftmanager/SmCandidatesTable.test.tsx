@@ -1,8 +1,7 @@
 import { describe, it, expect } from 'vitest'
 import { render, screen, fireEvent, within } from '@testing-library/react'
-// Real i18n (nl) side-effect init so real Dutch column/status text resolves —
-// mirrors VacanciesTable.test.tsx's convention.
-import '@/i18n'
+// Real i18n (nl) init: column and status copy is read through the key.
+import i18n from '@/i18n'
 import SmCandidatesTable from './SmCandidatesTable'
 import type { ReportCandidate } from '@/types/reports'
 import { tintBg } from '@/lib/tint'
@@ -21,8 +20,8 @@ const rows: ReportCandidate[] = [
 describe('SmCandidatesTable · columns', () => {
   it('renders the mirrored reports column headers plus the new Uitschrijfdatum column', () => {
     render(<SmCandidatesTable rows={rows} />)
-    expect(screen.getByText('Naam')).toBeInTheDocument()
-    expect(screen.getByText('Status')).toBeInTheDocument()
+    expect(screen.getByText(i18n.t('reports:candidates.cols.name'))).toBeInTheDocument()
+    expect(screen.getByText(i18n.t('reports:candidates.cols.status'))).toBeInTheDocument()
     expect(screen.getByText('Functie')).toBeInTheDocument()
     expect(screen.getByText('Uitschrijfdatum')).toBeInTheDocument()
   })

@@ -8,6 +8,7 @@ import { describe, it, expect, vi } from 'vitest'
 import { render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import ReportsDashboard from './ReportsDashboard'
+import i18n from '@/i18n'
 
 // Navigation spy — asserts the exact target route each card drills into.
 const mockNavigate = vi.fn()
@@ -184,7 +185,7 @@ describe('ReportsDashboard · attention block (PART A)', () => {
     renderDashboard()
     expect(screen.getByText('Vraagt aandacht')).toBeInTheDocument()
     expect(screen.getByText('Kandidaten zonder opvolging')).toBeInTheDocument()
-    expect(screen.getByText('Taken over tijd')).toBeInTheDocument()
+    expect(screen.getByText(i18n.t('analytics:hub.attention.cards.tasks_overdue'))).toBeInTheDocument()
 
     await userEvent.click(screen.getByRole('button', { name: '3 Kandidaten zonder opvolging' }))
     expect(mockNavigate).toHaveBeenCalledWith('reports.candidates')
@@ -197,7 +198,7 @@ describe('ReportsDashboard · attention block (PART A)', () => {
     })
     renderDashboard()
     expect(screen.queryByText('Kandidaten zonder opvolging')).not.toBeInTheDocument()
-    expect(screen.getByText('Geen aandachtspunten: alles is bij.')).toBeInTheDocument()
+    expect(screen.getByText(i18n.t('analytics:hub.attention.empty'))).toBeInTheDocument()
   })
 
   it('routes the conversations signal to the WhatsApp report (no own page)', async () => {
@@ -240,7 +241,7 @@ describe('ReportsDashboard · attention block (PART A)', () => {
     mockHub.mockReturnValue({ data: null, loading: false, error: true, errorObject: { response: { status: 500 } }, refetch: vi.fn() })
     renderDashboard()
     expect(screen.getByText(String(FIXTURES.candidates))).toBeInTheDocument()
-    expect(screen.getByText('De aandachtssignalen konden niet worden geladen')).toBeInTheDocument()
+    expect(screen.getByText(i18n.t('analytics:hub.attention.error'))).toBeInTheDocument()
   })
 
   it('renders nothing for the attention block on a 403 (no reports.view), KPI band stays', () => {
@@ -262,7 +263,7 @@ describe('ReportsDashboard · chart grid (PART B)', () => {
     expect(screen.getByText('Kandidaten per bron')).toBeInTheDocument()
     expect(screen.getByText('Vervullingspercentage vacatures')).toBeInTheDocument()
     expect(screen.getByText('Matches onder contract')).toBeInTheDocument()
-    expect(screen.getByText('Taken per status')).toBeInTheDocument()
+    expect(screen.getByText(i18n.t('analytics:hub.charts.tasksByStatus'))).toBeInTheDocument()
   })
 })
 
