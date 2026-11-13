@@ -30,11 +30,11 @@ const DEFAULT_OUTREACH_OUTCOMES: LookupOption[] = [
 
 // The outreach-outcome tenant lookup, translating seeded defaults into the user language while a tenant's own value stays exactly as typed.
 export function useOutreachOutcomes() {
-  const { t } = useTranslation('common')
+  const { t, i18n } = useTranslation('common')
   // The endpoint now exists (item 11) — a real 404 should surface in the dev log again.
   const { data: rawOutcomes } = useCachedLookup('/outreach-outcomes?active=1', mapLookupResponse, DEFAULT_OUTREACH_OUTCOMES)
   // Seeded defaults render in the user language; a tenant value stays as typed (LOOKUP-I18N-1).
-  const outcomes = useMemo(() => translateSeedList(t, 'outcomes', rawOutcomes), [rawOutcomes, t])
+  const outcomes = useMemo(() => translateSeedList(t, 'outcomes', rawOutcomes, i18n), [rawOutcomes, t, i18n])
 
   // Resolve a stored slug to its meta (label + colour) — tolerant of label-stored values.
   const metaOf = (v?: string | null): LookupOption | undefined =>

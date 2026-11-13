@@ -20,8 +20,8 @@ const mockedGet = vi.mocked(api.get)
 const mockedTenantId = vi.mocked(getActiveTenantId)
 let tenantSeq = 0
 
-// This test suite never initialises react-i18next, so `t(key, { defaultValue })`
-// falls back to `defaultValue` verbatim, i.e. label === value here.
+// This test suite never initialises react-i18next: the seed-label helper's labelOrRaw path
+// then returns the raw label through its empty-i18n guard, i.e. label === value here.
 // KEY-ADOPTION: asOptions now includes key (null for seed, real key for API rows).
 const asOptions = (names: string[], keys?: (string | null)[]) => names.map((name, i) => ({
   value: name,

@@ -28,7 +28,7 @@ const mapIndustries = (res: AxiosResponse): string[] | null => {
 
 // Tenant industry list plus a picker-ready options array; raw names stay unsaved-untranslated so a picker never persists a display label.
 export function useIndustries() {
-  const { t } = useTranslation('common')
+  const { t, i18n } = useTranslation('common')
   const { data: rawIndustries } = useCachedLookup('/industries?active=1', mapIndustries, DEFAULT_INDUSTRIES)
   // LOOKUP-I18N-1 SAFETY: this list is VALUE and LABEL at once — the picker stores the
   // string it shows, so a translated entry would be SAVED and the record would carry
@@ -38,8 +38,8 @@ export function useIndustries() {
   const industries = rawIndustries
   // Pairs each raw industry name with its translated label for pickers, without ever mutating the stored value itself.
   const industryOptions = useMemo(
-    () => rawIndustries.map(name => ({ value: name, label: translateSeedLabel(t, 'industries', { label: name }) })),
-    [rawIndustries, t],
+    () => rawIndustries.map(name => ({ value: name, label: translateSeedLabel(t, 'industries', { label: name }, i18n) })),
+    [rawIndustries, t, i18n],
   )
   return { industries, industryOptions }
 }

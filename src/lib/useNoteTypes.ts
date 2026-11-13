@@ -89,9 +89,9 @@ function buildNoteTypeHelpers(types: LookupOption[]) {
 // writable-types filter from the raw lookup rows — the final assembly step shared by
 // useNoteTypes and useNoteTypesFor, so their two return shapes never drift apart.
 function useResolvedNoteTypes(rawTypes: LookupOption[]) {
-  const { t } = useTranslation('common')
+  const { t, i18n } = useTranslation('common')
   // Seeded defaults render in the user language; a tenant value stays as typed (LOOKUP-I18N-1).
-  const types = useMemo(() => translateSeedList(t, 'noteTypes', rawTypes), [rawTypes, t])
+  const types = useMemo(() => translateSeedList(t, 'noteTypes', rawTypes, i18n), [rawTypes, t, i18n])
   const { labelOf, colorOf, writableTypes } = useMemo(() => buildNoteTypeHelpers(types), [types])
   return { types, writableTypes, labelOf, colorOf }
 }

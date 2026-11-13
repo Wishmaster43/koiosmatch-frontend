@@ -102,13 +102,13 @@ const mapDocumentTypes = (res: AxiosResponse): LookupOption[] | null => {
 
 // Tenant document-type lookup, optionally scoped to one entity's own cache slot.
 export function useDocumentTypes(entity?: string) {
-  const { t } = useTranslation('common')
+  const { t, i18n } = useTranslation('common')
   // Bake the optional entity filter into the cache key itself (see file header) —
   // no entity = the exact same request/url as before this axis existed.
   const url = entity ? `/document-types?entity=${encodeURIComponent(entity)}&active=1` : '/document-types?active=1'
   const { data: rawTypes } = useCachedLookup(url, mapDocumentTypes, DEFAULT_DOCUMENT_TYPES)
   // Seeded defaults render in the user language; a tenant value stays as typed (LOOKUP-I18N-1).
-  const types = useMemo(() => translateSeedList(t, 'documentTypes', rawTypes), [rawTypes, t])
+  const types = useMemo(() => translateSeedList(t, 'documentTypes', rawTypes, i18n), [rawTypes, t, i18n])
 
   // Build resolver functions (find/labelOf/colorOf/iconOf) from the lookup list,
   // but override colorOf to use the fallback colour for missing entries.

@@ -36,10 +36,10 @@ const mapOpportunityStages = (res: AxiosResponse): LookupOption[] | null => norm
 // Tenant opportunity-pipeline stage lookup (see file docblock above), seed-labelled
 // and cached so every mounted consumer shares one fetch.
 export function useOpportunityStages() {
-  const { t } = useTranslation('common')
+  const { t, i18n } = useTranslation('common')
   const { data: rawStages } = useCachedLookup('/opportunity-stages?active=1', mapOpportunityStages, DEFAULT_OPPORTUNITY_STAGES)
   // Seeded defaults render in the user language; a tenant value stays as typed (LOOKUP-I18N-1).
-  const stages = useMemo(() => translateSeedList(t, 'opportunityStages', rawStages), [rawStages, t])
+  const stages = useMemo(() => translateSeedList(t, 'opportunityStages', rawStages, i18n), [rawStages, t, i18n])
 
   // value(slug) → item, with a neutral fallback so the UI never crashes.
   // eslint-disable-next-line no-restricted-syntax -- DATA fallback, not a UI colour choice
