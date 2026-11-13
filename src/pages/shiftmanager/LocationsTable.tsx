@@ -5,6 +5,7 @@
  * colours match every other entity list.
  */
 import { useTranslation } from 'react-i18next'
+import { labelOrRaw } from '@/lib/labelOrRaw'
 import type { CSSProperties } from 'react'
 import { MapPin } from 'lucide-react'
 import DataTable from '@/components/ui/DataTable'
@@ -37,7 +38,7 @@ export default function LocationsTable({ rows, loading, selectedId, onSelect }: 
   selectedId?: string | number | null
   onSelect?: (row: SmLocationRow) => void
 }) {
-  const { t } = useTranslation('shiftmanager')
+  const { t, i18n } = useTranslation('shiftmanager')
 
   const columns: Column<SmLocationRow>[] = [
     {
@@ -102,7 +103,7 @@ export default function LocationsTable({ rows, loading, selectedId, onSelect }: 
     {
       key: 'status', header: t('locationsPage.cols.status'), sortable: true, sortValue: l => l.status ?? '',
       render: l => l.status
-        ? <StatusPill label={t(`locationsPage.status.${l.status.toLowerCase()}`, { defaultValue: l.status })} color={STATUS_COLORS[l.status.toLowerCase()]} />
+        ? <StatusPill label={labelOrRaw(t, i18n, `locationsPage.status.${l.status.toLowerCase()}`, l.status, 'shiftmanager')} color={STATUS_COLORS[l.status.toLowerCase()]} />
         : <span style={{ color: 'var(--text-muted)' }}>{t('locationsPage.statusUnknown')}</span>,
     },
   ]

@@ -11,6 +11,7 @@ export { ac }
 // so the drawer's status badge never drifts from the table's.
 import SoftChip from '@/components/ui/SoftChip'
 import { useTranslation } from 'react-i18next'
+import { labelOrRaw } from '@/lib/labelOrRaw'
 import { SmInitialBubble } from './smParts'
 
 // Square initial-avatar (shared body lives in SmInitialBubble — DRY round 11, SHIFTMANAGER).
@@ -24,8 +25,8 @@ const STATUS_COLORS: Record<string, string> = { active: 'var(--color-success)', 
 // Active/inactive soft-chip pill; the raw slug is stable English (useSmDepartments),
 // translated here — an unrecognised value falls back to the raw slug itself.
 export function StatusBadge({ status }: { status?: string }) {
-  const { t } = useTranslation('shiftmanager')
+  const { t, i18n } = useTranslation('shiftmanager')
   if (!status) return <span style={{ color: 'var(--text-muted)' }}>—</span>
   const key = status.toLowerCase()
-  return <SoftChip label={t(`departmentsPage.status.${key}`, { defaultValue: status })} color={STATUS_COLORS[key]} round />
+  return <SoftChip label={labelOrRaw(t, i18n, `departmentsPage.status.${key}`, status, 'shiftmanager')} color={STATUS_COLORS[key]} round />
 }

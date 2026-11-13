@@ -5,6 +5,7 @@
  */
 import { useState, useMemo, useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
+import { labelOrRaw } from '@/lib/labelOrRaw'
 import { Layers, Building2, Users } from 'lucide-react'
 import { useRightPanel } from '@/context/RightPanelContext'
 import { toggleInList } from '@/lib/selectionSet'
@@ -23,7 +24,7 @@ import { SmTableSection } from './SmTableSection'
 
 // Thin container: reads the SM mirror, derives filter option lists + KPI totals, and composes the table + drawer.
 export default function DepartmentsPage() {
-  const { t } = useTranslation('shiftmanager')
+  const { t, i18n } = useTranslation('shiftmanager')
   // Data (fetch + transform) lives in the shared hook (§3).
   const { departments, truncated, isLoading, isError, refetch } = useSmDepartments()
   const [search,      setSearch]      = useState('')
@@ -46,7 +47,7 @@ export default function DepartmentsPage() {
   // Assembles the right-panel filter groups (status/customer/location) from the derived option lists.
   const filterGroups = useMemo(() => [
     { key: 'status',  label: t('departmentsPage.filter.status'),
-      options: statusOptions.map(s => ({ value: s, label: t(`departmentsPage.status.${s.toLowerCase()}`, { defaultValue: s }) })),
+      options: statusOptions.map(s => ({ value: s, label: labelOrRaw(t, i18n, `departmentsPage.status.${s.toLowerCase()}`, s, 'shiftmanager') })),
       selected: selStatuses,  onToggle: (val: string) => setSelStatuses(prev => toggleInList(prev, val)) },
     { key: 'customer',   label: t('departmentsPage.filter.customer'),
       options: customerOptions.map(k => ({ value: k, label: k })),
@@ -54,7 +55,7 @@ export default function DepartmentsPage() {
     { key: 'location', label: t('departmentsPage.filter.location'),
       options: locationOptions.map(l => ({ value: l, label: l })),
       selected: selLocations,  onToggle: (val: string) => setSelLocations(prev => toggleInList(prev, val)) },
-  ], [t, statusOptions, customerOptions, locationOptions, selStatuses, selCustomers, selLocations])
+  ], [t, i18n, statusOptions, customerOptions, locationOptions, selStatuses, selCustomers, selLocations])
 
   // Publishes the filter groups to the shared right panel, and unregisters them on unmount so a stale filter set doesn't linger after leaving this page.
   useEffect(() => {

@@ -16,6 +16,7 @@
 import { useState, useMemo, useEffect } from 'react'
 import { SM_STATUS } from '@/lib/smStatus'
 import { useTranslation } from 'react-i18next'
+import { labelOrRaw } from '@/lib/labelOrRaw'
 import { useKpiSettings } from '@/lib/useKpiSettings'
 import { useSmCandidatesList } from './hooks/useSmCandidatesList'
 import { useReportCandidates } from '@/components/reports/useReportCandidates'
@@ -46,7 +47,7 @@ import type { ReportCandidate } from '@/types/reports'
 // client-refined table over the current page, and the rich drill-down drawers
 // (per-KPI subset + per-row detail).
 export default function CandidatesDetailPage() {
-  const { t } = useTranslation('reports')
+  const { t, i18n } = useTranslation('reports')
   const { t: tSm } = useTranslation('shiftmanager')
   const { candidates_per_page } = useKpiSettings()
   const { candidates, loading, error, page, pageSize, total, lastPage, setPage, handlePageSizeChange } = useSmCandidatesList()
@@ -128,11 +129,11 @@ export default function CandidatesDetailPage() {
       { key: 'year', label: t('candidates.filters.year'), options: years.map(y => ({ value: y, label: String(y) })), selected: selectedYears, onToggle: toggle(setSelectedYears) },
       // Status axis in the drawer too (Danny 24-07) — multi-toggle onto the same
       // statusFilter the KPI/donut picks drive (labels via the reports status map).
-      { key: 'status', label: t('candidates.filters.status'), options: statuses.map(st => ({ value: st, label: t(`candidates.status.${(st || '').toLowerCase().replace(/\s+/g, '')}`, { defaultValue: st }) })), selected: statusFilter, onToggle: toggle(setStatusFilter) },
+      { key: 'status', label: t('candidates.filters.status'), options: statuses.map(st => ({ value: st, label: labelOrRaw(t, i18n, `candidates.status.${(st || '').toLowerCase().replace(/\s+/g, '')}`, st, 'reports') })), selected: statusFilter, onToggle: toggle(setStatusFilter) },
       { key: 'position', label: t('candidates.filters.position'), options: positions.map(p => ({ value: p, label: p })), selected: selectedPositions, onToggle: toggle(setSelectedPositions) },
       { key: 'features', label: t('candidates.filters.features'), options: features.map(k => ({ value: k, label: k })), selected: selectedFeatures, onToggle: toggle(setSelectedFeatures) },
     ]
-  }, [t, allCandidates, candidates, selectedYears, statusFilter, selectedPositions, selectedFeatures])
+  }, [t, i18n, allCandidates, candidates, selectedYears, statusFilter, selectedPositions, selectedFeatures])
   // Publish the current filter groups into the shared right panel; unregister on
   // unmount/change so a stale group set never lingers there.
   useEffect(() => {

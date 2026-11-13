@@ -8,6 +8,7 @@
 import { useMemo } from 'react'
 import type { CSSProperties } from 'react'
 import { useTranslation } from 'react-i18next'
+import { labelOrRaw } from '@/lib/labelOrRaw'
 import DataTable from '@/components/ui/DataTable'
 import type { Column } from '@/components/ui/DataTable'
 import Avatar from '@/components/ui/Avatar'
@@ -34,7 +35,7 @@ interface SmCandidatesTableProps {
 
 // Declares only columns for the shared DataTable (see the module doc above): rendering/sorting/selection/empty states all live there.
 export default function SmCandidatesTable({ rows, loading, onRowClick }: SmCandidatesTableProps) {
-  const { t } = useTranslation(['shiftmanager', 'reports'])
+  const { t, i18n } = useTranslation(['shiftmanager', 'reports'])
   const { formatDate } = useDateFormat()
   const { formatCurrency } = useNumberFormat()
 
@@ -66,7 +67,7 @@ export default function SmCandidatesTable({ rows, loading, onRowClick }: SmCandi
       render: c => {
         const key = (c.status ?? '').toLowerCase()
         const color = SM_CANDIDATE_STATUS_COLORS[key] ?? 'var(--text-muted)'
-        const label = c.status ? t(`candidates.status.${key}`, { ns: 'reports', defaultValue: c.status }) : t('candidates.unknown', { ns: 'reports' })
+        const label = c.status ? labelOrRaw(t, i18n, `candidates.status.${key}`, c.status, 'reports') : t('candidates.unknown', { ns: 'reports' })
         return <SoftChip label={label} color={color} round />
       },
     },
@@ -120,7 +121,7 @@ export default function SmCandidatesTable({ rows, loading, onRowClick }: SmCandi
         )
       },
     },
-  ], [t, formatDate, formatCurrency])
+  ], [t, i18n, formatDate, formatCurrency])
 
   return (
     <DataTable

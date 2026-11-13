@@ -5,6 +5,7 @@
  * StatusPill so the colours match every other entity list.
  */
 import { useTranslation } from 'react-i18next'
+import { labelOrRaw } from '@/lib/labelOrRaw'
 import type { CSSProperties } from 'react'
 import { MapPin } from 'lucide-react'
 import DataTable from '@/components/ui/DataTable'
@@ -30,7 +31,7 @@ export default function DepartmentsTable({ rows, loading, selectedId, onSelect }
   selectedId?: string | number | null
   onSelect?: (row: SmDepartmentRow) => void
 }) {
-  const { t } = useTranslation('shiftmanager')
+  const { t, i18n } = useTranslation('shiftmanager')
 
   const columns: Column<SmDepartmentRow>[] = [
     {
@@ -68,7 +69,7 @@ export default function DepartmentsTable({ rows, loading, selectedId, onSelect }
     {
       key: 'status', header: t('departmentsPage.cols.status'), sortable: true, sortValue: d => d.status ?? '',
       render: d => d.status
-        ? <StatusPill label={t(`departmentsPage.status.${d.status.toLowerCase()}`, { defaultValue: d.status })} color={STATUS_COLORS[d.status.toLowerCase()]} />
+        ? <StatusPill label={labelOrRaw(t, i18n, `departmentsPage.status.${d.status.toLowerCase()}`, d.status, 'shiftmanager')} color={STATUS_COLORS[d.status.toLowerCase()]} />
         : <span style={{ color: 'var(--text-muted)' }}>—</span>,
     },
   ]
