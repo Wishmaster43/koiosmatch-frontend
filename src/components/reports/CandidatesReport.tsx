@@ -1,5 +1,6 @@
 import { useState, useEffect, useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
+import { labelOrRaw } from '@/lib/labelOrRaw'
 import ErrorBanner from '@/components/ui/ErrorBanner'
 import Spinner from '@/components/ui/Spinner'
 import { useKpiSettings } from '@/lib/useKpiSettings'
@@ -218,7 +219,7 @@ export default function CandidatesReport() {
       selected: selectedStatuses,
       onToggle: (v: string) => setSelectedStatuses(p => p.includes(v) ? p.filter(s => s !== v) : [...p, v]),
       options: allStatuses.map(s => ({
-        value: s, label: t(`candidates.status.${s}`, { defaultValue: s }),
+        value: s, label: labelOrRaw(t, i18n, `candidates.status.${s}`, s, 'reports'),
         count: candidates.filter(c => statusOf(c) === s).length,
       })),
     },
@@ -231,7 +232,7 @@ export default function CandidatesReport() {
         count: candidates.filter(c => (c.position||unknownLabel) === p).length,
       })),
     },
-  ], [t, showPercent, selectedYear, selectedStatuses, selectedPositions, allStatuses, allPositions, availableYears, candidates, unknownLabel])
+  ], [t, i18n, showPercent, selectedYear, selectedStatuses, selectedPositions, allStatuses, allPositions, availableYears, candidates, unknownLabel])
 
   // Keeps this report's filter groups mirrored into the shared right panel whenever they
   // change, and deregisters them on unmount so a stale entry doesn't linger for other pages.

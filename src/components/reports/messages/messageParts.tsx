@@ -6,6 +6,7 @@
  */
 import { MessageCircle, Mail, Phone, CheckCheck, Clock, XCircle, AlertTriangle } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
+import { labelOrRaw } from '@/lib/labelOrRaw'
 import { formatDateTimeStr } from '@/lib/localDate'
 import MetadataBadge, { type BadgeMeta } from '@/components/ui/MetadataBadge'
 
@@ -39,12 +40,12 @@ export const STATUS_META: Record<string, BadgeMeta> = {
 }
 
 export function ChannelBadge({ channel }: { channel?: string }) {
-  const { t } = useTranslation('reports')
+  const { t, i18n } = useTranslation('reports')
   return (
     <MetadataBadge
       value={channel}
       meta={CHANNEL_META}
-      labelOf={(key) => t(`messages.channel.${key}`, { defaultValue: channel })}
+      labelOf={(key) => labelOrRaw(t, i18n, `messages.channel.${key}`, channel ?? '', 'reports')}
       fallbackIcon={MessageCircle}
     />
   )
@@ -52,12 +53,12 @@ export function ChannelBadge({ channel }: { channel?: string }) {
 
 // Coloured status pill with an icon; an unrecognised/missing status falls back to a muted neutral look rather than rendering nothing.
 export function StatusBadge({ status }: { status?: string }) {
-  const { t } = useTranslation('reports')
+  const { t, i18n } = useTranslation('reports')
   return (
     <MetadataBadge
       value={status}
       meta={STATUS_META}
-      labelOf={(key) => t(`messages.status.${key}`, { defaultValue: status })}
+      labelOf={(key) => labelOrRaw(t, i18n, `messages.status.${key}`, status ?? '', 'reports')}
       fallbackIcon={Clock}
     />
   )

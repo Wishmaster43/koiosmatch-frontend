@@ -39,7 +39,7 @@ export default function ShiftAnalysisPage() {
 
   // Alarm counts drive the KPI cards.
   const counts = useMemo(() => {
-    const c = { wegvallend: 0, daling: 0, opkomend: 0, newly_inactive: 0 }
+    const c = { dropping_out: 0, declining: 0, rising: 0, newly_inactive: 0 }
     for (const r of rows) if (r.alarm) c[r.alarm] += 1
     return c
   }, [rows])
@@ -83,11 +83,11 @@ export default function ShiftAnalysisPage() {
 
           {/* Alarm KPI row */}
           <div className="grid gap-4 mb-6" style={{ gridTemplateColumns: 'repeat(auto-fit, minmax(190px, 1fr))' }}>
-            <KpiCard label={t('shiftAnalysis.kpi.wegvallend')} value={counts.wegvallend}
+            <KpiCard label={t('shiftAnalysis.kpi.droppingOut')} value={counts.dropping_out}
               icon={TrendingDown} iconBg="var(--color-danger-bg)" iconColor="var(--color-danger)" />
-            <KpiCard label={t('shiftAnalysis.kpi.daling')} value={counts.daling}
+            <KpiCard label={t('shiftAnalysis.kpi.declining')} value={counts.declining}
               icon={TrendingDown} iconBg="var(--color-warning-bg)" iconColor="var(--color-warning)" />
-            <KpiCard label={t('shiftAnalysis.kpi.opkomend')} value={counts.opkomend}
+            <KpiCard label={t('shiftAnalysis.kpi.rising')} value={counts.rising}
               icon={TrendingUp} iconBg="var(--color-success-bg)" iconColor="var(--color-success)" />
             <KpiCard label={t('shiftAnalysis.kpi.newlyInactive')} value={counts.newly_inactive}
               icon={UserX} iconBg="var(--color-warning-bg)" iconColor="var(--color-warning)" />

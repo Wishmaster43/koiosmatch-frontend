@@ -8,6 +8,8 @@ import { useTranslation } from 'react-i18next'
 import { CheckCircle, AlertCircle, Clock } from 'lucide-react'
 import { useKpiSettings } from '@/lib/useKpiSettings'
 import { useAuth } from '@/context/AuthContext'
+import { canAccessPage } from '@/lib/access'
+import Button from '@/components/ui/Button'
 import { useNumberFormat } from '@/lib/formatters'
 import { SmLoadErrorBanner } from './SmLoadErrorBanner'
 import type { KpiSpec } from '@/components/insights/InsightsRow'
@@ -24,13 +26,12 @@ const AI_PACKAGES = ['reporting_sm_ai', 'reporting_hf_ai', 'reporting_sm_hf_ai',
 // Loosely-typed SM candidate row (mirrors external data).
 type Rec = Record<string, unknown>
 
-// Shared card header (title + "view all" link) for the recent-runs/recent-
-// conversations panels — identical shape, only the title differs.
-function DashboardCardHeader({ title, viewAllLabel }: { title: string; viewAllLabel: string }) {
+// Shared card header for the recent-runs/recent-conversations panels; the "view all" link only renders when the viewer may open its target page.
+function DashboardCardHeader({ title, href, linkLabel }: { title: string; href?: string; linkLabel: string }) {
   return (
     <div className="flex items-center justify-between px-4 py-3" style={{ borderBottom: '1px solid var(--border)' }}>
       <span className="font-medium text-(--text)" style={{ fontSize: 13 }}>{title}</span>
-      <span className="text-xs text-(--text-muted) cursor-pointer">{viewAllLabel}</span>
+      {href && <Button variant="ghost" size="sm" href={href}>{linkLabel}</Button>}
     </div>
   )
 }
@@ -95,8 +96,8 @@ export default function ShiftmanagerDashboard() {
     const inactive = list.filter(c => statusOf(c) === SM_STATUS.INACTIVE)
     // Aandachtskandidaten ("attention candidates") — the SAME function as the candidates
     // report (calcAttention: active + new <30d + not yet scheduled) so the KPIs on both
-    // screens match (Danny). The "active but never logged in" rule CANNOT be added:
-    // `last_login_at` DOES exist on the model but NOT on the resource (BE handoff). The
+    // screens match (Danny). The "active but never logged in" rule is not added yet:
+    // `last_login_at` IS on SmCandidateResource (CMBE 13-11), so the rows already carry it. The
     // 2 "works less" rules wait on future per-candidate hours (shifts-per-candidate).
     const attention = calcAttention(list as unknown as ReportCandidate[])
     return { newList, newCount, avg, active, inactive, all: list, bNever, bWorked, bPlanned, bIdle, attention }
@@ -161,7 +162,8 @@ export default function ShiftmanagerDashboard() {
 
         {/* Recent runs */}
         <div className="overflow-hidden bg-(--surface) rounded-xl" style={{ border: '1px solid var(--border)' }}>
-          <DashboardCardHeader title={t('dashboard.recentRuns')} viewAllLabel={t('dashboard.viewAll')} />
+          <DashboardCardHeader title={t('dashboard.recentRuns')} linkLabel={t('dashboard.viewAll')}
+            href={canAccessPage('details.runs', auth ?? undefined) ? '#details.runs' : undefined} />
           {runs.length === 0 && (
             <div className="px-4 py-6 text-xs text-center text-(--text-muted)">{t('charts.empty')}</div>
           )}
@@ -187,7 +189,8 @@ export default function ShiftmanagerDashboard() {
 
         {/* Recent conversations */}
         <div className="overflow-hidden bg-(--surface) rounded-xl" style={{ border: '1px solid var(--border)' }}>
-          <DashboardCardHeader title={t('dashboard.recentConversations')} viewAllLabel={t('dashboard.viewAll')} />
+          <DashboardCardHeader title={t('dashboard.recentConversations')} linkLabel={t('dashboard.viewAll')}
+            href={canAccessPage('details.messages', auth ?? undefined) ? '#details.messages' : undefined} />
           {conversations.length === 0 && (
             <div className="px-4 py-6 text-xs text-center text-(--text-muted)">{t('charts.empty')}</div>
           )}

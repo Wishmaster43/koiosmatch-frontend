@@ -16,15 +16,15 @@
       "alarm": "Signal"
     },
     "alarm": {
-      "wegvallend": "Wegfallend",
-      "daling": "Starker Rückgang",
-      "opkomend": "Aufkommend",
+      "dropping_out": "Wegfallend",
+      "declining": "Starker Rückgang",
+      "rising": "Aufkommend",
       "newly_inactive": "Neu & inaktiv"
     },
     "kpi": {
-      "wegvallend": "Wegfallend",
-      "daling": "Starker Rückgang",
-      "opkomend": "Aufkommend",
+      "droppingOut": "Wegfallend",
+      "declining": "Starker Rückgang",
+      "rising": "Aufkommend",
       "newlyInactive": "Neu & inaktiv"
     },
     "plannedTitle": "Geplante UZK pro Monat",

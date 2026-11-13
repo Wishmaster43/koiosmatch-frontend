@@ -25,7 +25,7 @@ vi.mock('@/lib/api', async () => {
   return { ...actual, default: { get: vi.fn(), post: vi.fn() } }
 })
 // Raw key passthrough — assertions target stable keys, not locale copy.
-const activeI18n = vi.hoisted(() => ({ language: 'nl' }))
+const activeI18n = vi.hoisted(() => ({ language: 'nl', exists: () => false }))
 vi.mock('react-i18next', () => ({
   useTranslation: () => ({ t: (k: string) => k, i18n: activeI18n }),
 }))

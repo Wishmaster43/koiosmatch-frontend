@@ -5,6 +5,7 @@
  * once instead of a copy per drawer.
  */
 import { useTranslation } from 'react-i18next'
+import { labelOrRaw } from '@/lib/labelOrRaw'
 import StatusPill from '@/components/ui/StatusPill'
 import { SM_STATUS, normalizeSmStatus } from '@/lib/smStatus'
 
@@ -19,8 +20,8 @@ const STATUS_COLORS: Record<string, string> = {
 
 // Translated label from the normalised key, the raw status as fallback, "unknown" without one.
 export default function RecordStatusBadge({ status }: { status?: string }) {
-  const { t } = useTranslation('reports')
+  const { t, i18n } = useTranslation('reports')
   const key = normalizeSmStatus(status)
-  const label = status ? t(`candidates.status.${key}`, { defaultValue: status }) : t('candidates.unknown')
+  const label = status ? labelOrRaw(t, i18n, `candidates.status.${key}`, status, 'reports') : t('candidates.unknown')
   return <StatusPill label={label} color={STATUS_COLORS[key]} />
 }

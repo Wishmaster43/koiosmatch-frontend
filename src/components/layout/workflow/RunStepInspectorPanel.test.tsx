@@ -18,7 +18,7 @@ vi.mock('@/lib/api', async (importOriginal) => {
 })
 // Raw key passthrough — assertions target stable keys, not locale copy.
 vi.mock('react-i18next', () => ({
-  useTranslation: () => ({ t: (k: string, o?: Record<string, unknown>) => (o ? `${k}:${JSON.stringify(o)}` : k) }),
+  useTranslation: () => ({ t: (k: string, o?: Record<string, unknown>) => (o ? `${k}:${JSON.stringify(o)}` : k), i18n: { language: 'nl', exists: () => false } }),
   initReactI18next: { type: '3rdParty', init: () => {} },
 }))
 vi.mock('./useModuleCatalog', () => ({

@@ -4,6 +4,7 @@
  * present in the row data; onToggle follows the shared panel's select/deselect pattern.
  */
 import type { TFunction } from 'i18next'
+import { labelOrRaw } from '@/lib/labelOrRaw'
 import type { ReportFilterGroup } from '@/types/reports'
 
 /**
@@ -13,6 +14,7 @@ import type { ReportFilterGroup } from '@/types/reports'
  */
 export function buildStatusGroup(
   t: TFunction,
+  i18n: { exists: (key: string, options?: { ns?: string }) => boolean },
   statusValues: (string | undefined)[],
   selectedStatuses: (string | number)[],
   rows: Array<{ status?: string }>,
@@ -28,7 +30,7 @@ export function buildStatusGroup(
     selected: selectedStatuses,
     options: statusValues.map(s => ({
       value: s || '',
-      label: t(`${namespace}.status.${transform(s || '')}`, { defaultValue: s || '' }),
+      label: labelOrRaw(t, i18n, `${namespace}.status.${transform(s || '')}`, s || '', 'reports'),
       count: rows.filter(r => r.status === s).length,
     })),
     onToggle,

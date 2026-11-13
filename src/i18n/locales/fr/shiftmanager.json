@@ -16,15 +16,15 @@
       "alarm": "Signal"
     },
     "alarm": {
-      "wegvallend": "En chute",
-      "daling": "Forte baisse",
-      "opkomend": "En hausse",
+      "dropping_out": "En chute",
+      "declining": "Forte baisse",
+      "rising": "En hausse",
       "newly_inactive": "Nouveau & inactif"
     },
     "kpi": {
-      "wegvallend": "En chute",
-      "daling": "Forte baisse",
-      "opkomend": "En hausse",
+      "droppingOut": "En chute",
+      "declining": "Forte baisse",
+      "rising": "En hausse",
       "newlyInactive": "Nouveau & inactif"
     },
     "plannedTitle": "UZK planifiés par mois",

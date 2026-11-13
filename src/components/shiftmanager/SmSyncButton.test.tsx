@@ -28,10 +28,19 @@ beforeEach(() => {
 })
 
 describe('SmSyncButton', () => {
-  it('disables the button (never hides it) when the user is not a superadmin', () => {
+  // SYNC-RETIRE-1: the emergency control is hidden for a bureau user, shown for a super admin.
+  it('renders no button for a bureau user (not a super admin)', () => {
     mockUseAuth.mockReturnValue({ isSuperAdmin: () => false })
     render(<SmSyncButton />)
-    expect(screen.getByRole('button')).toBeDisabled()
+    expect(screen.queryByRole('button')).not.toBeInTheDocument()
+    // The connections and sync hooks are never mounted for a bureau user (no request fires).
+    expect(mockUseSmConnections).not.toHaveBeenCalled()
+    expect(mockUseSmSync).not.toHaveBeenCalled()
+  })
+
+  it('renders the button for a super admin', () => {
+    render(<SmSyncButton />)
+    expect(screen.getByRole('button')).toBeEnabled()
   })
 
   it('disables the button when there is no active Shiftmanager connection', () => {
@@ -43,6 +52,8 @@ describe('SmSyncButton', () => {
   it('syncs the single connection directly on click — no picker shown', () => {
     render(<SmSyncButton />)
     fireEvent.click(screen.getByRole('button'))
+    // The hook owns the POST /sm_reports/sync request; assert the call it receives.
+    expect(mockSync).toHaveBeenCalledTimes(1)
     expect(mockSync).toHaveBeenCalledWith('c1')
   })
 

@@ -16,15 +16,15 @@
       "alarm": "Signal"
     },
     "alarm": {
-      "wegvallend": "Dropping off",
-      "daling": "Strong decline",
-      "opkomend": "Rising",
+      "dropping_out": "Dropping off",
+      "declining": "Strong decline",
+      "rising": "Rising",
       "newly_inactive": "New & inactive"
     },
     "kpi": {
-      "wegvallend": "Dropping off",
-      "daling": "Strong decline",
-      "opkomend": "Rising",
+      "droppingOut": "Dropping off",
+      "declining": "Strong decline",
+      "rising": "Rising",
       "newlyInactive": "New & inactive"
     },
     "plannedTitle": "Planned UZK per month",

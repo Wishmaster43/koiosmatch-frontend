@@ -2,9 +2,9 @@
  * SmSyncButton (SYNC-1) — the manual "Sync" action next to "Laatste sync" on the SM
  * dashboard charts. One active Shiftmanager connection syncs immediately; several open
  * a small SelectMenu picker first (never guesses which account — same rule as the
- * workflow sm_* modules' own connection_id field). Gated on superadmin role (route is
- * backend-superadmin-only), disabled (not hidden) with a tooltip when missing — the
- * backend re-checks the role regardless (§7).
+ * workflow sm_* modules' own connection_id field). SYNC-RETIRE-1: POST /sm_reports/sync is
+ * a super-admin emergency route, so the control renders ONLY for a super admin and never
+ * for a bureau user — the backend re-checks the role regardless (§7).
  */
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
@@ -16,12 +16,17 @@ import { Caption } from '@/components/ui/typography'
 import { useSmConnections } from './useSmConnections'
 import { useSmSync } from './useSmSync'
 
+// Gate wrapper: a bureau user renders nothing and fires no request (§8 minimisation).
+export default function SmSyncButton() {
+  const auth = useAuth()
+  if (!(auth?.isSuperAdmin?.() ?? false)) return null
+  return <SmSyncControl />
+}
+
 // The manual Shiftmanager sync action (see file docblock above): syncs immediately
 // with one connection, or opens a picker first with several — never a silent guess.
-export default function SmSyncButton() {
+function SmSyncControl() {
   const { t } = useTranslation('shiftmanager')
-  const auth = useAuth()
-  const canSync = auth?.isSuperAdmin?.() ?? false
   const { connections, loading: loadingConnections } = useSmConnections()
   const { syncing, awaitingSnapshot, result, sync } = useSmSync()
   // The picker only replaces the button once it's actually needed (2+ connections) —
@@ -31,7 +36,7 @@ export default function SmSyncButton() {
   const noConnection = !loadingConnections && connections.length === 0
   // N007-POINT3-FIX-1: stays blocked while the queued snapshot has not landed yet,
   // so a second click right after a successful queue does not re-fire the sync.
-  const blocked = !canSync || syncing || awaitingSnapshot || noConnection || loadingConnections
+  const blocked = syncing || awaitingSnapshot || noConnection || loadingConnections
 
   // Entry point: one connection syncs immediately, several open the picker instead.
   const handleClick = () => {
@@ -40,9 +45,7 @@ export default function SmSyncButton() {
     setPicking(true)
   }
 
-  const title = !canSync ? t('charts.sync.noPermission')
-    : noConnection ? t('charts.sync.noConnection')
-    : undefined
+  const title = noConnection ? t('charts.sync.noConnection') : undefined
 
   // Caption carries the 11px identity; only layout and the -text ink twin are set per result kind.
   return (

@@ -4,6 +4,7 @@
  * consistent and is never duplicated. Labels resolve via the `reports` namespace.
  */
 import { useTranslation } from 'react-i18next'
+import { labelOrRaw } from '@/lib/labelOrRaw'
 import { Ban, CheckCircle, XCircle, RotateCcw, Clock, ShieldAlert, SkipForward } from 'lucide-react'
 import { formatDateTimeStr } from '@/lib/localDate'
 import { formatSeconds } from '@/lib/formatters'
@@ -57,12 +58,12 @@ export const STATUS_META: Record<string, BadgeMeta> = {
 // (the run's block reason when blocked, see blockedReason above) rides the
 // badge's title/aria so the cap reason is reachable without opening the run drawer.
 export function StatusBadge({ status, reason }: { status?: string; reason?: string | null }) {
-  const { t } = useTranslation('reports')
+  const { t, i18n } = useTranslation('reports')
   return (
     <MetadataBadge
       value={status}
       meta={STATUS_META}
-      labelOf={(key) => t(`runs.status.${key}`, { defaultValue: status })}
+      labelOf={(key) => labelOrRaw(t, i18n, `runs.status.${key}`, status ?? '', 'reports')}
       fallbackIcon={Clock}
       title={reason ?? undefined}
     />

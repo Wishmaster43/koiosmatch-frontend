@@ -14,6 +14,7 @@ import { statusOf } from '@/lib/smStatus'
 import type { ReactNode } from 'react'
 import { useFocusTrap } from '@/hooks/useFocusTrap'
 import { useTranslation } from 'react-i18next'
+import { labelOrRaw } from '@/lib/labelOrRaw'
 import { X, MessageSquare, History } from 'lucide-react'
 import type { LucideIcon } from 'lucide-react'
 import Avatar from '@/components/ui/Avatar'
@@ -161,7 +162,7 @@ export default function CandidateDetailDrawer({ candidate: c, onClose, headerAct
   candidate: ReportCandidate | null; onClose: () => void; headerActions?: ReactNode; notice?: ReactNode
 }) {
   const panelRef = useFocusTrap<HTMLDivElement>(onClose)
-  const { t } = useTranslation('reports')
+  const { t, i18n } = useTranslation('reports')
   const [activeTab, setActiveTab] = useState('general')
   if (!c) return null
 
@@ -170,7 +171,7 @@ export default function CandidateDetailDrawer({ candidate: c, onClose, headerAct
   const fullName = `${c.firstname ?? ''} ${c.lastname ?? ''}`.trim() || t('candidateDrawer.unknownName')
   const statusKey = statusOf(c)
   const statusColor = SM_CANDIDATE_STATUS_COLORS[statusKey] ?? 'var(--text-muted)'
-  const statusLabel = c.status ? t(`candidates.status.${statusKey}`, { defaultValue: c.status }) : t('candidates.unknown')
+  const statusLabel = c.status ? labelOrRaw(t, i18n, `candidates.status.${statusKey}`, c.status, 'reports') : t('candidates.unknown')
 
   // Sub-tab config: DrawerTabs (the shared underline bar) renders icon + label per tab.
   const tabItems = [

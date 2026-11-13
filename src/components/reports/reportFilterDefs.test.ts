@@ -8,6 +8,8 @@ import type { TFunction } from 'i18next'
 describe('reportFilterDefs', () => {
   // Mock t() that returns the translation key (simulating i18next behavior where keys are used as fallback).
   const mockT: TFunction = ((key: string) => key) as TFunction
+  // Key checker stub: every key exists, so labels come from t().
+  const mockI18n = { exists: () => true }
 
   describe('buildStatusGroup', () => {
     it('builds a status filter group with options from distinct row values', () => {
@@ -19,7 +21,7 @@ describe('reportFilterDefs', () => {
       ]
       const onToggle = vi.fn()
 
-      const group = buildStatusGroup(mockT, statusValues, [], rows, 'messages.filters.status', onToggle)
+      const group = buildStatusGroup(mockT, mockI18n, statusValues, [], rows, 'messages.filters.status', onToggle)
 
       expect(group.key).toBe('status')
       expect(group.label).toBe('messages.filters.status')
@@ -41,6 +43,7 @@ describe('reportFilterDefs', () => {
 
       const group = buildStatusGroup(
         mockT,
+        mockI18n,
         statusValues,
         [],
         rows,
@@ -60,7 +63,7 @@ describe('reportFilterDefs', () => {
       const rows = [{ status: 'sent' }]
       const onToggle = vi.fn()
 
-      const group = buildStatusGroup(mockT, statusValues, [], rows, 'test.label', onToggle)
+      const group = buildStatusGroup(mockT, mockI18n, statusValues, [], rows, 'test.label', onToggle)
 
       group.onToggle?.('sent')
       expect(onToggle).toHaveBeenCalledWith('sent')

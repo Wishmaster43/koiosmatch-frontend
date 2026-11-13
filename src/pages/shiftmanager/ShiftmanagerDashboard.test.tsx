@@ -32,6 +32,13 @@ vi.mock('@/components/shiftmanager/ShiftsChartsBlock', () => ({
 const mockUseAuth = vi.fn(() => ({ activeTenant: { package: 'core' }, user: null }))
 vi.mock('@/context/AuthContext', () => ({ useAuth: () => mockUseAuth() }))
 
+// Page access is decided by one toggle so the header links can be shown and hidden.
+const access = vi.hoisted(() => ({ allowed: true }))
+vi.mock('@/lib/access', async () => {
+  const actual = await vi.importActual<typeof import('@/lib/access')>('@/lib/access')
+  return { ...actual, canAccessPage: () => access.allowed }
+})
+
 // Real, current-year monthly buckets: this-month total (5) is deliberately LOWER
 // than the row page's own "new this month" rows (8, simulated below the cap) so a
 // pass here can only happen if the tile actually reads the server bucket.
@@ -139,6 +146,27 @@ describe('ShiftmanagerDashboard · recent runs tile (tri-state ok render)', () =
 
     await screen.findByTestId('kpi-new')
     expect(screen.queryByText('Completed sync')).toBeNull()
+  })
+})
+
+// The card headers deep-link to the runs and messages pages, and hide the link without page access.
+describe('ShiftmanagerDashboard · card header links', () => {
+  it('links the two view-all affordances to #details.runs and #details.messages', async () => {
+    access.allowed = true
+    mockUseAuth.mockReturnValue({ activeTenant: { package: 'reporting_sm_ai' }, user: null })
+    renderDashboard()
+    await screen.findByText('Completed sync')
+    const links = screen.getAllByText(t('dashboard.viewAll')).map(el => el.closest('a')?.getAttribute('href'))
+    expect(links).toEqual(['#details.runs', '#details.messages'])
+  })
+
+  it('renders no link when the viewer cannot open the target pages', async () => {
+    access.allowed = false
+    mockUseAuth.mockReturnValue({ activeTenant: { package: 'reporting_sm_ai' }, user: null })
+    renderDashboard()
+    await screen.findByText('Completed sync')
+    expect(screen.queryByText(t('dashboard.viewAll'))).toBeNull()
+    access.allowed = true
   })
 })
 

@@ -6,6 +6,7 @@
  */
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
+import { labelOrRaw } from '@/lib/labelOrRaw'
 import { ChevronRight, ChevronDown, Zap, Clock } from 'lucide-react'
 import { formatDuration, StepStatusBadge } from './runFormat'
 import { stepReasonLabel, stepBlockedCodes } from './stepReason'
@@ -71,9 +72,10 @@ function sendCounters(output: unknown): { sent: number; queued: number; skipped:
 // channel, an honest status chip (+ reason), the preview, and a deep link to the thread
 // on the record it belongs to (the same navigation the Koios chips use).
 function StepMessages({ messages, counters }: { messages: RunStepMessage[]; counters: ReturnType<typeof sendCounters> }) {
-  const { t } = useTranslation('reports')
+  const { t, i18n } = useTranslation('reports')
   const { openEntity } = useNavigation()
-  const statusLabel = (s: string | null | undefined) => (s ? t(`runs.drawer.messages.status.${s}`, { defaultValue: s }) : '')
+  // Known statuses are translated; an open-ended server status shows its own text.
+  const statusLabel = (s: string | null | undefined) => (s ? labelOrRaw(t, i18n, `runs.drawer.messages.status.${s}`, s, 'reports') : '')
   return (
     <div style={{ padding: '0 12px 10px 33px', display: 'flex', flexDirection: 'column', gap: 4 }}>
       <Caption as="div" style={{ fontWeight: 600 }}>

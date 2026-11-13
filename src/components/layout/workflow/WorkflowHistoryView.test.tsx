@@ -19,7 +19,7 @@ vi.mock('@/lib/api', async () => {
 // `i18n.use(initReactI18next).init(...)`), which would otherwise crash under
 // the react-i18next mock above (no initReactI18next export) — see
 // lib/countries.ts's file-header note on the same landmine.
-const activeI18n = vi.hoisted(() => ({ language: 'nl' }))
+const activeI18n = vi.hoisted(() => ({ language: 'nl', exists: () => false }))
 vi.mock('react-i18next', () => ({
   useTranslation: () => ({ t: (k: string) => k, i18n: activeI18n }),
 }))

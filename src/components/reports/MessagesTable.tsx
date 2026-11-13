@@ -8,6 +8,7 @@
  */
 import { useState, useMemo, useCallback } from 'react'
 import { useTranslation } from 'react-i18next'
+import { labelOrRaw } from '@/lib/labelOrRaw'
 import { useDateFormat }      from '@/lib/datetime'
 import PaginationBar          from '../ui/PaginationBar'
 import { useReportPaging }    from './useReportPaging'
@@ -32,7 +33,7 @@ const COL_KEYS = [
 
 // Wires local UI state (search, sort, filters, paging) around the API-backed rows fetched by useReportList; see the module doc above for the overall shape.
 export default function MessagesTable() {
-  const { t } = useTranslation('reports')
+  const { t, i18n } = useTranslation('reports')
   const COLS = COL_KEYS.map(c => ({ ...c, label: t(`messages.cols.${c.tKey}`) }))
   // Data (fetch) lives in the shared hook (§3); this component only derives + renders.
   const { rows, loading, error } = useReportList<MessageRow>('/messages')
@@ -69,14 +70,14 @@ export default function MessagesTable() {
         selected: selectedChannels,
         options: channelOptions.map(c => ({
           value: c,
-          label: t(`messages.channel.${c?.toLowerCase()}`, { defaultValue: c }),
+          label: labelOrRaw(t, i18n, `messages.channel.${c?.toLowerCase()}`, c, 'reports'),
           count: rows.filter(r => r.channel === c).length,
         })),
         onToggle: v => setSelectedChannels(p => p.includes(v) ? p.filter(x => x !== v) : [...p, v]),
       })
     }
     if (statusOptions.length) {
-      groups.push(buildStatusGroup(t, statusOptions, selectedStatuses, rows, 'messages.filters.status',
+      groups.push(buildStatusGroup(t, i18n, statusOptions, selectedStatuses, rows, 'messages.filters.status',
         v => setSelectedStatuses(p => p.includes(v) ? p.filter(x => x !== v) : [...p, v]),
         (s: string) => s.toLowerCase?.() ?? s))
     }
@@ -85,7 +86,7 @@ export default function MessagesTable() {
         v => setSelectedWorkflows(p => p.includes(v) ? p.filter(x => x !== v) : [...p, v])))
     }
     return groups
-  }, [t, channelOptions, statusOptions, workflowOptions, selectedChannels, selectedStatuses, selectedWorkflows, rows])
+  }, [t, i18n, channelOptions, statusOptions, workflowOptions, selectedChannels, selectedStatuses, selectedWorkflows, rows])
 
   // Consolidates filtered/sorted memo and registers filter groups with the shared panel.
   const { filtered, sorted } = useReportTableFilter({

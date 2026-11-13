@@ -59,7 +59,7 @@ export function getWorkflowIdFromHash(hash: string): string | null {
 // Searchable, filterable workflow-runs list built on the shared DataTable; row
 // click opens RunDetailDrawer for the per-step input/output of that execution.
 export default function RunsTable() {
-  const { t } = useTranslation('reports')
+  const { t, i18n } = useTranslation('reports')
   // WEBHOOK-RUN-CORRELATION-1: a workflow_id arriving via this page's own hash
   // (e.g. a WorkflowRefs link) narrows the request to that workflow's runs. Read
   // once at mount — a fresh navigation here always remounts this table (a page
@@ -184,7 +184,7 @@ export default function RunsTable() {
   const filterGroups = useMemo(() => {
     const groups: ReportFilterGroup[] = []
     // Fixed vocabulary (see RUN_STATUS_VALUES) — this group always registers.
-    groups.push(buildStatusGroup(t, statusOptions, selectedStatuses, rows, 'runs.filters.status',
+    groups.push(buildStatusGroup(t, i18n, statusOptions, selectedStatuses, rows, 'runs.filters.status',
       v => setSelectedStatuses(p => p.includes(v) ? p.filter(x => x !== v) : [...p, v])))
     if (workflowOptions.length) {
       groups.push(buildWorkflowGroup(t, workflowOptions, selectedWorkflows, rows, 'runs.filters.workflow',
@@ -199,7 +199,7 @@ export default function RunsTable() {
       onToChange: (v: string) => setRangeTo(v),
     })
     return groups
-  }, [t, statusOptions, workflowOptions, selectedStatuses, selectedWorkflows, rows, rangeFrom, rangeTo])
+  }, [t, i18n, statusOptions, workflowOptions, selectedStatuses, selectedWorkflows, rows, rangeFrom, rangeTo])
 
   // Publish the current filter groups into the shared right panel; unregister on
   // unmount/change so a stale group set never lingers there.
