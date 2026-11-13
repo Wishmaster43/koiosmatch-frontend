@@ -14,6 +14,7 @@ import { useDateFormat } from '@/lib/datetime'
 import { useNumberFormat } from '@/lib/formatters'
 import { graceBoundary, type GraceWindow } from '@/lib/graceWindow'
 import { Z } from '@/lib/zIndexScale'
+import { labelOrRaw } from '@/lib/labelOrRaw'
 import type { DeletionPreview } from '@/types/deletion'
 import Spinner from './Spinner'
 
@@ -41,7 +42,7 @@ export interface DeletionPreviewModalProps {
 export default function DeletionPreviewModal({
   open, onClose, entityLabel, preview, loading, error, users, onConfirm, busy, blocked, graceDays = null, graceWindow = null,
 }: DeletionPreviewModalProps) {
-  const { t } = useTranslation('common')
+  const { t, i18n } = useTranslation('common')
   const { formatDate } = useDateFormat()
   const { formatNumber } = useNumberFormat()
   const transferLabelId = useId()
@@ -100,7 +101,7 @@ export default function DeletionPreviewModal({
               <div style={{ fontSize: 12, fontWeight: 600, color: 'var(--text)' }}>{t('trash.modal.blockedTitle')}</div>
               {blockers.map(b => (
                 <div key={b.type} style={{ display: 'flex', justifyContent: 'space-between', gap: 12, fontSize: 13, color: 'var(--text)' }}>
-                  <span>{t(`trash.blockers.${b.type}`, { defaultValue: b.label })}</span>
+                  <span>{labelOrRaw(t, i18n, `trash.blockers.${b.type}`, b.label, 'common')}</span>
                   <Mono style={{ fontWeight: 600 }}>{formatNumber(b.count)}</Mono>
                 </div>
               ))}

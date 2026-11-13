@@ -41,8 +41,8 @@ export default function StatusBadge({ status, map = {}, size = 12 }: StatusBadge
   const { t } = useTranslation('common')
   const key = String(status ?? '').toLowerCase()
   const s = { ...DEFAULT_MAP, ...map }[key] ?? { color: 'var(--text-muted)' }
-  // Caller-provided label wins; otherwise translate known defaults; else show raw status.
+  // Caller-provided label wins; otherwise translate known defaults (all keys exist in 7 locales); else show raw status.
   const label = map[key]?.label
-    ?? (DEFAULT_MAP[key] ? t(`status.${key}`, { defaultValue: status ?? undefined }) : (status ?? '—'))
+    ?? (Object.prototype.hasOwnProperty.call(DEFAULT_MAP, key) ? t(`status.${key}`) : (status ?? '—'))
   return <SoftChip label={label} color={s.color} round size={size} />
 }

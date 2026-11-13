@@ -37,7 +37,7 @@ const SidebarTyped = Sidebar as unknown as ComponentType<Record<string, unknown>
 // The app shell: sidebar + active page + Koios/right panels, driving real browser
 // history so back/forward navigates between pages instead of doing nothing.
 export default function DashboardLayout() {
-  const { t } = useTranslation('common')
+  const { t, i18n } = useTranslation('common')
   const [expanded,       setExpanded]       = useState(true)
   const auth0                               = useAuth()
   const pkg0                                = auth0?.activeTenant?.package ?? auth0?.user?.tenant?.package
@@ -45,7 +45,10 @@ export default function DashboardLayout() {
     defaultPage: PACKAGE_DEFAULT_PAGE[pkg0 ?? ''] ?? 'dashboard',
   })
   // Translated page title: feeds the top-bar <h1> and the document title.
-  const pageTitle = t(activePage, { ns: 'pageTitles', keySeparator: false, defaultValue: PAGE_TITLES[activePage] || activePage })
+  // (the exists guard mirrors labelOrRaw: a tree without an i18n instance falls back, never throws)
+  const pageTitle = typeof i18n?.exists === 'function' && i18n.exists(activePage, { ns: 'pageTitles', keySeparator: false })
+    ? t(activePage, { ns: 'pageTitles', keySeparator: false })
+    : PAGE_TITLES[activePage] || activePage
   useDocumentTitle(pageTitle)
   const [rightPanelOpen, setRightPanelOpen] = useState(false)
   const { koiosOpen, setKoiosOpen, koiosQuestion, setKoiosQuestion, koiosContextRef } = useKoiosBridge()
@@ -181,7 +184,9 @@ export default function DashboardLayout() {
                 // eslint-disable-next-line huisstijlLegacy/no-restricted-syntax -- tintBg/tintBorder ARE the canonical §4 tint helpers; the primary token here is only their argument, not a hand-painted fill
                 background: tintBg('var(--color-primary)'),
                 border: tintBorder('var(--color-primary)') }}>
-              ← {t('back')} · {t(jumpOrigin, { ns: 'pageTitles', keySeparator: false, defaultValue: PAGE_TITLES[jumpOrigin] || jumpOrigin })}
+              ← {t('back')} · {typeof i18n?.exists === 'function' && i18n.exists(jumpOrigin, { ns: 'pageTitles', keySeparator: false })
+                ? t(jumpOrigin, { ns: 'pageTitles', keySeparator: false })
+                : PAGE_TITLES[jumpOrigin] || jumpOrigin}
             </button>
           )}
 

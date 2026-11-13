@@ -12,6 +12,7 @@ import { Check, CheckCheck, Clock } from 'lucide-react'
 import SoftChip from '@/components/ui/SoftChip'
 import { avatarColor } from '@/lib/avatarColor'
 import { tintBg, tintBorder } from '@/lib/tint'
+import { labelOrRaw } from '@/lib/labelOrRaw'
 import type { Id } from '@/types/common'
 import { CHANNEL_COLORS, HANDLED_BY_COLORS } from './channelColors'
 import { renderWaMarkup } from './waMarkup'
@@ -74,7 +75,7 @@ export default function ConversationMessage({ message, formatDateTime }: {
   // The host's locale-aware formatter — never a second date formatting rule (§5).
   formatDateTime: (value: string) => string
 }) {
-  const { t } = useTranslation('candidates')
+  const { t, i18n } = useTranslation('candidates')
   const out = message.direction === 'outbound'
   const color = senderColor(message)
   return (
@@ -94,11 +95,11 @@ export default function ConversationMessage({ message, formatDateTime }: {
       </div>
       <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginTop: 2 }}>
         {message.channel && CHANNEL_COLORS[message.channel] && (
-          <SoftChip label={t(`conversations.channel.${message.channel}`, { defaultValue: message.channel_label ?? '' })}
+          <SoftChip label={labelOrRaw(t, i18n, `conversations.channel.${message.channel}`, message.channel_label ?? '', 'candidates')}
             color={CHANNEL_COLORS[message.channel]} />
         )}
         {message.purpose && (
-          <SoftChip label={t(`conversations.purpose.${message.purpose}`, { defaultValue: humanize(message.purpose) })}
+          <SoftChip label={labelOrRaw(t, i18n, `conversations.purpose.${message.purpose}`, humanize(message.purpose), 'candidates')}
             color="var(--color-primary)" />
         )}
         {/* PUNT-2: the turn's owner — silent for null/unknown, mirrors the channel chip. */}

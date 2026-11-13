@@ -8,8 +8,13 @@ import { render, screen } from '@testing-library/react'
 import WhatsAppWebDevice from './WhatsAppWebDevice'
 import type { WhatsAppDevice } from './statusMeta'
 
+// Whether the mocked i18n instance knows a key; flipped per test to cover both labelOrRaw branches.
+let keyExists = false
 vi.mock('react-i18next', () => ({
-  useTranslation: () => ({ t: (k: string, opts?: Record<string, unknown>) => opts ? `${k}:${JSON.stringify(opts)}` : k }),
+  useTranslation: () => ({
+    t: (k: string, opts?: Record<string, unknown>) => opts ? `${k}:${JSON.stringify(opts)}` : k,
+    i18n: { exists: () => keyExists },
+  }),
   initReactI18next: { type: '3rdParty', init: () => {} },
 }))
 vi.mock('qrcode.react', () => ({ QRCodeSVG: ({ value }: { value: string }) => <div data-testid="qr">{value}</div> }))
@@ -71,10 +76,19 @@ describe('WhatsAppWebDevice', () => {
 // CMBE 25-08: the row also ships warmup {stage,label,daily_cap}; the object wins
 // over the bare stage and the cap renders as a caption.
 it('reads the warmup object (stage + daily cap) when the server ships it', () => {
-  render(<WhatsAppWebDevice device={{ ...baseDevice, warmup_stage: 0, warmup: { stage: 1, label: 'nieuw nummer', daily_cap: 5 } }} busy={false} notEnabled={false} onConnect={noop} onDisconnect={noop} onRemove={noop} />)
-  // The test's t() mock appends the options, so match on the key prefix + the server fallback / cap.
-  expect(screen.getByText(/^profile\.whatsappWeb\.warmup\.1:.*nieuw nummer/)).toBeInTheDocument()
-  expect(screen.getByText(/^profile\.whatsappWeb\.dailyCap:.*"cap":5/)).toBeInTheDocument()
+  // Unknown key: the server label is shown raw; the t() mock appends options, so match the cap by key prefix.
+  keyExists = false
+  const { unmount } = render(<WhatsAppWebDevice device={{ ...baseDevice, warmup_stage: 0, warmup: { stage: 1, label: 'server label', daily_cap: 5 } }} busy={false} notEnabled={false} onConnect={noop} onDisconnect={noop} onRemove={noop} />)
+  expect(screen.getByText('server label')).toBeInTheDocument()
+  expect(screen.getAllByText(/^profile\.whatsappWeb\.dailyCap:.*"cap":5/).length).toBeGreaterThan(0)
+  unmount()
+  // Known key: the translation wins over the server label.
+  keyExists = true
+  render(<WhatsAppWebDevice device={{ ...baseDevice, warmup_stage: 0, warmup: { stage: 1, label: 'server label', daily_cap: 5 } }} busy={false} notEnabled={false} onConnect={noop} onDisconnect={noop} onRemove={noop} />)
+  // The echo t carries the options labelOrRaw passed, so this also pins the auth namespace.
+  expect(screen.getByText('profile.whatsappWeb.warmup.1:{"ns":"auth"}')).toBeInTheDocument()
+  expect(screen.queryByText('server label')).not.toBeInTheDocument()
+  keyExists = false
 })
 
 // Gateway handling on the row: the unreachable warning and linking switched off while the gateway is down.

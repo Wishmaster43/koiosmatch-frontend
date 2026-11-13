@@ -8,6 +8,7 @@ import { useTranslation } from 'react-i18next'
 import { MessageCircle, Trash2 } from 'lucide-react'
 import { useDateFormat } from '@/lib/datetime'
 import Button from '@/components/ui/Button'
+import { labelOrRaw } from '@/lib/labelOrRaw'
 import Spinner from '@/components/ui/Spinner'
 import SoftChip from '@/components/ui/SoftChip'
 import CalloutBox from '@/components/ui/CalloutBox'
@@ -30,7 +31,7 @@ interface WhatsAppWebDeviceProps {
 
 // One WhatsApp Web device row: status dot/label, QR/connecting block, and the connect/disconnect/remove actions.
 export default function WhatsAppWebDevice({ device, busy, notEnabled, unreachable = false, gatewayDown = false, onConnect, onDisconnect, onRemove }: WhatsAppWebDeviceProps) {
-  const { t } = useTranslation('auth')
+  const { t, i18n } = useTranslation('auth')
   const { formatDateTime } = useDateFormat()
   // Resolve the dot colour + label for this status (fallback: disconnected).
   const meta = STATUS_META[device.status] ?? STATUS_META.disconnected
@@ -54,7 +55,7 @@ export default function WhatsAppWebDevice({ device, busy, notEnabled, unreachabl
             {/* Status is never a raw slug — always the mapped SoftChip label. */}
             <SoftChip label={t(`profile.whatsappWeb.${meta.labelKey}`)} color={meta.dot} dot round />
             {warmup !== null && (
-              <SoftChip label={device.warmup?.label ? t(`profile.whatsappWeb.warmup.${warmup}`, { defaultValue: device.warmup.label }) : t(`profile.whatsappWeb.warmup.${warmup}`)} color="var(--color-info)" round />
+              <SoftChip label={device.warmup?.label ? labelOrRaw(t, i18n, `profile.whatsappWeb.warmup.${warmup}`, device.warmup.label, 'auth') : t(`profile.whatsappWeb.warmup.${warmup}`)} color="var(--color-info)" round />
             )}
             {warmup !== null && device.warmup?.daily_cap != null && (
               <Caption as="span">{t('profile.whatsappWeb.dailyCap', { cap: device.warmup.daily_cap })}</Caption>

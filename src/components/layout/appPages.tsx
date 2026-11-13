@@ -147,8 +147,11 @@ export const PAGE_TITLES: Record<string, string> = {
 // dots), falling back to the raw PAGE_TITLES English string for an untranslated key.
 export function PlaceholderPage({ pageKey }: { pageKey: string }) {
   // "Coming soon" suffix — this route has no real feature behind it yet.
-  const { t } = useTranslation(['common', 'pageTitles'])
-  const title: ReactNode = t(pageKey, { ns: 'pageTitles', keySeparator: false, defaultValue: PAGE_TITLES[pageKey] || pageKey })
+  const { t, i18n } = useTranslation(['common', 'pageTitles'])
+  // (the exists guard mirrors labelOrRaw: a tree without an i18n instance falls back, never throws)
+  const title: ReactNode = typeof i18n?.exists === 'function' && i18n.exists(pageKey, { ns: 'pageTitles', keySeparator: false })
+    ? t(pageKey, { ns: 'pageTitles', keySeparator: false })
+    : PAGE_TITLES[pageKey] || pageKey
   return (
     <div className="flex items-center justify-center h-full">
       <p className="font-mono text-sm text-(--text-muted)">{title} — {t('comingSoon')}</p>

@@ -42,6 +42,7 @@ import { useThreadViewPrefs } from './useThreadViewPrefs'
 import type { Id } from '@/types/common'
 import ErrorBanner from '@/components/ui/ErrorBanner'
 import { Caption } from '@/components/ui/typography'
+import { labelOrRaw } from '@/lib/labelOrRaw'
 
 // WA-SEND-TRANSPORT-1 (landed 06-08, verified by reading MessageController::store /
 // sendSessionReply, read-only reference in koiosmatch-api): an outbound POST
@@ -99,7 +100,7 @@ export default function ConversationsSection({ threadsUrl, threadsParams, header
     // No badge for an unrecognized/unknown channel — never render a raw enum code.
     const color = channel ? CHANNEL_COLORS[channel] : undefined
     if (!color) return null
-    const label = t(`conversations.channel.${channel}`, { defaultValue: channelLabel ?? '' })
+    const label = labelOrRaw(t, i18n, `conversations.channel.${channel}`, channelLabel ?? '', 'candidates')
     return <SoftChip label={label} color={color} />
   }
   // Active-window badge (setting `conversation_active_weeks`) — green when active, muted otherwise.
