@@ -1,4 +1,5 @@
 /** SectionTabsSort · sort preference persistence (split from SectionTabsSort.test.tsx; mocks and helpers are duplicated per file because hoisted vi.mock blocks cannot be shared). */
+import i18n from '@/i18n'
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { render, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
@@ -42,7 +43,7 @@ beforeEach(() => {
 // Open the sort menu, then pick the option with this exact label (mirrors how
 // a recruiter actually drives the control — ActionMenu closes after each pick).
 const pick = async (user: ReturnType<typeof userEvent.setup>, label: string) => {
-  await user.click(screen.getByRole('button', { name: 'Sorteren' }))
+  await user.click(screen.getByRole('button', { name: i18n.t('candidates:sections.sortLabel') }))
   await user.click(screen.getByRole('menuitem', { name: label }))
 }
 

@@ -1,4 +1,5 @@
 /** SectionTabs · skills and experience linked-document icons (split from SectionTabs.test.tsx; real i18n nl). */
+import i18n from '@/i18n'
 import { describe, it, expect, vi } from 'vitest'
 import { render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
@@ -47,22 +48,22 @@ describe('SkillsTab · DOC-LANG-SKILL-LINK-1 linked-document icons + edit-form p
   it('renders no link icons when the entry has no linked document (calm by default)', () => {
     const item = { id: 's1', name: 'Heftruck rijden', level: 'Gevorderd' }
     render(<SkillsTab items={[item]} documents={documents} />)
-    expect(screen.queryByTitle('Voorbeeld')).toBeNull()
-    expect(screen.queryByTitle('Downloaden')).toBeNull()
+    expect(screen.queryByTitle(i18n.t('candidates:documents.preview'))).toBeNull()
+    expect(screen.queryByTitle(i18n.t('candidates:documents.download'))).toBeNull()
   })
 
   it('renders preview + download icons once the entry links a document (by document_id)', () => {
     const item = { id: 's1', name: 'Heftruck rijden', document_id: 'doc1' }
     render(<SkillsTab items={[item]} documents={documents} />)
-    expect(screen.getByTitle('Voorbeeld')).toBeInTheDocument()
-    expect(screen.getByTitle('Downloaden')).toBeInTheDocument()
+    expect(screen.getByTitle(i18n.t('candidates:documents.preview'))).toBeInTheDocument()
+    expect(screen.getByTitle(i18n.t('candidates:documents.download'))).toBeInTheDocument()
   })
 
   it('resolves the linked document via the reverse link (skill_id) when document_id is absent', () => {
     const item = { id: 's1', name: 'Heftruck rijden' }
     const withReverse = [{ id: 'doc9', name: 'certificaat.pdf', url: '/x', skill_id: 's1' }]
     render(<SkillsTab items={[item]} documents={withReverse} />)
-    expect(screen.getByTitle('Voorbeeld')).toBeInTheDocument()
+    expect(screen.getByTitle(i18n.t('candidates:documents.preview'))).toBeInTheDocument()
   })
 
   // LOOKUP-ICON-1: useSkillLevels now returns full {value,label,icon,color}
@@ -85,7 +86,7 @@ describe('SkillsTab · DOC-LANG-SKILL-LINK-1 linked-document icons + edit-form p
     const legacySkill = 'Heftruck rijden' as unknown as Record<string, unknown>
     render(<SkillsTab items={[legacySkill]} documents={documents} />)
     expect(screen.getByText('Heftruck rijden')).toBeInTheDocument()
-    expect(screen.queryByTitle('Voorbeeld')).toBeNull()
+    expect(screen.queryByTitle(i18n.t('candidates:documents.preview'))).toBeNull()
   })
 
   it('the jump icon is absent without an onJumpToDocuments callback, and present + wired with one', async () => {
@@ -105,7 +106,7 @@ describe('SkillsTab · DOC-LANG-SKILL-LINK-1 linked-document icons + edit-form p
     const item = { id: 's1', name: 'Heftruck rijden', document_id: 'doc1' }
     render(<SkillsTab items={[item]} documents={documents} />)
     expect(screen.queryByTestId('preview-modal')).toBeNull()
-    await user.click(screen.getByTitle('Voorbeeld'))
+    await user.click(screen.getByTitle(i18n.t('candidates:documents.preview')))
     expect(screen.getByTestId('preview-modal')).toHaveTextContent('certificaat.pdf')
   })
 
@@ -114,7 +115,7 @@ describe('SkillsTab · DOC-LANG-SKILL-LINK-1 linked-document icons + edit-form p
     vi.mocked(downloadFilesSequentially).mockClear()
     const item = { id: 's1', name: 'Heftruck rijden', document_id: 'doc1' }
     render(<SkillsTab items={[item]} documents={documents} />)
-    await user.click(screen.getByTitle('Downloaden'))
+    await user.click(screen.getByTitle(i18n.t('candidates:documents.download')))
     expect(downloadFilesSequentially).toHaveBeenCalledWith([{ url: documents[0].url, name: documents[0].name }])
   })
 
@@ -123,13 +124,13 @@ describe('SkillsTab · DOC-LANG-SKILL-LINK-1 linked-document icons + edit-form p
     const onEdit = vi.fn()
     const item = { id: 's1', name: 'Heftruck rijden', level: 'Gevorderd' }
     render(<SkillsTab items={[item]} onEdit={onEdit} documents={documents} />)
-    await user.click(screen.getByTitle('Bewerken'))
+    await user.click(screen.getByTitle(i18n.t('common:edit')))
     // ALWAYS-SEARCHABLE-1: the document_id picker is the house CreatableSelect, named
     // by its own label ("Gekoppeld document") — distinct from the level picker
     // (already showing its picked value "Gevorderd").
-    await user.click(screen.getByRole('button', { name: 'Gekoppeld document' }))
+    await user.click(screen.getByRole('button', { name: i18n.t('candidates:addFields.linkedDocument') }))
     await user.click(await screen.findByRole('button', { name: 'ander.pdf' }))
-    await user.click(screen.getByTitle('Opslaan'))
+    await user.click(screen.getByTitle(i18n.t('common:save')))
     // §13: assert the save PAYLOAD carries the picked document_id.
     expect(onEdit).toHaveBeenCalledWith(0, expect.objectContaining({ document_id: 'doc2' }))
   })
@@ -150,22 +151,22 @@ describe('ExperienceTab · DOC-ERV-1 linked-document icons (read-only)', () => {
   it('renders no link icons when the entry has no linked document (calm by default)', () => {
     const item = { id: 'e1', title: 'Verpleegkundige', company: 'Ziekenhuis X' }
     render(<ExperienceTab items={[item]} documents={documents} />)
-    expect(screen.queryByTitle('Voorbeeld')).toBeNull()
-    expect(screen.queryByTitle('Downloaden')).toBeNull()
+    expect(screen.queryByTitle(i18n.t('candidates:documents.preview'))).toBeNull()
+    expect(screen.queryByTitle(i18n.t('candidates:documents.download'))).toBeNull()
   })
 
   it('renders preview + download icons once the entry links a document (by document_id)', () => {
     const item = { id: 'e1', title: 'Verpleegkundige', document_id: 'doc1' }
     render(<ExperienceTab items={[item]} documents={documents} />)
-    expect(screen.getByTitle('Voorbeeld')).toBeInTheDocument()
-    expect(screen.getByTitle('Downloaden')).toBeInTheDocument()
+    expect(screen.getByTitle(i18n.t('candidates:documents.preview'))).toBeInTheDocument()
+    expect(screen.getByTitle(i18n.t('candidates:documents.download'))).toBeInTheDocument()
   })
 
   it('resolves the linked document via the reverse link (experience_id) when document_id is absent', () => {
     const withReverse = [{ id: 'doc9', name: 'werkgeversverklaring.pdf', experience_id: 'e1' }]
     const item = { id: 'e1', title: 'Verpleegkundige' }
     render(<ExperienceTab items={[item]} documents={withReverse} />)
-    expect(screen.getByTitle('Voorbeeld')).toBeInTheDocument()
+    expect(screen.getByTitle(i18n.t('candidates:documents.preview'))).toBeInTheDocument()
   })
 
   it('the jump icon is absent without an onJumpToDocuments callback, and present + wired with one', async () => {
@@ -185,7 +186,7 @@ describe('ExperienceTab · DOC-ERV-1 linked-document icons (read-only)', () => {
     const item = { id: 'e1', title: 'Verpleegkundige', document_id: 'doc1' }
     render(<ExperienceTab items={[item]} documents={documents} />)
     expect(screen.queryByTestId('preview-modal')).toBeNull()
-    await user.click(screen.getByTitle('Voorbeeld'))
+    await user.click(screen.getByTitle(i18n.t('candidates:documents.preview')))
     expect(screen.getByTestId('preview-modal')).toHaveTextContent('werkgeversverklaring.pdf')
   })
 
@@ -194,7 +195,7 @@ describe('ExperienceTab · DOC-ERV-1 linked-document icons (read-only)', () => {
     vi.mocked(downloadFilesSequentially).mockClear()
     const item = { id: 'e1', title: 'Verpleegkundige', document_id: 'doc1' }
     render(<ExperienceTab items={[item]} documents={documents} />)
-    await user.click(screen.getByTitle('Downloaden'))
+    await user.click(screen.getByTitle(i18n.t('candidates:documents.download')))
     expect(downloadFilesSequentially).toHaveBeenCalledWith([{ url: documents[0].url, name: documents[0].name }])
   })
 })

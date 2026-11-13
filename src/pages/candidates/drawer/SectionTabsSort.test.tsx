@@ -20,6 +20,7 @@
  *   not a per-user preference; BackgroundTab.test.tsx owns the real
  *   PUT .../reorder request assertion).
  */
+import i18n from '@/i18n'
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
@@ -64,7 +65,7 @@ beforeEach(() => {
 // Open the sort menu, then pick the option with this exact label (mirrors how
 // a recruiter actually drives the control — ActionMenu closes after each pick).
 const pick = async (user: ReturnType<typeof userEvent.setup>, label: string) => {
-  await user.click(screen.getByRole('button', { name: 'Sorteren' }))
+  await user.click(screen.getByRole('button', { name: i18n.t('candidates:sections.sortLabel') }))
   await user.click(screen.getByRole('menuitem', { name: label }))
 }
 
@@ -81,8 +82,8 @@ describe('ExperienceTab sort menu', () => {
   it('offers start date, end date, function AND own order — all four are real here', async () => {
     const user = userEvent.setup()
     render(<ExperienceTab items={items} onAdd={() => {}} onEdit={() => {}} onRemove={() => {}} />)
-    await user.click(screen.getByRole('button', { name: 'Sorteren' }))
-    expect(screen.getByRole('menu', { name: 'Sorteren' })).toBeInTheDocument()
+    await user.click(screen.getByRole('button', { name: i18n.t('candidates:sections.sortLabel') }))
+    expect(screen.getByRole('menu', { name: i18n.t('candidates:sections.sortLabel') })).toBeInTheDocument()
     expect(screen.getByRole('menuitem', { name: 'Begindatum' })).toBeInTheDocument()
     expect(screen.getByRole('menuitem', { name: 'Einddatum' })).toBeInTheDocument()
     // FIELD TRAP (build brief point 3): the menu label is "Functietitel" — the FE
@@ -138,7 +139,7 @@ describe('ExperienceTab sort menu', () => {
   it('is keyboard-operable: Enter opens the menu on the focused trigger, Enter on the auto-focused first option picks it', async () => {
     const user = userEvent.setup()
     render(<ExperienceTab items={items} onAdd={() => {}} onEdit={() => {}} onRemove={() => {}} />)
-    const trigger = screen.getByRole('button', { name: 'Sorteren' })
+    const trigger = screen.getByRole('button', { name: i18n.t('candidates:sections.sortLabel') })
     trigger.focus()
     await user.keyboard('{Enter}')
     expect(screen.getByRole('menu')).toBeInTheDocument()
@@ -163,7 +164,7 @@ describe('EducationTab sort menu', () => {
   it('offers start date, end date and own order, but NOT function — candidate_educations has no job-title field', async () => {
     const user = userEvent.setup()
     render(<EducationTab items={items} onAdd={() => {}} onEdit={() => {}} onRemove={() => {}} />)
-    await user.click(screen.getByRole('button', { name: 'Sorteren' }))
+    await user.click(screen.getByRole('button', { name: i18n.t('candidates:sections.sortLabel') }))
     expect(screen.getByRole('menuitem', { name: 'Begindatum' })).toBeInTheDocument()
     expect(screen.getByRole('menuitem', { name: 'Einddatum' })).toBeInTheDocument()
     expect(screen.getByRole('menuitem', { name: 'Eigen volgorde' })).toBeInTheDocument()
@@ -191,8 +192,8 @@ describe('CertificationsTab sort menu', () => {
   it('labels the two real date columns with THIS tab\'s own wording (Issued/Expires), not a generic Start/End, and offers own order too', async () => {
     const user = userEvent.setup()
     render(<CertificationsTab items={items} onAdd={() => {}} onEdit={() => {}} onRemove={() => {}} />)
-    await user.click(screen.getByRole('button', { name: 'Sorteren' }))
-    expect(screen.getByRole('menuitem', { name: 'Uitgegeven' })).toBeInTheDocument()
+    await user.click(screen.getByRole('button', { name: i18n.t('candidates:sections.sortLabel') }))
+    expect(screen.getByRole('menuitem', { name: i18n.t('candidates:certified.issued') })).toBeInTheDocument()
     expect(screen.getByRole('menuitem', { name: 'Verloopt' })).toBeInTheDocument()
     expect(screen.getByRole('menuitem', { name: 'Eigen volgorde' })).toBeInTheDocument()
     expect(screen.queryByRole('menuitem', { name: 'Functietitel' })).not.toBeInTheDocument()
@@ -220,7 +221,7 @@ describe('SkillsTab sort menu', () => {
   it('offers ONLY own order — no date column and no function field exist here', async () => {
     const user = userEvent.setup()
     render(<SkillsTab items={[{ id: '1', name: 'Triage', level: 'Expert' }, { id: '2', name: 'BHV', level: '' }]} onAdd={() => {}} onEdit={() => {}} onRemove={() => {}} />)
-    await user.click(screen.getByRole('button', { name: 'Sorteren' }))
+    await user.click(screen.getByRole('button', { name: i18n.t('candidates:sections.sortLabel') }))
     expect(screen.getByRole('menuitem', { name: 'Eigen volgorde' })).toBeInTheDocument()
     expect(screen.queryByRole('menuitem', { name: 'Begindatum' })).not.toBeInTheDocument()
     expect(screen.queryByRole('menuitem', { name: 'Functietitel' })).not.toBeInTheDocument()
@@ -245,7 +246,7 @@ describe('ReferencesTab sort menu', () => {
   it('offers function and own order — candidate_references has no date column, but DOES carry the referent\'s own role plus sort_order', async () => {
     const user = userEvent.setup()
     render(<ReferencesTab items={items} onAdd={() => {}} onEdit={() => {}} onRemove={() => {}} onVerify={() => {}} />)
-    await user.click(screen.getByRole('button', { name: 'Sorteren' }))
+    await user.click(screen.getByRole('button', { name: i18n.t('candidates:sections.sortLabel') }))
     expect(screen.getByRole('menuitem', { name: 'Functie' })).toBeInTheDocument()
     expect(screen.getByRole('menuitem', { name: 'Eigen volgorde' })).toBeInTheDocument()
     expect(screen.queryByRole('menuitem', { name: 'Begindatum' })).not.toBeInTheDocument()

@@ -1,4 +1,5 @@
 /** SectionTabsSort · own order, DRAG-SORT-1 (split from SectionTabsSort.test.tsx; mocks and helpers are duplicated per file because hoisted vi.mock blocks cannot be shared). */
+import i18n from '@/i18n'
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { render, screen, waitFor, fireEvent } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
@@ -42,7 +43,7 @@ beforeEach(() => {
 // Open the sort menu, then pick the option with this exact label (mirrors how
 // a recruiter actually drives the control — ActionMenu closes after each pick).
 const pick = async (user: ReturnType<typeof userEvent.setup>, label: string) => {
-  await user.click(screen.getByRole('button', { name: 'Sorteren' }))
+  await user.click(screen.getByRole('button', { name: i18n.t('candidates:sections.sortLabel') }))
   await user.click(screen.getByRole('menuitem', { name: label }))
 }
 
@@ -64,7 +65,7 @@ describe('ExperienceTab own order (DRAG-SORT-1)', () => {
   it('renders no drag handles while a date/function axis is active (the default)', () => {
     const { container } = render(<ExperienceTab items={items} onAdd={() => {}} onEdit={() => {}} onRemove={() => {}} onReorder={() => {}} />)
     expect(container.querySelectorAll('[draggable="true"]')).toHaveLength(0)
-    expect(screen.queryByRole('button', { name: 'Omhoog verplaatsen' })).toBeNull()
+    expect(screen.queryByRole('button', { name: i18n.t('common:dragList.moveUp') })).toBeNull()
   })
 
   it('picking "own order" shows the RECEIVED order (not the date-sorted one) and renders a handle per row', async () => {
@@ -74,8 +75,8 @@ describe('ExperienceTab own order (DRAG-SORT-1)', () => {
     // Identity order — items as given, NOT newest-start-first (that would be Arts first).
     expect(names()).toEqual(['Verpleegkundige', 'Arts', 'Coördinator'])
     expect(container.querySelectorAll('[draggable="true"]')).toHaveLength(3)
-    expect(screen.getAllByRole('button', { name: 'Omhoog verplaatsen' })).toHaveLength(3)
-    expect(screen.getAllByRole('button', { name: 'Omlaag verplaatsen' })).toHaveLength(3)
+    expect(screen.getAllByRole('button', { name: i18n.t('common:dragList.moveUp') })).toHaveLength(3)
+    expect(screen.getAllByRole('button', { name: i18n.t('common:dragList.moveDown') })).toHaveLength(3)
   })
 
   it('switching back to a date axis hides the handles again — sorting by date and then dragging would be meaningless (the next render re-sorts it away)', async () => {
@@ -111,7 +112,7 @@ describe('ExperienceTab own order (DRAG-SORT-1)', () => {
     render(<ExperienceTab items={items} onAdd={() => {}} onEdit={() => {}} onRemove={() => {}} onReorder={onReorder} />)
     await pick(user, 'Eigen volgorde')
 
-    const moveDown = screen.getAllByRole('button', { name: 'Omlaag verplaatsen' })[0]
+    const moveDown = screen.getAllByRole('button', { name: i18n.t('common:dragList.moveDown') })[0]
     moveDown.focus()
     await user.keyboard('{Enter}')
 
@@ -124,8 +125,8 @@ describe('ExperienceTab own order (DRAG-SORT-1)', () => {
     const user = userEvent.setup()
     render(<ExperienceTab items={items} onAdd={() => {}} onEdit={() => {}} onRemove={() => {}} onReorder={() => {}} />)
     await pick(user, 'Eigen volgorde')
-    expect(screen.getAllByRole('button', { name: 'Omhoog verplaatsen' })[0]).toBeDisabled()
-    expect(screen.getAllByRole('button', { name: 'Omlaag verplaatsen' }).at(-1)).toBeDisabled()
+    expect(screen.getAllByRole('button', { name: i18n.t('common:dragList.moveUp') })[0]).toBeDisabled()
+    expect(screen.getAllByRole('button', { name: i18n.t('common:dragList.moveDown') }).at(-1)).toBeDisabled()
   })
 
   it('picking "own order" persists ONLY the chosen axis to ui_preferences — the manual order/ids never ride along in that same body', async () => {

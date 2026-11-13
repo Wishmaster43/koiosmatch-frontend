@@ -6,6 +6,7 @@
  * Only the Tiptap RichTextEditor is stubbed (its own internals are out of scope
  * here — mirrors src/pages/customers/drawer/EditableRichTextField.test.tsx).
  */
+import i18n from '@/i18n'
 import { describe, it, expect, vi } from 'vitest'
 import { render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
@@ -65,7 +66,7 @@ describe('EducationTab · read/edit start-date parity (C-12)', () => {
     expect(screen.getByText(/01-01-2009/)).toBeInTheDocument()
 
     // One pencil per entry (DRAWER-ONE-PENCIL-1, Danny 05-08) — the row-level edit form.
-    await user.click(screen.getByTitle('Bewerken'))
+    await user.click(screen.getByTitle(i18n.t('common:edit')))
     expect(screen.getByDisplayValue('01-01-2009')).toBeInTheDocument()
   })
 
@@ -73,7 +74,7 @@ describe('EducationTab · read/edit start-date parity (C-12)', () => {
     const user = userEvent.setup()
     const item = { id: 'e2', title: 'Onbekend', inProgress: true }
     render(<EducationTab items={[item]} onEdit={vi.fn()} />)
-    await user.click(screen.getByTitle('Bewerken'))
+    await user.click(screen.getByTitle(i18n.t('common:edit')))
     // The start-date field (react-datepicker) has no display value to assert against —
     // confirm no stray date leaked in instead.
     expect(screen.queryByDisplayValue(/\d{2}-\d{2}-\d{4}/)).toBeNull()
@@ -88,11 +89,11 @@ describe('EducationTab · "Nog in opleiding" checkbox label (C-11 regression gua
     await user.click(screen.getByRole('button', { name: /Toevoegen/ }))
     const checkbox = screen.getByRole('checkbox')
 
-    expect(screen.getByText('Nog in opleiding')).toBeInTheDocument()
+    expect(screen.getByText(i18n.t('candidates:addFields.inProgress'))).toBeInTheDocument()
     await user.click(checkbox)
-    expect(screen.getByText('Nog in opleiding')).toBeInTheDocument()
+    expect(screen.getByText(i18n.t('candidates:addFields.inProgress'))).toBeInTheDocument()
     await user.click(checkbox)
-    expect(screen.getByText('Nog in opleiding')).toBeInTheDocument()
+    expect(screen.getByText(i18n.t('candidates:addFields.inProgress'))).toBeInTheDocument()
   })
 })
 
@@ -113,9 +114,9 @@ describe('EducationTab · education level (KAND-NIVEAU-1)', () => {
     // ALWAYS-SEARCHABLE-1: the level_id picker is now the house CreatableSelect — an
     // empty picker's trigger is named by its own label ("Niveau"). Open it and wait
     // for the lookup GET to resolve and its portalled options to render.
-    await user.click(screen.getByRole('button', { name: 'Niveau' }))
+    await user.click(screen.getByRole('button', { name: i18n.t('candidates:addFields.educationLevel') }))
     await user.click(await screen.findByRole('button', { name: 'HBO' }))
-    await user.click(screen.getByTitle('Opslaan'))
+    await user.click(screen.getByTitle(i18n.t('common:save')))
     // §13: assert the save PAYLOAD carries the picked level_id.
     expect(onAdd).toHaveBeenCalledWith(expect.objectContaining({ level_id: 'lvl-2' }))
   })

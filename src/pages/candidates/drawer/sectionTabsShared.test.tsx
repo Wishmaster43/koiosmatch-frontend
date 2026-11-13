@@ -4,7 +4,7 @@
  */
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { render, screen, fireEvent } from '@testing-library/react'
-import '@/i18n'
+import i18n from '@/i18n'
 
 const downloadMock = vi.fn()
 vi.mock('@/lib/downloadFiles', () => ({ downloadFilesSequentially: (...a: unknown[]) => downloadMock(...a) }))
@@ -16,7 +16,7 @@ describe('DocEntryLinks download', () => {
 
   it('downloads the signed download_url of a clean row', () => {
     render(<DocEntryLinks doc={{ name: 'a.pdf', url: '/stream/1', download_url: 'https://signed/1' }} onPreview={vi.fn()} />)
-    fireEvent.click(screen.getByRole('button', { name: 'Downloaden' }))
+    fireEvent.click(screen.getByRole('button', { name: i18n.t('candidates:documents.download') }))
     expect(downloadMock).toHaveBeenCalledWith([{ url: 'https://signed/1', name: 'a.pdf' }])
   })
 

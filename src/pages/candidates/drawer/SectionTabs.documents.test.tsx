@@ -1,4 +1,5 @@
 /** SectionTabs · linked-document resolver, education and certification icons (split from SectionTabs.test.tsx; real i18n nl). */
+import i18n from '@/i18n'
 import { describe, it, expect, vi } from 'vitest'
 import { render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
@@ -82,15 +83,15 @@ describe('EducationTab · DOC-EDU-1 linked-document icons + edit-form picker', (
   it('renders no link icons when the entry has no linked document (calm by default)', () => {
     const item = { id: 'e1', title: 'Verpleegkunde', school: 'ROC' }
     render(<EducationTab items={[item]} documents={documents} />)
-    expect(screen.queryByTitle('Voorbeeld')).toBeNull()
-    expect(screen.queryByTitle('Downloaden')).toBeNull()
+    expect(screen.queryByTitle(i18n.t('candidates:documents.preview'))).toBeNull()
+    expect(screen.queryByTitle(i18n.t('candidates:documents.download'))).toBeNull()
   })
 
   it('renders preview + download icons once the entry links a document (by document_id)', () => {
     const item = { id: 'e1', title: 'Verpleegkunde', document_id: 'doc1' }
     render(<EducationTab items={[item]} documents={documents} />)
-    expect(screen.getByTitle('Voorbeeld')).toBeInTheDocument()
-    expect(screen.getByTitle('Downloaden')).toBeInTheDocument()
+    expect(screen.getByTitle(i18n.t('candidates:documents.preview'))).toBeInTheDocument()
+    expect(screen.getByTitle(i18n.t('candidates:documents.download'))).toBeInTheDocument()
   })
 
   it('the jump icon is absent without an onJumpToDocuments callback, and present + wired with one', async () => {
@@ -111,7 +112,7 @@ describe('EducationTab · DOC-EDU-1 linked-document icons + edit-form picker', (
     const item = { id: 'e1', title: 'Verpleegkunde', document_id: 'doc1' }
     render(<EducationTab items={[item]} documents={documents} />)
     expect(screen.queryByTestId('preview-modal')).toBeNull()
-    await user.click(screen.getByTitle('Voorbeeld'))
+    await user.click(screen.getByTitle(i18n.t('candidates:documents.preview')))
     expect(screen.getByTestId('preview-modal')).toHaveTextContent('diploma.pdf')
   })
 
@@ -120,7 +121,7 @@ describe('EducationTab · DOC-EDU-1 linked-document icons + edit-form picker', (
     vi.mocked(downloadFilesSequentially).mockClear()
     const item = { id: 'e1', title: 'Verpleegkunde', document_id: 'doc1' }
     render(<EducationTab items={[item]} documents={documents} />)
-    await user.click(screen.getByTitle('Downloaden'))
+    await user.click(screen.getByTitle(i18n.t('candidates:documents.download')))
     expect(downloadFilesSequentially).toHaveBeenCalledWith([{ url: documents[0].url, name: documents[0].name }])
   })
 
@@ -129,12 +130,12 @@ describe('EducationTab · DOC-EDU-1 linked-document icons + edit-form picker', (
     const onEdit = vi.fn()
     const item = { id: 'e1', title: 'Verpleegkunde', school: 'ROC' }
     render(<EducationTab items={[item]} onEdit={onEdit} documents={documents} />)
-    await user.click(screen.getByTitle('Bewerken'))
+    await user.click(screen.getByTitle(i18n.t('common:edit')))
     // ALWAYS-SEARCHABLE-1: the document_id picker is the house CreatableSelect, named
     // by its own label ("Gekoppeld document") — open it and pick doc2 by document name.
-    await user.click(screen.getByRole('button', { name: 'Gekoppeld document' }))
+    await user.click(screen.getByRole('button', { name: i18n.t('candidates:addFields.linkedDocument') }))
     await user.click(await screen.findByRole('button', { name: 'ander.pdf' }))
-    await user.click(screen.getByTitle('Opslaan'))
+    await user.click(screen.getByTitle(i18n.t('common:save')))
     // §13: assert the save PAYLOAD carries the picked document_id.
     expect(onEdit).toHaveBeenCalledWith(0, expect.objectContaining({ document_id: 'doc2' }))
   })
@@ -149,21 +150,21 @@ describe('CertificationsTab · DOC-GELDIGHEID-1 linked-document icons + edit-for
   it('renders no link icons when the entry has no linked document', () => {
     const item = { id: 'c1', name: 'VCA Basis' }
     render(<CertificationsTab items={[item]} documents={documents} />)
-    expect(screen.queryByTitle('Voorbeeld')).toBeNull()
+    expect(screen.queryByTitle(i18n.t('candidates:documents.preview'))).toBeNull()
   })
 
   it('renders preview + download icons once the entry links a document (by document_id)', () => {
     const item = { id: 'c1', name: 'VCA Basis', document_id: 'doc1' }
     render(<CertificationsTab items={[item]} documents={documents} />)
-    expect(screen.getByTitle('Voorbeeld')).toBeInTheDocument()
-    expect(screen.getByTitle('Downloaden')).toBeInTheDocument()
+    expect(screen.getByTitle(i18n.t('candidates:documents.preview'))).toBeInTheDocument()
+    expect(screen.getByTitle(i18n.t('candidates:documents.download'))).toBeInTheDocument()
   })
 
   it('resolves the linked document via the reverse link (certification_id) when document_id is absent', () => {
     const item = { id: 'c1', name: 'VCA Basis' }
     const withReverse = [{ id: 'doc9', name: 'vca.pdf', url: '/x', certification_id: 'c1' }]
     render(<CertificationsTab items={[item]} documents={withReverse} />)
-    expect(screen.getByTitle('Voorbeeld')).toBeInTheDocument()
+    expect(screen.getByTitle(i18n.t('candidates:documents.preview'))).toBeInTheDocument()
   })
 
   it('jumping to Documenten calls the provided callback', async () => {
@@ -180,11 +181,11 @@ describe('CertificationsTab · DOC-GELDIGHEID-1 linked-document icons + edit-for
     const onEdit = vi.fn()
     const item = { id: 'c1', name: 'VCA Basis', org: 'SSVV' }
     render(<CertificationsTab items={[item]} onEdit={onEdit} documents={documents} />)
-    await user.click(screen.getByTitle('Bewerken'))
+    await user.click(screen.getByTitle(i18n.t('common:edit')))
     // ALWAYS-SEARCHABLE-1: the house CreatableSelect, named by its own label.
-    await user.click(screen.getByRole('button', { name: 'Gekoppeld document' }))
+    await user.click(screen.getByRole('button', { name: i18n.t('candidates:addFields.linkedDocument') }))
     await user.click(await screen.findByRole('button', { name: 'ander.pdf' }))
-    await user.click(screen.getByTitle('Opslaan'))
+    await user.click(screen.getByTitle(i18n.t('common:save')))
     expect(onEdit).toHaveBeenCalledWith(0, expect.objectContaining({ document_id: 'doc2' }))
   })
 })
