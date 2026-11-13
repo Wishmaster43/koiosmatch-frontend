@@ -108,9 +108,9 @@ describe('CustomersReport · server prospect_kpis strip (SERVER-KPIS-1)', () => 
     open()
     getSpy.mockClear()
     await user.click(screen.getByText(i18n.t('analytics:customers.kpis.prospectsNoContact')))
-    expect(getSpy).toHaveBeenCalledWith('/reports/customers/kpi-signal-drill',
+    expect(getSpy).toHaveBeenCalledWith('/reports/customers/signals/drill',
       expect.objectContaining({ params: expect.objectContaining({ kpi: 'prospects_no_contact' }) }))
-    const params = getSpy.mock.calls.find(c => c[0] === '/reports/customers/kpi-signal-drill')?.[1]?.params as Record<string, unknown>
+    const params = getSpy.mock.calls.find(c => c[0] === '/reports/customers/signals/drill')?.[1]?.params as Record<string, unknown>
     // Window params ride along, phase_filter does not (the signal-drill request does not know it).
     expect(params).toHaveProperty('period')
     expect(params).not.toHaveProperty('phase_filter')

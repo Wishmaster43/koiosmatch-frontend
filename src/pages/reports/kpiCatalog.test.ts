@@ -9,11 +9,11 @@ import {
 // carry a real catalogue — the settings screen picker (ReportKpiSettings) reads
 // these functions directly, so covering them here proves the picker works
 // without mounting the whole settings screen.
-// The customers kpi-drill wire enum (CustomersReport.tsx) and the signal label
+// The customers kpis/drill wire enum (CustomersReport.tsx) and the signal label
 // map here describe the SAME nine keys — a future divergence must fail loudly
 // instead of silently rendering an undrillable or unlabeled card.
 describe('kpiCatalog — customers signal keys stay in lockstep with the drill enum', () => {
-  it('CUSTOMERS_SIGNAL_LABEL_KEYS covers exactly the nine kpi-drill enum keys', () => {
+  it('CUSTOMERS_SIGNAL_LABEL_KEYS covers exactly the nine kpis/drill enum keys', () => {
     expect(Object.keys(CUSTOMERS_SIGNAL_LABEL_KEYS).sort()).toEqual([
       'contract_ending', 'customers_without_applications', 'customers_without_vacancies',
       'departments_without_placement', 'matches_stopped_early', 'no_contact',

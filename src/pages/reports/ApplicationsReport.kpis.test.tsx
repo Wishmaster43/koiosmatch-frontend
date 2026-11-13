@@ -174,15 +174,35 @@ describe('ApplicationsReport (RAPPORTEN-SUITE-1 portie 2)', () => {
       expect.objectContaining({ params: { axis: 'state', value: 'done', period: 'month' } }))
   })
 
-  // With a panel filter active, intake tiles/bars stay non-drillable (same gate
-  // as recruiter/branch — the intakes endpoint has no filter params, so a filtered
-  // envelope would disagree with the drawer's unfiltered count).
-  it('does not fire a request when clicking the planned tile while a panel filter is active', async () => {
+  // REPORT-INTAKES-FILTERS-1 (BE 6fdf12208): owner and branch filters narrow the
+  // intakes block AND its drill, so the tiles stay clickable and the drill carries
+  // owner_id[] / location_id[] next to axis/value/period.
+  it('clicking the planned tile with owner and branch filters active drills with owner_id and location_id', async () => {
     const user = userEvent.setup()
     mockUseApplicationsReport.mockReturnValue({ data, loading: false, error: false })
     render(
       <QueryClientProvider client={new QueryClient()}>
-        <ApplicationsReport period="month" filters={{ ...EMPTY_REPORT_FILTERS, status: ['active'] }} />
+        <ApplicationsReport period="month" filters={{ ...EMPTY_REPORT_FILTERS, ownerId: ['u1'], locationId: [7] }} />
+      </QueryClientProvider>,
+    )
+    getSpy.mockClear()
+    await user.click(screen.getByText(i18n.t('analytics:applications.intakes.planned')))
+    expect(getSpy).toHaveBeenCalledWith('/reports/applications/intakes/drill',
+      expect.objectContaining({ params: { axis: 'state', value: 'planned', period: 'month', owner_id: ['u1'], location_id: [7] } }))
+  })
+
+  // INTAKES-FILTER-SCOPE-1: status and customer filters are ignored by the intakes
+  // block, so a filtered envelope would disagree with the drawer; the tiles stay
+  // click-free while either is active and no request is sent.
+  it.each([
+    ['status', { status: ['active'] }],
+    ['customer', { customerId: ['c1'] }],
+  ])('does not fire a request when clicking the planned tile while a %s filter is active', async (_name, extra) => {
+    const user = userEvent.setup()
+    mockUseApplicationsReport.mockReturnValue({ data, loading: false, error: false })
+    render(
+      <QueryClientProvider client={new QueryClient()}>
+        <ApplicationsReport period="month" filters={{ ...EMPTY_REPORT_FILTERS, ...extra }} />
       </QueryClientProvider>,
     )
     getSpy.mockClear()

@@ -334,17 +334,17 @@ describe('CustomersReport (RAPPORTEN-SUITE-1 portie 3, customers inflow report)'
     expect(screen.getByText('7')).toBeInTheDocument()
   })
 
-  // KPIS-DRILL-1: a signal card drills via the dedicated kpi-drill endpoint,
+  // KPIS-DRILL-1: a signal card drills via the dedicated kpis/drill endpoint,
   // not the plain drill route — no settings override needed, the nine signals
   // ARE the default Klanten catalog.
-  it('clicking the contract_ending signal card drills via /reports/customers/kpi-drill with kpi=contract_ending', async () => {
+  it('clicking the contract_ending signal card drills via /reports/customers/kpis/drill with kpi=contract_ending', async () => {
     const user = userEvent.setup()
     mockUseCustomersReport.mockReturnValue({ data, loading: false, error: false })
     renderReport()
     await user.click(screen.getByText(i18n.t('customers.kpis.contractEnding', { ns: 'analytics' })))
-    // Contract: the kpi-drill endpoint accepts ONLY `kpi` (standing signal, no
+    // Contract: the kpis/drill endpoint accepts ONLY `kpi` (standing signal, no
     // window) — the request must not smuggle period/filter params along.
-    expect(getSpy).toHaveBeenCalledWith('/reports/customers/kpi-drill',
+    expect(getSpy).toHaveBeenCalledWith('/reports/customers/kpis/drill',
       expect.objectContaining({ params: { kpi: 'contract_ending' } }))
     expect(getSpy.mock.calls.some(c => c[0] === '/reports/customers/drill')).toBe(false)
   })

@@ -64,9 +64,10 @@ import { useReportCustomKpis } from './hooks/useReportCustomKpis'
 type Axis = 'status' | 'phase' | 'industry' | 'branch'
 
 // KPI-CUSTOMERS-SIGNALS-1: the nine CUSTOMERS_SIGNAL_LABEL_KEYS are the Klanten position's
-// fixed strip and drill via GET /reports/customers/kpi-drill (nine KD10 keys only). The three
-// Prospects server cards (customers_prospect + two standing keys) drill via the separate
-// GET /reports/customers/kpi-signal-drill, which takes the window params but no phase_filter.
+// fixed strip and drill via GET /reports/customers/kpis/drill (nine KD10 keys only). The three
+// Prospects server cards drill via GET /reports/customers/signals/drill, which takes the window
+// params but no phase_filter. REPORT-INTAKES-FILTERS-1 (BE 6fdf12208) named these two canonical
+// paths; the old kpi-drill / kpi-signal-drill aliases stay until the BE retire row that follows this landing.
 // Server prospect card key -> its label key; an unknown server key is skipped, never shown in server English.
 const PROSPECT_KPI_LABEL_KEYS: Record<string, string> = {
   customers_prospect: 'prospects.total',
@@ -161,24 +162,24 @@ export default function CustomersReport({ period, filters = EMPTY_REPORT_FILTERS
   const pickOwnerBar = (segs: CandidateOwnerSegment[]) =>
     gateDrillClick('customers', ownerClick(segs, openSegment))
 
-  // KPIS-DRILL-1: a signal card whose key is one of the nine kpi-drill enum
+  // KPIS-DRILL-1: a signal card whose key is one of the nine kpis/drill enum
   // values opens the same shared drawer, but sourced from the dedicated
-  // kpi-drill endpoint (a standing count, not an axis segment — no breakdown).
+  // kpis/drill endpoint (a standing count, not an axis segment — no breakdown).
   // Contract (getReportsCustomersKpiDrill): the endpoint accepts ONLY `kpi` —
   // these are STANDING signals over the live base, so no window params ride
   // along and the subtitle says "live snapshot", never the report window.
   const openSignalKpiDrill = (label: string, count: number, kpi: string) => setDrill({
     title: label, value: count, subtitle: t('customers.signalSnapshot'),
     entityPage: 'customers',
-    rowsEndpoint: '/reports/customers/kpi-drill', rowsParams: { kpi },
+    rowsEndpoint: '/reports/customers/kpis/drill', rowsParams: { kpi },
   })
 
-  // Prospect server cards drill via kpi-signal-drill: window + panel filters + kpi, no phase_filter.
+  // Prospect server cards drill via signals/drill: window + panel filters + kpi, no phase_filter.
   const openProspectKpiDrill = (label: string, count: number, kpi: string) => setDrill({
     title: label, value: count,
     subtitle: kpi === 'customers_prospect' ? windowSub() : t('customers.signalSnapshot'),
     entityPage: 'customers',
-    rowsEndpoint: '/reports/customers/kpi-signal-drill',
+    rowsEndpoint: '/reports/customers/signals/drill',
     rowsParams: { ...buildReportQueryParams(period, 'customers', filters), kpi },
   })
 

@@ -190,7 +190,7 @@ const REPORT_KPI_FIXED_CATALOG: Partial<Record<ReportKpiScopeId, KpiCatalogEntry
   ],
   // KPI-CUSTOMERS-SIGNALS-1: the Klanten position's nine cards are now the
   // report's own STANDING signal kpis[] suite verbatim (server predicate ==
-  // drill predicate via /reports/customers/kpi-drill) — CUSTOMERS_SIGNAL_LABEL_KEYS
+  // drill predicate via /reports/customers/kpis/drill) — CUSTOMERS_SIGNAL_LABEL_KEYS
   // above is the one place the key→i18n-suffix mapping is spelled out, consumed
   // both here and by CustomersReport.tsx so the two can never drift.
   customers: Object.entries(CUSTOMERS_SIGNAL_LABEL_KEYS).map(([signalKey, i18nSuffix]) => ({

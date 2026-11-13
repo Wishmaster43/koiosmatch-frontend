@@ -125,24 +125,25 @@ export default function ApplicationsReport({ period, filters = EMPTY_REPORT_FILT
   // the drawer deep-links to the application drilldown (§3A entityPage).
   const openSegment = makeOpenSegment({ entityPage: 'applications', rowsEndpoint: '/reports/applications/drill', adviceEndpoint: '/reports/applications/advice', baseParams, windowSub, setDrill })
 
-  // INTAKE-IN-APPS-1: the intake axis drill (GET /reports/applications/intakes/drill,
-  // operation getReportsApplicationsIntakesDrill) — its documented request body only
-  // carries axis/value/period/from/to (no status/owner/location/customer filters), so
-  // only those fields are sent here, never the full `baseParams` filter set.
-  // CONSEQUENCE: the intake bars come from the filter-scoped envelope while this
-  // drill cannot be filter-scoped — with an active panel filter the drawer would
-  // count a DIFFERENT population than the bar shows, so the bars render without
-  // a click while any filter is active (contract gap filed with CMBE:
-  // WAVE-1B-CONTRACTVRAGEN-CMBE).
+  // INTAKE-IN-APPS-1 + REPORT-INTAKES-FILTERS-1 (BE 6fdf12208): the intakes block and
+  // its drill (GET /reports/applications/intakes/drill) narrow by owner_id[] and
+  // location_id[], so those two panel filters ride along and the drawer counts the
+  // same population the tile shows. INTAKES-FILTER-SCOPE-1 (provisional): status[]
+  // and customer_id[] are accepted but IGNORED by the intakes block, so they are
+  // never sent and the gate below keeps the tiles click-free while either is active
+  // (a filtered envelope would disagree with an unfiltered drawer).
   const openIntakeDrill = (axis: 'state' | 'recruiter' | 'branch', label: string, value: string | number, rawValue: string) =>
     setDrill({
       title: label, value, subtitle: windowSub(),
-      rowsEndpoint: '/reports/applications/intakes/drill', rowsParams: { axis, value: rawValue, period },
+      rowsEndpoint: '/reports/applications/intakes/drill',
+      rowsParams: {
+        axis, value: rawValue, period,
+        ...(filters.ownerId.length ? { owner_id: filters.ownerId } : {}),
+        ...(filters.locationId.length ? { location_id: filters.locationId } : {}),
+      },
     })
-  // See the CONSEQUENCE note above: intake drills are honest only when no panel
-  // filter narrows the envelope this block was drawn from.
-  const intakeDrillable = [filters.status, filters.ownerId, filters.locationId, filters.customerId]
-    .every(a => a.length === 0)
+  // Intake drills are honest only while no filter the intakes block ignores is active.
+  const intakeDrillable = [filters.status, filters.customerId].every(a => a.length === 0)
 
   // Donut data for a coloured/few-value lookup axis (§chart-type-rule): each
   // slice wears its own tenant colour, falling back to the house series.
