@@ -75,10 +75,13 @@ interface InputProps {
   onChange: (v: string) => void
   placeholder?: string
   style?: CSSProperties
+  // `id` pairs the input with a Row htmlFor label (§6); `maxLength` mirrors a server length rule.
+  id?: string
+  maxLength?: number
 }
-function Input({ value, onChange, placeholder, style }: InputProps) {
+function Input({ value, onChange, placeholder, style, id, maxLength }: InputProps) {
   return (
-    <input value={value ?? ''} onChange={(e: ChangeEvent<HTMLInputElement>) => onChange(e.target.value)} placeholder={placeholder}
+    <input id={id} maxLength={maxLength} value={value ?? ''} onChange={(e: ChangeEvent<HTMLInputElement>) => onChange(e.target.value)} placeholder={placeholder}
       style={{ ...baseInput, ...style }} />
   )
 }
@@ -123,8 +126,12 @@ function Select({ value, onChange, options }: SelectProps) {
 // company_country stores the ISO-2 CODE ('NL'), matching the backend's own seed
 // (DevResetCommand.php) and GET /countries — a plain English name here used to
 // mismatch that seed and render as a raw unmatched value (COUNTRY-LOOKUP-1).
+// REST7A-DEBTOR-IDS-1 (Danny 12-11): the bureau's own KvK and VAT numbers feed the
+// invoice export (BE freezes them on the invoice at finalisation); the BE caps both at 32.
+const COMPANY_NUMBER_MAX_LENGTH = 32
 const EMPTY = {
   company_country: 'NL',
+  company_coc_number: '', company_vat_number: '',
   company_street: '', company_house_number: '', company_house_number_suffix: '',
   company_postcode: '', company_city: '', company_province: '',
   company_language: 'nl', company_currency: 'EUR', company_timezone: 'Europe/Amsterdam',
@@ -165,6 +172,8 @@ export default function CompanySettings() {
       setForm(f => ({
         ...f,
         company_country:  s.company_country  ?? 'NL',
+        company_coc_number: s.company_coc_number ?? '',
+        company_vat_number: s.company_vat_number ?? '',
         company_street:              s.company_street              ?? '',
         company_house_number:        s.company_house_number        ?? '',
         company_house_number_suffix: s.company_house_number_suffix ?? '',
@@ -246,6 +255,13 @@ export default function CompanySettings() {
         <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
           {/* 1. Identity — what the company IS, before any address detail. */}
           <Group title={t('company.sectionIdentity')}>
+            {/* The bureau's own registration numbers (REST7A-DEBTOR-IDS-1), printed on its invoices. */}
+            <Row label={t('company.cocNumber')} htmlFor="company-coc-number">
+              <Input id="company-coc-number" maxLength={COMPANY_NUMBER_MAX_LENGTH} value={form.company_coc_number} onChange={v => set('company_coc_number', v)} placeholder={t('company.cocPlaceholder')} />
+            </Row>
+            <Row label={t('company.vatNumber')} htmlFor="company-vat-number">
+              <Input id="company-vat-number" maxLength={COMPANY_NUMBER_MAX_LENGTH} value={form.company_vat_number} onChange={v => set('company_vat_number', v)} placeholder={t('company.vatPlaceholder')} />
+            </Row>
             <Row label={t('company.banner')} last>
               <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
                 {bannerUrl && <img src={bannerUrl} alt={t('company.banner')} style={{ width: '100%', maxWidth: 400, height: 100, objectFit: 'cover', borderRadius: 8, border: '1px solid var(--border)' }} />}

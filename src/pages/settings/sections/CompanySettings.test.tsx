@@ -242,6 +242,32 @@ describe('CompanySettings — language names from the backend code list', () => 
 
 // H2 retired keys: the save POST must never carry company_industry or company_address*.
 describe('CompanySettings: retired keys', () => {
+  // REST7A-DEBTOR-IDS-1: the bureau's KvK / VAT numbers load from and save to their own
+  // settings keys, capped at the BE's 32 characters on the input itself.
+  it('loads company_coc_number / company_vat_number into labelled inputs capped at 32 characters', async () => {
+    mockedLoadSettings.mockResolvedValue({ company_coc_number: '84738375', company_vat_number: 'NL863341172B01' })
+    renderPage()
+    const coc = await screen.findByLabelText(t('company.cocNumber'))
+    const vat = screen.getByLabelText(t('company.vatNumber'))
+    expect(coc).toHaveValue('84738375')
+    expect(vat).toHaveValue('NL863341172B01')
+    expect(coc).toHaveAttribute('maxlength', '32')
+    expect(vat).toHaveAttribute('maxlength', '32')
+  })
+
+  it('saves the typed KvK and VAT numbers under company_coc_number / company_vat_number', async () => {
+    mockedLoadSettings.mockResolvedValue({})
+    mockedSaveSettings.mockResolvedValue(undefined)
+    const user = userEvent.setup()
+    renderPage()
+    await user.type(await screen.findByLabelText(t('company.cocNumber')), '84738375')
+    await user.type(screen.getByLabelText(t('company.vatNumber')), 'NL863341172B01')
+    fireEvent.click(screen.getByRole('button', { name: t('common.save') }))
+    await waitFor(() => expect(mockedSaveSettings).toHaveBeenCalledWith(expect.objectContaining({
+      company_coc_number: '84738375', company_vat_number: 'NL863341172B01',
+    })))
+  })
+
   it('saves without company_industry or company_address*', async () => {
     mockedLoadSettings.mockResolvedValue({ company_industry: 'IT', company_address1: 'Old 1' })
     mockedSaveSettings.mockResolvedValue(undefined)
