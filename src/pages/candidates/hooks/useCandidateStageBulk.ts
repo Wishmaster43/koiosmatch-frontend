@@ -1,6 +1,7 @@
 import api from '@/lib/api'
 import { reasonBreakdown } from '@/lib/bulkSkipReasons'
 import type { TFunction } from 'i18next'
+import { labelOrRaw, type KeyChecker } from '@/lib/labelOrRaw'
 import { metaOf } from '../data/candidatesShared'
 import type { Id } from '@/types/common'
 import type { LookupItem } from '@/context/LookupsContext'
@@ -21,6 +22,7 @@ interface UseCandidateStageBulkParams {
   selectedIds: Set<Id>
   notify: (type: string, msg: string) => void
   t: TFunction
+  i18n: KeyChecker
   funnelTypes: LookupItem[]
   confirm: ConfirmFn
   bulkMutate: (args: BulkMutateArgs) => void
@@ -37,7 +39,7 @@ interface UseCandidateStageBulkParams {
  * in so there is exactly one implementation of each — never a second copy here.
  */
 export function useCandidateStageBulk({
-  selectedIds, notify, t, funnelTypes, confirm, bulkMutate, notifyOutcome,
+  selectedIds, notify, t, i18n, funnelTypes, confirm, bulkMutate, notifyOutcome,
 }: UseCandidateStageBulkParams) {
   // Move the selection to a funnel stage — the real bulk route (BULK-2) with single-PATCH
   // semantics (Match-spawn on hired, event after commit). Replaces the per-id bridge.
@@ -94,7 +96,7 @@ export function useCandidateStageBulk({
   // Human label for one axis condition token (lead/available/temporarily_unavailable/
   // placed/blacklist/archived) — falls back to the raw token so an unmapped future
   // condition never renders blank.
-  const axisConditionLabel = (condition: string): string => t(`bulk.axisConditions.${condition}`, { defaultValue: condition })
+  const axisConditionLabel = (condition: string): string => labelOrRaw(t, i18n, `bulk.axisConditions.${condition}`, condition, 'candidates')
 
   // Set a (simple) deployability status for the selection. Match/reason-gated statuses
   // (placed/unavailable/blacklist) are excluded from bulk in the UI.

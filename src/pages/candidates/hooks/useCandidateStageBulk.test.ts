@@ -43,7 +43,7 @@ const cand = (overrides: Partial<Candidate> = {}): Candidate => ({
 // mirroring exactly what useCandidateBulkActions passes into this hook — so
 // this test exercises the same optimistic-update/reconcile/confirm contract
 // the real app runs, not a mocked stand-in.
-function harness(initial: Candidate[]) {
+function harness(initial: Candidate[], tFn: import('i18next').TFunction = t, checker: { exists: (k: string) => boolean } = i18n) {
   return renderHook(() => {
     const [candidates, setCandidates] = useState<Candidate[]>(initial)
     const [selectedIds, setSelectedIds] = useState<Set<Id>>(new Set())
@@ -78,7 +78,7 @@ function harness(initial: Candidate[]) {
       setSelectedIds(new Set())
     }
 
-    const actions = useCandidateStageBulk({ selectedIds, notify, t, funnelTypes: FUNNEL, confirm, bulkMutate, notifyOutcome })
+    const actions = useCandidateStageBulk({ selectedIds, notify, t: tFn, i18n: checker, funnelTypes: FUNNEL, confirm, bulkMutate, notifyOutcome })
     return { candidates, setSelectedIds, actions, dialog }
   })
 }
@@ -184,6 +184,22 @@ describe('useCandidateStageBulk · bulkSetStatus (AXIS-MATRIX-2 N2 bulk prefligh
     expect(r.result.current.dialog.props.message).toBe('bulk.statusBlockedConfirmSample')
     act(() => r.result.current.dialog.props.onConfirm())
     await waitFor(() => expect(post).toHaveBeenCalledWith('/candidates/bulk/status', { candidate_ids: [1, 2, 3], status: 'placed' }))
+  })
+
+  // The reasons part of the confirm names the axis condition: translated when the key exists, raw otherwise.
+  it.each([[true, 'translated:archived'], [false, 'archived']])('labels the blocked axis condition (key known: %s)', async (known, label) => {
+    post.mockResolvedValue({
+      data: { total: 3, allowed: 2, warned: 0, blocked: 1, not_found: 0,
+        breakdown: [{ condition: 'archived', popup_code: 'P4', effect: 'block', count: 1, sample_names: [] }] },
+    })
+    const tReasons = ((k: string, o?: { reasons?: string }) => (k === 'bulk.statusBlockedConfirm' ? String(o?.reasons) : k === 'bulk.axisConditions.archived' ? 'translated:archived' : k)) as unknown as import('i18next').TFunction
+    // The checker answers only in the candidates namespace, so a wrong-namespace lookup would show as raw.
+    const exists = vi.fn((_key: string, o?: { ns?: string }) => o?.ns === 'candidates' && known)
+    const r = harness([cand({ id: 1 }), cand({ id: 2 }), cand({ id: 3 })], tReasons, { exists })
+    act(() => r.result.current.setSelectedIds(new Set([1, 2, 3])))
+    await act(async () => { r.result.current.actions.bulkSetStatus('placed', 'x') })
+    expect(r.result.current.dialog.props.message).toBe(`1 ${label}`)
+    expect(exists).toHaveBeenCalledWith('bulk.axisConditions.archived', { ns: 'candidates' })
   })
 
   it('falls back to the plain blocked confirm when the preflight has no sample names', async () => {

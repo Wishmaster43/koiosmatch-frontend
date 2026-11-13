@@ -71,7 +71,7 @@ const CandidateDrawer = CandidateDrawerJs as ComponentType<{
 // The candidate list page shell (the §3A blueprint); an optional intent prop lets a deep link (dashboard tile, notification) preselect a filter/attention state on mount.
 export default function CandidatesPage({ intent }: { intent?: CandidateIntent } = {}) {
   const { hasPermission } = useAuth() as unknown as { hasPermission: (p: string) => boolean }
-  const { t } = useTranslation(['candidates', 'common'])
+  const { t, i18n } = useTranslation(['candidates', 'common'])
   const { candidateTypes, funnelTypes, statuses, phases } = useLookups()
   const { genders } = useGenders()
   const { data: users = [] } = useUsers() as { data?: AppUser[] }
@@ -285,7 +285,7 @@ export default function CandidatesPage({ intent }: { intent?: CandidateIntent } 
     bulkScope, setBulkScope, resetBulkScope, filteredTotal,
     dialog: bulkConfirmDialog,
   } = useCandidateBulkActions({
-    candidates, setCandidates, setTotal, selectedIds, setSelectedIds, notify, t, funnelTypes, candidateTypes,
+    candidates, setCandidates, setTotal, selectedIds, setSelectedIds, notify, t, i18n, funnelTypes, candidateTypes,
     filterParams, filteredTotal: total,
     onFilteredMutated: () => queryClient.invalidateQueries({ queryKey: ['candidates'] }),
   })

@@ -63,7 +63,7 @@ function harness(initial: Candidate[], filterArgs: { filterParams?: Record<strin
     const [total, setTotal] = useState(initial.length)
     const [selectedIds, setSelectedIds] = useState<Set<Id>>(new Set())
     const actions = useCandidateBulkActions({
-      candidates, setCandidates, setTotal, selectedIds, setSelectedIds, notify, t,
+      candidates, setCandidates, setTotal, selectedIds, setSelectedIds, notify, t, i18n: { exists: () => false },
       funnelTypes: FUNNEL, candidateTypes: CANDIDATE_TYPES,
       ...filterArgs,
     })

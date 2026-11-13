@@ -35,6 +35,7 @@ import type { Candidate } from '@/types/candidate'
 import type { Id, LookupOption } from '@/types/common'
 import type { LookupItem } from '@/context/LookupsContext'
 import type { CandidateBulkSelectionBase } from './candidateBulkTypes'
+import type { KeyChecker } from '@/lib/labelOrRaw'
 
 // Re-exported so CandidateLifecycleModals (and any other outside caller) keeps
 // importing these two types from this file's own path unchanged.
@@ -45,6 +46,8 @@ export type { BulkMergeLite, BulkMergeTarget } from './useCandidateMergeBulk'
 // shared CandidateBulkSelectionBase (jscpd CANDHOOKS #3, shared with
 // useCandidateArchiveBulk's own param shape) — only this hook's own fields follow.
 interface UseCandidateBulkActionsParams extends CandidateBulkSelectionBase {
+  // Key checker so the stage cluster can fall back to the raw axis condition label.
+  i18n: KeyChecker
   candidates: Candidate[]
   setCandidates: Dispatch<SetStateAction<Candidate[]>>
   setTotal: Dispatch<SetStateAction<number>>
@@ -86,7 +89,7 @@ export interface BulkMutateArgs {
 
 // Bulk-mutation handlers for the candidates table (funnel/phase/type/…), reporting an updated/total/skipped breakdown so a partial failure never reads as a bare success.
 export function useCandidateBulkActions({
-  candidates, setCandidates, setTotal, selectedIds, setSelectedIds, notify, t, funnelTypes, candidateTypes,
+  candidates, setCandidates, setTotal, selectedIds, setSelectedIds, notify, t, i18n, funnelTypes, candidateTypes,
   filterParams, filteredTotal, onFilteredMutated,
 }: UseCandidateBulkActionsParams) {
   const { confirm, dialog } = useConfirm()
@@ -243,7 +246,7 @@ export function useCandidateBulkActions({
   // bulkMutate/notifyOutcome are passed in so there is exactly one implementation
   // of each. The three returned functions are re-exported below unchanged.
   const { bulkSetStage, bulkConvertPhase, bulkSetStatus } = useCandidateStageBulk({
-    selectedIds, notify, t, funnelTypes, confirm, bulkMutate, notifyOutcome,
+    selectedIds, notify, t, i18n, funnelTypes, confirm, bulkMutate, notifyOutcome,
   })
 
   // Set channel consent (AVG opt-in) for the selection. No optimistic row patch —
