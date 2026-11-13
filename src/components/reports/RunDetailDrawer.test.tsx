@@ -147,7 +147,7 @@ describe('RunDetailDrawer — run id copy control', () => {
         <RunDetailDrawer run={{ ...baseRun, status: 'success' }} onClose={() => {}} />
       </I18nextProvider>,
     )
-    const copyButton = screen.getByRole('button', { name: 'Klik om het ID te kopiëren' })
+    const copyButton = screen.getByRole('button', { name: i18n.t('reports:runs.drawer.copyId') })
     await user.click(copyButton)
     expect(writeTextSpy).toHaveBeenCalledWith('5')
   })

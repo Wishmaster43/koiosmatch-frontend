@@ -23,7 +23,7 @@ describe('CandidateDetailDrawer — restyled header', () => {
     expect(screen.getByText('Anna Jansen')).toBeInTheDocument()
 
     // SoftChip tints via color-mix — never a solid fill (§4).
-    const pill = screen.getByText('Actief')
+    const pill = screen.getByText(i18n.t('reports:candidates.status.actief'))
     expect(pill.closest('span')).toHaveInlineStyle({ background: 'color-mix(in srgb, var(--color-success) 10%, transparent)' })
 
     // ReferenceNumberChip — the id in JetBrains Mono with a click-to-copy affordance.
@@ -38,7 +38,7 @@ describe('CandidateDetailDrawer — restyled header', () => {
   it('has an aria-labelled close button that fires onClose', () => {
     const onClose = vi.fn()
     render(<CandidateDetailDrawer candidate={candidate} onClose={onClose} />)
-    fireEvent.click(screen.getByRole('button', { name: 'Sluiten' }))
+    fireEvent.click(screen.getByRole('button', { name: i18n.t('common:close') }))
     expect(onClose).toHaveBeenCalled()
   })
 

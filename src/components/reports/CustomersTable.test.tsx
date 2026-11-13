@@ -7,7 +7,7 @@
 import { describe, it, expect, vi } from 'vitest'
 import { render, screen, fireEvent, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
-import '@/i18n'
+import i18n from '@/i18n'
 import CustomersTable from './CustomersTable'
 import type { ReportCustomer } from '@/types/reports'
 
@@ -27,7 +27,7 @@ vi.mock('@/context/AuthContext', () => ({ useAuth: () => ({ user: { id: 'u1' } }
 describe('CustomersTable — search box wiring', () => {
   it('renders a search input (was missing — the search state had no control)', () => {
     render(<CustomersTable />)
-    expect(screen.getByPlaceholderText('Zoek op naam, debiteurnummer, accountmanager…')).toBeInTheDocument()
+    expect(screen.getByPlaceholderText(i18n.t('reports:customers.search'))).toBeInTheDocument()
   })
 
   it('shows every customer before typing', () => {
@@ -38,7 +38,7 @@ describe('CustomersTable — search box wiring', () => {
 
   it('typing in the search box narrows the visible rows', () => {
     render(<CustomersTable />)
-    const input = screen.getByPlaceholderText('Zoek op naam, debiteurnummer, accountmanager…')
+    const input = screen.getByPlaceholderText(i18n.t('reports:customers.search'))
     fireEvent.change(input, { target: { value: 'Amsterdam' } })
     expect(screen.getByText('Amsterdam UMC')).toBeInTheDocument()
     expect(screen.queryByText('Zorgpartners Midden-Holland')).not.toBeInTheDocument()

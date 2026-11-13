@@ -6,7 +6,7 @@
  */
 import { describe, it, expect, vi } from 'vitest'
 import { render, screen, fireEvent } from '@testing-library/react'
-import '@/i18n'
+import i18n from '@/i18n'
 import CustomerDetailDrawer from './CustomerDetailDrawer'
 import type { ReportCustomer } from '@/types/reports'
 
@@ -30,7 +30,7 @@ describe('CustomerDetailDrawer — shared chrome adoption', () => {
   it('closes via the footer Close button', () => {
     const onClose = vi.fn()
     render(<CustomerDetailDrawer customer={customer} onClose={onClose} />)
-    fireEvent.click(screen.getByText('Sluiten'))
+    fireEvent.click(screen.getByText(i18n.t('reports:dr.close')))
     expect(onClose).toHaveBeenCalledOnce()
   })
 })

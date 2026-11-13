@@ -110,8 +110,8 @@ describe('RunsTable — failed load is an error state', () => {
   it('shows the load error copy and not the empty copy when the hook reports an error', () => {
     vi.mocked(useReportList).mockReturnValueOnce({ rows: [], loading: false, error: true })
     render(<RunsTable />)
-    expect(screen.getByText('Kon uitvoeringen niet laden.')).toBeInTheDocument()
-    expect(screen.queryByText('Geen uitvoeringen gevonden')).toBeNull()
+    expect(screen.getByText(i18n.t('reports:runs.loadError'))).toBeInTheDocument()
+    expect(screen.queryByText(i18n.t('reports:runs.empty'))).toBeNull()
   })
 })
 
@@ -206,7 +206,7 @@ describe('RunsTable — LIMITS-FE-F7 blocked status', () => {
       loading: false, error: false,
     })
     render(<RunsTable />)
-    expect(screen.getByText('Geblokkeerd').closest('span'))
+    expect(screen.getByText(i18n.t('reports:runs.status.blocked')).closest('span'))
       .toHaveAttribute('title', 'Limiet bereikt (sm, modus block) — stap overgeslagen, niets gesynchroniseerd.')
   })
 })
@@ -221,7 +221,7 @@ describe('RunsTable — blocked badge translates the capped step reason code', (
       loading: false, error: false,
     })
     render(<RunsTable />)
-    expect(screen.getByText('Geblokkeerd').closest('span'))
+    expect(screen.getByText(i18n.t('reports:runs.status.blocked')).closest('span'))
       .toHaveAttribute('title', i18n.t('reports:runs.stepReasons.cap_reached'))
   })
 })
@@ -246,7 +246,7 @@ describe('RunsTable — RUN-SKIPPED-REASON-FE-1 skipped status + reason', () => 
       loading: false, error: false,
     })
     render(<RunsTable />)
-    expect(screen.getByText('Overgeslagen')).toBeInTheDocument()
+    expect(screen.getByText(i18n.t('reports:runs.status.skipped'))).toBeInTheDocument()
   })
 
   it('shows the run-level reason as the status badge title when there is no blocked-step reason', () => {
@@ -255,7 +255,7 @@ describe('RunsTable — RUN-SKIPPED-REASON-FE-1 skipped status + reason', () => 
       loading: false, error: false,
     })
     render(<RunsTable />)
-    expect(screen.getByText('Overgeslagen').closest('span'))
+    expect(screen.getByText(i18n.t('reports:runs.status.skipped')).closest('span'))
       .toHaveAttribute('title', 'Geen kandidaten in de selectie')
   })
 
@@ -271,7 +271,7 @@ describe('RunsTable — RUN-SKIPPED-REASON-FE-1 skipped status + reason', () => 
       loading: false, error: false,
     })
     render(<RunsTable />)
-    const search = screen.getByPlaceholderText('Zoek op workflow, trigger, fout…')
+    const search = screen.getByPlaceholderText(i18n.t('reports:runs.search'))
     fireEvent.change(search, { target: { value: 'zeldzame' } })
     expect(screen.getByText('Skipflow')).toBeInTheDocument()
     expect(screen.queryByText('Anderflow')).not.toBeInTheDocument()
@@ -289,8 +289,8 @@ describe('RunsTable — RUN-REASON-I18N-1 translated reason code', () => {
       loading: false, error: false,
     })
     render(<RunsTable />)
-    expect(screen.getByText('Overgeslagen').closest('span'))
-      .toHaveAttribute('title', 'Sollicitatie is afgewezen')
+    expect(screen.getByText(i18n.t('reports:runs.status.skipped')).closest('span'))
+      .toHaveAttribute('title', i18n.t('reports:runs.reasons.rejected_stage'))
   })
 
   it('finds a run by searching the translated label text of its reason code', () => {
@@ -302,7 +302,7 @@ describe('RunsTable — RUN-REASON-I18N-1 translated reason code', () => {
       loading: false, error: false,
     })
     render(<RunsTable />)
-    const search = screen.getByPlaceholderText('Zoek op workflow, trigger, fout…')
+    const search = screen.getByPlaceholderText(i18n.t('reports:runs.search'))
     fireEvent.change(search, { target: { value: 'afgewezen' } })
     expect(screen.getByText('Skipflow')).toBeInTheDocument()
     expect(screen.queryByText('Anderflow')).not.toBeInTheDocument()

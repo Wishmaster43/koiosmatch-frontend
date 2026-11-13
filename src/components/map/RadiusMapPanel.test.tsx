@@ -9,7 +9,7 @@
 import { describe, it, expect, vi } from 'vitest'
 import { render, screen, fireEvent } from '@testing-library/react'
 // Real i18next instance so t() resolves actual locale strings, not raw keys.
-import '@/i18n'
+import i18n from '@/i18n'
 import RadiusMapPanel from './RadiusMapPanel'
 
 vi.mock('@/components/map/RadiusMap', () => ({
@@ -68,7 +68,7 @@ describe('RadiusMapPanel · radius slider passes the same values the native rang
   it('the exact-km number input still fires onRadiusChange directly (unchanged contract)', () => {
     const onRadiusChange = vi.fn()
     render(<RadiusMapPanel {...baseProps} radiusKm={30} onRadiusChange={onRadiusChange} />)
-    fireEvent.change(screen.getByRole('spinbutton', { name: 'Straal' }), { target: { value: '45' } })
+    fireEvent.change(screen.getByRole('spinbutton', { name: i18n.t('common:map.radius') }), { target: { value: '45' } })
     expect(onRadiusChange).toHaveBeenCalledWith(45)
   })
 })
@@ -81,7 +81,7 @@ describe('RadiusMapPanel · short point-count caption with a tooltip hint', () =
     render(<RadiusMapPanel {...baseProps} radiusKm={30} onRadiusChange={vi.fn()} pointsLabel="3 vacatures op de kaart" />)
     const caption = screen.getByText('3 vacatures op de kaart')
     expect(caption).toBeInTheDocument()
-    expect(caption).toHaveAttribute('title', 'Klik op de kaart om het middelpunt te verplaatsen')
+    expect(caption).toHaveAttribute('title', i18n.t('common:map.clickHint'))
   })
 })
 

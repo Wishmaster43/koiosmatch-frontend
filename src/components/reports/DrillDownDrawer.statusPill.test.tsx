@@ -5,7 +5,7 @@
  */
 import { describe, it, expect } from 'vitest'
 import { render, screen } from '@testing-library/react'
-import '@/i18n'
+import i18n from '@/i18n'
 import DrillDownDrawer from './DrillDownDrawer'
 import type { ReportCandidate } from '@/types/reports'
 
@@ -14,7 +14,7 @@ const candidate: ReportCandidate = { id: 'c1', firstname: 'Jan', lastname: 'Jans
 describe('DrillDownDrawer — status pill', () => {
   it('renders the status label using only design-system tokens, no hex colour', () => {
     render(<DrillDownDrawer title="Test" candidates={[candidate]} onClose={() => {}} />)
-    const pill = screen.getByText('Actief')
+    const pill = screen.getByText(i18n.t('reports:candidates.status.actief'))
     expect(pill).toBeInTheDocument()
     // The pill's own colour (walk up to the styled chip span) must never carry a raw hex value.
     const styled = pill.closest('span')

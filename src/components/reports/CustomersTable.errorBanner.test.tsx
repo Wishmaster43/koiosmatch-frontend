@@ -4,7 +4,7 @@
  */
 import { describe, it, expect, vi } from 'vitest'
 import { render, screen } from '@testing-library/react'
-import '@/i18n'
+import i18n from '@/i18n'
 import CustomersTable from './CustomersTable'
 
 vi.mock('./useReportCustomers', () => ({
@@ -16,6 +16,6 @@ describe('CustomersTable — load error', () => {
   it('renders the load error via the shared ErrorBanner (role="alert")', () => {
     render(<CustomersTable />)
     const banner = screen.getByRole('alert')
-    expect(banner).toHaveTextContent('Kon klanten niet laden.')
+    expect(banner).toHaveTextContent(i18n.t('reports:customers.loadError'))
   })
 })

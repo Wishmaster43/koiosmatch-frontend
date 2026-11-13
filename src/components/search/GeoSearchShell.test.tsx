@@ -9,7 +9,7 @@
 import { describe, it, expect, vi } from 'vitest'
 import { render, screen, fireEvent } from '@testing-library/react'
 // Real i18next instance so t() resolves the actual common:map.* strings.
-import '@/i18n'
+import i18n from '@/i18n'
 import GeoSearchShell from './GeoSearchShell'
 
 const baseRadius = { value: 30, onChange: vi.fn(), count: 4, countLabel: '4 op de kaart' }
@@ -43,8 +43,8 @@ describe('GeoSearchShell · slots', () => {
 describe('GeoSearchShell · radius controls', () => {
   it('renders the slider + km input at the given value and the resolved count line', () => {
     render(<GeoSearchShell triggers={null} map={<div>MAP</div>} results={<div>RESULTS</div>} radius={baseRadius} />)
-    expect(screen.getByRole('slider', { name: 'Straal' })).toHaveAttribute('aria-valuenow', '30')
-    expect(screen.getByRole('spinbutton', { name: 'Straal' })).toHaveValue(30)
+    expect(screen.getByRole('slider', { name: i18n.t('common:map.radius') })).toHaveAttribute('aria-valuenow', '30')
+    expect(screen.getByRole('spinbutton', { name: i18n.t('common:map.radius') })).toHaveValue(30)
     expect(screen.getByText('4 op de kaart')).toBeInTheDocument()
   })
 
@@ -52,7 +52,7 @@ describe('GeoSearchShell · radius controls', () => {
     const onChange = vi.fn()
     render(<GeoSearchShell triggers={null} map={<div>MAP</div>} results={<div>RESULTS</div>}
       radius={{ ...baseRadius, onChange }} />)
-    fireEvent.change(screen.getByRole('spinbutton', { name: 'Straal' }), { target: { value: '80' } })
+    fireEvent.change(screen.getByRole('spinbutton', { name: i18n.t('common:map.radius') }), { target: { value: '80' } })
     expect(onChange).toHaveBeenCalledWith(80)
   })
 
@@ -60,7 +60,7 @@ describe('GeoSearchShell · radius controls', () => {
     const onChange = vi.fn()
     render(<GeoSearchShell triggers={null} map={<div>MAP</div>} results={<div>RESULTS</div>}
       radius={{ ...baseRadius, value: 5, onChange }} />)
-    fireEvent.keyDown(screen.getByRole('slider', { name: 'Straal' }), { key: 'ArrowLeft' })
+    fireEvent.keyDown(screen.getByRole('slider', { name: i18n.t('common:map.radius') }), { key: 'ArrowLeft' })
     expect(onChange).toHaveBeenCalledWith(5)
   })
 
