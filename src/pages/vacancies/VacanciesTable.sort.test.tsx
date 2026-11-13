@@ -188,7 +188,7 @@ describe('VacanciesTable · Koios column (Danny 05-08)', () => {
     render(<VacanciesTable rows={[stale, fresh]} />)
 
     expect(screen.getByRole('img', { name: 'Koios AI' })).toBeInTheDocument()
-    expect(screen.getByText('Aandacht')).toBeInTheDocument()
+    expect(screen.getByText(i18n.t('common:koios.actions.attention'))).toBeInTheDocument()
   })
 
   it('renders an honest dash for an unpublished vacancy, even with zero applications', () => {

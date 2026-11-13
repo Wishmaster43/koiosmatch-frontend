@@ -12,7 +12,7 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import type { ComponentProps } from 'react'
 // Real i18n (nl) side-effect init so t() resolves genuine Dutch text — the
 // removed badge rendered the literal "Actief" copy this test asserts against.
-import '@/i18n'
+import i18n from '@/i18n'
 import ApplicationDrawer from './ApplicationDrawer'
 import { useAuth } from '@/context/AuthContext'
 import type { ApplicationDetail } from '@/types/application'
@@ -67,15 +67,15 @@ describe('ApplicationDrawer — header bucket badge removed (S21, Danny 21-07)',
     renderDrawer({ application: application(), onClose: vi.fn() })
     // The badge used to render this exact translated bucket label — Danny's
     // literal complaint ("ACTIEF???"). It must be entirely absent now.
-    expect(screen.queryByText('Actief')).not.toBeInTheDocument()
+    expect(screen.queryByText(i18n.t('applications:buckets.active'))).not.toBeInTheDocument()
     // The candidate name stays, directly in the title row.
     expect(screen.getByText('Jan Jansen')).toBeInTheDocument()
     // The Fase meta picker (single source of truth for the phase) is untouched.
-    expect(screen.getByText('Fase')).toBeInTheDocument()
+    expect(screen.getByText(i18n.t('applications:drawer.phase'))).toBeInTheDocument()
     // The changelog popover icon in the title row is untouched. Its name now comes from
     // the shared common:changelog key — every entity used to word this control
     // differently ("Wijzigingslog" / "Wijzigingen" / "Activiteit"), unified 28-07.
-    expect(screen.getByRole('button', { name: 'Wijzigingslog' })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: i18n.t('common:changelog') })).toBeInTheDocument()
   })
 
   it('still renders the matched/rejected bucket data path elsewhere unaffected (no badge for any bucket value)', () => {
@@ -83,7 +83,7 @@ describe('ApplicationDrawer — header bucket badge removed (S21, Danny 21-07)',
     // with its translated label appears in the header — the removal is
     // unconditional, not just for 'active'.
     renderDrawer({ application: application({ bucket: 'rejected' }), onClose: vi.fn() })
-    expect(screen.queryByText('Afgewezen')).not.toBeInTheDocument()
+    expect(screen.queryByText(i18n.t('applications:buckets.rejected'))).not.toBeInTheDocument()
   })
 })
 
@@ -98,17 +98,17 @@ describe('ApplicationDrawer · footer/action gate (RIGHTS-GATE-OPENERS-1)', () =
   it('hides Afwijzen, Ontkoppelen and Voorstellen aan klant without applications.update', () => {
     vi.mocked(useAuth).mockReturnValue({ hasPermission: () => false } as unknown as ReturnType<typeof useAuth>)
     renderDrawer({ application: activeApp, onClose: vi.fn(), canManage: true })
-    expect(screen.queryByRole('button', { name: 'Afwijzen' })).not.toBeInTheDocument()
-    expect(screen.queryByRole('button', { name: 'Ontkoppelen' })).not.toBeInTheDocument()
-    expect(screen.queryByRole('button', { name: 'Voorstellen aan klant' })).not.toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: i18n.t('applications:rejection.action') })).not.toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: i18n.t('applications:detach.button') })).not.toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: i18n.t('applications:propose.trigger') })).not.toBeInTheDocument()
   })
 
   it('shows Afwijzen, Ontkoppelen and Voorstellen aan klant with applications.update', () => {
     vi.mocked(useAuth).mockReturnValue({ hasPermission: () => true } as unknown as ReturnType<typeof useAuth>)
     renderDrawer({ application: activeApp, onClose: vi.fn(), canManage: true })
-    expect(screen.getByRole('button', { name: 'Afwijzen' })).toBeInTheDocument()
-    expect(screen.getByRole('button', { name: 'Ontkoppelen' })).toBeInTheDocument()
-    expect(screen.getByRole('button', { name: 'Voorstellen aan klant' })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: i18n.t('applications:rejection.action') })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: i18n.t('applications:detach.button') })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: i18n.t('applications:propose.trigger') })).toBeInTheDocument()
   })
 })
 
@@ -140,7 +140,7 @@ describe('ApplicationDrawer · open existing proposal switches to the applicatio
     const app = application({ bucket: 'active', vacancyId: 'v1', candidateId: 'cand-1', customerId: 'cust-1' } as Partial<ApplicationDetail>)
     renderDrawer({ application: app, onClose: vi.fn(), canManage: true, initialTab: 'notes' })
     expect(screen.getByRole('tab', { name: nlApplications.drawer.tabs.notes })).toHaveAttribute('aria-selected', 'true')
-    fireEvent.click(screen.getByRole('button', { name: 'Voorstellen aan klant' }))
+    fireEvent.click(screen.getByRole('button', { name: i18n.t('applications:propose.trigger') }))
     fireEvent.click(screen.getByRole('button', { name: 'open-existing-stub' }))
     expect(screen.getByRole('tab', { name: nlApplications.drawer.tabs.application })).toHaveAttribute('aria-selected', 'true')
     expect(screen.queryByRole('button', { name: 'open-existing-stub' })).toBeNull()
@@ -154,12 +154,12 @@ describe('ApplicationDrawer · open existing proposal is repeatable', () => {
     const app = application({ bucket: 'active', vacancyId: 'v1', candidateId: 'cand-1', customerId: 'cust-1' } as Partial<ApplicationDetail>)
     renderDrawer({ application: app, onClose: vi.fn(), canManage: true, initialTab: 'notes' })
     const appTab = () => screen.getByRole('tab', { name: nlApplications.drawer.tabs.application })
-    fireEvent.click(screen.getByRole('button', { name: 'Voorstellen aan klant' }))
+    fireEvent.click(screen.getByRole('button', { name: i18n.t('applications:propose.trigger') }))
     fireEvent.click(screen.getByRole('button', { name: 'open-existing-stub' }))
     expect(appTab()).toHaveAttribute('aria-selected', 'true')
     fireEvent.click(screen.getByRole('tab', { name: nlApplications.drawer.tabs.notes }))
     expect(appTab()).toHaveAttribute('aria-selected', 'false')
-    fireEvent.click(screen.getByRole('button', { name: 'Voorstellen aan klant' }))
+    fireEvent.click(screen.getByRole('button', { name: i18n.t('applications:propose.trigger') }))
     fireEvent.click(screen.getByRole('button', { name: 'open-existing-stub' }))
     expect(appTab()).toHaveAttribute('aria-selected', 'true')
   })

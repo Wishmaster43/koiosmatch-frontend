@@ -6,7 +6,7 @@
 import { describe, it, expect, vi } from 'vitest'
 import { render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
-import '@/i18n'
+import i18n from '@/i18n'
 import PhaseChangeAppointmentWarning from './PhaseChangeAppointmentWarning'
 
 describe('PhaseChangeAppointmentWarning', () => {
@@ -22,7 +22,7 @@ describe('PhaseChangeAppointmentWarning', () => {
     const onConfirm = vi.fn()
     const onCancel = vi.fn()
     render(<PhaseChangeAppointmentWarning phaseLabel="Uitgenodigd" onConfirm={onConfirm} onCancel={onCancel} />)
-    await user.click(screen.getByText('Toch verplaatsen'))
+    await user.click(screen.getByText(i18n.t('applications:moveWarn.confirm')))
     expect(onConfirm).toHaveBeenCalledTimes(1)
     expect(onCancel).not.toHaveBeenCalled()
   })
@@ -32,7 +32,7 @@ describe('PhaseChangeAppointmentWarning', () => {
     const onConfirm = vi.fn()
     const onCancel = vi.fn()
     render(<PhaseChangeAppointmentWarning phaseLabel="Uitgenodigd" onConfirm={onConfirm} onCancel={onCancel} />)
-    await user.click(screen.getByText('Annuleren'))
+    await user.click(screen.getByText(i18n.t('applications:moveWarn.cancel')))
     expect(onCancel).toHaveBeenCalledTimes(1)
     expect(onConfirm).not.toHaveBeenCalled()
   })

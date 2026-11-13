@@ -9,7 +9,7 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
-import '@/i18n'
+import i18n from '@/i18n'
 import GenerateDescriptionFlow from './GenerateDescriptionFlow'
 import nl from '@/i18n/locales/nl/vacancies.json'
 import nlCommon from '@/i18n/locales/nl/common.json'
@@ -110,7 +110,7 @@ describe('GenerateDescriptionFlow · success — review before apply', () => {
     // AI-ACT-1: the generated concept carries the shared AI-generated disclosure
     // label (common:aiGenerated has no entry yet, so it falls back to its Dutch
     // defaultValue — see AiGeneratedLabel).
-    expect(screen.getByText('AI-gegenereerd')).toBeInTheDocument()
+    expect(screen.getByText(i18n.t('common:aiGenerated'))).toBeInTheDocument()
 
     await userEvent.click(screen.getByRole('button', { name: nl.generate.apply }))
     expect(onApply).toHaveBeenCalledWith('Wij zoeken een verpleegkundige…')

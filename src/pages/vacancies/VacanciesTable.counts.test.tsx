@@ -5,7 +5,7 @@ import userEvent from '@testing-library/user-event'
 // Real i18n (nl) side-effect init so the "AI-agent" column header resolves genuine
 // Dutch text (mirrors VacancyDrawer.test.tsx's convention). Default-exported so the
 // seeded-label tests in the sibling file switch languages (mirrors Sidebar.test.jsx).
-import '@/i18n'
+import i18n from '@/i18n'
 import VacanciesTable from './VacanciesTable'
 
 const openEntity = vi.fn()
@@ -135,7 +135,7 @@ describe('VacanciesTable · Age column (V2)', () => {
     const { container } = render(<VacanciesTable rows={rowsNoDate} />)
     // falls back to the raw key string; this proves the COLUMN exists and works,
     // independent of the eventual translated label.
-    const headerCell = screen.getByText('Leeftijd').closest('th') as HTMLElement
+    const headerCell = screen.getByText(i18n.t('vacancies:columns.age')).closest('th') as HTMLElement
     const colIndex = Array.from(headerCell.parentElement?.children ?? []).indexOf(headerCell)
     expect(container.querySelectorAll('tbody tr')[0].children[colIndex].textContent).toBe('—')
   })
@@ -143,7 +143,7 @@ describe('VacanciesTable · Age column (V2)', () => {
   it('carries the exact formatted date as a tooltip for a known created date', () => {
     const rowsWithDate = [{ id: 'v1', title: 'A', created: '2024-01-01', createdSort: '2024-01-01' }] as unknown as Vacancy[]
     const { container } = render(<VacanciesTable rows={rowsWithDate} />)
-    const headerCell = screen.getByText('Leeftijd').closest('th') as HTMLElement
+    const headerCell = screen.getByText(i18n.t('vacancies:columns.age')).closest('th') as HTMLElement
     const colIndex = Array.from(headerCell.parentElement?.children ?? []).indexOf(headerCell)
     const cell = container.querySelectorAll('tbody tr')[0].children[colIndex]
     expect(cell.querySelector('span')?.getAttribute('title')).toBe('2024-01-01')
@@ -157,7 +157,7 @@ describe('VacanciesTable · Age column (V2)', () => {
     try {
       const rows = [{ id: 'v1', title: 'A', created: '2024-01-12T00:00:00Z', createdSort: '2024-01-12T00:00:00Z' }] as unknown as Vacancy[]
       const { container } = render(<VacanciesTable rows={rows} />)
-      const headerCell = screen.getByText('Leeftijd').closest('th') as HTMLElement
+      const headerCell = screen.getByText(i18n.t('vacancies:columns.age')).closest('th') as HTMLElement
       const colIndex = Array.from(headerCell.parentElement?.children ?? []).indexOf(headerCell)
       const cell = container.querySelectorAll('tbody tr')[0].children[colIndex]
       expect(cell.textContent).toBe('3')

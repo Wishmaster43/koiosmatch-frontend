@@ -96,7 +96,7 @@ describe('VacancyDrawer · "Kandidaten zoeken" autoExpand (Danny 23-07)', () => 
     )
 
     // Activating the map+list tab requests the wider drawer width.
-    await user.click(screen.getByRole('tab', { name: 'Kandidaten zoeken' }))
+    await user.click(screen.getByRole('tab', { name: i18n.t('vacancies:drawer.tabs.candidateSearch') }))
     expect(screen.getByText('candidate-search-tab-content')).toBeInTheDocument()
     expect(onToggleExpand).toHaveBeenCalledTimes(1)
 
@@ -115,14 +115,14 @@ describe('VacancyDrawer · "Kandidaten zoeken" tenant visibility gate (Danny 23-
     settingsState.settings = { vacancy_candidate_tab: { vacancy_statuses: ['open'] } }
     const closedVacancy = { ...vacancy, statusValue: 'closed' } as unknown as VacancyDetail
     render(<VacancyDrawer vacancy={closedVacancy} onClose={vi.fn()} />)
-    expect(screen.queryByRole('button', { name: 'Kandidaten zoeken' })).not.toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: i18n.t('vacancies:drawer.tabs.candidateSearch') })).not.toBeInTheDocument()
   })
 
   it('still shows the tab for a status the explicit config allows', () => {
     settingsState.settings = { vacancy_candidate_tab: { vacancy_statuses: ['open'] } }
     const openVacancy = { ...vacancy, statusValue: 'open' } as unknown as VacancyDetail
     render(<VacancyDrawer vacancy={openVacancy} onClose={vi.fn()} />)
-    expect(screen.getByRole('tab', { name: 'Kandidaten zoeken' })).toBeInTheDocument()
+    expect(screen.getByRole('tab', { name: i18n.t('vacancies:drawer.tabs.candidateSearch') })).toBeInTheDocument()
   })
 })
 
@@ -133,7 +133,7 @@ describe('VacancyDrawer · initialTab deep-link (VACANCY-MATCH-COUNT-1, Danny 23
     render(<VacancyDrawer vacancy={vacancy} onClose={vi.fn()} initialTab="candidateSearch" />)
     // The tab's content shows immediately — no click needed to switch there.
     expect(screen.getByText('candidate-search-tab-content')).toBeInTheDocument()
-    const activeBtn = screen.getByRole('tab', { name: 'Kandidaten zoeken' })
+    const activeBtn = screen.getByRole('tab', { name: i18n.t('vacancies:drawer.tabs.candidateSearch') })
     expect(activeBtn).toHaveInlineStyle({ fontWeight: 600 })
   })
 
@@ -143,7 +143,7 @@ describe('VacancyDrawer · initialTab deep-link (VACANCY-MATCH-COUNT-1, Danny 23
     settingsState.settings = { vacancy_candidate_tab: { vacancy_statuses: ['open'] } }
     const closedVacancy = { ...vacancy, statusValue: 'closed' } as unknown as VacancyDetail
     render(<VacancyDrawer vacancy={closedVacancy} onClose={vi.fn()} initialTab="candidateSearch" />)
-    expect(screen.queryByRole('button', { name: 'Kandidaten zoeken' })).not.toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: i18n.t('vacancies:drawer.tabs.candidateSearch') })).not.toBeInTheDocument()
     expect(screen.queryByText('candidate-search-tab-content')).not.toBeInTheDocument()
     const detailsBtn = screen.getByRole('tab', { name: 'Details' })
     expect(detailsBtn).toHaveInlineStyle({ fontWeight: 600 })

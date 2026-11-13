@@ -9,6 +9,7 @@
  */
 import { describe, it, expect } from 'vitest'
 import { render, screen } from '@testing-library/react'
+import i18n from '@/i18n'
 import Timeline, { kindOf, type TimelineItem } from './Timeline'
 
 const RAW_ISO = '2026-08-04T17:30:00+00:00'
@@ -80,12 +81,12 @@ describe('Timeline · the author is context, not the headline', () => {
 describe('Timeline · AI-generated disclosure (AI-ACT-1)', () => {
   it('shows the AI-generated label on an ai-flagged item', () => {
     render(<Timeline items={[item({ ai: true })]} />)
-    expect(screen.getByText('AI-gegenereerd')).toBeInTheDocument()
+    expect(screen.getByText(i18n.t('common:aiGenerated'))).toBeInTheDocument()
   })
 
   it('shows nothing extra on a human-authored item', () => {
     render(<Timeline items={[item({ ai: false })]} />)
-    expect(screen.queryByText('AI-gegenereerd')).toBeNull()
+    expect(screen.queryByText(i18n.t('common:aiGenerated'))).toBeNull()
   })
 })
 

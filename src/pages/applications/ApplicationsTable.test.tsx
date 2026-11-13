@@ -165,7 +165,7 @@ describe('ApplicationsTable · missing-appointment chip (V-appdetail-1)', () => 
     const flagged = { ...baseRow, id: 30, missingAppointment: true }
     const notFlagged = { ...baseRow, id: 31, missingAppointment: false }
     render(<ApplicationsTable rows={[flagged, notFlagged]} />)
-    expect(screen.getAllByText('Afspraak ontbreekt')).toHaveLength(1)
+    expect(screen.getAllByText(i18n.t('applications:kpi.missingAppointment'))).toHaveLength(1)
   })
 })
 
@@ -244,7 +244,7 @@ describe('ApplicationsTable · days-in-phase column (PDF-SOLLICITATIES point 8)'
   it('renders a dash, never a fabricated zero, when currentStageEnteredAt is missing', () => {
     const row = { ...baseRow, id: 41, currentStageEnteredAt: null } as unknown as Application
     render(<ApplicationsTable rows={[row]} />)
-    const headerCell = screen.getByText('Dagen in fase').closest('th') as HTMLElement
+    const headerCell = screen.getByText(i18n.t('applications:cols.daysInPhase')).closest('th') as HTMLElement
     const col = Array.from(headerCell.parentElement?.children ?? []).indexOf(headerCell)
     const cell = document.querySelectorAll('tbody tr')[0].children[col]
     expect(cell.textContent).toBe('—')
@@ -263,7 +263,7 @@ describe('ApplicationsTable · days-in-phase column (PDF-SOLLICITATIES point 8)'
     const long = { ...baseRow, id: 44, currentStageEnteredAt: '2026-08-01T00:00:00Z' } as unknown as Application // 13 days
     render(<ApplicationsTable rows={[short, long]} />)
 
-    const headerCell = screen.getByText('Dagen in fase').closest('th') as HTMLElement
+    const headerCell = screen.getByText(i18n.t('applications:cols.daysInPhase')).closest('th') as HTMLElement
     const col = Array.from(headerCell.parentElement?.children ?? []).indexOf(headerCell)
     fireEvent.click(within(headerCell).getByRole('button'))
     let rows = document.querySelectorAll('tbody tr')
@@ -305,14 +305,14 @@ describe('ApplicationsTable · score source marking', () => {
   const base = { id: 1, candidateName: 'A', vacancyTitle: 'V', score: 82 }
   it('marks an ai-sourced score with the Koios mark', () => {
     render(<ApplicationsTable rows={[{ ...base, scoreSource: 'ai' } as unknown as Application]} />)
-    expect(screen.getByTitle('Score door Koios AI')).toBeInTheDocument()
+    expect(screen.getByTitle(i18n.t('applications:cols.scoreByKoios'))).toBeInTheDocument()
   })
   it('renders a manual override and an unknown source bare', () => {
     render(<ApplicationsTable rows={[
       { ...base, id: 2, scoreSource: 'manual' } as unknown as Application,
       { ...base, id: 3 } as unknown as Application,
     ]} />)
-    expect(screen.queryByTitle('Score door Koios AI')).toBeNull()
+    expect(screen.queryByTitle(i18n.t('applications:cols.scoreByKoios'))).toBeNull()
   })
 })
 

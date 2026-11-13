@@ -4,7 +4,7 @@ import userEvent from '@testing-library/user-event'
 // Real i18n (nl) side-effect init so the "AI-agent" column header resolves genuine
 // Dutch text (mirrors VacancyDrawer.test.tsx's convention). Default-exported so the
 // seeded-label tests in the sibling file switch languages (mirrors Sidebar.test.jsx).
-import '@/i18n'
+import i18n from '@/i18n'
 import VacanciesTable from './VacanciesTable'
 
 const openEntity = vi.fn()
@@ -78,7 +78,7 @@ describe('VacanciesTable · AI-agent column (Danny 22-07)', () => {
     const { container } = render(<VacanciesTable rows={rows} />)
 
     // Locate the AI-agent column by its real (nl) header text, not a hardcoded index.
-    const headerCell = screen.getByText('AI-agent').closest('th') as HTMLElement
+    const headerCell = screen.getByText(i18n.t('vacancies:columns.aiAgent')).closest('th') as HTMLElement
     const colIndex = Array.from(headerCell.parentElement?.children ?? []).indexOf(headerCell)
     const tableRows = container.querySelectorAll('tbody tr')
     expect(tableRows).toHaveLength(2)
@@ -156,7 +156,7 @@ describe('VacanciesTable · Leads sort puts unknown rows last (VACANCY-LEADS-COU
     ] as unknown as Vacancy[]
     const { container } = render(<VacanciesTable rows={mixedRows} />)
 
-    const headerCell = screen.getByText('Leads').closest('th') as HTMLElement
+    const headerCell = screen.getByText(i18n.t('vacancies:columns.leads')).closest('th') as HTMLElement
     // Click the header BUTTON: sorting lives in a real button since the keyboard-
     // accessibility fix (audit 2026-07-27); clicking the th alone proves nothing.
     await user.click(within(headerCell).getByRole('button'))
@@ -185,7 +185,7 @@ describe('VacanciesTable · match count state caveats (VACANCY-LEADS-COUNT-1)', 
     // Scoped to the Leads cell (not the whole table): the Koios column's own
     // brand mark is ALSO `role="img"` (Danny 05-08 rollout) — a page-wide query
     // would false-fail on that, unrelated mark.
-    const headerCell = screen.getByText('Leads').closest('th') as HTMLElement
+    const headerCell = screen.getByText(i18n.t('vacancies:columns.leads')).closest('th') as HTMLElement
     const colIndex = Array.from(headerCell.parentElement?.children ?? []).indexOf(headerCell)
     const leadsCell = container.querySelectorAll('tbody tr')[0].children[colIndex]
     expect(leadsCell.querySelector('[role="img"]')).not.toBeInTheDocument()
@@ -199,7 +199,7 @@ describe('VacanciesTable · match count state caveats (VACANCY-LEADS-COUNT-1)', 
         matchCountState: { computedAt: '2026-08-22', isStale: false, geoMissing: false, partial: false } },
     ] as unknown as Vacancy[]
     const { container } = render(<VacanciesTable rows={freshRows} />)
-    const headerCell = screen.getByText('Leads').closest('th') as HTMLElement
+    const headerCell = screen.getByText(i18n.t('vacancies:columns.leads')).closest('th') as HTMLElement
     const colIndex = Array.from(headerCell.parentElement?.children ?? []).indexOf(headerCell)
     const leadsCell = container.querySelectorAll('tbody tr')[0].children[colIndex]
     expect(leadsCell.querySelector('[role="img"]')).not.toBeInTheDocument()
@@ -237,7 +237,7 @@ describe('VacanciesTable · reference number column (JOB1)', () => {
     const withoutRef = { id: 'v2', title: 'Doktersassistent', referenceNumber: '', created: '2024-01-01', createdSort: '2024-01-01' }
     const { container } = render(<VacanciesTable rows={[withRef, withoutRef] as unknown as Vacancy[]} />)
 
-    const headerCell = screen.getByText('Referentienr.').closest('th') as HTMLElement
+    const headerCell = screen.getByText(i18n.t('vacancies:columns.referenceNumber')).closest('th') as HTMLElement
     const colIndex = Array.from(headerCell.parentElement?.children ?? []).indexOf(headerCell)
     const tableRows = container.querySelectorAll('tbody tr')
     const values = Array.from(tableRows).map(r => r.children[colIndex].textContent)
@@ -254,7 +254,7 @@ describe('VacanciesTable · reference number column (JOB1)', () => {
     ] as unknown as Vacancy[]
     const { container } = render(<VacanciesTable rows={mixedRows} />)
 
-    const headerCell = screen.getByText('Referentienr.').closest('th') as HTMLElement
+    const headerCell = screen.getByText(i18n.t('vacancies:columns.referenceNumber')).closest('th') as HTMLElement
     const colIndex = Array.from(headerCell.parentElement?.children ?? []).indexOf(headerCell)
     await user.click(within(headerCell).getByRole('button'))
 
