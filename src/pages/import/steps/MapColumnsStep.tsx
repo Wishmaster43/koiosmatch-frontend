@@ -30,7 +30,7 @@ interface MapColumnsStepProps {
 }
 
 export default function MapColumnsStep({ entity, headers, targetColumns, mapping, onChangeMapping, onNext, onBack }: MapColumnsStepProps) {
-  const { t } = useTranslation(['settings', 'customers'])
+  const { t, i18n } = useTranslation(['settings', 'customers'])
   const skipped = unmappedSourceColumns(mapping)
   const missingRequired = missingRequiredColumns(mapping, entity)
 
@@ -62,7 +62,7 @@ export default function MapColumnsStep({ entity, headers, targetColumns, mapping
             const rowLabelId = `map-col-label-${header.replace(/\s+/g, '-')}`
             const options = [
               { value: SKIP, label: t('import.wizard.mapping.skipOption') },
-              ...targetColumns.map((column) => ({ value: column, label: fieldLabel(t, entity, column) })),
+              ...targetColumns.map((column) => ({ value: column, label: fieldLabel(t, i18n, entity, column) })),
             ]
             return (
               <div key={header} style={{ display: 'flex', alignItems: 'center', padding: '8px 12px',
@@ -103,7 +103,7 @@ export default function MapColumnsStep({ entity, headers, targetColumns, mapping
         <div style={{ marginTop: 16 }}>
           <CalloutBox variant="warning">
             {t('import.wizard.mapping.missingRequired', {
-              fields: missingRequired.map((column) => fieldLabel(t, entity, column)).join(', '),
+              fields: missingRequired.map((column) => fieldLabel(t, i18n, entity, column)).join(', '),
             })}
           </CalloutBox>
         </div>

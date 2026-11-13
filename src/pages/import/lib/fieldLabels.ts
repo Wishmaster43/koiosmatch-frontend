@@ -9,12 +9,13 @@
  * settings:import.wizard.fields.*, listed in this delivery's i18n report.
  */
 import type { TFunction } from 'i18next'
+import { labelOrRaw, type KeyChecker } from '@/lib/labelOrRaw'
 
 interface FieldLabelRef {
   ns: string
   key: string
-  /** English fallback so a not-yet-translated NEW key never renders a raw key path. */
-  defaultValue?: string
+  /** Raw fallback text (data) so a column without a key never renders a raw key path. */
+  fallback?: string
 }
 
 // `naam` ("name") means a different thing per entity (customer / location /
@@ -110,13 +111,14 @@ function labelRefFor(entity: string, column: string): FieldLabelRef {
   if (base && DEFAULT_LABELS[base]) return DEFAULT_LABELS[base]
   // A column this mirror doesn't know (a future backend addition) still needs a
   // label — the raw column name is honest and better than a blank select option.
-  return { ns: 'settings', key: `import.wizard.fields.${column}`, defaultValue: column }
+  return { ns: 'settings', key: `import.wizard.fields.${column}`, fallback: column }
 }
 
 /** The label to show for one column, in the mapping step's target-field select. */
-export function fieldLabel(t: TFunction, entity: string, column: string): string {
+export function fieldLabel(t: TFunction, i18n: KeyChecker, entity: string, column: string): string {
   const ref = labelRefFor(entity, column)
-  return ref.defaultValue !== undefined
-    ? t(ref.key, { ns: ref.ns, defaultValue: ref.defaultValue })
-    : t(ref.key, { ns: ref.ns })
+  // A ref with a fallback shows it when the key is missing (labelOrRaw, with its no-instance guard);
+  // a ref without one translates directly.
+  if (ref.fallback === undefined) return t(ref.key, { ns: ref.ns })
+  return labelOrRaw(t, i18n, ref.key, ref.fallback, ref.ns)
 }

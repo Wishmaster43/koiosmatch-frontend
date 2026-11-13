@@ -4,6 +4,7 @@
  * component just renders rows. Clicking a row opens the campaign detail (step 2).
  */
 import { useTranslation } from 'react-i18next'
+import { labelOrRaw } from '@/lib/labelOrRaw'
 import { RefreshCw } from 'lucide-react'
 import DataTable, { type Column } from '@/components/ui/DataTable'
 import StatusBadge from '@/components/ui/StatusBadge'
@@ -35,7 +36,7 @@ interface Props {
 // The campaigns table: renders the four UI states the page owns the toolbar.
 export default function OutreachList({ campaigns, loading, error, onReload, onOpen, emptyText,
   selectable, selectedIds, onToggleRow, onToggleAll }: Props) {
-  const { t } = useTranslation('outreach')
+  const { t, i18n } = useTranslation('outreach')
   const { formatDate } = useDateFormat()
   // GETALLEN-1: every visible number renders through the house formatter.
   const { formatNumber } = useNumberFormat()
@@ -66,7 +67,7 @@ export default function OutreachList({ campaigns, loading, error, onReload, onOp
       render: (r: Campaign) => {
         const m = getChannelMeta(r.channel)
         const Icon = m.icon
-        const label = t(`channel.${r.channel}`, { defaultValue: r.channel ?? '—' })
+        const label = labelOrRaw(t, i18n, `channel.${r.channel}`, r.channel ?? '—', 'outreach')
         if (!colorChannel) return <span style={{ display: 'inline-flex', alignItems: 'center', gap: 5, color: 'var(--text)', fontSize: 12 }}><Icon size={12} /> {label}</span>
         return <SoftChip color={m.color} label={<><Icon size={12} /> {label}</>} />
       } },

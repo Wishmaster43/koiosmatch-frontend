@@ -5,6 +5,7 @@
  * expand and match state live in the parent (useOutreachTargets).
  */
 import { useTranslation } from 'react-i18next'
+import { labelOrRaw } from '@/lib/labelOrRaw'
 import { Phone, X, RotateCcw, ListChecks, Handshake, ChevronDown, ChevronRight } from 'lucide-react'
 import Avatar from '@/components/ui/Avatar'
 import CandidateStatusChip from '@/components/ui/CandidateStatusChip'
@@ -57,7 +58,7 @@ export default function TargetRow({ tg, statuses, metaOf, initial, outcomes, sel
   confirmMatch: () => void
   onCancelMatch: () => void
 }) {
-  const { t } = useTranslation('outreach')
+  const { t, i18n } = useTranslation('outreach')
   const { formatDate } = useDateFormat()
   const st   = tg.status ?? initial?.value ?? 'todo'
   const meta = metaOf(st)
@@ -97,7 +98,7 @@ export default function TargetRow({ tg, statuses, metaOf, initial, outcomes, sel
           {/* Status chip — the shared SoftChip (was a hand-rolled 12/35 tint
               with raw ink, 2.2-3.5:1 — herhaal-slotaudit r3.5). */}
           <SoftChip round size={10} color={col}
-            label={meta?.label ?? t(`drawer.target.${st}`, { defaultValue: st })} />
+            label={meta?.label ?? labelOrRaw(t, i18n, `drawer.target.${st}`, st, 'outreach')} />
           {/* Quick check-off: contacted / answered / skipped; done rows can reset to todo. */}
           {/* Quick check-off / follow-up actions — Button iconOnly carries the chrome
               (§4 tint-vs-trio law: these are ACTIONS, not status/data chips); the

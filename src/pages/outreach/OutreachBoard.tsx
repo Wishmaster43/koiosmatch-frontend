@@ -5,6 +5,7 @@
 import { useState } from 'react'
 import type { DragEvent } from 'react'
 import { useTranslation } from 'react-i18next'
+import { labelOrRaw } from '@/lib/labelOrRaw'
 import { Users } from 'lucide-react'
 import type { Campaign } from './hooks/useOutreachCampaigns'
 import { useDragAutoScroll } from '@/lib/useDragAutoScroll'
@@ -24,7 +25,7 @@ interface Props {
 export default function OutreachBoard({ rows, columns, onMove, onOpen }: Props) {
   // Edge-scroll the board while dragging (HTML5 DnD never scrolls itself).
   const { ref: boardScrollRef, onDragOver: boardAutoScroll } = useDragAutoScroll<HTMLDivElement>()
-  const { t } = useTranslation('outreach')
+  const { t, i18n } = useTranslation('outreach')
   const [dragOver, setDragOver] = useState<string | null>(null)
 
   // Card dropped on a column: optimistically move it by firing the status change.
@@ -72,7 +73,7 @@ export default function OutreachBoard({ rows, columns, onMove, onOpen }: Props) 
                     {/* SoftChip — the ONE chip component (§4, HUISSTIJL-1). */}
                     <SoftChip color={m.color} round label={
                       <span style={{ display: 'inline-flex', alignItems: 'center', gap: 5 }}>
-                        <Icon size={12} /> {t(`channel.${c.channel}`, { defaultValue: c.channel ?? '—' })}
+                        <Icon size={12} /> {labelOrRaw(t, i18n, `channel.${c.channel}`, c.channel ?? '—', 'outreach')}
                       </span>
                     } />
                     {targets != null && (

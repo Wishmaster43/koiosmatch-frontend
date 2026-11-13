@@ -30,6 +30,7 @@
  */
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
+import { labelOrRaw } from '@/lib/labelOrRaw'
 import { useDateFormat } from '@/lib/datetime'
 import { useCustomFields } from '@/lib/useCustomFields'
 import EntityDrawer from '@/components/drawer/EntityDrawer'
@@ -93,7 +94,7 @@ export default function OutreachDrawer({ id, createdAt, archived = false, archiv
   expanded?: boolean
   onToggleExpand?: () => void
 }) {
-  const { t } = useTranslation('outreach')
+  const { t, i18n } = useTranslation('outreach')
   const { formatDate, formatDateTime } = useDateFormat()
   // Always fetch: an archived campaign's detail now loads too (withTrashed show()).
   const { detail, loading, error, reload, setTargetStatus, setTargetOutcome, setTargetNote, applyTargetNote, assignTargets, setOwner, setCustomFields, setFields } = useOutreachDetail(id, onMutated)
@@ -206,7 +207,7 @@ export default function OutreachDrawer({ id, createdAt, archived = false, archiv
       header={
         <EntityHeader
           // TITEL-CHIP-1 (Danny 19-08): the status badge IS the title.
-          label={<TitleBadge label={t(`status.${st}`, { defaultValue: st })} color={stBadgeColor} />}
+          label={<TitleBadge label={labelOrRaw(t, i18n, `status.${st}`, st, 'outreach')} color={stBadgeColor} />}
           avatar={{ initials: initialsOf(name), soft: true }}
           // Changelog icon (§3A(d)) — the ONE shared house popover shell, same as the
           // other seven entities. Its content mounts (and only then fetches) on open.

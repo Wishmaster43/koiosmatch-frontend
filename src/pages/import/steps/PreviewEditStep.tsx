@@ -52,7 +52,7 @@ export default function PreviewEditStep({
   entity, targetColumns, mapping, editableRows, dirty, onEditCell, onValidate,
   previewStatus, previewError, previewResult, runStatus, runError, canImport, wholeTree, onConfirm, onBackToMapping,
 }: PreviewEditStepProps) {
-  const { t } = useTranslation(['settings', 'customers'])
+  const { t, i18n } = useTranslation(['settings', 'customers'])
   const mappedColumns = targetColumns.filter((column) => Object.values(mapping).includes(column))
   const validating = previewStatus === 'loading'
   // A row of the LAST successful dry-run, keyed by line number (header = line 1, so
@@ -83,7 +83,7 @@ export default function PreviewEditStep({
                 <th style={{ padding: '6px 10px', textAlign: 'left', color: 'var(--text-muted)', fontWeight: 600, fontSize: 11 }}>#</th>
                 {mappedColumns.map((column) => (
                   <th key={column} style={{ padding: '6px 10px', textAlign: 'left', color: 'var(--text-muted)', fontWeight: 600, fontSize: 11, whiteSpace: 'nowrap' }}>
-                    {fieldLabel(t, entity, column)}
+                    {fieldLabel(t, i18n, entity, column)}
                   </th>
                 ))}
                 <th style={{ padding: '6px 10px', textAlign: 'left', color: 'var(--text-muted)', fontWeight: 600, fontSize: 11 }} />
@@ -98,7 +98,7 @@ export default function PreviewEditStep({
                     {mappedColumns.map((column) => (
                       <td key={column} style={{ padding: '3px 6px' }}>
                         <input value={row[column] ?? ''} onChange={(e) => onEditCell(rowIndex, column, e.target.value)}
-                          aria-label={fieldLabel(t, entity, column)}
+                          aria-label={fieldLabel(t, i18n, entity, column)}
                           style={GRID_CELL_STYLE} />
                       </td>
                     ))}
