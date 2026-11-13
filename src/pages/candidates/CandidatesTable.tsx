@@ -6,6 +6,7 @@
 import { useMemo } from 'react'
 import { cellButton } from '@/components/ui/cellButton'
 import { useTranslation } from 'react-i18next'
+import { labelOrRaw } from '@/lib/labelOrRaw'
 import { useSeedLabel } from '@/lib/useSeedLabel'
 import type { ComponentType, CSSProperties } from 'react'
 import type { TableSelectionProps, TableSortProps, TableVirtualizationProps } from '@/components/ui/dataTableTypes'
@@ -76,7 +77,7 @@ interface CandidatesTableProps extends TableSelectionProps, TableSortProps, Tabl
  * (useCallback) in their hooks so they don't force this memo to churn.
  */
 export default function CandidatesTable({ rows, loading, selectedId, onSelect, onOpenTab, selectable, selectedIds, onToggleRow, onToggleAll, selectionBusy, stickyHeader = false, scrollParentRef, sort, onSortChange }: CandidatesTableProps) {
-  const { t } = useTranslation('candidates')
+  const { t, i18n } = useTranslation('candidates')
   // Seeded lookup labels the server embedded in the row render in the user language.
   const seedLabel = useSeedLabel()
   const { formatDate } = useDateFormat()
@@ -301,7 +302,8 @@ export default function CandidatesTable({ rows, loading, selectedId, onSelect, o
       // useCandidateAdvice() resolver, same source the drawer's advice block uses.
       makeKoiosColumn({
         adviceOf, colored: colorKoios, label: t('columns.koios'),
-        fallbackLabel: action => t(`koios.actions.${action}`, { defaultValue: action }),
+        // Open vocabulary: an unknown advice action shows its raw word.
+        fallbackLabel: action => labelOrRaw(t, i18n, `koios.actions.${action}`, action, 'candidates'),
       }),
       {
         // Backoffice coupling scanning aid (JOB2) — not sortable: a compound
@@ -331,7 +333,7 @@ export default function CandidatesTable({ rows, loading, selectedId, onSelect, o
       },
     ]
   }, [
-    t, formatDate, funnelMeta, statusMeta, phaseMeta, typeMeta,
+    t, i18n, formatDate, funnelMeta, statusMeta, phaseMeta, typeMeta,
     genderColor, lastContactLabel, lastContactIcon, adviceOf, seedLabel,
     colorFunnel, colorType, colorPool, colorKoios, coloredByGender, colorStatus, colorPhase, colorOwner,
     showHelloflex, showShiftmanager,

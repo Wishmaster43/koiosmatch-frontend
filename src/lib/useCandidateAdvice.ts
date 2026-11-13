@@ -20,7 +20,7 @@ import type { Candidate } from '@/types/candidate'
 
 // Returns a memo-free deriver closure that turns one candidate into a Koios advice item, fed by the tenant phases/status lookups and the stale-contact threshold setting.
 export function useCandidateAdvice(): (c: Candidate) => KoiosAdvice | null {
-  const { t } = useTranslation('candidates')
+  const { t, i18n } = useTranslation('candidates')
   const { phases, statusMeta } = useLookups()
   const settings = useAllSettings()
   const staleMonths = getNumberSetting(settings, 'no_contact_alert_months', 6)
@@ -40,12 +40,12 @@ export function useCandidateAdvice(): (c: Candidate) => KoiosAdvice | null {
       // KEY (e.g. "advice.reason.stale_contact"), never a rendered sentence — a raw
       // pass-through would print the literal key on screen. Detect a key by shape
       // (dotted, no whitespace) and resolve it through t(), interpolating the
-      // stale-contact threshold; the defaultValue falls back to the raw value
+      // stale-contact threshold; the raw value is the fallback
       // (never an empty string) so an unrecognised/future key still shows something.
       const rawReason = c.koiosAdvice?.reason ?? null
       const looksLikeKey = typeof rawReason === 'string' && rawReason.includes('.') && !/\s/.test(rawReason)
       const reason = looksLikeKey
-        ? t(rawReason as string, { months: staleMonths, defaultValue: rawReason as string })
+        ? (typeof i18n?.exists === 'function' && i18n.exists(rawReason as string, { ns: 'candidates' }) ? t(rawReason as string, { months: staleMonths }) : rawReason)
         : rawReason
 
       return {
@@ -67,5 +67,5 @@ export function useCandidateAdvice(): (c: Candidate) => KoiosAdvice | null {
       reason: t(rule.reasonKey, rule.reasonParams),
       source: 'rules',
     }
-  }, [t, statusMeta, staleMonths, entryPhase])
+  }, [t, i18n, statusMeta, staleMonths, entryPhase])
 }

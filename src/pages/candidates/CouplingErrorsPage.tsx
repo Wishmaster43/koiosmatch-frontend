@@ -7,6 +7,7 @@
  */
 import { useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
+import { labelOrRaw } from '@/lib/labelOrRaw'
 import DataTable from '@/components/ui/DataTable'
 import type { Column } from '@/components/ui/DataTable'
 import ErrorBanner from '@/components/ui/ErrorBanner'
@@ -40,7 +41,7 @@ const isErasureRow = (r: CouplingErrorRow) => r.entity_type.startsWith('erasure_
 // The dashboard KPI tile's deep-link destination (see file docblock above) —
 // lists every failed backoffice mapping so a recruiter can act on it.
 export default function CouplingErrorsPage() {
-  const { t } = useTranslation('candidates')
+  const { t, i18n } = useTranslation('candidates')
   const { formatDateTime } = useDateFormat()
   const { rows, loading, error, refetch } = useCouplingErrors()
 
@@ -61,12 +62,12 @@ export default function CouplingErrorsPage() {
     {
       key: 'system', header: t('couplingErrors.col.system'), sortable: true,
       sortValue: r => r.system,
-      render: r => <SoftChip label={t(`couplingErrors.system.${r.system}`, { defaultValue: r.system })} color={SYSTEM_COLOR[r.system]} />,
+      render: r => <SoftChip label={labelOrRaw(t, i18n, `couplingErrors.system.${r.system}`, r.system, 'candidates')} color={SYSTEM_COLOR[r.system]} />,
     },
     {
       key: 'error', header: t('couplingErrors.col.error'),
       render: r => {
-        const text = isErasureRow(r) ? t(`couplingErrors.erasure.${r.error}`, { defaultValue: r.error }) : r.error
+        const text = isErasureRow(r) ? labelOrRaw(t, i18n, `couplingErrors.erasure.${r.error}`, r.error, 'candidates') : r.error
         return <BodyText title={text} style={{ maxWidth: 420, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', display: 'block' }}>{text}</BodyText>
       },
     },
@@ -75,7 +76,7 @@ export default function CouplingErrorsPage() {
       sortValue: r => r.synced_at ? new Date(r.synced_at).getTime() : null,
       render: r => <Caption>{formatDateTime(r.synced_at)}</Caption>,
     },
-  ], [t, formatDateTime])
+  ], [t, i18n, formatDateTime])
 
   return (
     <div className="flex flex-col h-full p-6">

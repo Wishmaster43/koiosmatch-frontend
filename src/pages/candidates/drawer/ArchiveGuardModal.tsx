@@ -9,6 +9,7 @@
  */
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
+import { labelOrRaw } from '@/lib/labelOrRaw'
 import { AlertTriangle } from 'lucide-react'
 import SoftChip from '@/components/ui/SoftChip'
 import FloatingPanel from '@/components/ui/FloatingPanel'
@@ -50,7 +51,7 @@ interface Props {
 // Blocks archive/prullenbak while a live application or active match still
 // hangs on the candidate(s); "resolve all" walks each blocker before proceeding.
 export default function ArchiveGuardModal({ mode, candidateName, aggregate, applications: initialApps, matches: initialMatches, funnelTypes = DEFAULT_FUNNEL_TYPES, onClose, onResolved }: Props) {
-  const { t } = useTranslation(['candidates', 'common'])
+  const { t, i18n } = useTranslation(['candidates', 'common'])
   const { reasons, loading: reasonsLoading } = useRejectionReasons()
   const [reasonId, setReasonId] = useState<string>('')
   const [applications, setApplications] = useState(initialApps)
@@ -158,7 +159,7 @@ export default function ArchiveGuardModal({ mode, candidateName, aggregate, appl
                       {m.candidateName && <strong style={{ fontWeight: 600 }}>{m.candidateName} · </strong>}
                       {[m.vacancyTitle, m.client].filter(Boolean).join(' · ')}
                     </span>
-                    <SoftChip label={t(`archiveGuard.matchStatus.${m.statusKey}`, { defaultValue: m.statusKey })} color="var(--color-warning)" />
+                    <SoftChip label={labelOrRaw(t, i18n, `archiveGuard.matchStatus.${m.statusKey}`, m.statusKey, 'candidates')} color="var(--color-warning)" />
                   </div>
                   {matchErrors[String(m.id)] && (
                     <Caption as="div" style={{ padding: '0 12px 8px', color: 'var(--color-danger-text)' }}>{t('archiveGuard.matchConflict')}</Caption>

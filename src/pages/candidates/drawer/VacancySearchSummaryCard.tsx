@@ -5,6 +5,7 @@
 // CandidateSearchTab); this file only composes the vacancy-specific chips and
 // the vacancy-only detail/description blocks.
 import { useTranslation } from 'react-i18next'
+import { labelOrRaw } from '@/lib/labelOrRaw'
 import EntityLink from '@/components/ui/EntityLink'
 import StatusPill from '@/components/ui/StatusPill'
 import SearchSummaryCardFrame from '@/components/drawer/SearchSummaryCardFrame'
@@ -43,7 +44,7 @@ export default function VacancySearchSummaryCard({
   description: string | null; detail: VacancyDetail | null
   statusMeta: (status?: string | null) => VacancyLookupItem
 }) {
-  const { t } = useTranslation('candidates')
+  const { t, i18n } = useTranslation('candidates')
   // Tenant currency + app locale for the salary range (I18N-1 L5); the distance
   // uses the same active-locale hook (GETALLEN-1) instead of the pure formatter's
   // nl-NL default, so an en-GB tenant sees "12.5 km" next to "£1,200".
@@ -80,7 +81,7 @@ export default function VacancySearchSummaryCard({
         <Caption><Mono>
           {t('vacancySearch.cardSalary', {
             range: formatRange(detail.salaryMin, detail.salaryMax, n => formatCurrency(n, undefined, 0)),
-            period: detail.salaryPeriod ? t(`vacancySearch.salaryPeriod.${detail.salaryPeriod}`, { defaultValue: detail.salaryPeriod }) : '',
+            period: detail.salaryPeriod ? labelOrRaw(t, i18n, `vacancySearch.salaryPeriod.${detail.salaryPeriod}`, detail.salaryPeriod, 'candidates') : '',
           })}
         </Mono></Caption>
       )}
