@@ -17,6 +17,7 @@ import { useMemo, useState } from 'react'
 import { bureauNow } from '@/lib/bureauTime'
 import type { ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
+import { labelOrRaw } from '@/lib/labelOrRaw'
 import { useQuery } from '@tanstack/react-query'
 import { CheckCircle, AlertCircle, Clock, ExternalLink } from 'lucide-react'
 import api, { unwrap } from '@/lib/api'
@@ -64,7 +65,7 @@ interface KoiosForYouCardProps {
 
 // See the file's top doc above for the for-you endpoint and the period-picker/KPI-tile drilldown it drives.
 export default function KoiosForYouCard({ title, scope, scopeToggle = false, footer, fill = false }: KoiosForYouCardProps = {}) {
-  const { t } = useTranslation(['dashboard', 'common'])
+  const { t, i18n } = useTranslation(['dashboard', 'common'])
   const { formatDateTime } = useDateFormat()
   const { formatNumber } = useNumberFormat()
   // Period preset — 'thisWeek' is the default (KOIOS-KAART-COMPACT-2 spec).
@@ -176,7 +177,7 @@ export default function KoiosForYouCard({ title, scope, scopeToggle = false, foo
         const color = ok ? 'var(--color-success)' : failed ? 'var(--color-danger)' : 'var(--text-muted)'
         // Translated status with a visible text twin — colour/icon is never the
         // only signal (§6) and a raw wire value never reaches the a11y tree (§5).
-        const statusLabel = t(`koiosForYou.status.${row.status}`, { defaultValue: humanizeKey(row.status) })
+        const statusLabel = labelOrRaw(t, i18n, `koiosForYou.status.${row.status}`, humanizeKey(row.status), 'dashboard')
         return (
           <span style={{ display: 'inline-flex', alignItems: 'center', gap: 5 }}>
             <Icon size={14} color={color} aria-hidden="true" />

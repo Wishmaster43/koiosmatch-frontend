@@ -4,16 +4,17 @@
  * is never translated. This guard counts literal defaultValue fallbacks inside t() calls and
  * pins the count as a ratchet. Accepted leftovers are technical fallbacks on DYNAMIC keys:
  * most carry a non-literal value (a wire word, a column or permission name) and are not matched;
- * four carry a literal by design and ARE counted: the empty description in ImportSettings, the two
- * empty search terms in settingsSearchIndex and the ReportDataWindow date-range template.
+ * three carry a literal by design and ARE counted: the empty description in ImportSettings and the
+ * two empty search terms in settingsSearchIndex (the ReportDataWindow date-range template dropped
+ * its fallback on 13-11).
  *
  * Plain .js: the walker needs node:fs (no @types/node in this repo).
  */
 import { describe, it, expect } from 'vitest'
 import { readFileSync, readdirSync, statSync } from 'node:fs'
 
-// Pinned ceiling: only goes down, never raise it (05-11: 4 sites, all technical: the empty description in ImportSettings, the two empty search terms in settingsSearchIndex and the ReportDataWindow date-range template).
-const CEILING = 4
+// Pinned ceiling: only goes down, never raise it (13-11: 3 sites, all technical).
+const CEILING = 3
 
 // Collects every non-test .ts/.tsx/.js/.jsx source file under src (the remaining .js files are in scope too).
 const sources = dir => readdirSync(dir).flatMap(name => {

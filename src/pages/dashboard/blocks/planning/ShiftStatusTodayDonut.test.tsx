@@ -14,11 +14,9 @@ vi.mock('@/lib/bureauTime', () => ({ bureauToday: () => '2026-08-25' }))
 
 vi.mock('react-i18next', () => ({
   useTranslation: () => ({
-    t: (k: string, opts?: { defaultValue?: string }) => {
-      const known = ['feed.shiftStatus.planned', 'feed.shiftStatus.confirmed']
-      if (k.startsWith('feed.shiftStatus.') && !known.includes(k)) return opts?.defaultValue ?? k
-      return k
-    },
+    t: (k: string) => k,
+    // Only the two known statuses have a locale key; the rest falls back to the shared unknown label.
+    i18n: { exists: (k: string) => ['feed.shiftStatus.planned', 'feed.shiftStatus.confirmed'].includes(k) },
   }),
 }))
 

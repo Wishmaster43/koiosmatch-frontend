@@ -33,7 +33,7 @@ export function ReportDataWindow({
   if (!from || !to) return null
 
   const windowKey = `${reportKey}.window`
-  const dateRange = t(windowKey, { from, to, defaultValue: `${from} – ${to}` })
+  const dateRange = t(windowKey, { from, to })
 
   return (
     <>

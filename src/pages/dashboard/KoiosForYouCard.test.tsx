@@ -17,7 +17,7 @@ import KoiosForYouCard from './KoiosForYouCard'
 
 // Identity translations — this test asserts on state/structure, not copy
 // (mirrors Dashboard.test.tsx's approach).
-vi.mock('react-i18next', () => ({ useTranslation: () => ({ t: (k: string) => k }) }))
+vi.mock('react-i18next', () => ({ useTranslation: () => ({ t: (k: string) => k, i18n: { exists: () => true } }) }))
 // Avoid real locale-dependent formatting / the @/i18n side-effect import
 // (same reasoning as Dashboard.test.tsx).
 vi.mock('@/lib/formatters', () => ({ useNumberFormat: () => ({ formatNumber: (n: number) => String(n) }) }))

@@ -6,6 +6,7 @@
  * planning page yet — this only lands on today's window, PLANNING-INTENT-1).
  */
 import { useTranslation } from 'react-i18next'
+import { labelOrRaw } from '@/lib/labelOrRaw'
 import { bureauToday } from '@/lib/bureauTime'
 import PieChartCard from '@/components/charts/PieChartCard'
 import { CHART_SERIES_COLORS } from '@/components/charts/chartTypes'
@@ -26,10 +27,10 @@ export default function ShiftStatusTodayDonut({ rows, onNavigate }: {
   rows: ShiftStatusTodayRow[]
   onNavigate?: (page: string, params?: Record<string, unknown>) => void
 }) {
-  const { t } = useTranslation('dashboard')
+  const { t, i18n } = useTranslation('dashboard')
   // Drop zero slices; unknown statuses fall back to the shared "unknown" label.
   const data = rows.filter(r => r.count > 0).map((r, i) => ({
-    name: t(`feed.shiftStatus.${r.status}`, { defaultValue: t('widget.unknown') }),
+    name: labelOrRaw(t, i18n, `feed.shiftStatus.${r.status}`, t('widget.unknown'), 'dashboard'),
     value: r.count,
     color: STATUS_COLOR[r.status] ?? CHART_SERIES_COLORS[i % CHART_SERIES_COLORS.length],
   }))
