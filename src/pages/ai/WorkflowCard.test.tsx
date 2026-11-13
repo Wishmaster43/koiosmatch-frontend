@@ -23,13 +23,13 @@ describe('WorkflowCard', () => {
   // control, unlike its sibling in WorkflowListRow which already had one.
   it('exposes an accessible name on the icon-only "…" menu button', () => {
     render(<WorkflowCard workflow={baseWorkflow} onRun={vi.fn()} onEdit={vi.fn()} />)
-    expect(screen.getByRole('button', { name: 'Workflow bewerken' })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: i18n.t('workflows:list.editWorkflow') })).toBeInTheDocument()
   })
 
   it('opens the editor when the "…" button is clicked, without double-firing via the card click', () => {
     const onEdit = vi.fn()
     render(<WorkflowCard workflow={baseWorkflow} onRun={vi.fn()} onEdit={onEdit} />)
-    fireEvent.click(screen.getByRole('button', { name: 'Workflow bewerken' }))
+    fireEvent.click(screen.getByRole('button', { name: i18n.t('workflows:list.editWorkflow') }))
     expect(onEdit).toHaveBeenCalledTimes(1)
   })
 })
@@ -42,13 +42,13 @@ describe('WorkflowCard · run button done state (N007-POINT3-FIX-1)', () => {
     const onRun = vi.fn(() => new Promise<void>(res => { resolveRun = res }))
     render(<WorkflowCard workflow={baseWorkflow} onRun={onRun} onEdit={vi.fn()} />)
 
-    const runButton = screen.getByRole('button', { name: 'Uitvoeren' })
+    const runButton = screen.getByRole('button', { name: i18n.t('workflows:page.run') })
     fireEvent.click(runButton)
     expect(onRun).toHaveBeenCalledTimes(1)
 
     await act(async () => { resolveRun(); await Promise.resolve() })
 
-    const doneButton = screen.getByRole('button', { name: 'Zojuist gestart' })
+    const doneButton = screen.getByRole('button', { name: i18n.t('workflows:page.justRan') })
     expect(doneButton).toBeDisabled()
     fireEvent.click(doneButton)
     expect(onRun).toHaveBeenCalledTimes(1) // the repeat click never re-fired the run
@@ -63,8 +63,8 @@ describe('WorkflowCard · archived (TRASH-OVERAL-1b)', () => {
   it('shows the archived badge and hides the run button', () => {
     render(<WorkflowCard workflow={archivedWorkflow} onRun={vi.fn()} onEdit={vi.fn()}
       canManageFolders onArchive={vi.fn()} onRestore={vi.fn()} />)
-    expect(screen.getByText('Gearchiveerd')).toBeInTheDocument()
-    expect(screen.queryByRole('button', { name: 'Uitvoeren' })).not.toBeInTheDocument()
+    expect(screen.getByText(i18n.t('workflows:list.archivedBadge'))).toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: i18n.t('workflows:page.run') })).not.toBeInTheDocument()
   })
 
   it('the restore button calls onRestore without opening the editor, and is hidden without permission', async () => {
@@ -72,13 +72,13 @@ describe('WorkflowCard · archived (TRASH-OVERAL-1b)', () => {
     const onRestore = vi.fn()
     const { rerender } = render(<WorkflowCard workflow={archivedWorkflow} onRun={vi.fn()} onEdit={onEdit}
       canManageFolders onArchive={vi.fn()} onRestore={onRestore} />)
-    await act(async () => { fireEvent.click(screen.getByLabelText('Workflow herstellen')) })
+    await act(async () => { fireEvent.click(screen.getByLabelText(i18n.t('workflows:list.restoreWorkflow'))) })
     expect(onRestore).toHaveBeenCalledTimes(1)
     expect(onEdit).not.toHaveBeenCalled()
 
     rerender(<WorkflowCard workflow={archivedWorkflow} onRun={vi.fn()} onEdit={onEdit}
       canManageFolders={false} onArchive={vi.fn()} onRestore={onRestore} />)
-    expect(screen.queryByLabelText('Workflow herstellen')).not.toBeInTheDocument()
+    expect(screen.queryByLabelText(i18n.t('workflows:list.restoreWorkflow'))).not.toBeInTheDocument()
   })
 
   it('a live (non-archived) card with permission shows a gated archive action that does not open the editor', () => {
@@ -86,7 +86,7 @@ describe('WorkflowCard · archived (TRASH-OVERAL-1b)', () => {
     const onArchive = vi.fn()
     render(<WorkflowCard workflow={baseWorkflow} onRun={vi.fn()} onEdit={onEdit}
       canManageFolders onArchive={onArchive} onRestore={vi.fn()} />)
-    fireEvent.click(screen.getByLabelText('Workflow archiveren'))
+    fireEvent.click(screen.getByLabelText(i18n.t('workflows:list.archiveWorkflow')))
     expect(onArchive).toHaveBeenCalledTimes(1)
     expect(onEdit).not.toHaveBeenCalled()
   })

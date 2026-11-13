@@ -42,7 +42,7 @@ describe('WorkflowListRow', () => {
     // Real i18n is active here (WorkflowListRow pulls in useDateFormat → src/i18n); default language is nl.
     // handleRun awaits onRun then clears `running` in a finally — await it so the
     // state update lands inside act() (D8 re-audit: dropped the fixed setTimeout).
-    await act(async () => { fireEvent.click(screen.getByRole('button', { name: 'Uitvoeren' })) })
+    await act(async () => { fireEvent.click(screen.getByRole('button', { name: i18n.t('workflows:page.run') })) })
     expect(onRun).toHaveBeenCalledWith('wf-1')
     expect(onEdit).not.toHaveBeenCalled()
   })
@@ -50,7 +50,7 @@ describe('WorkflowListRow', () => {
   it('the "…" menu does not double-fire onEdit via bubbling (stopPropagation)', () => {
     const onEdit = vi.fn()
     render(<WorkflowListRow workflow={baseWorkflow} onRun={vi.fn()} onEdit={onEdit} onToggleStatus={vi.fn()} />)
-    fireEvent.click(screen.getByLabelText('Workflow bewerken'))
+    fireEvent.click(screen.getByLabelText(i18n.t('workflows:list.editWorkflow')))
     expect(onEdit).toHaveBeenCalledTimes(1)
   })
 
@@ -72,13 +72,13 @@ describe('WorkflowListRow', () => {
     const onRun = vi.fn(() => new Promise<void>(res => { resolveRun = res }))
     render(<WorkflowListRow workflow={baseWorkflow} onRun={onRun} onEdit={vi.fn()} onToggleStatus={vi.fn()} />)
 
-    const runButton = screen.getByRole('button', { name: 'Uitvoeren' })
+    const runButton = screen.getByRole('button', { name: i18n.t('workflows:page.run') })
     fireEvent.click(runButton)
     expect(onRun).toHaveBeenCalledTimes(1)
 
     await act(async () => { resolveRun(); await Promise.resolve() })
 
-    const doneButton = screen.getByRole('button', { name: 'Zojuist gestart' })
+    const doneButton = screen.getByRole('button', { name: i18n.t('workflows:page.justRan') })
     expect(doneButton).toBeDisabled()
     fireEvent.click(doneButton)
     expect(onRun).toHaveBeenCalledTimes(1) // the repeat click never re-fired the run
@@ -93,9 +93,9 @@ describe('WorkflowListRow · archived (TRASH-OVERAL-1b)', () => {
   it('shows the archived badge and hides run/status-toggle controls', () => {
     render(<WorkflowListRow workflow={archivedWorkflow} onRun={vi.fn()} onEdit={vi.fn()} onToggleStatus={vi.fn()}
       canManageFolders onArchive={vi.fn()} onRestore={vi.fn()} />)
-    expect(screen.getByText('Gearchiveerd')).toBeInTheDocument()
+    expect(screen.getByText(i18n.t('workflows:list.archivedBadge'))).toBeInTheDocument()
     expect(screen.queryByRole('switch')).not.toBeInTheDocument()
-    expect(screen.queryByRole('button', { name: 'Uitvoeren' })).not.toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: i18n.t('workflows:page.run') })).not.toBeInTheDocument()
   })
 
   it('the restore button calls onRestore without opening the editor, and is hidden without permission', async () => {
@@ -103,13 +103,13 @@ describe('WorkflowListRow · archived (TRASH-OVERAL-1b)', () => {
     const onRestore = vi.fn()
     const { rerender } = render(<WorkflowListRow workflow={archivedWorkflow} onRun={vi.fn()} onEdit={onEdit} onToggleStatus={vi.fn()}
       canManageFolders onArchive={vi.fn()} onRestore={onRestore} />)
-    await act(async () => { fireEvent.click(screen.getByLabelText('Workflow herstellen')) })
+    await act(async () => { fireEvent.click(screen.getByLabelText(i18n.t('workflows:list.restoreWorkflow'))) })
     expect(onRestore).toHaveBeenCalledTimes(1)
     expect(onEdit).not.toHaveBeenCalled()
 
     rerender(<WorkflowListRow workflow={archivedWorkflow} onRun={vi.fn()} onEdit={onEdit} onToggleStatus={vi.fn()}
       canManageFolders={false} onArchive={vi.fn()} onRestore={onRestore} />)
-    expect(screen.queryByLabelText('Workflow herstellen')).not.toBeInTheDocument()
+    expect(screen.queryByLabelText(i18n.t('workflows:list.restoreWorkflow'))).not.toBeInTheDocument()
   })
 
   it('a live (non-archived) row with permission shows a gated archive action that does not open the editor', () => {
@@ -117,7 +117,7 @@ describe('WorkflowListRow · archived (TRASH-OVERAL-1b)', () => {
     const onArchive = vi.fn()
     render(<WorkflowListRow workflow={baseWorkflow} onRun={vi.fn()} onEdit={onEdit} onToggleStatus={vi.fn()}
       canManageFolders onArchive={onArchive} onRestore={vi.fn()} />)
-    fireEvent.click(screen.getByLabelText('Workflow archiveren'))
+    fireEvent.click(screen.getByLabelText(i18n.t('workflows:list.archiveWorkflow')))
     expect(onArchive).toHaveBeenCalledTimes(1)
     expect(onEdit).not.toHaveBeenCalled()
   })
@@ -138,7 +138,7 @@ describe('WorkflowListRow · trash lifecycle (TRASH-OVERAL-2)', () => {
     render(<WorkflowListRow workflow={archivedWorkflow} onRun={vi.fn()} onEdit={onEdit} onToggleStatus={vi.fn()}
       canManageFolders onRestore={vi.fn()} onMarkDeletion={onMarkDeletion} />)
     // Real i18n (nl): common:trash.markAction.
-    fireEvent.click(screen.getByLabelText('Definitief verwijderen'))
+    fireEvent.click(screen.getByLabelText(i18n.t('common:trash.markAction')))
     expect(onMarkDeletion).toHaveBeenCalledTimes(1)
     expect(onEdit).not.toHaveBeenCalled()
   })
@@ -146,7 +146,7 @@ describe('WorkflowListRow · trash lifecycle (TRASH-OVERAL-2)', () => {
   it('hides the mark-deletion action when the prop is absent (no workflows.delete)', () => {
     render(<WorkflowListRow workflow={archivedWorkflow} onRun={vi.fn()} onEdit={vi.fn()} onToggleStatus={vi.fn()}
       canManageFolders onRestore={vi.fn()} />)
-    expect(screen.queryByLabelText('Definitief verwijderen')).not.toBeInTheDocument()
+    expect(screen.queryByLabelText(i18n.t('common:trash.markAction'))).not.toBeInTheDocument()
   })
 
   it('a trashed row shows the erase note (DD-MM-YYYY) + unmark, and hides restore/mark', () => {
@@ -156,16 +156,16 @@ describe('WorkflowListRow · trash lifecycle (TRASH-OVERAL-2)', () => {
     // House date format, never ISO (DATUM-1): pending since 10-08, erased around +30d.
     expect(screen.getByText(/10-08-2026/)).toBeInTheDocument()
     expect(screen.getByText(/09-09-2026/)).toBeInTheDocument()
-    expect(screen.queryByLabelText('Workflow herstellen')).not.toBeInTheDocument()
-    expect(screen.queryByLabelText('Definitief verwijderen')).not.toBeInTheDocument()
-    fireEvent.click(screen.getByLabelText('Terugzetten naar archief'))
+    expect(screen.queryByLabelText(i18n.t('workflows:list.restoreWorkflow'))).not.toBeInTheDocument()
+    expect(screen.queryByLabelText(i18n.t('common:trash.markAction'))).not.toBeInTheDocument()
+    fireEvent.click(screen.getByLabelText(i18n.t('common:trash.unmarkAction')))
     expect(onUnmark).toHaveBeenCalledTimes(1)
   })
 
   it('hides the unmark action on a trashed row when the prop is absent (no settings.update)', () => {
     render(<WorkflowListRow workflow={trashedWorkflow} onRun={vi.fn()} onEdit={vi.fn()} onToggleStatus={vi.fn()}
       canManageFolders={false} />)
-    expect(screen.queryByLabelText('Terugzetten naar archief')).not.toBeInTheDocument()
+    expect(screen.queryByLabelText(i18n.t('common:trash.unmarkAction'))).not.toBeInTheDocument()
   })
 })
 
@@ -194,24 +194,26 @@ describe('WorkflowListRow · seeded workflow name i18n (LOOKUP-I18N-1)', () => {
   })
 })
 
+// Substring matcher built from translated copy (the meta span joins several texts with ' · ').
+const copyRegExp = (text: string) => new RegExp(text.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'))
+
 // K-254 (WF-RELATIONS-FE-2): the call-graph counters — only shown when > 0
 // (a counter never renders "0", §SCHERMWAARHEID).
 describe('WorkflowListRow · relations_summary counters', () => {
   it('shows both counters when the workflow calls others and is called by others', () => {
     const workflow: Workflow = { ...baseWorkflow, relations_summary: { calls: 2, called_by: 1 } }
     render(<WorkflowListRow workflow={workflow} onRun={vi.fn()} onEdit={vi.fn()} onToggleStatus={vi.fn()} />)
-    expect(screen.getByText(/roept 2 workflows aan/)).toBeInTheDocument()
-    expect(screen.getByText(/1× aangeroepen/)).toBeInTheDocument()
+    expect(screen.getByText(copyRegExp(i18n.t('workflows:list.relationsCalls', { count: 2 })))).toBeInTheDocument()
+    expect(screen.getByText(copyRegExp(i18n.t('workflows:list.relationsCalledBy', { count: 1 })))).toBeInTheDocument()
   })
 
   it('shows neither counter when relations_summary is absent or zero', () => {
     const workflow: Workflow = { ...baseWorkflow, relations_summary: { calls: 0, called_by: 0 } }
     render(<WorkflowListRow workflow={workflow} onRun={vi.fn()} onEdit={vi.fn()} onToggleStatus={vi.fn()} />)
-    expect(screen.queryByText(/aangeroepen/)).not.toBeInTheDocument()
-    // The zero case would render the PLURAL ('roept 0 workflows aan'), so assert on the
-    // count itself — a singular-only regex silently passed while a 0 counter rendered.
-    expect(screen.queryByText(/roept 0/)).not.toBeInTheDocument()
-    expect(screen.queryByText(/workflows? aan/)).not.toBeInTheDocument()
+    expect(screen.queryByText(copyRegExp(i18n.t('workflows:list.relationsCalledBy', { count: 0 })))).not.toBeInTheDocument()
+    // The zero case would render the PLURAL form with count 0, so assert on exactly that
+    // copy: a singular-only regex silently passed while a 0 counter rendered.
+    expect(screen.queryByText(copyRegExp(i18n.t('workflows:list.relationsCalls', { count: 0 })))).not.toBeInTheDocument()
   })
 })
 
