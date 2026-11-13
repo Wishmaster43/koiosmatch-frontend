@@ -15,6 +15,7 @@
 import { useState } from 'react'
 import type { CSSProperties, ChangeEvent, FocusEvent } from 'react'
 import { useTranslation } from 'react-i18next'
+import { labelOrRaw } from '@/lib/labelOrRaw'
 import { useAllSettings, saveSettingsKeys, invalidateAllSettingsCache } from '@/lib/settings/useAllSettings'
 import { useNumberingEntities, type NumberingEntity } from '@/lib/useNumberingEntities'
 import { notifyError } from '@/lib/notify'
@@ -41,7 +42,7 @@ interface EntityRowProps {
 // One entity's prefix/pad/start row — reads its three flat settings keys and
 // commits each independently on blur (optimistic + revert-on-failure).
 function EntityRow({ entity, settings }: EntityRowProps) {
-  const { t } = useTranslation('settings')
+  const { t, i18n } = useTranslation('settings')
   const keys = {
     prefix: `numbering.${entity.key}.prefix`,
     pad:    `numbering.${entity.key}.pad`,
@@ -89,8 +90,8 @@ function EntityRow({ entity, settings }: EntityRowProps) {
       <td style={{ padding: '10px 12px', fontSize: 13, fontWeight: 500, color: 'var(--text)' }}>
         {/* Translated key wins once it ships; the backend's own Dutch label is an
             honest graceful fallback for an entity whose key has no translation yet
-            (mirrors ModulePicker's t(key, { defaultValue }) convention). */}
-        {t(`numbering.entities.${entity.key}`, { defaultValue: entity.label })}
+            (labelOrRaw, the house existence check). */}
+        {labelOrRaw(t, i18n, `numbering.entities.${entity.key}`, entity.label, 'settings')}
       </td>
       <td style={{ padding: '8px 12px' }}>
         <div>

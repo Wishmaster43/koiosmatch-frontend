@@ -9,6 +9,7 @@
 import { useEffect, useState } from 'react'
 import type { ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
+import { labelOrRaw } from '@/lib/labelOrRaw'
 import { RefreshCw, Search } from 'lucide-react'
 import api, { unwrap } from '@/lib/api'
 import { withIdempotencyKey } from '@/lib/idempotency'
@@ -76,7 +77,7 @@ function EmptyNotice({ children }: { children: ReactNode }) {
 // Settings → WhatsApp: manages the tenant's connections plus each connection's
 // numbers/templates sub-views, gated on the whatsapp.manage permission.
 export default function WhatsAppSettings() {
-  const { t } = useTranslation('settings')
+  const { t, i18n } = useTranslation('settings')
   // PROVISION-GATE-1 (08-08): the create/edit/sync affordances are gated on the
   // exact server permission (whatsapp.manage) — hidden, not disabled, for anyone
   // without it (§3). hasPermission already lets super admins through.
@@ -335,8 +336,8 @@ export default function WhatsAppSettings() {
                   const bodyText = Array.isArray(tpl.components)
                     ? tpl.components.find(c => c.type === 'BODY')?.text
                     : null
-                  const catKey = tpl.category ? t(`whatsapp.cat${tpl.category}`, { defaultValue: tpl.category }) : '—'
-                  const statusLabel = t(`whatsapp.status${tpl.status ?? ''}`, { defaultValue: tpl.status ?? '' })
+                  const catKey = tpl.category ? labelOrRaw(t, i18n, `whatsapp.cat${tpl.category}`, tpl.category, 'settings') : '—'
+                  const statusLabel = labelOrRaw(t, i18n, `whatsapp.status${tpl.status ?? ''}`, tpl.status ?? '', 'settings')
                   return (
                     <tr key={tpl.id ?? i}
                       style={{ borderBottom: '1px solid var(--hover-bg)' }}

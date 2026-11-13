@@ -17,6 +17,7 @@
 import { useState, useEffect, useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
 import type { TFunction } from 'i18next'
+import { labelOrRaw, type KeyChecker } from '@/lib/labelOrRaw'
 import type { AxiosError } from 'axios'
 import { X } from 'lucide-react'
 import api, { unwrap, unwrapList } from '@/lib/api'
@@ -56,8 +57,8 @@ interface EmailLogEntry {
 const PER_PAGE = 50
 const PAGE_SIZE_OPTIONS = [50, 100, 200] // backend MAX_PER_PAGE is 200 (422 above it)
 
-const entityText = (e: EmailLogEntry, t: TFunction<'settings'>) =>
-  e.entity_label ?? (e.entity_type ? t(`audit.entity.${e.entity_type.split('\\').pop()?.toLowerCase()}`, { defaultValue: e.entity_type }) : '—')
+const entityText = (e: EmailLogEntry, t: TFunction<'settings'>, i18n: KeyChecker) =>
+  e.entity_label ?? (e.entity_type ? labelOrRaw(t, i18n, `audit.entity.${e.entity_type.split('\\').pop()?.toLowerCase()}`, e.entity_type, 'settings') : '—')
 
 // True when an axios error carries a 403 or 404 — a settings.view-only caller
 // legitimately gets 403 on an entity-linked mail's body (EmailLogEntityGateTest),
@@ -70,7 +71,7 @@ const isAccessDenied = (err: unknown): boolean => {
 // Detail panel for one logged e-mail — lazily fetches the (encrypted) body via
 // GET /email-log/{id}, since the list response never carries it (DL-04).
 function EmailLogDrawer({ entry, onClose }: { entry: EmailLogEntry; onClose: () => void }) {
-  const { t } = useTranslation('settings')
+  const { t, i18n } = useTranslation('settings')
   // App-wide active locale (§5) — formatDateTime replaces the old hardcoded 'nl-NL' fmt().
   const { formatDateTime } = useDateFormat()
   // Single-source dialog behaviour (Escape + Tab-trap + focus restore) via the
@@ -109,7 +110,7 @@ function EmailLogDrawer({ entry, onClose }: { entry: EmailLogEntry; onClose: () 
     [t('emailLog.from'), entry.from ?? '—'],
     [t('emailLog.to'), entry.to ?? '—'],
     [t('emailLog.subject'), entry.subject ?? '—'],
-    [t('audit.colEntity'), entityText(entry, t)],
+    [t('audit.colEntity'), entityText(entry, t, i18n)],
     [t('log.status'), statusLabel(t, entry.status) ?? '—'],
     [t('log.date'), formatDateTime(entry.created_at)],
   ]
@@ -155,7 +156,7 @@ function EmailLogDrawer({ entry, onClose }: { entry: EmailLogEntry; onClose: () 
 
 // Settings → e-mail audit log: server-paginated table + search/direction filters + a row detail panel.
 export default function EmailLog() {
-  const { t } = useTranslation('settings')
+  const { t, i18n } = useTranslation('settings')
   // App-wide active locale (§5) — formatDateTime replaces the old hardcoded 'nl-NL' fmt().
   const { formatDateTime } = useDateFormat()
   const [rows, setRows] = useState<EmailLogEntry[]>([])
@@ -210,7 +211,7 @@ export default function EmailLog() {
     { key: 'direction', header: t('log.direction'), width: 120, render: r => <DirectionPill direction={r.direction} /> },
     { key: 'party', header: t('emailLog.party'), render: r => (isInbound(r.direction) ? r.from : r.to) ?? '—' },
     { key: 'subject', header: t('emailLog.subject'), render: r => r.subject ?? '—' },
-    { key: 'entity', header: t('audit.colEntity'), render: r => entityText(r, t) },
+    { key: 'entity', header: t('audit.colEntity'), render: r => entityText(r, t, i18n) },
     { key: 'status', header: t('log.status'), width: 120, render: r => <StatusPill status={r.status} label={statusLabel(t, r.status)} /> },
     { key: 'created_at', header: t('log.date'), width: 150, nowrap: true, render: r => formatDateTime(r.created_at) },
   ]
@@ -231,7 +232,7 @@ export default function EmailLog() {
     { header: t('log.direction'), value: r => isInbound(r.direction) ? t('log.in') : t('log.out') },
     { header: t('emailLog.party'), value: r => (isInbound(r.direction) ? r.from : r.to) ?? '' },
     { header: t('emailLog.subject'), value: r => r.subject ?? '' },
-    { header: t('audit.colEntity'), value: r => entityText(r, t) },
+    { header: t('audit.colEntity'), value: r => entityText(r, t, i18n) },
     { header: t('log.status'), value: r => statusLabel(t, r.status) ?? '' },
     { header: t('log.date'), value: r => formatDateTime(r.created_at) },
   ]

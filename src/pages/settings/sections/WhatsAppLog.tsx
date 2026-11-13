@@ -14,6 +14,7 @@
  */
 import { useState, useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
+import { labelOrRaw } from '@/lib/labelOrRaw'
 import { useDateFormat } from '@/lib/datetime'
 import LogView from '@/components/ui/LogView'
 import type { LogExportCol } from '@/components/ui/LogView'
@@ -47,7 +48,7 @@ const contactOf = (m: WaMessage) =>
 
 // Bureau-wide WhatsApp message log: server-filtered direction/status plus a client-side search over the loaded page.
 export default function WhatsAppLog() {
-  const { t } = useTranslation('settings')
+  const { t, i18n } = useTranslation('settings')
   const [search, setSearch] = useState('')
   const [selectedDir, setSelectedDir] = useState<string[]>([])
   const [selectedStatus, setSelectedStatus] = useState<string[]>([])
@@ -100,9 +101,9 @@ export default function WhatsAppLog() {
       onToggle: (v: string) => setSelectedDir(p => p[0] === v ? [] : [v]) },
     { key: 'status', label: t('log.status'), type: 'search-select', selected: selectedStatus,
       // Same translated label as the status column itself (§5) — never the raw enum slug.
-      options: statusOptions.map(s => ({ value: s, label: t(`whatsapp:msgStatus.${s}`, { defaultValue: s }) })),
+      options: statusOptions.map(s => ({ value: s, label: labelOrRaw(t, i18n, `msgStatus.${s}`, s, 'whatsapp') })),
       onToggle: (v: string) => setSelectedStatus(p => p[0] === v ? [] : [v]) },
-  ], [t, search, selectedDir, selectedStatus, statusOptions])
+  ], [t, i18n, search, selectedDir, selectedStatus, statusOptions])
 
   // One source per label (§5): the CSV header text for every column reuses the
   // SAME shared column headers (`whatsapp` namespace) the table itself renders,
@@ -117,10 +118,10 @@ export default function WhatsAppLog() {
     { header: String(headerOf('recipient')), value: m => contactOf(m) },
     { header: String(headerOf('channel')), value: m => m.channel_label ?? m.channel ?? '' },
     { header: String(headerOf('type')), value: m => m.message_type?.label ?? '' },
-    { header: String(headerOf('purpose')), value: m => m.purpose ? t(`candidates:conversations.purpose.${m.purpose}`, { defaultValue: m.purpose }) : '' },
+    { header: String(headerOf('purpose')), value: m => m.purpose ? labelOrRaw(t, i18n, `conversations.purpose.${m.purpose}`, m.purpose, 'candidates') : '' },
     { header: String(headerOf('template')), value: m => m.template_name ?? '' },
     { header: String(headerOf('body')), value: m => m.body ?? '' },
-    { header: String(headerOf('status')), value: m => t(`whatsapp:msgStatus.${m.status}`, { defaultValue: m.status ?? '' }) },
+    { header: String(headerOf('status')), value: m => (m.status ? labelOrRaw(t, i18n, `msgStatus.${m.status}`, m.status, 'whatsapp') : '') },
     { header: String(headerOf('sentBy')), value: m => m.sent_by_user?.name ?? t('whatsapp:messages.automatic') },
     { header: String(headerOf('sent_at')), value: m => formatDateTime(m.sent_at) },
   ]

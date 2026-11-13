@@ -13,6 +13,7 @@
 import { useState } from 'react'
 import type { CSSProperties } from 'react'
 import { useTranslation } from 'react-i18next'
+import { labelOrRaw } from '@/lib/labelOrRaw'
 import { ChevronDown, ChevronUp } from 'lucide-react'
 import { useAuth } from '@/context/AuthContext'
 import { canAccessPage } from '@/lib/access'
@@ -92,7 +93,7 @@ interface PermissionMatrixProps {
 // The expandable permission-group matrix, filtered to modules the viewing admin
 // can actually see (canAccessPage), per the comment below.
 export function PermissionMatrix({ groups, hasPermission, onToggle, onSetMany }: PermissionMatrixProps) {
-  const { t } = useTranslation('settings')
+  const { t, i18n } = useTranslation('settings')
   // Same gate as the sidebar: canAccessPage handles the tenant module flags,
   // package mapping and the super-admin bypass in ONE place — raw accessiblePages
   // wrongly hid open modules for super admins (CMFE review 20-07). Pure UI
@@ -114,12 +115,12 @@ export function PermissionMatrix({ groups, hasPermission, onToggle, onSetMany }:
 
   // Label helpers — group/action names are tenant-agnostic permission vocabulary,
   // so a missing translation still shows the raw key instead of crashing.
-  const groupLabel  = (g: string) => t(`roles.groups.${g}`, { defaultValue: g })
-  const actionLabel = (a: string) => t(`roles.actions.${a}`, { defaultValue: a })
+  const groupLabel  = (g: string) => labelOrRaw(t, i18n, `roles.groups.${g}`, g, 'settings')
+  const actionLabel = (a: string) => labelOrRaw(t, i18n, `roles.actions.${a}`, a, 'settings')
   // Non-CRUD action label: a real roles.actions.<x> entry when one exists
   // (offer/manage/assign_roles/…), else the matching group label — most detail
   // entries are page.* toggles whose action segment IS a page/entity name.
-  const otherLabel  = (a: string) => t(`roles.actions.${a}`, { defaultValue: groupLabel(a) })
+  const otherLabel  = (a: string) => labelOrRaw(t, i18n, `roles.actions.${a}`, groupLabel(a), 'settings')
 
   // One label function for EVERY permission in a group now that the whole row
   // (CRUD + non-CRUD alike) expands into a flat toggle list: CRUD verbs get their
