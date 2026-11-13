@@ -50,8 +50,8 @@ describe('PickCandidateForAppointmentModal · candidate search (step 1)', () => 
     getMock.mockResolvedValue(paginated([candidateRow()], 1))
     render(<PickCandidateForAppointmentModal vacancyId="v-1" onClose={vi.fn()} onCreated={vi.fn()} />)
     await waitFor(() => expect(getMock).toHaveBeenCalledTimes(1))
-    fireEvent.click(screen.getByRole('button', { name: /^kandidaat$/i }))
-    fireEvent.change(screen.getByPlaceholderText(/zoeken/i), { target: { value: 'jane' } })
+    fireEvent.click(screen.getByRole('button', { name: i18n.t('vacancies:appointmentsTab.pickCandidate.label') }))
+    fireEvent.change(screen.getByPlaceholderText(i18n.t('common:search')), { target: { value: 'jane' } })
     await waitFor(() => expect(getMock).toHaveBeenCalledWith('/candidates',
       expect.objectContaining({ params: { search: 'jane', per_page: 25 } })))
   })
@@ -59,14 +59,14 @@ describe('PickCandidateForAppointmentModal · candidate search (step 1)', () => 
   it('shows the honest "shown of total" hint when the tenant has more candidates than the capped page', async () => {
     getMock.mockResolvedValue(paginated([candidateRow()], 292))
     render(<PickCandidateForAppointmentModal vacancyId="v-1" onClose={vi.fn()} onCreated={vi.fn()} />)
-    await waitFor(() => expect(screen.getByText('1 van 292 getoond')).toBeInTheDocument())
+    await waitFor(() => expect(screen.getByText(i18n.t('common:shownOf', { shown: 1, total: 292 }))).toBeInTheDocument())
   })
 
   it('shows no cap hint once every matching candidate already fits on the page', async () => {
     getMock.mockResolvedValue(paginated([candidateRow()], 1))
     render(<PickCandidateForAppointmentModal vacancyId="v-1" onClose={vi.fn()} onCreated={vi.fn()} />)
     await waitFor(() => expect(getMock).toHaveBeenCalled())
-    expect(screen.queryByText(/getoond/)).not.toBeInTheDocument()
+    expect(screen.queryByText(i18n.t('common:shownOf', { shown: 1, total: 1 }))).not.toBeInTheDocument()
   })
 
   it('reports a failed search instead of silently showing an empty list', async () => {
@@ -80,7 +80,7 @@ describe('PickCandidateForAppointmentModal · candidate search (step 1)', () => 
     const onClose = vi.fn()
     render(<PickCandidateForAppointmentModal vacancyId="v-1" onClose={onClose} onCreated={vi.fn()} />)
     await waitFor(() => expect(getMock).toHaveBeenCalled())
-    fireEvent.click(screen.getByRole('button', { name: /annuleren/i }))
+    fireEvent.click(screen.getByRole('button', { name: i18n.t('common:cancel') }))
     expect(onClose).toHaveBeenCalled()
   })
 })
@@ -90,12 +90,12 @@ describe('PickCandidateForAppointmentModal · pick → shared modal (step 2)', (
     getMock.mockResolvedValue(paginated([candidateRow()], 1))
     render(<PickCandidateForAppointmentModal vacancyId="v-1" onClose={vi.fn()} onCreated={vi.fn()} />)
     await waitFor(() => expect(getMock).toHaveBeenCalled())
-    fireEvent.click(screen.getByRole('button', { name: /^kandidaat$/i }))
+    fireEvent.click(screen.getByRole('button', { name: i18n.t('vacancies:appointmentsTab.pickCandidate.label') }))
     const option = await screen.findByText(/Jane Doe · Verpleegkundige · Amsterdam/)
     fireEvent.click(option)
     const shown = JSON.parse(screen.getByTestId('modal-props').textContent || '{}')
     expect(shown).toEqual({ candidateId: 'c-1', defaultVacancyId: 'v-1', mode: 'appointment' })
     // Step 1's own panel is gone once step 2 takes over.
-    expect(screen.queryByPlaceholderText(/zoeken/i)).not.toBeInTheDocument()
+    expect(screen.queryByPlaceholderText(i18n.t('common:search'))).not.toBeInTheDocument()
   })
 })

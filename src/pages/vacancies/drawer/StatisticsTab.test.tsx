@@ -96,7 +96,7 @@ describe('StatisticsTab · V25 real data (derived from the detail applications a
     // Days open: 1 July → 15 July = 14 whole days.
     expect(screen.getByText('14')).toBeInTheDocument()
     // Published channels: 1 of the 2 configured (the KPI's "sub" caption is unique text).
-    expect(screen.getByText('van de 2 geconfigureerd')).toBeInTheDocument()
+    expect(screen.getByText(nlVacancies.statistics.channelsPublishedSub.replace('{{total}}', '2'))).toBeInTheDocument()
     vi.useRealTimers()
   })
 

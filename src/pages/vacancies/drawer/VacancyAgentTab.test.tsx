@@ -65,10 +65,10 @@ const rawDetail = (over: Record<string, unknown> = {}) => ({
 const vacancyRow = { id: 'v1', title: 'Verpleegkundige' } as Vacancy
 
 // Real nl copy (see the file doc comment on why this isn't the raw t() key).
-const PLACEHOLDER = 'Selecteer een AI-agent'
-const NONE = 'Geen agent'
-const LOAD_ERROR = 'AI-agenten laden is mislukt.'
-const FLOW_HINT = 'Koppel een agent om het interview te zien.'
+const PLACEHOLDER = i18n.t('vacancies:aiagent.placeholder')
+const NONE = i18n.t('vacancies:aiagent.none')
+const LOAD_ERROR = i18n.t('vacancies:aiagent.loadError')
+const FLOW_HINT = i18n.t('vacancies:aiagent.flowHint')
 
 // Harness: mounts the REAL useVacancyRecord + VacancyAgentTab together, so
 // `onUpdate` exercises the actual PATCH-mapping wiring end to end. VacancyAgentTab
@@ -130,7 +130,7 @@ describe('VacancyAgentTab · picker → PATCH ai_agent_id + read-only interview 
     // PDF-VACATURES point 21 (14-08): the flow source is stated honestly (agent
     // fallback only — no contract-form default exists yet), and since this
     // vacancy carries no contract form, the fallback note shows too.
-    expect(screen.getByText('Overgenomen van de gekoppelde agent (Kelly). Er is nog geen standaard per contractvorm beschikbaar.')).toBeInTheDocument()
+    expect(screen.getByText(i18n.t('vacancies:aiagent.flowSource.fromAgent', { agent: 'Kelly' }))).toBeInTheDocument()
     expect(screen.getByText(i18n.t('vacancies:aiagent.flowSource.noContractType'))).toBeInTheDocument()
   })
 
@@ -170,7 +170,7 @@ describe('VacancyAgentTab · default flow override picker', () => {
     renderHarness()
     await waitFor(() => expect(screen.getByText('Zorgintake (9 stappen)')).toBeInTheDocument())
 
-    const flowTrigger = await screen.findByRole('button', { name: /Kies een interviewflow|flowPickerPlaceholder/i })
+    const flowTrigger = await screen.findByRole('button', { name: i18n.t('vacancies:aiagent.flowPickerPlaceholder') })
     mockPatch.mockResolvedValue({ data: { data: rawDetail({ ai_agent: { id: 'a1', name: 'Kelly' }, interview_flow_id: 'f1' }) } })
     const user = userEvent.setup()
     await user.click(flowTrigger)
@@ -178,7 +178,7 @@ describe('VacancyAgentTab · default flow override picker', () => {
     expect(mockPatch).toHaveBeenCalledWith('/vacancies/v1', { interview_flow_id: 'f1' })
 
     mockPatch.mockResolvedValue({ data: { data: rawDetail({ ai_agent: { id: 'a1', name: 'Kelly' }, interview_flow_id: null }) } })
-    await user.click(screen.getByTitle('Geen vacature-flow (agent-standaard) wissen'))
+    await user.click(screen.getByTitle(i18n.t('common:clearField', { field: i18n.t('vacancies:aiagent.flowPickerLabel') })))
     await waitFor(() => expect(mockPatch).toHaveBeenCalledWith('/vacancies/v1', { interview_flow_id: null }))
   })
 })
@@ -190,7 +190,7 @@ describe('VacancyAgentTab · default flow override picker', () => {
 // `{ started, skipped:[{application_id, reason}], eligible_total }` contract —
 // its result toast now reads "X of Y started" (Y = eligible_total, i.e. only
 // LIVE-stage applications) plus a translated reason breakdown when rows were skipped.
-const BACKFILL_BUTTON = 'Interview starten voor bestaande sollicitanten'
+const BACKFILL_BUTTON = i18n.t('vacancies:aiagent.backfill.button')
 
 describe('VacancyAgentTab · backfill existing applicants (INTERVIEW-BACKFILL-1)', () => {
   it('does not render the backfill action when no agent is linked', async () => {
@@ -207,7 +207,7 @@ describe('VacancyAgentTab · backfill existing applicants (INTERVIEW-BACKFILL-1)
 
     const user = userEvent.setup()
     await user.click(screen.getByRole('button', { name: BACKFILL_BUTTON }))
-    expect(screen.getByText(/Dit stuurt WhatsApp-berichten\.$/)).toBeInTheDocument()
+    expect(screen.getByText(i18n.t('vacancies:aiagent.backfill.confirm'))).toBeInTheDocument()
 
     mockPost.mockResolvedValueOnce({ data: { data: { started: 3, skipped: [], eligible_total: 3 } } })
     await user.click(screen.getByRole('button', { name: i18n.t('common:confirm') }))
@@ -275,7 +275,7 @@ describe('VacancyAgentTab · backfill existing applicants (INTERVIEW-BACKFILL-1)
     renderHarness()
     await waitFor(() => screen.getByText('Zorgintake (9 stappen)'))
     await userEvent.click(screen.getByRole('button', { name: BACKFILL_BUTTON }))
-    expect(screen.getByText(/^3 bestaande sollicitanten van deze vacature/)).toBeInTheDocument()
+    expect(screen.getByText(i18n.t('vacancies:aiagent.backfill.confirmWithCount', { count: 3 }))).toBeInTheDocument()
   })
 
   it('cancelling the confirm dialog never calls the API', async () => {
@@ -297,7 +297,7 @@ describe('VacancyAgentTab · backfill existing applicants (INTERVIEW-BACKFILL-1)
     mockPost.mockRejectedValueOnce({ response: { status: 404 } })
     await user.click(screen.getByRole('button', { name: i18n.t('common:confirm') }))
 
-    await waitFor(() => expect(mockNotifyError).toHaveBeenCalledWith('Interview starten voor bestaande sollicitanten is nog niet beschikbaar. Wacht op de backend-koppeling.'))
+    await waitFor(() => expect(mockNotifyError).toHaveBeenCalledWith(i18n.t('vacancies:aiagent.backfill.unavailable')))
     expect(screen.getByRole('button', { name: BACKFILL_BUTTON })).toBeDisabled()
   })
 })
@@ -305,7 +305,7 @@ describe('VacancyAgentTab · backfill existing applicants (INTERVIEW-BACKFILL-1)
 // INTERVIEW-WORKFLOW-1 (Appendix D/E): the vacancy's own workflow link,
 // presence-gated on whether GET /vacancies/{id} carries the
 // `interview_workflow_id` key at all — never inferred from its value.
-const WORKFLOW_UNAVAILABLE = 'Beschikbaar zodra de workflow-koppeling aan de backend is'
+const WORKFLOW_UNAVAILABLE = i18n.t('vacancies:aiagent.workflow.unavailable')
 // WFB-08: WorkflowResource never emits a folder object — no `folder` key.
 const mockWorkflow = { id: 'wf-1', name: 'Kelly-Helpende', status: 'active', agent: { id: 'a1', name: 'Kelly' } }
 
@@ -338,12 +338,12 @@ describe('VacancyAgentTab · interview-workflow link (INTERVIEW-WORKFLOW-1)', ()
     // shows the real agent + workflow names — never the "— / —" dash pair —
     // with NO reopen needed. Resolved from the already-fetched workflow list
     // (workflowById), which the picked id itself came from.
-    await waitFor(() => expect(screen.getAllByText('Afgeleid uit de workflow: Kelly / Kelly-Helpende').length).toBe(2))
+    await waitFor(() => expect(screen.getAllByText(i18n.t('vacancies:aiagent.workflow.derivedFrom', { agent: 'Kelly', workflow: 'Kelly-Helpende' })).length).toBe(2))
     expect(screen.queryByText(/— \/ —/)).not.toBeInTheDocument()
 
     mockPatch.mockResolvedValue({ data: { data: rawDetail({ interview_workflow_id: null, interview_workflow: null }) } })
-    await waitFor(() => screen.getByTitle(/Geen workflow wissen/))
-    await user.click(screen.getByTitle(/Geen workflow wissen/))
+    await waitFor(() => screen.getByTitle(i18n.t('common:clearField', { field: i18n.t('vacancies:aiagent.workflow.none') })))
+    await user.click(screen.getByTitle(i18n.t('common:clearField', { field: i18n.t('vacancies:aiagent.workflow.none') })))
     expect(mockPatch).toHaveBeenLastCalledWith('/vacancies/v1', { interview_workflow_id: null })
   })
 
@@ -353,7 +353,7 @@ describe('VacancyAgentTab · interview-workflow link (INTERVIEW-WORKFLOW-1)', ()
       [mockAgent], [mockFlow], [mockWorkflow],
     ))
     renderHarness()
-    await waitFor(() => expect(screen.getAllByText('Afgeleid uit de workflow: Kelly / Kelly-Helpende').length).toBeGreaterThan(0))
+    await waitFor(() => expect(screen.getAllByText(i18n.t('vacancies:aiagent.workflow.derivedFrom', { agent: 'Kelly', workflow: 'Kelly-Helpende' })).length).toBeGreaterThan(0))
     // The old interactive agent picker is gone — replaced by derived text.
     expect(screen.queryByRole('button', { name: PLACEHOLDER })).not.toBeInTheDocument()
   })
