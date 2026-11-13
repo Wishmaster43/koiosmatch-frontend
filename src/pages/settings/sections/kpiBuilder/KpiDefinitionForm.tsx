@@ -9,6 +9,7 @@
 import { cloneElement } from 'react'
 import type { ReactElement, ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
+import { labelOrRaw } from '@/lib/labelOrRaw'
 import FloatingPanel from '@/components/ui/FloatingPanel'
 import ModalFooter from '@/components/ui/ModalFooter'
 import Toggle from '@/components/ui/Toggle'
@@ -46,11 +47,11 @@ function HintedControl({ hint, children, ...labelProps }: { hint: ReactNode; chi
 }
 
 export default function KpiDefinitionForm({ entity, registry, editing, saving = false, onSubmit, onClose }: KpiDefinitionFormProps) {
-  const { t } = useTranslation('settings')
+  const { t, i18n } = useTranslation('settings')
   const { draft, setField, metric, valid, createBody, changedKeys } = useKpiDefinitionDraft(registry, editing)
 
   const unitChoices = metric ? unitOptionsFor(metric.kind, metric.default_unit) : (draft.unit ? [draft.unit] : [])
-  const dimensionOptions = registry.dimensions.map(d => ({ value: d, label: d === 'all' ? t('kpiBuilder.dimensionAll') : t(`kpiBuilder.dimension.${d}`, { defaultValue: d }) }))
+  const dimensionOptions = registry.dimensions.map(d => ({ value: d, label: d === 'all' ? t('kpiBuilder.dimensionAll') : labelOrRaw(t, i18n, `kpiBuilder.dimension.${d}`, d, 'settings') }))
 
   // Create posts the full body (entity injected here); edit posts only the diff — {} closes without a request.
   const handleSubmit = () => {

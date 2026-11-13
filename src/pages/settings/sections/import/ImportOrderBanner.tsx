@@ -1,4 +1,5 @@
 import { useTranslation } from 'react-i18next'
+import { labelOrRaw } from '@/lib/labelOrRaw'
 import { ArrowRight } from 'lucide-react'
 import { PageSubtitle } from '@/components/ui/typography'
 
@@ -27,7 +28,7 @@ interface ImportOrderBannerProps {
  * for creating a new one in one go — never both for the same data.
  */
 export default function ImportOrderBanner({ entity, wholeTreeEntity, onSelectEntity }: ImportOrderBannerProps) {
-  const { t } = useTranslation('settings')
+  const { t, i18n } = useTranslation('settings')
   return (
     <div style={{ padding: '10px 14px',
       background: 'color-mix(in srgb, var(--color-info) 8%, transparent)',
@@ -39,7 +40,7 @@ export default function ImportOrderBanner({ entity, wholeTreeEntity, onSelectEnt
           <span key={id} style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
             {/* Text colour uses the AA-contrast primary-text token, not the raw accent (P2b). */}
             <span style={{ fontWeight: id === entity ? 700 : 400, color: id === entity ? 'var(--color-primary-text)' : 'var(--text-muted)' }}>
-              {t(`import.entities.${id}.label`, { defaultValue: id })}
+              {labelOrRaw(t, i18n, `import.entities.${id}.label`, id, 'settings')}
             </span>
             {index < ORDER.length - 1 && <ArrowRight size={11} style={{ color: 'var(--text-muted)' }} aria-hidden="true" />}
           </span>
@@ -48,7 +49,7 @@ export default function ImportOrderBanner({ entity, wholeTreeEntity, onSelectEnt
       {/* Per-entity hint (which link columns it needs); falls back to the generic
           hint for any future entity the backend adds that isn't in ORDER above. */}
       <PageSubtitle as="div" style={{ marginTop: 4 }}>
-        {t(`import.order.${entity}Hint`, { defaultValue: t('import.order.hint') })}
+        {labelOrRaw(t, i18n, `import.order.${entity}Hint`, t('import.order.hint'), 'settings')}
       </PageSubtitle>
 
       {/* The one-file alternative, offered rather than hidden — a user creating a

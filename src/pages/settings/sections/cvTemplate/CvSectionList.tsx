@@ -7,6 +7,7 @@
  * and a save fn instead of threading three callbacks through.
  */
 import { useTranslation } from 'react-i18next'
+import { labelOrRaw } from '@/lib/labelOrRaw'
 import { ChevronUp, ChevronDown } from 'lucide-react'
 import { CV_MOVABLE_SECTION_IDS } from '@/lib/useCvSettings'
 import { Toggle } from '@/pages/settings/components/SettingsKit'
@@ -23,7 +24,7 @@ interface CvSectionListProps {
 // `sections` is the normalized list from useCvSettings; `onSave` its partial-save fn.
 export default function CvSectionList({ sections, onSave }: CvSectionListProps) {
   const { t } = useTranslation('settings')
-  const { t: tCv } = useTranslation('candidates')
+  const { t: tCv, i18n: i18nCv } = useTranslation('candidates')
 
   const labelStyle = { fontSize: 12, fontWeight: 600, color: 'var(--text)', marginBottom: 5, display: 'block' }
 
@@ -76,10 +77,10 @@ export default function CvSectionList({ sections, onSave }: CvSectionListProps) 
           {items.map((sec, idx, arr) => {
             // The section's display name is ALWAYS resolved by id through i18n
             // (never the raw stored `label`) — a tenant may still have a blob
-            // saved with the old hardcoded English label; that string is only
-            // ever used as the i18next defaultValue fallback, never displayed
-            // directly (§5 i18n fix, "profile text" → "Profieltekst").
-            const label = tCv(`cv.${sec.id}`, { defaultValue: sec.label })
+            // saved with the old hardcoded English label; that string is the
+            // labelOrRaw raw fallback, shown only when no cv.<id> key exists
+            // (§5 i18n fix, "profile text" → "Profieltekst").
+            const label = labelOrRaw(tCv, i18nCv, `cv.${sec.id}`, sec.label, 'candidates')
             const movable = CV_MOVABLE_SECTION_IDS.includes(sec.id)
             return (
               <div key={sec.id} style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '7px 0',

@@ -9,6 +9,7 @@
  * between; with a single group the list stays a plain list.
  */
 import { useTranslation } from 'react-i18next'
+import { labelOrRaw } from '@/lib/labelOrRaw'
 import { groupTemplates } from './importTemplateShape'
 import { iconForTemplate } from './importEntityIcon'
 import type { ImportTemplateSummary } from './importApi'
@@ -27,7 +28,7 @@ interface ImportEntityNavProps {
 
 // Splits import templates into whole-tree vs per-entity groups, so the two real choices stay visible instead of one hiding behind the other (see file header).
 export default function ImportEntityNav({ templates, phase, selected, onSelect, onReload }: ImportEntityNavProps) {
-  const { t } = useTranslation('settings')
+  const { t, i18n } = useTranslation('settings')
   const { wholeTree, perEntity } = groupTemplates(templates)
   // Headings only earn their space when both paths actually exist.
   const showHeadings = wholeTree.length > 0 && perEntity.length > 0
@@ -39,7 +40,7 @@ export default function ImportEntityNav({ templates, phase, selected, onSelect, 
     return (
       <SubNavButton key={tpl.entity} icon={Icon} active={active} ariaCurrent={active}
         onClick={() => onSelect(tpl.entity)}
-        label={t(`import.entities.${tpl.entity}.label`, { defaultValue: tpl.entity })} />
+        label={labelOrRaw(t, i18n, `import.entities.${tpl.entity}.label`, tpl.entity, 'settings')} />
     )
   }
 

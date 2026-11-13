@@ -5,6 +5,7 @@
  * no colour swatch, no icon picker) is its own, not a status list.
  */
 import { useTranslation } from 'react-i18next'
+import { labelOrRaw } from '@/lib/labelOrRaw'
 import { Pencil, Trash2 } from 'lucide-react'
 import Button from '@/components/ui/Button'
 import Toggle from '@/components/ui/Toggle'
@@ -35,7 +36,7 @@ function InfoChip({ children }: { children: React.ReactNode }) {
 }
 
 export default function KpiDefinitionRow({ row, canEdit, onToggleActive, onEdit, onDelete }: KpiDefinitionRowProps) {
-  const { t } = useTranslation(['settings', 'common'])
+  const { t, i18n } = useTranslation(['settings', 'common'])
   const { formatNumber } = useNumberFormat()
 
   const label = row.label ?? row.computed?.metric_label ?? row.metric_key
@@ -45,7 +46,7 @@ export default function KpiDefinitionRow({ row, canEdit, onToggleActive, onEdit,
     <div style={{ display: 'flex', alignItems: 'center', gap: 8, flex: 1, minWidth: 0 }}>
       <BodyText as="span" style={{ flexShrink: 0 }}>{label}</BodyText>
       {row.dimension !== 'all' && (
-        <InfoChip>{t(`kpiBuilder.dimension.${row.dimension}`, { defaultValue: row.dimension })}</InfoChip>
+        <InfoChip>{labelOrRaw(t, i18n, `kpiBuilder.dimension.${row.dimension}`, row.dimension, 'settings')}</InfoChip>
       )}
       {row.dimension !== 'all' && row.dimension_value == null && (
         <InfoChip>{t('kpiBuilder.fanOutBadge')}</InfoChip>

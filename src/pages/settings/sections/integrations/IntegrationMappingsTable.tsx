@@ -11,6 +11,7 @@
  */
 import { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
+import { labelOrRaw } from '@/lib/labelOrRaw'
 import { Plus, Trash2, Check } from 'lucide-react'
 import Spinner from '@/components/ui/Spinner'
 import Button from '@/components/ui/Button'
@@ -47,7 +48,7 @@ const newEditRow = (): EditRow => ({
 })
 
 export default function IntegrationMappingsTable({ connector, domains }: { connector: ConnectorId; domains: string[] }) {
-  const { t } = useTranslation('settings')
+  const { t, i18n } = useTranslation('settings')
   const [domain, setDomain] = useState(domains[0])
   const [reloadTick, setReloadTick] = useState(0)
   const [rows, setRows] = useState<EditRow[]>([])
@@ -156,7 +157,7 @@ export default function IntegrationMappingsTable({ connector, domains }: { conne
     return original.koios_value !== row.koios_value || original.external_value !== row.external_value || original.is_default !== row.is_default
   }
 
-  const domainTabs = domains.map((d) => ({ id: d, label: t(`integrations.mappings.domains.${d}`, { defaultValue: d }) }))
+  const domainTabs = domains.map((d) => ({ id: d, label: labelOrRaw(t, i18n, `integrations.mappings.domains.${d}`, d, 'settings') }))
 
   return (
     <div style={{ maxWidth: 720 }}>

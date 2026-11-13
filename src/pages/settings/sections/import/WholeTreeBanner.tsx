@@ -16,6 +16,7 @@
  *    already exists — hence the switch button rather than a hidden alternative.
  */
 import { useTranslation } from 'react-i18next'
+import { labelOrRaw } from '@/lib/labelOrRaw'
 import { ArrowRight, Network } from 'lucide-react'
 import { tintBg, tintBorder } from '@/lib/tint'
 import Button from '@/components/ui/Button'
@@ -31,7 +32,7 @@ interface WholeTreeBannerProps {
 }
 
 export default function WholeTreeBanner({ separateEntity, onSelectEntity }: WholeTreeBannerProps) {
-  const { t } = useTranslation('settings')
+  const { t, i18n } = useTranslation('settings')
 
   return (
     <div style={{ padding: '12px 14px',
@@ -44,7 +45,7 @@ export default function WholeTreeBanner({ separateEntity, onSelectEntity }: Whol
         <span style={{ fontWeight: 600, color: 'var(--text)' }}>{t('import.tree.title')}:</span>
         {LEVELS.map((id, index) => (
           <span key={id} style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-            <span style={{ color: 'var(--text-muted)' }}>{t(`import.entities.${id}.label`, { defaultValue: id })}</span>
+            <span style={{ color: 'var(--text-muted)' }}>{labelOrRaw(t, i18n, `import.entities.${id}.label`, id, 'settings')}</span>
             {index < LEVELS.length - 1 && <ArrowRight size={11} style={{ color: 'var(--text-muted)' }} aria-hidden="true" />}
           </span>
         ))}

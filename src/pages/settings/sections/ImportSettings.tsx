@@ -23,6 +23,7 @@
  * rather than duplicating them. Both stay: neither is a mockup of the other.
  */
 import { useTranslation } from 'react-i18next'
+import { labelOrRaw } from '@/lib/labelOrRaw'
 import { AlertTriangle, ArrowRight } from 'lucide-react'
 import { useAuth } from '@/context/AuthContext'
 import { tintBg, tintBorder } from '@/lib/tint'
@@ -97,7 +98,7 @@ function EntityWizard({ entity, wholeTree, otherPathEntity, onSelectEntity, canV
 
 // Settings screen driving the shared import wizard through upload/preview/confirm/result steps.
 export default function ImportSettings() {
-  const { t } = useTranslation('settings')
+  const { t, i18n } = useTranslation('settings')
   // Auth context can be null pre-boot (mirrors CustomersBulkBar's own fallback).
   const hasPermission = useAuth()?.hasPermission ?? (() => false)
   // IMPORT-WIZARD-1: jumps to the full-screen wizard (#import-wizard) that adds
@@ -183,10 +184,10 @@ export default function ImportSettings() {
               })()}
               <div style={{ minWidth: 0 }}>
                 <div style={{ fontSize: 14, fontWeight: 600, color: 'var(--text)' }}>
-                  {t(`import.entities.${selectedTemplate.entity}.label`, { defaultValue: selectedTemplate.entity })}
+                  {labelOrRaw(t, i18n, `import.entities.${selectedTemplate.entity}.label`, selectedTemplate.entity, 'settings')}
                 </div>
                 <PageSubtitle as="div" style={{ marginTop: 2 }}>
-                  {t(`import.entities.${selectedTemplate.entity}.desc`, { defaultValue: '' })}
+                  {labelOrRaw(t, i18n, `import.entities.${selectedTemplate.entity}.desc`, '', 'settings')}
                 </PageSubtitle>
               </div>
             </div>
