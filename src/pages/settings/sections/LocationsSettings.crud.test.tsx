@@ -1,0 +1,222 @@
+/** LocationsSettings create, edit and icon payload tests (split from LocationsSettings.test.tsx; fixtures in LocationsSettings.testKit.tsx). */
+import { describe, it, expect, vi, afterEach } from 'vitest'
+import { screen, waitFor, fireEvent } from '@testing-library/react'
+import userEvent from '@testing-library/user-event'
+import api from '@/lib/api'
+// vi.mocked() gives the mocked-module factory's plain vi.fn()s their real Mock typing at every call site.
+const mockedApi = vi.mocked(api, true)
+import { renderPage, st, confirmDelete, location } from './LocationsSettings.testKit'
+
+// Keep the real unwrap/unwrapList (importActual) — only the default client is stubbed.
+vi.mock('@/lib/api', async () => {
+  const actual = await vi.importActual('@/lib/api')
+  return { ...actual, default: { get: vi.fn(), post: vi.fn(), patch: vi.fn(), put: vi.fn(), delete: vi.fn() } }
+})
+// Connector modules switchable per test; permissions all granted.
+const mockModules = vi.hoisted(() => ({ on: new Set<string>() }))
+vi.mock('@/context/AuthContext', () => ({
+  useAuth: () => ({ hasModule: (k: string) => mockModules.on.has(k), hasPermission: () => true }),
+}))
+vi.mock('@/lib/notify', () => ({ notifyError: vi.fn(), notifySuccess: vi.fn() }))
+
+afterEach(() => { vi.clearAllMocks(); vi.restoreAllMocks(); mockModules.on.clear() })
+
+describe('LocationsSettings', () => {
+  it('creating a new location unwraps the resource (not the {"data": …} envelope) into the table', async () => {
+    mockedApi.get.mockResolvedValue({ data: { data: [] } })
+    mockedApi.post.mockResolvedValue({ data: { data: location({ id: 'loc2', name: 'Nieuwe vestiging' }) } })
+    const user = userEvent.setup()
+    renderPage()
+    await waitFor(() => expect(screen.getByText(st('locations.empty'))).toBeInTheDocument())
+
+    await user.click(screen.getByRole('button', { name: st('locations.create') }))
+    await user.type(screen.getByLabelText(st('locations.nameLabel')), 'Nieuwe vestiging')
+    await user.click(screen.getByRole('button', { name: st('locations.createBtn') }))
+
+    await waitFor(() => expect(mockedApi.post).toHaveBeenCalledWith('/locations', expect.objectContaining({ name: 'Nieuwe vestiging' })))
+    // Regression guard: the row shows the plain name, never "[object Object]" from a
+    // stored-but-unwrapped { data: {...} } envelope.
+    expect(await screen.findByText('Nieuwe vestiging')).toBeInTheDocument()
+  })
+
+  it('VESTIGING-ICOON-1 fallback: a row with no stored colour/icon falls back to the read-only hash badge', async () => {
+    // Neither `location()` factory row sets color/icon — mirrors an older row saved
+    // before these columns existed on `locations`.
+    mockedApi.get.mockResolvedValue({ data: { data: [location(), location({ id: 'loc2', name: 'Vestiging Utrecht' })] } })
+    renderPage()
+    await waitFor(() => expect(screen.getByText('Kantoor Rotterdam')).toBeInTheDocument())
+
+    // The badge sits next to the name; querying via the name text keeps this test
+    // resilient to markup changes elsewhere in the row.
+    const badgeOf = (name: string) => screen.getByText(name).querySelector('span[aria-hidden="true"]') as HTMLElement
+    const rotterdamBadge = badgeOf('Kantoor Rotterdam')
+    const utrechtBadge = badgeOf('Vestiging Utrecht')
+
+    // The generic Building2 glyph renders (identifiability "at a glance"), not just a coloured dot.
+    expect(rotterdamBadge.querySelector('svg.lucide-building2')).toBeInTheDocument()
+    // Same `avatarColor` hash the rest of the app uses (Avatar / Shiftmanager
+    // entities) — 'K'.charCodeAt(0) % 7 = 5 → AVATAR_COLORS[5]; 'V' → index 2.
+    // eslint-disable-next-line no-restricted-syntax, huisstijlLegacy/no-restricted-syntax -- DATA: asserting the exact AVATAR_COLORS[5] palette entry and its computed §4 tint string, not an invented UI colour
+    expect(rotterdamBadge).toHaveInlineStyle({ background: 'color-mix(in srgb, #8B5CF6 16%, transparent)' })
+    // eslint-disable-next-line huisstijlLegacy/no-restricted-syntax -- DATA: asserting the computed §4 tint string of the success token, not a hand-rolled tint
+    expect(utrechtBadge).toHaveInlineStyle({ background: 'color-mix(in srgb, var(--color-success) 16%, transparent)' })
+    // Two different names must hash to two different colours — that is what makes
+    // rows scannable instead of a uniform icon repeated on every row.
+    expect(rotterdamBadge.style.background).not.toEqual(utrechtBadge.style.background)
+  })
+
+  it('VESTIGING-ICOON-1: a row WITH a stored colour/icon renders those instead of the hash fallback', async () => {
+    // eslint-disable-next-line no-restricted-syntax -- DATA: mock API row colour, not UI styling
+    mockedApi.get.mockResolvedValue({ data: { data: [location({ color: '#059669', icon: 'store' })] } })
+    renderPage()
+    await waitFor(() => expect(screen.getByText('Kantoor Rotterdam')).toBeInTheDocument())
+
+    const badge = screen.getByText('Kantoor Rotterdam').querySelector('span[aria-hidden="true"]') as HTMLElement
+    // The row's OWN colour drives the tint — not the deterministic name hash.
+    // eslint-disable-next-line no-restricted-syntax, huisstijlLegacy/no-restricted-syntax -- DATA: asserting the exact stored row colour and its computed §4 tint string, not an invented UI colour
+    expect(badge).toHaveInlineStyle({ background: 'color-mix(in srgb, #059669 16%, transparent)' })
+    // The row's OWN icon renders — the 'store' slug, not the Building2 fallback.
+    expect(badge.querySelector('svg.lucide-store')).toBeInTheDocument()
+    expect(badge.querySelector('svg.lucide-building2')).not.toBeInTheDocument()
+  })
+
+  it('creating a location rides the chosen icon (and a real colour) along in the POST payload', async () => {
+    mockedApi.get.mockResolvedValue({ data: { data: [] } })
+    // eslint-disable-next-line no-restricted-syntax -- DATA: mock API row colour, not UI styling
+    mockedApi.post.mockResolvedValue({ data: { data: location({ id: 'loc2', name: 'Nieuwe vestiging', color: '#059669', icon: 'store' }) } })
+    const user = userEvent.setup()
+    renderPage()
+    await waitFor(() => expect(screen.getByText(st('locations.empty'))).toBeInTheDocument())
+
+    await user.click(screen.getByRole('button', { name: st('locations.create') }))
+    await user.type(screen.getByLabelText(st('locations.nameLabel')), 'Nieuwe vestiging')
+
+    // Open the reused IconPickerControl and pick 'store' instead of the default glyph.
+    const iconLabel = `${st('documentTypes.icon')}: ${st('locations.icon')}`
+    await user.click(screen.getByRole('button', { name: iconLabel }))
+    await user.click(screen.getByRole('menuitem', { name: `${st('documentTypes.icon')}: store` }))
+
+    await user.click(screen.getByRole('button', { name: st('locations.createBtn') }))
+
+    // Assert the REQUEST body — both fields ride along, icon carries the exact pick.
+    await waitFor(() => expect(mockedApi.post).toHaveBeenCalledWith('/locations', expect.objectContaining({
+      name: 'Nieuwe vestiging', icon: 'store', color: expect.any(String),
+    })))
+  })
+
+  it('editing a location rides the chosen colour/icon along in the PATCH payload', async () => {
+    // eslint-disable-next-line no-restricted-syntax -- DATA: mock API row colour, not UI styling
+    mockedApi.get.mockResolvedValue({ data: { data: [location({ color: '#059669', icon: 'landmark' })] } })
+    // eslint-disable-next-line no-restricted-syntax -- DATA: mock API row colour, not UI styling
+    mockedApi.patch.mockResolvedValue({ data: { data: location({ color: '#059669', icon: 'building' }) } })
+    const user = userEvent.setup()
+    renderPage()
+    await waitFor(() => expect(screen.getByText('Kantoor Rotterdam')).toBeInTheDocument())
+
+    await user.click(screen.getByRole('button', { name: st('locations.edit') }))
+
+    // Prefilled from the row's own stored icon, not the default glyph.
+    const iconLabel = `${st('documentTypes.icon')}: ${st('locations.icon')}`
+    await user.click(screen.getByRole('button', { name: iconLabel }))
+    await user.click(screen.getByRole('menuitem', { name: `${st('documentTypes.icon')}: building` }))
+    await user.click(screen.getByRole('button', { name: st('common.save') }))
+
+    // The stored colour rides along untouched; the icon carries the new pick.
+    await waitFor(() => expect(mockedApi.patch).toHaveBeenCalledWith('/locations/loc1', expect.objectContaining({
+      // eslint-disable-next-line no-restricted-syntax -- DATA: asserting the exact stored row colour, not an invented UI colour
+      color: '#059669', icon: 'building',
+    })))
+  })
+
+  it('SETTINGS-INCON-B2: the create dialog is the shared FloatingPanel — draggable header, resizable, wide-form width (no longer a fixed, undraggable popup)', async () => {
+    mockedApi.get.mockResolvedValue({ data: { data: [] } })
+    const user = userEvent.setup()
+    renderPage()
+    await waitFor(() => expect(screen.getByText(st('locations.empty'))).toBeInTheDocument())
+
+    await user.click(screen.getByRole('button', { name: st('locations.create') }))
+    const dialog = await screen.findByRole('dialog', { name: st('locations.create') })
+
+    // FloatingPanel's own drag handle (POPUP-SLEEP-1) — the old header was a
+    // static row with no way to move the panel.
+    expect(dialog.querySelector('[data-drag-handle]')).toBeInTheDocument()
+    // Same wide-form footprint every create modal shares (WIDE_MODAL_PANEL_SIZE),
+    // not the old inline 94vw/WIDE_MODAL.maxWidth sizing on a plain fixed div.
+    expect(dialog).toHaveInlineStyle({ maxWidth: '1320px' })
+  })
+
+  it('LOC-FOCUS-TRAP-1: opening the create modal moves focus in, Escape closes it, and focus returns to the trigger', async () => {
+    // Regression guard for a focus trap that was structurally dead: useFocusTrap
+    // was previously armed in the always-mounted container, so its effect ran once
+    // at page mount with a null ref and never attached a keydown listener at all.
+    mockedApi.get.mockResolvedValue({ data: { data: [] } })
+    const user = userEvent.setup()
+    renderPage()
+    await waitFor(() => expect(screen.getByText(st('locations.empty'))).toBeInTheDocument())
+
+    const createBtn = screen.getByRole('button', { name: st('locations.create') })
+    await user.click(createBtn)
+
+    const dialog = await screen.findByRole('dialog', { name: st('locations.create') })
+    // Focus must move INTO the panel on open — not stay on the trigger behind it.
+    await waitFor(() => expect(dialog).toContainElement(document.activeElement as HTMLElement | null))
+
+    // The trap's own keydown listener closes on Escape (house pattern, §6).
+    fireEvent.keyDown(dialog, { key: 'Escape' })
+    await waitFor(() => expect(screen.queryByRole('dialog')).not.toBeInTheDocument())
+    // And focus is restored to whatever opened the dialog.
+    expect(document.activeElement).toBe(createBtn)
+  })
+
+  it('LOC-PAGE-CLAMP-1: deleting the last row of the last page snaps back to page 1 instead of an empty page', async () => {
+    // Regression guard: `page` state used to keep pointing at a page number that no
+    // longer exists once the row count drops, showing the empty state with no way
+    // back except a reload. 11 rows = page 1 (10) + page 2 (the 11th, alone).
+    const rows = Array.from({ length: 11 }, (_, i) => location({ id: `loc${i + 1}`, name: `Vestiging ${i + 1}` }))
+    mockedApi.get.mockResolvedValue({ data: { data: rows } })
+    mockedApi.delete.mockResolvedValue({})
+    const user = userEvent.setup()
+    renderPage()
+    await waitFor(() => expect(screen.getByText('Vestiging 1')).toBeInTheDocument())
+
+    // Move to page 2, which holds only the last row.
+    await user.click(screen.getByRole('button', { name: st('locations.next') }))
+    await waitFor(() => expect(screen.getByText('Vestiging 11')).toBeInTheDocument())
+    expect(screen.queryByText('Vestiging 1')).not.toBeInTheDocument()
+
+    await confirmDelete(user, 'Vestiging 11')
+
+    await waitFor(() => expect(mockedApi.delete).toHaveBeenCalledWith('/locations/loc11'))
+    // The page must follow the data back to page 1 — never a lingering empty page 2.
+    await waitFor(() => expect(screen.getByText('Vestiging 1')).toBeInTheDocument())
+    expect(screen.queryByText(st('locations.empty'))).not.toBeInTheDocument()
+  })
+
+  it('B-43: PATCHes is_default:true through /locations/{id} when the default flag is toggled', async () => {
+    const rows = [location({ id: 'loc1', name: 'Rotterdam' }), location({ id: 'loc2', name: 'Amsterdam' })]
+    mockedApi.get.mockResolvedValue({ data: { data: rows } })
+    mockedApi.patch.mockResolvedValue({ data: { data: { ...rows[0], is_default: true } } })
+    const user = userEvent.setup()
+    renderPage()
+    await waitFor(() => expect(screen.getByText('Rotterdam')).toBeInTheDocument())
+
+    // Click Edit on Rotterdam
+    const editButtons = screen.getAllByRole('button', { name: st('locations.edit') })
+    await user.click(editButtons[0])
+
+    // Toggle the is_default switch (the shared Toggle atom, role=switch).
+    const checkbox = await screen.findByRole('switch', { name: st('locations.isDefault') })
+    expect(checkbox).toHaveAttribute('aria-checked', 'false')
+    await user.click(checkbox)
+    expect(checkbox).toBeChecked()
+
+    // Click Save
+    await user.click(screen.getByRole('button', { name: st('common.save') }))
+
+    // Assert the PATCH body includes is_default:true
+    await waitFor(() => expect(mockedApi.patch).toHaveBeenCalledWith(
+      '/locations/loc1',
+      expect.objectContaining({ is_default: true })
+    ))
+  })
+})
