@@ -55,8 +55,8 @@ describe('ConfigPanel · translations tab', () => {
   })
 
   it('does not render the translations field label on the main settings tab', () => {
-    // fieldLabel() passes a `defaultValue`, so with no i18n instance t() resolves
-    // to the raw label "Vertalingen" (not the key "fieldLabels.Vertalingen") —
+    // fieldLabel() returns the raw registry label when i18n.exists() says the key is
+    // missing, so the label reads "Vertalingen" (not the key "fieldLabels.Vertalingen") —
     // assert on that literal or the guard is vacuous (it would still pass with
     // the translations field leaking onto Settings via a bare label lookup).
     const node: FlowNode = { id: 'n1', position: { x: 0, y: 0 }, data: { type: 'whatsapp_send', config: { message_type: 'session' } } }
@@ -77,7 +77,7 @@ describe('ConfigPanel · translations tab', () => {
   )
     fireEvent.click(screen.getByText('Vertalingen'))
     expect(screen.getByText('Bedrijfstaal')).toBeInTheDocument()
-    // Strong form (see the earlier test's comment): defaultValue makes t() render
+    // Strong form (see the earlier test's comment): the exists-check fallback renders
     // the literal label "Vertalingen", never the key — assert on the literal.
     expect(screen.queryByText('Vertalingen', { selector: 'label' })).not.toBeInTheDocument()
   })

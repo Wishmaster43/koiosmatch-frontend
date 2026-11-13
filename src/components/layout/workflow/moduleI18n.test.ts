@@ -4,15 +4,18 @@
  * added for the module registry (fieldPlaceholders.* / fieldHints.*).
  */
 import { describe, it, expect } from 'vitest'
-import { fieldHint, fieldLabel, fieldPlaceholder, i18nKey } from './moduleI18n'
+import { fieldHint, fieldLabel, fieldPlaceholder, i18nKey, optionLabel } from './moduleI18n'
 
-// Minimal t stub: dictionary lookup with i18next's defaultValue fallback.
+// Minimal t + checker stubs over one dictionary; both refuse any namespace other than 'workflows',
+// so a lookup in the wrong namespace would surface as WRONG-NS instead of passing silently.
 const dict: Record<string, string> = {
-  'fieldLabels.Name': 'Naam',
-  'fieldPlaceholders.Eg Yessy AI': 'Bijv. Yessy AI',
-  'fieldHints.One name per line': 'Eén naam per regel.',
+  'fieldLabels.Name': 'translated label',
+  'fieldOptions.GET': 'translated option',
+  'fieldPlaceholders.Eg Yessy AI': 'translated placeholder',
+  'fieldHints.One name per line': 'translated hint',
 }
-const t = (key: string, opts?: { defaultValue?: string }) => dict[key] ?? opts?.defaultValue ?? key
+const t = (key: string, o?: { ns?: string }) => (o?.ns === 'workflows' ? dict[key] ?? key : `WRONG-NS:${key}`)
+const i18n = { exists: (key: string, o?: { ns?: string }) => o?.ns === 'workflows' && key in dict }
 
 describe('i18nKey', () => {
   it('strips i18next separators (. and :) from the source string', () => {
@@ -25,23 +28,34 @@ describe('i18nKey', () => {
   })
 })
 
-describe('fieldPlaceholder / fieldHint / fieldLabel', () => {
+describe('fieldPlaceholder / fieldHint / fieldLabel / optionLabel', () => {
+  it('translates a known label via fieldLabels.* and keeps an unknown label as the raw registry string', () => {
+    expect(fieldLabel(t, i18n, 'Name')).toBe('translated label')
+    expect(fieldLabel(t, i18n, 'Unknown label')).toBe('Unknown label')
+  })
+
+  it('translates a known option via fieldOptions.* and keeps a technical value (JSON) as-is', () => {
+    expect(optionLabel(t, i18n, 'GET')).toBe('translated option')
+    expect(optionLabel(t, i18n, 'JSON')).toBe('JSON')
+    expect(optionLabel(t, i18n, undefined)).toBe('')
+  })
+
   it('translates a known placeholder via fieldPlaceholders.*', () => {
-    expect(fieldPlaceholder(t, 'E.g. Yessy AI')).toBe('Bijv. Yessy AI')
+    expect(fieldPlaceholder(t, i18n, 'E.g. Yessy AI')).toBe('translated placeholder')
   })
 
   it('translates a known hint via fieldHints.*', () => {
-    expect(fieldHint(t, 'One name per line.')).toBe('Eén naam per regel.')
+    expect(fieldHint(t, i18n, 'One name per line.')).toBe('translated hint')
   })
 
   it('falls back to the raw source for language-neutral values', () => {
-    expect(fieldPlaceholder(t, '{{trigger.session_id}}')).toBe('{{trigger.session_id}}')
-    expect(fieldHint(t, '10000')).toBe('10000')
+    expect(fieldPlaceholder(t, i18n, '{{trigger.session_id}}')).toBe('{{trigger.session_id}}')
+    expect(fieldHint(t, i18n, '10000')).toBe('10000')
   })
 
   it('returns an empty string for absent values', () => {
-    expect(fieldPlaceholder(t, undefined)).toBe('')
-    expect(fieldHint(t, undefined)).toBe('')
-    expect(fieldLabel(t, undefined)).toBe('')
+    expect(fieldPlaceholder(t, i18n, undefined)).toBe('')
+    expect(fieldHint(t, i18n, undefined)).toBe('')
+    expect(fieldLabel(t, i18n, undefined)).toBe('')
   })
 })

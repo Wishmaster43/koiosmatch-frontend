@@ -16,6 +16,12 @@ import ModulePicker from './ModulePicker'
 import { MODULE_META } from '@/modules/index'
 import type { ModuleCatalog } from './filterFieldCatalog'
 
+// No i18n instance in this suite: keys echo back and no key exists, so registry labels fall back to their raw text.
+vi.mock('react-i18next', async () => {
+  const actual = await vi.importActual<typeof import('react-i18next')>('react-i18next')
+  return { ...actual, useTranslation: () => ({ t: (k: string) => k, i18n: { language: 'en', exists: () => false } }) }
+})
+
 // Every app/module-gated type is disabled, so only ungated registry entries survive
 // isModuleEnabled — the fixed baseline the executability gate is layered on top of.
 vi.mock('@/context/AppsContext', () => ({ useApps: () => ({ isAppEnabled: () => false }) }))

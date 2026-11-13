@@ -42,17 +42,17 @@ import CalloutBox from '@/components/ui/CalloutBox'
 // Plain panel textarea + the enlarge popup (Danny 31-08). Kept beside FieldInput so
 // every 'textarea' field (without variables) shares one implementation.
 export function ExpandableTextarea({ field, value, onChange }: { field: WorkflowField; value?: unknown; onChange: OnChange }) {
-  const { t } = useTranslation('workflows')
+  const { t, i18n } = useTranslation('workflows')
   const [expanded, setExpanded] = useState(false)
   return (
     <div style={{ position: 'relative' }}>
-      <textarea value={(value as string) || ''} placeholder={fieldPlaceholder(t, field.placeholder)} aria-label={fieldLabel(t, field.label)}
+      <textarea value={(value as string) || ''} placeholder={fieldPlaceholder(t, i18n, field.placeholder)} aria-label={fieldLabel(t, i18n, field.label)}
         onChange={e => onChange(field.key, e.target.value)}
         rows={4}
         style={{ width: '100%', padding: '7px 30px 7px 9px', border: '1px solid var(--border)', borderRadius: 8, fontSize: 12, color: 'var(--text)', background: 'var(--surface)', outline: 'none', boxSizing: 'border-box', fontFamily: 'monospace', resize: 'vertical' }}
         onFocus={e => (e.target.style.borderColor = 'var(--color-primary)')}
         onBlur={e  => (e.target.style.borderColor = 'var(--border)')} />
-      <TextExpandControl label={fieldLabel(t, field.label)} expandLabel={t('fields.textExpand')}
+      <TextExpandControl label={fieldLabel(t, i18n, field.label)} expandLabel={t('fields.textExpand')}
         value={(value as string) || ''} onChange={next => onChange(field.key, next)}
         expanded={expanded} onExpand={() => setExpanded(true)} onClose={() => setExpanded(false)}
         style={{ position: 'absolute', top: 4, right: 4 }} />
@@ -67,7 +67,7 @@ export function FieldInput({ field, value, onChange, variables, config, instruct
   // the 'instruction_list' field type only; every other field type ignores it.
   instructionOutputFields?: InstructionOutputField[]
 }) {
-  const { t } = useTranslation('workflows')
+  const { t, i18n } = useTranslation('workflows')
   // Called unconditionally (rules-of-hooks) even though only the 'select' branch
   // below uses it — CreatableSelect's trigger is a <button>, which a plain
   // aria-label cannot name the way a native <select> could; a sr-only span +
@@ -85,7 +85,7 @@ export function FieldInput({ field, value, onChange, variables, config, instruct
   if (field.type === 'lookup_select') {
     // field.placeholder overrides the generic "select…" copy for the clear/empty
     // option (VAC-CLEAR-1) — e.g. interview_start's "default from vacancy/application".
-    return <LookupSelectField value={value} onChange={onChange} fieldKey={field.key} endpoint={String(field.endpoint ?? '')} valueKey={typeof field.valueKey === 'string' ? field.valueKey : undefined} responseKey={typeof field.responseKey === 'string' ? field.responseKey : undefined} emptyLabel={field.placeholder ? fieldPlaceholder(t, field.placeholder) : undefined} />
+    return <LookupSelectField value={value} onChange={onChange} fieldKey={field.key} endpoint={String(field.endpoint ?? '')} valueKey={typeof field.valueKey === 'string' ? field.valueKey : undefined} responseKey={typeof field.responseKey === 'string' ? field.responseKey : undefined} emptyLabel={field.placeholder ? fieldPlaceholder(t, i18n, field.placeholder) : undefined} />
   }
   if (field.type === 'whatsapp_phone_number') {
     // Reads the sibling `channel` field from the full node config to filter to
@@ -109,7 +109,7 @@ export function FieldInput({ field, value, onChange, variables, config, instruct
     const on = !!(value ?? field.default)
     return (
       <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-        <Toggle checked={on} onChange={v => onChange(field.key, v)} ariaLabel={fieldLabel(t, field.label) || field.key} />
+        <Toggle checked={on} onChange={v => onChange(field.key, v)} ariaLabel={fieldLabel(t, i18n, field.label) || field.key} />
         <span style={{ fontSize: 12, color: 'var(--text-muted)' }}>{on ? t('fields.boolOn') : t('fields.boolOff')}</span>
       </div>
     )
@@ -126,14 +126,14 @@ export function FieldInput({ field, value, onChange, variables, config, instruct
     const options = (field.options ?? []).map(o => {
       const val = typeof o === 'object' ? o.value : o
       const lbl = typeof o === 'object' ? o.label : o
-      return { value: String(val), label: optionLabel(t, lbl as string) }
+      return { value: String(val), label: optionLabel(t, i18n, lbl as string) }
     })
     const withPlaceholder = field.default == null
       ? [{ value: '', label: t('fields.selectPlaceholder') }, ...options]
       : options
     return (
       <>
-        <span id={selectLabelId} className="sr-only">{fieldLabel(t, field.label)}</span>
+        <span id={selectLabelId} className="sr-only">{fieldLabel(t, i18n, field.label)}</span>
         <CreatableSelect value={(value ?? field.default ?? '') as string} onChange={v => onChange(field.key, v)}
           aria-labelledby={selectLabelId} allowCreate={false} options={withPlaceholder}
           placeholder={t('fields.selectPlaceholder')}
@@ -178,7 +178,7 @@ export function FieldInput({ field, value, onChange, variables, config, instruct
   }
   if (field.type === 'help_text') {
     // D8: static behaviour description — nothing to type, nothing gets saved.
-    return <CalloutBox variant="info">{fieldPlaceholder(t, field.placeholder)}</CalloutBox>
+    return <CalloutBox variant="info">{fieldPlaceholder(t, i18n, field.placeholder)}</CalloutBox>
   }
   if (field.type === 'keyvalue') {
     const pairs = (Array.isArray(value) ? value : []) as Array<{ name?: string; value?: string }>
@@ -208,7 +208,7 @@ export function FieldInput({ field, value, onChange, variables, config, instruct
   return (
     <input type={field.type === 'number' ? 'number' : field.type === 'date' ? 'date' : 'text'}
       value={(value ?? field.default ?? '') as string}
-      placeholder={fieldPlaceholder(t, field.placeholder)} aria-label={fieldLabel(t, field.label)}
+      placeholder={fieldPlaceholder(t, i18n, field.placeholder)} aria-label={fieldLabel(t, i18n, field.label)}
       onChange={e => onChange(field.key, field.type === 'number' ? Number(e.target.value) : e.target.value)}
       style={PANEL_INPUT_STYLE}
       onFocus={e => (e.target.style.borderColor = 'var(--color-primary)')}

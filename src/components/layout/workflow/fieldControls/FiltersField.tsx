@@ -22,7 +22,7 @@ import type { OnChange } from './types'
 
 // ── Filters field ───────────────────────────────────────────────────────────────
 export function FiltersField({ field, value, onChange }: { field: WorkflowField; value?: EdgeFilters; onChange: OnChange }) {
-  const { t } = useTranslation('workflows')
+  const { t, i18n } = useTranslation('workflows')
   // Names the yes/no value menu of a boolean condition (SelectMenu's trigger is a button).
   const booleanLabelId = useId()
   const logic = value?.logic ?? 'AND'
@@ -34,7 +34,7 @@ export function FiltersField({ field, value, onChange }: { field: WorkflowField;
   const fieldOptions = (field.fields ?? []).map(o => {
     const v = typeof o === 'object' ? o.value : o
     const l = typeof o === 'object' ? o.label : o
-    return { value: String(v), label: fieldLabel(t, l as string) }
+    return { value: String(v), label: fieldLabel(t, i18n, l as string) }
   })
 
   const set      = (next: EdgeFilters)        => onChange(field.key, next)

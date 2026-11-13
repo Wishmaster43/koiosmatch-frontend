@@ -28,7 +28,7 @@ type Opt = { value: string; label: string }
 export default function MultiSelectField({ field, value, onChange }: {
   field: WorkflowField; value?: unknown; onChange: OnChange
 }) {
-  const { t } = useTranslation('workflows')
+  const { t, i18n } = useTranslation('workflows')
   const lookups = useLookups()
   const [open, setOpen] = useState(false)
   const [search, setSearch] = useState('')
@@ -73,8 +73,8 @@ export default function MultiSelectField({ field, value, onChange }: {
     if (field.source && bySource[field.source]) {
       return bySource[field.source].map(o => ({ value: o.value, label: o.label }))
     }
-    return ((field.options ?? []) as string[]).map(o => ({ value: o, label: optionLabel(t, o) }))
-  }, [endpoint, remoteOpts, field.source, field.options, lookups, t])
+    return ((field.options ?? []) as string[]).map(o => ({ value: o, label: optionLabel(t, i18n, o) }))
+  }, [endpoint, remoteOpts, field.source, field.options, lookups, t, i18n])
 
   // An endpoint field is never free-entry (an unmatched value would never resolve to a
   // real record); it just shows the loading/no-results states below instead.

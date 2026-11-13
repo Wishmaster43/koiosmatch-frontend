@@ -59,7 +59,7 @@ function ownSlice(step: RunStep, catalog: ModuleCatalog): { rows: Array<Record<s
 
 // See the file's top doc above for why this renders only the step's own output slice, never the merged upstream blob.
 export default function StepOutputSlice({ step, catalog }: { step: RunStep; catalog: ModuleCatalog }) {
-  const { t } = useTranslation('workflows')
+  const { t, i18n } = useTranslation('workflows')
   const slice = ownSlice(step, catalog)
   // A passthrough module (e.g. wait) never claims a slice AND never gets the
   // generic items fallback either — that list is just the UPSTREAM step's own
@@ -115,7 +115,7 @@ export default function StepOutputSlice({ step, catalog }: { step: RunStep; cata
                   <th key={k} style={{ position: 'sticky', top: 0, background: 'var(--hover-bg)', textAlign: 'left',
                                        padding: '4px 8px', fontSize: 10, fontWeight: 600, color: 'var(--text-muted)',
                                        whiteSpace: 'nowrap' }}>
-                    {fieldLabel(t, fields[k] ?? k)}
+                    {fieldLabel(t, i18n, fields[k] ?? k)}
                   </th>
                 ))}
               </tr>

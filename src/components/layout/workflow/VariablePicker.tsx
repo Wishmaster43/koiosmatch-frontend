@@ -14,6 +14,7 @@ import { Braces, Search, ChevronRight } from 'lucide-react'
 import { TextExpandControl } from './fieldControls/TextExpandControl'
 import { MODULE_META } from '@/modules/index'
 import { fieldLabel, fieldPlaceholder } from './moduleI18n'
+import { labelOrRaw } from '@/lib/labelOrRaw'
 import { useFocusTrap } from '@/hooks/useFocusTrap'
 import type { WorkflowField, WorkflowVarField, WorkflowVarGroup } from '@/types/workflow'
 import { Caption } from '@/components/ui/typography'
@@ -47,7 +48,7 @@ function FieldChip({ field, display, onInsert }: {
 function ModuleGroup({ group, query, onInsert }: {
   group: WorkflowVarGroup; query: string; onInsert: (f: WorkflowVarField) => void
 }) {
-  const { t } = useTranslation('workflows')
+  const { t, i18n } = useTranslation('workflows')
   const [openParents, setOpenParents] = useState<Set<string>>(new Set())
 
   // Group fields by their first path segment: depth-0 chips + expandable parents.
@@ -66,7 +67,7 @@ function ModuleGroup({ group, query, onInsert }: {
 
   // Resolve the group's display name: custom node name, else translated module label.
   const label = group.customName
-    || t('modules.' + group.moduleType, { defaultValue: MODULE_META[group.moduleType]?.label ?? group.moduleType })
+    || labelOrRaw(t, i18n, 'modules.' + group.moduleType, MODULE_META[group.moduleType]?.label ?? group.moduleType, 'workflows')
 
   // Search filter: an entry stays when its own path or any child path matches.
   const q = query
@@ -201,7 +202,7 @@ export function TextFieldWithVars({ field, value, onChange, variables, multiline
   multiline?: boolean
   insertMode?: InsertMode
 }) {
-  const { t } = useTranslation('workflows')
+  const { t, i18n } = useTranslation('workflows')
   const [open, setOpen] = useState(false)
   const ref = useRef<HTMLInputElement & HTMLTextAreaElement>(null)
   // Danny 31-08: enlarge popup state for the multiline variant.
@@ -229,13 +230,13 @@ export function TextFieldWithVars({ field, value, onChange, variables, multiline
   return (
     <div style={{ position: 'relative', flex: 1, minWidth: 0 }}>
       {multiline ? (
-        <textarea ref={ref} value={(value as string) || ''} placeholder={fieldPlaceholder(t, field.placeholder)} aria-label={fieldLabel(t, field.label)}
+        <textarea ref={ref} value={(value as string) || ''} placeholder={fieldPlaceholder(t, i18n, field.placeholder)} aria-label={fieldLabel(t, i18n, field.label)}
           onChange={e => onChange(field.key, e.target.value)} rows={4}
           style={{ ...base, fontFamily: 'monospace', resize: 'vertical', paddingRight: 9 }}
           onFocus={e => (e.target.style.borderColor = 'var(--color-primary)')}
           onBlur={e  => (e.target.style.borderColor = 'var(--border)')} />
       ) : (
-        <input ref={ref} type="text" value={(value as string) || ''} placeholder={fieldPlaceholder(t, field.placeholder)} aria-label={fieldLabel(t, field.label)}
+        <input ref={ref} type="text" value={(value as string) || ''} placeholder={fieldPlaceholder(t, i18n, field.placeholder)} aria-label={fieldLabel(t, i18n, field.label)}
           onChange={e => onChange(field.key, e.target.value)}
           style={base}
           onFocus={e => (e.target.style.borderColor = 'var(--color-primary)')}
@@ -254,7 +255,7 @@ export function TextFieldWithVars({ field, value, onChange, variables, multiline
 
       {/* Danny 31-08: enlarge popup for long multiline values (persona, variables). */}
       {multiline && (
-        <TextExpandControl label={fieldLabel(t, field.label)} expandLabel={t('fields.textExpand')}
+        <TextExpandControl label={fieldLabel(t, i18n, field.label)} expandLabel={t('fields.textExpand')}
           value={(value as string) || ''} onChange={next => onChange(field.key, next)}
           expanded={expanded} onExpand={() => setExpanded(true)} onClose={() => setExpanded(false)}
           style={{ position: 'absolute', top: 28, right: 2 }} />

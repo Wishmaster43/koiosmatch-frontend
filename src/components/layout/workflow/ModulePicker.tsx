@@ -10,6 +10,7 @@ import { MODULE_META, MODULE_APP_MAP, MODULE_REQUIRED_MODULE } from '@/modules/i
 import { useApps } from '@/context/AppsContext'
 import { useAuth } from '@/context/AuthContext'
 import { categorySlug } from './moduleI18n'
+import { labelOrRaw } from '@/lib/labelOrRaw'
 import { useModuleCatalog } from './useModuleCatalog'
 import FloatingPanel from '@/components/ui/FloatingPanel'
 
@@ -31,7 +32,7 @@ export default function ModulePicker({ insertAfterEdgeId, onSelect, onClose }: {
   onSelect: (type: string, edgeId: string | null) => void
   onClose: () => void
 }) {
-  const { t } = useTranslation('workflows')
+  const { t, i18n } = useTranslation('workflows')
   const [search, setSearch] = useState('')
   const [tab,    setTab]    = useState('all')
   const { isAppEnabled } = useApps() ?? {}
@@ -40,9 +41,9 @@ export default function ModulePicker({ insertAfterEdgeId, onSelect, onClose }: {
   // real executable set. Fails soft to {} on error/while loading (useModuleCatalog).
   const { catalog } = useModuleCatalog()
 
-  // Translated module label + category (registry value = nl source / defaultValue).
-  const modLabel = (type: string, label: string) => t('modules.' + type, { defaultValue: label })
-  const catLabel = (cat: string) => t('categories.' + categorySlug(cat), { defaultValue: cat })
+  // Translated module label + category; the registry value is the raw fallback.
+  const modLabel = (type: string, label: string) => labelOrRaw(t, i18n, 'modules.' + type, label, 'workflows')
+  const catLabel = (cat: string) => labelOrRaw(t, i18n, 'categories.' + categorySlug(cat), cat, 'workflows')
 
   // Hide a module when its connector-app is disabled OR its billing module is off.
   // Two axes: MODULE_APP_MAP → AppsContext connectors; MODULE_REQUIRED_MODULE → package add-ons.

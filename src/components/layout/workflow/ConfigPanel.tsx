@@ -17,6 +17,7 @@ import DrawerTabs from '@/components/drawer/DrawerTabs'
 import { MODULE_META, MODULE_SCHEMAS } from '@/modules/index'
 import { FieldInput } from './fields'
 import { categorySlug, fieldHint, fieldLabel } from './moduleI18n'
+import { labelOrRaw } from '@/lib/labelOrRaw'
 import { useModuleCatalog } from './useModuleCatalog'
 import AgentTestPanel from './AgentTestPanel'
 import OutputTree from './OutputTree'
@@ -65,7 +66,7 @@ export default function ConfigPanel({ node, onUpdate, onDelete, onTabChange, var
   onTabChange?: (tab: string) => void
   variables?: WorkflowVarGroup[]
 }) {
-  const { t } = useTranslation('workflows')
+  const { t, i18n } = useTranslation('workflows')
   // INTERVIEW-WORKFLOW-1 CMBE delta: the per-type instruction_output_fields
   // allow-list for ai_agent's instruction_list field (server-served, never
   // hardcoded) — the session-cached catalog is safe to re-fetch here since
@@ -229,7 +230,7 @@ export default function ConfigPanel({ node, onUpdate, onDelete, onTabChange, var
                 wired here — that needs FieldInput itself (out of this file's scope). */}
             {!isTranslations && (
               <label style={{ ...groupLabelStyle, display: 'block', marginBottom: 6 }}>
-                {fieldLabel(t, field.label as string | undefined)}
+                {fieldLabel(t, i18n, field.label as string | undefined)}
                 {isRequired && requiredMark}
               </label>
             )}
@@ -237,10 +238,10 @@ export default function ConfigPanel({ node, onUpdate, onDelete, onTabChange, var
               instructionOutputFields={instructionOutputFields}
               onChange={(key, val) => onUpdate(node.id, key, val)} />
             {/* Helper text under the field — registry `hint:`/`help:` through the render-layer i18n (§5). */}
-            {(field.hint ?? field.help) ? <Caption style={{ display: 'block', marginTop: 4 }}>{fieldHint(t, (field.hint ?? field.help) as string)}</Caption> : null}
+            {(field.hint ?? field.help) ? <Caption style={{ display: 'block', marginTop: 4 }}>{fieldHint(t, i18n, (field.hint ?? field.help) as string)}</Caption> : null}
             {/* WA-RECIPIENT-FIELD-1: the value the server would refuse is named here, before the 422. */}
             {invalidMsg && (
-              <Caption style={{ display: 'block', marginTop: 4, color: 'var(--color-danger-text)' }}>{fieldHint(t, invalidMsg)}</Caption>
+              <Caption style={{ display: 'block', marginTop: 4, color: 'var(--color-danger-text)' }}>{fieldHint(t, i18n, invalidMsg)}</Caption>
             )}
             {/* Required-and-empty hint shows regardless of a registry hint, so a required field with a hint still surfaces it (SCHERMWAARHEID-1). */}
             {isRequired && isEmpty && (
@@ -261,8 +262,8 @@ export default function ConfigPanel({ node, onUpdate, onDelete, onTabChange, var
           {Icon && <Icon size={16} color={meta?.color} />}
         </div>
         <div style={{ flex: 1, minWidth: 0 }}>
-          <SectionTitle style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{t('modules.' + type, { defaultValue: meta?.label ?? type })}</SectionTitle>
-          <Caption>{t('categories.' + categorySlug(meta?.category), { defaultValue: meta?.category ?? '' })}</Caption>
+          <SectionTitle style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{labelOrRaw(t, i18n, 'modules.' + type, meta?.label ?? type, 'workflows')}</SectionTitle>
+          <Caption>{labelOrRaw(t, i18n, 'categories.' + categorySlug(meta?.category), meta?.category ?? '', 'workflows')}</Caption>
         </div>
         {/* HUISSTIJL-1: icon-action → Button iconOnly ghost; the hover-driven danger
             colour rides along via onMouseEnter/onMouseLeave (Button forwards native
@@ -345,7 +346,7 @@ export default function ConfigPanel({ node, onUpdate, onDelete, onTabChange, var
                   {/* REQUIRED-A11Y-1: shared house asterisk (fields.tsx); see the
                       renderFields comment above for why aria-required stays a gap here. */}
                   <label style={{ ...groupLabelStyle, display: 'block', marginBottom: 6 }}>
-                    {fieldLabel(t, field.label as string | undefined)}
+                    {fieldLabel(t, i18n, field.label as string | undefined)}
                     {isRequired && requiredMark}
                   </label>
                   <FieldInput field={field as WorkflowField} value={fieldValue(field.key)} variables={variables} config={config}
@@ -357,12 +358,12 @@ export default function ConfigPanel({ node, onUpdate, onDelete, onTabChange, var
                     const isWaWebMessageType = type === 'whatsapp_send' && field.key === 'message_type' && config?.channel === 'wa_web'
                     if (isWaWebMessageType) return null
                     return (field.hint ?? field.help)
-                      ? <Caption style={{ display: 'block', marginTop: 4 }}>{fieldHint(t, (field.hint ?? field.help) as string)}</Caption>
+                      ? <Caption style={{ display: 'block', marginTop: 4 }}>{fieldHint(t, i18n, (field.hint ?? field.help) as string)}</Caption>
                       : null
                   })()}
                   {/* WA-RECIPIENT-FIELD-1: the value the server would refuse is named here, before the 422. */}
                   {invalidMsg && (
-                    <Caption style={{ display: 'block', marginTop: 4, color: 'var(--color-danger-text)' }}>{fieldHint(t, invalidMsg)}</Caption>
+                    <Caption style={{ display: 'block', marginTop: 4, color: 'var(--color-danger-text)' }}>{fieldHint(t, i18n, invalidMsg)}</Caption>
                   )}
                   {/* K-193 fase 2b: WhatsApp Web only ever sends a session message. */}
                   {type === 'whatsapp_send' && field.key === 'message_type' && config?.channel === 'wa_web' && (

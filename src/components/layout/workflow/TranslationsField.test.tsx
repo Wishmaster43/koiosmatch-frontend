@@ -15,7 +15,7 @@ import { MESSAGING_LANGUAGES } from '@/modules/messagingLanguages'
 // (LogsPanel.test.tsx), with i18n.language read directly by languageDisplayName.
 vi.mock('react-i18next', () => ({
   initReactI18next: { type: '3rdParty', init: () => {} },
-  useTranslation: () => ({ t: (k: string, o?: Record<string, unknown>) => (o ? `${k}:${JSON.stringify(o)}` : k), i18n: { language: 'nl' } }),
+  useTranslation: () => ({ t: (k: string, o?: Record<string, unknown>) => (o ? `${k}:${JSON.stringify(o)}` : k), i18n: { language: 'nl', exists: () => false } }),
 }))
 
 const textField = { key: 'translations', fields: ['text'], languages: MESSAGING_LANGUAGES, mainFields: { text: 'session_text' } } as unknown as WorkflowField

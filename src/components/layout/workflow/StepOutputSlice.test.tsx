@@ -6,11 +6,17 @@
  * polish wave — show a muted note instead of that fallback for a KNOWN
  * passthrough module (its `items` would just repeat the upstream card).
  */
-import { describe, it, expect } from 'vitest'
+import { describe, it, expect, vi } from 'vitest'
 import { render, screen, fireEvent } from '@testing-library/react'
 import StepOutputSlice from './StepOutputSlice'
 import type { ModuleCatalog } from './filterFieldCatalog'
 import type { RunStep } from '@/types/reports'
+
+// No i18n instance in this suite: keys echo back and no key exists, so registry labels fall back to their raw text.
+vi.mock('react-i18next', async () => {
+  const actual = await vi.importActual<typeof import('react-i18next')>('react-i18next')
+  return { ...actual, useTranslation: () => ({ t: (k: string) => k, i18n: { language: 'en', exists: () => false } }) }
+})
 
 const catalog: ModuleCatalog = {
   sm_customers: { outputFields: { id: 'Klant-ID', name: 'Klantnaam' }, emits: 'replace' },

@@ -24,6 +24,12 @@ import { EdgeFilterPanel } from './EdgeFilterPanel'
 import type { ModuleCatalog } from './filterFieldCatalog'
 import type { FlowNode, FlowEdge } from '@/types/workflow'
 
+// No i18n instance in this suite: keys echo back and no key exists, so registry labels fall back to their raw text.
+vi.mock('react-i18next', async () => {
+  const actual = await vi.importActual<typeof import('react-i18next')>('react-i18next')
+  return { ...actual, useTranslation: () => ({ t: (k: string) => k, i18n: { language: 'en', exists: () => false } }) }
+})
+
 // One replace-emitting upstream module so the field picker has real options —
 // mirrors filterFieldCatalog.test.ts's fixture shape.
 const catalog: ModuleCatalog = {

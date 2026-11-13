@@ -21,6 +21,7 @@ import { parseEdgeFilterGroups, edgeFilterGroupsToFilters } from './serializatio
 import { VALUELESS_OPERATORS } from './constants'
 import { collectUpstreamFilterFields, toFilterFieldOptions, type ModuleCatalog } from './filterFieldCatalog'
 import { fieldLabel } from './moduleI18n'
+import { labelOrRaw } from '@/lib/labelOrRaw'
 import { filterFieldGroupsToVarGroups } from './filterFieldGroupsToVarGroups'
 import { splitFieldFormat } from './fieldFormat'
 import { FilterFieldPicker } from './FilterFieldPicker'
@@ -54,11 +55,11 @@ export function EdgeFilterPanel({ filters, label, sourceNodeId, nodes = [], edge
   // `groups` is always ≥1 AND-group; ≥2 groups are OR'ed (the new capability).
   const [groups, setGroups] = useState<FilterConditionGroup[]>(() => parseEdgeFilterGroups(filters))
   const [name, setName] = useState(label ?? '')
-  const { t } = useTranslation('workflows')
+  const { t, i18n } = useTranslation('workflows')
 
   // Translated module label resolver — shared by the field picker, the value
   // picker's mapping groups and the FilterFieldOption.label below.
-  const moduleLabel = useCallback((type: string) => t('modules.' + type, { defaultValue: MODULE_META[type]?.label ?? type }), [t])
+  const moduleLabel = useCallback((type: string) => labelOrRaw(t, i18n, 'modules.' + type, MODULE_META[type]?.label ?? type, 'workflows'), [t, i18n])
 
   // Make-style numbered upstream walk (FILTER-VELD-1) — walked ONCE per graph
   // change; both the FIELD picker and the VALUE mapping picker (FILTER-MAPPING-1,
@@ -72,7 +73,7 @@ export function EdgeFilterPanel({ filters, label, sourceNodeId, nodes = [], edge
 
   // Flattened "N. <module label> · <field>" options for the field picker; the catalog field
   // label is English source text (KOIOS-EN-1) and translates through the shared fieldLabel.
-  const fieldOptions = useMemo(() => toFilterFieldOptions(groupsUpstream, moduleLabel, label => fieldLabel(t, label)), [groupsUpstream, moduleLabel, t])
+  const fieldOptions = useMemo(() => toFilterFieldOptions(groupsUpstream, moduleLabel, label => fieldLabel(t, i18n, label)), [groupsUpstream, moduleLabel, t, i18n])
 
   // The same chain, reshaped as the numbered mapping groups the value
   // control's "{ }" button offers (FILTER-MAPPING-1).

@@ -3,6 +3,12 @@ import { render, screen, fireEvent } from '@testing-library/react'
 import MultiSelectField from './MultiSelectField'
 import type { WorkflowField } from '@/types/workflow'
 
+// No i18n instance in this suite: keys echo back and no key exists, so registry labels fall back to their raw text.
+vi.mock('react-i18next', async () => {
+  const actual = await vi.importActual<typeof import('react-i18next')>('react-i18next')
+  return { ...actual, useTranslation: () => ({ t: (k: string) => k, i18n: { language: 'en', exists: () => false } }) }
+})
+
 // The workflow config multi-select reads tenant lookups through LookupsContext; these
 // tests drive the STATIC option path, so the context is stubbed with empty lists.
 vi.mock('@/context/LookupsContext', () => ({
