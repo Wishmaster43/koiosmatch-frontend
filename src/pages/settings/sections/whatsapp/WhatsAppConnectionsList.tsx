@@ -51,7 +51,7 @@ export default function WhatsAppConnectionsList({
 }: WhatsAppConnectionsListProps) {
   const { t } = useTranslation('settings')
   // roleLabel resolves roles.<name> in the USERS namespace (usersParts convention).
-  const { t: tUsers } = useTranslation('users')
+  const { t: tUsers, i18n: usersI18n } = useTranslation('users')
   const { formatDateTime } = useDateFormat()
   const locations = useLocations()
   const { confirm, dialog } = useConfirm()
@@ -106,7 +106,7 @@ export default function WhatsAppConnectionsList({
   // Scope → { label, color } for the row's soft chip. role_name/location_id are
   // exclusive by contract, so at most one branch below ever applies.
   const scopeOf = (row: WhatsappConnectionRow) => {
-    if (row.role_name) return { label: String(roleLabel(tUsers, row.role_name)), color: 'var(--color-violet)' }
+    if (row.role_name) return { label: String(roleLabel(tUsers, usersI18n, row.role_name)), color: 'var(--color-violet)' }
     if (row.location_id) {
       const loc = locations.find(l => String(l.value) === String(row.location_id))
       return { label: loc?.label ?? t('whatsapp.scopeLocationUnknown'), color: 'var(--color-info)' }

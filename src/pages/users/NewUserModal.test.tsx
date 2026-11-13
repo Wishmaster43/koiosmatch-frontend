@@ -21,9 +21,9 @@ import api from '@/lib/api'
 import { notifySuccess } from '@/lib/notify'
 
 // A tiny, realistic i18n mock: known keys resolve like a real locale file would;
-// anything else (including a custom role's dead `roles.<name>` key) falls back
-// to the caller's `defaultValue` — exactly like real i18next — so this test can
-// tell "translated seed label" apart from "custom role's own raw name".
+// the exists stub below decides which role keys exist, so labelOrRaw shows a custom
+// role's own raw name, and this test can tell "translated seed label" apart from
+// "custom role's own raw name" (the defaultValue branch of t stays for other callers).
 vi.mock('react-i18next', () => ({
   useTranslation: () => ({
     t: (key: string, opts?: { defaultValue?: string }) => {
@@ -32,6 +32,8 @@ vi.mock('react-i18next', () => ({
       const email = (opts as { email?: string } | undefined)?.email
       return email ? `${key}:${email}` : (seeded[key] ?? opts?.defaultValue ?? key)
     },
+    // Only the seeded role key exists; a custom role has no key, so labelOrRaw yields its raw name.
+    i18n: { exists: (key: string) => key === 'roles.planner' },
   }),
 }))
 vi.mock('@/lib/api', () => ({

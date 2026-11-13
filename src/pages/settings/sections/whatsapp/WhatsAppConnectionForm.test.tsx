@@ -40,7 +40,7 @@ vi.mock('@/lib/useLocations', () => ({
 vi.mock('@/pages/users/shared', () => ({
   useAssignableRoles: () => ({ roles: [{ id: 'r1', name: 'recruiter' }, { id: 'r2', name: 'backoffice' }], loading: false }),
   // Flat barrel mock (§2 TESTLES) — identity passthrough is enough here.
-  roleLabel: (_t: unknown, name: string) => name,
+  roleLabel: (_t: unknown, _i: unknown, name: string) => name,
 }))
 
 const noop = () => {}

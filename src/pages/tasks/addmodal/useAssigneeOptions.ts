@@ -56,7 +56,7 @@ export function useAssigneeOptions(): AssigneeOptionsState {
   // Role labels come from the SHARED users vocabulary, so the picker names a role
   // exactly like the users page does; a tenant-created role has no key and falls
   // back to its own name (runtime data, not a hardcoded second label).
-  const { t: tUsers } = useTranslation('users')
+  const { t: tUsers, i18n: usersI18n } = useTranslation('users')
   const query = useUsers() as UsersQuery
   const users = useMemo(() => query.data ?? NO_USERS, [query.data])
 
@@ -64,9 +64,9 @@ export function useAssigneeOptions(): AssigneeOptionsState {
   const options = useMemo(() => buildAssigneeOptions({
     users,
     unassignedLabel: t('modal.assigneeUnassigned'),
-    roleLabel: (name: string) => roleLabel(tUsers, name),
+    roleLabel: (name: string) => roleLabel(tUsers, usersI18n, name),
     withRole: (name: string, role: string) => t('modal.assigneeWithRole', { name, role }),
-  }), [users, t, tUsers])
+  }), [users, t, tUsers, usersI18n])
 
   return {
     users,

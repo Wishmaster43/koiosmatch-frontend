@@ -43,7 +43,7 @@ vi.mock('@/context/RightPanelContext', () => ({
 }))
 // Presentational parts are out of scope — stub them so no network-touching hooks mount.
 vi.mock('./usersParts', () => ({
-  RoleBadge: () => null, EditableAvatar: () => null, roleLabel: (_t: unknown, n: string) => n,
+  RoleBadge: () => null, EditableAvatar: () => null, roleLabel: (_t: unknown, _i: unknown, n: string) => n,
   isSuperAdminUser: () => false, roleName: (r: unknown) => String(r), SUPER_ADMIN_COLOR: '#000',
 }))
 

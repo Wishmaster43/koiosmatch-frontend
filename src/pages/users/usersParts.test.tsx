@@ -7,12 +7,12 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { render, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
-import { RoleSelector } from './usersParts'
+import { RoleSelector, roleLabel } from './usersParts'
 import api from '@/lib/api'
 import { notifyError } from '@/lib/notify'
 import type { ManagedUser } from '@/types/api'
 
-vi.mock('react-i18next', () => ({ useTranslation: () => ({ t: (k: string) => k }) }))
+vi.mock('react-i18next', () => ({ useTranslation: () => ({ t: (k: string) => k, i18n: { exists: () => true } }) }))
 vi.mock('@/lib/notify', () => ({ notifyError: vi.fn() }))
 vi.mock('@/lib/api', () => ({
   default: { put: vi.fn() },
@@ -50,5 +50,20 @@ describe('RoleSelector · assign', () => {
 
     await waitFor(() => expect(notifyError).toHaveBeenCalledWith('changeRoleFailed'))
     expect(onChanged).not.toHaveBeenCalled()
+  })
+})
+
+describe('roleLabel', () => {
+  const echoT = ((k: string, o?: { ns?: string }) => `${o?.ns}:${k}`) as never
+
+  // Known key: translated through the users namespace; the default role maps to roles.user.
+  it('translates a seeded role and maps default to user', () => {
+    expect(roleLabel(echoT, { exists: () => true }, 'planner')).toBe('users:roles.planner')
+    expect(roleLabel(echoT, { exists: () => true }, 'default')).toBe('users:roles.user')
+  })
+
+  // Unknown (tenant) role: falls back to its own raw name.
+  it('falls back to the raw name for a tenant role', () => {
+    expect(roleLabel(echoT, { exists: () => false }, 'custom_role')).toBe('custom_role')
   })
 })

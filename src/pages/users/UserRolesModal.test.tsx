@@ -20,7 +20,7 @@ vi.mock('@/lib/api', () => ({
 // The role chip renders the raw role name so options stay findable by text.
 vi.mock('./usersParts', () => ({
   RoleBadge: ({ role }: { role: string }) => <span>{`chip:${role}`}</span>,
-  roleLabel: (_t: unknown, name: string) => name,
+  roleLabel: (_t: unknown, _i: unknown, name: string) => name,
   roleName: (r: unknown) => (typeof r === 'string' ? r : (r as { name?: string })?.name),
 }))
 

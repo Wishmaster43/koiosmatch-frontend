@@ -38,7 +38,7 @@ export default function UserRolesModal({ user, roles, onSaved, onClose }: {
   onSaved: (updated: ManagedUser) => void
   onClose: () => void
 }) {
-  const { t } = useTranslation('users')
+  const { t, i18n } = useTranslation('users')
   // Selection is held as the string form of each role id (SearchSelect option
   // values are strings); the original id is looked back up on save.
   const [selected, setSelected] = useState<string[]>(() => {
@@ -89,7 +89,7 @@ export default function UserRolesModal({ user, roles, onSaved, onClose }: {
             {/* HUISSTIJL-1: left hand-styled — an 18px chip-remove glyph sized to sit
                 inside the role-chip row; Button's smallest footprint (28px) would break it. */}
             <button type="button" onClick={() => toggle(String(r.id))}
-              aria-label={t('rolesModal.remove', { role: roleLabel(t, r.name) })}
+              aria-label={t('rolesModal.remove', { role: roleLabel(t, i18n, r.name) })}
               style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: 18, height: 18,
                        borderRadius: 5, border: '1px solid var(--border)', background: 'var(--surface)',
                        color: 'var(--text-muted)', cursor: 'pointer' }}>
@@ -101,7 +101,7 @@ export default function UserRolesModal({ user, roles, onSaved, onClose }: {
 
       {/* Adding is a real button (§ house rule), opening the searchable checklist. */}
       <div style={{ marginBottom: 18 }}>
-        <SearchSelect options={roles.map(r => ({ value: String(r.id), label: roleLabel(t, r.name) }))}
+        <SearchSelect options={roles.map(r => ({ value: String(r.id), label: roleLabel(t, i18n, r.name) }))}
           selected={selected} onToggle={toggle}
           renderTrigger={open => (
             <Button variant="soft" onClick={open}>

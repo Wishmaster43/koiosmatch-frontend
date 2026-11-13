@@ -27,7 +27,7 @@ vi.mock('@/lib/useLocations', () => ({
 vi.mock('@/pages/users/shared', () => ({
   useAssignableRoles: () => ({ roles: [{ id: 'r1', name: 'recruiter' }], loading: false }),
   // Flat barrel mock (§2 TESTLES) — identity passthrough is enough here.
-  roleLabel: (_t: unknown, name: string) => name,
+  roleLabel: (_t: unknown, _i: unknown, name: string) => name,
 }))
 
 // Resolve the active locale's own copy so assertions never hardcode a language.

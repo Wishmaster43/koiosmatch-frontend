@@ -37,7 +37,7 @@ vi.mock('@/context/RightPanelContext', () => ({
   useRightPanel: () => ({ registerFilters: vi.fn(), unregisterFilters: vi.fn() }),
 }))
 vi.mock('./usersParts', () => ({
-  RoleBadge: () => null, EditableAvatar: () => null, roleLabel: (_t: unknown, n: string) => n,
+  RoleBadge: () => null, EditableAvatar: () => null, roleLabel: (_t: unknown, _i: unknown, n: string) => n,
   isSuperAdminUser: () => false, roleName: (r: unknown) => String(r), SUPER_ADMIN_COLOR: '#000',
 }))
 vi.mock('@/lib/notify', () => ({ notifyError: vi.fn(), notifySuccess: vi.fn() }))

@@ -18,14 +18,15 @@ import Button from '@/components/ui/Button'
 import type { ManagedUser } from '@/types/api'
 import { tintBg, tintBorder, chipInk } from '@/lib/tint'
 import { useEscapeLayer } from '@/hooks/useEscapeLayer'
+import { labelOrRaw } from '@/lib/labelOrRaw'
+import type { KeyChecker } from '@/lib/labelOrRaw'
+import type { TFunction } from 'i18next'
 
 // A role reference as it can appear on a user: a bare name or a role object
 // (the backend now carries colour + icon on the object).
 export type RoleRef = string | { name?: string; color?: string | null; icon?: string | null }
 // An available role from /roles (for the inline role-changer).
 export interface AvailableRole { id: string | number; name: string }
-// Loose translation function (the i18next TFunction is assignable to this).
-type TFunc = (key: string, opts?: Record<string, unknown>) => string
 
 // Resolve a role reference to its name (a bare-string role is its own name).
 // eslint-disable-next-line react-refresh/only-export-components -- pure helper shared by many callers (UsersPage, UsersTable, NewUserModal, hooks, …); relocating touches nine unrelated files
@@ -50,7 +51,7 @@ const ROLE_META: Record<string, { color: string; icon: LucideIcon }> = {
 // object, so this always silently fell through to the raw role name): the seed
 // labels live at `roles.<name>` directly in the `users` namespace.
 // eslint-disable-next-line react-refresh/only-export-components -- pure helper, same shared-caller reasoning as roleName above
-export const roleLabel = (t: TFunc, name: string) => t(`roles.${name === 'default' ? 'user' : name}`, { defaultValue: name })
+export const roleLabel = (t: TFunction, i18n: KeyChecker, name: string) => labelOrRaw(t, i18n, `roles.${name === 'default' ? 'user' : name}`, name, 'users')
 
 // Icon-name fallback for the seeded/system roles (before a tenant sets an icon).
 const LEGACY_ICON: Record<string, string> = {
@@ -64,13 +65,13 @@ export const isSuperAdminUser = (u: ManagedUser) => hasRole(u, 'super_admin')
 // RoleBadge — the role as a coloured chip with its icon. Colour/icon come from the
 // role object when present (backend); otherwise the seeded ROLE_META fallback.
 export function RoleBadge({ role }: { role: RoleRef }) {
-  const { t } = useTranslation('users')
+  const { t, i18n } = useTranslation('users')
   const obj = typeof role === 'string' ? {} : (role ?? {})
   const name = typeof role === 'string' ? role : role?.name ?? 'default'
   const meta = ROLE_META[name] ?? ROLE_META.default
   const color = obj.color ?? meta.color
   const icon = obj.icon ?? LEGACY_ICON[name] ?? 'user'
-  return <RoleChip name={roleLabel(t, name)} title={name} color={color} icon={icon} size={10} />
+  return <RoleChip name={roleLabel(t, i18n, name)} title={name} color={color} icon={icon} size={10} />
 }
 
 // Inline role-changer shown when clicking the role cell of a non-super-admin user.
@@ -80,7 +81,7 @@ export function RoleSelector({ user: u, availableRoles, onChanged }: {
   availableRoles: AvailableRole[]
   onChanged: (updated: ManagedUser) => void
 }) {
-  const { t } = useTranslation('users')
+  const { t, i18n } = useTranslation('users')
   const [open,    setOpen]    = useState(false)
   const [saving,  setSaving]  = useState(false)
   const [menuPos, setMenuPos] = useState<{ top: number; left: number } | null>(null)
@@ -167,7 +168,7 @@ export function RoleSelector({ user: u, availableRoles, onChanged }: {
                   onMouseLeave={e => { if (!isCurrent) e.currentTarget.style.background = 'transparent' }}>
                   <div style={{ width: 8, height: 8, borderRadius: '50%',
                                  background: meta.color, flexShrink: 0 }} />
-                  {roleLabel(t, role.name)}
+                  {roleLabel(t, i18n, role.name)}
                   {isCurrent && (
                     <span style={{ marginLeft: 'auto', fontSize: 11, color: 'var(--color-primary-text)' }}>✓</span>
                   )}

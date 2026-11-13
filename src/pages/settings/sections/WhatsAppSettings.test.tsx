@@ -35,7 +35,7 @@ vi.mock('@/lib/useLocations', () => ({ useLocations: () => [] }))
 // WhatsAppConnectionForm.test.tsx's own convention.
 vi.mock('@/pages/users/shared', () => ({
   useAssignableRoles: () => ({ roles: [], loading: false }),
-  roleLabel: (_t: unknown, name: string) => name,
+  roleLabel: (_t: unknown, _i: unknown, name: string) => name,
 }))
 
 // Resolve the active locale's own copy so assertions never hardcode a language

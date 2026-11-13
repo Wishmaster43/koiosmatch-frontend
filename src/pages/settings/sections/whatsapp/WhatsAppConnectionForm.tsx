@@ -76,7 +76,7 @@ interface WhatsAppConnectionFormProps {
 export default function WhatsAppConnectionForm({ connection, onSaved, onCancel }: WhatsAppConnectionFormProps) {
   const { t } = useTranslation('settings')
   // roleLabel resolves roles.<name> in the USERS namespace (usersParts convention).
-  const { t: tUsers } = useTranslation('users')
+  const { t: tUsers, i18n: usersI18n } = useTranslation('users')
   const isEdit = Boolean(connection)
   const [label, setLabel] = useState(connection?.label ?? '')
   const [wabaId, setWabaId] = useState(connection?.waba_id ?? '')
@@ -96,7 +96,7 @@ export default function WhatsAppConnectionForm({ connection, onSaved, onCancel }
   const { confirm, dialog } = useConfirm()
   const locationOptions = locations.map(l => ({ value: String(l.value), label: l.label }))
   // Same translated label the Users screen shows (roleLabel → users:roles.<name>).
-  const roleOptions = roles.map(r => ({ value: r.name, label: String(roleLabel(tUsers, r.name)) }))
+  const roleOptions = roles.map(r => ({ value: r.name, label: String(roleLabel(tUsers, usersI18n, r.name)) }))
 
   // waba_id is required in BOTH modes now (WA-WABA-EDIT-1) — emptying it in edit
   // mode is a validation error, never a silently-dropped PATCH (§3).

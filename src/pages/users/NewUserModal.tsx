@@ -61,7 +61,7 @@ export default function NewUserModal({ onClose, onCreated }: {
   onClose: () => void
   onCreated: (user: ManagedUser) => void
 }) {
-  const { t } = useTranslation('users')
+  const { t, i18n } = useTranslation('users')
   const { roles: allRoles, loading: rolesLoading } = useAssignableRoles()
   // Creating with a non-default role needs users.assign_roles (lane G CMBE-C-6):
   // without it only the default role is offered, as a locked pick.
@@ -92,8 +92,8 @@ export default function NewUserModal({ onClose, onCreated }: {
 
   // Locked mode falls back to one synthetic default option when GET /roles omits it.
   const roleOptions = roles.length === 0 && !canAssignRoles
-    ? [{ value: DEFAULT_ROLE, label: roleLabel(t, DEFAULT_ROLE) }]
-    : roles.map(r => ({ value: r.name, label: roleLabel(t, r.name) }))
+    ? [{ value: DEFAULT_ROLE, label: roleLabel(t, i18n, DEFAULT_ROLE) }]
+    : roles.map(r => ({ value: r.name, label: roleLabel(t, i18n, r.name) }))
 
   // The picked role's id drives the branch-template seed below the select.
   const selectedRoleId = roles.find(r => r.name === form.role)?.id ?? null

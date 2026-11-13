@@ -6,6 +6,7 @@
  */
 import type { ChangeEvent, ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
+import { labelOrRaw } from '@/lib/labelOrRaw'
 import { User, Mail, Phone, Check, Shield, MapPin } from 'lucide-react'
 import { Section, Field, Pill, ROLE_META, inputStyle } from './profileParts'
 import { Caption } from '@/components/ui/typography'
@@ -38,7 +39,7 @@ interface ProfileDetailsTabProps {
 export default function ProfileDetailsTab({ form, onField, onSave, saving, saved, error, user,
   credentialChange, currentPassword, onCurrentPasswordChange }: ProfileDetailsTabProps) {
   const { t } = useTranslation('auth')
-  const { t: tUsers } = useTranslation('users')
+  const { t: tUsers, i18n: usersI18n } = useTranslation('users')
 
   // Load the user's linked branches + set default preference (X-13).
   // Only the LOAD error hides the picker — a save failure keeps the working
@@ -119,7 +120,7 @@ export default function ProfileDetailsTab({ form, onField, onSave, saving, saved
                 const name = roleName(r)
                 const meta = ROLE_META[name] ?? ROLE_META.default
                 return <Pill key={i} icon={Shield} color={meta.color} bg={meta.bg}
-                  label={tUsers(`roles.${name === 'default' ? 'user' : name}`, { defaultValue: name })} />
+                  label={labelOrRaw(tUsers, usersI18n, `roles.${name === 'default' ? 'user' : name}`, name, 'users')} />
               })}
             </div>
           ) : <span style={{ fontSize: 13, color: 'var(--text-muted)' }}>{t('profile.noRoles')}</span>}
