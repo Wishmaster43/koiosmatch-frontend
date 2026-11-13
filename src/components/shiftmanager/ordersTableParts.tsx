@@ -5,6 +5,7 @@
  */
 /* eslint-disable react-refresh/only-export-components -- shared parts file: the components and their column/style constants ship together by design; HMR-nicety warning only (house precedent: runFormat.tsx) */
 import { useTranslation } from 'react-i18next'
+import { labelOrRaw } from '@/lib/labelOrRaw'
 import type { CSSProperties, ReactNode } from 'react'
 
 import SortCaret from '@/components/ui/SortCaret'
@@ -27,12 +28,12 @@ const STATUS_LABELS: Record<string, { bg: string; color: string }> = {
 /* eslint-enable no-restricted-syntax */
 
 export function StatusBadge({ status }: { status?: string }) {
-  const { t } = useTranslation('shiftmanager')
+  const { t, i18n } = useTranslation('shiftmanager')
   const s = STATUS_LABELS[status ?? ''] ?? { bg: 'var(--hover-bg)', color: 'var(--text-muted)' }
   return (
     <span style={{ background: s.bg, color: s.color, fontSize: 11, fontWeight: 500,
                    padding: '2px 8px', borderRadius: 999, whiteSpace: 'nowrap' }}>
-      {status ? t(`orders.status.${status}`, { defaultValue: status }) : '—'}
+      {status ? labelOrRaw(t, i18n, `orders.status.${status}`, status, 'shiftmanager') : '—'}
     </span>
   )
 }

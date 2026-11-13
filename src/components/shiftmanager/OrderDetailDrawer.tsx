@@ -4,6 +4,7 @@
  * notes. Pure presentation; the row is passed in from OrdersTable.
  */
 import { useTranslation } from 'react-i18next'
+import { labelOrRaw } from '@/lib/labelOrRaw'
 import type { ReactNode } from 'react'
 import { X } from 'lucide-react'
 import { useFocusTrap } from '@/hooks/useFocusTrap'
@@ -26,7 +27,7 @@ const Field = ({ label, value }: { label: ReactNode; value?: ReactNode }) => (
 // Read-only slide-in detail panel for one Shiftmanager order; renders nothing without a row (see file header).
 export default function OrderDetailDrawer({ row, onClose }: { row: OrderRow | null; onClose: () => void }) {
   const panelRef = useFocusTrap<HTMLDivElement>(onClose)
-  const { t } = useTranslation('shiftmanager')
+  const { t, i18n } = useTranslation('shiftmanager')
   const locale = useLocale()
   if (!row) return null
 
@@ -73,7 +74,7 @@ export default function OrderDetailDrawer({ row, onClose }: { row: OrderRow | nu
             <Field label={t('orders.drawer.endTime')}      value={formatTime(row.end_time)} />
             <Field label={t('orders.drawer.jobType')}      value={row.job_type} />
             <Field label={t('orders.drawer.persons')}      value={row.number_persons} />
-            <Field label={t('orders.drawer.status')}       value={row.own_status ? t(`orders.status.${row.own_status}`, { defaultValue: row.own_status }) : null} />
+            <Field label={t('orders.drawer.status')}       value={row.own_status ? labelOrRaw(t, i18n, `orders.status.${row.own_status}`, row.own_status, 'shiftmanager') : null} />
           </Section>
 
           <Section title={t('orders.drawer.customerLocation')}>

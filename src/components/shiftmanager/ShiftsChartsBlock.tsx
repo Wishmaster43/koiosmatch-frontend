@@ -13,6 +13,7 @@
  */
 import { useCallback, useEffect, useMemo, useRef, useState } from "react"
 import { useTranslation }     from "react-i18next"
+import { labelOrRaw }         from "@/lib/labelOrRaw"
 import ShiftsDrillDownDrawer  from "./ShiftsDrillDownDrawer"
 import DrillTabs              from "@/components/ui/DrillTabs"
 import { useRightPanel }      from "@/context/RightPanelContext"
@@ -55,13 +56,13 @@ export default function ShiftsChartsBlock({
   leadingKpis?: KpiSpec[]
   leadingDonuts?: DonutSpec[]
 }) {
-  const { t } = useTranslation('shiftmanager')
+  const { t, i18n } = useTranslation('shiftmanager')
   // App-wide active locale (§5) — feeds the "last sync" timestamp below and the
   // month-abbreviation labels in the chart data + filter groups, instead of a
   // hardcoded 'nl-NL' toLocaleString.
   const { formatDateTime, locale } = useDateFormat()
-  // Stable series-label resolver (memoised so derived bars don't recompute each render).
-  const seriesLabel = useCallback((key: string) => t(`charts.series.${key}`, { defaultValue: key }), [t])
+  // Stable series-label resolver (memoised so derived bars don't recompute each render); series keys are server words.
+  const seriesLabel = useCallback((key: string) => labelOrRaw(t, i18n, `charts.series.${key}`, key, 'shiftmanager'), [t, i18n])
 
   // Stabilise array props so they keep the same reference across renders
   // (a default [] in props would otherwise cause an infinite re-render loop).

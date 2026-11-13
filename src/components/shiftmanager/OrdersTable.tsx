@@ -8,6 +8,7 @@
  */
 import { useState, useEffect, useMemo, useId } from 'react'
 import { useTranslation } from 'react-i18next'
+import { labelOrRaw } from '@/lib/labelOrRaw'
 import { Search } from 'lucide-react'
 import { useRightPanel } from '@/context/RightPanelContext'
 // App-wide active locale (DATUM-1/LANE-B) — feeds the month-dropdown labels.
@@ -28,7 +29,7 @@ import type { EnrichedOrderRow } from '@/types/shiftmanager'
 
 // Shiftmanager orders list: local filter/search state drives the data hook, with filter groups pushed into the shared right panel and a row click opening the order detail drawer.
 export default function OrdersTable() {
-  const { t } = useTranslation('shiftmanager')
+  const { t, i18n } = useTranslation('shiftmanager')
   const locale = useLocale()
   const COLS = COL_KEYS.map(c => ({ ...c, label: t(`orders.cols.${c.tKey}`) }))
 
@@ -58,11 +59,11 @@ export default function OrdersTable() {
     selected: selectedStatuses,
     options: statusOptions.map(s => ({
       value: s,
-      label: t(`orders.status.${s}`, { defaultValue: s }),
+      label: labelOrRaw(t, i18n, `orders.status.${s}`, s, 'shiftmanager'),
       count: rows.filter(r => r.own_status === s).length,
     })),
     onToggle: (v: string) => setSelectedStatuses(p => p.includes(v) ? p.filter(x => x !== v) : [...p, v]),
-  }], [t, selectedStatuses, statusOptions, rows])
+  }], [t, i18n, selectedStatuses, statusOptions, rows])
 
   // Registers this table's filter groups with the shared right panel, and unregisters them on unmount so they do not leak into another page.
   useEffect(() => {

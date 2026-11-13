@@ -14,6 +14,7 @@ import type { LucideIcon } from 'lucide-react'
 import { useState } from 'react'
 import type { ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
+import { labelOrRaw } from '@/lib/labelOrRaw'
 import { useDateFormat } from '@/lib/datetime'
 import { useNumberFormat } from '@/lib/formatters'
 import { useDrillDownShifts } from './hooks/useDrillDownShifts'
@@ -41,12 +42,12 @@ const STATUS_META: Record<string, { bg: string; color: string }> = {
 // Renders a shift's status as a soft-tinted pill, falling back to a neutral
 // "unknown" look for a status not covered by STATUS_META.
 function Badge({ status }: { status?: string }) {
-  const { t } = useTranslation('shiftmanager')
+  const { t, i18n } = useTranslation('shiftmanager')
   const s = STATUS_META[status ?? ''] ?? { bg: 'var(--hover-bg)', color: 'var(--text-muted)' }
   return (
     <span style={{ background: s.bg, color: s.color, borderRadius: 999,
                    padding: '2px 8px', fontSize: 11, fontWeight: 500, flexShrink: 0 }}>
-      {status ? t(`shiftsDrawer.status.${status}`, { defaultValue: status }) : t('shiftsDrawer.unknown')}
+      {status ? labelOrRaw(t, i18n, `shiftsDrawer.status.${status}`, status, 'shiftmanager') : t('shiftsDrawer.unknown')}
     </span>
   )
 }
