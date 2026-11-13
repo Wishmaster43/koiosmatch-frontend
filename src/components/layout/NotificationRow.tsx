@@ -45,7 +45,7 @@ interface Props {
 const argsOf = (a: NotificationAction) => a.input ?? {}
 
 export default function NotificationRow({ n, isLast, fmt, showRemove, onRemove, onClose }: Props) {
-  const { t } = useTranslation('common')
+  const { t, i18n } = useTranslation('common')
   const [exec, setExec] = useState<ExecState>({ phase: 'idle' })
   const run = useRun(setExec)
   const stageAndConfirm = useStageAndConfirm(setExec, run)
@@ -130,7 +130,10 @@ export default function NotificationRow({ n, isLast, fmt, showRemove, onRemove, 
           <div style={{ display: 'flex', gap: 4, marginTop: 4 }}>
             {actions.map(a => {
               const Ico = toolIcon(a)
-              const label = t(a.label_key, { defaultValue: t(a.tool_label_key, { defaultValue: t('koios.tools.unknown') }) })
+              // Action word, else the tool's own label, else the generic verb (first existing key wins).
+              const label = i18n.exists(a.label_key, { ns: 'common' }) ? t(a.label_key, { ns: 'common' })
+                : i18n.exists(a.tool_label_key, { ns: 'common' }) ? t(a.tool_label_key, { ns: 'common' })
+                : t('koios.tools.unknown')
               return (
                 <Button key={a.key} size="sm" variant={a === primary ? 'secondary' : 'ghost'} iconOnly
                   onClick={() => runAction(a)} aria-label={label} title={label}>

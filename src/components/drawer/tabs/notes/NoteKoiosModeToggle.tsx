@@ -42,7 +42,7 @@ export default function NoteKoiosModeToggle() {
               background: active ? 'var(--button-fill)' : 'transparent',
               color: active ? 'var(--button-ink)' : 'var(--text-muted)',
             }}>
-            {t(`notesAssist.koiosMode.${m}`, { defaultValue: m === 'wizard' ? 'Wizard' : 'Auto' })}
+            {t(`notesAssist.koiosMode.${m}`)}
             {/* KOIOS-MODE-DEFAULT: this mode is inherited from the bureau default, not chosen by the user. */}
             {koios.isBureauDefault && active && (
               <Caption as="span" style={{ marginLeft: 3, color: 'inherit' }}>{t('notesAssist.koiosMode.bureauDefault')}</Caption>

@@ -13,7 +13,7 @@ import userEvent from '@testing-library/user-event'
 import AssistActionsResultsPanel from './AssistActionsResultsPanel'
 import { executeRichTextActions, fetchWorkflowRun } from './assistActionsExecuteApi'
 
-vi.mock('react-i18next', () => ({ useTranslation: () => ({ t: (k: string) => k }) }))
+vi.mock('react-i18next', () => ({ useTranslation: () => ({ t: (k: string) => k, i18n: { exists: () => true } }) }))
 // AssistActionItemCard (rendered by this panel) now calls useDateFormat for the
 // appointment start preview. useDateFormat (@/lib/datetime) imports `@/i18n`,
 // which needs a REAL react-i18next (initReactI18next) to initialise — stub

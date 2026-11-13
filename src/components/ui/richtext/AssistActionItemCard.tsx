@@ -22,6 +22,7 @@ import Button from '../Button'
 import { Caption } from '../typography'
 import { humanizeIsoDates } from '@/lib/localDate'
 import { useTranslation } from 'react-i18next'
+import { labelOrRaw } from '@/lib/labelOrRaw'
 import { CheckSquare, MessageCircle, Mail, CalendarClock, Bell, Check, Clock, ShieldAlert, HelpCircle, ExternalLink, AlertTriangle, Send } from 'lucide-react'
 import { useDateFormat } from '@/lib/datetime'
 import { useNumberFormat } from '@/lib/formatters'
@@ -65,7 +66,7 @@ interface AssistActionItemCardProps {
 
 // Renders one action item's execute outcome (executed/pending/wizard_required/forbidden/unsupported) with its own icon, reason tooltip and draft/appointment preview (see the module doc above for why this isn't KoiosPendingActionCard).
 export default function AssistActionItemCard({ item, onConfirm, onViewRun, onCvChange }: AssistActionItemCardProps) {
-  const { t } = useTranslation('common')
+  const { t, i18n } = useTranslation('common')
   const { formatDateTime } = useDateFormat()
   const { formatNumber } = useNumberFormat()
   const Icon = TYPE_ICON[item.type]
@@ -192,7 +193,7 @@ export default function AssistActionItemCard({ item, onConfirm, onViewRun, onCvC
                 // K-242: the backend enum key ('workflow_run'/'koios_ai_token') never
                 // reaches the tenant raw — translate it through budgetUnits first.
                 unit: item.budget.unit
-                  ? t(`notesAssist.execute.budgetUnits.${item.budget.unit}`, { defaultValue: item.budget.unit })
+                  ? labelOrRaw(t, i18n, `notesAssist.execute.budgetUnits.${item.budget.unit}`, item.budget.unit, 'common')
                   : '',
               })}
             </Caption>

@@ -13,6 +13,16 @@ import KoiosAssistantBlock from './KoiosAssistantBlock'
 import api from '@/lib/api'
 import { notifySuccess } from '@/lib/notify'
 
+// The uninitialised real i18next hands components an empty i18n object; this stub gives it the
+// `exists` checker the row reads, with no key known (the generic fallbacks apply, as before),
+// and a plain key-echo t (KEY-ECHO-TEST-1).
+vi.mock('react-i18next', async (importOriginal) => ({
+  ...(await importOriginal<typeof import('react-i18next')>()),
+  useTranslation: () => ({
+    t: (k: string) => k,
+    i18n: { exists: () => false },
+  }),
+}))
 // KOIOS-SUGGEST-COMPACT-2 (Danny 28-09: "Create taak annuleren en blijft staan, geen
 // auto refresh"): the toast is the visible feedback once a row resolves — spy on it
 // instead of re-implementing the notify event plumbing here.

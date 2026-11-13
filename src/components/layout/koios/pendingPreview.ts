@@ -11,6 +11,7 @@
  */
 import { humanizeIsoDates } from '@/lib/localDate'
 import type { KoiosPreviewRow } from './koiosTypes'
+import type { KeyChecker } from '@/lib/labelOrRaw'
 
 // FILES-EN-1 legacy alias: the server still sends these Dutch parameter keys
 // today. Remove this map once KOIOS-EN-1 (BE) renames every tool's input keys
@@ -64,13 +65,16 @@ function isHiddenRow(key: string, row: KoiosPreviewRow): boolean {
 
 // The model's confidence value, translated (hoog/high → high, …); an unknown
 // value renders as-is rather than being silently dropped.
-function translateConfidence(value: string, t: (key: string, opts?: { defaultValue?: string }) => string): string {
+function translateConfidence(value: string, t: (key: string, opts?: { ns?: string }) => string, i18n: KeyChecker): string {
   const normalised = value.trim().toLowerCase()
   const bucket = normalised === 'hoog' || normalised === 'high' ? 'high'
     : normalised === 'middel' || normalised === 'medium' ? 'medium'
     : normalised === 'laag' || normalised === 'low' ? 'low'
     : null
-  return bucket ? t(`koios.pendingAction.confidence.${bucket}`, { defaultValue: value }) : value
+  if (!bucket) return value
+  // Unknown locale key: show the model's own word as data.
+  const key = `koios.pendingAction.confidence.${bucket}`
+  return i18n.exists(key, { ns: 'common' }) ? t(key, { ns: 'common' }) : value
 }
 
 export interface ShapedPreviewRow {
@@ -89,7 +93,8 @@ export interface ShapedPreview {
 // dates, id/UUID rows hidden, and the confidence value pulled out of the list.
 export function shapePreviewRows(
   rows: KoiosPreviewRow[],
-  t: (key: string, opts?: { defaultValue?: string }) => string,
+  t: (key: string, opts?: { ns?: string }) => string,
+  i18n: KeyChecker,
 ): ShapedPreview {
   const shaped: ShapedPreviewRow[] = []
   let confidence: string | null = null
@@ -98,12 +103,12 @@ export function shapePreviewRows(
     const key = normaliseKey(row.label)
     const rawValue = row.text ?? row.after ?? row.before
     if (key === 'confidence') {
-      confidence = rawValue != null ? translateConfidence(rawValue, t) : null
+      confidence = rawValue != null ? translateConfidence(rawValue, t, i18n) : null
       continue
     }
     if (isHiddenRow(key, row)) continue
     shaped.push({
-      label: t(`koios.pendingAction.fields.${key}`, { defaultValue: humanise(key) }),
+      label: i18n.exists(`koios.pendingAction.fields.${key}`, { ns: 'common' }) ? t(`koios.pendingAction.fields.${key}`, { ns: 'common' }) : humanise(key),
       before: row.before != null ? humanizeIsoDates(row.before) : row.before,
       after: row.after != null ? humanizeIsoDates(row.after) : row.after,
       text: row.text != null ? humanizeIsoDates(row.text) : row.text,

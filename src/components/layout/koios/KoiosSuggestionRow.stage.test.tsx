@@ -15,7 +15,7 @@ const mockPost = api.post as unknown as ReturnType<typeof vi.fn>
 // fallback chain's PRIORITY (which key wins) is directly observable here.
 vi.mock('react-i18next', async (importOriginal) => ({
   ...(await importOriginal<typeof import('react-i18next')>()),
-  useTranslation: () => ({ t: (key: string) => key }),
+  useTranslation: () => ({ t: (key: string) => key, i18n: { exists: () => true } }),
 }))
 
 // lib/formatters re-exports datetime's useLocale at module scope (DATETIME-IMPORT-LES);

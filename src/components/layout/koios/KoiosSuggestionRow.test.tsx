@@ -29,7 +29,7 @@ const mockPost = api.post as unknown as ReturnType<typeof vi.fn>
 // fallback chain's PRIORITY (which key wins) is directly observable here.
 vi.mock('react-i18next', async (importOriginal) => ({
   ...(await importOriginal<typeof import('react-i18next')>()),
-  useTranslation: () => ({ t: (key: string) => key }),
+  useTranslation: () => ({ t: (key: string) => key, i18n: { exists: () => true } }),
 }))
 
 // lib/formatters re-exports datetime's useLocale at module scope (DATETIME-IMPORT-LES);
@@ -165,18 +165,15 @@ describe('KoiosSuggestionRow · icon-button actions (CMBE addendum action shape)
 
   // KOIOS-EN-1 phase B: when tool_label_key itself does not resolve (a stale
   // Dutch-id key the locale no longer carries), toolLabel falls through to
-  // `koios.tools.<canonicalToolId(tool)>` — proven with a `t` mock that mimics
-  // real i18next's unresolved-key + defaultValue behaviour, unlike this file's
-  // key-echo stub used everywhere else (see file header).
+  // `koios.tools.<canonicalToolId(tool)>` — the exists stub below is what decides
+  // which key resolves; t stays the file's plain key echo.
   it('falls back to koios.tools.<canonicalToolId> when tool_label_key itself does not resolve', async () => {
     vi.resetModules()
     vi.doMock('react-i18next', async (importOriginal) => ({
       ...(await importOriginal<typeof import('react-i18next')>()),
       useTranslation: () => ({
-        t: (key: string, opts?: Record<string, unknown>) => {
-          if (key === 'koios.tools.missing_x') return (opts?.defaultValue as string) ?? key
-          return key
-        },
+        t: (key: string) => key,
+        i18n: { exists: (key: string) => key !== 'koios.tools.missing_x' },
       }),
     }))
     const { default: FreshRow } = await import('./KoiosSuggestionRow')

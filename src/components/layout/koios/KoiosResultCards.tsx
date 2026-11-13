@@ -13,6 +13,7 @@ import { useNavigation } from '@/context/NavigationContext'
 import { entityIconEl } from './koiosEntityIcons'
 import { pageForResultRef, tabForChildRef } from './koiosResultLinks'
 import { humanizeIsoDates } from '@/lib/localDate'
+import { labelOrRaw } from '@/lib/labelOrRaw'
 import { useNumberFormat } from '@/lib/formatters'
 import { Caption, GroupLabel } from '@/components/ui/typography'
 import Button from '@/components/ui/Button'
@@ -119,7 +120,7 @@ export default function KoiosResultCards({
   // compact: no group header (the caller's own title already names the entity) and no top margin.
   compact?: boolean
 }) {
-  const { t: tk } = useTranslation('koios')
+  const { t: tk, i18n } = useTranslation('koios')
   const { formatNumber } = useNumberFormat()
   // Support both the old refs prop and the new groups prop.
   const { groups: actualGroups } = groups || { groups: refs && refs.length > 0 ? groupRefsByType(refs) : [] }
@@ -152,7 +153,7 @@ export default function KoiosResultCards({
         const hasMore = unique.length > ITEMS_PER_GROUP
 
         const labelKey = ENTITY_LABELS[group.entity]
-        const entityLabel = labelKey ? tk(`results.group.${labelKey}`, { defaultValue: group.entity }) : group.entity
+        const entityLabel = labelKey ? labelOrRaw(tk, i18n, `results.group.${labelKey}`, group.entity, 'koios') : group.entity
 
         return (
           <div key={group.entity}>

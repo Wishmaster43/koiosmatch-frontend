@@ -6,6 +6,7 @@
  */
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
+import { labelOrRaw } from '@/lib/labelOrRaw'
 import { RefreshCw, ChevronDown } from 'lucide-react'
 import KoiosAiMark from '@/components/ui/KoiosAiMark'
 import Button from '@/components/ui/Button'
@@ -86,7 +87,7 @@ export default function KoiosAdviceBlock({
 }: KoiosAdviceBlockProps) {
   // 'common' alongside the feature namespace — the AI-Act disclosure hint
   // (AI-ACT-1) is shared copy, not per-entity.
-  const { t } = useTranslation([namespace, 'common'])
+  const { t, i18n } = useTranslation([namespace, 'common'])
   const { formatDateTime } = useDateFormat()
   const { formatNumber } = useNumberFormat()
   const [loading, setLoading] = useState(false)
@@ -165,7 +166,7 @@ export default function KoiosAdviceBlock({
                     <>
                       <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
                         <SoftChip round color={verdictColor(aiAdvice.verdict)}
-                          label={aiAdvice.verdict ? t(`common:koios.advice.verdict.${aiAdvice.verdict}`, { defaultValue: aiAdvice.verdict }) : '—'} />
+                          label={aiAdvice.verdict ? labelOrRaw(t, i18n, `koios.advice.verdict.${aiAdvice.verdict}`, aiAdvice.verdict, 'common') : '—'} />
                         {/* EENHEID-LES: this is a 0-100 FIT SCORE (config/koios_advice.php),
                             never a share-of-sum percentage — the raw number, never a '%'. */}
                         {aiAdvice.score != null && (

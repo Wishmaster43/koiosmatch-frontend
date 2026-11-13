@@ -45,10 +45,10 @@ export function ExecutedNotice({ created, t }: { created?: KoiosContextRef | nul
 // dates, id/UUID rows hidden — so a raw parameter key or an ISO date never
 // reaches the screen (RESCHEDULE-EDIT-1, DATUM-1).
 export function StagedPreview({ exec, setExec, onDone }: { exec: ExecState; setExec: (s: ExecState) => void; onDone?: () => void }) {
-  const { t } = useTranslation('common')
+  const { t, i18n } = useTranslation('common')
   const st = exec.staged
   const run = useRun(setExec, onDone)
-  const shaped = shapePreviewRows(st?.preview ?? [], t)
+  const shaped = shapePreviewRows(st?.preview ?? [], t, i18n)
   return (
     <div style={{ marginLeft: 26, display: 'flex', flexDirection: 'column', gap: 4 }}>
       <Caption style={{ display: 'block' }}>{shaped.rows.map(previewLine).join(' · ')}</Caption>

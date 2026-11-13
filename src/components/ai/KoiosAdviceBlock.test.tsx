@@ -17,7 +17,7 @@ vi.mock('react-i18next', async () => {
         // For other keys, return the key as-is (matching the existing test pattern)
         return key
       },
-      i18n: { language: 'nl' },
+      i18n: { language: 'nl', exists: () => true },
     }),
   }
 })
@@ -135,7 +135,7 @@ describe('KoiosAdviceBlock · aiAdvice (S1 K-266/K-267)', () => {
       verdict: 'proceed', score: 88, text: 'Strong fit for this role.', language: 'nl',
       generatedAt: '2026-09-01T09:00:00Z', runId: 'run-9',
     }} />)
-    expect(screen.getByText('common:koios.advice.verdict.proceed')).toBeInTheDocument()
+    expect(screen.getByText('koios.advice.verdict.proceed')).toBeInTheDocument()
     // S1 repair NOTE 6 (EENHEID-LES): a 0-100 fit score, never a '%' suffix.
     expect(screen.getByText('common:koios.advice.score')).toBeInTheDocument()
     expect(screen.getByText('88')).toBeInTheDocument()

@@ -25,6 +25,7 @@ import { confirmPendingAction, cancelPendingAction, stagePendingAction } from '.
 import { extractApiError } from '@/lib/extractApiError'
 import { KIND_META, toolIcon, reasonKey, reasonShortKey } from './koiosSuggestionMeta'
 import { canonicalToolId } from './koiosToolIds'
+import type { KeyChecker } from '@/lib/labelOrRaw'
 import { ExecErrorNotice, ExecutedNotice, StagedPreview } from './KoiosSuggestionExec'
 import SuggestionEditor from './SuggestionEditor'
 import { editorFieldsForAction } from './suggestionEditorSpec'
@@ -51,12 +52,15 @@ const argsOf = (a: KoiosAssistantAction) => a.input ?? a.args ?? {}
 
 // The chat handoff button — the ONE face on every row (icon-only, ghost), never a
 // filled button on a row that happens to have no executable action.
-function AskKoiosButton({ suggestion, onAskKoios, t }: { suggestion: KoiosAssistantSuggestion; onAskKoios?: AskKoios; t: TFn }) {
+function AskKoiosButton({ suggestion, onAskKoios, t, i18n }: { suggestion: KoiosAssistantSuggestion; onAskKoios?: AskKoios; t: TFn; i18n: KeyChecker }) {
   if (!onAskKoios) return null
   const label = t('koios.assistant.askKoios')
+  // The kind-specific intent when its key exists, else the generic intent (same vars).
+  const kindKey = `koios.assistant.askIntentByKind.${suggestion.kind}`
+  const intentKey = i18n.exists(kindKey, { ns: 'common' }) ? kindKey : 'koios.assistant.askIntent'
   return (
     <Button size="sm" variant="ghost" iconOnly aria-label={label} title={label}
-      onClick={() => onAskKoios(t(`koios.assistant.askIntentByKind.${suggestion.kind}`, { title: suggestion.title, body: suggestion.body, defaultValue: t('koios.assistant.askIntent', { title: suggestion.title, body: suggestion.body }) }), contextRefsOf(suggestion))}>
+      onClick={() => onAskKoios(t(intentKey, { ns: 'common', title: suggestion.title, body: suggestion.body }), contextRefsOf(suggestion))}>
       <MessageSquare size={13} />
     </Button>
   )
@@ -65,12 +69,15 @@ function AskKoiosButton({ suggestion, onAskKoios, t }: { suggestion: KoiosAssist
 // The short typed reason (KOIOS-SUGGEST-COMPACT-1): a plural count from `params`
 // when the backend sends it, else the short kind fallback — NEVER the server's
 // Dutch `body`, which stays only as the row's title tooltip.
-function reasonOf(suggestion: KoiosAssistantSuggestion, t: TFn): string {
+function reasonOf(suggestion: KoiosAssistantSuggestion, t: TFn, i18n: KeyChecker): string {
   const p = suggestion.params
   if (p) {
     // A pending_action's short verb: the registry tool's own word (canonical
     // English id, so an old Dutch id still resolves), else the generic "Run".
-    if ('tool' in p) return t(`koios.tools.${canonicalToolId(p.tool)}`, { defaultValue: t('koios.tools.unknown') })
+    if ('tool' in p) {
+      const toolKey = `koios.tools.${canonicalToolId(p.tool)}`
+      return t(i18n.exists(toolKey, { ns: 'common' }) ? toolKey : 'koios.tools.unknown', { ns: 'common' })
+    }
     if ('days_overdue' in p) return t(reasonKey(suggestion.kind), { count: p.days_overdue })
     if ('days_since_contact' in p) return p.days_since_contact == null ? t(reasonShortKey(suggestion.kind)) : t(reasonKey(suggestion.kind), { count: p.days_since_contact })
     if ('days_to_close' in p) return t(reasonKey(suggestion.kind), { count: p.days_to_close })
@@ -84,21 +91,21 @@ function reasonOf(suggestion: KoiosAssistantSuggestion, t: TFn): string {
 // (KOIOS-EN-1 phase B) when THAT key itself is missing (a stale Dutch id the
 // locale no longer carries), `koios.tools.<canonicalToolId(tool)>` instead —
 // then the server's NL label, never a bare "Execute".
-function toolLabel(a: KoiosAssistantAction, t: TFn): string {
+function toolLabel(a: KoiosAssistantAction, t: TFn, i18n: KeyChecker): string {
+  // Translate `key` when the locale carries it, else the given fallback text.
+  const tOr = (key: string, fallback: string) => (i18n.exists(key, { ns: 'common' }) ? t(key, { ns: 'common' }) : fallback)
   const nlFallback = a.label || t('koios.tools.unknown')
-  const MISSING = '__koios_tool_label_missing__'
   let toolFallback = nlFallback
   if (a.tool_label_key) {
-    const resolved = t(a.tool_label_key, { defaultValue: MISSING })
-    toolFallback = resolved === MISSING ? t(`koios.tools.${canonicalToolId(a.tool)}`, { defaultValue: nlFallback }) : resolved
+    toolFallback = tOr(a.tool_label_key, tOr(`koios.tools.${canonicalToolId(a.tool)}`, nlFallback))
   }
-  return a.label_key ? t(a.label_key, { defaultValue: toolFallback }) : toolFallback
+  return a.label_key ? tOr(a.label_key, toolFallback) : toolFallback
 }
 
 // One suggestion row: kind/task-type icon (drawn INTO the record chip, never a second
 // glyph beside it) · record chip · short reason · icon actions · chat.
 export default function KoiosSuggestionRow({ suggestion, onAskKoios, onDone }: { suggestion: KoiosAssistantSuggestion; onAskKoios?: AskKoios; onDone?: (result: 'executed' | 'cancelled') => void }) {
-  const { t } = useTranslation('common')
+  const { t, i18n } = useTranslation('common')
   const meta = KIND_META[suggestion.kind] ?? KIND_META.pending_action
   const Icon = meta.Icon
   const primaryRef = contextRefsOf(suggestion)[0]
@@ -151,7 +158,7 @@ export default function KoiosSuggestionRow({ suggestion, onAskKoios, onDone }: {
           )}
         {/* One line, never the server's raw prose — the full body stays the tooltip. */}
         <Caption title={suggestion.body} style={{ flex: 1, minWidth: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-          {reasonOf(suggestion, t)}
+          {reasonOf(suggestion, t, i18n)}
         </Caption>
         <span style={{ flexShrink: 0, display: 'flex', alignItems: 'center', gap: 4 }}>
           <SuggestionActions suggestion={suggestion} onAskKoios={onAskKoios} exec={exec} setExec={setExec} />
@@ -178,7 +185,7 @@ export default function KoiosSuggestionRow({ suggestion, onAskKoios, onDone }: {
 function SuggestionActions({ suggestion, onAskKoios, exec, setExec }: {
   suggestion: KoiosAssistantSuggestion; onAskKoios?: AskKoios; exec: ExecState; setExec: (s: ExecState) => void
 }) {
-  const { t } = useTranslation('common')
+  const { t, i18n } = useTranslation('common')
   const { openEntity } = useNavigation()
   const { tools: capabilityTools, isLoading: capsLoading } = useKoiosToolCapabilities()
   const choices = choicesOf(suggestion)
@@ -277,7 +284,7 @@ function SuggestionActions({ suggestion, onAskKoios, exec, setExec }: {
   // width and just adds a click — Danny: "taak overtijd moet actie bij staan").
   const showRestInline = iconTotal <= 6
   const showExtraInline = (iconTotal - restPersonChannels.length) <= 6 || extra.length === 1
-  const overflowActionItems = extra.map(a => ({ key: a.key ?? a.tool, label: toolLabel(a, t), onSelect: () => runAction(a) }))
+  const overflowActionItems = extra.map(a => ({ key: a.key ?? a.tool, label: toolLabel(a, t, i18n), onSelect: () => runAction(a) }))
   const overflowChannelItems = restPersonChannels.map(c => ({ key: c.key, label: c.label, onSelect: () => { window.location.href = c.href } }))
   return (
     <>
@@ -300,7 +307,7 @@ function SuggestionActions({ suggestion, onAskKoios, exec, setExec }: {
       )}
       {primary && primaryOffered && (
         <Button size="sm" variant="secondary" iconOnly onClick={() => runAction(primary)} disabled={exec.phase === 'staging' || capsLoading}
-          aria-label={toolLabel(primary, t)} title={previewTitle(primary) || toolLabel(primary, t)}>
+          aria-label={toolLabel(primary, t, i18n)} title={previewTitle(primary) || toolLabel(primary, t, i18n)}>
           {exec.phase === 'staging' ? <Spinner size={12} /> : (() => { const Ico = toolIcon(primary); return <Ico size={13} /> })()}
         </Button>
       )}
@@ -308,14 +315,14 @@ function SuggestionActions({ suggestion, onAskKoios, exec, setExec }: {
         const Ico = toolIcon(a)
         return (
           <Button key={a.key ?? a.tool} size="sm" variant="ghost" iconOnly onClick={() => runAction(a)}
-            aria-label={toolLabel(a, t)} title={previewTitle(a) || toolLabel(a, t)}><Ico size={13} /></Button>
+            aria-label={toolLabel(a, t, i18n)} title={previewTitle(a) || toolLabel(a, t, i18n)}><Ico size={13} /></Button>
         )
       })}
       {((!showExtraInline && extra.length > 0) || (!showRestInline && restPersonChannels.length > 0)) && (
         <ActionMenu iconOnly ariaLabel={t('koios.assistant.moreActions')} align="right" menuWidth={220}
           items={[...(showExtraInline ? [] : overflowActionItems), ...(showRestInline ? [] : overflowChannelItems)]} />
       )}
-      <AskKoiosButton suggestion={suggestion} onAskKoios={onAskKoios} t={t} />
+      <AskKoiosButton suggestion={suggestion} onAskKoios={onAskKoios} t={t} i18n={i18n} />
     </>
   )
 }

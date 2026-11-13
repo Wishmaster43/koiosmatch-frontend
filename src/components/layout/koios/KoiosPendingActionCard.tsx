@@ -77,7 +77,7 @@ function PreviewRow({ row }: { row: ShapedPreviewRow }) {
 // One assist-panel card for a Koios-proposed action: countdown, confirm/cancel,
 // and (for a destructive action) a required second confirm step before submitting.
 export default function KoiosPendingActionCard({ action }: { action: KoiosPendingAction }) {
-  const { t } = useTranslation(['common', 'koios'])
+  const { t, i18n } = useTranslation(['common', 'koios'])
   const { formatNumber } = useNumberFormat()
   const [status, setStatus] = useState<CardStatus>('proposed')
   const [remaining, setRemaining] = useState(() => secondsLeft(action.expires_at))
@@ -229,7 +229,7 @@ export default function KoiosPendingActionCard({ action }: { action: KoiosPendin
   const owner = findOwner(action.preview) ?? action.entity_ref.owner
   // Row shaping: translated labels, humanised dates, id/UUID rows hidden, the
   // model's confidence pulled out into its own caption (KOIOS-PENDING-CARD-FACE-1).
-  const { rows: previewRows, confidence } = shapePreviewRows(action.preview, t)
+  const { rows: previewRows, confidence } = shapePreviewRows(action.preview, t, i18n)
   // No duplicate header: when the entity chip would repeat the title verbatim,
   // render the title once and fold the owner suffix into that single line.
   const chipDuplicatesTitle = action.entity_ref.label.trim() === action.title.trim()

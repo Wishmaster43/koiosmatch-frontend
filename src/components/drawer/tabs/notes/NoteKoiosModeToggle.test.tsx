@@ -9,7 +9,7 @@ import userEvent from '@testing-library/user-event'
 import NoteKoiosModeToggle from './NoteKoiosModeToggle'
 import api from '@/lib/api'
 
-vi.mock('react-i18next', () => ({ useTranslation: () => ({ t: (k: string, opts?: { defaultValue?: string }) => opts?.defaultValue ?? k }) }))
+vi.mock('react-i18next', () => ({ useTranslation: () => ({ t: (k: string) => k }) }))
 vi.mock('@/lib/api', async () => {
   const actual = await vi.importActual('@/lib/api')
   return { ...actual, default: { get: vi.fn(), put: vi.fn() } }
@@ -25,12 +25,12 @@ describe('NoteKoiosModeToggle', () => {
     expect(container).toBeEmptyDOMElement()
   })
 
-  it('shows Wizard active by default, Auto reachable', async () => {
+  it('shows the wizard mode active by default, auto reachable (labels read through the key, no inline fallback)', async () => {
     vi.mocked(api.get).mockResolvedValue({ data: { mode: 'wizard', auto_messages: false, tenant_default: { mode: 'wizard', auto_messages: false }, user_choice: { mode: 'wizard', auto_messages: false } } })
     render(<NoteKoiosModeToggle />)
-    const wizardBtn = await screen.findByRole('button', { name: 'Wizard' })
+    const wizardBtn = await screen.findByRole('button', { name: 'notesAssist.koiosMode.wizard' })
     expect(wizardBtn).toHaveAttribute('aria-pressed', 'true')
-    expect(screen.getByRole('button', { name: 'Auto' })).toHaveAttribute('aria-pressed', 'false')
+    expect(screen.getByRole('button', { name: 'notesAssist.koiosMode.auto' })).toHaveAttribute('aria-pressed', 'false')
   })
 
   it('clicking Auto PUTs /settings/my-koios-mode via the SAME shared hook used by the profile tab', async () => {
@@ -38,9 +38,9 @@ describe('NoteKoiosModeToggle', () => {
     vi.mocked(api.put).mockResolvedValue({ data: { mode: 'auto', auto_messages: false } })
     const user = userEvent.setup()
     render(<NoteKoiosModeToggle />)
-    await screen.findByRole('button', { name: 'Wizard' })
+    await screen.findByRole('button', { name: 'notesAssist.koiosMode.wizard' })
 
-    await user.click(screen.getByRole('button', { name: 'Auto' }))
+    await user.click(screen.getByRole('button', { name: 'notesAssist.koiosMode.auto' }))
 
     await waitFor(() => expect(api.put).toHaveBeenCalledWith('/settings/my-koios-mode', { mode: 'auto', auto_messages: false }))
   })

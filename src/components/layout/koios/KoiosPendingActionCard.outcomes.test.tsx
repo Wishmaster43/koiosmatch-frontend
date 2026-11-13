@@ -15,7 +15,7 @@ vi.mock('./koiosApi', () => ({ confirmPendingAction: vi.fn(), cancelPendingActio
 vi.mock('@/context/NavigationContext', () => ({ useNavigation: vi.fn() }))
 // useKoiosToolCapabilities fetches GET /ai/koios/capabilities directly via the axios client.
 vi.mock('@/lib/api', () => ({ default: { get: vi.fn() }, unwrap: (r: { data: unknown }) => r.data }))
-vi.mock('react-i18next', () => ({ useTranslation: () => ({ t: (k: string, opts?: { defaultValue?: string; count?: number }) => (k === 'koios.pendingAction.reasons.send_failed' ? 'Sending failed.' : null) ?? opts?.defaultValue ?? (opts?.count != null ? `${k}|${opts.count}` : k) }) }))
+vi.mock('react-i18next', () => ({ useTranslation: () => ({ t: (k: string, opts?: { defaultValue?: string; count?: number }) => (k === 'koios.pendingAction.reasons.send_failed' ? 'Sending failed.' : null) ?? opts?.defaultValue ?? (opts?.count != null ? `${k}|${opts.count}` : k), i18n: { exists: () => false } }) }))
 vi.mock('@/lib/formatters', () => ({ useNumberFormat: () => ({ formatNumber: (n: number) => String(n) }) }))
 // PROPOSAL-CV-PANEL-1: the lazy host that wraps the shared ensure hook is mocked (the hook renders a PDF and fetches).
 const mockEnsure = vi.fn()
