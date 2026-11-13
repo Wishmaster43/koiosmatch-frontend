@@ -3,6 +3,7 @@ import { render, screen, fireEvent, waitFor } from '@testing-library/react'
 import api from '@/lib/api'
 import { AgentsTab, PromptsTab, FAQTab, ToolsTab } from './AIManagementTabs'
 import type { AiAgent, AiItem } from '@/types/ai'
+import i18n from '@/i18n'
 
 // AgentsTab fetches agents/prompts/faqs on mount and posts/puts through the same
 // client on save — stub the whole default client (keep unwrap/unwrapList real).
@@ -62,7 +63,7 @@ describe('AgentsTab — AI-AGENTS-2/3 fields', () => {
 
     // The system prompt is collapsed by default, then reveals on click (no fake affordance).
     expect(screen.queryByText(/Je bent Kelly/)).toBeNull()
-    fireEvent.click(screen.getByText('Toon systeemprompt'))
+    fireEvent.click(screen.getByText(i18n.t('workflows:ai.agent.interviewFlow.showPrompt')))
     expect(screen.getByText(/Je bent Kelly/)).toBeInTheDocument()
 
     // Webhook URL — read-only row.
@@ -74,7 +75,7 @@ describe('AgentsTab — AI-AGENTS-2/3 fields', () => {
     await screen.findByText(mockAgent.webhook_url as string)
 
     const dispatchSpy = vi.spyOn(window, 'dispatchEvent')
-    fireEvent.click(screen.getByRole('button', { name: 'Kopieer webhook-URL' }))
+    fireEvent.click(screen.getByRole('button', { name: i18n.t('workflows:ai.agent.webhookCopy') }))
 
     await waitFor(() => expect(navigator.clipboard.writeText).toHaveBeenCalledWith(mockAgent.webhook_url))
     expect(dispatchSpy).toHaveBeenCalledWith(expect.objectContaining({
@@ -87,7 +88,7 @@ describe('AgentsTab — AI-AGENTS-2/3 fields', () => {
     render(<AgentsTab />)
     await screen.findByText('Zorgintake (9 stappen)')
 
-    fireEvent.click(screen.getByRole('button', { name: 'Opslaan' }))
+    fireEvent.click(screen.getByRole('button', { name: i18n.t('common:save') }))
 
     await waitFor(() => expect(api.put).toHaveBeenCalled())
     const [url, body] = vi.mocked(api.put).mock.calls[0]
@@ -142,7 +143,7 @@ describe('AgentForm/AgentsTab — the write contract must not leak across an age
     // happened (without the key fix, the same instance would still show "Kelly").
     await waitFor(() => expect(screen.getByDisplayValue('Robin')).toBeInTheDocument())
 
-    fireEvent.click(screen.getByRole('button', { name: 'Opslaan' }))
+    fireEvent.click(screen.getByRole('button', { name: i18n.t('common:save') }))
 
     await waitFor(() => expect(api.put).toHaveBeenCalled())
     const [url, body] = vi.mocked(api.put).mock.calls[0]
@@ -178,11 +179,11 @@ describe('AgentsTab — delete failure must not remove the agent from the list',
 
     // Two delete affordances exist for the same agent (the side-list row and the
     // detail panel's own delete button) — both call the same handler; either works.
-    fireEvent.click(screen.getAllByRole('button', { name: 'Verwijderen' })[0])
+    fireEvent.click(screen.getAllByRole('button', { name: i18n.t('common:delete') })[0])
 
     // The delete only fires after the house ConfirmDialog's own button is pressed —
     // never a bare window.confirm() (§0 restschuld cleanup).
-    fireEvent.click(await screen.findByRole('button', { name: 'Bevestigen' }))
+    fireEvent.click(await screen.findByRole('button', { name: i18n.t('common:confirm') }))
 
     // Wait for the actual async signal (the toast fired from the .catch) rather than
     // the synchronous call args — the delete call is recorded before its promise settles.
@@ -206,8 +207,8 @@ describe('AgentsTab — delete failure must not remove the agent from the list',
 
     render(<AgentsTab />)
     await screen.findAllByText('Kelly Jansen')
-    fireEvent.click(screen.getAllByRole('button', { name: 'Verwijderen' })[0])
-    fireEvent.click(await screen.findByRole('button', { name: 'Bevestigen' }))
+    fireEvent.click(screen.getAllByRole('button', { name: i18n.t('common:delete') })[0])
+    fireEvent.click(await screen.findByRole('button', { name: i18n.t('common:confirm') }))
 
     // The structured counts win over the server prose: translated, with numbers.
     await waitFor(() => expect(dispatchSpy).toHaveBeenCalledWith(expect.objectContaining({
@@ -223,8 +224,8 @@ describe('AgentsTab — delete failure must not remove the agent from the list',
 
     render(<AgentsTab />)
     await screen.findAllByText('Kelly Jansen')
-    fireEvent.click(screen.getAllByRole('button', { name: 'Verwijderen' })[0])
-    fireEvent.click(await screen.findByRole('button', { name: 'Bevestigen' }))
+    fireEvent.click(screen.getAllByRole('button', { name: i18n.t('common:delete') })[0])
+    fireEvent.click(await screen.findByRole('button', { name: i18n.t('common:confirm') }))
 
     await waitFor(() => expect(dispatchSpy).toHaveBeenCalledWith(expect.objectContaining({
       detail: { type: 'error', message: 'Agent is in gebruik.' },
@@ -256,9 +257,9 @@ describe('PromptsTab — delete failure must not remove the prompt from the list
     render(<PromptsTab />)
     await screen.findByText('Openingsbericht')
 
-    fireEvent.click(screen.getByRole('button', { name: 'Verwijderen' }))
+    fireEvent.click(screen.getByRole('button', { name: i18n.t('common:delete') }))
     // The delete only fires after the house ConfirmDialog's own button is pressed.
-    fireEvent.click(await screen.findByRole('button', { name: 'Bevestigen' }))
+    fireEvent.click(await screen.findByRole('button', { name: i18n.t('common:confirm') }))
 
     await waitFor(() => expect(dispatchSpy).toHaveBeenCalledWith(expect.objectContaining({
       detail: { type: 'error', message: 'Actie mislukt. Probeer het opnieuw.' },
@@ -286,9 +287,9 @@ describe('FAQTab — delete failure must not remove the FAQ from the list', () =
     render(<FAQTab />)
     await screen.findByText('Vergoeding')
 
-    fireEvent.click(screen.getByRole('button', { name: 'Verwijderen' }))
+    fireEvent.click(screen.getByRole('button', { name: i18n.t('common:delete') }))
     // The delete only fires after the house ConfirmDialog's own button is pressed.
-    fireEvent.click(await screen.findByRole('button', { name: 'Bevestigen' }))
+    fireEvent.click(await screen.findByRole('button', { name: i18n.t('common:confirm') }))
 
     await waitFor(() => expect(dispatchSpy).toHaveBeenCalledWith(expect.objectContaining({
       detail: { type: 'error', message: 'Actie mislukt. Probeer het opnieuw.' },
@@ -306,7 +307,7 @@ describe('ToolsTab — read-only honest notice (no backend endpoint exists yet)'
   it('shows the "not available" notice and renders every tool row as disabled', () => {
     render(<ToolsTab />)
 
-    expect(screen.getByText('Nog niet gekoppeld aan een agent. Deze keuzes worden niet opgeslagen.')).toBeInTheDocument()
+    expect(screen.getByText(i18n.t('workflows:ai.tools.notAvailable'))).toBeInTheDocument()
     expect(screen.getByText('Dienst opzoeken')).toBeInTheDocument()
     // No button/checkbox role anywhere — there is nothing left to click.
     expect(screen.queryByRole('button')).toBeNull()

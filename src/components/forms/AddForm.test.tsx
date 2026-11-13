@@ -7,7 +7,7 @@
 import { describe, it, expect, vi } from 'vitest'
 import { render, screen, fireEvent } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
-import '@/i18n'
+import i18n from '@/i18n'
 import AddForm from './AddForm'
 
 const expFields = [
@@ -25,7 +25,7 @@ const eduFields = [
 // The checkbox label and the save button must live in the same footer flex row.
 const sharesFooterRow = (labelText: string) => {
   const label = screen.getByText(labelText).closest('label')!
-  const save = screen.getByTitle('Opslaan')
+  const save = screen.getByTitle(i18n.t('common:save'))
   return label.parentElement === save.parentElement?.parentElement
 }
 
@@ -40,10 +40,10 @@ const referenceFields = [
 describe('AddForm richtext expand toggle', () => {
   it('renders the expand toggle on a richtext field and flips its title on click', () => {
     render(<AddForm fields={referenceFields} onSave={vi.fn()} onCancel={vi.fn()} />)
-    const toggle = screen.getByTitle('Vergroten')
+    const toggle = screen.getByTitle(i18n.t('common:expand'))
     expect(toggle).toBeTruthy()
     fireEvent.click(toggle)
-    expect(screen.getByTitle('Verkleinen')).toBeTruthy()
+    expect(screen.getByTitle(i18n.t('common:collapse'))).toBeTruthy()
   })
 })
 
@@ -76,7 +76,7 @@ describe('AddForm required fields (KAND-ACHTERGROND-VERPLICHT-1)', () => {
   it('blocks Save and fires no onSave call when the required field is empty', () => {
     const onSave = vi.fn()
     render(<AddForm fields={requiredFields} onSave={onSave} onCancel={vi.fn()} />)
-    fireEvent.click(screen.getByTitle('Opslaan'))
+    fireEvent.click(screen.getByTitle(i18n.t('common:save')))
     expect(onSave).not.toHaveBeenCalled()
     // Points at the field: an inline notice renders once the blocked attempt flags it.
     expect(screen.getByRole('alert')).toBeInTheDocument()
@@ -87,7 +87,7 @@ describe('AddForm required fields (KAND-ACHTERGROND-VERPLICHT-1)', () => {
     const onSave = vi.fn()
     render(<AddForm fields={requiredFields} onSave={onSave} onCancel={vi.fn()} />)
     await user.type(screen.getByPlaceholderText('Bedrijf *'), 'Zorggroep Noord')
-    fireEvent.click(screen.getByTitle('Opslaan'))
+    fireEvent.click(screen.getByTitle(i18n.t('common:save')))
     expect(onSave).toHaveBeenCalledWith(expect.objectContaining({ employer: 'Zorggroep Noord' }))
     expect(screen.queryByRole('alert')).toBeNull()
   })
@@ -95,7 +95,7 @@ describe('AddForm required fields (KAND-ACHTERGROND-VERPLICHT-1)', () => {
   it('clears the blocked-save marker as soon as the user starts filling the field', async () => {
     const user = userEvent.setup()
     render(<AddForm fields={requiredFields} onSave={vi.fn()} onCancel={vi.fn()} />)
-    fireEvent.click(screen.getByTitle('Opslaan'))
+    fireEvent.click(screen.getByTitle(i18n.t('common:save')))
     expect(screen.getByRole('alert')).toBeInTheDocument()
     await user.type(screen.getByPlaceholderText('Bedrijf *'), 'Z')
     expect(screen.queryByRole('alert')).toBeNull()
@@ -104,7 +104,7 @@ describe('AddForm required fields (KAND-ACHTERGROND-VERPLICHT-1)', () => {
   it('a field with no `required` flag can still be saved empty (no regression for optional fields)', () => {
     const onSave = vi.fn()
     render(<AddForm fields={[{ key: 'location', label: 'Locatie' }]} onSave={onSave} onCancel={vi.fn()} />)
-    fireEvent.click(screen.getByTitle('Opslaan'))
+    fireEvent.click(screen.getByTitle(i18n.t('common:save')))
     expect(onSave).toHaveBeenCalledWith(expect.objectContaining({ location: '' }))
   })
 })
@@ -132,7 +132,7 @@ describe('AddForm footer checkbox', () => {
     const onSave = vi.fn()
     render(<AddForm fields={expFields} onSave={onSave} onCancel={vi.fn()} />)
     fireEvent.click(screen.getByText('Huidige functie'))
-    fireEvent.click(screen.getByTitle('Opslaan'))
+    fireEvent.click(screen.getByTitle(i18n.t('common:save')))
     expect(onSave).toHaveBeenCalledWith(expect.objectContaining({ current: true }))
   })
 })

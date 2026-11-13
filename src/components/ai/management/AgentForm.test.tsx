@@ -72,11 +72,11 @@ describe('AgentForm — WhatsApp intro template picker + FAQ/knowledge (WA_INTRO
     render(<AgentForm agent={mockAgent} prompts={[]} faqs={mockFaqs} knowledgeItems={[]} onSaved={vi.fn()} onDelete={vi.fn()} />)
 
     // Real templates load from GET /whatsapp-templates — never a hardcoded name.
-    const trigger = await screen.findByRole('button', { name: /WhatsApp-intro-template/ })
+    const trigger = await screen.findByRole('button', { name: new RegExp(i18n.t('workflows:ai.agent.waIntroTemplate')) })
     fireEvent.click(trigger)
     fireEvent.click(await screen.findByRole('button', { name: 'welcome_nl (nl)' }))
 
-    fireEvent.click(screen.getByRole('button', { name: 'Opslaan' }))
+    fireEvent.click(screen.getByRole('button', { name: i18n.t('common:save') }))
 
     await waitFor(() => expect(api.put).toHaveBeenCalled())
     const [url, body] = vi.mocked(api.put).mock.calls[0]
@@ -86,7 +86,7 @@ describe('AgentForm — WhatsApp intro template picker + FAQ/knowledge (WA_INTRO
 
   it('is no longer a native <select> — the prompt and WA-template fields are the house CreatableSelect', async () => {
     const { container } = render(<AgentForm agent={mockAgent} prompts={[]} faqs={mockFaqs} knowledgeItems={[]} onSaved={vi.fn()} onDelete={vi.fn()} />)
-    await screen.findByRole('button', { name: /WhatsApp-intro-template/ })
+    await screen.findByRole('button', { name: new RegExp(i18n.t('workflows:ai.agent.waIntroTemplate')) })
     expect(container.querySelector('select')).toBeNull()
   })
 
@@ -97,7 +97,7 @@ describe('AgentForm — WhatsApp intro template picker + FAQ/knowledge (WA_INTRO
     })
     render(<AgentForm agent={mockAgent} prompts={[]} faqs={[]} knowledgeItems={[]} onSaved={vi.fn()} onDelete={vi.fn()} />)
 
-    expect(await screen.findByText('Geen goedgekeurde templates gevonden. Controleer de WhatsApp-koppeling.')).toBeInTheDocument()
+    expect(await screen.findByText(i18n.t('workflows:wa.templateEmpty'))).toBeInTheDocument()
   })
 
   it('toggles the knowledge switch and a FAQ chip, and PUTs both fields', async () => {
@@ -106,7 +106,7 @@ describe('AgentForm — WhatsApp intro template picker + FAQ/knowledge (WA_INTRO
 
     fireEvent.click(screen.getByRole('switch'))
     fireEvent.click(screen.getByText('Openingstijden'))
-    fireEvent.click(screen.getByRole('button', { name: 'Opslaan' }))
+    fireEvent.click(screen.getByRole('button', { name: i18n.t('common:save') }))
 
     await waitFor(() => expect(api.put).toHaveBeenCalled())
     const [, body] = vi.mocked(api.put).mock.calls[0]
@@ -121,14 +121,14 @@ describe('AgentForm — WhatsApp intro template picker + FAQ/knowledge (WA_INTRO
 describe('AgentForm — knowledge-item picker (KNOWLEDGE-SCOPE-1)', () => {
   it('renders the lookup options and shows the empty state when the tenant has none', async () => {
     render(<AgentForm agent={mockAgent} prompts={[]} faqs={[]} knowledgeItems={[]} onSaved={vi.fn()} onDelete={vi.fn()} />)
-    expect(await screen.findByText('Geen kennisitems aangemaakt')).toBeInTheDocument()
+    expect(await screen.findByText(i18n.t('workflows:ai.agent.noKnowledgeItems'))).toBeInTheDocument()
   })
 
   it('omits knowledge_ids from the PUT body when the picker is never touched', async () => {
     render(<AgentForm agent={mockAgent} prompts={[]} faqs={[]} knowledgeItems={mockKnowledgeItems} onSaved={vi.fn()} onDelete={vi.fn()} />)
     await screen.findByText('CAO regels')
 
-    fireEvent.click(screen.getByRole('button', { name: 'Opslaan' }))
+    fireEvent.click(screen.getByRole('button', { name: i18n.t('common:save') }))
 
     await waitFor(() => expect(api.put).toHaveBeenCalled())
     const [, body] = vi.mocked(api.put).mock.calls[0]
@@ -142,7 +142,7 @@ describe('AgentForm — knowledge-item picker (KNOWLEDGE-SCOPE-1)', () => {
     fireEvent.click(screen.getByText('CAO regels'))
     expect(await screen.findByText('1 kennisitem(s) gekoppeld')).toBeInTheDocument()
 
-    fireEvent.click(screen.getByRole('button', { name: 'Opslaan' }))
+    fireEvent.click(screen.getByRole('button', { name: i18n.t('common:save') }))
 
     await waitFor(() => expect(api.put).toHaveBeenCalled())
     const [, body] = vi.mocked(api.put).mock.calls[0]
@@ -160,11 +160,11 @@ describe('AgentForm — masked custom API key (write-only, security audit findin
 
     // The custom-API section auto-opens because a key is already configured; the
     // input starts empty — only the "✓ ingesteld" badge signals a stored key.
-    const input = await screen.findByPlaceholderText('Laat leeg om de huidige sleutel te behouden') as HTMLInputElement
+    const input = await screen.findByPlaceholderText(i18n.t('workflows:ai.agent.apiKeyKeepPlaceholder')) as HTMLInputElement
     expect(input.value).toBe('')
     expect(screen.getByText('✓ ingesteld')).toBeInTheDocument()
 
-    fireEvent.click(screen.getByRole('button', { name: 'Opslaan' }))
+    fireEvent.click(screen.getByRole('button', { name: i18n.t('common:save') }))
 
     await waitFor(() => expect(api.put).toHaveBeenCalled())
     const [, body] = vi.mocked(api.put).mock.calls[0]
@@ -175,9 +175,9 @@ describe('AgentForm — masked custom API key (write-only, security audit findin
     const agentWithKey: AiAgent = { ...mockAgent, has_custom_api_key: true }
     render(<AgentForm agent={agentWithKey} prompts={[]} faqs={[]} knowledgeItems={[]} onSaved={vi.fn()} onDelete={vi.fn()} />)
 
-    const input = await screen.findByPlaceholderText('Laat leeg om de huidige sleutel te behouden')
+    const input = await screen.findByPlaceholderText(i18n.t('workflows:ai.agent.apiKeyKeepPlaceholder'))
     fireEvent.change(input, { target: { value: 'sk-new-secret' } })
-    fireEvent.click(screen.getByRole('button', { name: 'Opslaan' }))
+    fireEvent.click(screen.getByRole('button', { name: i18n.t('common:save') }))
 
     await waitFor(() => expect(api.put).toHaveBeenCalled())
     const [, body] = vi.mocked(api.put).mock.calls[0]
@@ -207,12 +207,12 @@ describe('AgentForm — save failure must notify (was a silent catch)', () => {
     render(<AgentForm agent={mockAgent} prompts={[]} faqs={[]} knowledgeItems={[]} onSaved={vi.fn()} onDelete={vi.fn()} />)
     await screen.findByDisplayValue('Kelly')
 
-    fireEvent.click(screen.getByRole('button', { name: 'Opslaan' }))
+    fireEvent.click(screen.getByRole('button', { name: i18n.t('common:save') }))
 
     await waitFor(() => expect(dispatchSpy).toHaveBeenCalledWith(expect.objectContaining({
       detail: { type: 'error', message: 'Actie mislukt. Probeer het opnieuw.' },
     })))
-    expect(screen.queryByText('Opgeslagen')).toBeNull()
+    expect(screen.queryByText(i18n.t('workflows:ai.saved'))).toBeNull()
   })
 })
 
@@ -222,7 +222,7 @@ describe('AgentForm — delete button accessible name', () => {
   it('exposes an accessible name on the icon-only delete button', async () => {
     render(<AgentForm agent={mockAgent} prompts={[]} faqs={[]} knowledgeItems={[]} onSaved={vi.fn()} onDelete={vi.fn()} />)
     await screen.findByDisplayValue('Kelly')
-    expect(screen.getByRole('button', { name: 'Verwijderen' })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: i18n.t('common:delete') })).toBeInTheDocument()
   })
 })
 
@@ -243,9 +243,9 @@ describe('AgentForm — chat test surfaces the real upstream error (AIK-08)', ()
     await screen.findByDisplayValue('Kelly')
 
     fireEvent.click(screen.getByRole('button', { name: 'Test' }))
-    const input = await screen.findByPlaceholderText(/Typ een bericht/i)
+    const input = await screen.findByPlaceholderText(i18n.t('workflows:ai.chat.placeholder'))
     fireEvent.change(input, { target: { value: 'Hoi' } })
-    fireEvent.click(screen.getByRole('button', { name: 'Versturen' }))
+    fireEvent.click(screen.getByRole('button', { name: i18n.t('common:send') }))
 
     await waitFor(() => expect(dispatchSpy).toHaveBeenCalledWith(expect.objectContaining({
       detail: { type: 'error', message: 'Agent heeft geen actief model.' },
@@ -260,9 +260,9 @@ describe('AgentForm — chat test surfaces the real upstream error (AIK-08)', ()
     await screen.findByDisplayValue('Kelly')
 
     fireEvent.click(screen.getByRole('button', { name: 'Test' }))
-    const input = await screen.findByPlaceholderText(/Typ een bericht/i)
+    const input = await screen.findByPlaceholderText(i18n.t('workflows:ai.chat.placeholder'))
     fireEvent.change(input, { target: { value: 'Hoi' } })
-    fireEvent.click(screen.getByRole('button', { name: 'Versturen' }))
+    fireEvent.click(screen.getByRole('button', { name: i18n.t('common:send') }))
 
     expect(await screen.findByText('Hoi daar!')).toBeInTheDocument()
     expect(screen.queryByText('dead-fallback')).toBeNull()
@@ -302,7 +302,7 @@ describe('AgentForm · use_knowledge default and has_knowledge caption (B2-3)', 
     render(<AgentForm agent={null} prompts={[]} faqs={mockFaqs} knowledgeItems={[]} onSaved={vi.fn()} onDelete={vi.fn()} />)
     await screen.findByText('Openingstijden')
 
-    fireEvent.click(screen.getByRole('button', { name: 'Opslaan' }))
+    fireEvent.click(screen.getByRole('button', { name: i18n.t('common:save') }))
 
     await waitFor(() => expect(api.post).toHaveBeenCalled())
     const [, body] = vi.mocked(api.post).mock.calls[0]
@@ -314,7 +314,7 @@ describe('AgentForm · use_knowledge default and has_knowledge caption (B2-3)', 
     await screen.findByText('Openingstijden')
 
     fireEvent.click(screen.getByRole('switch'))
-    fireEvent.click(screen.getByRole('button', { name: 'Opslaan' }))
+    fireEvent.click(screen.getByRole('button', { name: i18n.t('common:save') }))
 
     await waitFor(() => expect(api.put).toHaveBeenCalled())
     const [, body] = vi.mocked(api.put).mock.calls[0]

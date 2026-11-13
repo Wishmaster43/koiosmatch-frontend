@@ -8,7 +8,7 @@ import { render, screen, waitFor, fireEvent } from '@testing-library/react'
 // Real i18n instance (§10 test convention) — none of this component's own deps
 // happen to import '@/lib/datetime' (the usual transitive trigger), so without
 // this the NL copy under test would never actually resolve.
-import '@/i18n'
+import i18n from '@/i18n'
 import api from '@/lib/api'
 import NoteLinksRow from './NoteLinksRow'
 import type { NoteLinkItem } from './noteLinksApi'
@@ -65,7 +65,7 @@ describe('NoteLinksRow', () => {
     render(<NoteLinksRow mode="edit" host="candidates" hostId="c1" noteId="n1" canManage />)
     fireEvent.click(screen.getByRole('button', { name: 'Koppelen' }))
     // Default principal type is 'candidate' — open the entity search and pick the result.
-    fireEvent.click(screen.getByRole('button', { name: 'Zoek record…' }))
+    fireEvent.click(screen.getByRole('button', { name: i18n.t('common:notes.links.pickEntity') }))
     await waitFor(() => expect(screen.getByRole('button', { name: 'Ahmed Bakker' })).toBeInTheDocument())
     fireEvent.click(screen.getByRole('button', { name: 'Ahmed Bakker' }))
 

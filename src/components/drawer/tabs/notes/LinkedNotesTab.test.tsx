@@ -13,6 +13,7 @@ import { render, screen, fireEvent, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import LinkedNotesTab from './LinkedNotesTab'
 import type { NoteFeedItem, UseNoteFeedResult } from '@/hooks/useNoteFeed'
+import i18n from '@/i18n'
 
 // vi.mock factories are hoisted above const declarations, so every spy a
 // factory closes over must be created via vi.hoisted (mirrors NotesTab.test.tsx).
@@ -84,7 +85,7 @@ describe('LinkedNotesTab · toolbar', () => {
     expect(screen.getByText(/call about the interview/)).toBeInTheDocument()
     expect(screen.getByText('placed successfully')).toBeInTheDocument()
 
-    await user.type(screen.getByPlaceholderText('Zoek gekoppelde notities…'), 'interview')
+    await user.type(screen.getByPlaceholderText(i18n.t('common:notes.feed.search')), 'interview')
     expect(screen.getByText(/call about the interview/)).toBeInTheDocument()
     expect(screen.queryByText('placed successfully')).not.toBeInTheDocument()
   })
@@ -96,7 +97,7 @@ describe('LinkedNotesTab · toolbar', () => {
     ]))
     render(<LinkedNotesTab entity="candidates" id="c1" />)
     await user.click(screen.getByRole('button', { name: 'Filter' }))
-    await user.click(screen.getByRole('button', { name: 'Alle bronnen' }))
+    await user.click(screen.getByRole('button', { name: i18n.t('common:notes.feed.allSources') }))
     await user.click(screen.getByRole('button', { name: 'Match' }))
     // The hook re-runs with source_type 'match'; the rows are whatever the server returns.
     expect(useNoteFeedMock).toHaveBeenLastCalledWith('candidates', 'c1', true, undefined, 'match')
@@ -108,9 +109,9 @@ describe('LinkedNotesTab · toolbar', () => {
     render(<LinkedNotesTab entity="candidates" id="c1" />)
     expect(screen.getByText('linked note')).toBeInTheDocument()
     await user.click(screen.getByRole('button', { name: 'Filter' }))
-    await user.click(screen.getByRole('switch', { name: 'Alleen directe notities' }))
+    await user.click(screen.getByRole('switch', { name: i18n.t('common:notes.feed.onlyDirect') }))
     expect(screen.queryByText('linked note')).not.toBeInTheDocument()
-    expect(screen.getByText('Geen gekoppelde notities.')).toBeInTheDocument()
+    expect(screen.getByText(i18n.t('common:notes.feed.empty'))).toBeInTheDocument()
   })
 })
 
@@ -119,22 +120,22 @@ describe('LinkedNotesTab · action cluster gating', () => {
     useNoteFeedMock.mockReturnValue(feedResult([feedItem({ can_manage: false })]))
     render(<LinkedNotesTab entity="candidates" id="c1" />)
     expect(screen.getByText('linked note')).toBeInTheDocument()
-    expect(screen.queryByRole('button', { name: 'Bewerken' })).not.toBeInTheDocument()
-    expect(screen.queryByRole('button', { name: 'Open op tweede scherm' })).not.toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: i18n.t('common:edit') })).not.toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: i18n.t('common:openSecondScreen') })).not.toBeInTheDocument()
   })
 
   it('shows both actions when can_manage is true', () => {
     useNoteFeedMock.mockReturnValue(feedResult([feedItem({ can_manage: true })]))
     render(<LinkedNotesTab entity="candidates" id="c1" />)
-    expect(screen.getByRole('button', { name: 'Bewerken' })).toBeInTheDocument()
-    expect(screen.getByRole('button', { name: 'Open op tweede scherm' })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: i18n.t('common:edit') })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: i18n.t('common:openSecondScreen') })).toBeInTheDocument()
   })
 
   it('a masked row never grows a pencil, even when can_manage is true', () => {
     useNoteFeedMock.mockReturnValue(feedResult([feedItem({ can_manage: true, body_masked: true, body: null })]))
     render(<LinkedNotesTab entity="candidates" id="c1" />)
-    expect(screen.getByText('Inhoud afgeschermd (geen kandidaat-rechten)')).toBeInTheDocument()
-    expect(screen.queryByRole('button', { name: 'Bewerken' })).not.toBeInTheDocument()
+    expect(screen.getByText(i18n.t('common:notes.feed.masked'))).toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: i18n.t('common:edit') })).not.toBeInTheDocument()
   })
 })
 
@@ -145,10 +146,10 @@ describe('LinkedNotesTab · inline edit', () => {
     patchLinkedNoteMock.mockResolvedValueOnce(true)
     render(<LinkedNotesTab entity="candidates" id="c1" />)
 
-    fireEvent.click(screen.getByRole('button', { name: 'Bewerken' }))
+    fireEvent.click(screen.getByRole('button', { name: i18n.t('common:edit') }))
     const textarea = screen.getByLabelText('rte-body')
     fireEvent.change(textarea, { target: { value: 'edited body' } })
-    fireEvent.click(screen.getByRole('button', { name: 'Opslaan' }))
+    fireEvent.click(screen.getByRole('button', { name: i18n.t('common:save') }))
 
     await waitFor(() => expect(patchLinkedNoteMock).toHaveBeenCalledWith(item, 'edited body'))
     await waitFor(() => expect(reloadMock).toHaveBeenCalled())
@@ -160,10 +161,10 @@ describe('LinkedNotesTab · inline edit', () => {
     patchLinkedNoteMock.mockResolvedValueOnce(false)
     render(<LinkedNotesTab entity="candidates" id="c1" />)
 
-    fireEvent.click(screen.getByRole('button', { name: 'Bewerken' }))
-    fireEvent.click(screen.getByRole('button', { name: 'Opslaan' }))
+    fireEvent.click(screen.getByRole('button', { name: i18n.t('common:edit') }))
+    fireEvent.click(screen.getByRole('button', { name: i18n.t('common:save') }))
 
-    await waitFor(() => expect(screen.getByText('Opslaan is niet gelukt. Probeer het opnieuw.')).toBeInTheDocument())
+    await waitFor(() => expect(screen.getByText(i18n.t('common:notes.feed.saveError'))).toBeInTheDocument())
     expect(reloadMock).not.toHaveBeenCalled()
     expect(screen.getByLabelText('rte-body')).toBeInTheDocument()
   })
@@ -173,8 +174,8 @@ describe('LinkedNotesTab · inline edit', () => {
     useNoteFeedMock.mockReturnValue(feedResult([item]))
     render(<LinkedNotesTab entity="candidates" id="c1" />)
 
-    fireEvent.click(screen.getByRole('button', { name: 'Bewerken' }))
-    fireEvent.click(screen.getByRole('button', { name: 'Annuleren' }))
+    fireEvent.click(screen.getByRole('button', { name: i18n.t('common:edit') }))
+    fireEvent.click(screen.getByRole('button', { name: i18n.t('common:cancel') }))
 
     expect(patchLinkedNoteMock).not.toHaveBeenCalled()
     expect(screen.queryByLabelText('rte-body')).not.toBeInTheDocument()
@@ -188,7 +189,7 @@ describe('LinkedNotesTab · pop-out', () => {
     useNoteFeedMock.mockReturnValue(feedResult([feedItem({ id: 'n9', can_manage: true, source: { type: 'candidate', id: 'c1', label: 'Ahmed Bakker', deleted: false } })]))
     render(<LinkedNotesTab entity="candidates" id="c1" />)
 
-    fireEvent.click(screen.getByRole('button', { name: 'Open op tweede scherm' }))
+    fireEvent.click(screen.getByRole('button', { name: i18n.t('common:openSecondScreen') }))
     expect(openSpy).toHaveBeenCalledWith('/popout/notes/candidate/c1/n9', expect.stringContaining('koios-note-candidate-c1-n9'), expect.any(String))
     openSpy.mockRestore()
   })

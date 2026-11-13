@@ -6,6 +6,7 @@ import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { render, screen, fireEvent, waitFor, act } from '@testing-library/react'
 import api from '@/lib/api'
 import { KnowledgeTab } from './KnowledgeTab'
+import i18n from '@/i18n'
 
 // KnowledgeTab fetches on mount and posts/puts through the same client on save —
 // stub the whole default client (keep unwrap/unwrapList real).
@@ -30,7 +31,7 @@ describe('KnowledgeTab — save POSTs/PUTs with {name, body, audience}', () => {
     render(<KnowledgeTab />)
     await waitFor(() => expect(api.get).toHaveBeenCalledWith('/ai/knowledge'))
 
-    await act(async () => { fireEvent.click(screen.getByText('Opslaan')) })
+    await act(async () => { fireEvent.click(screen.getByText(i18n.t('common:save'))) })
 
     expect(api.post).toHaveBeenCalledWith('/ai/knowledge', { name: '', body: '', audience: 'both' })
   })
@@ -44,7 +45,7 @@ describe('KnowledgeTab — save POSTs/PUTs with {name, body, audience}', () => {
     render(<KnowledgeTab />)
     await waitFor(() => expect(screen.getByDisplayValue('Verlofbeleid')).toBeInTheDocument())
 
-    await act(async () => { fireEvent.click(screen.getByText('Opslaan')) })
+    await act(async () => { fireEvent.click(screen.getByText(i18n.t('common:save'))) })
 
     expect(api.put).toHaveBeenCalledWith('/ai/knowledge/k1', { name: 'Verlofbeleid', body: 'Regels...', audience: 'internal' })
   })

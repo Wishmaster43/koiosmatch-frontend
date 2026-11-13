@@ -7,7 +7,7 @@
 import { describe, it, expect, vi, afterEach } from 'vitest'
 import { render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
-import '@/i18n'
+import i18n from '@/i18n'
 import CustomFieldsTab from './CustomFieldsTab'
 import { useCustomFields } from '@/lib/useCustomFields'
 
@@ -71,13 +71,13 @@ describe('CustomFieldsTab', () => {
     const user = userEvent.setup()
     const { container } = render(<CustomFieldsTab entityType="task" values={{ region: 'Noord' }} onSave={onSave} />)
 
-    await user.click(screen.getByTitle('Bewerken'))
+    await user.click(screen.getByTitle(i18n.t('common:edit')))
     expect(container.querySelector('select')).toBeNull()
 
     // Trigger's accessible name = "<field label> <current value>" (aria-labelledby).
     await user.click(screen.getByRole('button', { name: 'Regio Noord' }))
     await user.click(await screen.findByRole('button', { name: 'Zuid' }))
-    await user.click(screen.getByTitle('Opslaan'))
+    await user.click(screen.getByTitle(i18n.t('common:save')))
 
     expect(onSave).toHaveBeenCalledWith({ region: 'Zuid' })
   })
@@ -95,7 +95,7 @@ describe('CustomFieldsTab', () => {
     })
     render(<CustomFieldsTab entityType="task" values={{ budget: 500 }} onSave={vi.fn()} />)
     // The group title sits above the card, mirroring the Persoonlijk/Contact cards.
-    expect(screen.getByText('Eigen velden')).toBeInTheDocument()
+    expect(screen.getByText(i18n.t('common:customFieldsCard.title'))).toBeInTheDocument()
     // The card frame carries the shared bordered-surface style (SectionCard's sectionBlock).
     const card = screen.getByText('Budget').parentElement?.parentElement as HTMLElement
     expect(card.style.border).toBe('1px solid var(--border)')
