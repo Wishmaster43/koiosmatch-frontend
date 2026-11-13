@@ -8,10 +8,9 @@ import { PermissionMatrix } from './RolesPermissionMatrix'
 import type { PermissionGroups } from './RolesPermissionMatrix'
 
 const st = (key: string, opts?: Record<string, unknown>) => i18n.t(key, { ns: 'settings', ...opts })
-// Mirrors the component's own fallback computation exactly (RolesPermissionMatrix.tsx)
-// so the assertion stays correct whether or not roles.matrixAllowed has been seeded yet.
+// Reads the chip copy through the real locale, exactly as the component renders it.
 const chipText = (active: number, total: number) =>
-  st('roles.matrixAllowed', { active, total, defaultValue: `${active}/${total} toegestaan` })
+  st('roles.matrixAllowed', { active, total })
 const rowName = (group: string, active: number, total: number) => `${st(`roles.groups.${group}`)} — ${chipText(active, total)}`
 
 const mockAuth = vi.fn()
@@ -85,7 +84,7 @@ describe('PermissionMatrix — collapsed group rows, expand reveals every toggle
     // No toggle for ANY candidates permission exists yet — CRUD included — until
     // the row itself is opened (no fake affordance: nothing pre-clutters the row).
     expect(screen.queryByTitle('candidates.create')).not.toBeInTheDocument()
-    expect(screen.queryByText('Archiveren')).not.toBeInTheDocument()
+    expect(screen.queryByText(st('roles.actions.archive'))).not.toBeInTheDocument()
   })
 
   it('opening a row reveals every permission in that group as its own toggle, CRUD + non-CRUD alike', async () => {
@@ -101,7 +100,7 @@ describe('PermissionMatrix — collapsed group rows, expand reveals every toggle
     expect(screen.getByText(st('roles.actions.view'))).toBeInTheDocument()
     expect(screen.getByText(st('roles.actions.create'))).toBeInTheDocument()
     // Non-CRUD entries keep their documented overrides.
-    expect(screen.getByText('Archiveren')).toBeInTheDocument()
+    expect(screen.getByText(st('roles.actions.archive'))).toBeInTheDocument()
     expect(screen.getByText(st('roles.actions.candidatesDocumentsManage'))).toBeInTheDocument()
     expect(screen.getByText(st('roles.actions.candidatesNotesManageAll'))).toBeInTheDocument()
     expect(screen.getByText(st('roles.actions.sync'))).toBeInTheDocument()
@@ -131,7 +130,7 @@ describe('PermissionMatrix — collapsed group rows, expand reveals every toggle
     render(<PermissionMatrix groups={GROUPS} hasPermission={hasPermission} onToggle={onToggle} />)
 
     await user.click(screen.getByRole('button', { name: rowName('candidates', 2, 8) }))
-    const toggle = screen.getByRole('switch', { name: `${st('roles.groups.candidates')} — Archiveren` })
+    const toggle = screen.getByRole('switch', { name: `${st('roles.groups.candidates')} — ${st('roles.actions.archive')}` })
     await user.click(toggle)
     expect(onToggle).toHaveBeenCalledWith('candidates.archive')
   })
@@ -145,11 +144,11 @@ describe('PermissionMatrix — collapsed group rows, expand reveals every toggle
     // "Kandidaten" (the candidates row) stays a single exact match — the nav
     // toggle reads "Pagina: Kandidaten" instead, a genuinely different string.
     expect(screen.getAllByText(st('roles.groups.candidates'), { exact: true })).toHaveLength(1)
-    expect(screen.getByText(`Pagina: ${st('roles.groups.candidates')}`)).toBeInTheDocument()
+    expect(screen.getByText(st('roles.pageAccess', { label: st('roles.groups.candidates') }))).toBeInTheDocument()
     // page.details is renamed away from the generic "Details" label — never a
     // bare "Details" group/toggle anywhere in the rendered tree.
     expect(screen.getByText(st('roles.pageAccess', { label: st('roles.actions.details') }))).toBeInTheDocument()
-    expect(screen.queryByText('Details', { exact: true })).not.toBeInTheDocument()
+    expect(screen.queryByText(st('roles.groups.details'), { exact: true })).not.toBeInTheDocument()
   })
 
   it('a single-permission group (vacancy_generation) shows its real translated label, never the raw i18n key', () => {

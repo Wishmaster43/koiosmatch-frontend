@@ -33,7 +33,7 @@ describe('PermissionMatrix — transfer-family groups', () => {
   it('renders the three family groups with translated labels, never raw keys', () => {
     render(<PermissionMatrix groups={GROUPS} hasPermission={() => true} onToggle={vi.fn()} />)
 
-    for (const label of ['Notities', 'Conversaties', 'Documenten']) {
+    for (const label of ['notes', 'conversations', 'documents'].map((g) => i18n.t(`settings:roles.groups.${g}`))) {
       expect(screen.getByText(label)).toBeInTheDocument()
     }
     // Raw group keys must not appear anywhere as visible text.
@@ -45,16 +45,16 @@ describe('PermissionMatrix — transfer-family groups', () => {
     render(<PermissionMatrix groups={GROUPS} hasPermission={() => true} onToggle={vi.fn()} />)
 
     // Expand the Notities group row, then both action toggles carry real labels.
-    fireEvent.click(screen.getByText('Notities'))
-    expect(screen.getByText('Exporteren')).toBeInTheDocument()
-    expect(screen.getByText('Importeren')).toBeInTheDocument()
+    fireEvent.click(screen.getByText(i18n.t('settings:roles.groups.notes')))
+    expect(screen.getByText(i18n.t('settings:roles.actions.export'))).toBeInTheDocument()
+    expect(screen.getByText(i18n.t('settings:roles.actions.import'))).toBeInTheDocument()
   })
 
   it('shows the translated export-financial toggle, never the raw permission key', () => {
     render(<PermissionMatrix groups={CANDIDATES_GROUP} hasPermission={() => true} onToggle={vi.fn()} />)
 
     // Expand the Kandidaten group row to reveal the export-financial toggle.
-    fireEvent.click(screen.getByText('Kandidaten'))
+    fireEvent.click(screen.getByText(i18n.t('settings:roles.groups.candidates')))
     expect(screen.getByText(i18n.t('settings:roles.actions.export-financial'))).toBeInTheDocument()
     expect(screen.queryByText('export-financial')).toBeNull()
     expect(screen.queryByText('candidates.export-financial')).toBeNull()
