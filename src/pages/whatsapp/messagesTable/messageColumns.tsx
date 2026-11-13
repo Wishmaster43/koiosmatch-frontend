@@ -23,6 +23,7 @@ import { Mono, Caption } from '@/components/ui/typography'
 import { DirectionPill, StatusPill } from '@/components/ui/logChips'
 import { CHANNEL_COLORS } from '@/components/drawer/channelColors'
 import { humanize } from '@/components/drawer/ConversationMessage'
+import { labelOrRaw } from '@/lib/labelOrRaw'
 import { useNavigation } from '@/context/NavigationContext'
 import { useDateFormat } from '@/lib/datetime'
 import { interactive } from '@/lib/a11y'
@@ -71,11 +72,11 @@ function RecipientCell({ message }: { message: WaMessage }) {
 // for an unknown/legacy channel with no server label (never a raw code).
 // eslint-disable-next-line react-refresh/only-export-components -- private cell component; the file's public export is the useMessageColumns hook (HMR-nicety warning only)
 function ChannelCell({ message }: { message: WaMessage }) {
-  const { t } = useTranslation('candidates')
+  const { t, i18n } = useTranslation('candidates')
   const channel = message.channel
   const known = channel != null && channel in CHANNEL_COLORS
   if (!known && !message.channel_label) return null
-  const label = known ? t(`conversations.channel.${channel}`, { defaultValue: message.channel_label ?? '' }) : message.channel_label
+  const label = known ? labelOrRaw(t, i18n, `conversations.channel.${channel}`, message.channel_label ?? '', 'candidates') : message.channel_label
   if (!label) return null
   return <SoftChip label={label} color={known ? CHANNEL_COLORS[channel as string] : null} />
 }
@@ -119,7 +120,7 @@ function TemplateCell({ message, onFilter }: { message: WaMessage; onFilter?: (p
 // listing the delivery timestamps + failure reason when present.
 // eslint-disable-next-line react-refresh/only-export-components -- private cell component; the file's public export is the useMessageColumns hook (HMR-nicety warning only)
 function StatusCell({ message }: { message: WaMessage }) {
-  const { t } = useTranslation('whatsapp')
+  const { t, i18n } = useTranslation('whatsapp')
   const { formatDateTime } = useDateFormat()
   if (!message.status) return <StatusPill status={message.status} />
   const parts: string[] = []
@@ -127,7 +128,7 @@ function StatusCell({ message }: { message: WaMessage }) {
   if (message.read_at) parts.push(`${t('msgStatus.read')}: ${formatDateTime(message.read_at)}`)
   if (message.failed_at) parts.push(`${t('msgStatus.failed')}: ${formatDateTime(message.failed_at)}`)
   if (message.failure_reason) parts.push(message.failure_reason)
-  return <StatusPill status={message.status} label={t(`msgStatus.${message.status}`, { defaultValue: humanize(message.status) })} title={parts.join(' · ') || undefined} />
+  return <StatusPill status={message.status} label={labelOrRaw(t, i18n, `msgStatus.${message.status}`, humanize(message.status), 'whatsapp')} title={parts.join(' · ') || undefined} />
 }
 
 // Conversation cell: opens the row's owner's Communication → Conversations tab
@@ -162,7 +163,7 @@ function ConversationCell({ message }: { message: WaMessage }) {
 // already had. `onFilter` (stage B) wires the type/template chips into the
 // table's own filter state; omitted, those chips stay inert.
 export function useMessageColumns({ clampBody = false, onFilter }: { clampBody?: boolean; onFilter?: (patch: MessageFilterPatch) => void } = {}): Column<WaMessage>[] {
-  const { t } = useTranslation('whatsapp')
+  const { t, i18n } = useTranslation('whatsapp')
   const { formatDateTime } = useDateFormat()
   return [
     { key: 'sent_at', header: t('messages.date'), width: 150, nowrap: true,
@@ -177,7 +178,7 @@ export function useMessageColumns({ clampBody = false, onFilter }: { clampBody?:
       render: m => <TypeCell message={m} onFilter={onFilter} /> },
     { key: 'purpose', header: t('messages.purpose'), width: 150,
       render: m => m.purpose
-        ? <span>{t(`candidates:conversations.purpose.${m.purpose}`, { defaultValue: humanize(m.purpose) })}</span>
+        ? <span>{labelOrRaw(t, i18n, `conversations.purpose.${m.purpose}`, humanize(m.purpose), 'candidates')}</span>
         : <span style={{ color: 'var(--text-muted)' }}>—</span> },
     { key: 'template', header: t('messages.template'), width: 150,
       render: m => <TemplateCell message={m} onFilter={onFilter} /> },

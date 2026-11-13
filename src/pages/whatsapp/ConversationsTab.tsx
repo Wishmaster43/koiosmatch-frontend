@@ -10,6 +10,7 @@
  */
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { useTranslation } from 'react-i18next'
+import { labelOrRaw } from '@/lib/labelOrRaw'
 import { ChevronUp, MessageCircle, Pause, Play, X } from 'lucide-react'
 import { useRightPanel } from '@/context/RightPanelContext'
 import { useNavigation } from '@/context/NavigationContext'
@@ -39,7 +40,7 @@ const counterpartName = (row: WaConversationRow) =>
 
 // Bureau-wide WhatsApp inbox: a thread table plus a read-only thread drill-down; the real composer lives on the candidate/contact record, deep-linked from here.
 export default function ConversationsTab({ openConversationId }: { openConversationId?: string | null }) {
-  const { t } = useTranslation('whatsapp')
+  const { t, i18n } = useTranslation('whatsapp')
   const { formatDateTime } = useDateFormat()
   const { openEntity } = useNavigation()
   const { registerFilters, unregisterFilters } = useRightPanel()
@@ -124,7 +125,7 @@ export default function ConversationsTab({ openConversationId }: { openConversat
     {
       key: 'channel', header: t('conversations.column.channel'),
       render: r => r.primary_channel && CHANNEL_COLORS[r.primary_channel]
-        ? <SoftChip label={t(`candidates:conversations.channel.${r.primary_channel}`, { defaultValue: r.channel_label ?? '' })} color={CHANNEL_COLORS[r.primary_channel]} />
+        ? <SoftChip label={labelOrRaw(t, i18n, `conversations.channel.${r.primary_channel}`, r.channel_label ?? '', 'candidates')} color={CHANNEL_COLORS[r.primary_channel]} />
         : '—',
     },
     {
@@ -168,7 +169,7 @@ export default function ConversationsTab({ openConversationId }: { openConversat
                 <Caption as="div">{selectedRow.wa_number ?? '—'}</Caption>
               </div>
               {selectedRow.primary_channel && CHANNEL_COLORS[selectedRow.primary_channel] && (
-                <SoftChip label={t(`candidates:conversations.channel.${selectedRow.primary_channel}`, { defaultValue: selectedRow.channel_label ?? '' })}
+                <SoftChip label={labelOrRaw(t, i18n, `conversations.channel.${selectedRow.primary_channel}`, selectedRow.channel_label ?? '', 'candidates')}
                   color={CHANNEL_COLORS[selectedRow.primary_channel]} />
               )}
               {/* CMFE-MEET-1: the agent state sits next to its control. Pause hands the thread

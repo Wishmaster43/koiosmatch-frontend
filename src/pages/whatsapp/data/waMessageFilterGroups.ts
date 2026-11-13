@@ -10,6 +10,8 @@
  */
 import type { Dispatch, SetStateAction } from 'react'
 import type { TFunction } from 'i18next'
+import { labelOrRaw } from '@/lib/labelOrRaw'
+import type { KeyChecker } from '@/lib/labelOrRaw'
 import type { WaMessageType } from '@/types/whatsapp'
 import type { WaTemplateOption } from '@/components/layout/workflow/whatsappTemplate'
 import type { WaPhoneNumberOption, WaMessagePurposeOption } from '../hooks/useWaFilterOptions'
@@ -21,6 +23,7 @@ export interface WaDateRange { from: string; to: string }
 
 interface BuildArgs {
   t: TFunction
+  i18n: KeyChecker
   tog: Tog
   selectedStatus: string[]; setSelectedStatus: Dispatch<SetStateAction<string[]>>
   selectedDirection: string[]; setSelectedDirection: Dispatch<SetStateAction<string[]>>
@@ -43,7 +46,7 @@ interface BuildArgs {
 
 // Pure builder of the WhatsApp messages filter-panel config; shares the same setters the table's own chip clicks use, so the two filter gateways can never disagree (see file header).
 export function buildWaMessageFilterGroups({
-  t, tog,
+  t, i18n, tog,
   selectedStatus, setSelectedStatus, selectedDirection, setSelectedDirection,
   selectedChannel, setSelectedChannel, selectedType, setSelectedType,
   priorityOnly, setPriorityOnly, selectedPurpose, setSelectedPurpose,
@@ -59,7 +62,7 @@ export function buildWaMessageFilterGroups({
   // the channel column reads (candidates:conversations.channel.*) — one label
   // per concept, never a second copy.
   const channelOptions: Opt[] = ['waba', 'waba_coex', 'wa_web']
-    .map(v => ({ value: v, label: t(`candidates:conversations.channel.${v}`, { defaultValue: v }) }))
+    .map(v => ({ value: v, label: labelOrRaw(t, i18n, `conversations.channel.${v}`, v, 'candidates') }))
 
   // Tenant message types (GET /whatsapp-message-types), soft-chip colour ignored
   // here (the panel renders plain option rows, not chips).
@@ -68,7 +71,7 @@ export function buildWaMessageFilterGroups({
   // Purpose options — the tenant lookup (GET /message-purposes), so a tenant's
   // own added/relabelled purpose is filterable with its own label.
   const purposeOptions: Opt[] = purposes.map(p => ({
-    value: p.value, label: t(`candidates:conversations.purpose.${p.value}`, { defaultValue: p.label }),
+    value: p.value, label: labelOrRaw(t, i18n, `conversations.purpose.${p.value}`, p.label, 'candidates'),
   }))
 
   // Template options — the approved template list (GET /whatsapp-templates),

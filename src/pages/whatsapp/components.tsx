@@ -9,6 +9,7 @@
  */
 import { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
+import { labelOrRaw } from '@/lib/labelOrRaw'
 import { AlertTriangle, Clock } from 'lucide-react'
 import SoftChip from '@/components/ui/SoftChip'
 import { SectionTitle, Caption } from '@/components/ui/typography'
@@ -115,7 +116,7 @@ export function AgentBadgeChip({ agentSessionStatus }: { agentSessionStatus?: 'a
 // row's own `escalation_reason` (bundle F), then the shared tenant lookup by
 // id, then the derived-diagnostic-key palette (see file doc).
 export function EscalationList({ escalations, loading }: { escalations: WaEscalation[]; loading?: boolean }) {
-  const { t } = useTranslation('whatsapp')
+  const { t, i18n } = useTranslation('whatsapp')
   // Real tenant escalation-reason lookup (LOOKUP-GAP-1(c)) — id-based fallback
   // for a row whose `escalation_reason` name/color went stale (renamed lookup).
   const { metaOf } = useEscalationReasons()
@@ -156,7 +157,7 @@ export function EscalationList({ escalations, loading }: { escalations: WaEscala
           const color = esc.escalation_reason?.color ?? lookupMeta?.color
             ?? (esc.reason ? DERIVED_REASON_STYLE[esc.reason] : undefined) ?? 'var(--text-muted)'
           const reasonLabel = esc.escalation_reason?.name ?? lookupMeta?.label
-            ?? t(`reasons.${esc.reason}`, { defaultValue: esc.reason })
+            ?? labelOrRaw(t, i18n, `reasons.${esc.reason}`, esc.reason ?? '', 'whatsapp')
           return (
             <div key={esc.candidate_id ?? i} style={{
               display: 'flex', alignItems: 'center', gap: 10,

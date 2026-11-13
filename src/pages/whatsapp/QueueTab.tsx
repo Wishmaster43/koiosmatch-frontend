@@ -15,6 +15,7 @@ import Spinner from '@/components/ui/Spinner'
 import { Mono, Caption, BodyText, GroupLabel } from '@/components/ui/typography'
 import { useDateFormat } from '@/lib/datetime'
 import { humanize } from '@/components/drawer/ConversationMessage'
+import { labelOrRaw } from '@/lib/labelOrRaw'
 import { isBatchActive } from './hooks/useWhatsAppQueue'
 import type { WaQueueBatch } from '@/types/whatsapp'
 
@@ -30,7 +31,7 @@ function Count({ label, value, color }: { label: string; value: number; color: s
 
 // One batch row. `active` drives the live progress bar vs. the muted finished look.
 function BatchRow({ batch, active }: { batch: WaQueueBatch; active: boolean }) {
-  const { t } = useTranslation('whatsapp')
+  const { t, i18n } = useTranslation('whatsapp')
   const { formatDateTime } = useDateFormat()
   const sent      = batch.sent ?? 0
   const skipped   = batch.skipped ?? 0
@@ -56,7 +57,7 @@ function BatchRow({ batch, active }: { batch: WaQueueBatch; active: boolean }) {
             never render the slug raw (§5). */}
         {batch.priority != null && (
           <Caption as="span">
-            {t('queue.priority')}: {t(`queue.priorityLevel.${batch.priority}`, { defaultValue: humanize(batch.priority) })}
+            {t('queue.priority')}: {labelOrRaw(t, i18n, `queue.priorityLevel.${batch.priority}`, humanize(batch.priority), 'whatsapp')}
           </Caption>
         )}
         {batch.tempo != null && (

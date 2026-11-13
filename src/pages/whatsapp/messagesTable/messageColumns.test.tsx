@@ -15,10 +15,13 @@ import type { WaMessage } from '@/types/whatsapp'
 
 // Pass-through t (keys, not translated prose) — this file asserts wire-shape
 // behaviour, not i18n copy (covered by localeParity.test.ts / keysExist.test.ts).
-// Pass-through t() that still honours `defaultValue` like the real i18next
-// does for an unseeded key — needed to assert the humanized purpose fallback.
+// Key-echo t() that prefixes the namespace it was given (so a wrong-namespace resolution would show),
+// plus an i18n.exists stub that reports one purpose key as unseeded (labelOrRaw fallback).
 vi.mock('react-i18next', () => ({
-  useTranslation: () => ({ t: (k: string, opts?: { defaultValue?: string }) => k.includes('smb_app_echo') && opts?.defaultValue ? opts.defaultValue : k }),
+  useTranslation: () => ({
+    t: (k: string, o?: { ns?: string }) => (o?.ns ? `${o.ns}:${k}` : k),
+    i18n: { exists: (k: string) => !k.includes('smb_app_echo') },
+  }),
 }))
 vi.mock('@/lib/datetime', () => ({ useDateFormat: () => ({ formatDateTime: (v?: string) => v ? `dt:${v}` : '' }) }))
 
@@ -137,7 +140,7 @@ describe('useMessageColumns · wire shape (WA-MSG-TABLE-2)', () => {
 
   it('channel renders a chip with its token colour when the channel is known', () => {
     render(<Harness messages={[candidateRow]} />)
-    expect(screen.getByText('conversations.channel.waba')).toBeInTheDocument()
+    expect(screen.getByText('candidates:conversations.channel.waba')).toBeInTheDocument()
   })
 
   it('channel renders no chip when the channel is unknown and there is no server label', () => {
@@ -148,7 +151,7 @@ describe('useMessageColumns · wire shape (WA-MSG-TABLE-2)', () => {
   it('purpose renders the translated key when it exists, humanized fallback when it does not', () => {
     const unseeded: WaMessage = { ...candidateRow, id: 'm-4', purpose: 'smb_app_echo' }
     render(<Harness messages={[candidateRow, unseeded]} />)
-    // Pass-through t() returns the key itself for a seeded purpose (mocked above).
+    // The echo t() shows the namespace labelOrRaw resolved the seeded purpose in.
     expect(screen.getByText('candidates:conversations.purpose.birthday')).toBeInTheDocument()
     // An unseeded purpose falls back to the humanized slug, never the raw one.
     expect(screen.getByText('Smb app echo')).toBeInTheDocument()
@@ -163,7 +166,7 @@ describe('useMessageColumns · wire shape (WA-MSG-TABLE-2)', () => {
 
   it('the status chip carries a translated label and a tooltip with failed_at + failure_reason', () => {
     render(<Harness messages={[failedRow]} />)
-    const chip = screen.getByText('msgStatus.failed')
+    const chip = screen.getByText('whatsapp:msgStatus.failed')
     expect(chip).toHaveAttribute('title', expect.stringContaining('Number opted out'))
   })
 

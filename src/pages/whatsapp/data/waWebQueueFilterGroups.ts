@@ -5,16 +5,19 @@
  * unregisters it on tab switch/unmount), so it never shows on the other tabs.
  */
 import type { TFunction } from 'i18next'
+import { labelOrRaw } from '@/lib/labelOrRaw'
+import type { KeyChecker } from '@/lib/labelOrRaw'
 
 const STATUSES = ['queued', 'sending', 'sent', 'failed', 'paused', 'canceled'] as const
 
 // Builds the WA-Web queue tab's status filter group.
-export function buildWaWebQueueFilterGroups({ t, status, setStatus }: {
+export function buildWaWebQueueFilterGroups({ t, i18n, status, setStatus }: {
   t: TFunction
+  i18n: KeyChecker
   status: string
   setStatus: (v: string) => void
 }) {
-  const options = STATUSES.map(v => ({ value: v, label: t(`waWebQueue.status.${v}`, { defaultValue: v }) }))
+  const options = STATUSES.map(v => ({ value: v, label: labelOrRaw(t, i18n, `waWebQueue.status.${v}`, v, 'whatsapp') }))
   return [
     {
       key: 'wa-web-status', type: 'radio', category: t('filters.categories.message'),

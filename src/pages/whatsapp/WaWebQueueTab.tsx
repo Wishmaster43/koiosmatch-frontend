@@ -16,6 +16,7 @@ import StatusPill from '@/components/ui/StatusPill'
 import Button from '@/components/ui/Button'
 import { Mono, Caption } from '@/components/ui/typography'
 import { humanize } from '@/components/drawer/ConversationMessage'
+import { labelOrRaw } from '@/lib/labelOrRaw'
 import { useDateFormat } from '@/lib/datetime'
 import { useWaWebQueueList, useWaWebQueueStats, useWaWebQueueActions } from './hooks/useWaWebQueue'
 import type { WaWebQueueRow } from './hooks/useWaWebQueue'
@@ -31,7 +32,7 @@ const STATUS_COLOR: Record<string, string> = {
 }
 
 export default function WaWebQueueTab({ status, canManage }: { status: string; canManage: boolean }) {
-  const { t } = useTranslation('whatsapp')
+  const { t, i18n } = useTranslation('whatsapp')
   const { formatDateTime } = useDateFormat()
   const { data: rows = [], isLoading, isError } = useWaWebQueueList(status || undefined)
   const { data: stats = [], isLoading: statsLoading } = useWaWebQueueStats(rows.some(r => r.status === 'queued' || r.status === 'sending'))
@@ -56,13 +57,13 @@ export default function WaWebQueueTab({ status, canManage }: { status: string; c
     },
     {
       key: 'status', header: t('waWebQueue.column.status'),
-      render: r => <StatusPill label={t(`waWebQueue.status.${r.status}`, { defaultValue: humanize(r.status) })} color={STATUS_COLOR[r.status]} />,
+      render: r => <StatusPill label={labelOrRaw(t, i18n, `waWebQueue.status.${r.status}`, humanize(r.status), 'whatsapp')} color={STATUS_COLOR[r.status]} />,
     },
     {
       key: 'hold_reason', header: t('waWebQueue.column.holdReason'),
       render: r => r.hold_reason
-        ? <Caption as="span" title={t(`waWebQueue.reason.${r.hold_reason}`, { defaultValue: humanize(r.hold_reason) })}>
-            {t(`waWebQueue.reason.${r.hold_reason}`, { defaultValue: humanize(r.hold_reason) })}
+        ? <Caption as="span" title={labelOrRaw(t, i18n, `waWebQueue.reason.${r.hold_reason}`, humanize(r.hold_reason), 'whatsapp')}>
+            {labelOrRaw(t, i18n, `waWebQueue.reason.${r.hold_reason}`, humanize(r.hold_reason), 'whatsapp')}
           </Caption>
         : '—',
     },

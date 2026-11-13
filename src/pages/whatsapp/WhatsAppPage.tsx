@@ -21,6 +21,7 @@
 import { useState, useEffect, useMemo, useCallback } from 'react'
 import type { Dispatch, SetStateAction } from 'react'
 import { useTranslation } from 'react-i18next'
+import { labelOrRaw } from '@/lib/labelOrRaw'
 import { MessageCircle } from 'lucide-react'
 import { useRightPanel } from '@/context/RightPanelContext'
 import { useAuth } from '@/context/AuthContext'
@@ -60,9 +61,9 @@ import { WA_DIRECTION_VALUES, WA_STATUS_VALUES } from './shared'
 // ─── main page ───────────────────────────────────────────────────────────────
 
 export default function WhatsAppPage({ intent }: { intent?: unknown } = {}) {
-  const { t } = useTranslation('whatsapp')
-  // Channel names live in the candidates namespace (one label per enum value, app-wide).
-  const { t: tCandidates } = useTranslation('candidates')
+  // Channel and purpose labels resolve in ns 'candidates' through labelOrRaw's own namespace argument;
+  // every namespace is preloaded at init (src/i18n ns: ALL_NAMESPACES), so no second useTranslation is needed.
+  const { t, i18n } = useTranslation('whatsapp')
   // K-193 fase 1: the WA-Web queue + Conversations tabs are module-gated —
   // hasModule stays presence-based (rol-onafhankelijk), mirroring every other
   // whatsapp_web-gated surface (CONTRACT-CHANGELOG 25-08).
@@ -129,10 +130,10 @@ export default function WhatsAppPage({ intent }: { intent?: unknown } = {}) {
   // unfilterable and rendering as a raw untranslated chip. Labels still come
   // from i18n; the VALUES come from the contract.
   const directionOptions = useMemo(() => WA_DIRECTION_VALUES
-    .map(v => ({ value: v, label: t(`msgDirection.${v}`, { defaultValue: v }) })), [t])
+    .map(v => ({ value: v, label: labelOrRaw(t, i18n, `msgDirection.${v}`, v, 'whatsapp') })), [t, i18n])
   // Status filter options, values pinned to the server contract (see comment above).
   const statusOptions = useMemo(() => WA_STATUS_VALUES
-    .map(v => ({ value: v, label: t(`msgStatus.${v}`, { defaultValue: v }) })), [t])
+    .map(v => ({ value: v, label: labelOrRaw(t, i18n, `msgStatus.${v}`, v, 'whatsapp') })), [t, i18n])
 
   // Generic multi-select toggle (add/remove a value from the array) — shared by
   // every `search-select` group below (mirrors buildMatchFilterGroups' `tog`).
@@ -142,14 +143,14 @@ export default function WhatsAppPage({ intent }: { intent?: unknown } = {}) {
   // Full filter-group config (WA-MSG-TABLE-1 stage B) — pure builder, mirrors
   // buildMatchFilterGroups/buildTaskFilterGroups (§0.3 size split).
   const filterGroups = useMemo(() => buildWaMessageFilterGroups({
-    t, tog,
+    t, i18n, tog,
     selectedStatus, setSelectedStatus, selectedDirection, setSelectedDirection,
     selectedChannel, setSelectedChannel, selectedType, setSelectedType,
     priorityOnly, setPriorityOnly, selectedPurpose, setSelectedPurpose,
     selectedTemplate, setSelectedTemplate, selectedOwner, setSelectedOwner,
     selectedNumber, setSelectedNumber, dateRange, setDateRange, sort, setSort,
     statusOptions, directionOptions, messageTypes, purposes, templates, phoneNumbers, users,
-  }), [t, selectedStatus, selectedDirection, selectedChannel, selectedType, priorityOnly,
+  }), [t, i18n, selectedStatus, selectedDirection, selectedChannel, selectedType, priorityOnly,
       selectedPurpose, selectedTemplate, selectedOwner, selectedNumber, dateRange, sort,
       statusOptions, directionOptions, messageTypes, purposes, templates, phoneNumbers, users])
 
@@ -194,7 +195,7 @@ export default function WhatsAppPage({ intent }: { intent?: unknown } = {}) {
 
   // K-193: the WA-Web queue's own status filter — registered only while that
   // tab is the active one, so it never bleeds into the message feed's panel.
-  const waWebFilterGroups = useMemo(() => buildWaWebQueueFilterGroups({ t, status: waWebStatus, setStatus: setWaWebStatus }), [t, waWebStatus])
+  const waWebFilterGroups = useMemo(() => buildWaWebQueueFilterGroups({ t, i18n, status: waWebStatus, setStatus: setWaWebStatus }), [t, i18n, waWebStatus])
   // Register the WA-Web queue's own status filter only while that tab is active;
   // switching away unregisters it so it never bleeds into the message feed's panel.
   useEffect(() => {
@@ -226,7 +227,7 @@ export default function WhatsAppPage({ intent }: { intent?: unknown } = {}) {
 
   // Nine-card KPI assembly + overview chart derivations (WA-KPI9-1) live in the shared hook.
   const { kpis, statusData, reasonsData, channelData, hasChannelSplit, hasChannelSeries } = useWhatsappPageData({
-    t, tCandidates, stats, messages, escalations, activity, loading, errors,
+    t, i18n, stats, messages, escalations, activity, loading, errors,
     batches, queueLoading, queueError, queueNotAvailable, setDrill, drillDirection,
   })
 

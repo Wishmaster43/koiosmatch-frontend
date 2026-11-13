@@ -28,7 +28,7 @@ import { chipInk, tintBg } from '@/lib/tint'
 import type { WaEscalation } from '@/types/whatsapp'
 import type { WaConversationRow } from './hooks/useConversations'
 
-vi.mock('react-i18next', () => ({ useTranslation: () => ({ t: (k: string) => k }) }))
+vi.mock('react-i18next', () => ({ useTranslation: () => ({ t: (k: string) => k, i18n: { exists: () => true } }) }))
 
 const mockMetaOf = vi.fn()
 vi.mock('./hooks/useEscalationReasons', () => ({ useEscalationReasons: () => ({ metaOf: mockMetaOf, reasons: [], loading: false }) }))

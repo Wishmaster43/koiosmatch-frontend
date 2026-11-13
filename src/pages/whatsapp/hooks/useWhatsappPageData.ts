@@ -6,6 +6,8 @@
  */
 import { useMemo } from 'react'
 import type { TFunction } from 'i18next'
+import { labelOrRaw } from '@/lib/labelOrRaw'
+import type { KeyChecker } from '@/lib/labelOrRaw'
 import type { KpiSpec } from '@/components/insights/InsightsRow'
 import { CHANNEL_COLORS } from '@/components/drawer/channelColors'
 import { sumBatches } from './useWhatsAppQueue'
@@ -18,11 +20,11 @@ const cardValue = (ready: boolean, v: number | undefined | null): number | strin
   (!ready || v === undefined || v === null) ? DASH : v
 
 export function useWhatsappPageData({
-  t, tCandidates, stats, messages, escalations, activity, loading, errors,
+  t, i18n, stats, messages, escalations, activity, loading, errors,
   batches, queueLoading, queueError, queueNotAvailable, setDrill, drillDirection,
 }: {
   t: TFunction
-  tCandidates: TFunction
+  i18n: KeyChecker
   stats: WaStats | null | undefined
   messages: WaMessage[]
   escalations: WaEscalation[]
@@ -80,22 +82,22 @@ export function useWhatsappPageData({
   const statusData = useMemo(() => {
     const c: Record<string, number> = {}
     messages.forEach(m => { const s = (m.status as string) || 'unknown'; c[s] = (c[s] ?? 0) + 1 })
-    return Object.entries(c).map(([s, value]) => ({ name: t(`msgStatus.${s}`, { defaultValue: s }), value }))
-  }, [messages, t])
+    return Object.entries(c).map(([s, value]) => ({ name: labelOrRaw(t, i18n, `msgStatus.${s}`, s, 'whatsapp'), value }))
+  }, [messages, t, i18n])
   // Escalation reasons, tallied client-side from the already-loaded list, for the overview chart.
   const reasonsData = useMemo(() => {
     const c: Record<string, number> = {}
     escalations.forEach(e => { const r = (e.reason as string) || 'unknown'; c[r] = (c[r] ?? 0) + 1 })
-    return Object.entries(c).map(([r, value]) => ({ name: t(`reasons.${r}`, { defaultValue: r }), value }))
-  }, [escalations, t])
+    return Object.entries(c).map(([r, value]) => ({ name: labelOrRaw(t, i18n, `reasons.${r}`, r, 'whatsapp'), value }))
+  }, [escalations, t, i18n])
 
   // K-197: today's messages per channel (sent + received); the server zero-fills all
   // three channels, an older envelope has no by_channel and hides the card.
   const channelData = useMemo(() => (stats?.by_channel ?? []).map(c => ({
-    name: tCandidates(`conversations.channel.${c.channel}`, { defaultValue: c.label ?? c.channel }),
+    name: labelOrRaw(t, i18n, `conversations.channel.${c.channel}`, c.label ?? c.channel, 'candidates'),
     value: (c.sent ?? 0) + (c.received ?? 0), key: c.channel,
     color: CHANNEL_COLORS[c.channel] ?? 'var(--color-primary)',
-  })), [stats, tCandidates])
+  })), [stats, t, i18n])
   const hasChannelSplit = channelData.length > 0
   const hasChannelSeries = activity.some(d => d.by_channel != null)
 
