@@ -47,7 +47,7 @@ import type { ReportFilterState } from './reportFilterParams'
 import { ReportStateFlow } from './components/ReportStateFlow'
 import { labelOrRaw } from './lib/labelOrRaw'
 import { ReportDataWindow } from './components/ReportDataWindow'
-import { camelKpiSpecs } from './lib/kpiSpecs'
+import { plainKpiSpecs } from './lib/kpiSpecs'
 import { reportWindowLabel } from './lib/reportWindowLabel'
 import { useReportCustomKpis } from './hooks/useReportCustomKpis'
 
@@ -58,9 +58,9 @@ const KPI_COLOR: Partial<Record<string, string>> = {
   escalations_open: 'var(--color-danger)',
   unanswered_over_window: 'var(--color-warning)',
 }
-// The nine fixed KPI keys the live backend returns (WhatsappReport::CARDS), in
-// camelCase label form (whatsapp.kpi.*) — the server's own `label` is
-// intentionally ignored (§5: every user-facing string goes through i18n).
+// The nine fixed KPI keys the live backend returns (WhatsappReport::CARDS): the record
+// keys are the BE snake_case keys, the values the camelCase label keys (whatsapp.kpi.*);
+// the server's own `label` is intentionally ignored (§5: every string through i18n).
 const KPI_LABEL_KEYS: Record<string, string> = {
   conversations_total: 'whatsapp.kpi.conversationsTotal',
   active_7d: 'whatsapp.kpi.active7d',
@@ -89,10 +89,13 @@ export default function WhatsappReport({ period, filters }: { period: ReportPeri
   // server-masked wa_number, rendered verbatim by the drawer.
   const [kpiDrill, setKpiDrill] = useState<DrillSpec | null>(null)
   const windowSub = () => reportWindowLabel(formatDate, data?.meta.from, data?.meta.to)
+  // The panel filters ride on every drill so the drawer lists the same population as the filtered
+  // tile (the backend applies them through messageBase); drill-specific keys are spread after it.
+  const drillBase = buildReportQueryParams(period, 'whatsapp', filters ?? EMPTY_REPORT_FILTERS)
   const openKpiDrill = (serverKey: string, label: string, value: string | number) =>
     gateDrillClick('whatsapp', () => setKpiDrill({
       title: label, value, subtitle: windowSub(),
-      rowsEndpoint: '/reports/whatsapp/kpis/drill', rowsParams: { kpi: serverKey, period },
+      rowsEndpoint: '/reports/whatsapp/kpis/drill', rowsParams: { ...drillBase, kpi: serverKey },
     }))
 
   // The one axis drill (GET /reports/whatsapp/axes/drill) reuses the same drawer
@@ -102,7 +105,7 @@ export default function WhatsappReport({ period, filters }: { period: ReportPeri
   const openAxisDrill = (axis: 'direction' | 'type' | 'escalated' | 'conversation' | 'channel', label: string, value: string | number, rawValue: string) =>
     setKpiDrill({
       title: label, value, subtitle: windowSub(),
-      rowsEndpoint: '/reports/whatsapp/axes/drill', rowsParams: { axis, value: rawValue, period },
+      rowsEndpoint: '/reports/whatsapp/axes/drill', rowsParams: { ...drillBase, axis, value: rawValue },
     })
   // WA-REPORT-TOLERANT-1 (measured on the demo tenant, 10-09): the server sends
   // `timeseries` either as { bucket, series } (the typed contract) or as a flat
@@ -119,7 +122,7 @@ export default function WhatsappReport({ period, filters }: { period: ReportPeri
     setKpiDrill({
       title: `${chartLabel} · ${formatDate(dateKey)}`, value: count, subtitle: windowSub(),
       rowsEndpoint: '/reports/whatsapp/axes/drill',
-      rowsParams: { axis: 'timeseries', value: dateKey, period,
+      rowsParams: { ...drillBase, axis: 'timeseries', value: dateKey,
         ...(timeseries.bucket === 'week' ? { bucket: 'week' } : {}) },
     })
 
@@ -162,7 +165,7 @@ export default function WhatsappReport({ period, filters }: { period: ReportPeri
 
   // The nine fixed cards straight off the server's kpis[] array — each label from
   // the local i18n catalogue, each card clickable into its own drill.
-  const kpiByKey = camelKpiSpecs({
+  const kpiByKey = plainKpiSpecs({
     data,
     labelKeys: KPI_LABEL_KEYS,
     colors: KPI_COLOR,
@@ -181,9 +184,8 @@ export default function WhatsappReport({ period, filters }: { period: ReportPeri
   // KPI-BUILDER-FE-1 (slice 3): tenant-defined KPI cards ride a second strip
   // row, sharing the same drawer state as the KPI/axis drills above. No
   // entityPage: WhatsApp rows carry masked numbers, no single record page (§8).
-  const customBase = buildReportQueryParams(period, 'whatsapp', filters ?? EMPTY_REPORT_FILTERS)
   const { customKpis, extraTitle: customKpiTitle } = useReportCustomKpis({
-    data, drill: kpiDrill, baseParams: customBase, windowSub, setDrill: setKpiDrill,
+    data, drill: kpiDrill, baseParams: drillBase, windowSub, setDrill: setKpiDrill,
   })
 
   return (

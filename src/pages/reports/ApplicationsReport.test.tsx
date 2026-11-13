@@ -422,10 +422,10 @@ describe('ApplicationsReport (RAPPORTEN-SUITE-1 portie 2)', () => {
 
   // RAPPORT-APPS-VERDIEPING-1: 'applications' is now a 'fixed' family scope
   // (like whatsapp) — the catalogue is exactly the nine server keys, no spares.
-  it('the applications KPI catalogue is exactly the nine fixed server keys', () => {
+  it('the applications KPI catalogue is exactly the nine fixed server keys (snake_case)', () => {
     const keys = getReportKpiCatalog('applications').map(c => c.key)
-    expect(keys).toEqual(['total', 'new', 'active', 'matched', 'rejected', 'conversionPct',
-      'avgDaysToMatch', 'tooLongInStage', 'missingAppointment'])
+    expect(keys).toEqual(['total', 'new', 'active', 'matched', 'rejected', 'conversion_pct',
+      'avg_days_to_match', 'too_long_in_stage', 'missing_appointment'])
   })
 
   // RAPPORT-COMPARE-2 (§4): the compare window lives in the right-hand filter

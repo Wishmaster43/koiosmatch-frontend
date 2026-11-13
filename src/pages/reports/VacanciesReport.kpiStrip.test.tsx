@@ -21,8 +21,8 @@ vi.mock('@/lib/api', () => ({
   getActiveTenantId: () => 'test-tenant',
 }))
 
-// Mock useReportKpiSelection hook to return default KPI order
-const mockUseReportKpiSelection = vi.fn(() => ({ data: ['status', 'lead_source', 'region', 'required_function', 'contract_form', 'language', 'level', 'experience', 'no_cv'] as string[], isLoading: false }))
+// The tenant picked all nine suite cards (the backend default is only four)
+const mockUseReportKpiSelection = vi.fn(() => ({ data: ['total', 'open', 'filled', 'fill_rate', 'stale_online', 'long_concept', 'no_matches', 'closing_soon', 'customers_count'] as string[], isLoading: false }))
 vi.mock('./hooks/useReportKpiSelection', () => ({ useReportKpiSelection: () => mockUseReportKpiSelection() }))
 
 // Tenant KPI-order settings, controllable per test (RAPPORT-KPI-INSTELBAAR).
@@ -185,15 +185,15 @@ describe('VacanciesReport (RAPPORTEN-SUITE-1 portie 4, additive on C-34)', () =>
   // KPI-VAC-1: the catalogue is now the server suite's own nine keys — no
   // spares (supersedes the old REPORTS-KPI-SPARE-1 six-spare block).
   describe('VacanciesReport (kpi catalogue, KPI-VAC-1)', () => {
-    it('offers exactly the nine server-suite keys, in suite order, no spares', async () => {
+    it('offers the nine server-suite keys, in suite order; the backend default is the first four', async () => {
       const { getReportKpiCatalog, getReportKpiDefaultOrder, reportHasSpareKpiCards } = await import('./kpiCatalog')
       const keys = getReportKpiCatalog('vacancies').map(c => c.key)
       expect(keys).toEqual([
         'total', 'open', 'filled', 'fill_rate', 'stale_online',
         'long_concept', 'no_matches', 'closing_soon', 'customers_count',
       ])
-      expect(getReportKpiDefaultOrder('vacancies')).toEqual(keys)
-      expect(reportHasSpareKpiCards('vacancies')).toBe(false)
+      expect(getReportKpiDefaultOrder('vacancies')).toEqual(keys.slice(0, 4))
+      expect(reportHasSpareKpiCards('vacancies')).toBe(true)
     })
   })
 })

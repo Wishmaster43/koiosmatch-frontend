@@ -21,8 +21,8 @@ vi.mock('@/lib/api', () => ({
   getActiveTenantId: () => 'test-tenant',
 }))
 
-// Mock useReportKpiSelection hook to return default KPI order
-const mockUseReportKpiSelection = vi.fn(() => ({ data: ['by_stage', 'by_customer', 'by_owner', 'stale_opportunities', 'win_rate', 'by_reason', 'by_value', 'by_hours', 'by_source'] as string[], isLoading: false }))
+// The tenant picked all nine suite cards (the backend default is only four)
+const mockUseReportKpiSelection = vi.fn(() => ({ data: ['total', 'open', 'won', 'lost', 'win_rate', 'open_value', 'stale', 'closing_soon', 'overdue'] as string[], isLoading: false }))
 vi.mock('./hooks/useReportKpiSelection', () => ({ useReportKpiSelection: () => mockUseReportKpiSelection() }))
 
 // Tenant KPI-order settings (RAPPORT-KPI-INSTELBAAR) — empty blob = today's
@@ -155,14 +155,14 @@ describe('OpportunitiesReport (nine-card server-suite KPI strip, KPI-OPP-1)', ()
 // KPI-OPP-1: the catalogue is now the server suite's own nine keys — no spares
 // (supersedes the old REPORTS-KPI-SPARE-1 six-spare block).
 describe('OpportunitiesReport (kpi catalogue, KPI-OPP-1)', () => {
-  it('offers exactly the nine server-suite keys, in suite order, no spares', async () => {
+  it('offers the nine server-suite keys, in suite order; the backend default is four cards', async () => {
     const { getReportKpiCatalog, getReportKpiDefaultOrder, reportHasSpareKpiCards } = await import('./kpiCatalog')
     const keys = getReportKpiCatalog('opportunities').map(c => c.key)
     expect(keys).toEqual([
       'total', 'open', 'won', 'lost', 'win_rate', 'open_value', 'stale', 'closing_soon', 'overdue',
     ])
-    expect(getReportKpiDefaultOrder('opportunities')).toEqual(keys)
-    expect(reportHasSpareKpiCards('opportunities')).toBe(false)
+    expect(getReportKpiDefaultOrder('opportunities')).toEqual(['total', 'open', 'won', 'win_rate'])
+    expect(reportHasSpareKpiCards('opportunities')).toBe(true)
   })
 
   // RAPPORT-COMPARE-2 (§4): the compare window lives in the right-hand filter

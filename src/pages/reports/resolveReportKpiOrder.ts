@@ -1,11 +1,11 @@
 /**
- * resolveReportKpiOrder — turns a tenant's stored KPI-slot choice into a safe,
- * always-correct-length order, falling back to the report's default per slot
- * when a stored key no longer exists in the catalogue (renamed/removed card).
- * Pure and unit-tested in isolation (RAPPORT-KPI-INSTELBAAR §3): never throws,
- * never returns a shorter/longer list than `defaultOrder`, never renders a blank
- * slot (§0 no fake affordances). `fellBack` tells the caller (report page +
- * settings screen) to surface a visible notice — a correction is never silent.
+ * resolveReportKpiOrder — turns a tenant's stored KPI-slot choice into a safe
+ * order, falling back to the report's default per slot when a stored key no
+ * longer exists in the catalogue (renamed/removed card). Pure and unit-tested
+ * in isolation (RAPPORT-KPI-INSTELBAAR §3): never throws, never renders a blank
+ * slot (§0 no fake affordances). `fellBack` is true only on an unknown or
+ * duplicate key, so the caller (report page + settings screen) surfaces a
+ * visible notice for a real correction, never for a mere length difference.
  */
 export interface ResolveReportKpiOrderResult {
   order: string[]
@@ -38,20 +38,16 @@ export function resolveReportKpiOrder(
     }
   }
 
-  // Backfill from the default order (skipping keys already placed) until the
-  // result matches the expected length exactly.
+  // Backfill from the default order (skipping keys already placed) so a dropped
+  // or missing slot is patched, never blank; the target is the larger of stored
+  // and default length. Backfilling alone never counts as a fallback.
+  const target = Math.max(stored.length, defaultOrder.length)
   for (const key of defaultOrder) {
-    if (result.length >= defaultOrder.length) break
+    if (result.length >= target) break
     if (!seen.has(key)) {
       result.push(key)
       seen.add(key)
     }
-  }
-
-  // A stored list shorter than the default (e.g. an old, smaller catalogue) also
-  // counts as a correction — it changed shape from what's stored today.
-  if (result.length !== stored.length || result.length !== defaultOrder.length) {
-    fellBack = true
   }
 
   return { order: result, fellBack }

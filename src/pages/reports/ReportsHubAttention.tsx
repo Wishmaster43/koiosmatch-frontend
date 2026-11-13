@@ -14,6 +14,7 @@ import { ChevronRight } from 'lucide-react'
 import Button from '@/components/ui/Button'
 import { Mono } from '@/components/ui/typography'
 import { useNumberFormat } from '@/lib/formatters'
+import { labelOrRaw } from './lib/labelOrRaw'
 import ReportChartCard from './ReportChartCard'
 import ReportStateBlock from './ReportStateBlock'
 import { HubBlockBody, HubBlockTitle } from './hubLayout'
@@ -41,7 +42,7 @@ function isSignalReachable(s: { key: string; filters?: { expiring_within_days?: 
 
 // The attention list block: only non-zero signals, each a real button row.
 export default function ReportsHubAttention() {
-  const { t } = useTranslation('analytics')
+  const { t, i18n } = useTranslation('analytics')
   // GETALLEN-1: signal counts render locale-formatted (a large tenant can pass 1.000).
   const { formatNumber } = useNumberFormat()
   const { navigate } = useNavigation()
@@ -67,8 +68,8 @@ export default function ReportsHubAttention() {
   const list = (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
       {signals.map(s => {
-        // DEMO-TAAL/§5: the i18n key is the label; the server's Dutch label only backs an unmapped key.
-        const label = t(`hub.attention.cards.${s.key}`, { defaultValue: s.label })
+        // DEMO-TAAL/§5: the i18n key is the label; the server's own label only backs an unmapped key.
+        const label = labelOrRaw(t, i18n, `hub.attention.cards.${s.key}`, s.label)
         const target = resolveReportId(s.report, hasWhatsapp)
         const body = (
           <span style={{ display: 'flex', alignItems: 'center', gap: 10, minWidth: 0 }}>

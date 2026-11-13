@@ -44,16 +44,16 @@ import type { ReportCompareMode } from './reportCompareMode'
 import { ReportStateFlow } from './components/ReportStateFlow'
 import { ReportDataWindow } from './components/ReportDataWindow'
 
-import { camelKpiSpecs } from './lib/kpiSpecs'
+import { plainKpiSpecs } from './lib/kpiSpecs'
 import { makeOpenKpiDrill, makeOpenSegment } from './lib/drillFactories'
 import { reportWindowLabel } from './lib/reportWindowLabel'
 import { segmentClick, ownerClick } from './lib/drillClick'
 import { barData, ownerBarData } from './lib/chartData'
 import { useReportCustomKpis } from './hooks/useReportCustomKpis'
 // The nine fixed KPI keys the live backend returns (ApplicationKpisReport::CARDS,
-// RAPPORT-APPS-VERDIEPING-1) in camelCase label form (applications.kpi.*) — the
-// server's own `label` is intentionally ignored (§5). Mirrors WhatsappReport's
-// KPI_LABEL_KEYS exactly.
+// RAPPORT-APPS-VERDIEPING-1): the record keys are the BE snake_case keys, the values
+// the camelCase label keys (applications.kpi.*); the server's own `label` is
+// intentionally ignored (§5). Mirrors WhatsappReport's KPI_LABEL_KEYS exactly.
 const KPI_LABEL_KEYS: Record<string, string> = {
   total: 'applications.kpi.total',
   new: 'applications.kpi.new',
@@ -208,7 +208,7 @@ export default function ApplicationsReport({ period, filters = EMPTY_REPORT_FILT
   // Semantic colour per KPI key, applied only when the count is non-zero (§4:
   // colour carries meaning — a calm zero stays uncoloured). Conversion/avg-days
   // are debatable-meaning metrics and stay uncoloured (per brief).
-  const kpiByKey = camelKpiSpecs({
+  const kpiByKey = plainKpiSpecs({
     data,
     labelKeys: KPI_LABEL_KEYS,
     colors: KPI_COLOR,

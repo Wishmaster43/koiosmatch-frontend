@@ -130,3 +130,17 @@ describe('useDashboardViewModel · ENT2-07 net series reads from charts.timeseri
     expect(row?.net).toBeUndefined()
   })
 })
+
+// Shared resolver regression: a visible KPI missing from the stored order is backfilled, never dropped.
+describe('useDashboardViewModel · stored order backfill', () => {
+  it('still renders a visible KPI that the stored order leaves out', () => {
+    const { result } = renderHook(() => useDashboardViewModel(baseArgs({
+      activeType: 'admin' as const,
+      dash: { kpis: { placements: 7, opps_total: 5, candidates_total: 3 } },
+      kpiOrder: { admin: ['placements'] },
+    })))
+    const ids = result.current.kpis.map(k => k.id)
+    expect(ids[0]).toBe('placements')
+    expect(ids.length).toBeGreaterThan(1)
+  })
+})

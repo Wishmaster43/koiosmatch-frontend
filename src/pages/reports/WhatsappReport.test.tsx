@@ -8,10 +8,9 @@
  * is worthless.
  */
 import { describe, it, expect, vi, afterEach } from 'vitest'
-import { render, screen } from '@testing-library/react'
+import { screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
-import WhatsappReport from './WhatsappReport'
+import { data, FULL_NUMBER, MASKED_NUMBER, renderReport } from './WhatsappReport.testKit'
 import type { WhatsappReportData } from '@/types/analytics'
 
 // Data layer under test control (loading/error/empty/success — the four UI states).
@@ -21,8 +20,6 @@ vi.mock('./useWhatsappReport', () => ({ useWhatsappReport: () => mockUseWhatsapp
 // Spy on the underlying axios client so we can assert the exact request shape a
 // KPI-card click sends. The drill rows fixture carries the SERVER-MASKED
 // wa_number — exactly what the real ReportDrillController::whatsappKpi returns.
-const MASKED_NUMBER = '06••••5678'
-const FULL_NUMBER = '0612345678'
 const getSpy = vi.fn().mockResolvedValue({ data: { data: [
   { name: 'Jan Jansen', wa_number: MASKED_NUMBER, status: 'open' },
 ], meta: { total: 1 } } })
@@ -32,8 +29,8 @@ vi.mock('@/lib/api', () => ({
   getActiveTenantId: () => 'test-tenant',
 }))
 
-// Mock useReportKpiSelection hook to return default KPI order
-const mockUseReportKpiSelection = vi.fn(() => ({ data: ['total_conversations', 'open_conversations', 'unread_conversations', 'active_conversations', 'avg_message_rate', 'by_direction', 'by_status', 'top_conversations', 'by_hour'] as string[], isLoading: false }))
+// The stored selection mock carries the BE snake_case default (config/report_kpis.php whatsapp), so no fallback banner renders.
+const mockUseReportKpiSelection = vi.fn(() => ({ data: ['conversations_total', 'active_7d', 'new_in_period', 'inbound_in_period', 'outbound_in_period', 'app_echoes_in_period', 'escalations_open', 'unanswered_over_window', 'avg_first_response_minutes'] as string[], isLoading: false }))
 vi.mock('./hooks/useReportKpiSelection', () => ({ useReportKpiSelection: () => mockUseReportKpiSelection() }))
 
 // Tenant KPI-order settings (RAPPORT-KPI-INSTELBAAR) — empty blob = today's
@@ -43,52 +40,6 @@ vi.mock('@/lib/settings/useAllSettings', async () => {
   const actual = await vi.importActual('@/lib/settings/useAllSettings')
   return { ...actual, useAllSettings: () => mockSettings() }
 })
-
-const data: WhatsappReportData = {
-  meta: { period: 'month', from: '2026-05-24', to: '2026-08-24', total: 40 },
-  kpis: [
-    { key: 'conversations_total', label: 'ignored', count: 40 },
-    { key: 'active_7d', label: 'ignored', count: 18 },
-    { key: 'new_in_period', label: 'ignored', count: 9 },
-    { key: 'inbound_in_period', label: 'ignored', count: 25 },
-    { key: 'outbound_in_period', label: 'ignored', count: 21 },
-    { key: 'app_echoes_in_period', label: 'ignored', count: 5 },
-    { key: 'escalations_open', label: 'ignored', count: 3 },
-    { key: 'unanswered_over_window', label: 'ignored', count: 2 },
-    { key: 'avg_first_response_minutes', label: 'ignored', count: 12 },
-  ],
-  timeseries: { bucket: 'week', series: [
-    { date: '2026-05-24', inbound: 10, outbound: 8 },
-    { date: '2026-08-20', inbound: 15, outbound: 13 },
-  ] },
-  by_direction: [
-    { value: 'inbound', label: 'Inkomend', count: 25 },
-    { value: 'outbound', label: 'Uitgaand', count: 15 },
-  ],
-  by_type: [
-    { value: 'text', label: 'Tekst', count: 30 },
-    { value: 'app_echo', label: 'Via app', count: 10 },
-  ],
-  // Real backend vocabulary: escalated/normal (not yes/no).
-  by_escalated: [
-    { value: 'escalated', label: 'Geëscaleerd', count: 3 },
-    { value: 'normal', label: 'Niet geëscaleerd', count: 37 },
-  ],
-  // Real shape: candidate name + volume — no wa_number here (drill rows only).
-  top_conversations: [
-    { conversation_id: 'conv-1', candidate: 'Jan Jansen', message_count: 42, last_message_at: '2026-08-20' },
-    { conversation_id: 'conv-2', candidate: null, message_count: 30, last_message_at: null },
-  ],
-}
-
-function renderReport() {
-  const qc = new QueryClient()
-  return render(
-    <QueryClientProvider client={qc}>
-      <WhatsappReport period="month" />
-    </QueryClientProvider>,
-  )
-}
 
 // The house LineChartCard needs real layout (jsdom has none) so the timeseries
 // wrapper is mocked exactly like OutreachReport.test.tsx: one span per point.
@@ -178,49 +129,6 @@ describe('WhatsappReport (RAPPORTEN-WHATSAPP-FE-1)', () => {
     expect(getSpy).not.toHaveBeenCalled()
   })
 
-  // The axis drill (REPORTS-WHATSAPP-AXES-DRILL-1): a direction-segment click
-  // hits GET /reports/whatsapp/axes/drill with axis + the segment's OWN raw value.
-  // Timeseries bucket drill: value = the point's own count, the week bucket
-  // rides along (a week bar's drawer must count the whole week), and the title
-  // goes through the house date formatter — asserted on the REQUEST (§13).
-  it('clicking a timeseries point drills with axis=timeseries + bucket=week', async () => {
-    const user = userEvent.setup()
-    mockUseWhatsappReport.mockReturnValue({ data, loading: false, error: false })
-    renderReport()
-    getSpy.mockClear()
-    const firstDate = data.timeseries.series[0].date
-    // The mock renders one clickable span per point (role=button) — two charts
-    // (inbound + outbound) render the same dates; the first hit is inbound's.
-    const point = screen.getAllByText(`${firstDate}-${data.timeseries.series[0].inbound}`, { exact: false })
-      .map(el => el.closest('[role="button"]') ?? el).find(Boolean)
-    await user.click(point!)
-    expect(getSpy).toHaveBeenCalledWith('/reports/whatsapp/axes/drill',
-      expect.objectContaining({ params: { axis: 'timeseries', value: firstDate, period: 'month', bucket: 'week' } }))
-  })
-
-  it('clicking a direction segment drills via /reports/whatsapp/axes/drill with axis=direction', async () => {
-    const user = userEvent.setup()
-    mockUseWhatsappReport.mockReturnValue({ data, loading: false, error: false })
-    renderReport()
-    // The segment bar's own clickable row (role=button) — 'Inkomend' also labels
-    // the KPI card and the timeseries caption, neither of which is a segment row.
-    const segmentRow = screen.getAllByText('Inkomend').map(el => el.closest('[role="button"]')).find(Boolean)
-    await user.click(segmentRow!)
-    expect(getSpy).toHaveBeenCalledWith('/reports/whatsapp/axes/drill',
-      expect.objectContaining({ params: { axis: 'direction', value: 'inbound', period: 'month' } }))
-  })
-
-  // Same drill, different axis: a top-conversation row drills on axis=conversation
-  // with the raw conversation_id, never the rendered candidate name.
-  it('clicking a top-conversation row drills via /reports/whatsapp/axes/drill with axis=conversation', async () => {
-    const user = userEvent.setup()
-    mockUseWhatsappReport.mockReturnValue({ data, loading: false, error: false })
-    renderReport()
-    await user.click(screen.getByText('Jan Jansen'))
-    expect(getSpy).toHaveBeenCalledWith('/reports/whatsapp/axes/drill',
-      expect.objectContaining({ params: { axis: 'conversation', value: 'conv-1', period: 'month' } }))
-  })
-
   it('renders top_conversations with candidate names and volumes — never a number, never message content', () => {
     mockUseWhatsappReport.mockReturnValue({ data, loading: false, error: false })
     renderReport()
@@ -229,20 +137,6 @@ describe('WhatsappReport (RAPPORTEN-WHATSAPP-FE-1)', () => {
     expect(screen.getAllByText('—').length).toBeGreaterThan(0)
     expect(screen.getAllByText('42').length).toBeGreaterThan(0)
     expect(screen.getByText('20-08-2026')).toBeInTheDocument()
-    expect(document.body.textContent).not.toContain(FULL_NUMBER)
-  })
-
-  // The ONE whatsapp drill: per KPI card, kpi=<key> (§13: assert the request).
-  it('clicking a KPI card drills via /reports/whatsapp/kpis/drill with kpi=<key>', async () => {
-    const user = userEvent.setup()
-    mockUseWhatsappReport.mockReturnValue({ data, loading: false, error: false })
-    renderReport()
-    await user.click(screen.getByText('Totaal gesprekken'))
-    expect(getSpy).toHaveBeenCalledWith('/reports/whatsapp/kpis/drill',
-      expect.objectContaining({ params: { kpi: 'conversations_total', period: 'month' } }))
-    // The drawer shows the drill rows — including the SERVER-masked wa_number,
-    // rendered verbatim; the full number never appears anywhere.
-    expect(await screen.findByText(MASKED_NUMBER, { exact: false })).toBeInTheDocument()
     expect(document.body.textContent).not.toContain(FULL_NUMBER)
   })
 
@@ -267,8 +161,8 @@ describe('WhatsappReport (RAPPORTEN-WHATSAPP-FE-1)', () => {
   it('renders spare KPI cards with real values when picked in settings, strip stays nine', () => {
     mockSettings.mockReturnValue({
       report_kpis_whatsapp: [
-        'active7d', 'newInPeriod', 'inboundInPeriod', 'outboundInPeriod', 'appEchoesInPeriod',
-        'escalationsOpen', 'unansweredOverWindow', 'avgFirstResponseMinutes', 'conversationsTotal',
+        'active_7d', 'new_in_period', 'inbound_in_period', 'outbound_in_period', 'app_echoes_in_period',
+        'escalations_open', 'unanswered_over_window', 'avg_first_response_minutes', 'conversations_total',
       ],
     })
     mockUseWhatsappReport.mockReturnValue({ data, loading: false, error: false })

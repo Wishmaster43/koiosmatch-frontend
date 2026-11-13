@@ -224,6 +224,17 @@ describe('ReportsDashboard · attention block (PART A)', () => {
     expect(screen.queryByText(/^SERVER /)).not.toBeInTheDocument()
   })
 
+  // labelOrRaw fallback: a signal key with no locale key shows the server's own label.
+  it('shows the server label for a signal key that has no locale key', () => {
+    setSuccess()
+    mockHub.mockReturnValue({
+      data: { signals: [{ key: 'brand_new_signal', label: 'SERVER Brand new signal', count: 2, report: 'tasks', filters: {} }] },
+      loading: false, error: false, errorObject: undefined, refetch: vi.fn(),
+    })
+    renderDashboard()
+    expect(screen.getByText('SERVER Brand new signal')).toBeInTheDocument()
+  })
+
   it('still renders the KPI band when the hub errors, and shows the error block', () => {
     setSuccess()
     mockHub.mockReturnValue({ data: null, loading: false, error: true, errorObject: { response: { status: 500 } }, refetch: vi.fn() })

@@ -40,4 +40,29 @@ describe('resolveReportKpiOrder', () => {
     const { order } = resolveReportKpiOrder(['ghost1', 'ghost2'], CATALOG, DEFAULT)
     expect(order).toHaveLength(DEFAULT.length)
   })
+
+  // REPORT-KPI-CATALOG-DRIFT-1: a stored list of the BACKEND default (shorter than the
+  // catalogue) is valid; length alone never counts as a fallback.
+  it('does not fall back for a valid stored list shorter than the catalogue', () => {
+    const { order, fellBack } = resolveReportKpiOrder(['a', 'b', 'c'], CATALOG, ['a', 'b', 'c'])
+    expect(order).toEqual(['a', 'b', 'c'])
+    expect(fellBack).toBe(false)
+  })
+
+  it('does not fall back for a valid stored list longer than the default', () => {
+    const { order, fellBack } = resolveReportKpiOrder(CATALOG, CATALOG, ['a', 'b'])
+    expect(order).toEqual(CATALOG)
+    expect(fellBack).toBe(false)
+  })
+
+  // Shared consumers (dashboard order, settings KpiOrderList) pass visible as default and rely on backfill.
+  it('backfills a valid stored list shorter than the default without falling back', () => {
+    const { order, fellBack } = resolveReportKpiOrder(['a', 'b'], ['a', 'b', 'c'], ['a', 'b', 'c'])
+    expect(order).toEqual(['a', 'b', 'c'])
+    expect(fellBack).toBe(false)
+  })
+
+  it('falls back on an unknown key only', () => {
+    expect(resolveReportKpiOrder(['a', 'conversionPct'], CATALOG, ['a', 'b']).fellBack).toBe(true)
+  })
 })

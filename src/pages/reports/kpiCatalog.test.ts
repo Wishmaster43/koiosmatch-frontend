@@ -42,8 +42,9 @@ describe('kpiCatalog — spare cards on surviving scopes', () => {
   it('leads still reports real spare cards to the settings screen', () => {
     expect(reportHasSpareKpiCards('leads')).toBe(true)
   })
-  it('vacancies no longer reports spare cards after the server-suite flip', () => {
-    expect(reportHasSpareKpiCards('vacancies')).toBe(false)
+  it('vacancies default is the backend four-card list, so the other catalogue cards are spares', () => {
+    expect(getReportKpiDefaultOrder('vacancies')).toEqual(['total', 'open', 'filled', 'fill_rate'])
+    expect(reportHasSpareKpiCards('vacancies')).toBe(true)
   })
 
   // CMBE K-191: outreach moved to the server's own nine-card kpis[] suite —
@@ -60,9 +61,9 @@ describe('kpiCatalog — spare cards on surviving scopes', () => {
   // contract keys, in contract order — no spares yet.
   it('whatsapp default order is exactly the nine contract keys', () => {
     expect(getReportKpiDefaultOrder('whatsapp')).toEqual([
-      'conversationsTotal', 'active7d', 'newInPeriod', 'inboundInPeriod',
-      'outboundInPeriod', 'appEchoesInPeriod', 'escalationsOpen',
-      'unansweredOverWindow', 'avgFirstResponseMinutes',
+      'conversations_total', 'active_7d', 'new_in_period', 'inbound_in_period',
+      'outbound_in_period', 'app_echoes_in_period', 'escalations_open',
+      'unanswered_over_window', 'avg_first_response_minutes',
     ])
   })
 
@@ -79,5 +80,61 @@ describe('kpiCatalog — spare cards on surviving scopes', () => {
       const keys = getReportKpiCatalog(scopeId).map(c => c.key)
       expect(new Set(keys).size).toBe(keys.length)
     }
+  })
+})
+
+// REPORT-KPI-CATALOG-DRIFT-1: static fixture copied from koiosmatch-api config/report_kpis.php
+// (`available` keys and `default` lists per fixed scope, 13-11). The FE catalogue must use
+// exactly the backend snake_case keys; a key the backend offers that the FE has no card for
+// yet is listed in NOT_YET_RENDERED so the gap stays visible instead of silent.
+const BACKEND_KPIS: Record<string, { available: string[]; default: string[] }> = {
+  candidates: {
+    available: ['no_followup', 'status_stale', 'no_cv', 'document_expiring', 'availability_due', 'no_contact', 'active_conversations', 'inflow', 'outflow'],
+    default: ['inflow', 'outflow', 'no_followup', 'status_stale', 'no_cv', 'document_expiring', 'availability_due', 'no_contact', 'active_conversations'],
+  },
+  applications: {
+    available: ['total', 'new', 'active', 'matched', 'rejected', 'conversion_pct', 'avg_days_to_match', 'too_long_in_stage', 'missing_appointment', 'stage_dwell'],
+    default: ['total', 'new', 'active', 'matched', 'rejected', 'conversion_pct', 'avg_days_to_match', 'too_long_in_stage', 'missing_appointment'],
+  },
+  customers: {
+    available: ['contract_ending', 'no_contact', 'task_overdue', 'price_agreement_ending', 'vacancy_stale', 'departments_without_placement', 'customers_without_vacancies', 'customers_without_applications', 'matches_stopped_early'],
+    default: ['contract_ending', 'no_contact', 'task_overdue', 'price_agreement_ending', 'vacancy_stale', 'departments_without_placement', 'customers_without_vacancies', 'customers_without_applications', 'matches_stopped_early'],
+  },
+  vacancies: {
+    available: ['total', 'open', 'filled', 'fill_rate', 'stale_online', 'long_concept', 'no_matches', 'closing_soon', 'customers_count', 'without_advice', 'advice_stale', 'verdict_distribution'],
+    default: ['total', 'open', 'filled', 'fill_rate'],
+  },
+  opportunities: {
+    available: ['total', 'open', 'won', 'lost', 'win_rate', 'open_value', 'stale', 'closing_soon', 'overdue'],
+    default: ['total', 'open', 'won', 'win_rate'],
+  },
+  tasks: {
+    available: ['total', 'open', 'overdue', 'done_in_period', 'created_in_period', 'due_today', 'due_this_week', 'without_assignee', 'avg_completion_days'],
+    default: ['total', 'open', 'overdue', 'done_in_period', 'created_in_period', 'due_today', 'due_this_week', 'without_assignee', 'avg_completion_days'],
+  },
+  matches: {
+    available: ['total', 'new_in_period', 'active', 'expiring_soon', 'terminated_in_period', 'renewals_in_period', 'without_end_date', 'avg_duration_days', 'reach_rate'],
+    default: ['total', 'new_in_period', 'active', 'expiring_soon', 'terminated_in_period', 'renewals_in_period', 'without_end_date', 'avg_duration_days', 'reach_rate'],
+  },
+  outreach: {
+    available: ['total_targets', 'open_todo', 'called_in_period', 'reached', 'not_reached', 'conversion_pct', 'campaigns_active', 'campaigns_done_in_period', 'due_today'],
+    default: ['total_targets', 'open_todo', 'called_in_period', 'reached', 'not_reached', 'conversion_pct', 'campaigns_active', 'campaigns_done_in_period', 'due_today'],
+  },
+  whatsapp: {
+    available: ['conversations_total', 'active_7d', 'new_in_period', 'inbound_in_period', 'outbound_in_period', 'app_echoes_in_period', 'escalations_open', 'unanswered_over_window', 'avg_first_response_minutes'],
+    default: ['conversations_total', 'active_7d', 'new_in_period', 'inbound_in_period', 'outbound_in_period', 'app_echoes_in_period', 'escalations_open', 'unanswered_over_window', 'avg_first_response_minutes'],
+  },
+}
+const NOT_YET_RENDERED: Record<string, string[]> = {
+  applications: ['stage_dwell'],
+  vacancies: ['without_advice', 'advice_stale', 'verdict_distribution'],
+}
+
+describe('kpiCatalog — equals the backend catalogue (REPORT-KPI-CATALOG-DRIFT-1)', () => {
+  it.each(Object.keys(BACKEND_KPIS))('%s uses the backend keys and the backend default list', (scope) => {
+    const be = BACKEND_KPIS[scope]
+    const keys = getReportKpiCatalog(scope as 'candidates').map(c => c.key)
+    expect([...keys, ...(NOT_YET_RENDERED[scope] ?? [])].sort()).toEqual([...be.available].sort())
+    expect(getReportKpiDefaultOrder(scope as 'candidates')).toEqual(be.default)
   })
 })

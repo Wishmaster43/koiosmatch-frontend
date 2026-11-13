@@ -2,8 +2,8 @@
  * buildKpiSpecs — the one builder behind every report's nine-card KPI strip.
  * Each report used to copy the same loop: walk its label-key map, read the server
  * value, pick a colour when the count is non-zero, wire the per-KPI drill. The two
- * idioms in the codebase differ only in how the record is keyed (label-key tail
- * versus server key), whether the click needs a value, and per-report value/sub
+ * idioms in the codebase both key the record by the server key and differ only in
+ * the active flag, whether the click needs a value, and per-report value/sub
  * formatting — all of which arrive here as options (DRY-1 O5 round 8).
  */
 import type { ReactNode } from 'react'
@@ -27,9 +27,9 @@ export interface BuildKpiSpecsOpts {
   valueFor?: (serverKey: string, raw: number | null | undefined, has: boolean) => string | number
   // Per-report caption (unit text, compare metric, threshold caption).
   subFor?: (serverKey: string, raw: number | null | undefined, has: boolean) => ReactNode | undefined
-  // 'camel' keys the record by the label key's tail (applications/whatsapp idiom);
+  // 'serverPlain' keys the record by the server key without the active flag (applications/whatsapp);
   // 'server' keys it by the server key and marks the open drill's card active.
-  keyBy?: 'camel' | 'server'
+  keyBy: 'server' | 'serverPlain'
   // The kpi of the currently open drill (server-keyed reports): that card renders active.
   activeKey?: string
   // Wire the click only when the server sent a value (server-keyed reports).
@@ -41,7 +41,7 @@ export interface BuildKpiSpecsOpts {
 export function buildKpiSpecs(o: BuildKpiSpecsOpts): Record<string, KpiSpec> {
   return Object.fromEntries(
     Object.entries(o.labelKeys).map(([serverKey, labelKey]) => {
-      const key = o.keyBy === 'server' ? serverKey : labelKey.split('.').pop()!
+      const key = serverKey
       const raw = o.kpis.get(serverKey)
       const has = raw != null
       const label = o.t(labelKey)
@@ -76,20 +76,20 @@ export interface ServerKpiSpecsOpts extends SharedKpiFieldOpts {
   drill: DrillSpec | null
 }
 
-// The camel-keyed idiom applications/whatsapp share: build the kpiByServerKey
-// Map from the plain envelope's own kpis[] array and call buildKpiSpecs with the
-// default keyBy:'camel' (label-key tail) — labelKeys/colors/t/openKpiDrill/
-// valueFor/subFor stay per-page (rule B).
-export interface CamelKpiSpecsOpts extends SharedKpiFieldOpts {
+// The plain server-keyed idiom applications/whatsapp share: build the kpiByServerKey
+// Map from the plain envelope's own kpis[] array and key the cards by the SERVER's
+// snake_case key, matching the KPI catalogue (REPORT-KPI-CATALOG-DRIFT-1) — labelKeys/
+// colors/t/openKpiDrill/valueFor/subFor stay per-page (rule B).
+export interface PlainKpiSpecsOpts extends SharedKpiFieldOpts {
   // The plain report envelope's own kpis[] array (key/count pairs).
   data: { kpis?: Array<{ key: string; count: number | null }> } | null | undefined
 }
 
-export function camelKpiSpecs(o: CamelKpiSpecsOpts): Record<string, KpiSpec> {
+export function plainKpiSpecs(o: PlainKpiSpecsOpts): Record<string, KpiSpec> {
   const kpis = new Map((o.data?.kpis ?? []).map(k => [k.key, k.count]))
   return buildKpiSpecs({
     kpis, labelKeys: o.labelKeys, colors: o.colors, t: o.t, openKpiDrill: o.openKpiDrill,
-    valueFor: o.valueFor, subFor: o.subFor,
+    keyBy: 'serverPlain', valueFor: o.valueFor, subFor: o.subFor,
   })
 }
 

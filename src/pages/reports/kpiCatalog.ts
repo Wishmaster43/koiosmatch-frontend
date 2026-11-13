@@ -19,12 +19,12 @@
  *   now the report's own STANDING signal `kpis[]` suite (CUSTOMERS_SIGNAL_LABEL_KEYS
  *   below), replacing the old axis-topsegment filler cards; `prospects` still has
  *   no signal suite (those describe an existing client relationship a lead can't
- *   have) so it stays on the axis family, untouched. Since the 28-08 server-suite
- *   flips (matches, customers, opportunities, vacancies — each catalog now exactly
- *   its server nine) only `leads` still carries spare entries beyond its defaults;
- *   every other scope equals its default order 1:1. `hasSpareCards` reports
- *   per-scope so the settings screen stays honest where a picker has nothing extra
- *   to offer.
+ *   have) so it stays on the axis family, untouched. Each fixed scope has a default
+ *   list copied from the backend (REPORT_KPI_FIXED_DEFAULT): vacancies and
+ *   opportunities default to four cards and so report spares, `leads` carries spare
+ *   entries beyond its nine, the rest equal their first nine 1:1. `hasSpareCards`
+ *   reports per-scope so the settings screen stays honest where a picker has
+ *   nothing extra to offer.
  *
  * SCOPE IDS vs. ROUTE IDS (RAPPORTEN-CONSOLIDATIE-1, 2026-08-14): a KPI catalogue
  * entry is keyed by `ReportKpiScopeId`, a SUPERSET of the route-level `ReportId`.
@@ -170,10 +170,10 @@ const REPORT_KPI_AXIS_CATALOG: Partial<Record<ReportKpiScopeId, KpiCatalogEntry[
 
 // Fixed-family catalogues — one entry per today's literal `kpis: KpiSpec[]` card,
 // in the report's current order, PLUS (per REPORTS-KPI-SPARES-1) any extra spare
-// cards appended after those first nine. The first nine entries of each array are
-// always the report's current default order (see getReportKpiDefaultOrder below,
-// which slices to that fixed length) — a spare is only ever appended, never
-// inserted before position nine, so the default strip never silently changes.
+// cards appended after those first nine. The default order comes from the backend
+// default list where one exists (REPORT_KPI_FIXED_DEFAULT), otherwise from the
+// first nine entries (see getReportKpiDefaultOrder below) — a spare is only ever
+// appended, so the default strip never silently changes.
 const REPORT_KPI_FIXED_CATALOG: Partial<Record<ReportKpiScopeId, KpiCatalogEntry[]>> = {
   // The candidates suite (CandidatesReport::kpis, K-169 family) — nine real
   // attention/flow KPIs, each sharing its predicate with its own drill.
@@ -288,21 +288,21 @@ const REPORT_KPI_FIXED_CATALOG: Partial<Record<ReportKpiScopeId, KpiCatalogEntry
     { key: 'active', labelKey: 'applications.kpi.active' },
     { key: 'matched', labelKey: 'applications.kpi.matched' },
     { key: 'rejected', labelKey: 'applications.kpi.rejected' },
-    { key: 'conversionPct', labelKey: 'applications.kpi.conversionPct' },
-    { key: 'avgDaysToMatch', labelKey: 'applications.kpi.avgDaysToMatch' },
-    { key: 'tooLongInStage', labelKey: 'applications.kpi.tooLongInStage' },
-    { key: 'missingAppointment', labelKey: 'applications.kpi.missingAppointment' },
+    { key: 'conversion_pct', labelKey: 'applications.kpi.conversionPct' },
+    { key: 'avg_days_to_match', labelKey: 'applications.kpi.avgDaysToMatch' },
+    { key: 'too_long_in_stage', labelKey: 'applications.kpi.tooLongInStage' },
+    { key: 'missing_appointment', labelKey: 'applications.kpi.missingAppointment' },
   ],
   whatsapp: [
-    { key: 'conversationsTotal', labelKey: 'whatsapp.kpi.conversationsTotal' },
-    { key: 'active7d', labelKey: 'whatsapp.kpi.active7d' },
-    { key: 'newInPeriod', labelKey: 'whatsapp.kpi.newInPeriod' },
-    { key: 'inboundInPeriod', labelKey: 'whatsapp.kpi.inboundInPeriod' },
-    { key: 'outboundInPeriod', labelKey: 'whatsapp.kpi.outboundInPeriod' },
-    { key: 'appEchoesInPeriod', labelKey: 'whatsapp.kpi.appEchoesInPeriod' },
-    { key: 'escalationsOpen', labelKey: 'whatsapp.kpi.escalationsOpen' },
-    { key: 'unansweredOverWindow', labelKey: 'whatsapp.kpi.unansweredOverWindow' },
-    { key: 'avgFirstResponseMinutes', labelKey: 'whatsapp.kpi.avgFirstResponseMinutes' },
+    { key: 'conversations_total', labelKey: 'whatsapp.kpi.conversationsTotal' },
+    { key: 'active_7d', labelKey: 'whatsapp.kpi.active7d' },
+    { key: 'new_in_period', labelKey: 'whatsapp.kpi.newInPeriod' },
+    { key: 'inbound_in_period', labelKey: 'whatsapp.kpi.inboundInPeriod' },
+    { key: 'outbound_in_period', labelKey: 'whatsapp.kpi.outboundInPeriod' },
+    { key: 'app_echoes_in_period', labelKey: 'whatsapp.kpi.appEchoesInPeriod' },
+    { key: 'escalations_open', labelKey: 'whatsapp.kpi.escalationsOpen' },
+    { key: 'unanswered_over_window', labelKey: 'whatsapp.kpi.unansweredOverWindow' },
+    { key: 'avg_first_response_minutes', labelKey: 'whatsapp.kpi.avgFirstResponseMinutes' },
   ],
 }
 
@@ -329,9 +329,17 @@ export function getReportKpiCatalog(scopeId: ReportKpiScopeId): KpiCatalogEntry[
   return []
 }
 
-// The fixed strip length every report renders (§0 EXACTLY NINE) — the default
-// order is always this many keys, even once a catalogue grows spares beyond it.
-const REPORT_KPI_DEFAULT_LENGTH = 9
+// REPORT-KPI-CATALOG-DRIFT-1: the out-of-the-box strip per fixed scope, copied from
+// the backend's `default` lists (koiosmatch-api config/report_kpis.php). Its LENGTH
+// is the backend's, not a constant: vacancies and opportunities default to four
+// cards, so a stored selection of the backend default is never "shorter than nine".
+// Fixed scopes without an explicit entry here default to their first nine cards.
+// The report KPI strip always shows nine cards (the default list is padded up to it).
+export const NINE_CARD_STRIP = 9
+const REPORT_KPI_FIXED_DEFAULT: Partial<Record<ReportKpiScopeId, string[]>> = {
+  vacancies: ['total', 'open', 'filled', 'fill_rate'],
+  opportunities: ['total', 'open', 'won', 'win_rate'],
+}
 
 // Axis-family scopes whose catalogue now holds real single-segment "signal"
 // spares (KPI-SPARE-1) alongside their handful of true multi-segment axes —
@@ -348,7 +356,7 @@ const REPORT_KPI_AXIS_DEFAULT_LENGTH: Partial<Record<ReportKpiScopeId, number>> 
 }
 
 // Today's default order — identical to what the report renders when nothing is
-// stored. For 'fixed' scopes this is always the catalogue's FIRST nine entries:
+// stored. For 'fixed' scopes this is the backend's default list (REPORT_KPI_FIXED_DEFAULT) or else the catalogue's FIRST nine entries:
 // a scope's spare cards (REPORTS-KPI-SPARES-1) are appended after the default
 // nine, never inserted before them, so growing the catalogue never changes what
 // a never-configured tenant sees. For 'axis' scopes it is the catalogue's first
@@ -357,7 +365,8 @@ const REPORT_KPI_AXIS_DEFAULT_LENGTH: Partial<Record<ReportKpiScopeId, number>> 
 // (buildAxisKpis pads the rest by round-robining each axis's own segments).
 export function getReportKpiDefaultOrder(scopeId: ReportKpiScopeId): string[] {
   const family = REPORT_KPI_FAMILY[scopeId]
-  const cap = family === 'axis' ? (REPORT_KPI_AXIS_DEFAULT_LENGTH[scopeId] ?? Infinity) : REPORT_KPI_DEFAULT_LENGTH
+  if (family === 'fixed' && REPORT_KPI_FIXED_DEFAULT[scopeId]) return [...REPORT_KPI_FIXED_DEFAULT[scopeId]!]
+  const cap = family === 'axis' ? (REPORT_KPI_AXIS_DEFAULT_LENGTH[scopeId] ?? Infinity) : NINE_CARD_STRIP
   return getReportKpiCatalog(scopeId).slice(0, cap).map(e => e.key)
 }
 

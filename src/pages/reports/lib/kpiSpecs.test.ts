@@ -5,7 +5,7 @@
  */
 import { describe, it, expect, vi } from 'vitest'
 import type { TFunction } from 'i18next'
-import { buildKpiSpecs, serverKpiSpecs, camelKpiSpecs, unitAwareServerKpiSpecs, thresholdCaption, unitMapFor } from './kpiSpecs'
+import { buildKpiSpecs, serverKpiSpecs, plainKpiSpecs, unitAwareServerKpiSpecs, thresholdCaption, unitMapFor } from './kpiSpecs'
 import type { DrillSpec } from '../ReportDrillDrawer'
 
 const t = ((key: string) => `L:${key}`) as unknown as TFunction
@@ -13,14 +13,14 @@ const labelKeys = { total: 'x.kpi.total', avg_days: 'x.kpi.avgDays', open_now: '
 const colors = { total: 'var(--color-chart-1)', open_now: 'var(--color-chart-2)' }
 
 describe('buildKpiSpecs', () => {
-  it('camel idiom: keys by the label tail, keeps a number a number, dashes a NULL, colours only non-zero', () => {
+  it('serverPlain idiom: keys by the server key without active, keeps a number a number, dashes a NULL, colours only non-zero', () => {
     const openKpiDrill = vi.fn(() => () => {})
-    const out = buildKpiSpecs({ kpis: new Map([['total', 12], ['avg_days', null], ['open_now', 0]]), labelKeys, colors, t, openKpiDrill })
-    expect(Object.keys(out)).toEqual(['total', 'avgDays', 'openNow'])
+    const out = buildKpiSpecs({ kpis: new Map([['total', 12], ['avg_days', null], ['open_now', 0]]), labelKeys, colors, t, openKpiDrill, keyBy: 'serverPlain' })
+    expect(Object.keys(out)).toEqual(['total', 'avg_days', 'open_now'])
     expect(out.total).toMatchObject({ key: 'total', label: 'L:x.kpi.total', value: 12, color: 'var(--color-chart-1)' })
-    expect(out.avgDays.value).toBe('—')
-    expect(out.avgDays.color).toBeUndefined()
-    expect(out.openNow.color).toBeUndefined()
+    expect(out.avg_days.value).toBe('—')
+    expect(out.avg_days.color).toBeUndefined()
+    expect(out.open_now.color).toBeUndefined()
     expect(out.total).not.toHaveProperty('active')
     // The click is wired for every card, value included, exactly as the pages passed it.
     expect(openKpiDrill).toHaveBeenCalledWith('avg_days', 'L:x.kpi.avgDays', '—')
@@ -44,7 +44,7 @@ describe('buildKpiSpecs', () => {
   })
 
   it('omits the click when the report has no drill for that key', () => {
-    const out = buildKpiSpecs({ kpis: new Map([['total', 1]]), labelKeys: { total: 'x.total' }, colors: {}, t, openKpiDrill: () => undefined })
+    const out = buildKpiSpecs({ kpis: new Map([['total', 1]]), labelKeys: { total: 'x.total' }, colors: {}, t, openKpiDrill: () => undefined, keyBy: 'serverPlain' })
     expect(out.total).not.toHaveProperty('onClick')
   })
 })
@@ -80,14 +80,14 @@ describe('serverKpiSpecs', () => {
   })
 })
 
-describe('camelKpiSpecs', () => {
-  it('builds the camel-keyed record straight from data.kpis, same shape as calling buildKpiSpecs by hand', () => {
+describe('plainKpiSpecs', () => {
+  it('builds the server-keyed record straight from data.kpis, same shape as calling buildKpiSpecs by hand', () => {
     const openKpiDrill = vi.fn(() => () => {})
-    const out = camelKpiSpecs({
+    const out = plainKpiSpecs({
       data: { kpis: [{ key: 'total', count: 12 }, { key: 'avg_days', count: null }] },
       labelKeys, colors, t, openKpiDrill,
     })
-    expect(Object.keys(out)).toEqual(['total', 'avgDays', 'openNow'])
+    expect(Object.keys(out)).toEqual(['total', 'avg_days', 'open_now'])
     expect(out.total).toMatchObject({ key: 'total', value: 12, color: 'var(--color-chart-1)' })
     expect(out.total).not.toHaveProperty('active')
   })
