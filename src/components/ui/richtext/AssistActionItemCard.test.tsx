@@ -10,6 +10,7 @@ import { render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import AssistActionItemCard from './AssistActionItemCard'
 import type { ExecItem } from './useAssistActionsExecute'
+import i18n from '@/i18n'
 
 const BASE_ITEM: ExecItem = {
   title: 'Bel terug', type: 'task', due_date: null, note_excerpt: null,
@@ -62,12 +63,12 @@ describe('AssistActionItemCard — budget_exceeded unit label', () => {
 describe('AssistActionItemCard — confirm error copy per kind', () => {
   it('says the session expired on a 401/419 confirm', () => {
     render(<AssistActionItemCard item={{ ...BASE_ITEM, status: 'pending', confirmError: true, confirmErrorKind: 'sessionExpired' }} onConfirm={() => {}} />)
-    expect(screen.getByText('Sessie verlopen: log opnieuw in en bevestig nogmaals')).toBeInTheDocument()
+    expect(screen.getByText(i18n.t('common:notesAssist.execute.confirmSessionExpired'))).toBeInTheDocument()
   })
 
   it('says the server did not apply the confirm when it answered pending again', () => {
     render(<AssistActionItemCard item={{ ...BASE_ITEM, status: 'pending', confirmError: true, confirmErrorKind: 'notApplied' }} onConfirm={() => {}} />)
-    expect(screen.getByText('De server nam de bevestiging niet aan, probeer het nogmaals')).toBeInTheDocument()
+    expect(screen.getByText(i18n.t('common:notesAssist.execute.confirmNotApplied'))).toBeInTheDocument()
   })
 })
 
@@ -83,27 +84,27 @@ describe('AssistActionItemCard — executing/declined (CLAIM-1)', () => {
   it('renders the proposal_in_flight reason and calls onConfirm(true) from the force-send button', async () => {
     const onConfirm = vi.fn()
     render(<AssistActionItemCard item={{ ...BASE_ITEM, status: 'declined', code: 'proposal_in_flight', reason: 'Wacht op bevestiging.' }} onConfirm={onConfirm} />)
-    expect(screen.getByText('Voorstel wordt al verstuurd')).toBeInTheDocument()
-    await userEvent.click(screen.getByText('Toch versturen'))
+    expect(screen.getByText(i18n.t('common:notesAssist.execute.declined.proposal_in_flight'))).toBeInTheDocument()
+    await userEvent.click(screen.getByText(i18n.t('common:notesAssist.execute.forceSend')))
     expect(onConfirm).toHaveBeenCalledWith(true)
   })
 
   it('renders the proposal_recently_sent reason', () => {
     render(<AssistActionItemCard item={{ ...BASE_ITEM, status: 'declined', code: 'proposal_recently_sent' }} onConfirm={() => {}} />)
-    expect(screen.getByText('Voorstel is recent al verstuurd')).toBeInTheDocument()
+    expect(screen.getByText(i18n.t('common:notesAssist.execute.declined.proposal_recently_sent'))).toBeInTheDocument()
   })
 
   it('shows the existing-proposal chip only when proposal_id AND an application link are both present', () => {
     const { rerender } = render(
       <AssistActionItemCard item={{ ...BASE_ITEM, status: 'declined', code: 'proposal_recently_sent', proposal_id: 'p1' }} onConfirm={() => {}} />,
     )
-    expect(screen.queryByText('Bestaand voorstel')).not.toBeInTheDocument()
+    expect(screen.queryByText(i18n.t('common:notesAssist.execute.openProposal'))).not.toBeInTheDocument()
     rerender(
       <AssistActionItemCard
         item={{ ...BASE_ITEM, status: 'declined', code: 'proposal_recently_sent', proposal_id: 'p1', link_type: 'application', link_id: 'a1' }}
         onConfirm={() => {}} />,
     )
-    expect(screen.getByText('Bestaand voorstel')).toBeInTheDocument()
+    expect(screen.getByText(i18n.t('common:notesAssist.execute.openProposal'))).toBeInTheDocument()
   })
 
   // KOIOS-DEDUPE-1: the item's `ref` reaches AssistDeclinedFace as `existingRef`.
@@ -113,6 +114,6 @@ describe('AssistActionItemCard — executing/declined (CLAIM-1)', () => {
         item={{ ...BASE_ITEM, status: 'declined', code: 'duplicate_customer', ref: { type: 'customer', id: 'cust-1' } }}
         onConfirm={() => {}} />,
     )
-    expect(screen.getByText('Bekijk bestaand record')).toBeInTheDocument()
+    expect(screen.getByText(i18n.t('common:notesAssist.execute.openExisting'))).toBeInTheDocument()
   })
 })

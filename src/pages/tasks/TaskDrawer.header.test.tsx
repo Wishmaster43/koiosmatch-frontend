@@ -154,7 +154,7 @@ describe('TaskDrawer · header badge reads the LIVE lookup, not a baked snapshot
   // as the close button, and a separate row from the meta pickers below it (whose
   // "status" SelectMenu ALSO shows "Te doen" as its live current value, by design)
   // and from DetailsTab's own chip in the visible 'details' tab body.
-  const titleRowScope = () => within(screen.getByRole('button', { name: 'Sluiten' }).parentElement!)
+  const titleRowScope = () => within(screen.getByRole('button', { name: i18n.t('common:close') }).parentElement!)
   // The TYPE subtitle sits right below the title text, in its own wrapper div —
   // scoped there too, away from DetailsTab's own type chip in the tab body.
   const subtitleScope = () => within(screen.getByText('Bel kandidaat').parentElement!.parentElement!)
@@ -193,7 +193,7 @@ describe('TaskDrawer · header badge reads the LIVE lookup, not a baked snapshot
  * back to TitleBadge's own grey.
  */
 describe('TaskDrawer · header follows the table colour toggle (TASK-DISPLAY-DRILL-1 off-case)', () => {
-  const titleRowScope = () => within(screen.getByRole('button', { name: 'Sluiten' }).parentElement!)
+  const titleRowScope = () => within(screen.getByRole('button', { name: i18n.t('common:close') }).parentElement!)
   beforeEach(() => { displaySettingsRecord.current = {} })
   afterEach(() => {
     displaySettingsRecord.current = {}

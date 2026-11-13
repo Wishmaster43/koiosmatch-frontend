@@ -87,13 +87,13 @@ describe('tasks DetailsTab — split fields/description edit sections', () => {
   // affordance as the profile/match/vacancy text, beside its own pencil.
   it('renders the second-screen popout button beside the description pencil', () => {
     render(<DetailsTab task={task} onUpdate={vi.fn()} />)
-    expect(screen.getByTitle('Open op tweede scherm')).toBeInTheDocument()
+    expect(screen.getByTitle(i18n.t('common:openSecondScreen'))).toBeInTheDocument()
   })
 
   it('hides the popout button once description editing starts (mirrors MatchTextBlock)', () => {
     render(<DetailsTab task={task} onUpdate={vi.fn()} />)
     fireEvent.click(screen.getByTitle('Taakomschrijving'))
-    expect(screen.queryByTitle('Open op tweede scherm')).toBeNull()
+    expect(screen.queryByTitle(i18n.t('common:openSecondScreen'))).toBeNull()
   })
 
   it('saving the fields section sends the field patch WITHOUT description', () => {
@@ -138,7 +138,7 @@ describe('tasks DetailsTab — split fields/description edit sections', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Hoog' }))
     // Open + cancel the description section without touching the fields section.
     fireEvent.click(screen.getByTitle('Taakomschrijving'))
-    fireEvent.click(screen.getAllByTitle('Annuleren')[1])
+    fireEvent.click(screen.getAllByTitle(i18n.t('tasks:modal.cancel'))[1])
     // The fields section is still mid-edit, with the changed value intact.
     expect(screen.getByRole('button', { name: 'Prioriteit' })).toHaveTextContent('Hoog')
     fireEvent.click(screen.getByTitle('Plaatsen'))

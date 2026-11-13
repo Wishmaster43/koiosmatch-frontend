@@ -1,6 +1,6 @@
 import { describe, it, expect, vi } from 'vitest'
 import { render, screen, fireEvent } from '@testing-library/react'
-import '@/i18n'
+import i18n from '@/i18n'
 import ErrorBanner from './ErrorBanner'
 
 describe('ErrorBanner', () => {
@@ -17,14 +17,14 @@ describe('ErrorBanner', () => {
   it('fires onRetry when the retry action is clicked', () => {
     const onRetry = vi.fn()
     render(<ErrorBanner onRetry={onRetry}>Oops</ErrorBanner>)
-    fireEvent.click(screen.getByRole('button', { name: 'Probeer opnieuw' }))
+    fireEvent.click(screen.getByRole('button', { name: i18n.t('common:error.retry') }))
     expect(onRetry).toHaveBeenCalledTimes(1)
   })
 
   it('fires onDismiss when the dismiss action is clicked', () => {
     const onDismiss = vi.fn()
     render(<ErrorBanner onDismiss={onDismiss}>Oops</ErrorBanner>)
-    fireEvent.click(screen.getByRole('button', { name: 'Sluiten' }))
+    fireEvent.click(screen.getByRole('button', { name: i18n.t('common:close') }))
     expect(onDismiss).toHaveBeenCalledTimes(1)
   })
 
@@ -36,7 +36,7 @@ describe('ErrorBanner', () => {
     const alert = screen.getByRole('alert')
     expect(alert.style.background).toBe('')
     expect(alert.style.border).toBe('')
-    fireEvent.click(screen.getByRole('button', { name: 'Probeer opnieuw' }))
+    fireEvent.click(screen.getByRole('button', { name: i18n.t('common:error.retry') }))
     expect(onRetry).toHaveBeenCalledTimes(1)
   })
 })

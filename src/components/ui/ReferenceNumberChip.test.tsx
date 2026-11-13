@@ -5,7 +5,7 @@
  */
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { render, screen, fireEvent } from '@testing-library/react'
-import '@/i18n'
+import i18n from '@/i18n'
 import ReferenceNumberChip from './ReferenceNumberChip'
 
 const writeText = vi.fn(() => Promise.resolve())
@@ -24,6 +24,6 @@ describe('ReferenceNumberChip', () => {
     render(<ReferenceNumberChip value="K-00123" />)
     fireEvent.click(screen.getByText('K-00123'))
     expect(writeText).toHaveBeenCalledWith('K-00123')
-    expect(screen.getByRole('button', { name: 'Kopieer nummer' })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: i18n.t('common:referenceNumber.copy') })).toBeInTheDocument()
   })
 })

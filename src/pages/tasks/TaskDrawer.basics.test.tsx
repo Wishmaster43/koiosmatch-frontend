@@ -185,7 +185,7 @@ describe('TaskDrawer · title pencil (T1)', () => {
     fireEvent.click(screen.getByTitle('Bewerken'))
     const input = screen.getByDisplayValue('Bel kandidaat')
     fireEvent.change(input, { target: { value: '  Bel kandidaat morgen  ' } })
-    fireEvent.click(screen.getByTitle('Opslaan'))
+    fireEvent.click(screen.getByTitle(i18n.t('common:save')))
     expect(onUpdate).toHaveBeenCalledWith('t1', { title: 'Bel kandidaat morgen' })
   })
 
@@ -205,7 +205,7 @@ describe('TaskDrawer · title pencil (T1)', () => {
     render(<TaskDrawer task={task(false)} onClose={noop} onUpdate={onUpdate} onAddLink={noop} onRemoveLink={noop} />)
     fireEvent.click(screen.getByTitle('Bewerken'))
     fireEvent.change(screen.getByDisplayValue('Bel kandidaat'), { target: { value: '   ' } })
-    fireEvent.click(screen.getByTitle('Opslaan'))
+    fireEvent.click(screen.getByTitle(i18n.t('common:save')))
     expect(onUpdate).not.toHaveBeenCalled()
   })
 

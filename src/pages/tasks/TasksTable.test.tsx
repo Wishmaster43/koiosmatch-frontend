@@ -155,7 +155,7 @@ describe('TasksTable · link cell deep-link', () => {
     const row = { ...baseRow, id: 't90', links: [{ type: 'candidate', id: 'cand-9', label: 'Jan Jansen' }] }
     render(<TasksTable rows={[row]} onSelect={onSelect} />)
 
-    await user.click(screen.getByRole('button', { name: /Open gekoppeld record/ }))
+    await user.click(screen.getByRole('button', { name: new RegExp(i18n.t('tasks:cellLinks.openLink')) }))
 
     expect(openEntity).toHaveBeenCalledWith('candidates', 'cand-9')
     expect(onSelect).not.toHaveBeenCalled()
@@ -166,6 +166,6 @@ describe('TasksTable · link cell deep-link', () => {
     render(<TasksTable rows={[row]} />)
 
     expect(screen.getByText('Backoffice')).toBeInTheDocument()
-    expect(screen.queryByRole('button', { name: /Open gekoppeld record/ })).not.toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: new RegExp(i18n.t('tasks:cellLinks.openLink')) })).not.toBeInTheDocument()
   })
 })
