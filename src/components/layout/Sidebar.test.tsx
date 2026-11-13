@@ -50,7 +50,7 @@ describe('Sidebar — nav label i18n', () => {
   it('exposes a labelled navigation landmark (nl and en)', async () => {
     await i18n.changeLanguage('nl')
     const { unmount } = render(<Sidebar {...baseProps} />)
-    expect(screen.getByRole('navigation', { name: 'Hoofdnavigatie' })).toBeInTheDocument()
+    expect(screen.getByRole('navigation', { name: i18n.t('common:nav.main') })).toBeInTheDocument()
     unmount()
     await i18n.changeLanguage('en')
     render(<Sidebar {...baseProps} />)

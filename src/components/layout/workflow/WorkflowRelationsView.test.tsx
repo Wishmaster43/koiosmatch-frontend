@@ -8,6 +8,7 @@ import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { render, screen, fireEvent, waitFor } from '@testing-library/react'
 import WorkflowRelationsView from './WorkflowRelationsView'
 import api from '@/lib/api'
+import i18n from '@/i18n'
 
 vi.mock('@/lib/api', async importOriginal => {
   const actual = await importOriginal<typeof import('@/lib/api')>()
@@ -23,21 +24,21 @@ describe('WorkflowRelationsView', () => {
   it('shows the loading state while the tree is fetching', () => {
     mockedGet.mockReturnValue(new Promise(() => {}))
     render(<WorkflowRelationsView workflowId="wf-1" />)
-    expect(screen.getByText('Relaties ophalen…')).toBeInTheDocument()
+    expect(screen.getByText(i18n.t('workflows:relations.loading'))).toBeInTheDocument()
   })
 
   it('shows an honest error (with retry) on a failed fetch, never a blank/empty read', async () => {
     mockedGet.mockRejectedValue(new Error('down'))
     render(<WorkflowRelationsView workflowId="wf-1" />)
-    expect(await screen.findByText('Relaties laden mislukt')).toBeInTheDocument()
-    expect(screen.getByRole('button', { name: /Probeer opnieuw/ })).toBeInTheDocument()
+    expect(await screen.findByText(i18n.t('workflows:relations.loadFailed'))).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: new RegExp(i18n.t('common:error.retry')) })).toBeInTheDocument()
   })
 
   it('shows the honest empty line per section when a workflow has neither parents nor children', async () => {
     mockedGet.mockResolvedValue({ data: { parents: [], children: [] } })
     render(<WorkflowRelationsView workflowId="wf-1" />)
-    expect(await screen.findByText('Geen bovenliggende workflows')).toBeInTheDocument()
-    expect(screen.getByText('Geen onderliggende workflows')).toBeInTheDocument()
+    expect(await screen.findByText(i18n.t('workflows:relations.noParents'))).toBeInTheDocument()
+    expect(screen.getByText(i18n.t('workflows:relations.noChildren'))).toBeInTheDocument()
   })
 
   it('renders a parent row with its name, status pill and run count', async () => {
@@ -47,7 +48,7 @@ describe('WorkflowRelationsView', () => {
     } })
     render(<WorkflowRelationsView workflowId="wf-1" />)
     expect(await screen.findByText('Ouderflow')).toBeInTheDocument()
-    expect(screen.getByText('Actief')).toBeInTheDocument()
+    expect(screen.getByText(i18n.t('workflows:status.active'))).toBeInTheDocument()
     expect(screen.getByText('4 uitvoeringen')).toBeInTheDocument()
   })
 
@@ -134,7 +135,7 @@ describe('WorkflowRelationsView · recursive tree', () => {
       ] },
     } })
     render(<WorkflowRelationsView workflowId="wf-1" />)
-    expect(await screen.findByRole('img', { name: 'Laatste run mislukt' })).toBeInTheDocument()
+    expect(await screen.findByRole('img', { name: i18n.t('workflows:relations.childFailing') })).toBeInTheDocument()
   })
 
   it('a served tree renders its nested grandchild in a single fetch', async () => {
@@ -148,7 +149,7 @@ describe('WorkflowRelationsView · recursive tree', () => {
       ] },
     } })
     render(<WorkflowRelationsView workflowId="wf-1" />)
-    fireEvent.click(await screen.findByRole('button', { name: 'Onderliggende workflows tonen' }))
+    fireEvent.click(await screen.findByRole('button', { name: i18n.t('workflows:relations.expand') }))
     expect(await screen.findByText('Kleinkindflow')).toBeInTheDocument()
     // ONE relations fetch total — the whole tree came served, no per-node call
     // (other GETs may still fire for the per-row queue badge, unrelated to the tree).
@@ -168,8 +169,8 @@ describe('WorkflowRelationsView · recursive tree', () => {
       ] },
     } })
     render(<WorkflowRelationsView workflowId="wf-1" />)
-    fireEvent.click(await screen.findByRole('button', { name: 'Onderliggende workflows tonen' }))
-    expect(await screen.findByRole('img', { name: 'Deze workflow zit al in deze tak (lus)' })).toBeInTheDocument()
+    fireEvent.click(await screen.findByRole('button', { name: i18n.t('workflows:relations.expand') }))
+    expect(await screen.findByRole('img', { name: i18n.t('workflows:relations.cycle') })).toBeInTheDocument()
     // The looping row offers NO further expander (one expander total: the outer child's, now collapsed-state toggled).
     expect(screen.getAllByRole('button', { name: /Onderliggende workflows/ })).toHaveLength(1)
   })
@@ -184,7 +185,7 @@ describe('WorkflowRelationsView · recursive tree', () => {
     } })
     render(<WorkflowRelationsView workflowId="wf-1" />)
     await screen.findByText('Kindflow')
-    expect(screen.getByText('Al hierboven getoond')).toBeInTheDocument()
+    expect(screen.getByText(i18n.t('workflows:relations.truncated'))).toBeInTheDocument()
   })
 
   it('shows the call mode chip next to a node the workflow itself calls', async () => {

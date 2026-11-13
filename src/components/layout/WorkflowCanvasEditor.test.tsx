@@ -22,6 +22,7 @@ import type { ReactNode } from 'react'
 import WorkflowCanvasEditor from './WorkflowCanvasEditor'
 import type { Workflow } from '@/types/workflow'
 import api from '@/lib/api'
+import i18n from '@/i18n'
 
 // useWorkflowRun (live-run polling) needs a QueryClient in its tree.
 function wrapper({ children }: { children: ReactNode }) {
@@ -109,7 +110,7 @@ describe('WorkflowCanvasEditor · CurrentWorkflowContext root wiring', () => {
     // Open the searchable picker — the placeholder text is duplicated (the
     // trigger's own sr-only aria-label span carries the same string), so pick
     // the one actually inside the clickable <button>.
-    const placeholders = await screen.findAllByText('Selecteer een workflow…')
+    const placeholders = await screen.findAllByText(i18n.t('workflows:fields.workflowSelect'))
     const trigger = placeholders.find(el => el.closest('button'))
     fireEvent.click(trigger!)
 
@@ -130,12 +131,12 @@ describe('WorkflowCanvasEditor · Run saves first (RUN-SAVES-FIRST-1)', () => {
     render(<WorkflowCanvasEditor workflow={workflow} onClose={vi.fn()} onSave={onSave} />, { wrapper })
     await screen.findByText('node-n1')
     // Draft → active on the pill (local only until saved), then Run.
-    fireEvent.click(screen.getByText('Inactief').closest('button')!)
-    expect(screen.getByText('(niet opgeslagen)', { exact: false })).toBeInTheDocument()
+    fireEvent.click(screen.getByText(i18n.t('workflows:status.inactive')).closest('button')!)
+    expect(screen.getByText(i18n.t('workflows:status.unsaved'), { exact: false })).toBeInTheDocument()
     fireEvent.click(screen.getByRole('button', { name: /^Uitvoeren$/ }))
     await waitFor(() => expect(calls).toEqual(['save', 'post /workflows/wf-current/run']))
     expect(onSave).toHaveBeenCalledWith(expect.objectContaining({ status: 'active' }), false)
-    await waitFor(() => expect(screen.queryByText('(niet opgeslagen)', { exact: false })).toBeNull())
+    await waitFor(() => expect(screen.queryByText(i18n.t('workflows:status.unsaved'), { exact: false })).toBeNull())
   })
 
   it('a refused save stops the click: no run is posted', async () => {
@@ -158,10 +159,10 @@ describe('WorkflowCanvasEditor · status pill flips back to the server status', 
     await screen.findByText('node-n1')
     const pill = () => screen.getByText(/Actief|Inactief/).closest('button')!
     fireEvent.click(pill())
-    expect(pill()).toHaveTextContent('(niet opgeslagen)')
+    expect(pill()).toHaveTextContent(i18n.t('workflows:status.unsaved'))
     fireEvent.click(pill())
-    expect(pill()).not.toHaveTextContent('(niet opgeslagen)')
-    expect(pill()).toHaveTextContent('Inactief')
+    expect(pill()).not.toHaveTextContent(i18n.t('workflows:status.unsaved'))
+    expect(pill()).toHaveTextContent(i18n.t('workflows:status.inactive'))
   })
 })
 

@@ -76,7 +76,7 @@ describe('ConfigPanel · translations tab', () => {
     </I18nextProvider>,
   )
     fireEvent.click(screen.getByText('Vertalingen'))
-    expect(screen.getByText('Bedrijfstaal')).toBeInTheDocument()
+    expect(screen.getByText(i18n.t('workflows:translations.companyLanguage'))).toBeInTheDocument()
     // Strong form (see the earlier test's comment): the exists-check fallback renders
     // the literal label "Vertalingen", never the key — assert on the literal.
     expect(screen.queryByText('Vertalingen', { selector: 'label' })).not.toBeInTheDocument()
@@ -90,7 +90,7 @@ describe('ConfigPanel · translations tab', () => {
     </I18nextProvider>,
   )
     fireEvent.click(screen.getByText('Vertalingen'))
-    expect(screen.getByText('Bedrijfstaal')).toBeInTheDocument()
+    expect(screen.getByText(i18n.t('workflows:translations.companyLanguage'))).toBeInTheDocument()
     const flipped: FlowNode = { id: 'n1', position: { x: 0, y: 0 }, data: { type: 'whatsapp_send', config: { message_type: 'template' } } }
     rerender(
     <I18nextProvider i18n={i18n}>
@@ -98,7 +98,7 @@ describe('ConfigPanel · translations tab', () => {
     </I18nextProvider>,
   )
     expect(screen.queryByText('Vertalingen')).not.toBeInTheDocument()
-    expect(screen.queryByText('Bedrijfstaal')).not.toBeInTheDocument()
+    expect(screen.queryByText(i18n.t('workflows:translations.companyLanguage'))).not.toBeInTheDocument()
     // The fallback itself: the Settings pane is active again (its own field labels render),
     // not an empty translations pane — this line fails when the fallback effect is removed.
     expect(screen.getByText('Kanaal', { selector: 'label' })).toBeInTheDocument()

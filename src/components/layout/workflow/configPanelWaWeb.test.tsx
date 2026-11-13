@@ -109,7 +109,7 @@ describe('ConfigPanel · whatsapp_send wa_web channel branch', () => {
         <ConfigPanel node={node} onUpdate={vi.fn()} onDelete={vi.fn()} />
       </I18nextProvider>,
     )
-    fireEvent.click(screen.getByRole('tab', { name: /Uitvoering/ }))
+    fireEvent.click(screen.getByRole('tab', { name: new RegExp(i18n.t('workflows:config.tabExecution')) }))
     // i18n is initialized; the key translates to Dutch "In WhatsApp Web-wachtrij gezet..."
     expect(screen.getByText(/In WhatsApp Web-wachtrij/)).toBeInTheDocument()
   })
@@ -126,7 +126,7 @@ describe('ConfigPanel · whatsapp_send wa_web channel branch', () => {
         <ConfigPanel node={node} onUpdate={vi.fn()} onDelete={vi.fn()} />
       </I18nextProvider>,
     )
-    fireEvent.click(screen.getByRole('tab', { name: /Uitvoering/ }))
+    fireEvent.click(screen.getByRole('tab', { name: new RegExp(i18n.t('workflows:config.tabExecution')) }))
     expect(screen.queryByText('fields.whatsappQueued')).not.toBeInTheDocument()
   })
 
@@ -140,7 +140,7 @@ describe('ConfigPanel · whatsapp_send wa_web channel branch', () => {
         <ConfigPanel node={node} onUpdate={vi.fn()} onDelete={vi.fn()} />
       </I18nextProvider>,
     )
-    fireEvent.click(screen.getByRole('tab', { name: /Uitvoering/ }))
+    fireEvent.click(screen.getByRole('tab', { name: new RegExp(i18n.t('workflows:config.tabExecution')) }))
     expect(screen.queryByText('fields.whatsappQueued')).not.toBeInTheDocument()
   })
 })

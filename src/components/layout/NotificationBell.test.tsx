@@ -217,7 +217,7 @@ describe('NotificationBell row click-through', () => {
     } as unknown as ReturnType<typeof useNotificationsModule.useNotifications>)
     render(<NotificationBell />)
     fireEvent.click(screen.getByRole('button', { name: /notificat/i }))
-    expect(screen.getByText(/Bekijk de aangemaakte vervolgtaak\./)).toBeInTheDocument()
+    expect(screen.getByText(i18n.t('common:notifications.nextAction.check_followup_task'))).toBeInTheDocument()
     // Danny 30-09: the next-action sentence REPLACES the bare status, never doubles it.
     expect(screen.queryByText(i18n.t('notifications.actionStatus.failed'))).not.toBeInTheDocument()
   })
@@ -245,6 +245,6 @@ describe('NotificationBell row click-through', () => {
     } as unknown as ReturnType<typeof useNotificationsModule.useNotifications>)
     render(<NotificationBell />)
     fireEvent.click(screen.getByRole('button', { name: /notificat/i }))
-    expect(screen.queryByText(/Bekijk de aangemaakte/)).not.toBeInTheDocument()
+    expect(screen.queryByText(i18n.t('common:notifications.nextAction.check_followup_task'))).not.toBeInTheDocument()
   })
 })

@@ -39,7 +39,7 @@ describe('ConfigPanel · execution-output item count (ICU plural)', () => {
         <ConfigPanel node={baseNode} onUpdate={() => {}} onDelete={() => {}} />
       </I18nextProvider>,
     )
-    fireEvent.click(screen.getByRole('tab', { name: /Uitvoering/ }))
+    fireEvent.click(screen.getByRole('tab', { name: new RegExp(i18n.t('workflows:config.tabExecution')) }))
     expect(screen.getByText('2 items')).toBeInTheDocument()
   })
 
@@ -50,7 +50,7 @@ describe('ConfigPanel · execution-output item count (ICU plural)', () => {
         <ConfigPanel node={single} onUpdate={() => {}} onDelete={() => {}} />
       </I18nextProvider>,
     )
-    fireEvent.click(screen.getByRole('tab', { name: /Uitvoering/ }))
+    fireEvent.click(screen.getByRole('tab', { name: new RegExp(i18n.t('workflows:config.tabExecution')) }))
     expect(screen.getByText('1 item')).toBeInTheDocument()
   })
 })
