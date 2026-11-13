@@ -25,10 +25,10 @@ function contextProp(node: ReactNode): string | undefined {
 describe('registry — notif_conversations (settings-coherence-11 fix)', () => {
   const notifGroup = NAV_GROUPS.find((g) => g.key === 'notifications')
 
-  it('registers notif_conversations rendering NotificationsSettings with context="gesprekken"', () => {
+  it('registers notif_conversations rendering NotificationsSettings with context="conversations"', () => {
     const item = notifGroup?.items.find((i) => i.id === 'notif_conversations')
     expect(item).toBeTruthy()
-    expect(contextProp(item?.render?.())).toBe('gesprekken')
+    expect(contextProp(item?.render?.())).toBe('conversations')
   })
 
   // SETTINGS-TABS-FIX-1: every row in this group shares one Bell icon, not a

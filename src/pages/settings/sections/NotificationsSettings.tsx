@@ -1,5 +1,6 @@
 import { useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
+import { labelOrRaw } from '@/lib/labelOrRaw'
 import { useAuth } from '@/context/AuthContext'
 import { useSettingsForm } from '../lib/useSettingsForm'
 import { SettingsScaffold, SettingRow, Toggle } from '../components/SettingsKit'
@@ -8,7 +9,7 @@ import { hasNoEmitterYet } from '../lib/notificationContexts'
 
 /** NotificationsSettings — per-context (applications / vacancies / billing / candidates /
  * matches / tasks — mirrors api Notifier::TYPE_CONTEXT_MAP) notification preferences,
- * stored as `notif_<context>_in_app` + `notif_<context>_email` (O-27, commit 551c17e1).
+ * stored as `notifications_<context>_in_app` + `notifications_<context>_email` (O-27, commit 551c17e1).
  * Both channel keys live in the SAME generic tenant key/value settings store, so the
  * e-mail toggle needed no new backend route — it POSTs through the exact same `/settings`
  * endpoint the in-app toggle already used. Migrated to the settings kit; the scaffold owns
@@ -19,12 +20,12 @@ interface NotificationsSettingsProps {
 }
 
 export default function NotificationsSettings({ context }: NotificationsSettingsProps) {
-  const { t } = useTranslation('settings')
+  const { t, i18n } = useTranslation('settings')
   const auth = useAuth()
   const canEdit = auth?.hasPermission('settings.update') ?? false
-  const inAppKey = `notif_${context}_in_app`
-  const emailKey = `notif_${context}_email`
-  const popupKey = `notif_${context}_popup`
+  const inAppKey = `notifications_${context}_in_app`
+  const emailKey = `notifications_${context}_email`
+  const popupKey = `notifications_${context}_popup`
   // NOTIF-PARITY-1: shared with MyNotificationsSettings so both screens agree on
   // which contexts have no working backend emitter yet (see lib/notificationContexts).
   const noEmitterYet = hasNoEmitterYet(context)
@@ -57,8 +58,8 @@ export default function NotificationsSettings({ context }: NotificationsSettings
 
   return (
     <SettingsScaffold
-      title={t(`notifications.context.${context}.title`, context)}
-      subtitle={t(`notifications.context.${context}.desc`, '')}
+      title={labelOrRaw(t, i18n, `notifications.context.${context}.title`, context, 'settings')}
+      subtitle={labelOrRaw(t, i18n, `notifications.context.${context}.desc`, '', 'settings')}
       maxWidth={960} form={gatedForm}>
       <SettingRow label={t('notifications.channels.label')} description={t('notifications.channels.desc')}>
         {/* Honest gate (NOTIF-PARITY-1): a context with no real emitter never promises

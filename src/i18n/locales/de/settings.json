@@ -949,23 +949,23 @@
       "notYetActiveReason": "Für diesen Typ wird noch keine Benachrichtigung gesendet. Der Schalter ist bereits einstellbar."
     },
     "context": {
-      "sollicitaties": {
+      "applications": {
         "title": "Bewerbungen",
         "desc": "Benachrichtigungen über neue und aktualisierte Bewerbungen."
       },
-      "vacatures": {
+      "vacancies": {
         "title": "Stellen",
         "desc": "Benachrichtigungen über Stellen-Updates und Statusänderungen."
       },
-      "facturering": {
+      "billing": {
         "title": "Abrechnung",
         "desc": "Benachrichtigungen über Rechnungen, Zahlungen und Abos."
       },
-      "kandidaten": {
+      "candidates": {
         "title": "Kandidaten",
         "desc": "Benachrichtigungen über neue und aktualisierte Kandidaten."
       },
-      "klanten": {
+      "customers": {
         "title": "Kunden",
         "desc": "Benachrichtigungen über Kundenstagnation und Lebenszyklus-Ereignisse."
       },
@@ -973,7 +973,7 @@
         "title": "Matches",
         "desc": "Benachrichtigungen über neue Matches und Statusänderungen."
       },
-      "taken": {
+      "tasks": {
         "title": "Aufgaben",
         "desc": "Benachrichtigungen über neue und aktualisierte Aufgaben."
       },
@@ -993,7 +993,7 @@
         "title": "Termine",
         "desc": "Benachrichtigungen über heute geplante Termine."
       },
-      "gesprekken": {
+      "conversations": {
         "title": "Gespräche",
         "desc": "Benachrichtigungen über unbeantwortete Gespräche."
       }

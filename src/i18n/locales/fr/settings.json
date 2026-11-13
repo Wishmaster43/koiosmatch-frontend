@@ -949,23 +949,23 @@
       "notYetActiveReason": "Aucune notification n’est encore envoyée pour ce type. Le bouton est déjà configurable."
     },
     "context": {
-      "sollicitaties": {
+      "applications": {
         "title": "Candidatures",
         "desc": "Notifications sur les candidatures nouvelles et mises à jour."
       },
-      "vacatures": {
+      "vacancies": {
         "title": "Offres",
         "desc": "Notifications sur les mises à jour et changements de statut des offres."
       },
-      "facturering": {
+      "billing": {
         "title": "Facturation",
         "desc": "Notifications sur les factures, paiements et abonnements."
       },
-      "kandidaten": {
+      "candidates": {
         "title": "Candidats",
         "desc": "Notifications sur les candidats nouveaux et mis à jour."
       },
-      "klanten": {
+      "customers": {
         "title": "Clients",
         "desc": "Notifications concernant la stagnation client et les événements de cycle de vie."
       },
@@ -973,7 +973,7 @@
         "title": "Matchs",
         "desc": "Notifications sur les nouveaux matchs et changements de statut."
       },
-      "taken": {
+      "tasks": {
         "title": "Tâches",
         "desc": "Notifications sur les tâches nouvelles et mises à jour."
       },
@@ -993,7 +993,7 @@
         "title": "Rendez-vous",
         "desc": "Notifications concernant les rendez-vous prévus aujourd’hui."
       },
-      "gesprekken": {
+      "conversations": {
         "title": "Conversations",
         "desc": "Notifications sur les conversations sans réponse."
       }

@@ -1,8 +1,8 @@
 /**
  * MyNotificationsSettings (G28) — the CALLER's OWN per-context in-app
  * notification override, sitting NEXT TO the tenant-wide switch
- * (NotificationsSettings.jsx, which writes `notif_<context>_in_app` +, since
- * O-27, `notif_<context>_email`). Reads/writes `GET/PUT /settings/my-notifications
+ * (NotificationsSettings.jsx, which writes `notifications_<context>_in_app` +, since
+ * O-27, `notifications_<context>_email`). Reads/writes `GET/PUT /settings/my-notifications
  * { contexts: { <context>: true|false|null } }` (verified against
  * app/Http/Controllers/MyNotificationSettingsController.php +
  * app/Support/Notifier.php::contexts()): `null` = inherit the tenant-wide
@@ -42,6 +42,7 @@
 import { useEffect, useState } from 'react'
 import type { CSSProperties } from 'react'
 import { useTranslation } from 'react-i18next'
+import { labelOrRaw } from '@/lib/labelOrRaw'
 import { useUserPreference } from '@/hooks/useUserPreference'
 import { AlertTriangle } from 'lucide-react'
 import api, { unwrap } from '@/lib/api'
@@ -52,7 +53,7 @@ import SoftChip from '@/components/ui/SoftChip'
 import Toggle from '@/components/ui/Toggle'
 import { isSupported as isPushSupported, permissionState, isSubscribed, subscribe, unsubscribe } from '@/lib/pushSubscription'
 import { SettingCardList, SettingRow, SkeletonRows } from '../components/SettingsKit'
-import { hasNoEmitterYet } from '../lib/notificationContexts'
+import { hasNoEmitterYet, toCanonicalContext } from '../lib/notificationContexts'
 import { PageTitle, PageSubtitle } from '@/components/ui/typography'
 
 // The API's tri-state per context: null = inherit the tenant default, true/false
@@ -201,7 +202,7 @@ function ChannelToggleColumn({ label, noEmitterYet, notYetActiveLabel, notYetAct
 
 // Per-user notification preferences: per-context in-app/email toggles, browser push subscription and the sound setting.
 export default function MyNotificationsSettings() {
-  const { t } = useTranslation('settings')
+  const { t, i18n } = useTranslation('settings')
   const { contexts, popup, loading, error, setContext, setPopupContext } = useMyNotifications()
   const push = useBrowserPush()
   const sound = useSoundSetting()
@@ -256,13 +257,15 @@ export default function MyNotificationsSettings() {
       ) : (
         <SettingCardList>
           {known.map(context => {
-            const title = t(`notifications.context.${context}.title`, context)
+            // Wire token (Dutch) stays on the request; labels and emitter gate use the canonical name.
+            const canonical = toCanonicalContext(context)
+            const title = labelOrRaw(t, i18n, `notifications.context.${canonical}.title`, canonical, 'settings')
             // NOTIF-PARITY-1: a per-user override is exactly as fake as the tenant-wide
             // toggle when the context has no working backend emitter yet — never render a
             // working SegmentedControl that changes nothing (§3 no fake affordance).
-            const noEmitterYet = hasNoEmitterYet(context)
+            const noEmitterYet = hasNoEmitterYet(canonical)
             return (
-              <SettingRow key={context} label={title} description={t(`notifications.context.${context}.desc`, '')}>
+              <SettingRow key={context} label={title} description={labelOrRaw(t, i18n, `notifications.context.${canonical}.desc`, '', 'settings')}>
                 {/* Three columns, side by side: a real working in-app override, the
                     (currently honest, non-functional) e-mail marker — see the O-27 note
                     at the top of this file for why e-mail isn't a control yet — and a

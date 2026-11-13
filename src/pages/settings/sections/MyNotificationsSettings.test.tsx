@@ -54,14 +54,14 @@ describe('MyNotificationsSettings', () => {
     render(<MyNotificationsSettings />)
 
     await waitFor(() => expect(api.get).toHaveBeenCalledWith('/settings/my-notifications'))
-    expect(await screen.findByText(t('notifications.context.sollicitaties.title'))).toBeInTheDocument()
+    expect(await screen.findByText(t('notifications.context.applications.title'))).toBeInTheDocument()
     expect(screen.getByText(t('notifications.context.matches.title'))).toBeInTheDocument()
   })
 
   it('renders an honest "not available yet" e-mail marker next to in-app/popup, not a second control (O-27)', async () => {
     vi.mocked(api.get).mockResolvedValue({ data: { contexts: { sollicitaties: null, matches: false }, popup: {} } })
     render(<MyNotificationsSettings />)
-    await screen.findByText(t('notifications.context.sollicitaties.title'))
+    await screen.findByText(t('notifications.context.applications.title'))
 
     // Two radiogroups per row (in-app + popup) — the e-mail column is a muted marker,
     // never a working control (§3 no fake affordance: MyNotificationSettingsController
@@ -75,7 +75,7 @@ describe('MyNotificationsSettings', () => {
       data: { contexts: { sollicitaties: null, matches: false }, popup: { sollicitaties: true, matches: null } },
     })
     render(<MyNotificationsSettings />)
-    await screen.findByText(t('notifications.context.sollicitaties.title'))
+    await screen.findByText(t('notifications.context.applications.title'))
 
     const rows = screen.getAllByRole('radiogroup')
     // Row order per context: in-app first, popup second.
@@ -90,7 +90,7 @@ describe('MyNotificationsSettings', () => {
     vi.mocked(api.put).mockResolvedValue({ data: {} })
     const user = userEvent.setup()
     render(<MyNotificationsSettings />)
-    await screen.findByText(t('notifications.context.sollicitaties.title'))
+    await screen.findByText(t('notifications.context.applications.title'))
 
     await user.click(screen.getAllByRole('radio', { name: t('notifications.my.off') })[0])
 
@@ -104,7 +104,7 @@ describe('MyNotificationsSettings', () => {
     vi.mocked(api.put).mockResolvedValue({ data: {} })
     const user = userEvent.setup()
     render(<MyNotificationsSettings />)
-    await screen.findByText(t('notifications.context.sollicitaties.title'))
+    await screen.findByText(t('notifications.context.applications.title'))
 
     await user.click(screen.getAllByRole('radio', { name: t('notifications.my.inherit') })[0])
 
@@ -118,7 +118,7 @@ describe('MyNotificationsSettings', () => {
     vi.mocked(api.put).mockResolvedValue({ data: {} })
     const user = userEvent.setup()
     render(<MyNotificationsSettings />)
-    await screen.findByText(t('notifications.context.sollicitaties.title'))
+    await screen.findByText(t('notifications.context.applications.title'))
 
     // Second radiogroup in the row is the popup column.
     await user.click(within(screen.getAllByRole('radiogroup')[1]).getByRole('radio', { name: t('notifications.my.off') }))
@@ -133,7 +133,7 @@ describe('MyNotificationsSettings', () => {
   it('NOTIF-PARITY-1: a no-emitter context (facturering) shows a muted marker instead of working in-app/popup overrides, and never PUTs', async () => {
     vi.mocked(api.get).mockResolvedValue({ data: { contexts: { facturering: null }, popup: {} } })
     render(<MyNotificationsSettings />)
-    await screen.findByText(t('notifications.context.facturering.title'))
+    await screen.findByText(t('notifications.context.billing.title'))
 
     // No SegmentedControl (radiogroup) for the no-emitter context — every column
     // renders the same honest "not active yet" marker (§3 no fake affordance).
@@ -148,7 +148,7 @@ describe('MyNotificationsSettings', () => {
     vi.mocked(api.put).mockRejectedValue(new Error('network'))
     const user = userEvent.setup()
     render(<MyNotificationsSettings />)
-    await screen.findByText(t('notifications.context.sollicitaties.title'))
+    await screen.findByText(t('notifications.context.applications.title'))
 
     await user.click(screen.getAllByRole('radio', { name: t('notifications.my.off') })[0])
 
@@ -161,7 +161,7 @@ describe('MyNotificationsSettings', () => {
     vi.mocked(api.put).mockRejectedValue(new Error('network'))
     const user = userEvent.setup()
     render(<MyNotificationsSettings />)
-    await screen.findByText(t('notifications.context.sollicitaties.title'))
+    await screen.findByText(t('notifications.context.applications.title'))
 
     await user.click(within(screen.getAllByRole('radiogroup')[1]).getByRole('radio', { name: t('notifications.my.off') }))
 
@@ -189,7 +189,7 @@ describe('MyNotificationsSettings', () => {
     vi.mocked(api.get).mockResolvedValue({ data: { contexts: { sollicitaties: null, matches: null }, popup: { sollicitaties: null } } })
     vi.mocked(pushSubscription.isSubscribed).mockResolvedValue(false)
     render(<MyNotificationsSettings />)
-    await screen.findByText(t('notifications.context.sollicitaties.title'))
+    await screen.findByText(t('notifications.context.applications.title'))
 
     expect(screen.queryByText(t('notifications.popup.needsSubscription'))).not.toBeInTheDocument()
   })
@@ -198,7 +198,7 @@ describe('MyNotificationsSettings', () => {
     vi.mocked(api.get).mockResolvedValue({ data: { contexts: { sollicitaties: null }, popup: { sollicitaties: null } } })
     vi.mocked(pushSubscription.isSubscribed).mockResolvedValue(true)
     render(<MyNotificationsSettings />)
-    await screen.findByText(t('notifications.context.sollicitaties.title'))
+    await screen.findByText(t('notifications.context.applications.title'))
 
     expect(screen.queryByText(t('notifications.popup.needsSubscription'))).not.toBeInTheDocument()
   })

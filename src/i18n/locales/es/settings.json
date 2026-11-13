@@ -949,23 +949,23 @@
       "notYetActiveReason": "Aún no se envía ninguna notificación para este tipo: el interruptor ya se puede configurar."
     },
     "context": {
-      "sollicitaties": {
+      "applications": {
         "title": "Solicitudes",
         "desc": "Notificaciones sobre solicitudes nuevas y actualizadas."
       },
-      "vacatures": {
+      "vacancies": {
         "title": "Vacantes",
         "desc": "Notificaciones sobre actualizaciones y cambios de estado de vacantes."
       },
-      "facturering": {
+      "billing": {
         "title": "Facturación",
         "desc": "Notificaciones sobre facturas, pagos y suscripciones."
       },
-      "kandidaten": {
+      "candidates": {
         "title": "Candidatos",
         "desc": "Notificaciones sobre candidatos nuevos y actualizados."
       },
-      "klanten": {
+      "customers": {
         "title": "Clientes",
         "desc": "Notificaciones sobre estancamiento de clientes y eventos del ciclo de vida."
       },
@@ -973,7 +973,7 @@
         "title": "Coincidencias",
         "desc": "Notificaciones sobre nuevas coincidencias y cambios de estado."
       },
-      "taken": {
+      "tasks": {
         "title": "Tareas",
         "desc": "Notificaciones sobre tareas nuevas y actualizadas."
       },
@@ -993,7 +993,7 @@
         "title": "Citas",
         "desc": "Notificaciones sobre citas programadas para hoy."
       },
-      "gesprekken": {
+      "conversations": {
         "title": "Conversaciones",
         "desc": "Notificaciones sobre conversaciones sin responder."
       }

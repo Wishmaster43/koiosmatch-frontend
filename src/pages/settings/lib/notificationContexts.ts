@@ -6,28 +6,54 @@
  * anything (§3 no fake affordance). Verified against api Notifier.php
  * (TYPE_CONTEXT_MAP), every Notifier::send() call site, and the notification_send
  * workflow templates:
- *   sollicitaties -> application.created fires on every application write
- *   kandidaten    -> candidate.reactivated fires from the daily reactivate-due cron
- *   klanten       -> customer.* fires from five daily stagnation/lifecycle commands
+ *   applications  -> application.created fires on every application write
+ *   candidates    -> candidate.reactivated fires from the daily reactivate-due cron
+ *   customers     -> customer.* fires from five daily stagnation/lifecycle commands
  *   matches       -> match.expiring fires from the daily matches:expiring-alerts cron
- *   taken         -> task.due fires from the tasks:notify-due cron
+ *   tasks         -> task.due fires from the tasks:notify-due cron
  *   calllists     -> calllist.target_assigned fires on manual/round-robin/workflow
  *                    target assignment (NOTIF-CONTEXTEN-FE-1, CMBE 23-08)
  *   opportunities -> opportunity.won / opportunity.lost fire on every stage change
  *                    into an is_won/is_lost stage (NOTIF-CONTEXTEN-FE-1, CMBE 23-08)
  *   appointments  -> appointment.today fires from the daily appointments-due-today
  *                    cron (BEL-ACTIE-VANDAAG-1, CMBE K-156, 23-08)
- * vacatures (vacancy.*) is emitted by the vacancy workflow template since bundle MISC
+ * vacancies (vacancy.*) is emitted by the vacancy workflow template since bundle MISC
  * (RESTLIJST X-30) and left this set on 07-09.
- * facturering (invoice.*) only ever reaches Notifier::sendToSuperAdmins()
+ * billing (invoice.*) only ever reaches Notifier::sendToSuperAdmins()
  * (GenerateMonthlyInvoices), which targets super admins outside any tenant context
- * and never consults the tenant's notif_facturering_* gate — so the tenant-facing
+ * and never consults the tenant's notifications_billing_* gate — so the tenant-facing
  * toggle still cannot deliver anything. Re-verify this set whenever CMBE ships a new
  * emitter (drop the context here once a real tenant-gated call site lands).
  */
-export const CONTEXTS_WITHOUT_EMITTER = new Set(['facturering'])
+export const CONTEXTS_WITHOUT_EMITTER = new Set(['billing'])
 
 /** Whether a given notification context has no working backend emitter yet. */
 export function hasNoEmitterYet(context: string): boolean {
   return CONTEXTS_WITHOUT_EMITTER.has(context)
+}
+
+/**
+ * Canonical (English) notification context -> the Dutch token that
+ * GET/PUT /settings/my-notifications still speaks (BE contract unchanged).
+ * Removal trigger: SETTINGS-ALIAS-RETIRE-1 / X-47-BE (the BE retires the Dutch
+ * tokens); then delete this map and toCanonicalContext() and send canonical names.
+ */
+export const LEGACY_NOTIFICATION_CONTEXT: Record<string, string> = {
+  applications: 'sollicitaties',
+  vacancies: 'vacatures',
+  billing: 'facturering',
+  candidates: 'kandidaten',
+  customers: 'klanten',
+  tasks: 'taken',
+  conversations: 'gesprekken',
+}
+
+// Reverse lookup: Dutch wire token -> canonical English context.
+const CANONICAL_BY_LEGACY: Record<string, string> = Object.fromEntries(
+  Object.entries(LEGACY_NOTIFICATION_CONTEXT).map(([canonical, legacy]) => [legacy, canonical]),
+)
+
+/** Map a wire context (Dutch token or already canonical) to the canonical English name. */
+export function toCanonicalContext(context: string): string {
+  return CANONICAL_BY_LEGACY[context] ?? context
 }

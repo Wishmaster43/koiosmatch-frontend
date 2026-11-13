@@ -1209,23 +1209,23 @@
       "notYetActiveReason": "No notification is sent for this type yet. The toggle is already configurable."
     },
     "context": {
-      "sollicitaties": {
+      "applications": {
         "title": "Applications",
         "desc": "Notifications about new and updated applications."
       },
-      "vacatures": {
+      "vacancies": {
         "title": "Vacancies",
         "desc": "Notifications about vacancy updates and status changes."
       },
-      "facturering": {
+      "billing": {
         "title": "Billing",
         "desc": "Notifications about invoices, payments and subscriptions."
       },
-      "kandidaten": {
+      "candidates": {
         "title": "Candidates",
         "desc": "Notifications about new and updated candidates."
       },
-      "klanten": {
+      "customers": {
         "title": "Customers",
         "desc": "Notifications about customer stagnation and lifecycle events."
       },
@@ -1233,7 +1233,7 @@
         "title": "Matches",
         "desc": "Notifications about new matches and status changes."
       },
-      "taken": {
+      "tasks": {
         "title": "Tasks",
         "desc": "Notifications about new and updated tasks."
       },
@@ -1253,7 +1253,7 @@
         "title": "Appointments",
         "desc": "Notifications about appointments scheduled for today."
       },
-      "gesprekken": {
+      "conversations": {
         "title": "Conversations",
         "desc": "Notifications about unanswered conversations."
       }

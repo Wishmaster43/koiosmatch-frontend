@@ -1,11 +1,11 @@
 /**
  * NotificationsSettings (§13: assert the REAL /settings request, never only that a
  * callback fired) — O-27 (commit 551c17e1) + NOTIF-POPUP-1: three real, working toggles
- * (in-app / e-mail / popup), keyed `notif_<context>_in_app` / `notif_<context>_email` /
- * `notif_<context>_popup` and posted through the same generic /settings store. Covers:
+ * (in-app / e-mail / popup), keyed `notifications_<context>_in_app` / `notifications_<context>_email` /
+ * `notifications_<context>_popup` and posted through the same generic /settings store. Covers:
  * all three switches render and load with their contract defaults (in-app ON, e-mail
  * OFF, popup ON), toggling one channel leaves the other two untouched, and the
- * NOTIF-PARITY-1 no-emitter-yet gate disables ALL THREE channels for vacatures/facturering.
+ * NOTIF-PARITY-1 no-emitter-yet gate disables ALL THREE channels for billing.
  */
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { render, screen, waitFor } from '@testing-library/react'
@@ -38,7 +38,7 @@ beforeEach(() => {
   vi.mocked(useAuth).mockReturnValue({ hasPermission: (perm: string) => perm === 'settings.update' } as unknown as ReturnType<typeof useAuth>)
 })
 
-describe.each(['sollicitaties', 'kandidaten', 'klanten', 'matches', 'taken', 'calllists', 'opportunities'])(
+describe.each(['applications', 'candidates', 'customers', 'matches', 'tasks', 'calllists', 'opportunities'])(
   'NotificationsSettings — context=%s',
   context => {
     it('renders ALL THREE channel switches, in-app/popup defaulting ON and e-mail defaulting OFF (O-27, NOTIF-POPUP-1)', async () => {
@@ -53,7 +53,7 @@ describe.each(['sollicitaties', 'kandidaten', 'klanten', 'matches', 'taken', 'ca
       expect(popup).toHaveAttribute('aria-checked', 'true')
     })
 
-    it(`POSTs notif_${context}_in_app, notif_${context}_email and notif_${context}_popup on save, e-mail write leaves the others untouched`, async () => {
+    it(`POSTs notifications_${context}_in_app, notifications_${context}_email and notifications_${context}_popup on save, e-mail write leaves the others untouched`, async () => {
       const user = userEvent.setup()
       render(<NotificationsSettings context={context} />)
       const email = await screen.findByRole('switch', { name: t('notifications.email.label') })
@@ -64,9 +64,9 @@ describe.each(['sollicitaties', 'kandidaten', 'klanten', 'matches', 'taken', 'ca
       await user.click(screen.getByRole('button', { name: t('common.save') }))
 
       await waitFor(() => expect(api.post).toHaveBeenCalledWith('/settings', {
-        [`notif_${context}_in_app`]: 'true',
-        [`notif_${context}_email`]: 'true',
-        [`notif_${context}_popup`]: 'true',
+        [`notifications_${context}_in_app`]: 'true',
+        [`notifications_${context}_email`]: 'true',
+        [`notifications_${context}_popup`]: 'true',
       }))
     })
 
@@ -79,9 +79,9 @@ describe.each(['sollicitaties', 'kandidaten', 'klanten', 'matches', 'taken', 'ca
       await user.click(screen.getByRole('button', { name: t('common.save') }))
 
       await waitFor(() => expect(api.post).toHaveBeenCalledWith('/settings', {
-        [`notif_${context}_in_app`]: 'false',
-        [`notif_${context}_email`]: 'false',
-        [`notif_${context}_popup`]: 'true',
+        [`notifications_${context}_in_app`]: 'false',
+        [`notifications_${context}_email`]: 'false',
+        [`notifications_${context}_popup`]: 'true',
       }))
     })
 
@@ -94,9 +94,9 @@ describe.each(['sollicitaties', 'kandidaten', 'klanten', 'matches', 'taken', 'ca
       await user.click(screen.getByRole('button', { name: t('common.save') }))
 
       await waitFor(() => expect(api.post).toHaveBeenCalledWith('/settings', {
-        [`notif_${context}_in_app`]: 'true',
-        [`notif_${context}_email`]: 'false',
-        [`notif_${context}_popup`]: 'false',
+        [`notifications_${context}_in_app`]: 'true',
+        [`notifications_${context}_email`]: 'false',
+        [`notifications_${context}_popup`]: 'false',
       }))
     })
 
@@ -115,7 +115,7 @@ describe.each(['sollicitaties', 'kandidaten', 'klanten', 'matches', 'taken', 'ca
   },
 )
 
-describe.each(['facturering'])(
+describe.each(['billing'])(
   'NotificationsSettings — context=%s has no backend emitter yet (NOTIF-PARITY-1)',
   context => {
     it('renders ALL THREE switches disabled and shows the "not yet active" marker once on the block', async () => {
@@ -152,10 +152,25 @@ describe.each(['facturering'])(
   },
 )
 
+describe('NotificationsSettings — canonical wire keys (NOTIF-KEYS-EN-1)', () => {
+  it('POSTs the literal notifications_applications_* keys and titles the page via the English context key', async () => {
+    const user = userEvent.setup()
+    render(<NotificationsSettings context="applications" />)
+    expect(await screen.findByRole('heading', { name: t('notifications.context.applications.title') })).toBeInTheDocument()
+    await user.click(await screen.findByRole('switch', { name: t('notifications.email.label') }))
+    await user.click(screen.getByRole('button', { name: t('common.save') }))
+    await waitFor(() => expect(api.post).toHaveBeenCalledWith('/settings', {
+      notifications_applications_in_app: 'true',
+      notifications_applications_email: 'true',
+      notifications_applications_popup: 'true',
+    }))
+  })
+})
+
 describe('NotificationsSettings — permission gate (G2-schema-canedit)', () => {
   it('disables all toggles and hides Save when user lacks settings.update', async () => {
     vi.mocked(useAuth).mockReturnValue({ hasPermission: () => false } as unknown as ReturnType<typeof useAuth>)
-    render(<NotificationsSettings context="sollicitaties" />)
+    render(<NotificationsSettings context="applications" />)
 
     const inApp = await screen.findByRole('switch', { name: t('notifications.inApp.label') })
     const email = screen.getByRole('switch', { name: t('notifications.email.label') })

@@ -72,19 +72,19 @@ export const communicationGroups: NavGroup[] = [
     // TYPE_CONTEXT_MAP gate as application/vacancy/invoice, so they get the same rows.
     key: 'notifications', icon: Bell,
     items: [
-      // Wire contract: NotificationsSettings stores notif_<context>_in_app/_email — the
-      // context prop stays the legacy Dutch wire value while the registry id is English.
-      { id: 'notif_applications', icon: Bell, render: () => <NotificationsSettings context="sollicitaties" /> },
-      { id: 'notif_vacancies', icon: Bell, render: () => <NotificationsSettings context="vacatures" /> },
-      { id: 'notif_candidates', icon: Bell, render: () => <NotificationsSettings context="kandidaten" /> },
+      // Wire contract: NotificationsSettings stores notifications_<context>_in_app/_email
+      // with the canonical English context (BE alias release echoes both key names).
+      { id: 'notif_applications', icon: Bell, render: () => <NotificationsSettings context="applications" /> },
+      { id: 'notif_vacancies', icon: Bell, render: () => <NotificationsSettings context="vacancies" /> },
+      { id: 'notif_candidates', icon: Bell, render: () => <NotificationsSettings context="candidates" /> },
       // K22 (13-08): all five customer.* producers now fire as scheduled commands
-      // (never draft-only), so 'klanten' gets the same real settings row its
-      // siblings have — see NotificationsSettings.jsx's CONTEXTS_WITHOUT_EMITTER
-      // docblock for why 'vacatures'/'facturering' stay excluded from that set.
-      { id: 'notif_customers', icon: Bell, render: () => <NotificationsSettings context="klanten" /> },
+      // (never draft-only), so 'customers' gets the same real settings row its
+      // siblings have — see lib/notificationContexts.ts's CONTEXTS_WITHOUT_EMITTER
+      // docblock for why 'billing' is the one context still excluded from that set.
+      { id: 'notif_customers', icon: Bell, render: () => <NotificationsSettings context="customers" /> },
       { id: 'notif_matches', icon: Bell, render: () => <NotificationsSettings context="matches" /> },
-      { id: 'notif_tasks', icon: Bell, render: () => <NotificationsSettings context="taken" /> },
-      { id: 'notif_billing', icon: Bell, render: () => <NotificationsSettings context="facturering" /> },
+      { id: 'notif_tasks', icon: Bell, render: () => <NotificationsSettings context="tasks" /> },
+      { id: 'notif_billing', icon: Bell, render: () => <NotificationsSettings context="billing" /> },
       // NOTIF-CONTEXTEN-FE-1 (CMBE 23-08): new English-slug contexts, backend-context
       // keys 'calllists'/'opportunities' match 1:1 — no Dutch-slug migration needed.
       // Icon: Bell, matching every sibling row in this group (SETTINGS-TABS-FIX-1
@@ -98,7 +98,7 @@ export const communicationGroups: NavGroup[] = [
       // nudges get their own switchable context, with real conversation.* Notifier::send()
       // call sites backing it (SignalEscalation.php, WaWebReplyAttention.php) — a working
       // toggle like its siblings, not listed in CONTEXTS_WITHOUT_EMITTER.
-      { id: 'notif_conversations', icon: Bell, render: () => <NotificationsSettings context="gesprekken" /> },
+      { id: 'notif_conversations', icon: Bell, render: () => <NotificationsSettings context="conversations" /> },
       // Escalation (item 11, 3b): per stall signal, an optional day-threshold + target (user/role).
       { id: 'notif_escalation', icon: Bell, component: EscalationSettings },
       // The per-CALLER override (G28, MyNotificationsSettings) is a personal preference,

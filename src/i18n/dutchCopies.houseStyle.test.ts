@@ -250,7 +250,7 @@ const ALLOWLIST: string[] = [
   'de/settings:nav.kpis_candidates',
   'de/settings:nav.notif_candidates',
   'de/settings:nav.nt_candidate',
-  'de/settings:notifications.context.kandidaten.title',
+  'de/settings:notifications.context.candidates.title',
   'de/settings:reportKpis.reportNames.candidates',
   'de/settings:roles.groups.candidates',
   'de/settings:sync.items.candidates.label',
