@@ -8,6 +8,7 @@
 import { describe, it, expect, vi, afterEach } from 'vitest'
 import { render, screen, fireEvent, waitFor, act } from '@testing-library/react'
 import { useContext } from 'react'
+import i18n from '@/i18n'
 import SettingsPage from './SettingsPage'
 import { SettingsDirtyContext } from './lib/settingsDirty'
 
@@ -57,7 +58,7 @@ describe('SettingsPage — hashchange dirty-guard', () => {
     // Simulate the browser having already applied a new hash before the handler runs.
     act(() => { window.location.hash = '#settings/general/tab_a'; window.dispatchEvent(new HashChangeEvent('hashchange')) })
 
-    expect(await screen.findByText('Je hebt niet-opgeslagen wijzigingen. Wil je deze sectie verlaten?')).toBeInTheDocument()
+    expect(await screen.findByText(i18n.t('settings:common.unsavedConfirm'))).toBeInTheDocument()
   })
 
   it('cancel restores the old hash and keeps the dirty tab open', async () => {
@@ -67,7 +68,7 @@ describe('SettingsPage — hashchange dirty-guard', () => {
     fireEvent.click(screen.getByText('make-dirty'))
 
     act(() => { window.location.hash = '#settings/general/tab_a'; window.dispatchEvent(new HashChangeEvent('hashchange')) })
-    await screen.findByText('Je hebt niet-opgeslagen wijzigingen. Wil je deze sectie verlaten?')
+    await screen.findByText(i18n.t('settings:common.unsavedConfirm'))
 
     fireEvent.click(screen.getByText('Annuleren'))
 
@@ -82,9 +83,9 @@ describe('SettingsPage — hashchange dirty-guard', () => {
     fireEvent.click(screen.getByText('make-dirty'))
 
     act(() => { window.location.hash = '#settings/general/tab_a'; window.dispatchEvent(new HashChangeEvent('hashchange')) })
-    await screen.findByText('Je hebt niet-opgeslagen wijzigingen. Wil je deze sectie verlaten?')
+    await screen.findByText(i18n.t('settings:common.unsavedConfirm'))
 
-    fireEvent.click(screen.getByText('Bevestigen'))
+    fireEvent.click(screen.getByText(i18n.t('common:confirm')))
 
     await waitFor(() => expect(screen.getByText('tab-a-body')).toBeInTheDocument())
     await waitFor(() => expect(window.location.hash).toBe('#settings/general/tab_a'))

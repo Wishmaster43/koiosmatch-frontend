@@ -12,7 +12,7 @@
 import { describe, it, expect, vi } from 'vitest'
 import { render, screen, fireEvent } from '@testing-library/react'
 // Real i18n runtime — assertions check the actual translated nl copy.
-import '@/i18n'
+import i18n from '@/i18n'
 import { PermissionMatrix } from './RolesPermissionMatrix'
 import type { PermissionGroups } from './RolesPermissionMatrix'
 
@@ -55,7 +55,7 @@ describe('PermissionMatrix — transfer-family groups', () => {
 
     // Expand the Kandidaten group row to reveal the export-financial toggle.
     fireEvent.click(screen.getByText('Kandidaten'))
-    expect(screen.getByText('Financiële export')).toBeInTheDocument()
+    expect(screen.getByText(i18n.t('settings:roles.actions.export-financial'))).toBeInTheDocument()
     expect(screen.queryByText('export-financial')).toBeNull()
     expect(screen.queryByText('candidates.export-financial')).toBeNull()
   })

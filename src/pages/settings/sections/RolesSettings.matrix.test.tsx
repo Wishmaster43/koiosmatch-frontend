@@ -102,13 +102,13 @@ describe('PermissionMatrix — collapsed group rows, expand reveals every toggle
     expect(screen.getByText(st('roles.actions.create'))).toBeInTheDocument()
     // Non-CRUD entries keep their documented overrides.
     expect(screen.getByText('Archiveren')).toBeInTheDocument()
-    expect(screen.getByText('Documenten beheren')).toBeInTheDocument()
-    expect(screen.getByText('Alle notities beheren')).toBeInTheDocument()
+    expect(screen.getByText(st('roles.actions.candidatesDocumentsManage'))).toBeInTheDocument()
+    expect(screen.getByText(st('roles.actions.candidatesNotesManageAll'))).toBeInTheDocument()
     expect(screen.getByText(st('roles.actions.sync'))).toBeInTheDocument()
 
     // The sync toggle carries the "SM-spiegel" hint, not the raw permission name.
     const syncToggle = screen.getByRole('switch', { name: `${st('roles.groups.candidates')} — ${st('roles.actions.sync')}` })
-    expect(syncToggle).toHaveAttribute('title', 'SM-spiegel')
+    expect(syncToggle).toHaveAttribute('title', st('roles.hints.candidatesSync'))
   })
 
   it('clicking a CRUD toggle inside the expanded row calls onToggle with that permission name', async () => {
@@ -148,7 +148,7 @@ describe('PermissionMatrix — collapsed group rows, expand reveals every toggle
     expect(screen.getByText(`Pagina: ${st('roles.groups.candidates')}`)).toBeInTheDocument()
     // page.details is renamed away from the generic "Details" label — never a
     // bare "Details" group/toggle anywhere in the rendered tree.
-    expect(screen.getByText('Pagina: Rapportdetails (SM/AI)')).toBeInTheDocument()
+    expect(screen.getByText(st('roles.pageAccess', { label: st('roles.actions.details') }))).toBeInTheDocument()
     expect(screen.queryByText('Details', { exact: true })).not.toBeInTheDocument()
   })
 

@@ -10,6 +10,7 @@ import userEvent from '@testing-library/user-event'
 import i18n from '@/i18n'
 import api from '@/lib/api'
 import { getCountryName } from '@/lib/countries'
+import { languageDisplayName } from '@/lib/languageNames'
 import { loadSettings, saveSettings } from '../lib/settingsApi'
 import CompanySettings from './CompanySettings'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
@@ -233,7 +234,7 @@ describe('CompanySettings — language names from the backend code list', () => 
       : new Promise(() => {}))
     mockedLoadSettings.mockResolvedValue({ company_language: 'en' })
     renderPage()
-    expect(await screen.findByText('Engels')).toBeInTheDocument()
+    expect(await screen.findByText(languageDisplayName('en', i18n.language))).toBeInTheDocument()
     expect(screen.queryByText(/^EN$/)).not.toBeInTheDocument()
   })
 })

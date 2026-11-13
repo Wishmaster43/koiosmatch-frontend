@@ -26,7 +26,7 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 // Side-effect import: initialises the real i18next singleton (mirrors
 // CandidateRequiredFieldsSettings.test.tsx / CustomerRequiredFieldsSettings.test.tsx) —
 // without it react-i18next has no default instance and every t() call renders its raw key.
-import '@/i18n'
+import i18n from '@/i18n'
 import ApplicationRequiredFieldsSettings from './ApplicationRequiredFieldsSettings'
 
 // One field-inventory row, defaulting to a plain requirable/no-permission field.
@@ -191,11 +191,11 @@ describe('ApplicationRequiredFieldsSettings', () => {
       invField({ key: 'custom_fields', requirable: false, reason: 'custom fields carry their own required/required_phases mechanism on the field definition' }),
     ]
     renderScreen()
-    const toggle = await screen.findByRole('switch', { name: 'Eigen velden' })
+    const toggle = await screen.findByRole('switch', { name: i18n.t('candidates:drawer.customFields') })
     expect(toggle).toBeDisabled()
-    expect(screen.getByText('Eigen velden')).toHaveAttribute(
+    expect(screen.getByText(i18n.t('candidates:drawer.customFields'))).toHaveAttribute(
       'title',
-      'Eigen velden hebben hun eigen verplichtingsinstelling op de velddefinitie zelf.',
+      i18n.t('settings:settings.fieldInventory.reason.customFields'),
     )
   })
 
@@ -208,14 +208,14 @@ describe('ApplicationRequiredFieldsSettings', () => {
     await waitFor(() => expect(screen.getByRole('switch', { name: 'Bron' })).toBeInTheDocument())
     // Query the resolved LABEL, not the raw key — the raw key never renders in
     // either branch, so asserting it would pass even without the permission filter.
-    expect(screen.queryByRole('switch', { name: 'Matchscore' })).toBeNull()
+    expect(screen.queryByRole('switch', { name: i18n.t('settings:applicationRequiredFields.fieldLabels.matchScore') })).toBeNull()
   })
 
   it('the same `requires_permission` row renders once the caller has the permission', async () => {
     INVENTORY_REF.current = [...DEFAULT_FIELDS, invField({ key: 'match_score', requires_permission: 'applications.financial.view' })]
     hasPermissionRef.current = () => true
     renderScreen()
-    expect(await screen.findByText('Matchscore')).toBeInTheDocument()
+    expect(await screen.findByText(i18n.t('settings:applicationRequiredFields.fieldLabels.matchScore'))).toBeInTheDocument()
   })
 
   // VERPLICHTE-VELDEN-INVENTARIS-1 verifier fix: `phase_key` is published by the
@@ -226,7 +226,7 @@ describe('ApplicationRequiredFieldsSettings', () => {
       invField({ key: 'phase_key', requirable: false, reason: 'no such column on the applications table' }),
     ]
     renderScreen()
-    expect(await screen.findByText('Fase (systeem)')).toBeInTheDocument()
+    expect(await screen.findByText(i18n.t('settings:applicationRequiredFields.fieldLabels.phaseKey'))).toBeInTheDocument()
     expect(screen.queryByText('phase_key')).not.toBeInTheDocument()
   })
 
