@@ -7,6 +7,7 @@
 import { describe, it, expect } from 'vitest'
 import { render, screen, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
+import i18n from '@/i18n'
 import TenantUsageDetailsTable from './TenantUsageDetailsTable'
 
 // One month's row in the fixture history (mirrors AdminUsageController@show's history[]).
@@ -49,8 +50,8 @@ describe('TenantUsageDetailsTable', () => {
   it('adds a totals row summing every month in the history', () => {
     render(<TenantUsageDetailsTable history={history} />)
     // 12000+0 tokens, 40+0 calls, 5+0 runs, 4.5+0 total amount.
-    expect(screen.getByText('Totaal')).toBeInTheDocument()
-    const totalsRow = screen.getByText('Totaal').closest('div') as HTMLElement
+    expect(screen.getByText(i18n.t('settings:usage.details.totalsLabel'))).toBeInTheDocument()
+    const totalsRow = screen.getByText(i18n.t('settings:usage.details.totalsLabel')).closest('div') as HTMLElement
     expect(within(totalsRow).getByText('12.000')).toBeInTheDocument()
     expect(within(totalsRow).getByText('40')).toBeInTheDocument()
     expect(within(totalsRow).getByText('5')).toBeInTheDocument()
@@ -71,12 +72,12 @@ describe('TenantUsageDetailsTable', () => {
     render(<TenantUsageDetailsTable history={history} />)
     const buttons = screen.getAllByRole('button')
     await userEvent.click(buttons[1])
-    const noDataNotices = screen.getAllByText('Geen gegevens.')
+    const noDataNotices = screen.getAllByText(i18n.t('settings:usage.details.noData'))
     expect(noDataNotices.length).toBeGreaterThanOrEqual(2) // per-module + connectors
   })
 
   it('shows a calm empty state when the backend sends no history at all', () => {
     render(<TenantUsageDetailsTable history={[]} />)
-    expect(screen.getByText('Nog geen verbruiksgeschiedenis.')).toBeInTheDocument()
+    expect(screen.getByText(i18n.t('settings:usage.details.empty'))).toBeInTheDocument()
   })
 })

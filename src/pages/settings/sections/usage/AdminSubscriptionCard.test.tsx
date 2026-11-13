@@ -5,7 +5,7 @@
  */
 import { describe, it, expect } from 'vitest'
 import { render, screen } from '@testing-library/react'
-import '@/i18n'
+import i18n from '@/i18n'
 import AdminSubscriptionCard from './AdminSubscriptionCard'
 
 const sub = {
@@ -23,7 +23,7 @@ describe('AdminSubscriptionCard', () => {
 
   it('renders the split in euros with the honest over-limit line', () => {
     render(<AdminSubscriptionCard subscription={sub} />)
-    expect(screen.getByText('Abonnement')).toBeInTheDocument()
+    expect(screen.getByText(i18n.t('settings:usage.subscription.title'))).toBeInTheDocument()
     expect(screen.getByText('€ 995,00')).toBeInTheDocument()
     expect(screen.getByText('8 gebruikers (5 inbegrepen)')).toBeInTheDocument()
     expect(screen.getByText('€ 465,00')).toBeInTheDocument()

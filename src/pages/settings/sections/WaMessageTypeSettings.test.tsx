@@ -42,7 +42,7 @@ describe('WaMessageTypeSettings — priority rank input', () => {
 
     await screen.findByText('Match')
     // showRank renders a number input titled/labelled with the priority-rank copy.
-    const rankInputs = screen.getAllByTitle(st('statusList.priorityRank', { defaultValue: 'Prioriteit (1 = eerst verstuurd)' }))
+    const rankInputs = screen.getAllByTitle(st('statusList.priorityRank'))
     expect(rankInputs).toHaveLength(2)
     expect(rankInputs[0]).toHaveValue(1)
     expect(rankInputs[1]).toHaveValue(2)
