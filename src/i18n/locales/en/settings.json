@@ -1178,11 +1178,11 @@
     "secSsl": "SSL/TLS (port 465)",
     "secNone": "None (not recommended)",
     "context": {
-      "klanten": {
+      "customers": {
         "title": "Clients",
         "subtitle": "Email connection and signature for client communication and reminders."
       },
-      "kandidaten": {
+      "candidates": {
         "title": "Candidates",
         "subtitle": "Email connection and signature for candidate communication and reminders."
       },

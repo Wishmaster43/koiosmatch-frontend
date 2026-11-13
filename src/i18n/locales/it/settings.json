@@ -1159,11 +1159,11 @@
     "secSsl": "SSL/TLS (porta 465)",
     "secNone": "Nessuna (non consigliata)",
     "context": {
-      "klanten": {
+      "customers": {
         "title": "Clienti",
         "subtitle": "Connessione e-mail e firma per la comunicazione con i clienti e i promemoria."
       },
-      "kandidaten": {
+      "candidates": {
         "title": "Candidati",
         "subtitle": "Connessione e-mail e firma per la comunicazione con i candidati e i promemoria."
       },

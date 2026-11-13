@@ -918,11 +918,11 @@
     "secSsl": "SSL/TLS (puerto 465)",
     "secNone": "Ninguna (no recomendado)",
     "context": {
-      "klanten": {
+      "customers": {
         "title": "Clientes",
         "subtitle": "Conexión de correo y firma para comunicación y recordatorios de clientes."
       },
-      "kandidaten": {
+      "candidates": {
         "title": "Candidatos",
         "subtitle": "Conexión de correo y firma para comunicación y recordatorios de candidatos."
       },

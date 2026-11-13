@@ -918,11 +918,11 @@
     "secSsl": "SSL/TLS (Port 465)",
     "secNone": "Keine (nicht empfohlen)",
     "context": {
-      "klanten": {
+      "customers": {
         "title": "Kunden",
         "subtitle": "E-Mail-Verbindung und Signatur für Kundenkommunikation und Erinnerungen."
       },
-      "kandidaten": {
+      "candidates": {
         "title": "Kandidaten",
         "subtitle": "E-Mail-Verbindung und Signatur für Kandidatenkommunikation und Erinnerungen."
       },

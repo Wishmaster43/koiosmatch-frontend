@@ -1178,11 +1178,11 @@
     "secSsl": "SSL/TLS (poort 465)",
     "secNone": "Geen (niet aanbevolen)",
     "context": {
-      "klanten": {
+      "customers": {
         "title": "Klanten",
         "subtitle": "E-mailkoppeling en handtekening voor klantcommunicatie en reminders."
       },
-      "kandidaten": {
+      "candidates": {
         "title": "Kandidaten",
         "subtitle": "E-mailkoppeling en handtekening voor kandidaatcommunicatie en reminders."
       },

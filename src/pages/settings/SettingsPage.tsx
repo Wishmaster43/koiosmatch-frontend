@@ -86,10 +86,12 @@ const SLUG_ALIASES: Record<string, { category: string; tab: string }> = {
   'catalog/email': { category: 'communication', tab: 'email_general' },
 }
 
-// G-009: the BE's mailbox OAuth callback names no tab (`#settings/communication?email_oauth=…&context=klanten`); the context decides which email tab to open.
+// G-009: the BE's mailbox OAuth callback names no tab (`#settings/communication?email_oauth=…&context=klanten`); the context decides which email tab to open. The BE callback still sends the Dutch token, a future callback may send the canonical one.
 const OAUTH_CONTEXT_TABS: Record<string, string> = {
   klanten: 'email_customers',
+  customers: 'email_customers',
   kandidaten: 'email_candidates',
+  candidates: 'email_candidates',
   planning: 'email_planning',
 }
 

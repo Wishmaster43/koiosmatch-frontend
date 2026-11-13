@@ -52,26 +52,28 @@ function withLocationSpy() {
   return () => { Object.defineProperty(window, 'location', { configurable: true, value: original }) }
 }
 
-// The settings context this suite renders (a pre-existing Dutch settings slug, named once).
-const CONTEXT = 'klanten'
+// The canonical context this suite renders (settings keys are email_customers_*).
+const CONTEXT = 'customers'
+// The Dutch token the BE routes, test-mail body and OAuth callback still use for it.
+const WIRE = 'klanten'
 // Server status message fixture for the needs_reconnect case, shared by the mock and the assertion.
 const MAILBOX_MESSAGE = 'Token revoked by the provider'
 
-function renderPanel(context = 'klanten') {
+function renderPanel(context: 'customers' | 'candidates' | 'planning' = 'customers') {
   return render(<I18nextProvider i18n={i18n}><EmailSettings context={context} /></I18nextProvider>)
 }
 
 describe('EmailSettings · connection status (DL-10)', () => {
   it('fetches GET /settings/email/{context}/status on mount', async () => {
     loadSettings.mockResolvedValue({ [`email_${CONTEXT}_provider`]: 'gmail' })
-    mockedGet.mockResolvedValue({ data: { data: { context: 'klanten', connected: false, provider: 'gmail', address: null } } })
+    mockedGet.mockResolvedValue({ data: { data: { context: WIRE, connected: false, provider: 'gmail', address: null } } })
     renderPanel(CONTEXT)
-    await waitFor(() => expect(mockedGet).toHaveBeenCalledWith('/settings/email/klanten/status'))
+    await waitFor(() => expect(mockedGet).toHaveBeenCalledWith(`/settings/email/${WIRE}/status`))
   })
 
   it('shows the connected state with the provider and address', async () => {
     loadSettings.mockResolvedValue({ [`email_${CONTEXT}_provider`]: 'gmail' })
-    mockedGet.mockResolvedValue({ data: { data: { context: 'klanten', connected: true, provider: 'gmail', address: 'info@yesway.nl' } } })
+    mockedGet.mockResolvedValue({ data: { data: { context: WIRE, connected: true, provider: 'gmail', address: 'info@yesway.nl' } } })
     renderPanel(CONTEXT)
     await waitFor(() => expect(
       screen.getByText(st('email.oauthConnected').replace('{{provider}}', 'Google').replace('{{address}}', 'info@yesway.nl')),
@@ -90,24 +92,30 @@ describe('EmailSettings · connection status (DL-10)', () => {
   })
 
   it('re-fetches the status after a successful save', async () => {
-    loadSettings.mockResolvedValue({ email_klanten_provider: 'manual' })
-    mockedGet.mockResolvedValue({ data: { data: { context: 'klanten', connected: false, provider: null, address: null } } })
+    loadSettings.mockResolvedValue({ email_customers_provider: 'manual' })
+    mockedGet.mockResolvedValue({ data: { data: { context: WIRE, connected: false, provider: null, address: null } } })
     const user = userEvent.setup()
     renderPanel(CONTEXT)
-    await waitFor(() => expect(mockedGet).toHaveBeenCalledWith('/settings/email/klanten/status'))
+    await waitFor(() => expect(mockedGet).toHaveBeenCalledWith(`/settings/email/${WIRE}/status`))
     mockedGet.mockClear()
 
     await user.click(screen.getByRole('button', { name: st('common.save') }))
-    await waitFor(() => expect(saveSettings).toHaveBeenCalled())
-    await waitFor(() => expect(mockedGet).toHaveBeenCalledWith('/settings/email/klanten/status'))
+    await waitFor(() => expect(saveSettings).toHaveBeenCalledWith(expect.objectContaining({
+      email_customers_provider: 'manual',
+      email_customers_from_name: expect.any(String),
+      email_customers_smtp_host: expect.any(String),
+      email_customers_smtp_port: expect.any(String),
+      email_customers_signature: expect.any(String),
+    })))
+    await waitFor(() => expect(mockedGet).toHaveBeenCalledWith(`/settings/email/${WIRE}/status`))
   })
 })
 
 // §6 — every manual-SMTP field's visible label is a real <label htmlFor> tied to its input id.
 describe('EmailSettings · field label association (§6)', () => {
   it('associates sender/SMTP labels to their inputs for the manual provider', async () => {
-    loadSettings.mockResolvedValue({ email_klanten_provider: 'manual' })
-    mockedGet.mockResolvedValue({ data: { data: { context: 'klanten', connected: false, provider: null, address: null } } })
+    loadSettings.mockResolvedValue({ email_customers_provider: 'manual' })
+    mockedGet.mockResolvedValue({ data: { data: { context: WIRE, connected: false, provider: null, address: null } } })
     renderPanel(CONTEXT)
     await waitFor(() => expect(mockedGet).toHaveBeenCalled())
     expect(screen.getByLabelText(st('email.senderName'))).toBeInTheDocument()
@@ -124,7 +132,7 @@ describe('EmailSettings · field label association (§6)', () => {
 // re-fires the real test e-mail.
 describe('EmailSettings · test connection done state (N007-POINT3-FIX-1)', () => {
   it('disables the test button and shows "sent" after success, and a repeat click does not POST again', async () => {
-    loadSettings.mockResolvedValue({ email_klanten_provider: 'manual' })
+    loadSettings.mockResolvedValue({ email_customers_provider: 'manual' })
     mockedGet.mockResolvedValue({ data: { data: { connected: false, provider: null, address: null } } })
     mockedPost.mockResolvedValue({ data: { message: 'ok' } })
     const user = userEvent.setup()
@@ -133,7 +141,7 @@ describe('EmailSettings · test connection done state (N007-POINT3-FIX-1)', () =
 
     const testButton = screen.getByRole('button', { name: st('email.testConnection') })
     await user.click(testButton)
-    await waitFor(() => expect(mockedPost).toHaveBeenCalledWith('/settings/email/test', { context: CONTEXT }))
+    await waitFor(() => expect(mockedPost).toHaveBeenCalledWith('/settings/email/test', { context: WIRE }))
 
     const sentButton = await screen.findByRole('button', { name: st('email.testSentButton') })
     expect(sentButton).toBeDisabled()
@@ -142,7 +150,7 @@ describe('EmailSettings · test connection done state (N007-POINT3-FIX-1)', () =
   })
 
   it('re-enables the test button as soon as a form setting changes', async () => {
-    loadSettings.mockResolvedValue({ email_klanten_provider: 'manual' })
+    loadSettings.mockResolvedValue({ email_customers_provider: 'manual' })
     mockedGet.mockResolvedValue({ data: { data: { connected: false, provider: null, address: null } } })
     mockedPost.mockResolvedValue({ data: { message: 'ok' } })
     const user = userEvent.setup()
@@ -162,7 +170,7 @@ describe('EmailSettings · test connection done state (N007-POINT3-FIX-1)', () =
   // a context switch must re-enable the button even when every field value is
   // unchanged, never leave "Test verstuurd" on a context that was never tested.
   it('re-enables the test button on a context switch (shared component instance across sub-tabs)', async () => {
-    loadSettings.mockResolvedValue({ email_klanten_provider: 'manual' })
+    loadSettings.mockResolvedValue({ email_customers_provider: 'manual' })
     mockedGet.mockResolvedValue({ data: { data: { connected: false, provider: null, address: null } } })
     mockedPost.mockResolvedValue({ data: { message: 'ok' } })
     const user = userEvent.setup()
@@ -172,12 +180,14 @@ describe('EmailSettings · test connection done state (N007-POINT3-FIX-1)', () =
     await user.click(screen.getByRole('button', { name: st('email.testConnection') }))
     await screen.findByRole('button', { name: st('email.testSentButton') })
 
-    rerender(<I18nextProvider i18n={i18n}><EmailSettings context="kandidaten" /></I18nextProvider>)
+    mockedGet.mockClear()
+    rerender(<I18nextProvider i18n={i18n}><EmailSettings context="candidates" /></I18nextProvider>)
+    await waitFor(() => expect(mockedGet).toHaveBeenCalledWith('/settings/email/kandidaten/status'))
     expect(await screen.findByRole('button', { name: st('email.testConnection') })).not.toBeDisabled()
   })
 
   it('keeps today\'s behaviour on a FAILED test: the button re-enables, no "sent" state', async () => {
-    loadSettings.mockResolvedValue({ email_klanten_provider: 'manual' })
+    loadSettings.mockResolvedValue({ email_customers_provider: 'manual' })
     mockedGet.mockResolvedValue({ data: { data: { connected: false, provider: null, address: null } } })
     mockedPost.mockRejectedValue({ response: { data: { message: 'SMTP connection refused' } } })
     const user = userEvent.setup()
@@ -194,8 +204,8 @@ describe('EmailSettings · Koppelen (DL-10)', () => {
   it('fetches the consent URL and redirects the browser to it, never a bare navigation', async () => {
     loadSettings.mockResolvedValue({ [`email_${CONTEXT}_provider`]: 'gmail' })
     mockedGet.mockImplementation(async url => {
-      if (url === '/settings/email/klanten/status') return { data: { data: { connected: false, provider: 'gmail', address: null } } }
-      if (url === '/settings/email/oauth/klanten/redirect') return { data: { url: 'https://accounts.google.com/o/oauth2/consent?x=1' } }
+      if (url === `/settings/email/${WIRE}/status`) return { data: { data: { connected: false, provider: 'gmail', address: null } } }
+      if (url === `/settings/email/oauth/${WIRE}/redirect`) return { data: { url: 'https://accounts.google.com/o/oauth2/consent?x=1' } }
       throw new Error(`unexpected ${url}`)
     })
     const restore = withLocationSpy()
@@ -204,7 +214,7 @@ describe('EmailSettings · Koppelen (DL-10)', () => {
 
     await user.click(await screen.findByRole('button', { name: st('email.oauthConnect') }))
     await waitFor(() => {
-      const call = mockedGet.mock.calls.find(c => c[0] === '/settings/email/oauth/klanten/redirect')
+      const call = mockedGet.mock.calls.find(c => c[0] === `/settings/email/oauth/${WIRE}/redirect`)
       expect(call?.[1]?.params).toEqual({ provider: 'gmail' })
     })
     await waitFor(() => expect(window.location.href).toBe('https://accounts.google.com/o/oauth2/consent?x=1'))
@@ -221,7 +231,7 @@ describe('EmailSettings · Ontkoppelen (DL-10)', () => {
     renderPanel(CONTEXT)
 
     await user.click(await screen.findByRole('button', { name: st('email.oauthDisconnect') }))
-    await waitFor(() => expect(mockedApi.delete).toHaveBeenCalledWith('/settings/email/oauth/klanten'))
+    await waitFor(() => expect(mockedApi.delete).toHaveBeenCalledWith(`/settings/email/oauth/${WIRE}`))
   })
 })
 
@@ -278,13 +288,28 @@ describe('EmailSettings · OAuth callback landing reads the hash, not location.s
     window.location.hash = ''
   })
 
+  // EMAIL-KEYS-EN-1: a callback that already carries the canonical token (a future BE
+  // release) is consumed by the same tab as the Dutch one (toCanonicalEmailContext).
+  it('shows the connected banner for a callback carrying the canonical context=customers token', async () => {
+    window.location.hash = '#settings/communication/email_customers?email_oauth=connected&context=customers&email=info%40yesway.nl'
+    loadSettings.mockResolvedValue({ [`email_${CONTEXT}_provider`]: 'gmail' })
+    mockedGet.mockResolvedValue({ data: { data: { connected: true, provider: 'gmail', address: 'info@yesway.nl' } } })
+    renderPanel(CONTEXT)
+
+    await waitFor(() => expect(
+      screen.getByText(st('email.oauthCallbackConnected').replace('{{email}}', 'info@yesway.nl')),
+    ).toBeInTheDocument())
+    await waitFor(() => expect(window.location.hash).not.toContain('email_oauth'))
+    window.location.hash = ''
+  })
+
   it('ignores a connected callback addressed to a different context tab', async () => {
     window.location.hash = '#settings/communication/email_kandidaten?email_oauth=connected&context=kandidaten&email=x%40y.nl'
     loadSettings.mockResolvedValue({ [`email_${CONTEXT}_provider`]: 'gmail' })
     mockedGet.mockResolvedValue({ data: { data: { connected: false, provider: 'gmail', address: null } } })
     renderPanel(CONTEXT)
 
-    await waitFor(() => expect(mockedGet).toHaveBeenCalledWith('/settings/email/klanten/status'))
+    await waitFor(() => expect(mockedGet).toHaveBeenCalledWith(`/settings/email/${WIRE}/status`))
     expect(screen.queryByText(st('email.oauthCallbackConnected').replace('{{email}}', 'x@y.nl'))).not.toBeInTheDocument()
     window.location.hash = ''
   })
@@ -308,7 +333,7 @@ describe('EmailSettings · mailbox health statuses', () => {
     const btn = screen.getByRole('button', { name: st('email.oauthConnect') })
     mockedGet.mockClear()
     await userEvent.click(btn)
-    await waitFor(() => expect(mockedGet).toHaveBeenCalledWith(`/settings/email/oauth/${CONTEXT}/redirect`, { params: { provider: 'gmail' } }))
+    await waitFor(() => expect(mockedGet).toHaveBeenCalledWith(`/settings/email/oauth/${WIRE}/redirect`, { params: { provider: 'gmail' } }))
   })
 
   it('tenant_policy without server text falls back to the translated SMTP sentence', async () => {

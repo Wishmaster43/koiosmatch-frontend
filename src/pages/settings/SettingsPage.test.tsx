@@ -109,6 +109,8 @@ describe('parseHash — hash query (G-009)', () => {
     expect(parseHash()).toEqual({ category: 'communication', tab: 'email_customers' })
     window.location.hash = '#settings/communication?email_oauth=error&context=kandidaten'
     expect(parseHash()).toEqual({ category: 'communication', tab: 'email_candidates' })
+    window.location.hash = '#settings/communication?email_oauth=connected&context=customers'
+    expect(parseHash()).toEqual({ category: 'communication', tab: 'email_customers' })
     window.location.hash = '#settings/communication?context=planning'
     expect(parseHash()).toEqual({ category: 'communication', tab: 'email_planning' })
   })

@@ -37,10 +37,10 @@ export const communicationGroups: NavGroup[] = [
     // compose or workflow send-step surface.
     key: 'communication', icon: Mail,
     items: [
-      // Wire contract: EmailSettings keys its stored settings as email_<context>_* — the
-      // context prop stays the legacy Dutch wire value while the registry id is English.
-      { id: 'email_customers', icon: Mail, render: () => <EmailSettings context="klanten" /> },
-      { id: 'email_candidates', icon: Mail, render: () => <EmailSettings context="kandidaten" /> },
+      // EmailSettings keys its stored settings as email_customers_* / email_candidates_* /
+      // email_planning_*; the route tokens stay Dutch via lib/emailContexts.ts.
+      { id: 'email_customers', icon: Mail, render: () => <EmailSettings context="customers" /> },
+      { id: 'email_candidates', icon: Mail, render: () => <EmailSettings context="candidates" /> },
       { id: 'email_planning', icon: Mail, render: () => <EmailSettings context="planning" /> },
       { id: 'email_log', icon: ClipboardList, component: EmailLog },
       // AVG-RET-2-TAAL-1: agency-wide candidate/contact messaging-language default.

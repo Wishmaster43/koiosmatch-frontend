@@ -1,9 +1,11 @@
 /**
- * EmailSettings — one full email connection PER context (klanten / kandidaten /
+ * EmailSettings: one full email connection PER context (customers / candidates /
  * planning), each its own tab. Because connecting e.g. Gmail for client reminders
  * vs. planning means separate accounts, every context has its own provider/SMTP
  * credentials, sender identity AND email signature. Everything is stored under
- * `email_<context>_*` settings keys; the signature is HTML (RichTextEditor).
+ * `email_<context>_*` settings keys (canonical English context); the BE routes, the
+ * test-mail body and the OAuth callback still carry the Dutch token through
+ * lib/emailContexts (EMAIL-KEYS-EN-1). The signature is HTML (RichTextEditor).
  *
  * A signature is a static sign-off block, not a conversation, so it never
  * opts into "Actiepunten" - it rides RichTextAssistBar's own
@@ -21,6 +23,7 @@ import Button from '@/components/ui/Button'
 import SaveButton from '@/components/ui/SaveButton'
 import { PageTitle, PageSubtitle } from '@/components/ui/typography'
 import { useAuth } from '@/context/AuthContext'
+import { toLegacyEmailContext, toCanonicalEmailContext, type EmailContext } from '../lib/emailContexts'
 import { getHashParams, oauthReasonKey, stripOauthParams } from '@/lib/hashQuery'
 import { SETTINGS_MAX_W_WIDE } from '@/pages/settings/components/settingsMetrics'
 import type { EmailConnStatus, OutcomeBanner } from './email/types'
@@ -30,18 +33,20 @@ import EmailSenderCard from './email/EmailSenderCard'
 import EmailSmtpCard from './email/EmailSmtpCard'
 import EmailSignatureCard from './email/EmailSignatureCard'
 
-// Props: which context (klanten/kandidaten/planning) this tab configures.
+// Props: which context (customers/candidates/planning) this tab configures; routes still carry the Dutch token via emailContexts.
 interface EmailSettingsProps {
-  context?: string
+  context?: EmailContext
 }
 
-export default function EmailSettings({ context = 'klanten' }: EmailSettingsProps) {
+export default function EmailSettings({ context = 'customers' }: EmailSettingsProps) {
   const { t } = useTranslation('settings')
   const auth = useAuth()
   // DL-10: the OAuth Koppelen/Ontkoppelen actions both require settings.update on
   // the backend (route:list) — a settings.view-only caller must not see live buttons.
   const canEditConn = Boolean(auth?.hasPermission?.('settings.update'))
   const K = `email_${context}_`   // settings-key prefix for this context
+  // Dutch wire token for the BE routes, test-mail body and OAuth callback (see emailContexts).
+  const wire = toLegacyEmailContext(context)
 
   const [provider,     setProvider]     = useState('manual')
   const [fromName,     setFromName]      = useState('')
@@ -108,14 +113,14 @@ export default function EmailSettings({ context = 'klanten' }: EmailSettingsProp
   const loadConnStatus = useCallback(async (alive: { current: boolean } = { current: true }) => {
     setConnLoading(true)
     try {
-      const res = await api.get(`/settings/email/${context}/status`)
+      const res = await api.get(`/settings/email/${wire}/status`)
       if (alive.current) setConnStatus(res.data?.data ?? null)
     } catch {
       if (alive.current) setConnStatus(null)
     } finally {
       if (alive.current) setConnLoading(false)
     }
-  }, [context])
+  }, [wire])
 
   useEffect(() => {
     const alive = { current: true }
@@ -134,7 +139,7 @@ export default function EmailSettings({ context = 'klanten' }: EmailSettingsProp
     const params = getHashParams(window.location.hash)
     const outcome = params.get('email_oauth')
     if (!outcome) return
-    const forThisTab = outcome === 'error' || params.get('context') === context
+    const forThisTab = outcome === 'error' || toCanonicalEmailContext(params.get('context') ?? '') === context
     if (!forThisTab) return
     // ONIX L-002 (BE 84917a3e): the consent flow is bound to the browser that started
     // it; `reason=browser_mismatch` means the state came back in another browser.
@@ -171,7 +176,7 @@ export default function EmailSettings({ context = 'klanten' }: EmailSettingsProp
   const connectOauth = async () => {
     setConnecting(true)
     try {
-      const res = await api.get(`/settings/email/oauth/${context}/redirect`, { params: { provider } })
+      const res = await api.get(`/settings/email/oauth/${wire}/redirect`, { params: { provider } })
       const url = res.data?.url
       if (url) { window.location.href = url; return }
       notifyError(t('email.oauthConnectFailed'))
@@ -186,7 +191,7 @@ export default function EmailSettings({ context = 'klanten' }: EmailSettingsProp
   const disconnectOauth = async () => {
     setDisconnecting(true)
     try {
-      await api.delete(`/settings/email/oauth/${context}`)
+      await api.delete(`/settings/email/oauth/${wire}`)
       await loadConnStatus()
     } catch {
       notifyError(t('email.oauthDisconnectFailed'))
@@ -203,7 +208,7 @@ export default function EmailSettings({ context = 'klanten' }: EmailSettingsProp
     setTesting(true)
     setTestResult(null)
     try {
-      const res = await api.post('/settings/email/test', { context })
+      const res = await api.post('/settings/email/test', { context: wire })
       setTestResult({ ok: true, msg: res.data?.message ?? t('email.testSent') })
       setTestSent(true)
       if (testSentTimerRef.current) clearTimeout(testSentTimerRef.current)

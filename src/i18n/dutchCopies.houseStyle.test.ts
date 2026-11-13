@@ -242,7 +242,7 @@ const ALLOWLIST: string[] = [
   'de/reports:runs.drawer.candidates',
   'de/settings:apiKeys.scopes.candidates',
   'de/settings:audit.logName.candidates',
-  'de/settings:email.context.kandidaten.title',
+  'de/settings:email.context.candidates.title',
   'de/settings:export.entities.candidates.title',
   'de/settings:moduleView.modules.candidates',
   'de/settings:nav.cf_candidate',
