@@ -10,6 +10,7 @@
  * available cards show label via label_key with BE label as default fallback.
  */
 import { useTranslation } from 'react-i18next'
+import { labelOrRaw } from '@/lib/labelOrRaw'
 import { useState, useEffect } from 'react'
 import { useQuery, useMutation } from '@tanstack/react-query'
 import api from '@/lib/api'
@@ -88,7 +89,7 @@ export default function ReportKpiSettings() {
 
 // One scope's editor. Keyed by scope id in the parent so switching tabs never leaks state.
 function ReportKpiBlock({ scopeId, catalogData }: { scopeId: ReportKpiScopeId; catalogData: Record<string, CatalogScope> }) {
-  const { t } = useTranslation('settings')
+  const { t, i18n } = useTranslation('settings')
   const scopeCatalog = catalogData[scopeId]
 
   // Fetch selection for this scope.
@@ -144,7 +145,7 @@ function ReportKpiBlock({ scopeId, catalogData }: { scopeId: ReportKpiScopeId; c
     if (entry) {
       // Try to use i18n label_key; fall back to BE label.
       try {
-        return t(entry.label_key, { ns: 'analytics', defaultValue: entry.label })
+        return labelOrRaw(t, i18n, entry.label_key, entry.label, 'analytics')
       } catch {
         return entry.label
       }

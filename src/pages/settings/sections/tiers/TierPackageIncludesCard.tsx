@@ -5,6 +5,7 @@
  * Props-only presenter; the parent container owns GET/PUT and the SaveButton.
  */
 import { useTranslation } from 'react-i18next'
+import { labelOrRaw } from '@/lib/labelOrRaw'
 import SearchSelect from '@/components/ui/SearchSelect'
 import { PACKAGE_KEYS } from '../billingCardStyles'
 import { NumberField, SettingCardList, SettingRow } from '@/pages/settings/components/SettingsKit'
@@ -19,7 +20,7 @@ interface Props {
 
 // One row per package: the runs allowance and a single-pick AI tier side by side.
 export default function TierPackageIncludesCard({ baselines, aiTiers, onChange, disabled }: Props) {
-  const { t } = useTranslation('settings')
+  const { t, i18n } = useTranslation('settings')
 
   // Only active tiers are pickable — an inactive tier is not a valid baseline choice.
   const aiOptions = [
@@ -33,7 +34,7 @@ export default function TierPackageIncludesCard({ baselines, aiTiers, onChange, 
         const baseline = baselines[pkg]
         const aiKey = baseline?.ai_tier_key ?? ''
         // Package-qualified names: three identical controls would be indistinguishable to a screen reader (§6).
-        const pkgLabel = t(`billingBudgets.package.${pkg}`, { defaultValue: pkg })
+        const pkgLabel = labelOrRaw(t, i18n, `billingBudgets.package.${pkg}`, pkg, 'settings')
         return (
           <SettingRow key={pkg} label={pkgLabel}
             description={`${t('billingTiers.includesRuns')} · ${t('billingTiers.includesAiTier')}`}>

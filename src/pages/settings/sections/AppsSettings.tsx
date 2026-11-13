@@ -1,6 +1,7 @@
 /** AppsSettings — toggle external app connectors (with monthly-cost + package warnings). */
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
+import { labelOrRaw } from '@/lib/labelOrRaw'
 import SaveButton from '@/components/ui/SaveButton'
 import api from '@/lib/api'
 import { notifyError } from '@/lib/notify'
@@ -17,7 +18,7 @@ import { useQueryClient } from '@tanstack/react-query'
 
 // Connector toggles gated on super-admin + package: shows an honest disabled state, never a clickable 403.
 export default function AppsSettings() {
-  const { t } = useTranslation('settings')
+  const { t, i18n } = useTranslation('settings')
   // useApps() is null only outside its provider, which never happens on this settings
   // route — defaulted to an empty/no-op shape so the destructure stays type-safe.
   const { enabled, setApps } = useApps() ?? { enabled: [] as string[], setApps: (() => {}) as (next: string[]) => void }
@@ -111,7 +112,7 @@ export default function AppsSettings() {
           const unsaved = on !== savedOn
           const soon = !!app.comingSoon
           // Descriptive labels (verificatie group prose) route through i18n like description already does; brand names fall back to the raw catalogue label.
-          const appLabel = t(`appsCatalogLabels.${app.id}`, { defaultValue: app.label })
+          const appLabel = labelOrRaw(t, i18n, `appsCatalogLabels.${app.id}`, app.label, 'settings')
           return (
             <div key={app.id} style={{
               display: 'flex', alignItems: 'center', gap: 16,

@@ -9,6 +9,7 @@
  * spec: "a notice when a user is created outside the package").
  */
 import { useTranslation } from 'react-i18next'
+import { labelOrRaw } from '@/lib/labelOrRaw'
 import { AlertTriangle } from 'lucide-react'
 import { SectionTitle, BodyText, Caption, Mono } from '@/components/ui/typography'
 import { useNumberFormat } from '@/lib/formatters'
@@ -35,7 +36,7 @@ function MoneyRow({ label, amount, strong = false, formatCurrency }: { label: st
 
 // The superadmin subscription split; renders nothing without the block (older BE).
 export default function AdminSubscriptionCard({ subscription }: { subscription?: AdminSubscription | null }) {
-  const { t } = useTranslation('settings')
+  const { t, i18n } = useTranslation('settings')
   // GETALLEN-1: bind the formatters to the active locale, never the raw module defaults.
   const { formatNumber, formatCurrency } = useNumberFormat()
   if (!subscription) return null
@@ -66,7 +67,7 @@ export default function AdminSubscriptionCard({ subscription }: { subscription?:
         </div>
       )}
       {(subscription.addons ?? []).map((a, i) => (
-        <MoneyRow key={a.key ?? i} label={t(`usage.subscription.addon.${a.key}`, { defaultValue: a.key ?? '—' })} amount={a.amount} formatCurrency={formatCurrency} />
+        <MoneyRow key={a.key ?? i} label={labelOrRaw(t, i18n, `usage.subscription.addon.${a.key}`, a.key ?? '—', 'settings')} amount={a.amount} formatCurrency={formatCurrency} />
       ))}
       <div style={{ borderTop: '1px solid var(--border)', marginTop: 4 }}>
         <MoneyRow label={t('usage.subscription.total')} amount={subscription.total_amount} strong formatCurrency={formatCurrency} />

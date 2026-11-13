@@ -11,6 +11,8 @@
  */
 import { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
+import type { TFunction } from 'i18next'
+import { labelOrRaw, type KeyChecker } from '@/lib/labelOrRaw'
 import api, { unwrap } from '@/lib/api'
 import { useNumberFormat } from '@/lib/formatters'
 import { SectionTitle, Mono } from '@/components/ui/typography'
@@ -31,13 +33,13 @@ interface UsagePerActivityTabProps {
 
 // Translate a raw activity code via the tenant-facing map, falling back to the
 // raw code itself so an unmapped future code still renders something (§0.5).
-function activityLabel(t: (k: string, o?: Record<string, unknown>) => string, code: string): string {
-  return t(`billing.usage.activity.activityMap.${code}`, { defaultValue: code })
+function activityLabel(t: TFunction, i18n: KeyChecker, code: string): string {
+  return labelOrRaw(t, i18n, `billing.usage.activity.activityMap.${code}`, code, 'settings')
 }
 
 // AI-tokens-per-activity view (see the module doc above for the prev_month fallback and the split with the workflow-total endpoint).
 export default function UsagePerActivityTab({ overviewPeriod, workflow, workflowLoading }: UsagePerActivityTabProps) {
-  const { t } = useTranslation('settings')
+  const { t, i18n } = useTranslation('settings')
   const { formatNumber, formatCurrency } = useNumberFormat()
 
   const [ai, setAi] = useState<KoiosUsageResponse | null>(null)
@@ -61,7 +63,7 @@ export default function UsagePerActivityTab({ overviewPeriod, workflow, workflow
   }, [aiPeriod])
 
   const aiColumns: Column<{ activity: string; calls?: number; input_tokens?: number; output_tokens?: number; amount?: number }>[] = [
-    { key: 'activity', header: t('billing.usage.activity.colActivity'), render: (r) => activityLabel(t, r.activity) },
+    { key: 'activity', header: t('billing.usage.activity.colActivity'), render: (r) => activityLabel(t, i18n, r.activity) },
     { key: 'calls', header: t('billing.usage.activity.colCalls'), align: 'right', render: (r) => formatNumber(r.calls) },
     { key: 'tokens', header: t('billing.usage.activity.colTokens'), align: 'right', render: (r) => formatNumber((r.input_tokens ?? 0) + (r.output_tokens ?? 0)) },
     { key: 'amount', header: t('billing.usage.activity.colAmount'), align: 'right', render: (r) => formatCurrency(r.amount, ai?.totals?.currency) },

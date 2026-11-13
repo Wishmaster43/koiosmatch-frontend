@@ -13,7 +13,9 @@ vi.mock('@/lib/api', () => ({ default: { put: (...a: unknown[]) => mockPut(...a)
 const mockNotifyError = vi.fn()
 vi.mock('@/lib/notify', () => ({ notifyError: (...a: unknown[]) => mockNotifyError(...a) }))
 vi.mock('@/lib/extractApiError', () => ({ extractApiError: (err: { response?: { data?: { message?: string } } }, fb: string) => err?.response?.data?.message ?? fb }))
-vi.mock('react-i18next', () => ({ useTranslation: () => ({ t: (k: string) => k }) }))
+// Key-echo t plus an exists flag: true = every catalogue label has a key, false = brand names fall back to the raw label.
+const i18nState = vi.hoisted(() => ({ keyExists: true }))
+vi.mock('react-i18next', () => ({ useTranslation: () => ({ t: (k: string) => k, i18n: { exists: () => i18nState.keyExists } }) }))
 const mockRefreshUser = vi.fn(() => Promise.resolve({}))
 vi.mock('@/context/AuthContext', () => ({ useAuth: () => ({ hasPermission: () => true, hasModule: () => true, isSuperAdmin: () => true, refreshUser: mockRefreshUser }) }))
 vi.mock('@/lib/access', () => ({ canAccessPage: () => true }))
@@ -36,7 +38,7 @@ function renderApps() {
   return { ...utils, rerenderApps: () => utils.rerender(withClient(qc)) }
 }
 
-beforeEach(() => { mockPut.mockReset(); mockNotifyError.mockReset(); mockSetApps.mockClear(); mockRefreshUser.mockClear(); invalidate.mockClear(); mockEnabled = [] })
+beforeEach(() => { mockPut.mockReset(); mockNotifyError.mockReset(); mockSetApps.mockClear(); mockRefreshUser.mockClear(); invalidate.mockClear(); mockEnabled = []; i18nState.keyExists = true })
 
 describe('AppsSettings', () => {
   it("enabling HelloFlex PUTs the backend 'hf' slug, never 'helloflex'", async () => {
@@ -95,6 +97,16 @@ describe('AppsSettings', () => {
 
     toggles.forEach(toggle => fireEvent.click(toggle))
     expect(mockPut).not.toHaveBeenCalled()
+  })
+
+  // DEFAULTVALUE-ROUNDS-1: without a key the raw catalogue label is the data shown, never the key path.
+  it('falls back to the raw catalogue label when no appsCatalogLabels key exists', () => {
+    i18nState.keyExists = false
+    renderApps()
+    fireEvent.click(screen.getByRole('tab', { name: 'apps.tabVerificatie' }))
+    expect(screen.getByText('KvK / Company register')).toBeInTheDocument()
+    expect(screen.getByText('VAT validation (VIES)')).toBeInTheDocument()
+    expect(screen.queryByText('appsCatalogLabels.kvk')).not.toBeInTheDocument()
   })
 
   // MODULES-SAVE-FEEDBACK-1: the chip and green face follow the SAVED state, not the pending toggle.

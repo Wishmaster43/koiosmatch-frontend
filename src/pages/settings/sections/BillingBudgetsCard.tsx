@@ -17,6 +17,7 @@
  */
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
+import { labelOrRaw } from '@/lib/labelOrRaw'
 import api, { unwrap } from '@/lib/api'
 import { notifyError } from '@/lib/notify'
 import { extractApiError } from '@/lib/extractApiError'
@@ -45,7 +46,7 @@ const draftFromEntry = (entry?: BillingBudgetEntry): PackageDraft => ({
 
 // See the file's top doc above; superadmin package/tenant budget editor with the SaveButton optimistic-confirm pattern.
 export default function BillingBudgetsCard() {
-  const { t } = useTranslation('settings')
+  const { t, i18n } = useTranslation('settings')
   const { formatCurrency } = useNumberFormat()
 
   const { data, setData, phase, drafts, setDrafts, saving, setSaving, savedOk, setSavedOk } = useBillingCardState(draftFromEntry)
@@ -138,18 +139,18 @@ export default function BillingBudgetsCard() {
           return (
             <div key={key} style={{ border: '1px solid var(--border)', borderRadius: 8, padding: 12 }}>
               <SectionTitle style={{ marginBottom: 8 }}>
-                {t(`billingBudgets.package.${key}`, { defaultValue: key })}
+                {labelOrRaw(t, i18n, `billingBudgets.package.${key}`, key, 'settings')}
               </SectionTitle>
               <SettingCardList>
                 <SettingRow label={t('billingBudgets.workflowBudgetLabel')}>
                   <NumberField value={Number(drafts[key].included_workflow_runs) || 0} min={0} width={110}
-                    ariaLabel={`${t('billingBudgets.workflowBudgetLabel')}: ${t(`billingBudgets.package.${key}`, { defaultValue: key })}`}
+                    ariaLabel={`${t('billingBudgets.workflowBudgetLabel')}: ${labelOrRaw(t, i18n, `billingBudgets.package.${key}`, key, 'settings')}`}
                     onChange={(v: number) => setDrafts((prev) => ({ ...prev, [key]: { ...prev[key], included_workflow_runs: String(v) } }))} />
                 </SettingRow>
                 {/* The draft holds euros as text (the PUT converts to cents); the field shows and edits euros. */}
                 <SettingRow label={t('billingBudgets.baseFee')}>
                   <CurrencyInput cents={Math.round((Number(drafts[key].base_price_cents) || 0) * 100)} width={110} unit={t('billingTiers.perMonth')}
-                    ariaLabel={`${t('billingBudgets.baseFee')}: ${t(`billingBudgets.package.${key}`, { defaultValue: key })}`}
+                    ariaLabel={`${t('billingBudgets.baseFee')}: ${labelOrRaw(t, i18n, `billingBudgets.package.${key}`, key, 'settings')}`}
                     onChange={(cents) => setDrafts((prev) => ({ ...prev, [key]: { ...prev[key], base_price_cents: cents == null ? '' : String(cents / 100) } }))} />
                 </SettingRow>
               </SettingCardList>
@@ -166,7 +167,7 @@ export default function BillingBudgetsCard() {
                       cogs: entry.value.ai_cogs != null ? formatCurrency(entry.value.ai_cogs) : '—',
                       sale: entry.value.ai_sale != null ? formatCurrency(entry.value.ai_sale) : '—',
                       // The server's basis token is a vocabulary, never copy: translate it, fall back to the raw token.
-                      basis: entry.value.basis ? t(`billingBudgets.basis.${entry.value.basis}`, { defaultValue: entry.value.basis }) : '—',
+                      basis: entry.value.basis ? labelOrRaw(t, i18n, `billingBudgets.basis.${entry.value.basis}`, entry.value.basis, 'settings') : '—',
                     })}
                   </Caption>
                 )}

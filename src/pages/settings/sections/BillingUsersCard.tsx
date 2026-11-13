@@ -8,6 +8,7 @@
  * as text, never an invented infinity glyph (worker brief, verbatim).
  */
 import { useTranslation } from 'react-i18next'
+import { labelOrRaw } from '@/lib/labelOrRaw'
 import api, { unwrap } from '@/lib/api'
 import { notifyError } from '@/lib/notify'
 import { extractApiError } from '@/lib/extractApiError'
@@ -36,7 +37,7 @@ const draftFromEntry = (entry?: BillingBudgetEntry): PackageDraft => ({
 
 // Per-package included-users/extra-user-price editor; blank fields mean unlimited/unset, never 0 (see PackageDraft's doc comment above).
 export default function BillingUsersCard() {
-  const { t } = useTranslation('settings')
+  const { t, i18n } = useTranslation('settings')
   const { formatCurrency } = useNumberFormat()
 
   const { data, setData, phase, drafts, setDrafts, saving, setSaving, savedOk, setSavedOk } = useBillingCardState(draftFromEntry)
@@ -91,18 +92,18 @@ export default function BillingUsersCard() {
         {PACKAGE_KEYS.map((key) => (
           <div key={key} style={{ border: '1px solid var(--border)', borderRadius: 8, padding: 12 }}>
             <SectionTitle style={{ marginBottom: 8 }}>
-              {t(`billingBudgets.package.${key}`, { defaultValue: key })}
+              {labelOrRaw(t, i18n, `billingBudgets.package.${key}`, key, 'settings')}
             </SectionTitle>
             <SettingCardList>
               <SettingRow label={t('billingUsers.includedUsersLabel')}>
                 {/* An EMPTY field means unlimited (null on the PUT), so the raw NumberInput rides here — the kit field would coerce it to 0. */}
                 <NumberInput value={drafts[key].included_users === '' ? null : Number(drafts[key].included_users)} min={0} width={90}
-                  ariaLabel={`${t('billingUsers.includedUsersLabel')}: ${t(`billingBudgets.package.${key}`, { defaultValue: key })}`}
+                  ariaLabel={`${t('billingUsers.includedUsersLabel')}: ${labelOrRaw(t, i18n, `billingBudgets.package.${key}`, key, 'settings')}`}
                   onChange={(v) => setDrafts((prev) => ({ ...prev, [key]: { ...prev[key], included_users: v == null ? '' : String(v) } }))} />
               </SettingRow>
               <SettingRow label={t('billingUsers.extraPriceLabel')}>
                 <CurrencyInput cents={Number(drafts[key].extra_user_price_cents) || 0} width={110} unit={t('billingUsers.perUser')}
-                  ariaLabel={`${t('billingUsers.extraPriceLabel')}: ${t(`billingBudgets.package.${key}`, { defaultValue: key })}`}
+                  ariaLabel={`${t('billingUsers.extraPriceLabel')}: ${labelOrRaw(t, i18n, `billingBudgets.package.${key}`, key, 'settings')}`}
                   onChange={(cents) => setDrafts((prev) => ({ ...prev, [key]: { ...prev[key], extra_user_price_cents: cents == null ? '' : String(cents) } }))} />
               </SettingRow>
             </SettingCardList>
@@ -147,7 +148,7 @@ export default function BillingUsersCard() {
                 return (
                   <tr key={tenantId} style={{ borderTop: '1px solid var(--border)' }}>
                     <td style={{ padding: '6px 8px', ...monoStyle }}>{tenantId}</td>
-                    <td style={{ padding: '6px 8px' }}>{pkg ? t(`billingBudgets.package.${pkg}`, { defaultValue: pkg }) : '—'}</td>
+                    <td style={{ padding: '6px 8px' }}>{pkg ? labelOrRaw(t, i18n, `billingBudgets.package.${pkg}`, pkg, 'settings') : '—'}</td>
                     <td style={{ padding: '6px 8px', ...monoStyle }}>{active}</td>
                     <td style={{ padding: '6px 8px', ...monoStyle }}>{included == null ? t('billingUsers.unlimited') : included}</td>
                     <td style={{ padding: '6px 8px', ...monoStyle }}>

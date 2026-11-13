@@ -5,6 +5,8 @@
  */
 import { useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
+import type { TFunction } from 'i18next'
+import { labelOrRaw, type KeyChecker } from '@/lib/labelOrRaw'
 import { useDateFormat } from '@/lib/datetime'
 import WeeklyBarChartCard from '@/components/charts/WeeklyBarChartCard'
 import { SectionTitle } from '@/components/ui/typography'
@@ -18,13 +20,13 @@ interface UsagePerActivityPerDayChartProps {
 }
 
 // Activity label translation fallback — activity codes are backend slugs, translated via the existing activity map key.
-function activityLabel(t: (k: string, o?: Record<string, unknown>) => string, code: string): string {
-  return t(`billing.usage.activity.activityMap.${code}`, { defaultValue: code })
+function activityLabel(t: TFunction, i18n: KeyChecker, code: string): string {
+  return labelOrRaw(t, i18n, `billing.usage.activity.activityMap.${code}`, code, 'settings')
 }
 
 // Day × activity breakdown chart: stacks activities into daily bars.
 export default function UsagePerActivityPerDayChart({ workflow, phase }: UsagePerActivityPerDayChartProps) {
-  const { t } = useTranslation('settings')
+  const { t, i18n } = useTranslation('settings')
   const { formatDate } = useDateFormat()
 
   // Transform per_activity_per_day into chart format: group by date, nest activities as series.
@@ -76,11 +78,11 @@ export default function UsagePerActivityPerDayChart({ workflow, phase }: UsagePe
       ]
       return {
         key: activity,
-        label: activityLabel(t, activity),
+        label: activityLabel(t, i18n, activity),
         color: colors[i % colors.length],
       }
     })
-  }, [activities, t])
+  }, [activities, t, i18n])
 
   return (
     <div style={card}>

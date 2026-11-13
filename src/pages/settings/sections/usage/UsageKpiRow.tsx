@@ -1,5 +1,6 @@
 import { Wallet, Workflow, Sparkles, MessageCircle } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
+import { labelOrRaw } from '@/lib/labelOrRaw'
 import { useNumberFormat } from '@/lib/formatters'
 import KpiCard from '@/components/ui/KpiCard'
 import type { BillingUsageResponse } from '@/types/billingUsage'
@@ -20,7 +21,7 @@ interface UsageKpiRowProps {
 export default function UsageKpiRow({ billing, billingLoading }: UsageKpiRowProps) {
   const { t } = useTranslation('settings')
   // Channel names render through the shared lookup keys (same as UsageWhatsAppTab), never the platform label.
-  const { t: tc } = useTranslation('candidates')
+  const { t: tc, i18n } = useTranslation('candidates')
   const { formatNumber, formatCurrency } = useNumberFormat()
 
   // Total this period = workflow.amount + ai.amount — the endpoint returns no
@@ -36,7 +37,7 @@ export default function UsageKpiRow({ billing, billingLoading }: UsageKpiRowProp
   // Per-channel note: label + count for channels with messages, joined with " · ".
   const whatsappChannelNotes = whatsappChannels
     .filter((c) => (c.messages ?? 0) > 0)
-    .map((c) => `${tc(`conversations.channel.${c.channel}`, { defaultValue: c.label || c.channel })} (${formatNumber(c.messages ?? 0)})`)
+    .map((c) => `${labelOrRaw(tc, i18n, `conversations.channel.${c.channel}`, c.label || c.channel, 'candidates')} (${formatNumber(c.messages ?? 0)})`)
     .join(' · ')
 
   return (
