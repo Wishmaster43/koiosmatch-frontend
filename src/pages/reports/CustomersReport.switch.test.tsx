@@ -5,6 +5,8 @@ import userEvent from '@testing-library/user-event'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import CustomersReport from './CustomersReport'
 import i18n from '@/i18n'
+// Escapes translated copy before it becomes a RegExp matcher (copy may gain metacharacters).
+const escapeRegExp = (text: string) => text.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
 import { EMPTY_REPORT_FILTERS } from './reportFilterParams'
 import { data } from './CustomersReport.testKit'
 
@@ -92,7 +94,7 @@ describe('CustomersReport — Klanten/Prospects switch (RAPPORTEN-CONSOLIDATIE-1
     mockUseCustomersReport.mockReturnValue({ data, loading: false, error: false })
     renderReport()
     mockUseCustomersReport.mockClear()
-    await user.click(screen.getByRole('radio', { name: 'Prospects' }))
+    await user.click(screen.getByRole('radio', { name: i18n.t('analytics:customers.viewSwitch.prospects') }))
     expect(mockUseCustomersReport).toHaveBeenCalledWith('month', EMPTY_REPORT_FILTERS, 'lead')
   })
 
@@ -104,8 +106,8 @@ describe('CustomersReport — Klanten/Prospects switch (RAPPORTEN-CONSOLIDATIE-1
       </QueryClientProvider>,
     )
     expect(screen.getByText('Totaal prospects')).toBeInTheDocument()
-    expect(screen.getByText('Status: Actief')).toBeInTheDocument()
-    expect(screen.getByText('Branche: Zorg')).toBeInTheDocument()
+    expect(screen.getByText(`${i18n.t('analytics:customers.axes.status')}: Actief`)).toBeInTheDocument()
+    expect(screen.getByText(`${i18n.t('analytics:customers.axes.industry')}: Zorg`)).toBeInTheDocument()
   })
 
   // Supersede-guard: the Klanten flip retired the axis cards THERE, but the
@@ -120,7 +122,7 @@ describe('CustomersReport — Klanten/Prospects switch (RAPPORTEN-CONSOLIDATIE-1
       </QueryClientProvider>,
     )
     getSpy.mockClear()
-    await user.click(screen.getByText('Status: Actief'))
+    await user.click(screen.getByText(`${i18n.t('analytics:customers.axes.status')}: Actief`))
     expect(getSpy).toHaveBeenCalledWith('/reports/customers/drill',
       expect.objectContaining({ params: expect.objectContaining({ status: 'active', phase_filter: ['lead'] }) }))
   })
@@ -145,7 +147,7 @@ describe('CustomersReport — Klanten/Prospects switch (RAPPORTEN-CONSOLIDATIE-1
     const user = userEvent.setup()
     mockUseCustomersReport.mockReturnValue({ data, loading: false, error: false })
     renderReport()
-    await user.click(screen.getByRole('radio', { name: 'Prospects' }))
+    await user.click(screen.getByRole('radio', { name: i18n.t('analytics:customers.viewSwitch.prospects') }))
     expect(window.location.hash).toBe('#reports.customers?view=prospects')
   })
 
@@ -190,7 +192,7 @@ describe('CustomersReport — Klanten/Prospects switch (RAPPORTEN-CONSOLIDATIE-1
     // resolveReportKpiOrder drops it and backfills from the default order —
     // Status (the real default) renders in its place, never the signal card.
     expect(screen.queryByText(i18n.t('customers.kpis.contractEnding', { ns: 'analytics' }))).not.toBeInTheDocument()
-    expect(screen.getByText('Status: Actief')).toBeInTheDocument()
+    expect(screen.getByText(`${i18n.t('analytics:customers.axes.status')}: Actief`)).toBeInTheDocument()
   })
 })
 
@@ -211,7 +213,7 @@ describe('CustomersReport · tenant custom KPI cards (KPI-BUILDER-FE-1)', () => 
     renderReport()
     expect(screen.getByText("Eigen KPI's")).toBeInTheDocument()
     expect(screen.getByText('Eigen instroom')).toBeInTheDocument()
-    expect(screen.getByText(/doel 25/)).toBeInTheDocument()
+    expect(screen.getByText(new RegExp(escapeRegExp(i18n.t('analytics:customKpi.target', { value: 25 }))))).toBeInTheDocument()
   })
 
   it('clicking the tenant card opens the definition drill without phase_filter/kpi/date', async () => {

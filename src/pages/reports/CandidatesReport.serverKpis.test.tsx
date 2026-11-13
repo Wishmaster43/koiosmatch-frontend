@@ -102,7 +102,7 @@ describe('CandidatesReport · server lead_kpis strip (SERVER-KPIS-1)', () => {
   it('without lead_kpis the old axis cards render', () => {
     mockUseCandidatesReport.mockReturnValue({ data, loading: false, error: false })
     open()
-    expect(screen.getByText('Status: Beschikbaar')).toBeInTheDocument()
-    expect(screen.getByText('Vestiging: Utrecht')).toBeInTheDocument()
+    expect(screen.getByText(`${i18n.t('analytics:candidates.axes.status')}: Beschikbaar`)).toBeInTheDocument()
+    expect(screen.getByText(`${i18n.t('analytics:candidates.axes.branch')}: Utrecht`)).toBeInTheDocument()
   })
 })

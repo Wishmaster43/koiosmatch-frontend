@@ -4,6 +4,7 @@ import { render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import CandidatesReport from './CandidatesReport'
+import i18n from '@/i18n'
 import { EMPTY_REPORT_FILTERS } from './reportFilterParams'
 import { getReportKpiCatalog } from './kpiCatalog'
 import { data } from './CandidatesReport.testKit'
@@ -88,7 +89,7 @@ describe('CandidatesReport — Kandidaten/Leads switch (RAPPORTEN-CONSOLIDATIE-1
     mockUseCandidatesReport.mockReturnValue({ data, loading: false, error: false })
     renderReport()
     mockUseCandidatesReport.mockClear()
-    await user.click(screen.getByRole('radio', { name: 'Leads' }))
+    await user.click(screen.getByRole('radio', { name: i18n.t('analytics:candidates.viewSwitch.leads') }))
     expect(mockUseCandidatesReport).toHaveBeenCalledWith('month', EMPTY_REPORT_FILTERS, 'lead')
   })
 
@@ -99,9 +100,9 @@ describe('CandidatesReport — Kandidaten/Leads switch (RAPPORTEN-CONSOLIDATIE-1
         <CandidatesReport period="month" initialView="leads" />
       </QueryClientProvider>,
     )
-    expect(screen.getByText('Totaal leads')).toBeInTheDocument()
-    expect(screen.getByText('Status: Beschikbaar')).toBeInTheDocument()
-    expect(screen.getByText('Vestiging: Utrecht')).toBeInTheDocument()
+    expect(screen.getByText(i18n.t('analytics:leads.total'))).toBeInTheDocument()
+    expect(screen.getByText(`${i18n.t('analytics:candidates.axes.status')}: Beschikbaar`)).toBeInTheDocument()
+    expect(screen.getByText(`${i18n.t('analytics:candidates.axes.branch')}: Utrecht`)).toBeInTheDocument()
   })
 
   it('a drill list opened on the Leads position carries the `phase` filter — bar, list and switch position never disagree', async () => {
@@ -123,7 +124,7 @@ describe('CandidatesReport — Kandidaten/Leads switch (RAPPORTEN-CONSOLIDATIE-1
     const user = userEvent.setup()
     mockUseCandidatesReport.mockReturnValue({ data, loading: false, error: false })
     renderReport()
-    await user.click(screen.getByRole('radio', { name: 'Leads' }))
+    await user.click(screen.getByRole('radio', { name: i18n.t('analytics:candidates.viewSwitch.leads') }))
     expect(window.location.hash).toBe('#reports.candidates?view=leads')
   })
 
@@ -144,8 +145,8 @@ describe('CandidatesReport — Kandidaten/Leads switch (RAPPORTEN-CONSOLIDATIE-1
         <CandidatesReport period="month" initialView="leads" />
       </QueryClientProvider>,
     )
-    expect(screen.getByText('Eigenaar: Niet toegewezen')).toBeInTheDocument()
-    expect(screen.getByText('Totaal leads')).toBeInTheDocument()
+    expect(screen.getByText(`${i18n.t('analytics:candidates.axes.owner')}: Niet toegewezen`)).toBeInTheDocument()
+    expect(screen.getByText(i18n.t('analytics:leads.total'))).toBeInTheDocument()
   })
 
   it('a legacy reports.leads deep link (initialView="leads") opens directly on the Leads position', () => {
@@ -155,6 +156,6 @@ describe('CandidatesReport — Kandidaten/Leads switch (RAPPORTEN-CONSOLIDATIE-1
         <CandidatesReport period="month" initialView="leads" />
       </QueryClientProvider>,
     )
-    expect(screen.getByRole('radio', { name: 'Leads' })).toHaveAttribute('aria-checked', 'true')
+    expect(screen.getByRole('radio', { name: i18n.t('analytics:candidates.viewSwitch.leads') })).toHaveAttribute('aria-checked', 'true')
   })
 })

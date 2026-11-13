@@ -4,6 +4,8 @@ import userEvent from '@testing-library/user-event'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import CustomersReport from './CustomersReport'
 import i18n from '@/i18n'
+// Escapes translated copy before it becomes a RegExp matcher (copy may gain metacharacters).
+const escapeRegExp = (text: string) => text.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
 import { data } from './CustomersReport.testKit'
 
 // Data layer under test control (loading/error/empty/success — the four UI states).
@@ -120,7 +122,8 @@ describe('CustomersReport (RAPPORTEN-SUITE-1 portie 3, customers inflow report)'
   it('renders the data window prominently as DD-MM-YYYY', () => {
     mockUseCustomersReport.mockReturnValue({ data, loading: false, error: false })
     renderReport()
-    expect(screen.getByText(/Instroom 01-08-2026 t\/m 31-08-2026: \d+ nieuwe klanten/)).toBeInTheDocument()
+    // The fixture total is not pinned here: the translated sentence with any count.
+    expect(screen.getByText(new RegExp(escapeRegExp(i18n.t('analytics:customers.windowWithTotal', { from: '01-08-2026', to: '31-08-2026', total: '§' })).replace('§', '\\d+')))).toBeInTheDocument()
     expect(screen.queryByText(/2026-08-01/)).not.toBeInTheDocument()
   })
 
@@ -227,8 +230,8 @@ describe('CustomersReport (RAPPORTEN-SUITE-1 portie 3, customers inflow report)'
     expect(screen.getByText('12')).toBeInTheDocument()
     // The five dropped axis-topsegment cards no longer render on Klanten (the
     // axes' own charts below still do — asserted separately below).
-    expect(screen.queryByText('Status: Actief')).not.toBeInTheDocument()
-    expect(screen.queryByText('Eigenaar: Anna de Vries')).not.toBeInTheDocument()
+    expect(screen.queryByText(`${i18n.t('analytics:customers.axes.status')}: Actief`)).not.toBeInTheDocument()
+    expect(screen.queryByText(`${i18n.t('analytics:customers.axes.owner')}: Anna de Vries`)).not.toBeInTheDocument()
   })
 
   // RAPPORT-KPI-INSTELBAAR: which signal keys drive cards 2-9, and in what

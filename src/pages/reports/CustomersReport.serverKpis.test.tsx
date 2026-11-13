@@ -140,7 +140,7 @@ describe('CustomersReport · server prospect_kpis strip (SERVER-KPIS-1)', () => 
   it('without prospect_kpis the old axis cards render', () => {
     mockUseCustomersReport.mockReturnValue({ data, loading: false, error: false })
     open()
-    expect(screen.getByText('Status: Actief')).toBeInTheDocument()
+    expect(screen.getByText(`${i18n.t('analytics:customers.axes.status')}: Actief`)).toBeInTheDocument()
     expect(screen.queryByText(i18n.t('analytics:customers.kpis.prospectsNoContact'))).not.toBeInTheDocument()
   })
 })

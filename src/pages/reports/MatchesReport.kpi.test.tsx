@@ -4,6 +4,9 @@ import { render, screen, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import MatchesReport from './MatchesReport'
+import i18n from '@/i18n'
+// Escapes translated copy before it becomes a RegExp matcher (copy may gain metacharacters).
+const escapeRegExp = (text: string) => text.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
 import { data, dataWithKpis } from './MatchesReport.testKit'
 
 // Data layer under test control (loading/error/empty/success — the four UI states).
@@ -174,7 +177,7 @@ describe('MatchesReport (custom KPI band, KPI-BUILDER-FE-1)', () => {
     expect(screen.getByText('Eigen KPI\'s')).toBeInTheDocument()
     expect(screen.getByText('Nieuwe matches')).toBeInTheDocument()
     expect(screen.getByText('14')).toBeInTheDocument()
-    expect(screen.getByText(/doel 15/)).toBeInTheDocument()
+    expect(screen.getByText(new RegExp(escapeRegExp(i18n.t('analytics:customKpi.target', { value: 15 }))))).toBeInTheDocument()
   })
 
   it('opens the definition drill route with only the accepted params on click', async () => {
@@ -205,8 +208,8 @@ describe('MatchesReport (custom KPI band, KPI-BUILDER-FE-1)', () => {
       loading: false, error: false,
     })
     renderReport()
-    expect(screen.getByText('Nieuwe matches · ZZP')).toBeInTheDocument()
-    await user.click(screen.getByText('Nieuwe matches · ZZP'))
+    expect(screen.getByText(i18n.t('analytics:customKpi.labelWithDimension', { label: 'Nieuwe matches', dimension: 'ZZP' }))).toBeInTheDocument()
+    await user.click(screen.getByText(i18n.t('analytics:customKpi.labelWithDimension', { label: 'Nieuwe matches', dimension: 'ZZP' })))
     const [, opts] = getSpy.mock.calls.find(c => c[0] === '/reports/kpi-definitions/kd-2/drill')!
     expect((opts as { params: Record<string, unknown> }).params.dimension_value).toBe('freelance')
   })
