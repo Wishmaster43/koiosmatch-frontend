@@ -120,17 +120,17 @@ describe('TasksReport (RAPPORTEN-SUITE-1 portie 6, tasks report)', () => {
   it('renders the nine suite cards from kpis[] with translated labels', () => {
     mockUseTasksReport.mockReturnValue({ data: dataWithSuite, loading: false, error: false })
     renderReport()
-    expect(screen.getByText('Totaal taken')).toBeInTheDocument()
+    expect(screen.getByText(i18n.t('analytics:tasks.kpi.total'))).toBeInTheDocument()
     expect(screen.getByText(i18n.t('analytics:tasks.kpi.doneInPeriod'))).toBeInTheDocument()
-    expect(screen.getByText('Aangemaakt in periode')).toBeInTheDocument()
-    expect(screen.getByText('Vervalt vandaag')).toBeInTheDocument()
-    expect(screen.getByText('Vervalt deze week')).toBeInTheDocument()
-    expect(screen.getByText('Zonder behandelaar')).toBeInTheDocument()
+    expect(screen.getByText(i18n.t('analytics:tasks.kpi.createdInPeriod'))).toBeInTheDocument()
+    expect(screen.getByText(i18n.t('analytics:tasks.kpi.dueToday'))).toBeInTheDocument()
+    expect(screen.getByText(i18n.t('analytics:tasks.kpi.dueThisWeek'))).toBeInTheDocument()
+    expect(screen.getByText(i18n.t('analytics:tasks.kpi.withoutAssignee'))).toBeInTheDocument()
     // avg_completion_days renders as whole days (matches-card idiom), never a
     // bare decimal: 2.5 → "3 dagen".
-    expect(screen.getByText('3 dagen')).toBeInTheDocument()
+    expect(screen.getByText(i18n.t('analytics:tasks.kpi.daysValue', { days: 3 }))).toBeInTheDocument()
     // The non-zero overdue count wears the danger colour (semantic signal).
-    const overdueValue = screen.getByText('Te laat').parentElement?.parentElement
+    const overdueValue = screen.getByText(i18n.t('analytics:tasks.kpi.overdue')).parentElement?.parentElement
     expect(overdueValue?.textContent).toContain('2')
   })
 
@@ -157,7 +157,7 @@ describe('TasksReport (RAPPORTEN-SUITE-1 portie 6, tasks report)', () => {
     mockUseTasksReport.mockReturnValue({ data, loading: false, error: false })
     renderReport()
     expect(screen.getAllByText('—').length).toBeGreaterThanOrEqual(9)
-    await user.click(screen.getByText('Totaal taken'))
+    await user.click(screen.getByText(i18n.t('analytics:tasks.kpi.total')))
     expect(getSpy).not.toHaveBeenCalledWith('/reports/tasks/kpis/drill', expect.anything())
   })
 
@@ -168,7 +168,7 @@ describe('TasksReport (RAPPORTEN-SUITE-1 portie 6, tasks report)', () => {
     mockUseTasksReport.mockReturnValue({ data: { ...data, summary: undefined } as unknown as TasksReportData, loading: false, error: false })
     expect(() => renderReport()).not.toThrow()
     getSpy.mockClear()
-    await user.click(screen.getByText('Te laat'))
+    await user.click(screen.getByText(i18n.t('analytics:tasks.kpi.overdue')))
   })
 
   // BELANGRIJK per contract: the window must be prominent, DD-MM-YYYY from the
@@ -176,7 +176,7 @@ describe('TasksReport (RAPPORTEN-SUITE-1 portie 6, tasks report)', () => {
   it('renders the data window prominently as DD-MM-YYYY', () => {
     mockUseTasksReport.mockReturnValue({ data, loading: false, error: false })
     renderReport()
-    expect(screen.getByText('Taken 01-08-2026 t/m 31-08-2026')).toBeInTheDocument()
+    expect(screen.getByText(i18n.t('analytics:tasks.window', { from: '01-08-2026', to: '31-08-2026' }))).toBeInTheDocument()
     expect(screen.queryByText(/2026-08-01/)).not.toBeInTheDocument()
   })
 

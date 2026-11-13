@@ -77,7 +77,7 @@ describe('VacanciesReport (RAPPORTEN-SUITE-1 portie 4, additive on C-34)', () =>
   it('shows the loading state', () => {
     mockUseVacanciesReport.mockReturnValue({ data: null, loading: true, error: false })
     renderReport()
-    expect(screen.getByText('Vacatures laden…')).toBeInTheDocument()
+    expect(screen.getByText(i18n.t('analytics:vacancies.loading'))).toBeInTheDocument()
   })
 
   it('shows the error state', () => {
@@ -91,7 +91,7 @@ describe('VacanciesReport (RAPPORTEN-SUITE-1 portie 4, additive on C-34)', () =>
     const refetch = vi.fn()
     mockUseVacanciesReport.mockReturnValue({ data: null, loading: false, error: true, refetch })
     renderReport()
-    await userEvent.click(screen.getByRole('button', { name: 'Probeer opnieuw' }))
+    await userEvent.click(screen.getByRole('button', { name: i18n.t('common:error.retry') }))
     expect(refetch).toHaveBeenCalledTimes(1)
   })
 
@@ -147,7 +147,7 @@ describe('VacanciesReport (RAPPORTEN-SUITE-1 portie 4, additive on C-34)', () =>
   it('renders the data window prominently as DD-MM-YYYY', () => {
     mockUseVacanciesReport.mockReturnValue({ data, loading: false, error: false })
     renderReport()
-    expect(screen.getByText('Vacatures 14-05-2026 t/m 14-08-2026')).toBeInTheDocument()
+    expect(screen.getByText(i18n.t('analytics:vacancies.window', { from: '14-05-2026', to: '14-08-2026' }))).toBeInTheDocument()
     expect(screen.queryByText(/2026-05-14/)).not.toBeInTheDocument()
   })
 
@@ -191,12 +191,12 @@ describe('VacanciesReport (RAPPORTEN-SUITE-1 portie 4, additive on C-34)', () =>
     mockUseVacanciesReport.mockReturnValue({ data, loading: false, error: false })
     renderReport()
     // Fixture's only row has 4 applications — no zero-applicant section.
-    expect(screen.queryByText('Vacatures zonder sollicitaties (1)')).not.toBeInTheDocument()
+    expect(screen.queryByText(i18n.t('analytics:vacancies.noApplicants.title', { count: 1 }))).not.toBeInTheDocument()
 
     const zeroRow = { ...row, key: 'v2', label: 'Doktersassistent', applications: 0, matched: 0 }
     mockUseVacanciesReport.mockReturnValue({ data: { ...data, vacancies: [row, zeroRow] }, loading: false, error: false })
     renderReport()
-    expect(screen.getByText('Vacatures zonder sollicitaties (1)')).toBeInTheDocument()
+    expect(screen.getByText(i18n.t('analytics:vacancies.noApplicants.title', { count: 1 }))).toBeInTheDocument()
     // Appears once in the main table and once in the zero-applicants section.
     expect(screen.getAllByText('Doktersassistent')).toHaveLength(2)
   })
@@ -213,7 +213,7 @@ describe('VacanciesReport (RAPPORTEN-SUITE-1 portie 4, additive on C-34)', () =>
     const zeroRow = { ...row, key: 'v2', label: 'Doktersassistent', applications: 0, matched: 0 }
     mockUseVacanciesReport.mockReturnValue({ data: { ...dataWithKpis, vacancies: [row, zeroRow] }, loading: false, error: false })
     renderReport()
-    await user.click(screen.getByText('Vacatures zonder sollicitaties (1)'))
+    await user.click(screen.getByText(i18n.t('analytics:vacancies.noApplicants.title', { count: 1 })))
     expect(getSpy).toHaveBeenCalledWith('/reports/vacancies/drill',
       expect.objectContaining({ params: expect.objectContaining({ zero_applications: 1 }) }))
     expect(getSpy.mock.calls.some(c => c[0] === '/reports/vacancies/drill' &&
@@ -236,7 +236,7 @@ describe('VacanciesReport (RAPPORTEN-SUITE-1 portie 4, additive on C-34)', () =>
     mockUseVacanciesReport.mockReturnValue({ data: { ...data, vacancies: [row, zeroRow] }, loading: false, error: false })
     renderReport()
 
-    const header = screen.getByRole('button', { name: 'Vacatures zonder sollicitaties (1)' })
+    const header = screen.getByRole('button', { name: i18n.t('analytics:vacancies.noApplicants.title', { count: 1 }) })
     header.focus()
     expect(header).toHaveFocus()
     await user.keyboard('{Enter}')
@@ -250,10 +250,10 @@ describe('VacanciesReport (RAPPORTEN-SUITE-1 portie 4, additive on C-34)', () =>
     mockUseVacanciesReport.mockReturnValue({ data, loading: false, error: false })
     renderReport()
 
-    const header = screen.getByText('Vacature').closest('th')
+    const header = screen.getByText(i18n.t('analytics:vacancies.cols.vacancy')).closest('th')
     expect(header).toHaveAttribute('aria-sort', 'none')
 
-    const sortButton = screen.getByRole('button', { name: /Vacature/ })
+    const sortButton = screen.getByRole('button', { name: new RegExp(i18n.t('analytics:vacancies.cols.vacancy').replace(/[.*+?^${}()|[\]\\]/g, '\\$&')) })
     sortButton.focus()
     expect(sortButton).toHaveFocus()
     await user.keyboard('{Enter}')

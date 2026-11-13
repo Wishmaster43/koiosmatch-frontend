@@ -108,8 +108,7 @@ describe('ReportDrillDrawer — shown-of footer (SM idiom)', () => {
       advice: 'Some advice.', adviceLoading: false,
     })
     render(<ReportDrillDrawer drill={baseDrill} onClose={() => {}} />)
-    // Real nl copy (analytics.json drill.shownOf).
-    expect(screen.getByText('50 van 137 getoond')).toBeInTheDocument()
+    expect(screen.getByText(i18n.t('analytics:drill.shownOf', { shown: 50, total: 137 }))).toBeInTheDocument()
   })
 
   it('the search field filters the rows client-side and the footer follows', async () => {
@@ -124,10 +123,10 @@ describe('ReportDrillDrawer — shown-of footer (SM idiom)', () => {
       advice: null, adviceLoading: false,
     })
     render(<ReportDrillDrawer drill={baseDrill} onClose={() => {}} />)
-    await user.type(screen.getByRole('textbox', { name: 'Zoeken…' }), 'anna')
+    await user.type(screen.getByRole('textbox', { name: i18n.t('analytics:drill.search') }), 'anna')
     expect(screen.getByText('Anna de Vries')).toBeInTheDocument()
     expect(screen.queryByText('Bram Bakker')).not.toBeInTheDocument()
-    expect(screen.getByText('1 van 8 getoond')).toBeInTheDocument()
+    expect(screen.getByText(i18n.t('analytics:drill.shownOf', { shown: 1, total: 8 }))).toBeInTheDocument()
   })
 
   // SM idiom (Danny 24-08: the drill must match the SM report drawer): the search
@@ -140,7 +139,7 @@ describe('ReportDrillDrawer — shown-of footer (SM idiom)', () => {
       advice: 'Some advice.', adviceLoading: false,
     })
     render(<ReportDrillDrawer drill={baseDrill} onClose={() => {}} />)
-    expect(screen.getByRole('textbox', { name: 'Zoeken…' })).toBeInTheDocument()
+    expect(screen.getByRole('textbox', { name: i18n.t('analytics:drill.search') })).toBeInTheDocument()
   })
 
   // entityPage (SM idiom): rows deep-link to the record — the name is the
@@ -176,7 +175,7 @@ describe('ReportDrillDrawer — calm 403 degrade', () => {
       advice: 'Advice still renders.', adviceLoading: false,
     })
     render(<ReportDrillDrawer drill={baseDrill} onClose={() => {}} />)
-    expect(screen.queryByText('Onderliggende records')).not.toBeInTheDocument()
+    expect(screen.queryByText(i18n.t('analytics:drill.records'))).not.toBeInTheDocument()
     expect(screen.queryByText(/could not load|error|forbidden|mislukt|fout/i)).not.toBeInTheDocument()
     expect(screen.getByText('Advice still renders.')).toBeInTheDocument()
   })
@@ -193,7 +192,7 @@ describe('ReportDrillDrawer — a real error is never the calm "no records"/"no 
     render(<ReportDrillDrawer drill={baseDrill} onClose={() => {}} />)
     expect(screen.queryByText(i18n.t('analytics:drill.noRecords'))).not.toBeInTheDocument()
     expect(screen.getByText(i18n.t('analytics:drill.rowsError'))).toBeInTheDocument()
-    await user.click(screen.getByRole('button', { name: 'Probeer opnieuw' }))
+    await user.click(screen.getByRole('button', { name: i18n.t('common:error.retry') }))
     expect(rowsRefetch).toHaveBeenCalledTimes(1)
   })
 
@@ -208,8 +207,8 @@ describe('ReportDrillDrawer — a real error is never the calm "no records"/"no 
     expect(screen.queryByText(i18n.t('analytics:drill.noAdvice'))).not.toBeInTheDocument()
     expect(screen.getByText(i18n.t('analytics:drill.adviceError'))).toBeInTheDocument()
     // Even with a fresh advicePromptLogId, the feedback widget must not mount on an error.
-    expect(screen.queryByRole('button', { name: 'Nuttig' })).not.toBeInTheDocument()
-    await user.click(screen.getByRole('button', { name: 'Probeer opnieuw' }))
+    expect(screen.queryByRole('button', { name: i18n.t('common:koios.feedback.up') })).not.toBeInTheDocument()
+    await user.click(screen.getByRole('button', { name: i18n.t('common:error.retry') }))
     expect(adviceRefetch).toHaveBeenCalledTimes(1)
   })
 })
@@ -235,7 +234,7 @@ describe('ReportDrillDrawer — advice feedback (KOIOS-FEEDBACK-REPORT-ADVICE)',
       advice: 'Fresh advice.', adviceLoading: false, advicePromptLogId: 'log-123',
     })
     render(<ReportDrillDrawer drill={baseDrill} onClose={() => {}} />)
-    expect(screen.getByRole('button', { name: 'Nuttig' })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: i18n.t('common:koios.feedback.up') })).toBeInTheDocument()
   })
 
   it('does not mount the feedback widget when advicePromptLogId is null (cached advice)', () => {
@@ -244,7 +243,7 @@ describe('ReportDrillDrawer — advice feedback (KOIOS-FEEDBACK-REPORT-ADVICE)',
       advice: 'Cached advice.', adviceLoading: false, advicePromptLogId: null,
     })
     render(<ReportDrillDrawer drill={baseDrill} onClose={() => {}} />)
-    expect(screen.queryByRole('button', { name: 'Nuttig' })).not.toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: i18n.t('common:koios.feedback.up') })).not.toBeInTheDocument()
   })
 
   it('renders English feedback label when i18n is initialized in English', () => {

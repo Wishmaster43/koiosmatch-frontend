@@ -70,7 +70,7 @@ describe('SettingsPage — hashchange dirty-guard', () => {
     act(() => { window.location.hash = '#settings/general/tab_a'; window.dispatchEvent(new HashChangeEvent('hashchange')) })
     await screen.findByText(i18n.t('settings:common.unsavedConfirm'))
 
-    fireEvent.click(screen.getByText('Annuleren'))
+    fireEvent.click(screen.getByText(i18n.t('common:cancel')))
 
     await waitFor(() => expect(window.location.hash).toBe('#settings/other/tab_b'))
     expect(screen.getByText('make-dirty')).toBeInTheDocument()
