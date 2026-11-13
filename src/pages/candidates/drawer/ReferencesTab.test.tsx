@@ -22,6 +22,7 @@ import { describe, it, expect, vi } from 'vitest'
 import { render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import ReferencesTab from './ReferencesTab'
+import i18n from '@/i18n'
 
 vi.mock('@/components/ui/RichTextEditor', () => ({
   default: ({ value, onChange }: { value?: string; onChange: (v: string) => void }) => (
@@ -45,7 +46,7 @@ vi.mock('@/lib/useReferenceRelations', () => ({
 describe('ReferencesTab · read display', () => {
   it('shows the empty state when there are no references', () => {
     render(<ReferencesTab items={[]} />)
-    expect(screen.getByText('Nog geen referenties.')).toBeInTheDocument()
+    expect(screen.getByText(i18n.t('candidates:sections.referencesEmpty'))).toBeInTheDocument()
   })
 
   it('composes the read-mode name from first/middle/last name and shows relation/function/employer + both numbers', () => {
@@ -92,26 +93,26 @@ describe('ReferencesTab · reference-letter document link (DOC-EDU-1 mirror)', (
   it('shows no link icons when nothing resolves', () => {
     const item = { id: 'r1', first_name: 'Jan', last_name: 'Jansen' }
     render(<ReferencesTab items={[item]} />)
-    expect(screen.queryByTitle('Voorbeeld')).toBeNull()
+    expect(screen.queryByTitle(i18n.t('candidates:documents.preview'))).toBeNull()
   })
 
   it('resolves the linked document from the row\'s own nested `document` object', () => {
     const item = { id: 'r1', first_name: 'Jan', last_name: 'Jansen', document: { id: 'doc9', name: 'brief.pdf', url: '/x' } }
     render(<ReferencesTab items={[item]} />)
-    expect(screen.getByTitle('Voorbeeld')).toBeInTheDocument()
-    expect(screen.getByTitle('Downloaden')).toBeInTheDocument()
+    expect(screen.getByTitle(i18n.t('candidates:documents.preview'))).toBeInTheDocument()
+    expect(screen.getByTitle(i18n.t('candidates:documents.download'))).toBeInTheDocument()
   })
 
   it('resolves the linked document by cross-referencing document_id against the candidate\'s documents list', () => {
     const item = { id: 'r1', first_name: 'Jan', last_name: 'Jansen', document_id: 'doc1' }
     render(<ReferencesTab items={[item]} documents={[{ id: 'doc1', name: 'brief.pdf' }]} />)
-    expect(screen.getByTitle('Voorbeeld')).toBeInTheDocument()
+    expect(screen.getByTitle(i18n.t('candidates:documents.preview'))).toBeInTheDocument()
   })
 
   it('resolves the linked document via the reverse reference_id on a candidate document', () => {
     const item = { id: 'r1', first_name: 'Jan', last_name: 'Jansen' }
     render(<ReferencesTab items={[item]} documents={[{ id: 'doc1', name: 'brief.pdf', reference_id: 'r1' }]} />)
-    expect(screen.getByTitle('Voorbeeld')).toBeInTheDocument()
+    expect(screen.getByTitle(i18n.t('candidates:documents.preview'))).toBeInTheDocument()
   })
 
   it('only shows the "jump to documents" icon when onJumpToDocuments is supplied, and calls it on click', async () => {
@@ -119,7 +120,7 @@ describe('ReferencesTab · reference-letter document link (DOC-EDU-1 mirror)', (
     const onJumpToDocuments = vi.fn()
     const item = { id: 'r1', first_name: 'Jan', last_name: 'Jansen', document_id: 'doc1' }
     render(<ReferencesTab items={[item]} documents={[{ id: 'doc1', name: 'brief.pdf' }]} onJumpToDocuments={onJumpToDocuments} />)
-    const jumpBtn = screen.getByTitle('Naar documenten')
+    const jumpBtn = screen.getByTitle(i18n.t('candidates:documents.jumpToDocuments'))
     await user.click(jumpBtn)
     expect(onJumpToDocuments).toHaveBeenCalledTimes(1)
   })
@@ -130,24 +131,24 @@ describe('ReferencesTab · add/edit/remove wiring (generic AddableSection contra
     const user = userEvent.setup()
     const onAdd = vi.fn()
     render(<ReferencesTab items={[]} onAdd={onAdd} documents={[{ id: 'doc1', name: 'brief.pdf' }]} />)
-    await user.click(screen.getByRole('button', { name: 'Toevoegen' }))
+    await user.click(screen.getByRole('button', { name: i18n.t('common:add') }))
 
-    await user.type(screen.getByPlaceholderText('Voornaam'), 'Jan')
+    await user.type(screen.getByPlaceholderText(i18n.t('candidates:addFields.referenceFirstName')), 'Jan')
     await user.type(screen.getByPlaceholderText('Achternaam *'), 'Jansen')
-    await user.type(screen.getByPlaceholderText('Tussenvoegsel'), 'van der')
-    await user.type(screen.getByPlaceholderText('Functie'), 'Teamleider')
-    await user.type(screen.getByPlaceholderText('Werkgever'), 'Zorggroep X')
-    await user.type(screen.getByPlaceholderText('Telefoon'), '0201234567')
-    await user.type(screen.getByPlaceholderText('Mobiel'), '0612345678')
-    await user.type(screen.getByPlaceholderText('E-mailadres'), 'jan@example.com')
+    await user.type(screen.getByPlaceholderText(i18n.t('candidates:addFields.referenceMiddleName')), 'van der')
+    await user.type(screen.getByPlaceholderText(i18n.t('candidates:addFields.referenceFunction')), 'Teamleider')
+    await user.type(screen.getByPlaceholderText(i18n.t('candidates:addFields.employer')), 'Zorggroep X')
+    await user.type(screen.getByPlaceholderText(i18n.t('candidates:addFields.phone')), '0201234567')
+    await user.type(screen.getByPlaceholderText(i18n.t('candidates:addFields.mobile')), '0612345678')
+    await user.type(screen.getByPlaceholderText(i18n.t('candidates:addFields.email')), 'jan@example.com')
 
     // ALWAYS-SEARCHABLE-1: pick-only searchable dropdowns, never a plain <select>.
-    await user.click(screen.getByRole('button', { name: 'Relatie' }))
+    await user.click(screen.getByRole('button', { name: i18n.t('candidates:addFields.relation') }))
     await user.click(await screen.findByRole('button', { name: 'Manager' }))
-    await user.click(screen.getByRole('button', { name: 'Referentiebrief' }))
+    await user.click(screen.getByRole('button', { name: i18n.t('candidates:addFields.referenceLetter') }))
     await user.click(await screen.findByRole('button', { name: 'brief.pdf' }))
 
-    await user.click(screen.getByTitle('Opslaan'))
+    await user.click(screen.getByTitle(i18n.t('common:save')))
 
     expect(onAdd).toHaveBeenCalledWith(expect.objectContaining({
       first_name: 'Jan', last_name: 'Jansen', middle_name: 'van der', function: 'Teamleider',
@@ -161,10 +162,10 @@ describe('ReferencesTab · add/edit/remove wiring (generic AddableSection contra
     const onEdit = vi.fn()
     const item = { id: 'r1', first_name: 'Jan', last_name: 'Jansen', note: '<p>Oud</p>' }
     render(<ReferencesTab items={[item]} onEdit={onEdit} />)
-    await user.click(screen.getByTitle('Bewerken'))
+    await user.click(screen.getByTitle(i18n.t('common:edit')))
     expect(screen.getByDisplayValue('Jan')).toBeInTheDocument()
     expect(screen.getByDisplayValue('Jansen')).toBeInTheDocument()
-    await user.click(screen.getByTitle('Opslaan'))
+    await user.click(screen.getByTitle(i18n.t('common:save')))
     expect(onEdit).toHaveBeenCalledWith(0, expect.objectContaining({ first_name: 'Jan', last_name: 'Jansen', note: '<p>Oud</p>' }))
   })
 
@@ -173,14 +174,14 @@ describe('ReferencesTab · add/edit/remove wiring (generic AddableSection contra
     const onRemove = vi.fn()
     const item = { id: 'r1', first_name: 'Jan', last_name: 'Jansen' }
     render(<ReferencesTab items={[item]} onRemove={onRemove} />)
-    await user.click(screen.getByTitle('Verwijderen'))
+    await user.click(screen.getByTitle(i18n.t('common:remove')))
     expect(onRemove).toHaveBeenCalledWith(0)
   })
 
   it('is a pick-only searchable dropdown for relation/document — no native <select>', async () => {
     const user = userEvent.setup()
     const { container } = render(<ReferencesTab items={[]} onAdd={vi.fn()} />)
-    await user.click(screen.getByRole('button', { name: 'Toevoegen' }))
+    await user.click(screen.getByRole('button', { name: i18n.t('common:add') }))
     expect(container.querySelectorAll('select')).toHaveLength(0)
   })
 })
@@ -303,13 +304,13 @@ describe('ReferencesTab · work-experience link (REF-ERVARING-1)', () => {
     const user = userEvent.setup()
     const onAdd = vi.fn()
     const { container } = render(<ReferencesTab items={[]} onAdd={onAdd} experiences={experiences} />)
-    await user.click(screen.getByRole('button', { name: 'Toevoegen' }))
+    await user.click(screen.getByRole('button', { name: i18n.t('common:add') }))
     // ALWAYS-SEARCHABLE-1: the house CreatableSelect, never a native <select>.
     expect(container.querySelectorAll('select')).toHaveLength(0)
     await user.click(screen.getByRole('button', { name: PICKER }))
     await user.click(await screen.findByRole('button', { name: 'Woonzorg Centrum · Verzorgende · 06-08-2024 – heden' }))
     await user.type(screen.getByPlaceholderText('Achternaam *'), 'Jansen')
-    await user.click(screen.getByTitle('Opslaan'))
+    await user.click(screen.getByTitle(i18n.t('common:save')))
     expect(onAdd).toHaveBeenCalledWith(expect.objectContaining({ work_experience_id: 'exp-2' }))
   })
 
@@ -320,9 +321,9 @@ describe('ReferencesTab · work-experience link (REF-ERVARING-1)', () => {
     const onEdit = vi.fn()
     const item = { id: 'r1', first_name: 'Jan', last_name: 'Jansen', work_experience_id: 'exp-1' }
     render(<ReferencesTab items={[item]} onEdit={onEdit} experiences={experiences} />)
-    await user.click(screen.getByTitle('Bewerken'))
-    await user.click(screen.getByTitle('Wissen'))
-    await user.click(screen.getByTitle('Opslaan'))
+    await user.click(screen.getByTitle(i18n.t('common:edit')))
+    await user.click(screen.getByTitle(i18n.t('common:clear')))
+    await user.click(screen.getByTitle(i18n.t('common:save')))
     expect(onEdit).toHaveBeenCalledWith(0, expect.objectContaining({ work_experience_id: '' }))
   })
 
@@ -331,7 +332,7 @@ describe('ReferencesTab · work-experience link (REF-ERVARING-1)', () => {
   it('never offers a not-yet-persisted experience as a link target', async () => {
     const user = userEvent.setup()
     render(<ReferencesTab items={[]} onAdd={vi.fn()} experiences={[{ id: -1712, title: 'Helpende', company: 'Nieuw', start: '2025-01-01' }]} />)
-    await user.click(screen.getByRole('button', { name: 'Toevoegen' }))
+    await user.click(screen.getByRole('button', { name: i18n.t('common:add') }))
     expect(screen.queryByRole('button', { name: PICKER })).toBeNull()
   })
 })
@@ -345,7 +346,7 @@ describe('ReferencesTab · no work experiences to link', () => {
   it('offers no picker at all in the add form', async () => {
     const user = userEvent.setup()
     render(<ReferencesTab items={[]} onAdd={vi.fn()} experiences={[]} />)
-    await user.click(screen.getByRole('button', { name: 'Toevoegen' }))
+    await user.click(screen.getByRole('button', { name: i18n.t('common:add') }))
     expect(screen.queryByRole('button', { name: /workExperience|Werkervaring/i })).toBeNull()
   })
 

@@ -23,6 +23,7 @@ vi.mock('@/components/ui/RichTextEditor', () => ({
 }))
 
 import api from '@/lib/api'
+import i18n from '@/i18n'
 
 const candidate = (): Candidate => ({ id: 1, experiences: [], educations: [], certifications: [], skills: [], languages: [] } as unknown as Candidate)
 
@@ -52,7 +53,7 @@ describe('BackgroundTab · DOC-ENTRY-LINK-1 document_id round-trips through the 
     // (KAND-NIVEAU-1) is the OTHER combobox in this form and stays untouched here.
     await user.click(screen.getByRole('button', { name: 'oud.pdf' }))
     await user.click(await screen.findByRole('button', { name: 'nieuw.pdf' }))
-    await user.click(screen.getByTitle('Opslaan'))
+    await user.click(screen.getByTitle(i18n.t('common:save')))
     expect(api.patch).toHaveBeenCalledWith('/candidates/1/educations/e1', expect.objectContaining({ document_id: 'doc2' }), { quietStatuses: [422] })
   })
 
@@ -68,7 +69,7 @@ describe('BackgroundTab · DOC-ENTRY-LINK-1 document_id round-trips through the 
     await user.click(screen.getByTitle('Bewerken'))
     await user.click(screen.getByRole('button', { name: 'oud.pdf' }))
     await user.click(await screen.findByRole('button', { name: 'nieuw.pdf' }))
-    await user.click(screen.getByTitle('Opslaan'))
+    await user.click(screen.getByTitle(i18n.t('common:save')))
     expect(api.patch).toHaveBeenCalledWith('/candidates/1/certifications/c1', expect.objectContaining({ document_id: 'doc2' }), { quietStatuses: [422] })
   })
 
@@ -84,8 +85,8 @@ describe('BackgroundTab · DOC-ENTRY-LINK-1 document_id round-trips through the 
     await user.click(screen.getByTitle('Bewerken'))
     // ALWAYS-SEARCHABLE-1: unset via CreatableSelect's own `clearable` X — the
     // house replacement for the old native select's blank "unset" option.
-    await user.click(screen.getByTitle('Wissen'))
-    await user.click(screen.getByTitle('Opslaan'))
+    await user.click(screen.getByTitle(i18n.t('common:clear')))
+    await user.click(screen.getByTitle(i18n.t('common:save')))
     expect(api.patch).toHaveBeenCalledWith('/candidates/1/educations/e1', expect.objectContaining({ document_id: null }), { quietStatuses: [422] })
   })
 })
@@ -182,7 +183,7 @@ describe('BackgroundTab · DOC-1-EIGENAAR-1 the picker only offers still-free do
     } as unknown as Candidate} />)
     await user.click(screen.getByRole('tab', { name: 'Certificeringen' }))
     await user.click(screen.getByTitle('Bewerken'))
-    expect(screen.queryByPlaceholderText('Gekoppeld document')).toBeNull()
+    expect(screen.queryByPlaceholderText(i18n.t('candidates:addFields.linkedDocument'))).toBeNull()
   })
 })
 
@@ -221,7 +222,7 @@ describe('BackgroundTab · REF-ERVARING-1 work_experience_id round-trips through
     await user.click(screen.getByTitle('Bewerken'))
     await user.click(screen.getByRole('button', { name: PICKER }))
     await user.click(await screen.findByRole('button', { name: 'Zorggroep X · Helpende · 06-08-2023 – heden' }))
-    await user.click(screen.getByTitle('Opslaan'))
+    await user.click(screen.getByTitle(i18n.t('common:save')))
     expect(api.patch).toHaveBeenCalledWith('/candidates/1/references/r1', expect.objectContaining({ work_experience_id: 'exp-1' }), { quietStatuses: [422] })
   })
 
@@ -235,8 +236,8 @@ describe('BackgroundTab · REF-ERVARING-1 work_experience_id round-trips through
     render(<BackgroundTab c={c} />)
     await user.click(screen.getByRole('tab', { name: 'Referenties' }))
     await user.click(screen.getByTitle('Bewerken'))
-    await user.click(screen.getByTitle('Wissen'))
-    await user.click(screen.getByTitle('Opslaan'))
+    await user.click(screen.getByTitle(i18n.t('common:clear')))
+    await user.click(screen.getByTitle(i18n.t('common:save')))
     expect(api.patch).toHaveBeenCalledWith('/candidates/1/references/r1', expect.objectContaining({ work_experience_id: null }), { quietStatuses: [422] })
   })
 
@@ -250,7 +251,7 @@ describe('BackgroundTab · REF-ERVARING-1 work_experience_id round-trips through
     render(<BackgroundTab c={c} />)
     await user.click(screen.getByRole('tab', { name: 'Referenties' }))
     await user.click(screen.getByTitle('Bewerken'))
-    await user.click(screen.getByTitle('Opslaan'))
+    await user.click(screen.getByTitle(i18n.t('common:save')))
     expect(api.patch).toHaveBeenCalledWith('/candidates/1/references/r1', expect.objectContaining({ work_experience_id: null }), { quietStatuses: [422] })
   })
 })

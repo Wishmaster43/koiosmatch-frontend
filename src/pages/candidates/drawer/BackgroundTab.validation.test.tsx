@@ -24,6 +24,7 @@ vi.mock('@/components/ui/RichTextEditor', () => ({
 
 import api from '@/lib/api'
 import { notifyError } from '@/lib/notify'
+import i18n from '@/i18n'
 
 const candidate = (): Candidate => ({ id: 1, experiences: [], educations: [], certifications: [], skills: [], languages: [] } as unknown as Candidate)
 
@@ -53,7 +54,7 @@ describe.each([
     const user = userEvent.setup()
     render(<BackgroundTab c={candidate()} />)
     await user.click(screen.getByRole('tab', { name: tab }))
-    await user.click(screen.getByRole('button', { name: 'Toevoegen' }))
+    await user.click(screen.getByRole('button', { name: i18n.t('common:add') }))
 
     // 1) NO REQUIRED MARKER was the first defect. The marker lives IN the
     // placeholder rather than in a caption above the field: a caption made the
@@ -65,12 +66,12 @@ describe.each([
 
     // 2) SAVE IS ALLOWED WITH IT EMPTY was the third defect — clicking Save
     // without filling the required field must reach the API zero times.
-    fireEvent.click(screen.getByTitle('Opslaan'))
+    fireEvent.click(screen.getByTitle(i18n.t('common:save')))
     expect(api.post).not.toHaveBeenCalled()
 
     // Filling it in and saving again now sends the real, correctly-shaped request.
     await user.type(screen.getByPlaceholderText(`${placeholder} *`), value)
-    fireEvent.click(screen.getByTitle('Opslaan'))
+    fireEvent.click(screen.getByTitle(i18n.t('common:save')))
     expect(api.post).toHaveBeenCalledWith(`/candidates/1/${route}`, expect.objectContaining({ [bodyKey]: value }), expect.anything())
   })
 })
@@ -93,11 +94,11 @@ describe('BackgroundTab · a raw "required" 422 renders our translated message, 
     vi.mocked(notifyError).mockClear()
     render(<BackgroundTab c={candidate()} />)
     await user.click(screen.getByRole('tab', { name: 'Ervaring' }))
-    await user.click(screen.getByRole('button', { name: 'Toevoegen' }))
+    await user.click(screen.getByRole('button', { name: i18n.t('common:add') }))
     // Fill in the OTHER field the client checks (title) so this exercises the
     // residual server-side 422 path, not the client-side block covered above.
     await user.type(screen.getByPlaceholderText('Bedrijf *'), 'Zorggroep Noord')
-    fireEvent.click(screen.getByTitle('Opslaan'))
+    fireEvent.click(screen.getByTitle(i18n.t('common:save')))
 
     await waitFor(() => expect(notifyError).toHaveBeenCalled())
     const shown = vi.mocked(notifyError).mock.calls[0][0] as string
@@ -127,10 +128,10 @@ describe("BackgroundTab 422 error display", () => {
       documents: [{ id: "doc-free", name: "vrij.pdf" }],
     } as unknown as Candidate} />)
     await user.click(screen.getByRole("tab", { name: "Certificeringen" }))
-    await user.click(screen.getByTitle("Bewerken"))
-    await user.click(screen.getByRole("button", { name: "Gekoppeld document" }))
+    await user.click(screen.getByTitle(i18n.t('common:edit')))
+    await user.click(screen.getByRole("button", { name: i18n.t('candidates:addFields.linkedDocument') }))
     await user.click(await screen.findByRole("button", { name: "vrij.pdf" }))
-    await user.click(screen.getByTitle("Opslaan"))
+    await user.click(screen.getByTitle(i18n.t('common:save')))
     await waitFor(() => expect(notifyError).toHaveBeenCalledWith("Dit document is al aan een ander onderdeel gekoppeld."))
   })
 })
@@ -151,9 +152,9 @@ describe("BackgroundTab KEY-ADOPTION skills", () => {
     const user = userEvent.setup()
     render(<BackgroundTab c={candidate()} />)
     await user.click(screen.getByRole("tab", { name: "Vaardigheden" }))
-    await user.click(screen.getByRole("button", { name: "Toevoegen" }))
+    await user.click(screen.getByRole("button", { name: i18n.t('common:add') }))
     await user.type(screen.getByPlaceholderText("Vaardigheid *"), "Excel")
-    fireEvent.click(screen.getByTitle("Opslaan"))
+    fireEvent.click(screen.getByTitle(i18n.t('common:save')))
 
     await waitFor(() => expect(api.post).toHaveBeenCalledWith(
       "/candidates/1/skills",
@@ -170,11 +171,11 @@ describe("BackgroundTab KEY-ADOPTION skills", () => {
     } as unknown as Candidate
     render(<BackgroundTab c={c} />)
     await user.click(screen.getByRole("tab", { name: "Vaardigheden" }))
-    await user.click(screen.getByTitle("Bewerken"))
+    await user.click(screen.getByTitle(i18n.t('common:edit')))
     const input = screen.getByDisplayValue("Excel")
     await user.clear(input)
     await user.type(input, "Excel Advanced")
-    fireEvent.click(screen.getByTitle("Opslaan"))
+    fireEvent.click(screen.getByTitle(i18n.t('common:save')))
 
     await waitFor(() => expect(api.patch).toHaveBeenCalledWith(
       "/candidates/1/skills/s1",

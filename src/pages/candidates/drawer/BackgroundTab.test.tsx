@@ -31,6 +31,7 @@ vi.mock('@/components/ui/RichTextEditor', () => ({
 
 import api from '@/lib/api'
 import { notifyError } from '@/lib/notify'
+import i18n from '@/i18n'
 
 const candidate = (): Candidate => ({ id: 1, experiences: [], educations: [], certifications: [], skills: [], languages: [] } as unknown as Candidate)
 
@@ -47,31 +48,31 @@ describe('BackgroundTab · sub-tabs (kandidaten-ronde-2, punt B)', () => {
   it('defaults the open sub-tab to Ervaring, not the first alphabetically (Certificeringen)', () => {
     render(<BackgroundTab c={candidate()} />)
     expect(screen.getByRole('tab', { name: 'Ervaring' })).toHaveAttribute('aria-selected', 'true')
-    expect(screen.getByText('Nog geen ervaringen.')).toBeInTheDocument()
-    expect(screen.queryByText('Nog geen certificeringen.')).toBeNull()
+    expect(screen.getByText(i18n.t('candidates:sections.experienceEmpty'))).toBeInTheDocument()
+    expect(screen.queryByText(i18n.t('candidates:sections.certificationsEmpty'))).toBeNull()
   })
 
   it('Talen renders as its own sub-tab (moved here, same LanguagesSection)', async () => {
     const user = userEvent.setup()
     render(<BackgroundTab c={candidate()} />)
     await user.click(screen.getByRole('tab', { name: 'Talen' }))
-    expect(screen.getByText('Nog geen talen.')).toBeInTheDocument()
+    expect(screen.getByText(i18n.t('candidates:sections.languagesEmpty'))).toBeInTheDocument()
     // Switching away hides the previously-default Ervaring content.
-    expect(screen.queryByText('Nog geen ervaringen.')).toBeNull()
+    expect(screen.queryByText(i18n.t('candidates:sections.experienceEmpty'))).toBeNull()
   })
 
   it('Certificeringen renders on its own sub-tab', async () => {
     const user = userEvent.setup()
     render(<BackgroundTab c={candidate()} />)
     await user.click(screen.getByRole('tab', { name: 'Certificeringen' }))
-    expect(screen.getByText('Nog geen certificeringen.')).toBeInTheDocument()
+    expect(screen.getByText(i18n.t('candidates:sections.certificationsEmpty'))).toBeInTheDocument()
   })
 
   it('Referenties renders on its own sub-tab (KAND-REFERENTIES-1)', async () => {
     const user = userEvent.setup()
     render(<BackgroundTab c={candidate()} />)
     await user.click(screen.getByRole('tab', { name: 'Referenties' }))
-    expect(screen.getByText('Nog geen referenties.')).toBeInTheDocument()
+    expect(screen.getByText(i18n.t('candidates:sections.referencesEmpty'))).toBeInTheDocument()
   })
 })
 
@@ -134,10 +135,10 @@ describe('BackgroundTab · references verify wiring (KAND-REFERENTIES-1)', () =>
     const c = { ...candidate(), references: [] } as unknown as Candidate
     render(<BackgroundTab c={c} />)
     await user.click(screen.getByRole('tab', { name: 'Referenties' }))
-    await user.click(screen.getByRole('button', { name: 'Toevoegen' }))
-    await user.type(screen.getByPlaceholderText('Voornaam'), 'Piet')
+    await user.click(screen.getByRole('button', { name: i18n.t('common:add') }))
+    await user.type(screen.getByPlaceholderText(i18n.t('candidates:addFields.referenceFirstName')), 'Piet')
     await user.type(screen.getByPlaceholderText('Achternaam *'), 'Pietersen')
-    fireEvent.click(screen.getByTitle('Opslaan'))
+    fireEvent.click(screen.getByTitle(i18n.t('common:save')))
     // The optimistic row (negative temp id) renders with no verify action at all.
     expect(screen.getByText('Piet Pietersen')).toBeInTheDocument()
     expect(screen.queryByTitle('Verifiëren')).toBeNull()
@@ -164,7 +165,7 @@ describe('BackgroundTab · ops() optimistic-revert (onAdd/onEdit/onRemove)', () 
     vi.mocked(api.post).mockRejectedValue(new Error('network'))
     render(<BackgroundTab c={candidate()} />)
     await user.click(screen.getByRole('tab', { name: 'Vaardigheden' }))
-    await user.click(screen.getByRole('button', { name: 'Toevoegen' }))
+    await user.click(screen.getByRole('button', { name: i18n.t('common:add') }))
     await user.type(screen.getByPlaceholderText('Vaardigheid *'), 'Excel')
     // fireEvent (not userEvent): the mocked POST rejects on the SAME microtask
     // tick as the click — awaiting a userEvent click gives that catch handler
@@ -172,7 +173,7 @@ describe('BackgroundTab · ops() optimistic-revert (onAdd/onEdit/onRemove)', () 
     // already be gone by the time we could observe it. A plain synchronous
     // fireEvent.click lets us assert the optimistic state BEFORE the promise
     // settles, then waitFor drains the microtask queue for the revert.
-    fireEvent.click(screen.getByTitle('Opslaan'))
+    fireEvent.click(screen.getByTitle(i18n.t('common:save')))
 
     // Optimistic row appears immediately.
     expect(screen.getByText('Excel')).toBeInTheDocument()
@@ -195,7 +196,7 @@ describe('BackgroundTab · ops() optimistic-revert (onAdd/onEdit/onRemove)', () 
     await user.type(input, 'Excel Advanced')
     // fireEvent (see onAdd comment above): keeps the optimistic write observable
     // before the mocked-rejected PATCH's catch handler runs.
-    fireEvent.click(screen.getByTitle('Opslaan'))
+    fireEvent.click(screen.getByTitle(i18n.t('common:save')))
 
     // Optimistic edit shows immediately.
     expect(screen.getByText('Excel Advanced')).toBeInTheDocument()
@@ -257,8 +258,8 @@ describe('BackgroundTab · manual reorder (DRAG-SORT-1)', () => {
 
   const openOwnOrder = async (user: ReturnType<typeof userEvent.setup>) => {
     await user.click(screen.getByRole('tab', { name: 'Vaardigheden' }))
-    await user.click(screen.getByRole('button', { name: 'Sorteren' }))
-    await user.click(screen.getByRole('menuitem', { name: 'Eigen volgorde' }))
+    await user.click(screen.getByRole('button', { name: i18n.t('candidates:sections.sortLabel') }))
+    await user.click(screen.getByRole('menuitem', { name: i18n.t('candidates:addFields.ownOrder') }))
   }
 
   beforeEach(() => {
@@ -290,7 +291,7 @@ describe('BackgroundTab · manual reorder (DRAG-SORT-1)', () => {
     render(<BackgroundTab c={skillsCandidate()} />)
     await openOwnOrder(user)
 
-    const moveDown = screen.getAllByRole('button', { name: 'Omlaag verplaatsen' })[0]
+    const moveDown = screen.getAllByRole('button', { name: i18n.t('common:dragList.moveDown') })[0]
     moveDown.focus()
     await user.keyboard('{Enter}')
 
