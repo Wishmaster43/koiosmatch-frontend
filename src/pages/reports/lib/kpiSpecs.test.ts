@@ -151,4 +151,9 @@ describe('unitMapFor', () => {
   it('returns an empty map for an undefined kpis array', () => {
     expect(unitMapFor(undefined, {})).toEqual(new Map())
   })
+
+  // The BE writes 'percent' on verdict_distribution; the formatter word is 'pct'.
+  it("maps the BE unit word 'percent' to the formatter word 'pct'", () => {
+    expect(unitMapFor([{ key: 'v', unit: 'percent' }], {}).get('v')).toBe('pct')
+  })
 })

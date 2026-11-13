@@ -175,7 +175,10 @@
       "noMatches": "Without matches",
       "closingSoon": "Closing soon",
       "customersCount": "Customers with vacancies",
-      "customersCountDrillSub": "Vacancies of these customers"
+      "customersCountDrillSub": "Vacancies of these customers",
+      "withoutAdvice": "No Koios advice yet",
+      "koiosAdviceStale": "Koios advice outdated",
+      "verdictDistribution": "Share of positive Koios advice"
     }
   },
   "matches": {
@@ -366,7 +369,9 @@
       "avgDaysToMatch": "Avg. days to match",
       "tooLongInStage": "Too long in stage",
       "missingAppointment": "Missing appointment",
-      "daysUnit": "days"
+      "daysUnit": "days",
+      "stageDwell": "Avg. time in stage (workdays)",
+      "workdaysUnit": "workdays"
     },
     "intakes": {
       "title": "Intakes",

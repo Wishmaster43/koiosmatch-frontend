@@ -213,6 +213,10 @@ const REPORT_KPI_FIXED_CATALOG: Partial<Record<ReportKpiScopeId, KpiCatalogEntry
     { key: 'no_matches', labelKey: 'vacancies.kpi.noMatches' },
     { key: 'closing_soon', labelKey: 'vacancies.kpi.closingSoon' },
     { key: 'customers_count', labelKey: 'vacancies.kpi.customersCount' },
+    // REPORT-KPI-CARDS-MISSING-1: the three Koios-advice spares of the BE catalogue.
+    { key: 'without_advice', labelKey: 'vacancies.kpi.withoutAdvice' },
+    { key: 'advice_stale', labelKey: 'vacancies.kpi.koiosAdviceStale' },
+    { key: 'verdict_distribution', labelKey: 'vacancies.kpi.verdictDistribution' },
   ],
   // KPI-OPP-1 (CMBE 27-08, commit eb3af985): the strip reads the server kpis[]
   // suite — the catalogue is that suite's own nine keys, replacing the old
@@ -292,6 +296,8 @@ const REPORT_KPI_FIXED_CATALOG: Partial<Record<ReportKpiScopeId, KpiCatalogEntry
     { key: 'avg_days_to_match', labelKey: 'applications.kpi.avgDaysToMatch' },
     { key: 'too_long_in_stage', labelKey: 'applications.kpi.tooLongInStage' },
     { key: 'missing_appointment', labelKey: 'applications.kpi.missingAppointment' },
+    // REPORT-KPI-CARDS-MISSING-1: BE spare (KPI-BUILDER-1) appended after the default nine.
+    { key: 'stage_dwell', labelKey: 'applications.kpi.stageDwell' },
   ],
   whatsapp: [
     { key: 'conversations_total', labelKey: 'whatsapp.kpi.conversationsTotal' },

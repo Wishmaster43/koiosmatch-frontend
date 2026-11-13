@@ -182,15 +182,48 @@ describe('VacanciesReport (RAPPORTEN-SUITE-1 portie 4, additive on C-34)', () =>
     })
   })
 
+  // REPORT-KPI-CARDS-MISSING-1: the three Koios-advice cards render from the measured payload
+  // (counts plus verdict_distribution as unit 'percent', 0..100), do not fall back, and carry no
+  // drill because VacanciesKpiDrillRequest does not accept those keys.
+  describe('VacanciesReport (Koios-advice KPI cards)', () => {
+    it('renders the counts and the percentage in nl, no fallback notice, no drill request', async () => {
+      const user = userEvent.setup()
+      mockUseReportKpiSelection.mockReturnValue({ data: ['without_advice', 'advice_stale', 'verdict_distribution'], isLoading: false })
+      mockUseVacanciesReport.mockReturnValue({
+        data: { ...dataWithKpis, kpis: [...(dataWithKpis.kpis ?? []),
+          { key: 'without_advice', count: 61 }, { key: 'advice_stale', count: 47 },
+          { key: 'verdict_distribution', count: 62.5, unit: 'percent' }] },
+        loading: false, error: false,
+      })
+      renderReport()
+      for (const k of ['withoutAdvice', 'koiosAdviceStale', 'verdictDistribution']) {
+        expect(screen.getByText(i18n.t(`vacancies.kpi.${k}`, { ns: 'analytics' }))).toBeInTheDocument()
+      }
+      expect(screen.getByText('61')).toBeInTheDocument()
+      expect(screen.getByText('47')).toBeInTheDocument()
+      expect(screen.getByText('62,5%')).toBeInTheDocument()
+      expect(screen.queryByText(i18n.t('vacancies.kpiOrderFellBack', { ns: 'analytics' }))).not.toBeInTheDocument()
+      getSpy.mockClear()
+      await user.click(screen.getByText('62,5%'))
+      await user.click(screen.getByText('61'))
+      expect(getSpy).not.toHaveBeenCalledWith('/reports/vacancies/kpis/drill', expect.anything())
+      // No fake affordance: none of the three cards exposes a button role while the BE drill refuses the keys.
+      for (const k of ['withoutAdvice', 'koiosAdviceStale', 'verdictDistribution']) {
+        expect(screen.queryByRole('button', { name: i18n.t(`vacancies.kpi.${k}`, { ns: 'analytics' }) })).toBeNull()
+      }
+    })
+  })
+
   // KPI-VAC-1: the catalogue is now the server suite's own nine keys — no
   // spares (supersedes the old REPORTS-KPI-SPARE-1 six-spare block).
   describe('VacanciesReport (kpi catalogue, KPI-VAC-1)', () => {
-    it('offers the nine server-suite keys, in suite order; the backend default is the first four', async () => {
+    it('offers the nine server-suite keys plus the three Koios-advice spares; the backend default is the first four', async () => {
       const { getReportKpiCatalog, getReportKpiDefaultOrder, reportHasSpareKpiCards } = await import('./kpiCatalog')
       const keys = getReportKpiCatalog('vacancies').map(c => c.key)
       expect(keys).toEqual([
         'total', 'open', 'filled', 'fill_rate', 'stale_online',
         'long_concept', 'no_matches', 'closing_soon', 'customers_count',
+        'without_advice', 'advice_stale', 'verdict_distribution',
       ])
       expect(getReportKpiDefaultOrder('vacancies')).toEqual(keys.slice(0, 4))
       expect(reportHasSpareKpiCards('vacancies')).toBe(true)

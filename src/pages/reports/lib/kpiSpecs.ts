@@ -142,5 +142,9 @@ export function unitMapFor(
   kpis: Array<{ key: string; unit?: unknown }> | undefined,
   fallback: Partial<Record<string, unknown>>,
 ): Map<string, unknown> {
-  return new Map((kpis ?? []).map(k => [k.key, k.unit ?? fallback[k.key]]))
+  // The BE names its 0..100 percentage unit 'percent' (verdict_distribution); the formatter's word is 'pct'.
+  return new Map((kpis ?? []).map(k => {
+    const unit = k.unit ?? fallback[k.key]
+    return [k.key, unit === 'percent' ? 'pct' : unit]
+  }))
 }

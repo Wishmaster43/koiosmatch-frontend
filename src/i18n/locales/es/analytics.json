@@ -175,7 +175,10 @@
       "noMatches": "Sin matches",
       "closingSoon": "Cierra pronto",
       "customersCount": "Clientes con vacantes",
-      "customersCountDrillSub": "Vacantes de estos clientes"
+      "customersCountDrillSub": "Vacantes de estos clientes",
+      "withoutAdvice": "Aún sin consejo de Koios",
+      "koiosAdviceStale": "Consejo de Koios desactualizado",
+      "verdictDistribution": "Proporción de consejos positivos de Koios"
     }
   },
   "matches": {
@@ -366,7 +369,9 @@
       "avgDaysToMatch": "Días prom. hasta match",
       "tooLongInStage": "Demasiado tiempo en etapa",
       "missingAppointment": "Falta cita",
-      "daysUnit": "días"
+      "daysUnit": "días",
+      "stageDwell": "Tiempo medio en la fase (días laborables)",
+      "workdaysUnit": "días laborables"
     },
     "intakes": {
       "title": "Entrevistas",

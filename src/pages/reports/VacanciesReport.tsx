@@ -142,13 +142,18 @@ export default function VacanciesReport({ period, filters = EMPTY_REPORT_FILTERS
   const KPI_COLOR: Partial<Record<string, string>> = {
     filled: 'var(--color-success)', stale_online: 'var(--color-warning)',
     no_matches: 'var(--color-danger)', closing_soon: 'var(--color-warning)',
+    without_advice: 'var(--color-warning)', advice_stale: 'var(--color-warning)',
   }
   const SUITE_LABEL_KEY: Record<string, string> = {
     total: 'vacancies.kpi.total', open: 'vacancies.kpi.open', filled: 'vacancies.kpi.filled',
     fill_rate: 'vacancies.kpi.fillRate', stale_online: 'vacancies.kpi.staleOnline',
     long_concept: 'vacancies.kpi.longConcept', no_matches: 'vacancies.kpi.noMatches',
     closing_soon: 'vacancies.kpi.closingSoon', customers_count: 'vacancies.kpi.customersCount',
+    without_advice: 'vacancies.kpi.withoutAdvice', advice_stale: 'vacancies.kpi.koiosAdviceStale',
+    verdict_distribution: 'vacancies.kpi.verdictDistribution',
   }
+  // The BE VacanciesKpiDrillRequest enum lacks the three Koios-advice keys, so those cards carry no drill (no fake affordance).
+  const NO_DRILL_KEYS = new Set(['without_advice', 'advice_stale', 'verdict_distribution'])
   // UNIT-CANON (FRONTEND-CONTRACT §13, REPORT-KPI-STRIP-1): the SERVER's unit
   // field on each kpis[] entry decides the formatting; the local map is only the
   // tolerant fallback for a cached pre-unit envelope (§10) — never the source.
@@ -158,7 +163,7 @@ export default function VacanciesReport({ period, filters = EMPTY_REPORT_FILTERS
   // default window text.
   const kpiByKey = unitAwareServerKpiSpecs({
     data, drill, labelKeys: SUITE_LABEL_KEY, colors: KPI_COLOR, t,
-    openKpiDrill: (key, label, value) => openKpiDrill(key, label, value, key === 'customers_count' ? t('vacancies.kpi.customersCountDrillSub') : undefined),
+    openKpiDrill: (key, label, value) => NO_DRILL_KEYS.has(key) ? undefined : openKpiDrill(key, label, value, key === 'customers_count' ? t('vacancies.kpi.customersCountDrillSub') : undefined),
     unitFallback: { fill_rate: 'ratio' },
     // KPI-DREMPELS-FE-1: threshold cards keep their tenant-threshold caption.
     subFor: key => totalCompareSubFor(totalCompare)(key)

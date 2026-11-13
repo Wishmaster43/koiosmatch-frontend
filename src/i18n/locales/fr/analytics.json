@@ -175,7 +175,10 @@
       "noMatches": "Sans matchs",
       "closingSoon": "Clôture bientôt",
       "customersCount": "Clients avec postes",
-      "customersCountDrillSub": "Postes de ces clients"
+      "customersCountDrillSub": "Postes de ces clients",
+      "withoutAdvice": "Pas encore d’avis Koios",
+      "koiosAdviceStale": "Avis Koios obsolète",
+      "verdictDistribution": "Part d’avis Koios positifs"
     }
   },
   "matches": {
@@ -366,7 +369,9 @@
       "avgDaysToMatch": "Jours moy. jusqu’au match",
       "tooLongInStage": "Trop longtemps en phase",
       "missingAppointment": "Rendez-vous manquant",
-      "daysUnit": "jours"
+      "daysUnit": "jours",
+      "stageDwell": "Durée moyenne dans l’étape (jours ouvrés)",
+      "workdaysUnit": "jours ouvrés"
     },
     "intakes": {
       "title": "Entretiens",

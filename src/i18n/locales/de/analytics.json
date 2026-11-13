@@ -175,7 +175,10 @@
       "noMatches": "Ohne Matches",
       "closingSoon": "Schließt bald",
       "customersCount": "Kunden mit Vakanzen",
-      "customersCountDrillSub": "Vakanzen dieser Kunden"
+      "customersCountDrillSub": "Vakanzen dieser Kunden",
+      "withoutAdvice": "Noch keine Koios-Empfehlung",
+      "koiosAdviceStale": "Koios-Empfehlung veraltet",
+      "verdictDistribution": "Anteil positiver Koios-Empfehlungen"
     }
   },
   "matches": {
@@ -366,7 +369,9 @@
       "avgDaysToMatch": "Ø Tage bis Match",
       "tooLongInStage": "Zu lange in Phase",
       "missingAppointment": "Termin fehlt",
-      "daysUnit": "Tage"
+      "daysUnit": "Tage",
+      "stageDwell": "Durchschn. Verweildauer in Phase (Werktage)",
+      "workdaysUnit": "Werktage"
     },
     "intakes": {
       "title": "Intakes",

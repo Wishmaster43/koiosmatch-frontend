@@ -125,10 +125,8 @@ const BACKEND_KPIS: Record<string, { available: string[]; default: string[] }> =
     default: ['conversations_total', 'active_7d', 'new_in_period', 'inbound_in_period', 'outbound_in_period', 'app_echoes_in_period', 'escalations_open', 'unanswered_over_window', 'avg_first_response_minutes'],
   },
 }
-const NOT_YET_RENDERED: Record<string, string[]> = {
-  applications: ['stage_dwell'],
-  vacancies: ['without_advice', 'advice_stale', 'verdict_distribution'],
-}
+// Every BE key now has a card (REPORT-KPI-CARDS-MISSING-1); a future BE-only key goes here to stay visible.
+const NOT_YET_RENDERED: Record<string, string[]> = {}
 
 describe('kpiCatalog — equals the backend catalogue (REPORT-KPI-CATALOG-DRIFT-1)', () => {
   it.each(Object.keys(BACKEND_KPIS))('%s uses the backend keys and the backend default list', (scope) => {
