@@ -25,4 +25,8 @@ describe('labelOrRaw', () => {
   it('falls back to the raw server text when the key is missing', () => {
     expect(labelOrRaw(t, { exists: () => false }, 'a.b', 'raw')).toBe('raw')
   })
+
+  it('falls back to the raw text when react-i18next hands an empty i18n object (no instance in a test tree)', () => {
+    expect(labelOrRaw(t, {} as unknown as { exists: () => boolean }, 'a.b', 'raw')).toBe('raw')
+  })
 })

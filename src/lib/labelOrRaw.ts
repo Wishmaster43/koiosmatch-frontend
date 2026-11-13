@@ -11,7 +11,9 @@ import type { TFunction } from 'i18next'
 export interface KeyChecker { exists: (key: string, options?: { ns?: string }) => boolean }
 
 // Returns the translated label when the key exists in `ns`, else the raw fallback text. The `ns`
-// goes to t() as well, so the caller's t may be bound to any namespace.
+// goes to t() as well, so the caller's t may be bound to any namespace. An uninitialised
+// react-i18next (a test tree without an instance) hands an EMPTY i18n object: the fallback is then
+// the honest output, exactly what the old `t(key, { defaultValue })` path showed there.
 export function labelOrRaw(t: TFunction, i18n: KeyChecker, key: string, fallback: string, ns = 'analytics'): string {
-  return i18n.exists(key, { ns }) ? t(key, { ns }) : fallback
+  return typeof i18n?.exists === 'function' && i18n.exists(key, { ns }) ? t(key, { ns }) : fallback
 }
