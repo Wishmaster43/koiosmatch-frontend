@@ -11,30 +11,8 @@ import nl from '@/i18n/locales/nl/candidates.json'
 import type { Candidate } from '@/types/candidate'
 import { candidateTypesSeed, typeMetaFrom, vacancyLookupsSeed } from './VacancySearchTab.testKit'
 
-// The new filter keys (contractForm/hoursPerWeek/…/functionNotInLookup, Danny
-// 06-08) plus the new "apply" key (Danny 06-08 screenshot, "Solliciteren" button)
-// are reported separately for the five shipped locale files (house rule: this
-// task never edits src/i18n/locales/**) — injected here IN-MEMORY only, so this suite
-// exercises the real t() pipeline instead of asserting a raw key-path fallback string.
-// No file on disk is touched; this only patches the running i18next instance.
-i18n.addResourceBundle('nl', 'candidates', {
-  vacancySearch: {
-    contractForm: 'Contractvorm',
-    hoursPerWeek: 'Uren per week',
-    hoursMinPlaceholder: 'Min',
-    hoursMaxPlaceholder: 'Max',
-    availableFromFilter: 'Inzetbaar vanaf',
-    functionNotInLookup: "Functie '{{title}}' staat niet in de functielijst — alle functies worden doorzocht.",
-    apply: 'Solliciteren',
-    // Danny 08-08, point 8 — the reset trigger and the range slider's mono readout.
-    resetFilters: 'Filters herstellen',
-    hoursRangeValue: '{{min}}–{{max}}',
-    // P8-more-filters (batch 8): the shared DrawerFilterMenu popover that now
-    // carries these two secondary filters.
-    moreFilters: 'Meer filters',
-    moreFiltersTitle: 'Meer filters',
-  },
-}, true, true)
+// Escapes translated copy before it anchors a RegExp name matcher (copy may gain metacharacters).
+const escapeRegExp = (text: string) => text.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
 
 // Nudge a range-slider thumb with the keyboard — jsdom gives every element a
 // zero-width bounding box, so a pointer DRAG cannot be simulated; the arrow-key
@@ -48,7 +26,7 @@ function nudgeSlider(name: string, key: 'ArrowLeft' | 'ArrowRight', times: numbe
 // P8-more-filters: "Uren per week" + "Inzetbaar vanaf" now live behind the
 // "Meer filters" popover trigger — open it before reaching either control.
 async function openMoreFilters() {
-  await userEvent.click(await screen.findByRole('button', { name: 'Meer filters' }))
+  await userEvent.click(await screen.findByRole('button', { name: i18n.t('candidates:vacancySearch.moreFilters') }))
 }
 
 // Keep the real unwrap/unwrapList (importActual) — only the default client is stubbed.
@@ -194,7 +172,7 @@ describe('VacancySearchTab · "Inzetbaar vanaf" date filter (gated, Danny 06-08)
     render(<VacancySearchTab candidate={candidateWithLocation} />)
 
     await waitFor(() => expect(screen.getByText('Verzorgende IG | Amersfoort')).toBeInTheDocument())
-    expect(screen.queryByText('Inzetbaar vanaf')).not.toBeInTheDocument()
+    expect(screen.queryByText(i18n.t('candidates:vacancySearch.availableFromFilter'))).not.toBeInTheDocument()
   })
 
   it('shows once a row carries the key and filters on/after the chosen date, never excluding a vacancy without a start_date', async () => {
@@ -202,7 +180,7 @@ describe('VacancySearchTab · "Inzetbaar vanaf" date filter (gated, Danny 06-08)
     render(<VacancySearchTab candidate={candidateWithLocation} />)
 
     await openMoreFilters()
-    expect(screen.getByText('Inzetbaar vanaf')).toBeInTheDocument()
+    expect(screen.getByText(i18n.t('candidates:vacancySearch.availableFromFilter'))).toBeInTheDocument()
     expect(screen.getByText('Vroeg beschikbaar | Ede')).toBeInTheDocument()
     expect(screen.getByText('Laat beschikbaar | Arnhem')).toBeInTheDocument()
     expect(screen.getByText('Onbekende datum | Nijmegen')).toBeInTheDocument()
@@ -210,7 +188,7 @@ describe('VacancySearchTab · "Inzetbaar vanaf" date filter (gated, Danny 06-08)
     // COMPACT-1 (Danny 09-08): the filter is now the shared react-datepicker
     // convention (DD-MM-YYYY), not a native <input type="date"> — type the
     // displayed format instead of the raw ISO value.
-    fireEvent.change(screen.getByLabelText('Inzetbaar vanaf'), { target: { value: '01-07-2026' } })
+    fireEvent.change(screen.getByLabelText(i18n.t('candidates:vacancySearch.availableFromFilter')), { target: { value: '01-07-2026' } })
     await waitFor(() => expect(screen.queryByText('Vroeg beschikbaar | Ede')).not.toBeInTheDocument())
     expect(screen.getByText('Laat beschikbaar | Arnhem')).toBeInTheDocument()
     expect(screen.getByText('Onbekende datum | Nijmegen')).toBeInTheDocument()
@@ -224,7 +202,7 @@ describe('VacancySearchTab · "Inzetbaar vanaf" date filter (gated, Danny 06-08)
     // COMPACT-1 (Danny 09-08): displayed as DD-MM-YYYY now (the shared datepicker
     // convention), not the raw ISO value the old native input showed.
     await openMoreFilters()
-    expect(screen.getByLabelText('Inzetbaar vanaf')).toHaveValue('01-07-2026')
+    expect(screen.getByLabelText(i18n.t('candidates:vacancySearch.availableFromFilter'))).toHaveValue('01-07-2026')
     // Already filtered on load — the 2026-06-01 vacancy is before the seeded date.
     expect(screen.queryByText('Vroeg beschikbaar | Ede')).not.toBeInTheDocument()
     expect(screen.getByText('Laat beschikbaar | Arnhem')).toBeInTheDocument()
@@ -239,7 +217,7 @@ describe('VacancySearchTab · function-not-in-lookup hint (Danny 06-08 live feed
     render(<VacancySearchTab candidate={candidate} />)
 
     await waitFor(() => expect(mockGet).toHaveBeenCalledTimes(1))
-    expect(screen.getByText("Functie 'Verpleegkundige' staat niet in de functielijst — alle functies worden doorzocht.")).toBeInTheDocument()
+    expect(screen.getByText(i18n.t('candidates:vacancySearch.functionNotInLookup', { title: 'Verpleegkundige' }))).toBeInTheDocument()
   })
 
   it('stays absent when the title matches a lookup option exactly', async () => {
@@ -262,7 +240,7 @@ describe('VacancySearchTab · reset filters (Danny 08-08, point 8)', () => {
     render(<VacancySearchTab candidate={candidateWithLocation} />)
 
     await waitFor(() => expect(screen.getByText('Verzorgende IG | Amersfoort')).toBeInTheDocument())
-    expect(screen.queryByRole('button', { name: 'Filters herstellen' })).toBeNull()
+    expect(screen.queryByRole('button', { name: i18n.t('candidates:vacancySearch.resetFilters') })).toBeNull()
   })
 
   it('restores the SERVER filters — the request goes back to the exact starting parameters', async () => {
@@ -278,19 +256,19 @@ describe('VacancySearchTab · reset filters (Danny 08-08, point 8)', () => {
     await userEvent.click(await screen.findByRole('button', { name: 'Gesloten' }))
     // GEOSEARCH-1 (22-08): the km input is now the REAL GeoSearchShell control
     // (aria-label 'Straal', common:map.radius) — no more stub-map button.
-    fireEvent.change(screen.getByRole('spinbutton', { name: 'Straal' }), { target: { value: '80' } })
+    fireEvent.change(screen.getByRole('spinbutton', { name: i18n.t('common:map.radius') }), { target: { value: '80' } })
     await waitFor(() => expect(mockGet).toHaveBeenLastCalledWith('/candidates/cand1/vacancy-matches', {
       params: { radius: 80, status: ['open', 'closed'], per_page: 100 },
       signal: expect.anything(),
     }))
 
     // Reset — the very next request carries the STARTING parameters again.
-    await userEvent.click(screen.getByRole('button', { name: 'Filters herstellen' }))
+    await userEvent.click(screen.getByRole('button', { name: i18n.t('candidates:vacancySearch.resetFilters') }))
     await waitFor(() => expect(mockGet).toHaveBeenLastCalledWith('/candidates/cand1/vacancy-matches', {
       params: startParams, signal: expect.anything(),
     }))
     // …and the button retires itself: nothing deviates any more.
-    await waitFor(() => expect(screen.queryByRole('button', { name: 'Filters herstellen' })).toBeNull())
+    await waitFor(() => expect(screen.queryByRole('button', { name: i18n.t('candidates:vacancySearch.resetFilters') })).toBeNull())
   })
 
   it("restores the per-candidate PREFILLED hours range, not a blank one", async () => {
@@ -300,22 +278,22 @@ describe('VacancySearchTab · reset filters (Danny 08-08, point 8)', () => {
 
     // Seeded lower bound 30 — the 8-16 vacancy is filtered out on load.
     await openMoreFilters()
-    expect(screen.getByRole('slider', { name: 'Uren per week Min' })).toHaveAttribute('aria-valuenow', '30')
+    expect(screen.getByRole('slider', { name: `${i18n.t('candidates:vacancySearch.hoursPerWeek')} ${i18n.t('candidates:vacancySearch.hoursMinPlaceholder')}` })).toHaveAttribute('aria-valuenow', '30')
     expect(screen.queryByText('Parttime | Arnhem')).not.toBeInTheDocument()
 
     // Widen the range fully open — the 8-16 vacancy comes back and reset appears.
-    nudgeSlider('Uren per week Min', 'ArrowLeft', 30)
+    nudgeSlider(`${i18n.t('candidates:vacancySearch.hoursPerWeek')} ${i18n.t('candidates:vacancySearch.hoursMinPlaceholder')}`, 'ArrowLeft', 30)
     await waitFor(() => expect(screen.getByText('Parttime | Arnhem')).toBeInTheDocument())
-    expect(screen.getByRole('button', { name: 'Filters herstellen' })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: i18n.t('candidates:vacancySearch.resetFilters') })).toBeInTheDocument()
 
     // Reset goes back to the candidate's OWN 30-hour seed, never to a blank 0.
     // The reset button sits OUTSIDE the popover's own subtree, so clicking it
     // also closes the popover (outside click) — reopen it to read the slider.
-    await userEvent.click(screen.getByRole('button', { name: 'Filters herstellen' }))
+    await userEvent.click(screen.getByRole('button', { name: i18n.t('candidates:vacancySearch.resetFilters') }))
     await waitFor(() => expect(screen.queryByText('Parttime | Arnhem')).not.toBeInTheDocument())
     await openMoreFilters()
-    expect(screen.getByRole('slider', { name: 'Uren per week Min' })).toHaveAttribute('aria-valuenow', '30')
-    expect(screen.queryByRole('button', { name: 'Filters herstellen' })).toBeNull()
+    expect(screen.getByRole('slider', { name: `${i18n.t('candidates:vacancySearch.hoursPerWeek')} ${i18n.t('candidates:vacancySearch.hoursMinPlaceholder')}` })).toHaveAttribute('aria-valuenow', '30')
+    expect(screen.queryByRole('button', { name: i18n.t('candidates:vacancySearch.resetFilters') })).toBeNull()
   })
 
   it('restores the contract-form filter to the candidate\'s own seeded value', async () => {
@@ -325,15 +303,15 @@ describe('VacancySearchTab · reset filters (Danny 08-08, point 8)', () => {
 
     // Seeded to ['ZZP'] — the other contract form is filtered out, nothing deviates.
     await waitFor(() => expect(screen.getByText('ZZP-vacature | Ede')).toBeInTheDocument())
-    expect(screen.queryByRole('button', { name: 'Filters herstellen' })).toBeNull()
+    expect(screen.queryByRole('button', { name: i18n.t('candidates:vacancySearch.resetFilters') })).toBeNull()
 
     // Add a second contract form, then reset back to the seed. FILTER-VLAK-1
     // (13-08): the label lives inside the trigger's accessible name.
-    await userEvent.click(screen.getByRole('button', { name: /^Contractvorm/ }))
+    await userEvent.click(screen.getByRole('button', { name: new RegExp('^' + escapeRegExp(i18n.t('candidates:vacancySearch.contractForm'))) }))
     await userEvent.click(await screen.findByRole('button', { name: 'Tijdelijk' }))
     await waitFor(() => expect(screen.getByText('Tijdelijk-vacature | Arnhem')).toBeInTheDocument())
 
-    await userEvent.click(screen.getByRole('button', { name: 'Filters herstellen' }))
+    await userEvent.click(screen.getByRole('button', { name: i18n.t('candidates:vacancySearch.resetFilters') }))
     await waitFor(() => expect(screen.queryByText('Tijdelijk-vacature | Arnhem')).not.toBeInTheDocument())
     expect(screen.getByText('ZZP-vacature | Ede')).toBeInTheDocument()
   })
