@@ -6,7 +6,7 @@
  * badge shows instead of the real value (§13 — a mutation test proves the seam).
  */
 import { describe, it, expect, afterEach, beforeEach, vi } from 'vitest'
-import { render, screen, waitFor } from '@testing-library/react'
+import { act, fireEvent, render, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import i18n from '@/i18n'
 import api from '@/lib/api'
@@ -102,16 +102,21 @@ describe('FacebookLeadsSettings — saving', () => {
 
 // The "saved" flash timer must be cleared when the screen unmounts, so it never fires on a dead component.
 describe('FacebookLeadsSettings - saved flash timer', () => {
-  it('clears the pending saved timer on unmount', async () => {
+  afterEach(() => vi.useRealTimers())
+
+  it('leaves no pending saved timer after unmount', async () => {
     mockedApi.get.mockResolvedValue({ data: {} })
     const { unmount } = render(<FacebookLeadsSettings />)
-    await userEvent.type(await screen.findByLabelText(t('facebookLeads.appSecret')), 'x')
-    await userEvent.click(screen.getByRole('button', { name: t('common.save') }))
-    await waitFor(() => expect(mockedApi.post).toHaveBeenCalled())
-    await screen.findByText(t('common.saved'))
-    const clearSpy = vi.spyOn(globalThis, 'clearTimeout')
+    const secret = await screen.findByLabelText(t('facebookLeads.appSecret'))
+    vi.useFakeTimers({ toFake: ['setTimeout', 'clearTimeout'] })
+    const baseline = vi.getTimerCount()
+    fireEvent.change(secret, { target: { value: 'x' } })
+    fireEvent.click(screen.getByRole('button', { name: t('common.save') }))
+    await act(async () => { await Promise.resolve() })
+    expect(mockedApi.post).toHaveBeenCalledWith('/settings', expect.objectContaining({ facebook_app_secret: 'x' }))
+    expect(screen.getByText(t('common.saved'))).toBeInTheDocument()
+    expect(vi.getTimerCount()).toBeGreaterThan(baseline)
     unmount()
-    expect(clearSpy).toHaveBeenCalled()
-    clearSpy.mockRestore()
+    expect(vi.getTimerCount()).toBe(baseline)
   })
 })

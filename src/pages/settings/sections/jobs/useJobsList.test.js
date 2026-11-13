@@ -61,8 +61,12 @@ describe('useJobsList', () => {
     vi.mocked(cancelJob).mockRejectedValue({ response: { status: 404 } })
     const { result } = renderHook(() => useJobsList())
     await waitFor(() => expect(result.current.phase).toBe('ready'))
+    const callsBefore = vi.mocked(fetchJobsList).mock.calls.length
     await act(async () => { await result.current.cancel(5) })
+    expect(cancelJob).toHaveBeenCalledWith(5)
     expect(result.current.cancelError).toEqual({ id: 5, message: null, gone: true })
+    // The copy promises a refreshed list: the 404 path refetches.
+    await waitFor(() => expect(vi.mocked(fetchJobsList).mock.calls.length).toBeGreaterThan(callsBefore))
   })
 
   it('a second cancel while the first is pending sends no second request', async () => {

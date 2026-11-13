@@ -54,6 +54,8 @@ describe('useIntegrationHealth · failed request', () => {
     const { result } = renderHook(() => useIntegrationHealth('helloflex'), { wrapper: wrapper() })
     await waitFor(() => expect(result.current.isError).toBe(true))
     expect(result.current.health.state).toBe('unknown')
+    // The failure comes from the list adapter, called once (REQUEST-ASSERT-1).
+    expect(mockList).toHaveBeenCalledTimes(1)
   })
 })
 

@@ -5,8 +5,8 @@
  * blob under `helloflex_contract_type_map` (§13 — proves the seam, not just a
  * callback firing).
  */
-import { describe, it, expect, beforeEach, vi } from 'vitest'
-import { render, screen, waitFor } from '@testing-library/react'
+import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest'
+import { act, fireEvent, render, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import i18n from '@/i18n'
 import api from '@/lib/api'
@@ -146,5 +146,26 @@ describe('HelloflexContractMapSettings - load error', () => {
     expect(await screen.findByText('Uitzend')).toBeInTheDocument()
     expect(api.get).toHaveBeenCalledTimes(2)
     expect(api.get).toHaveBeenLastCalledWith('/settings')
+  })
+})
+
+// The saved flash timer must die with the screen: no pending timer survives an unmount.
+describe('HelloflexContractMapSettings - saved flash timer', () => {
+  afterEach(() => vi.useRealTimers())
+
+  it('clears the pending saved timer on unmount so nothing fires on a dead component', async () => {
+    vi.mocked(api.get).mockResolvedValue({ data: {} })
+    const { unmount } = render(<HelloflexContractMapSettings />)
+    await screen.findByText('Uitzend')
+    vi.useFakeTimers({ toFake: ['setTimeout', 'clearTimeout'] })
+    const baseline = vi.getTimerCount()
+    fireEvent.change(document.getElementById('hf-map-guid-temp_agency') as HTMLInputElement, { target: { value: '3' } })
+    fireEvent.click(screen.getByRole('button', { name: t('common.save') }))
+    await act(async () => { await Promise.resolve() })
+    expect(api.post).toHaveBeenCalledWith('/settings', expect.any(Object))
+    expect(screen.getByText(t('common.saved'))).toBeInTheDocument()
+    expect(vi.getTimerCount()).toBeGreaterThan(baseline)
+    unmount()
+    expect(vi.getTimerCount()).toBe(baseline)
   })
 })

@@ -8,7 +8,7 @@
  * the tile is not silently falling back to the under-counted row set.
  */
 import { render, screen, waitFor } from '@testing-library/react'
-import { describe, it, expect, vi } from 'vitest'
+import { describe, it, expect, vi, afterEach } from 'vitest'
 import { QueryClientProvider, QueryClient } from '@tanstack/react-query'
 import ShiftmanagerDashboard from './ShiftmanagerDashboard'
 import api from '@/lib/api'
@@ -33,10 +33,10 @@ const mockUseAuth = vi.fn(() => ({ activeTenant: { package: 'core' }, user: null
 vi.mock('@/context/AuthContext', () => ({ useAuth: () => mockUseAuth() }))
 
 // Page access is decided by one toggle so the header links can be shown and hidden.
-const access = vi.hoisted(() => ({ allowed: true }))
+const access = vi.hoisted(() => ({ allowed: true, ids: [] as string[] }))
 vi.mock('@/lib/access', async () => {
   const actual = await vi.importActual<typeof import('@/lib/access')>('@/lib/access')
-  return { ...actual, canAccessPage: () => access.allowed }
+  return { ...actual, canAccessPage: (id: string) => { access.ids.push(id); return access.allowed } }
 })
 
 // Real, current-year monthly buckets: this-month total (5) is deliberately LOWER
@@ -151,6 +151,9 @@ describe('ShiftmanagerDashboard · recent runs tile (tri-state ok render)', () =
 
 // The card headers deep-link to the runs and messages pages, and hide the link without page access.
 describe('ShiftmanagerDashboard · card header links', () => {
+  // Reset the shared access flag and the recorded page ids so no test leaks into the next.
+  afterEach(() => { access.allowed = true; access.ids.length = 0 })
+
   it('links the two view-all affordances to #details.runs and #details.messages', async () => {
     access.allowed = true
     mockUseAuth.mockReturnValue({ activeTenant: { package: 'reporting_sm_ai' }, user: null })
@@ -158,6 +161,7 @@ describe('ShiftmanagerDashboard · card header links', () => {
     await screen.findByText('Completed sync')
     const links = screen.getAllByText(t('dashboard.viewAll')).map(el => el.closest('a')?.getAttribute('href'))
     expect(links).toEqual(['#details.runs', '#details.messages'])
+    expect(access.ids).toEqual(expect.arrayContaining(['details.runs', 'details.messages']))
   })
 
   it('renders no link when the viewer cannot open the target pages', async () => {
@@ -166,7 +170,7 @@ describe('ShiftmanagerDashboard · card header links', () => {
     renderDashboard()
     await screen.findByText('Completed sync')
     expect(screen.queryByText(t('dashboard.viewAll'))).toBeNull()
-    access.allowed = true
+    expect(access.ids).toEqual(expect.arrayContaining(['details.runs', 'details.messages']))
   })
 })
 
