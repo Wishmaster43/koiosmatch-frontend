@@ -94,7 +94,7 @@ describe('WorkflowQueueView — fix-round pins', () => {
     } } })
     render(<WorkflowQueueView />)
     // Real (nl) i18n: the vocabulary entry renders, the raw wire value never.
-    expect((await screen.findAllByText(/Gepland/)).length).toBeGreaterThan(0)
+    expect((await screen.findAllByText(new RegExp(i18n.t('workflows:queue.trigger.scheduled')))).length).toBeGreaterThan(0)
     expect(screen.queryByText(/·\s*scheduled/)).not.toBeInTheDocument()
   })
 

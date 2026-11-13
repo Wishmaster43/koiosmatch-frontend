@@ -5,6 +5,7 @@
  */
 import type { MouseEvent } from 'react'
 import { useTranslation } from 'react-i18next'
+import { labelOrRaw } from '@/lib/labelOrRaw'
 import { AlertCircle, ArchiveRestore, CheckCircle, HelpCircle, MoreHorizontal, Play, Trash2, Zap } from 'lucide-react'
 // Shared module registry — every module type (label/Icon/colours), so no step chip
 // silently disappears (AW-6). The local 6-type map is gone.
@@ -39,10 +40,10 @@ const STATUS_STYLES: Record<string, { bg: string; color: string; dot: string }> 
 // AW-6: an unknown/missing type never disappears silently — it renders with a neutral
 // HelpCircle icon and its raw type as the label, mirroring WorkflowListRow's StepIconStack.
 function StepPill({ type }: { type: string }) {
-  const { t } = useTranslation('workflows')
+  const { t, i18n } = useTranslation('workflows')
   const meta = MODULE_META[type]
   const Icon = meta?.Icon ?? HelpCircle
-  const label = t(`modules.${type}`, { defaultValue: meta?.label ?? type })
+  const label = labelOrRaw(t, i18n, `modules.${type}`, meta?.label ?? type, 'workflows')
   return (
     <div
       className="flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-medium"
@@ -59,7 +60,7 @@ function StepPill({ type }: { type: string }) {
 
 // One card in the workflow list/board: status badge, step pills, and the run/edit/archive/restore/delete actions for that workflow.
 export default function WorkflowCard({ workflow, onRun, canRun = true, onEdit, canManageFolders, onArchive, onRestore, onMarkDeletion, onUnmark, unmarkBusy = false, graceWindow = null }: WorkflowCardProps) {
-  const { t } = useTranslation('workflows')
+  const { t, i18n } = useTranslation('workflows')
   const { formatDate, formatDateTime } = useDateFormat()
   const seedLabel = useSeedLabel()
   const { running, setRestoring, restoring, hover, setHover, justRan, runWithDoneFlash } = useWorkflowRowState()
@@ -121,7 +122,7 @@ export default function WorkflowCard({ workflow, onRun, canRun = true, onEdit, c
             style={{ background: status.bg, color: status.color }}
           >
             <span className="shrink-0 rounded-full" style={{ width: 5, height: 5, background: status.dot }} />
-            <span style={{ fontSize: 11, fontWeight: 500 }}>{t(`status.${workflow.status}`, { defaultValue: workflow.status })}</span>
+            <span style={{ fontSize: 11, fontWeight: 500 }}>{labelOrRaw(t, i18n, `status.${workflow.status}`, workflow.status ?? '', 'workflows')}</span>
           </div>
         )}
       </div>

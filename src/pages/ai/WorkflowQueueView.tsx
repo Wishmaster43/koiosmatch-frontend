@@ -9,6 +9,7 @@
  */
 import type { ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
+import { labelOrRaw } from '@/lib/labelOrRaw'
 import { Clock, PauseCircle, CalendarClock, RotateCcw, History } from 'lucide-react'
 import { useWorkflowQueue } from './hooks/useWorkflowQueue'
 import type { QueuePendingEntry, QueueWaitingEntry, QueueScheduledEntry, QueueRetryingEntry } from './hooks/useWorkflowQueue'
@@ -84,7 +85,7 @@ function QueueSection<T>({ icon: Icon, title, rows, emptyLabel, renderRow }: {
 // The tenant-wide (or one-workflow) queue snapshot: KPI counts up top, then the
 // four independent pending/waiting/scheduled/retrying sections.
 export default function WorkflowQueueView({ workflowId }: { workflowId?: string | number }) {
-  const { t } = useTranslation('workflows')
+  const { t, i18n } = useTranslation('workflows')
   const { formatDateTime } = useDateFormat()
   const { pending, waiting, scheduled, retrying, counts, loading, error, forbidden, retry } = useWorkflowQueue(workflowId != null ? String(workflowId) : undefined)
 
@@ -141,7 +142,7 @@ export default function WorkflowQueueView({ workflowId }: { workflowId?: string 
               <QueueRow key={row.run_id ?? i} workflowId={row.workflow_id} workflowName={row.workflow_name}>
                 <Caption>
                   {t('queue.pending.queuedAt', { date: formatDateTime(row.queued_at) })}
-                  {row.trigger ? ` · ${t(`queue.trigger.${row.trigger}`, { defaultValue: row.trigger })}` : ''}
+                  {row.trigger ? ` · ${labelOrRaw(t, i18n, `queue.trigger.${row.trigger}`, row.trigger, 'workflows')}` : ''}
                 </Caption>
               </QueueRow>
             )} />

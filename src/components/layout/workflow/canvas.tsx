@@ -7,6 +7,7 @@
  */
 import { useState, useContext, useRef } from 'react'
 import { useTranslation } from 'react-i18next'
+import { labelOrRaw } from '@/lib/labelOrRaw'
 import type { MouseEvent, DragEvent } from 'react'
 import { Handle, Position, BaseEdge, EdgeLabelRenderer, getStraightPath } from '@xyflow/react'
 import { AlertTriangle, CheckCircle, Filter, HelpCircle, Play, Plus, X } from 'lucide-react'
@@ -43,7 +44,7 @@ function ModuleNode({ id, data, selected }: { id: string; data: FlowNodeData; se
   const [busy, setBusy] = useState(false)
   const [dropOver, setDropOver] = useState(false)
   const dragRef = useRef(false)
-  const { t } = useTranslation('workflows')
+  const { t, i18n } = useTranslation('workflows')
   // GETALLEN-1: the node's live/processed counter badge renders through the
   // house number formatter on the active locale, never a raw JS number.
   const { formatNumber } = useNumberFormat()
@@ -63,7 +64,7 @@ function ModuleNode({ id, data, selected }: { id: string; data: FlowNodeData; se
   // Node label — translated via the shared `modules.*` keys (§5), same mechanism
   // as ConfigPanel/ModulePicker; an unrecognised type shows a translated notice
   // instead of the raw Dutch registry fallback.
-  const nodeLabel = knownMeta ? t('modules.' + rawType, { defaultValue: knownMeta.label }) : t('canvas.unknownModule')
+  const nodeLabel = knownMeta ? labelOrRaw(t, i18n, 'modules.' + rawType, knownMeta.label, 'workflows') : t('canvas.unknownModule')
   // PICKER-INTERSECT: a SAVED node whose type the engine cannot execute wears an
   // honest marker instead of disappearing. An EMPTY catalog (still loading, or the
   // fetch failed soft) carries no executability info — never flag on that, or every

@@ -5,6 +5,7 @@
  * Renders nothing for any other module — ConfigPanel stays a thin pass-through.
  */
 import { useTranslation } from 'react-i18next'
+import { labelOrRaw } from '@/lib/labelOrRaw'
 import SoftChip from '@/components/ui/SoftChip'
 import { GroupLabel, Mono } from '@/components/ui/typography'
 
@@ -39,10 +40,10 @@ function Stat({ label, value, color }: { label: string; value: number; color: st
 
 // The batch-progress card itself: status chip plus sent/skipped/failed/total counts.
 export default function FanoutSummary({ fanout }: { fanout: WaFanout }) {
-  const { t } = useTranslation('workflows')
+  const { t, i18n } = useTranslation('workflows')
   const statusKey   = String(fanout.status ?? '').toLowerCase()
   const statusColor = STATUS_COLOR[statusKey] ?? 'var(--text-muted)'
-  const statusLabel = t(`wa.fanout.status.${statusKey}`, { defaultValue: fanout.status ?? '—' })
+  const statusLabel = labelOrRaw(t, i18n, `wa.fanout.status.${statusKey}`, fanout.status ?? '—', 'workflows')
 
   return (
     <div style={{ border: '1px solid var(--border)', borderRadius: 8, padding: '10px 12px',

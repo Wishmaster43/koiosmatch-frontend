@@ -9,6 +9,7 @@
 import type { MouseEvent } from 'react'
 import type { LucideIcon } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
+import { labelOrRaw } from '@/lib/labelOrRaw'
 import { AlertCircle, ArchiveRestore, CheckCircle, Clock, HelpCircle, MoreHorizontal, MousePointerClick, Play, Trash2, Webhook, Zap, Bell } from 'lucide-react'
 import { interactive } from '@/lib/a11y'
 import { useDateFormat } from '@/lib/datetime'
@@ -51,7 +52,7 @@ function StepBubble({ Icon, color, bg, offset, title }: { Icon: LucideIcon; colo
 // Up to 3 overlapping step icons (registry icon/colour, same as the canvas
 // nodes) + a "+N" bubble for the rest — a peek at what the workflow does.
 function StepIconStack({ steps }: { steps: WorkflowStep[] }) {
-  const { t } = useTranslation('workflows')
+  const { t, i18n } = useTranslation('workflows')
   if (steps.length === 0) {
     return <StepBubble Icon={Zap} color="var(--color-primary)" bg="var(--color-primary-bg)" offset={0} />
   }
@@ -63,7 +64,7 @@ function StepIconStack({ steps }: { steps: WorkflowStep[] }) {
       {visible.map((step, i) => {
         const meta = step.type ? MODULE_META[step.type] : undefined
         const Icon = (meta?.Icon ?? HelpCircle) as unknown as LucideIcon
-        const label = t(`modules.${step.type}`, { defaultValue: meta?.label ?? step.type })
+        const label = labelOrRaw(t, i18n, `modules.${step.type}`, meta?.label ?? step.type ?? '', 'workflows')
         // No-hex fallback: a missing registry entry falls back to the muted text token,
         // not a hand-picked hex — the whole module registry itself uses tokens only.
         return <StepBubble key={step.id ?? i} Icon={Icon} color={meta?.color ?? 'var(--text-muted)'} bg={meta?.bg ?? 'var(--hover-bg)'} offset={i} title={label} />

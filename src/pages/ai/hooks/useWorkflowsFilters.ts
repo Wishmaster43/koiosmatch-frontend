@@ -8,6 +8,7 @@
  */
 import { useState, useEffect, useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
+import { labelOrRaw } from '@/lib/labelOrRaw'
 import { useRightPanel } from '@/context/RightPanelContext'
 import type { Workflow } from '@/types/workflow'
 import type { FolderId } from './useWorkflowsData'
@@ -20,7 +21,7 @@ const readStoredViewMode = (): ViewMode => (localStorage.getItem(VIEW_MODE_KEY) 
 // View mode + right-panel filters + the resulting visible workflow list.
 // `showTrash` (TRASH-OVERAL-2) narrows to lifecycle pending_erase; exclusive with showArchived.
 export function useWorkflowsFilters(workflows: Workflow[], showArchived: boolean, selectedFolder: FolderId, showTrash: boolean = false) {
-  const { t } = useTranslation(['workflows', 'common'])
+  const { t, i18n } = useTranslation(['workflows', 'common'])
   // List is the Make.com-style default; the choice persists across reloads (localStorage, non-PII).
   const [viewMode, setViewModeState] = useState<ViewMode>(readStoredViewMode)
   // Sets the view mode and persists the choice to localStorage so it survives a reload.
@@ -37,13 +38,13 @@ export function useWorkflowsFilters(workflows: Workflow[], showArchived: boolean
 
   // Distinct workflow statuses present, with live counts, for the status filter options.
   const statusOptions = useMemo(() => [...new Set(workflows.map(w => w.status))].filter((v): v is string => Boolean(v))
-    .map(v => ({ value: v, label: t(`status.${v}`, { defaultValue: v }), count: workflows.filter(w => w.status === v).length })), [workflows, t])
+    .map(v => ({ value: v, label: labelOrRaw(t, i18n, `status.${v}`, v, 'workflows'), count: workflows.filter(w => w.status === v).length })), [workflows, t, i18n])
   // Counts how many workflows use each step/module type, across all workflows' steps, for the module-type filter options.
   const moduleOptions = useMemo(() => {
     const counts: Record<string, number> = {}
     workflows.forEach(w => new Set((w.steps ?? []).map(s => s.type).filter((x): x is string => Boolean(x))).forEach(ty => { counts[ty] = (counts[ty] ?? 0) + 1 }))
-    return Object.keys(counts).map(v => ({ value: v, label: t(`modules.${v}`, { defaultValue: v }), count: counts[v] }))
-  }, [workflows, t])
+    return Object.keys(counts).map(v => ({ value: v, label: labelOrRaw(t, i18n, `modules.${v}`, v, 'workflows'), count: counts[v] }))
+  }, [workflows, t, i18n])
 
   // Builds the status/module filter definitions handed to the shared right-panel filter UI.
   const filterGroups = useMemo(() => [

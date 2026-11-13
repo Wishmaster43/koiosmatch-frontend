@@ -16,6 +16,7 @@ import type { NodeTypes, EdgeTypes } from '@xyflow/react'
 import '@xyflow/react/dist/style.css'
 import { Plus } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
+import { labelOrRaw } from '@/lib/labelOrRaw'
 import { useConfirm } from '@/hooks/useConfirm'
 import { useAuth } from '@/context/AuthContext'
 import { canDo } from '@/lib/access'
@@ -58,7 +59,7 @@ function EditorInner({ workflow, onClose, onSave, initialRunId }: {
     insertModule, addRouterBranch, updateNodeConfig, deleteNode, handleSave, handleRun, isDirty,
     inspecting, setInspecting,
   } = useWorkflowEditor({ workflow, onSave, initialRunId })
-  const { t } = useTranslation('workflows')
+  const { t, i18n } = useTranslation('workflows')
   // WORKFLOW-PERMS-1: Run and Save gate on the workflows.* verbs (open until the BE seeds them).
   const auth = useAuth()
   const canRunWorkflow = canDo(auth, 'workflows', 'run')
@@ -113,7 +114,7 @@ function EditorInner({ workflow, onClose, onSave, initialRunId }: {
   const inspectingType = inspectingNode?.data.type as string | undefined
   const inspectingKnownMeta = inspectingType ? MODULE_META[inspectingType] : undefined
   const inspectingModuleLabel = inspectingType
-    ? t('modules.' + inspectingType, { defaultValue: inspectingKnownMeta?.label ?? inspectingType })
+    ? labelOrRaw(t, i18n, 'modules.' + inspectingType, inspectingKnownMeta?.label ?? inspectingType, 'workflows')
     : t('canvas.unknownModule')
 
   return (

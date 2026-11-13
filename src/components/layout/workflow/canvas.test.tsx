@@ -27,12 +27,12 @@ vi.mock('@xyflow/react', () => ({
 }))
 
 // Real i18n is not initialized here (mirrors configPanelRequired.test.tsx) so `t()`
-// returns the raw key/defaultValue. ModuleNode now also pulls in useNumberFormat
+// returns the raw key (labelOrRaw shows the raw registry label). ModuleNode now also pulls in useNumberFormat
 // (@/lib/formatters -> @/lib/datetime -> @/i18n), which self-initializes the real
 // i18next singleton as a module side effect (DATETIME-IMPORT-LES) — mocking the
 // hook here keeps this file's raw-key assertions honest regardless of that import.
 vi.mock('react-i18next', () => ({
-  useTranslation: () => ({ t: (k: string, opts?: { defaultValue?: string }) => opts?.defaultValue ?? k, i18n: { language: 'nl' } }),
+  useTranslation: () => ({ t: (k: string) => k, i18n: { language: 'nl' } }),
 }))
 // @/i18n self-initializes real i18next as a side effect on import (its own
 // `i18n.use(initReactI18next).init(...)`), which crashes under the mock above
@@ -99,9 +99,8 @@ describe('ModuleNode · WF-MODULE-RECONCILE-FE-1 (no more "Onbekende module")', 
   it.each(RECONCILED_TYPES)('renders the real label for a saved %s node, never the unknown-module fallback', (type) => {
     mockCatalog = {}
     render(<ModuleNode {...node(type)} />)
-    // i18next has no instance in this test environment (see setup.js) — t() falls
-    // back to `defaultValue`, so a resolved registry entry renders its raw source
-    // label; an unresolved one would render the literal key 'canvas.unknownModule'.
+    // The mocked i18n has no exists(): labelOrRaw returns the raw registry label for a
+    // resolved entry; an unresolved one would render the literal key 'canvas.unknownModule'.
     expect(screen.getByText(MODULE_META[type].label)).toBeInTheDocument()
     expect(screen.queryByText('canvas.unknownModule')).not.toBeInTheDocument()
   })
