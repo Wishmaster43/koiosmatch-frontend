@@ -220,11 +220,11 @@
     "locationLabel": "Location",
     "statusLabel": "Candidate status",
     "period": {
-      "vandaag": "Today",
+      "today": "Today",
       "week": "This week",
-      "maand": "This month",
-      "kwartaal": "This quarter",
-      "jaar": "This year"
+      "month": "This month",
+      "quarter": "This quarter",
+      "year": "This year"
     }
   },
   "koiosForYou": {

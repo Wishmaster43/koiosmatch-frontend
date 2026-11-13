@@ -1,6 +1,6 @@
 /**
  * useShiftsBreakdown — the SM-CHARTS2 shift aggregation: open shifts (the
- * `geen_kandidaat` metric — "no candidate assigned") grouped per customer
+ * `no_candidate` metric — "no candidate assigned") grouped per customer
  * (customer→name, with a month series) and per job type (`job_type`), driven
  * by the SAME applied filter as the charts (queryString). Feeds both the
  * dashboard donuts (valued on hours) and the two breakdown charts under the
@@ -9,6 +9,7 @@
  */
 import { useQuery, keepPreviousData } from '@tanstack/react-query'
 import api from '@/lib/api'
+import { toWireMetric } from './shiftWire'
 
 export interface BreakdownRow {
   key: string; label: string; count: number; hours: number
@@ -24,37 +25,37 @@ export const BREAKDOWN_PALETTE = ['#1B60A9', '#19A5CA', '#F0AB00', '#16A34A', '#
 const toDonut = (rows: BreakdownRow[]): DonutDatum[] =>
   rows.slice(0, 7).map((r, i) => ({ name: r.label || '—', value: Number(r.hours) || 0, key: String(r.key), color: BREAKDOWN_PALETTE[i % BREAKDOWN_PALETTE.length] }))
 
-// Fetch one group_by breakdown (metric + optional month-split).
+// Fetch one group_by breakdown (English metric id; today's wire id is Dutch, translated by toWireMetric).
 const fetchBreakdown = (queryString: string, groupBy: 'customer' | 'job_type', metric: string, split?: boolean) =>
   async ({ signal }: { signal?: AbortSignal }) => {
-    const url = `/sm_reports/shifts-breakdown?${queryString}&metric=${metric}&group_by=${groupBy}${split ? '&split=month' : ''}`
+    const url = `/sm_reports/shifts-breakdown?${queryString}&metric=${toWireMetric(metric)}&group_by=${groupBy}${split ? '&split=month' : ''}`
     const data = (await api.get(url, { signal })).data?.data ?? []
     return (Array.isArray(data) ? data : []) as BreakdownRow[]
   }
 
 export function useShiftsBreakdown(queryString: string) {
-  // Open shifts (`geen_kandidaat` — no candidate assigned) per customer
+  // Open shifts (`no_candidate` — no candidate assigned) per customer
   // (month-split) + per job type.
   const customerQ = useQuery({
-    queryKey: ['sm_reports', 'shifts-breakdown', 'customer', 'geen_kandidaat', queryString],
-    queryFn: fetchBreakdown(queryString, 'customer', 'geen_kandidaat', true),
+    queryKey: ['sm_reports', 'shifts-breakdown', 'customer', 'no_candidate', queryString],
+    queryFn: fetchBreakdown(queryString, 'customer', 'no_candidate', true),
     placeholderData: keepPreviousData, staleTime: 60_000,
   })
   const functionQ = useQuery({
-    queryKey: ['sm_reports', 'shifts-breakdown', 'job_type', 'geen_kandidaat', queryString],
-    queryFn: fetchBreakdown(queryString, 'job_type', 'geen_kandidaat'),
+    queryKey: ['sm_reports', 'shifts-breakdown', 'job_type', 'no_candidate', queryString],
+    queryFn: fetchBreakdown(queryString, 'job_type', 'no_candidate'),
     placeholderData: keepPreviousData, staleTime: 60_000,
   })
   // All customers with any shift in the period → "active customers" count KPI.
   const activeCustomersQ = useQuery({
-    queryKey: ['sm_reports', 'shifts-breakdown', 'customer', 'totaal', queryString],
-    queryFn: fetchBreakdown(queryString, 'customer', 'totaal'),
+    queryKey: ['sm_reports', 'shifts-breakdown', 'customer', 'total', queryString],
+    queryFn: fetchBreakdown(queryString, 'customer', 'total'),
     placeholderData: keepPreviousData, staleTime: 60_000,
   })
-  // Customers that have PLANNED shifts (prognose) → the "5" in "5 / 7 active customers".
+  // Customers that have PLANNED shifts (forecast) → the "5" in "5 / 7 active customers".
   const plannedCustomersQ = useQuery({
-    queryKey: ['sm_reports', 'shifts-breakdown', 'customer', 'prognose', queryString],
-    queryFn: fetchBreakdown(queryString, 'customer', 'prognose'),
+    queryKey: ['sm_reports', 'shifts-breakdown', 'customer', 'forecast', queryString],
+    queryFn: fetchBreakdown(queryString, 'customer', 'forecast'),
     placeholderData: keepPreviousData, staleTime: 60_000,
   })
 

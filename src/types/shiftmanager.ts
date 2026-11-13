@@ -68,8 +68,14 @@ export interface SmLocationRow {
 
 // ── Shifts charts + orders cluster (ShiftsChartsBlock / OrdersTable) ──────────
 
-// A chart series descriptor (key + colour; label resolved via i18n).
-export interface ShiftSeries { key: string; color: string }
+// The five Shiftmanager chart series, English ids (WIRE-IDS-ENGLISH-1): the Dutch
+// wire ids exist only inside components/shiftmanager/shiftWire.ts.
+export type SeriesKey = 'total' | 'unfilled' | 'no_candidate' | 'forecast' | 'actual'
+// The hours twin of a series key as a per-month row carries it (`total_hours`, …).
+export type SeriesHoursKey = `${SeriesKey}_hours`
+
+// A chart series descriptor (key + colour; label resolved via i18n charts.series.<key>).
+export interface ShiftSeries { key: SeriesKey; color: string }
 
 // One selectable location in the shifts filter options.
 interface ShiftLocationOption { id: string | number; name: string; customer?: string; [k: string]: unknown }
@@ -77,8 +83,14 @@ interface ShiftLocationOption { id: string | number; name: string; customer?: st
 // The filter options returned by /sm_reports/shifts-filter-options.
 export interface ShiftFilterOptions { job_types: string[]; locations: ShiftLocationOption[] }
 
-// One per-month aggregation row from /sm_reports/shifts-per-month.
-export interface ShiftMonthRow { maand?: string; [k: string]: unknown }
+// One NORMALISED per-month row from /sm_reports/shifts-per-month (shiftWire.normalizeShiftMonthRow):
+// English keys only, every count and hours value a number (0 when the server omits it).
+export type ShiftMonthRow = { month: string } & Record<SeriesKey | SeriesHoursKey, number>
+
+// One candidate's per-month cell from /sm_reports/shifts-per-candidate, normalised to
+// English keys (shiftWire.normalizeMatrixCell); a metric the server omits stays absent.
+export type MatrixMetricKey = 'forecast_hours' | 'forecast_shifts' | 'actual_hours' | 'actual_shifts'
+export type MatrixCell = Partial<Record<MatrixMetricKey, number>>
 
 // A transformed chart entry — dynamic `${year}_${seriesKey}` numeric keys.
 export interface ShiftsChartDatum { label: string; _quarter?: string; _monthIndex?: number; [k: string]: string | number | undefined }

@@ -29,8 +29,8 @@ describe('ShiftsDrillDownDrawer', () => {
   it('renders the shift date as DD-MM-YYYY via the house formatter, not a locale-word date', () => {
     render(
       <ShiftsDrillDownDrawer
-        metric="totaal"
-        metricOptions={[{ value: 'totaal', label: 'Totaal' }]}
+        metric="total"
+        metricOptions={[{ value: 'total', label: 'Totaal' }]}
         periods={[{ key: '2026-03', label: 'maart' }]}
         initialPeriod="2026-03"
         buildUrl={() => '/sm_shifts'}

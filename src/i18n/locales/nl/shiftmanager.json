@@ -32,10 +32,10 @@
     "candidate": "Kandidaat",
     "total": "Totaal",
     "metric": {
-      "prognose_hours": "Prognose uren",
-      "prognose_shifts": "Prognose diensten",
-      "werkelijk_hours": "Werkelijke uren",
-      "werkelijk_shifts": "Werkelijke diensten"
+      "forecast_hours": "Prognose uren",
+      "forecast_shifts": "Prognose diensten",
+      "actual_hours": "Werkelijke uren",
+      "actual_shifts": "Werkelijke diensten"
     },
     "allForms": "Alle"
   },
@@ -163,11 +163,11 @@
       "location": "Locatie"
     },
     "series": {
-      "totaal": "Totaal",
-      "niet_ingevuld": "Niet ingevuld",
-      "geen_kandidaat": "Geen kandidaat",
-      "prognose": "Prognose",
-      "werkelijk": "Werkelijk"
+      "total": "Totaal",
+      "unfilled": "Niet ingevuld",
+      "no_candidate": "Geen kandidaat",
+      "forecast": "Prognose",
+      "actual": "Werkelijk"
     },
     "hoursTable": "Uren per maand",
     "shiftsTable": "Diensten per maand",

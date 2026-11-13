@@ -32,10 +32,10 @@
     "candidate": "Candidato",
     "total": "Totale",
     "metric": {
-      "prognose_hours": "Ore previste",
-      "prognose_shifts": "Turni previsti",
-      "werkelijk_hours": "Ore effettive",
-      "werkelijk_shifts": "Turni effettivi"
+      "forecast_hours": "Ore previste",
+      "forecast_shifts": "Turni previsti",
+      "actual_hours": "Ore effettive",
+      "actual_shifts": "Turni effettivi"
     },
     "allForms": "Tutti"
   },
@@ -163,11 +163,11 @@
       "location": "Sede"
     },
     "series": {
-      "totaal": "Totale",
-      "niet_ingevuld": "Non coperto",
-      "geen_kandidaat": "Nessun candidato",
-      "prognose": "Previsione",
-      "werkelijk": "Effettivo"
+      "total": "Totale",
+      "unfilled": "Non coperto",
+      "no_candidate": "Nessun candidato",
+      "forecast": "Previsione",
+      "actual": "Effettivo"
     },
     "hoursTable": "Ore al mese",
     "shiftsTable": "Turni al mese",

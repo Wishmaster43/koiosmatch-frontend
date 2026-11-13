@@ -1,20 +1,16 @@
 /**
  * useDashboardFilterPanel — builds the right-panel filter groups (period options are
- * static slugs translated here; location/status options come live from GET /dashboard
- * `filters`) and registers/unregisters them with the shared right panel. Extracted
- * from Dashboard.tsx (§0.3 size split); behaviour identical to the original inline
- * effect.
+ * the English PERIOD_KEYS translated here; status options come live from GET /dashboard
+ * `filters`, branch options from useBranchOptions) and registers/unregisters them with
+ * the shared right panel. Extracted from Dashboard.tsx (§0.3 size split); behaviour
+ * identical to the original inline effect.
  */
 import { useEffect, useMemo } from 'react'
 import type { Dispatch, SetStateAction } from 'react'
 import { useRightPanel } from '@/context/RightPanelContext'
 import { useBranchOptions } from '@/lib/useBranchOptions'
 import type { DashData } from '@/types/dashboard'
-
-// Period filter slugs — stable values sent to the backend as `period` (a contract: the Dutch slugs vandaag/maand move only with a BE-lockstep rename). Labels are
-// translated inside the hook (a module-scope const can't call t()); Vestiging +
-// status options come live from GET /dashboard (filters.locations / filters.statuses).
-const PERIOD_VALUES = ['vandaag', 'week', 'maand', 'kwartaal', 'jaar'] as const
+import { PERIOD_KEYS } from '../lib/periodWire'
 
 interface UseDashboardFilterPanelArgs {
   dash: DashData | null
@@ -29,9 +25,10 @@ interface UseDashboardFilterPanelArgs {
 export function useDashboardFilterPanel({
   dash, t, selPeriod, setSelPeriod, selBranch, setSelBranch, selStatus, setSelStatus,
 }: UseDashboardFilterPanelArgs) {
-  // Translate the stable period slugs into labels here (hook scope has t()).
+  // The period ids are the English PERIOD_KEYS (periodWire.toWirePeriod in useDashboardFilterState
+  // turns them into the Dutch wire value until the BE hash); labels are translated here (hook scope has t()).
   const periodOptions = useMemo(() =>
-    PERIOD_VALUES.map(value => ({ value, label: t(`filters.period.${value}`) })), [t])
+    PERIOD_KEYS.map(value => ({ value, label: t(`filters.period.${value}`) })), [t])
   // K-173 fase 3 — branch options come from the shared useBranchOptions hook (the
   // user's own scope, incl. the 'none' unassigned sentinel), never dash.filters.locations.
   const branchOptions = useBranchOptions()

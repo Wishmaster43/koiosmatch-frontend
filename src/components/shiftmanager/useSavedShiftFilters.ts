@@ -5,6 +5,7 @@
  * (/sm_reports/saved-filters, worklist SM-FILT-SAVE) without touching the UI.
  */
 import { useCallback, useEffect, useState } from 'react'
+import { migrateVisibleSeries } from './shiftWire'
 
 // The filter state a saved set carries (opaque to the storage layer).
 export interface ShiftFilterState {
@@ -24,7 +25,10 @@ function read(key: string): SavedShiftFilter[] {
   try {
     const raw = localStorage.getItem(key)
     const parsed = raw ? JSON.parse(raw) : []
-    return Array.isArray(parsed) ? parsed : []
+    if (!Array.isArray(parsed)) return []
+    // Presets saved with Dutch series ids load with English ones (delete with LEGACY_SERIES_KEY, WIRE-IDS-ENGLISH-1 step 3).
+    return (parsed as SavedShiftFilter[]).map((set) => Array.isArray(set?.state?.visible)
+      ? { ...set, state: { ...set.state, visible: migrateVisibleSeries(set.state.visible) } } : set)
   } catch { return [] }
 }
 

@@ -9,16 +9,16 @@ import { render, screen, within } from '@testing-library/react'
 import { ShiftsDataTable } from './shiftsChartsWidgets'
 import type { ShiftsChartDatum, ShiftBar } from '@/types/shiftmanager'
 
-// Two-year fixture: one metric ("Totaal"), one bar per year — the SM-2YR shape.
+// Two-year fixture: one metric ("Total"), one bar per year — the SM-2YR shape.
 const bar = (year: number): ShiftBar => ({
-  dataKey: `${year}_totaal`, name: `Totaal ${year}`, color: '#111', fill: '#111',
-  opacity: 1, legendType: 'square', year, seriesKey: 'totaal',
+  dataKey: `${year}_total`, name: `Total ${year}`, color: '#111', fill: '#111',
+  opacity: 1, legendType: 'square', year, seriesKey: 'total',
 })
 const bars: ShiftBar[] = [bar(2025), bar(2026)]
 const data: ShiftsChartDatum[] = [
-  { label: 'Jan', _monthIndex: 1, '2025_totaal': 100, '2026_totaal': 120 }, // +20%
-  { label: 'Feb', _monthIndex: 2, '2025_totaal': 50,  '2026_totaal': 40 },  // -20%
-  { label: 'Mar', _monthIndex: 3, '2025_totaal': 0,   '2026_totaal': 10 },  // no baseline → —
+  { label: 'Jan', _monthIndex: 1, '2025_total': 100, '2026_total': 120 }, // +20%
+  { label: 'Feb', _monthIndex: 2, '2025_total': 50,  '2026_total': 40 },  // -20%
+  { label: 'Mar', _monthIndex: 3, '2025_total': 0,   '2026_total': 10 },  // no baseline → —
 ]
 
 // Direct-child cells of the row identified by its leftmost label text.

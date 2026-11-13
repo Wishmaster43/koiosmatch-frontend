@@ -32,10 +32,10 @@
     "candidate": "Kandidat",
     "total": "Gesamt",
     "metric": {
-      "prognose_hours": "Prognose Stunden",
-      "prognose_shifts": "Prognose Einsätze",
-      "werkelijk_hours": "Tatsächliche Stunden",
-      "werkelijk_shifts": "Tatsächliche Einsätze"
+      "forecast_hours": "Prognose Stunden",
+      "forecast_shifts": "Prognose Einsätze",
+      "actual_hours": "Tatsächliche Stunden",
+      "actual_shifts": "Tatsächliche Einsätze"
     },
     "allForms": "Alle"
   },
@@ -163,11 +163,11 @@
       "location": "Standort"
     },
     "series": {
-      "totaal": "Gesamt",
-      "niet_ingevuld": "Nicht besetzt",
-      "geen_kandidaat": "Kein Kandidat",
-      "prognose": "Prognose",
-      "werkelijk": "Tatsächlich"
+      "total": "Gesamt",
+      "unfilled": "Nicht besetzt",
+      "no_candidate": "Kein Kandidat",
+      "forecast": "Prognose",
+      "actual": "Tatsächlich"
     },
     "hoursTable": "Stunden pro Monat",
     "shiftsTable": "Dienste pro Monat",

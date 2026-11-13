@@ -15,7 +15,8 @@ import { useTranslation } from "react-i18next"
 import { useQuery, keepPreviousData } from "@tanstack/react-query"
 import api, { unwrapList } from "@/lib/api"
 import { SERIES, monthAbbr, YEAR_OPACITY, QUARTERS, yearTint } from "./shiftsChartsConfig"
-import type { ShiftFilterOptions, ShiftMonthRow, ShiftsChartDatum, ShiftBar } from '@/types/shiftmanager'
+import type { ShiftFilterOptions, ShiftMonthRow, ShiftsChartDatum, ShiftBar, SeriesKey, SeriesHoursKey } from '@/types/shiftmanager'
+import { normalizeShiftMonthRow, hoursKeyOf } from './shiftWire'
 
 // Stable empty fallback so `rows` keeps a constant reference while there is no
 // data (avoids re-running the downstream useMemo on every render).
@@ -102,7 +103,8 @@ export function useShiftsChartData({
     queryFn: async ({ signal }) => {
       const res  = await api.get(`/sm_reports/shifts-per-month?${queryString}`, { signal })
       const data = unwrapList(res).rows
-      return (Array.isArray(data) ? data : []) as ShiftMonthRow[]
+      // Every row passes the wire normaliser so the FE only sees English keys.
+      return (Array.isArray(data) ? data : []).map((r) => normalizeShiftMonthRow(r as Record<string, unknown>))
     },
     placeholderData: keepPreviousData,
     staleTime: 60_000,
@@ -113,7 +115,7 @@ export function useShiftsChartData({
 
   // Index rows by "YYYY-MM" for fast lookup.
   const byYearMonth = useMemo(
-    () => new Map(rows.map((r) => [r.maand, r])),
+    () => new Map(rows.map((r) => [r.month, r])),
     [rows]
   )
 
@@ -130,10 +132,10 @@ export function useShiftsChartData({
         const entry: ShiftsChartDatum = { label: q.label, _quarter: q.key }
         selectedYears.forEach((year) => {
           const qRows = q.months.map((m) => byYearMonth.get(`${year}-${m}`) ?? ({} as ShiftMonthRow))
-          const sum   = (key: string) => qRows.reduce((acc, r) => acc + Number(r[key] ?? 0), 0)
+          const sum   = (key: SeriesKey | SeriesHoursKey) => qRows.reduce((acc, r) => acc + Number(r[key] ?? 0), 0)
           SERIES.forEach((s) => {
             entry[`${year}_${s.key}`]      = sum(s.key)
-            entry[`${year}_${s.key}_uren`] = sum(`${s.key}_uren`)
+            entry[`${year}_${hoursKeyOf(s.key)}`] = sum(hoursKeyOf(s.key))
           })
         })
         return entry
@@ -147,7 +149,7 @@ export function useShiftsChartData({
         const row = byYearMonth.get(key) ?? ({} as ShiftMonthRow)
         SERIES.forEach((s) => {
           entry[`${year}_${s.key}`]      = Number(row[s.key]            ?? 0)
-          entry[`${year}_${s.key}_uren`] = Number(row[`${s.key}_uren`] ?? 0)
+          entry[`${year}_${hoursKeyOf(s.key)}`] = Number(row[hoursKeyOf(s.key)] ?? 0)
         })
       })
       return entry
@@ -162,7 +164,7 @@ export function useShiftsChartData({
   // selecting years used to explode into years × series bars/columns (2 years × 5
   // series = 10, unreadable). Single-year keeps the full multi-series view untouched.
   // Falls back to the first visible series if the chosen metric was hidden via the
-  // "reeksen" filter.
+  // "series" filter.
   const barSeries = useMemo(() => {
     if (!multiYear) return activeSeries
     const chosen = activeSeries.find((s) => s.key === multiYearMetric)
@@ -182,7 +184,7 @@ export function useShiftsChartData({
   // mode the bar `name` carries the year (Totaal 2025 / Totaal 2026) so the legend and
   // tooltip stay unambiguous with only one metric on screen.
   // Shared bar-descriptor builder for the shifts (count) and hours charts — only
-  // the dataKey/seriesKey suffix ('' vs '_uren') differs between the two.
+  // the dataKey/seriesKey suffix ('' vs '_hours') differs between the two.
   const buildBars = useCallback((suffix: string): ShiftBar[] =>
     selectedYears.flatMap((year) => {
       const rank = yearRank.get(year) ?? 0
@@ -200,29 +202,29 @@ export function useShiftsChartData({
 
   const shiftBars = useMemo<ShiftBar[]>(() => buildBars(''), [buildBars])
 
-  const hoursBars = useMemo<ShiftBar[]>(() => buildBars('_uren'), [buildBars])
+  const hoursBars = useMemo<ShiftBar[]>(() => buildBars('_hours'), [buildBars])
 
   // Filter-driven hour KPIs for the dashboard tiles (derived from the same filtered
-  // chartData): open hours = geen-kandidaat uren · this-month = prognose of the current
-  // month · occupancy = werkelijk ÷ prognose. All over the selected years/months.
+  // chartData): open hours = no-candidate hours · this-month = forecast of the current
+  // month · occupancy = actual ÷ forecast. All over the selected years/months.
   const hourStats = useMemo(() => {
     const cm = new Date().getMonth() + 1
     // Per series: hours + shift-count, summed over the whole filter AND for the
-    // current calendar month separately (Invulgraad is current-month only — Danny).
-    const zero = () => ({ totaal: 0, niet_ingevuld: 0, geen_kandidaat: 0, prognose: 0, werkelijk: 0 } as Record<string, number>)
+    // current calendar month separately (the fill rate is current-month only, per Danny).
+    const zero = () => ({ total: 0, unfilled: 0, no_candidate: 0, forecast: 0, actual: 0 } as Record<SeriesKey, number>)
     const fH = zero(), fC = zero(), mH = zero(), mC = zero()
     for (const row of chartData) {
       for (const y of selectedYears) {
         for (const s of SERIES) {
-          const h = Number(row[`${y}_${s.key}_uren`] || 0)
+          const h = Number(row[`${y}_${hoursKeyOf(s.key)}`] || 0)
           const c = Number(row[`${y}_${s.key}`]      || 0)
           fH[s.key] += h; fC[s.key] += c
           if (row._monthIndex === cm) { mH[s.key] += h; mC[s.key] += c }
         }
       }
     }
-    // Fill rate = (prognose − niet_ingevuld) ÷ prognose, for the current month, hours-based.
-    const fillRateMonth = mH.prognose ? Math.round(((mH.prognose - mH.niet_ingevuld) / mH.prognose) * 100) : null
+    // Fill rate = (forecast − unfilled) ÷ forecast, for the current month, hours-based.
+    const fillRateMonth = mH.forecast ? Math.round(((mH.forecast - mH.unfilled) / mH.forecast) * 100) : null
     return { filterHours: fH, filterShifts: fC, monthHours: mH, monthShifts: mC, fillRateMonth }
   }, [chartData, selectedYears])
 

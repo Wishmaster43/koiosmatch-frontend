@@ -32,10 +32,10 @@
     "candidate": "Candidate",
     "total": "Total",
     "metric": {
-      "prognose_hours": "Forecast hours",
-      "prognose_shifts": "Forecast shifts",
-      "werkelijk_hours": "Actual hours",
-      "werkelijk_shifts": "Actual shifts"
+      "forecast_hours": "Forecast hours",
+      "forecast_shifts": "Forecast shifts",
+      "actual_hours": "Actual hours",
+      "actual_shifts": "Actual shifts"
     },
     "allForms": "All"
   },
@@ -163,11 +163,11 @@
       "location": "Location"
     },
     "series": {
-      "totaal": "Total",
-      "niet_ingevuld": "Not filled",
-      "geen_kandidaat": "No candidate",
-      "prognose": "Forecast",
-      "werkelijk": "Actual"
+      "total": "Total",
+      "unfilled": "Not filled",
+      "no_candidate": "No candidate",
+      "forecast": "Forecast",
+      "actual": "Actual"
     },
     "hoursTable": "Hours per month",
     "shiftsTable": "Shifts per month",

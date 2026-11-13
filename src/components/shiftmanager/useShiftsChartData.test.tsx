@@ -12,7 +12,8 @@ import type { ReactNode } from 'react'
 import { useShiftsChartData } from './useShiftsChartData'
 import api from '@/lib/api'
 
-vi.mock('@/lib/api', () => ({ default: { get: vi.fn() } }))
+// unwrapList stays real so a mocked list response is parsed like the live one.
+vi.mock('@/lib/api', async (importActual) => ({ ...(await importActual<typeof import('@/lib/api')>()), default: { get: vi.fn() } }))
 const mockedGet = vi.mocked(api.get)
 
 afterEach(() => vi.clearAllMocks())
@@ -26,7 +27,7 @@ function wrapper({ children }: { children: ReactNode }) {
 const baseArgs = {
   selectedMonths: Array.from({ length: 12 }, (_, i) => String(i + 1)),
   period: 'month',
-  visible: ['totaal', 'niet_ingevuld', 'geen_kandidaat', 'prognose', 'werkelijk'],
+  visible: ['total', 'unfilled', 'no_candidate', 'forecast', 'actual'],
   selectedJobTypes: [], selectedCustomers: [], selectedLocations: [],
   fixedCustomers: [], fixedLocationIds: [], fixedDepartmentId: null, fixedCandidateId: null,
   seriesLabel: (key: string) => key,
@@ -51,14 +52,14 @@ describe('useShiftsChartData — SM-2YR bar count', () => {
       data: url.includes('filter-options') ? { job_types: [], locations: [] } : { data: [] },
     }))
     const { result } = renderHook(
-      () => useShiftsChartData({ ...baseArgs, selectedYears: [2025, 2026], multiYearMetric: 'totaal' }),
+      () => useShiftsChartData({ ...baseArgs, selectedYears: [2025, 2026], multiYearMetric: 'total' }),
       { wrapper },
     )
     await waitFor(() => expect(result.current.loading).toBe(false))
     // Was 2 years × 5 series = 10 before the redesign — now exactly 2 (one per year).
     expect(result.current.hoursBars).toHaveLength(2)
-    // hoursBars carry the `_uren` suffix on seriesKey (see useShiftsChartData).
-    expect(result.current.hoursBars.every((b) => b.seriesKey === 'totaal_uren')).toBe(true)
+    // hoursBars carry the `_hours` suffix on seriesKey (see useShiftsChartData).
+    expect(result.current.hoursBars.every((b) => b.seriesKey === 'total_hours')).toBe(true)
   })
 
   it('keeps the newest year at full colour and mutes the older year via color-mix', async () => {
@@ -66,7 +67,7 @@ describe('useShiftsChartData — SM-2YR bar count', () => {
       data: url.includes('filter-options') ? { job_types: [], locations: [] } : { data: [] },
     }))
     const { result } = renderHook(
-      () => useShiftsChartData({ ...baseArgs, selectedYears: [2025, 2026], multiYearMetric: 'totaal' }),
+      () => useShiftsChartData({ ...baseArgs, selectedYears: [2025, 2026], multiYearMetric: 'total' }),
       { wrapper },
     )
     await waitFor(() => expect(result.current.loading).toBe(false))
@@ -76,5 +77,39 @@ describe('useShiftsChartData — SM-2YR bar count', () => {
     expect(bar2025.fill).toContain('color-mix')
     expect(bar2026.name).toContain('2026')
     expect(bar2025.name).toContain('2025')
+  })
+})
+
+// Wire tolerance: the BE still sends Dutch row keys; English keys must give the same chart data.
+describe('useShiftsChartData — wire normalisation', () => {
+  const mount = async (row: Record<string, unknown>) => {
+    mockedGet.mockImplementation((url: string) => Promise.resolve({
+      data: url.includes('filter-options') ? { job_types: [], locations: [] } : { data: [row] },
+    }))
+    const { result } = renderHook(
+      () => useShiftsChartData({ ...baseArgs, selectedYears: [2026], multiYearMetric: null }),
+      { wrapper },
+    )
+    await waitFor(() => expect(result.current.loading).toBe(false))
+    await waitFor(() => expect(result.current.chartData.find((d) => d._monthIndex === 3)?.['2026_total']).toBe(10))
+    return result.current
+  }
+  const dutch = { maand: '2026-03', totaal: 10, totaal_uren: 80, geen_kandidaat: 1, geen_kandidaat_uren: 8 }
+  const english = { month: '2026-03', total: 10, total_hours: 80, no_candidate: 1, no_candidate_hours: 8 }
+
+  it('maps Dutch wire rows onto English chart keys', async () => {
+    const r = await mount(dutch)
+    const march = r.chartData.find((d) => d._monthIndex === 3)!
+    expect(march['2026_total']).toBe(10)
+    expect(march['2026_total_hours']).toBe(80)
+    expect(r.hoursBars.some((b) => b.dataKey === '2026_total_hours')).toBe(true)
+    expect(String(mockedGet.mock.calls.find((c) => String(c[0]).includes('shifts-per-month'))?.[0])).toMatch(/^\/sm_reports\/shifts-per-month\?/)
+  })
+
+  it('yields the identical chart entry for English wire rows', async () => {
+    const a = await mount(dutch)
+    const entryA = a.chartData.find((d) => d._monthIndex === 3)
+    const b = await mount(english)
+    expect(b.chartData.find((d) => d._monthIndex === 3)).toEqual(entryA)
   })
 })

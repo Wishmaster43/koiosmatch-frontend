@@ -208,11 +208,11 @@
     "locationLabel": "Site",
     "statusLabel": "Statut du candidat",
     "period": {
-      "vandaag": "Aujourd’hui",
+      "today": "Aujourd’hui",
       "week": "Cette semaine",
-      "maand": "Ce mois-ci",
-      "kwartaal": "Ce trimestre",
-      "jaar": "Cette année"
+      "month": "Ce mois-ci",
+      "quarter": "Ce trimestre",
+      "year": "Cette année"
     }
   },
   "koiosForYou": {

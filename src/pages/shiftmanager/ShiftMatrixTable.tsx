@@ -1,7 +1,7 @@
 /**
  * ShiftMatrixTable — candidate × month grid for the shift analysis. Rows are
- * candidates, columns are months; each cell shows the selected metric (prognose/
- * werkelijk × uren/diensten). Sticky first column + a totals row per month.
+ * candidates, columns are months; each cell shows the selected metric (forecast/
+ * actual × hours/shifts). Sticky first column + a totals row per month.
  *
  * Bespoke by design, not an oversight (§4 written-reason rule): this is a PIVOT
  * grid whose column set is runtime-computed (one column per month in range) plus

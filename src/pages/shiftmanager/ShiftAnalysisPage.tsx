@@ -1,7 +1,7 @@
 /**
  * ShiftAnalysisPage — Kandidaten Shift-analyse (plan Fase A1). A KPI alarm row,
- * a "Geplande UZK per maand" bar chart, and a per-candidate × month matrix with a
- * metric toggle (prognose/werkelijk × uren/diensten) — the app version of Danny's
+ * a "planned UZK per month" bar chart, and a per-candidate × month matrix with a
+ * metric toggle (forecast/actual × hours/shifts) — the app version of Danny's
  * Excel reports. All four UI states; degrades gracefully until the backend feed
  * (/sm_reports/shifts-per-candidate) lands.
  */
@@ -35,7 +35,7 @@ export default function ShiftAnalysisPage() {
   // Contract-form filter (Danny's Excel is UZK-only) — null = all forms.
   const [contractForm, setContractForm] = useState<string | null>('UZK')
   const { rows, monthColumns, matrixRows, plannedPerMonth, contractForms, loading, error, unavailable } = useShiftAnalysis(contractForm)
-  const [metric, setMetric] = useState<MetricKey>('prognose_hours')
+  const [metric, setMetric] = useState<MetricKey>('forecast_hours')
 
   // Alarm counts drive the KPI cards.
   const counts = useMemo(() => {
@@ -44,7 +44,7 @@ export default function ShiftAnalysisPage() {
     return c
   }, [rows])
 
-  // "Geplande UZK per maand" bar data (localized month labels).
+  // "Planned UZK per month" bar data (localized month labels).
   const plannedData: ChartDatum[] = useMemo(
     () => plannedPerMonth.map(p => ({ name: monthLabel(p.month, i18n.language), value: p.count })),
     [plannedPerMonth, i18n.language],
@@ -97,7 +97,7 @@ export default function ShiftAnalysisPage() {
             <InfoBlock text={t('shiftAnalysis.empty')} />
           ) : (
             <>
-              {/* Geplande UZK per maand */}
+              {/* Planned UZK per month */}
               <div className="p-5 mb-6 bg-(--surface) rounded-xl" style={{ border: '1px solid var(--border)' }}>
                 <BarChartCard title={t('shiftAnalysis.plannedTitle')} data={plannedData}
                   colors={['var(--color-success)']} height={240} />

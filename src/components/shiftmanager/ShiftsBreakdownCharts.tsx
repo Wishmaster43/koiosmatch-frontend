@@ -1,6 +1,6 @@
 /**
  * ShiftsBreakdownCharts — the two SM-CHARTS2 charts under the tables: open shifts
- * ("open diensten", filtered on `geen_kandidaat` — "no candidate") per customer and
+ * ("open diensten", the `no_candidate` series, sent as its wire id via toWireMetric) per customer and
  * per function. Horizontal ranked bars (not donuts — Danny: "past niet" — "doesn't
  * fit") so long labels like "Stichting Zorgpartners Midden-Holland" and "Verzorgende
  * IG - UZK" read cleanly. Value follows the block's Hours/Shifts ("Uren/Diensten")

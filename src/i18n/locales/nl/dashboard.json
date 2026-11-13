@@ -208,11 +208,11 @@
     "locationLabel": "Vestiging",
     "statusLabel": "Kandidaatstatus",
     "period": {
-      "vandaag": "Vandaag",
+      "today": "Vandaag",
       "week": "Deze week",
-      "maand": "Deze maand",
-      "kwartaal": "Dit kwartaal",
-      "jaar": "Dit jaar"
+      "month": "Deze maand",
+      "quarter": "Dit kwartaal",
+      "year": "Dit jaar"
     }
   },
   "koiosForYou": {

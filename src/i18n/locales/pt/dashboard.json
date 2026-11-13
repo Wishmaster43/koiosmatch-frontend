@@ -208,11 +208,11 @@
     "locationLabel": "Filial",
     "statusLabel": "Estado do candidato",
     "period": {
-      "vandaag": "Hoje",
+      "today": "Hoje",
       "week": "Esta semana",
-      "maand": "Este mês",
-      "kwartaal": "Este trimestre",
-      "jaar": "Este ano"
+      "month": "Este mês",
+      "quarter": "Este trimestre",
+      "year": "Este ano"
     }
   },
   "koiosForYou": {

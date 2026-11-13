@@ -10,6 +10,7 @@
  * from the call entirely, never sent alongside the new param.
  */
 import { useMemo, useState } from 'react'
+import { toWirePeriod } from '../lib/periodWire'
 
 // Owns the topbar filter selections and derives the server params from them; period/status stay single-value while branch is a real multi-select (see file header).
 export function useDashboardFilterState() {
@@ -19,7 +20,8 @@ export function useDashboardFilterState() {
   // Period/status stay single-value server-side; branch is now a real multi-select.
   const dashFilterParams = useMemo(() => {
     const params: Record<string, unknown> = {}
-    if (selPeriod[0]) params.period = selPeriod[0]
+    // The UI id is English; the wire value stays Dutch until the BE hash.
+    if (selPeriod[0]) params.period = toWirePeriod(selPeriod[0])
     if (selStatus[0]) params.status = selStatus[0]
     if (selBranch.length) params.branch_id = selBranch
     return params

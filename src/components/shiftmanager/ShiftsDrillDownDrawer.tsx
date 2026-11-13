@@ -112,7 +112,7 @@ function CandidateBlock({ invite }: { invite: ShiftInvite }) {
 
 // The slide-in panel itself: series/period picker over totals or a searchable detail
 export default function ShiftsDrillDownDrawer({ metric, metricOptions, periods, initialPeriod, buildUrl, titleFor, countFor, onClose, locationMeta }: {
-  metric: string                                              // initial series (totaal / geen_kandidaat / …)
+  metric: string                                              // initial series (total / no_candidate / …)
   metricOptions: { value: string; label: string }[]           // switchable series (chips)
   periods: { key: string; label: string }[]                   // selectable periods (months) to page through
   initialPeriod: string                                       // the clicked period

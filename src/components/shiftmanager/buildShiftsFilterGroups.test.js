@@ -10,7 +10,7 @@ const baseArgs = {
   period: 'month',
   selectedYears: [2026],
   selectedMonths: [],
-  visible: ['totaal'],
+  visible: ['total'],
   selectedJobTypes: [],
   selectedCustomers: [],
   selectedLocations: [],

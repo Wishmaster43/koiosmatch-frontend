@@ -21,6 +21,7 @@ import { SERIES, CURRENT_YEAR } from "./shiftsChartsConfig"
 import { BarChartWidget, YearIndicator, ChartCard, ShiftsDataTable, PctToggle } from "./shiftsChartsWidgets"
 import { useShiftsChartData } from "./useShiftsChartData"
 import SmSyncButton            from "./SmSyncButton"
+import { toWireMetric } from "./shiftWire"
 import { buildShiftsFilterGroups } from "./buildShiftsFilterGroups"
 import { useSavedShiftFilters } from "./useSavedShiftFilters"
 import type { ShiftFilterState } from "./useSavedShiftFilters"
@@ -123,7 +124,7 @@ export default function ShiftsChartsBlock({
   const funcTotal = funcSegs.reduce((s, x) => s + x.value, 0)
   const openFuncBar = (
     <div>
-      <div style={{ fontSize: 22, fontWeight: 700, lineHeight: 1, color: 'var(--color-warning-text)' }}>{val(H.geen_kandidaat, C.geen_kandidaat)}</div>
+      <div style={{ fontSize: 22, fontWeight: 700, lineHeight: 1, color: 'var(--color-warning-text)' }}>{val(H.no_candidate, C.no_candidate)}</div>
       {!breakdownUnavailable && (
         <div style={{ display: 'flex', height: 9, borderRadius: 5, overflow: 'hidden', marginTop: 8, background: 'var(--hover-bg)' }}>
           {funcTotal > 0 && funcSegs.map(seg => (
@@ -137,15 +138,15 @@ export default function ShiftsChartsBlock({
 
   const kpiRow: KpiSpec[] = [
     ...(leadingKpis ?? []),                                             // Worked/Active · New · Attention
-    { key: 'forecast_month',   label: t('dashboard.stats.forecastMonth'), value: val(MH.prognose, MC.prognose),          color: 'var(--color-secondary)' },
-    { key: 'open',             label: isH ? t('dashboard.stats.openHours') : t('dashboard.stats.openShifts'), value: val(H.geen_kandidaat, C.geen_kandidaat), color: 'var(--color-warning-text)' },
+    { key: 'forecast_month',   label: t('dashboard.stats.forecastMonth'), value: val(MH.forecast, MC.forecast),          color: 'var(--color-secondary)' },
+    { key: 'open',             label: isH ? t('dashboard.stats.openHours') : t('dashboard.stats.openShifts'), value: val(H.no_candidate, C.no_candidate), color: 'var(--color-warning-text)' },
     { key: 'open_functions',   label: t('dashboard.stats.openByFunction'), render: openFuncBar },  // #6 mini stacked bar
     // Active customers: scheduled / total-active (e.g. 5/7), test customer already excluded.
     // A failed/loading breakdown must not render as "0/0" — an honest dash instead (D8).
     { key: 'active_customers', label: t('dashboard.stats.activeCustomers'), value: breakdownUnavailable ? null : `${fmtN(plannedCustomers)}/${fmtN(activeCustomers)}`, color: 'var(--color-secondary)' },
     // #8/#9 still to be decided (Danny) — for now Unfilled + Actual this month.
-    { key: 'unfilled',         label: t('dashboard.stats.unfilled'),      value: val(H.niet_ingevuld, C.niet_ingevuld),  color: 'var(--color-danger-text)' },
-    { key: 'actual_month',     label: t('dashboard.stats.actualMonth'),   value: val(MH.werkelijk, MC.werkelijk),        color: 'var(--color-success-text)' },
+    { key: 'unfilled',         label: t('dashboard.stats.unfilled'),      value: val(H.unfilled, C.unfilled),  color: 'var(--color-danger-text)' },
+    { key: 'actual_month',     label: t('dashboard.stats.actualMonth'),   value: val(MH.actual, MC.actual),        color: 'var(--color-success-text)' },
   ]
   const donutRow: DonutSpec[] = [...(leadingDonuts ?? [])]
 
@@ -166,7 +167,7 @@ export default function ShiftsChartsBlock({
   // and open the drill-down drawer on it.
   const handleBarClick = (datum: ShiftsChartDatum, barMeta: ShiftBar) => {
     const { year, seriesKey } = barMeta
-    const baseMetric = seriesKey.replace("_uren", "")
+    const baseMetric = seriesKey.replace("_hours", "")
     // baseQuery = filters only. NEITHER metric NOR period is baked in — the drawer
     // appends the chosen series (chips) and pages the month itself (Danny: één standaard).
     const params = new URLSearchParams()
@@ -214,7 +215,8 @@ export default function ShiftsChartsBlock({
   // interim; swaps to /sm_reports/saved-filters when SM-FILT-SAVE lands). Scoped
   // per page via filterKey, so it only appears where it's registered.
   const { saved, save, remove, setDefault, defaultState } = useSavedShiftFilters(`sm-saved-filters:${filterKey}`)
-  // Restore a saved (or default) filter set onto the live UI state in one go.
+  // Restore a saved (or default) filter set onto the live UI state in one go (the series
+  // ids are already English: useSavedShiftFilters.read() migrates legacy presets on load).
   const applyFilterState = useCallback((s: ShiftFilterState) => {
     setSelectedYears(s.selectedYears); setSelectedMonths(s.selectedMonths); setPeriod(s.period)
     setVisible(s.visible); setSelectedJobTypes(s.selectedJobTypes)
@@ -343,7 +345,7 @@ export default function ShiftsChartsBlock({
             metricOptions={SERIES.map(s => ({ value: s.key, label: seriesLabel(s.key) }))}
             periods={periods}
             initialPeriod={drill.initialPeriod}
-            buildUrl={(m, pk) => `/sm_reports/shifts-per-month/detail?${drill.baseQuery}${drill.baseQuery ? '&' : ''}${periodParam(pk)}&metric=${m}`}
+            buildUrl={(m, pk) => `/sm_reports/shifts-per-month/detail?${drill.baseQuery}${drill.baseQuery ? '&' : ''}${periodParam(pk)}&metric=${toWireMetric(m)}`}
             titleFor={(m, pk) => `${seriesLabel(m)}${drill.yearSuffix} — ${periods.find(p => p.key === pk)?.label ?? ''}`}
             countFor={(m, pk) => { const d = chartData.find(x => periodKeyOf(x) === pk); return d ? Number(d[`${drill.year}_${m}`] || 0) : 0 }}
             onClose={() => setDrill(null)}

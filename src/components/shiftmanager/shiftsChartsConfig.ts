@@ -6,19 +6,18 @@
 import type { ShiftSeries } from '@/types/shiftmanager'
 import { tint } from '@/lib/tint'
 
-// Series key + colour; labels come from i18n via t('charts.series.<key>').
-// Brand-aligned palette (Danny: black for the "totaal" (total) series looked bad):
-// totaal (total) = brand blue, niet_ingevuld (not filled) = brand gold,
-// geen_kandidaat (no candidate) = red, prognose (forecast) = indigo,
-// werkelijk (actual) = green. The keys themselves stay Dutch — they are the
-// literal SERIES data values this file defines, not translatable UI copy.
+// Series key + colour; labels come from i18n via t('charts.series.<englishKey>').
+// Brand-aligned palette (Danny: black for the "total" series looked bad):
+// total = brand blue, unfilled = brand gold, no_candidate = red,
+// forecast = indigo, actual = green. The keys are English ids; the Dutch ids the
+// BE still sends live only in shiftWire.ts.
 /* eslint-disable no-restricted-syntax -- fixed chart colour series (DATA), not UI styling: needs more distinct hues than the semantic token set provides */
 export const SERIES: ShiftSeries[] = [
-  { key: "totaal",         color: "#1B60A9" },
-  { key: "niet_ingevuld",  color: "#F0AB00" },
-  { key: "geen_kandidaat", color: "#ef4444" },
-  { key: "prognose",       color: "#6366f1" },
-  { key: "werkelijk",      color: "#10b981" },
+  { key: "total",        color: "#1B60A9" },
+  { key: "unfilled",     color: "#F0AB00" },
+  { key: "no_candidate", color: "#ef4444" },
+  { key: "forecast",     color: "#6366f1" },
+  { key: "actual",       color: "#10b981" },
 ]
 /* eslint-enable no-restricted-syntax */
 

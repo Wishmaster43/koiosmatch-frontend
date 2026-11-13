@@ -116,14 +116,14 @@ export function ShiftsDataTable({ data, bars, monthLabel, totalLabel, multiYear,
   const fmt = (v: unknown) => formatNumber(Number(v) || 0, locale)
   const fmtDelta = (d: number) => `${d > 0 ? '+' : ''}${formatPercent(d, locale)}`
   const totals = bars.map(b => data.reduce((s, r) => s + (Number(r[b.dataKey]) || 0), 0))
-  // Per year the "Totaal" series is the 100% baseline; every other series is a share of it
-  // (Danny: "Totaal = 100%, the rest is derived from it"). Map year → its Totaal column.
-  const totaalKeyByYear   = new Map<number, string>()
-  const totaalTotalByYear = new Map<number, number>()
+  // Per year the `total` series is the 100% baseline; every other series is a share of it
+  // (Danny: "Totaal = 100%, the rest is derived from it"). Map year → its `total` column.
+  const totalKeyByYear   = new Map<number, string>()
+  const totalTotalByYear = new Map<number, number>()
   bars.forEach((b, i) => {
-    if (b.seriesKey.replace('_uren', '') === 'totaal') {
-      totaalKeyByYear.set(b.year, b.dataKey)
-      totaalTotalByYear.set(b.year, totals[i])
+    if (b.seriesKey.replace('_hours', '') === 'total') {
+      totalKeyByYear.set(b.year, b.dataKey)
+      totalTotalByYear.set(b.year, totals[i])
     }
   })
   // Cell text: absolute value, a Δ vs the previous column (deltaMode), or a percentage
@@ -136,7 +136,7 @@ export function ShiftsDataTable({ data, bars, monthLabel, totalLabel, multiYear,
       const curVal  = Number(row[b.dataKey]) || 0
       return prevVal ? fmtDelta(Math.round((curVal - prevVal) / prevVal * 100)) : '—'
     }
-    const denom = Number(row[totaalKeyByYear.get(b.year) ?? '']) || 0
+    const denom = Number(row[totalKeyByYear.get(b.year) ?? '']) || 0
     return denom ? formatRatio((Number(row[b.dataKey]) || 0) / denom, locale) : '—'
   }
   // Same value/Δ/% logic as `cell` above, but for the totals row at the bottom of the table.
@@ -147,7 +147,7 @@ export function ShiftsDataTable({ data, bars, monthLabel, totalLabel, multiYear,
       const prevTotal = totals[idx - 1]
       return prevTotal ? fmtDelta(Math.round((colTotal - prevTotal) / prevTotal * 100)) : '—'
     }
-    const denom = totaalTotalByYear.get(b.year) ?? 0
+    const denom = totalTotalByYear.get(b.year) ?? 0
     return denom ? formatRatio(colTotal / denom, locale) : '—'
   }
   // Table header cell: Caption's raw identity (r6 style-object context) plus 600 weight for a header.

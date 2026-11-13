@@ -32,10 +32,10 @@
     "candidate": "Candidat",
     "total": "Total",
     "metric": {
-      "prognose_hours": "Heures prévues",
-      "prognose_shifts": "Missions prévues",
-      "werkelijk_hours": "Heures réelles",
-      "werkelijk_shifts": "Missions réelles"
+      "forecast_hours": "Heures prévues",
+      "forecast_shifts": "Missions prévues",
+      "actual_hours": "Heures réelles",
+      "actual_shifts": "Missions réelles"
     },
     "allForms": "Tous"
   },
@@ -163,11 +163,11 @@
       "location": "Site"
     },
     "series": {
-      "totaal": "Total",
-      "niet_ingevuld": "Non pourvu",
-      "geen_kandidaat": "Aucun candidat",
-      "prognose": "Prévision",
-      "werkelijk": "Réel"
+      "total": "Total",
+      "unfilled": "Non pourvu",
+      "no_candidate": "Aucun candidat",
+      "forecast": "Prévision",
+      "actual": "Réel"
     },
     "hoursTable": "Heures par mois",
     "shiftsTable": "Services par mois",
