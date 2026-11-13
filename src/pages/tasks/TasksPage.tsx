@@ -67,7 +67,7 @@ function TasksPageInner({ intent }: { intent?: unknown }) {
   // RIGHTS-GATE-OPENERS-1: mirrors tasks.create permission (backend: tasks-outreach.php:67 POST /tasks).
   const canCreateTask = (auth as unknown as { hasPermission?: (p: string) => boolean })?.hasPermission?.('tasks.create') ?? false
   const { data: users = [] } = useUsers() as { data?: UserLike[] }
-  const { t } = useTranslation(['tasks', 'common'])
+  const { t, i18n } = useTranslation(['tasks', 'common'])
   // Scroll container for row virtualization (F-11): DataTable virtualizes against it.
   const tableScrollRef = useRef<HTMLDivElement>(null)
   const { registerFilters, unregisterFilters } = useRightPanel()
@@ -126,13 +126,13 @@ function TasksPageInner({ intent }: { intent?: unknown }) {
   // Register the right-panel filters (status/priority/type/assignee/team/linked
   // entity/deadline/archived) — pure builder (§0.3 split).
   const filterGroups = useMemo(() => buildTaskFilterGroups({
-    t, tog,
+    t, i18n, tog,
     selectedStatus, setSelectedStatus, selectedPriority, setSelectedPriority,
     selectedType, setSelectedType, selectedAssignee, setSelectedAssignee,
     selectedTeam, setSelectedTeam, selectedLinkType, setSelectedLinkType,
     dueRange, setDueRange, showArchived, setShowArchived,
     statusData, priorityData, typeData, assigneeOptions, teamOptions, linkTypeOptions,
-  }), [t, selectedStatus, setSelectedStatus, selectedPriority, setSelectedPriority, selectedType, setSelectedType,
+  }), [t, i18n, selectedStatus, setSelectedStatus, selectedPriority, setSelectedPriority, selectedType, setSelectedType,
        selectedAssignee, setSelectedAssignee, selectedTeam, setSelectedTeam, selectedLinkType, setSelectedLinkType,
        dueRange, setDueRange, showArchived, setShowArchived,
        statusData, priorityData, typeData, assigneeOptions, teamOptions, linkTypeOptions])

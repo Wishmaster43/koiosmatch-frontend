@@ -7,19 +7,20 @@
  * flat description line).
  */
 import { useTranslation } from 'react-i18next'
+import { labelOrRaw } from '@/lib/labelOrRaw'
 import EntityChangelogTab, { type ChangelogEvent } from '@/components/drawer/tabs/EntityChangelogTab'
 import { useOpportunityActivity } from '../hooks/useOpportunityActivity'
 import type { Opportunity } from '@/types/opportunity'
 
 // Opportunity drawer's changelog tab content.
 export default function ChangelogTab({ opportunity: o }: { opportunity: Opportunity }) {
-  const { t } = useTranslation('opportunities')
+  const { t, i18n } = useTranslation('opportunities')
   const { items, loading, error } = useOpportunityActivity(o?.id)
   // The hours_period diff arrives as a raw slug (week|month|total); reuse the
   // details-tab keys so the changelog speaks the same language as the form.
   const formatValue = (field: string, val: unknown): string | undefined => {
     if (val === null || val === undefined || val === '') return undefined
-    if (field === 'hours_period') return t(`details.periods.${String(val)}`, { defaultValue: String(val) })
+    if (field === 'hours_period') return labelOrRaw(t, i18n, `details.periods.${String(val)}`, String(val), 'opportunities')
     return undefined
   }
   return <EntityChangelogTab items={items as ChangelogEvent[]} loading={loading} error={error} namespace="opportunities" formatValue={formatValue} />

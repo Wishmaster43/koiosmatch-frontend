@@ -6,6 +6,8 @@
  */
 import type { Dispatch, SetStateAction } from 'react'
 import type { TFunction } from 'i18next'
+import { labelOrRaw } from '@/lib/labelOrRaw'
+import type { KeyChecker } from '@/lib/labelOrRaw'
 import type { Aggregate } from '../hooks/useTaskOptions'
 import type { DueRangeFilter } from '../hooks/useTaskFilters'
 import { Tog, archivedCheckboxGroup } from '@/lib/filterGroups/common'
@@ -17,6 +19,8 @@ const asOptions = (data: Aggregate[]): Opt[] => data.map(d => ({ value: d.key, l
 
 interface BuildArgs {
   t: TFunction
+  // Key-existence checker for the links.* label fallback.
+  i18n: KeyChecker
   tog: Tog
   selectedStatus: string[]; setSelectedStatus: Dispatch<SetStateAction<string[]>>
   selectedPriority: string[]; setSelectedPriority: Dispatch<SetStateAction<string[]>>
@@ -33,7 +37,7 @@ interface BuildArgs {
 
 // Builds the tasks page's right-panel filter config.
 export function buildTaskFilterGroups({
-  t, tog, selectedStatus, setSelectedStatus, selectedPriority, setSelectedPriority,
+  t, i18n, tog, selectedStatus, setSelectedStatus, selectedPriority, setSelectedPriority,
   selectedType, setSelectedType, selectedAssignee, setSelectedAssignee,
   selectedTeam, setSelectedTeam, selectedLinkType, setSelectedLinkType,
   dueRange, setDueRange, showArchived, setShowArchived,
@@ -46,7 +50,7 @@ export function buildTaskFilterGroups({
   // Linked-entity type options: raw link `type` token labelled via the shared
   // links.* i18n keys (candidate/vacancy/customer/…) — never a second vocabulary.
   const linkTypeOpts: Opt[] = linkTypeOptions.map(o => ({
-    value: o.value, label: t(`links.${o.value}`, { defaultValue: o.value }), count: o.count,
+    value: o.value, label: labelOrRaw(t, i18n, `links.${o.value}`, o.value, 'tasks'), count: o.count,
   }))
 
   return [

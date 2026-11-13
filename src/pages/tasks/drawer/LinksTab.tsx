@@ -9,6 +9,7 @@
  */
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
+import { labelOrRaw } from '@/lib/labelOrRaw'
 import { Link2, UserCheck, X } from 'lucide-react'
 import EntityLink from '@/components/ui/EntityLink'
 import AddLinkRow from '../links/AddLinkRow'
@@ -24,10 +25,11 @@ import { GroupLabel } from '@/components/ui/typography'
 export default function LinksTab({ task, onAddLink, onRemoveLink }: {
   task: TaskDetail; onAddLink: (link: NewLink) => void; onRemoveLink: (link: { type: string; id: Id | null }) => void
 }) {
-  const { t } = useTranslation('tasks')
+  const { t, i18n } = useTranslation('tasks')
   const [adding, setAdding] = useState(false)
   const links = task.links ?? []
-  const typeLabel = (type: string) => t(`links.${type}`, { defaultValue: type })
+  // Link type token labelled via links.*, raw token when unseeded.
+  const typeLabel = (type: string) => labelOrRaw(t, i18n, `links.${type}`, type, 'tasks')
   // REFERENCE-LINK-1: the dependent `reference` token reads its options off THIS
   // task's own candidate link — no candidate link, no reference token offered.
   const candidateLinkId = links.find(l => l.type === 'candidate')?.id

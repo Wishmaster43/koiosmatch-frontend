@@ -17,6 +17,7 @@ function build(overrides: Partial<Parameters<typeof buildTaskFilterGroups>[0]> =
   const setDueRange = vi.fn()
   const args = {
     t: i18n.getFixedT('nl', 'tasks'),
+    i18n,
     tog,
     selectedStatus: [], setSelectedStatus: vi.fn(),
     selectedPriority: [], setSelectedPriority: vi.fn(),
@@ -33,6 +34,16 @@ function build(overrides: Partial<Parameters<typeof buildTaskFilterGroups>[0]> =
   } as Parameters<typeof buildTaskFilterGroups>[0]
   return { groups: buildTaskFilterGroups(args), setShowArchived, setDueRange }
 }
+
+describe('buildTaskFilterGroups · link type labels', () => {
+  // Known link token resolves via links.*, unknown token stays raw.
+  it('labels a seeded link type through i18n and an unknown one raw', () => {
+    const { groups } = build({ linkTypeOptions: [{ value: 'candidate', count: 1 }, { value: 'zz_unknown', count: 2 }] })
+    const g = groups.find(x => x.key === 'linkType') as { options: { label: string }[] }
+    expect(g.options[0].label).toBe(i18n.getFixedT('nl', 'tasks')('links.candidate'))
+    expect(g.options[1].label).toBe('zz_unknown')
+  })
+})
 
 describe('buildTaskFilterGroups · parity groups (half 2)', () => {
   it('emits an archived checkbox group whose onToggle flips the request-driving flag', () => {

@@ -5,6 +5,7 @@
 import { useState } from 'react'
 import { ExternalLink, Link2, Pencil, ChevronRight, ChevronDown } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
+import { labelOrRaw } from '@/lib/labelOrRaw'
 import type { ReactNode } from 'react'
 import SoftChip from '@/components/ui/SoftChip'
 import StatusPill from '@/components/ui/StatusPill'
@@ -133,7 +134,7 @@ export default function MatchCard({
   collapsible = false, flatRow = false,
   leadWithOtherParty = false, showVacancyColumn = true,
 }: MatchCardProps) {
-  const { t } = useTranslation(['candidates', 'common'])
+  const { t, i18n } = useTranslation(['candidates', 'common'])
   const { formatDate } = useDateFormat()
   // Compact mode's own expand state — collapsed by default (Danny: "collapsed
   // by default … click expands"); a per-card independent toggle, purely
@@ -168,7 +169,8 @@ export default function MatchCard({
     ) },
     { key: 'branch', label: t('matchesView.branch'), value: branchName || '—' },
     { key: 'owner', label: t('matchesView.owner'), value: ownerName || '—' },
-    { key: 'contractStatus', label: t('matchesView.contract'), value: t(`matchesView.contractStatus.${contractStatus ?? 'none'}`, { defaultValue: contractStatus || t('matchesView.contractStatus.none') }) },
+    // Contract status: the known-value label, else the raw status word, else the translated none label (labelOrRaw keeps the exists guard).
+    { key: 'contractStatus', label: t('matchesView.contract'), value: labelOrRaw(t, i18n, `matchesView.contractStatus.${contractStatus ?? 'none'}`, contractStatus || t('matchesView.contractStatus.none', { ns: 'candidates' }), 'candidates') },
   ]
 
   // Title block: "{vacancy} — {phase}" (point 2) — shared verbatim between the
