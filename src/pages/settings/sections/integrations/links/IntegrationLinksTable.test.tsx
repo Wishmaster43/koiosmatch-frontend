@@ -47,6 +47,23 @@ describe('IntegrationLinksTable', () => {
   })
 
   // Without settings.update the id is text, not an input.
+  // Screen probe 13-11: a failed HelloFlex row and a pending Shiftmanager row have no external id yet, and
+  // the old blank-id rule hid their stored status behind 'Niet gekoppeld' (the Mislukt filter then returned a
+  // row whose chip disagreed). The stored status wins; unlinked is only a row without id AND without status.
+  it('lets the stored status win over a blank external id, unlinked only when both are missing', () => {
+    render(<IntegrationLinksTable rows={[
+      row({ entity_id: 'f1', label: 'Failed', status: 'failed', external_id: null, error: 'HelloFlex answered 422' }),
+      row({ entity_id: 'p1', label: 'Pending', status: 'pending', external_id: null }),
+      row({ entity_id: 'n1', label: 'None', status: null, external_id: null }),
+      row({ entity_id: 'l1', label: 'Linked', status: null, external_id: 'X-1' }),
+    ]} loading={false} canEdit={false} onSave={vi.fn()} />)
+    expect(screen.getByText(t('integrations.links.status.failed'))).toBeInTheDocument()
+    expect(screen.getByText(t('integrations.links.status.pending'))).toBeInTheDocument()
+    expect(screen.getAllByText(t('integrations.links.status.unlinked'))).toHaveLength(1)
+    // The column header 'Gekoppeld' shares the word with the linked chip: count chips (spans) only.
+    expect(screen.getAllByText(t('integrations.links.status.linked'), { selector: 'span' })).toHaveLength(1)
+  })
+
   it('renders the external id read-only without edit permission', () => {
     render(<IntegrationLinksTable rows={[row({})]} loading={false} canEdit={false} onSave={vi.fn()} />)
     expect(screen.queryByRole('textbox')).not.toBeInTheDocument()

@@ -73,7 +73,7 @@ export default function IntegrationLinksTable({ rows, loading, canEdit, onSave }
         const dirty = value.trim() !== (r.external_id ?? '')
         return (
           <div style={{ display: 'flex', gap: 6, alignItems: 'center' }}>
-            <input maxLength={255} aria-label={t('integrations.links.columns.externalId')} value={value} style={fieldInputStyle}
+            <input maxLength={255} aria-label={t('integrations.links.columns.externalId')} value={value} style={{ ...fieldInputStyle, width: 180 }}
               onChange={(e) => setDrafts((prev) => ({ ...prev, [key]: e.target.value }))} />
             <SaveButton iconOnly aria-label={t('common:save')} size="sm" saved={!dirty}
               disabled={!dirty || savingKey === key} onClick={() => save(r)}>
@@ -84,8 +84,9 @@ export default function IntegrationLinksTable({ rows, loading, canEdit, onSave }
       } },
     { key: 'status', header: t('integrations.links.columns.status'), nowrap: true,
       render: (r) => {
-        // Blank id = unlinked whatever the stored status; an id without a stored status reads as linked.
-        const s = !r.external_id ? 'unlinked' : (r.status ?? 'linked')
+        // The stored status wins (a failed or pending row usually has no id yet); without one, an id reads as
+        // linked and a blank id as unlinked (screen probe 13-11: the Mislukt filter returned a 'Niet gekoppeld' chip).
+        const s = r.status ?? (r.external_id ? 'linked' : 'unlinked')
         return <StatusPill label={t(`integrations.links.status.${s}`)} color={STATUS_COLOR[s]} />
       } },
     { key: 'error', header: t('integrations.links.columns.error'),
