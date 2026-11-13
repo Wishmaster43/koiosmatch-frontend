@@ -68,15 +68,15 @@ const mapContactFunctions = (res: AxiosResponse): ContactFunctionsLookupData => 
 // The tenant's contact-person job-title lookup plus the free-entry flag, both
 // read off the SAME cached response (see the file doc for the two-key pitfall this avoids).
 export function useContactFunctions() {
-  const { t } = useTranslation('common')
+  const { t, i18n } = useTranslation('common')
   const { data, invalidate } = useCachedLookup('/contact-functions?active=1', mapContactFunctions, FALLBACK)
   // Seeded defaults render in the user language; a tenant value stays as typed
   // (LOOKUP-I18N-1). VALUE stays the raw backend name (never translated) so the
   // submitted `function` is always what the backend recognises; only LABEL is
   // translated for display.
   const contactFunctions = useMemo(
-    () => translateSeedList(t, 'contactFunctions', data.contactFunctions.map(name => ({ value: name, label: name }))),
-    [data.contactFunctions, t],
+    () => translateSeedList(t, 'contactFunctions', data.contactFunctions.map(name => ({ value: name, label: name })), i18n),
+    [data.contactFunctions, t, i18n],
   )
   return { contactFunctions, allowFreeEntry: data.apiFreeEntry, invalidate }
 }

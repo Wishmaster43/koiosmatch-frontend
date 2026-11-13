@@ -90,7 +90,7 @@ const TaskLookupsContext = createContext<TaskLookupsValue | null>(null)
 // back to the seed defaults per-list on a 404/empty response, and exposes both
 // the raw lists and derived meta-resolvers/KPI helpers to every task screen.
 export function TaskLookupsProvider({ children }: { children: ReactNode }) {
-  const { t } = useTranslation('common')
+  const { t, i18n } = useTranslation('common')
   const [statusesRaw,   setStatuses]   = useState<TaskLookupItem[]>(DEFAULT_TASK_STATUSES)
   const [typesRaw,      setTypes]      = useState<TaskLookupItem[]>(DEFAULT_TASK_TYPES)
   const [prioritiesRaw, setPriorities] = useState<TaskLookupItem[]>(DEFAULT_TASK_PRIORITIES)
@@ -106,10 +106,10 @@ export function TaskLookupsProvider({ children }: { children: ReactNode }) {
   }, [])
 
   // Seeded defaults render in the user language; a tenant value stays as typed (LOOKUP-I18N-1).
-  const statuses   = useMemo(() => translateSeedList(t, 'taskStatuses', statusesRaw), [statusesRaw, t])
+  const statuses   = useMemo(() => translateSeedList(t, 'taskStatuses', statusesRaw, i18n), [statusesRaw, t, i18n])
   // Same seed-translation treatment as statuses above, for the activity-type list.
-  const types      = useMemo(() => translateSeedList(t, 'taskTypes', typesRaw), [typesRaw, t])
-  const priorities = useMemo(() => translateSeedList(t, 'taskPriorities', prioritiesRaw), [prioritiesRaw, t])
+  const types      = useMemo(() => translateSeedList(t, 'taskTypes', typesRaw, i18n), [typesRaw, t, i18n])
+  const priorities = useMemo(() => translateSeedList(t, 'taskPriorities', prioritiesRaw, i18n), [prioritiesRaw, t, i18n])
 
   // The set of status keys that count as "completed" (for open/overdue/done KPIs).
   const doneStatusValues = statuses.filter(s => s.is_done).map(s => s.value)

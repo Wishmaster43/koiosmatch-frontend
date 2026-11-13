@@ -143,7 +143,7 @@ const VacancyLookupsContext = createContext<VacancyLookupsValue | null>(null)
 
 export function VacancyLookupsProvider({ children }: { children: ReactNode }) {
   // LOOKUP-I18N-1 catalogue's keys live in the 'common' namespace.
-  const { t: tCommon } = useTranslation('common')
+  const { t: tCommon, i18n } = useTranslation('common')
   const [statusesRaw,        setStatuses]        = useState<VacancyLookupItem[]>(DEFAULT_VACANCY_STATUSES)
   const [phasesRaw,          setPhases]          = useState<VacancyLookupItem[]>(DEFAULT_VACANCY_PHASES)
   const [seniorityLevelsRaw, setSeniorityLevels] = useState<VacancyLookupItem[]>(DEFAULT_SENIORITY_LEVELS)
@@ -164,14 +164,14 @@ export function VacancyLookupsProvider({ children }: { children: ReactNode }) {
 
   // Seeded defaults render in the user language; a tenant value stays as typed (LOOKUP-I18N-1).
   // All five lists route through the shared catalogue (family names below).
-  const statuses        = useMemo(() => translateSeedList(tCommon, 'vacancyStatuses', statusesRaw), [statusesRaw, tCommon])
+  const statuses        = useMemo(() => translateSeedList(tCommon, 'vacancyStatuses', statusesRaw, i18n), [statusesRaw, tCommon, i18n])
   // Phases render through the funnelTypes seed family (they ARE funnel stages), unlike the other lists' own catalogue names.
-  const phases          = useMemo(() => translateSeedList(tCommon, 'funnelTypes', phasesRaw), [phasesRaw, tCommon])
+  const phases          = useMemo(() => translateSeedList(tCommon, 'funnelTypes', phasesRaw, i18n), [phasesRaw, tCommon, i18n])
   // Seniority levels get the same translate-or-passthrough treatment as statuses above.
-  const seniorityLevels = useMemo(() => translateSeedList(tCommon, 'seniorityLevels', seniorityLevelsRaw), [seniorityLevelsRaw, tCommon])
+  const seniorityLevels = useMemo(() => translateSeedList(tCommon, 'seniorityLevels', seniorityLevelsRaw, i18n), [seniorityLevelsRaw, tCommon, i18n])
   // Education levels get the same translate-or-passthrough treatment as statuses above.
-  const educationLevels = useMemo(() => translateSeedList(tCommon, 'educationLevels', educationLevelsRaw), [educationLevelsRaw, tCommon])
-  const channels         = useMemo(() => translateSeedList(tCommon, 'channels', channelsRaw), [channelsRaw, tCommon])
+  const educationLevels = useMemo(() => translateSeedList(tCommon, 'educationLevels', educationLevelsRaw, i18n), [educationLevelsRaw, tCommon, i18n])
+  const channels         = useMemo(() => translateSeedList(tCommon, 'channels', channelsRaw, i18n), [channelsRaw, tCommon, i18n])
 
   // value → item helper with a neutral fallback so the UI never crashes.
   const value: VacancyLookupsValue = {

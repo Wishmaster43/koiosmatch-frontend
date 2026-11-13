@@ -16,9 +16,9 @@ afterEach(() => vi.clearAllMocks())
 
 // LOOKUP-I18N-1: `contactFunctions` is `{ value, label }[]`, not a bare string[] —
 // value is the untranslated backend name, label the (possibly translated) display
-// text. This suite never initialises react-i18next, so `t(key, { defaultValue })`
-// falls back to `defaultValue` verbatim, i.e. label === value here (real-locale
-// translation is covered by lookupSeedI18n.test.ts, the pure helper's own suite).
+// text. This suite never initialises react-i18next: the seed-label helper's labelOrRaw
+// path then returns the raw label through its empty-i18n guard, i.e. label === value
+// here (real-locale translation is covered by lookupSeedI18n.test.ts, the pure helper's own suite).
 const asOptions = (names: string[]) => names.map(name => ({ value: name, label: name }))
 
 // useCachedLookup caches per URL at module scope (one fetch per session), so each

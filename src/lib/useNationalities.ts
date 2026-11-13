@@ -57,7 +57,7 @@ const mapNationalities = (res: AxiosResponse): NationalitiesData | null => {
 
 // Cached tenant nationality lookup + a name-to-flag-emoji map derived from each row's country code (see the module doc above for why both share one cache entry).
 export function useNationalities() {
-  const { t } = useTranslation('common')
+  const { t, i18n } = useTranslation('common')
   const { data } = useCachedLookup('/nationalities?active=1', mapNationalities, DEFAULT_DATA)
   // Seeded defaults render in the user language; a tenant value stays as typed (LOOKUP-I18N-1).
   // Flags are re-keyed onto the translated name so `flags[name]` still resolves for callers
@@ -67,14 +67,14 @@ export function useNationalities() {
     // LOOKUP-I18N-1 SAFETY: the picker saves the string it shows, so the stored names stay
     // raw and only `options` carries a translated label (display sites use useSeedLabel).
     const names = data.names
-    const options = data.names.map(name => ({ value: name, label: translateSeedLabel(t, 'nationalities', { label: name }), key: data.keys[name] ?? null }))
+    const options = data.names.map(name => ({ value: name, label: translateSeedLabel(t, 'nationalities', { label: name }, i18n), key: data.keys[name] ?? null }))
     const flags: Record<string, string> = {}
     data.names.forEach((name, i) => {
       const flag = data.flags[name]
       if (flag) flags[names[i]] = flag
     })
     return { names, options, flags }
-  }, [data, t])
+  }, [data, t, i18n])
 
   return { nationalities: translated.names, nationalityOptions: translated.options, flags: translated.flags }
 }

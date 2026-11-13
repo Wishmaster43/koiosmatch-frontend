@@ -18,6 +18,15 @@ vi.mock('@/lib/api', async () => {
 
 const mockedGet = vi.mocked(api.get)
 
+// react-i18next without an initialised instance hands out a fresh `i18n` object per render, which
+// would defeat the identity assertions below; a stable t + i18n pair mirrors the real, initialised app.
+vi.mock('react-i18next', () => {
+  const t = (key: string) => key
+  const i18n = { exists: () => false, language: 'en' }
+  const value = { t, i18n }
+  return { useTranslation: () => value }
+})
+
 // Answer each lookup endpoint from one map; anything unlisted resolves empty (→ seed).
 function mockLookups(byUrl: Record<string, unknown[]>) {
   mockedGet.mockImplementation((url: string) =>

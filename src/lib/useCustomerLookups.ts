@@ -86,17 +86,17 @@ const metaIn = (list: LookupOption[]) => (v?: string | null): LookupOption => li
 // Tenant customer/location/department/contact status lookups, with translated seed
 // fallbacks and a value→item meta helper per list (mirrors useGenders/useFunctions).
 export function useCustomerLookups() {
-  const { t } = useTranslation('common')
+  const { t, i18n } = useTranslation('common')
   const { data, loading } = useCachedLookup('/settings/customer-lookups', mapCustomerLookups, FALLBACK)
 
   // Seeded defaults render in the user language; a tenant value stays as typed (LOOKUP-I18N-1).
   // Memoised: consumers put these arrays in dependency arrays (§9 stable reference).
-  const statuses           = useMemo(() => translateSeedList(t, 'customerStatuses', data.statuses), [data.statuses, t])
+  const statuses           = useMemo(() => translateSeedList(t, 'customerStatuses', data.statuses, i18n), [data.statuses, t, i18n])
   // Same seed-translation treatment as `statuses` above, for locations.
-  const locationStatuses   = useMemo(() => translateSeedList(t, 'subStatuses', data.locationStatuses), [data.locationStatuses, t])
+  const locationStatuses   = useMemo(() => translateSeedList(t, 'subStatuses', data.locationStatuses, i18n), [data.locationStatuses, t, i18n])
   // Same seed-translation treatment as `statuses` above, for departments.
-  const departmentStatuses = useMemo(() => translateSeedList(t, 'subStatuses', data.departmentStatuses), [data.departmentStatuses, t])
-  const contactStatuses    = useMemo(() => translateSeedList(t, 'subStatuses', data.contactStatuses), [data.contactStatuses, t])
+  const departmentStatuses = useMemo(() => translateSeedList(t, 'subStatuses', data.departmentStatuses, i18n), [data.departmentStatuses, t, i18n])
+  const contactStatuses    = useMemo(() => translateSeedList(t, 'subStatuses', data.contactStatuses, i18n), [data.contactStatuses, t, i18n])
 
   // One memoised helper per list: its identity only changes when the list does (§9 stable reference).
   const statusMeta           = useMemo(() => metaIn(statuses), [statuses])

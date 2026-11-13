@@ -196,7 +196,7 @@ const LookupsContext = createContext<LookupsValue | null>(null)
 
 // Loads the tenant's candidate lookups once a session exists (login/tenant-switch), keeping the seed defaults meanwhile so the UI never renders empty pickers pre-login or on failure.
 export function LookupsProvider({ children }: { children: ReactNode }) {
-  const { t } = useTranslation('common')
+  const { t, i18n } = useTranslation('common')
   const [candidateTypesRaw, setCandidateTypes] = useState<LookupItem[]>(DEFAULT_CANDIDATE_TYPES)
   const [phasesRaw,         setPhases]         = useState<LookupItem[]>(DEFAULT_PHASES)
   const [funnelTypesRaw,    setFunnelTypes]    = useState<LookupItem[]>(DEFAULT_FUNNEL_TYPES)
@@ -229,12 +229,12 @@ export function LookupsProvider({ children }: { children: ReactNode }) {
   }, [ready, scopeKey])
 
   // Seeded defaults render in the user language; a tenant value stays as typed (LOOKUP-I18N-1).
-  const candidateTypes = useMemo(() => translateSeedList(t, 'candidateTypes', candidateTypesRaw), [candidateTypesRaw, t])
+  const candidateTypes = useMemo(() => translateSeedList(t, 'candidateTypes', candidateTypesRaw, i18n), [candidateTypesRaw, t, i18n])
   // Same seed-or-tenant-value translation as candidateTypes above, for phases.
-  const phases         = useMemo(() => translateSeedList(t, 'phases', phasesRaw), [phasesRaw, t])
+  const phases         = useMemo(() => translateSeedList(t, 'phases', phasesRaw, i18n), [phasesRaw, t, i18n])
   // Same translation, for funnel types.
-  const funnelTypes    = useMemo(() => translateSeedList(t, 'funnelTypes', funnelTypesRaw), [funnelTypesRaw, t])
-  const statuses       = useMemo(() => translateSeedList(t, 'statuses', statusesRaw), [statusesRaw, t])
+  const funnelTypes    = useMemo(() => translateSeedList(t, 'funnelTypes', funnelTypesRaw, i18n), [funnelTypesRaw, t, i18n])
+  const statuses       = useMemo(() => translateSeedList(t, 'statuses', statusesRaw, i18n), [statusesRaw, t, i18n])
   // Availability never fetches (C-39 below) and has no seed-catalogue entry — always the
   // seed, always translated through its own local key lookup.
   const availability   = useMemo(() => translateSeedLabels(t, 'availability', availabilityRaw), [availabilityRaw, t])
