@@ -21,25 +21,25 @@ const FLAVORS = ['snel', 'slim', 'max']
 
 describe('KoiosModelPicker — stand names, never the vendor id', () => {
   it('shows the active flavour as its stand label ("Snel"), not the raw id', () => {
-    render(<KoiosModelPicker models={FLAVORS} value="snel" onChange={vi.fn()} t={t} />)
+    render(<KoiosModelPicker models={FLAVORS} value="snel" onChange={vi.fn()} t={t} i18n={i18n} />)
     expect(screen.getByText('Snel')).toBeInTheDocument()
     expect(screen.queryByText('snel')).not.toBeInTheDocument()
   })
 
   it('lists every option by its stand label in the dropdown', () => {
-    render(<KoiosModelPicker models={FLAVORS} value="snel" onChange={vi.fn()} t={t} />)
+    render(<KoiosModelPicker models={FLAVORS} value="snel" onChange={vi.fn()} t={t} i18n={i18n} />)
     fireEvent.click(screen.getByRole('button', { name: 'Snel' }))
     expect(screen.getByText('Slim')).toBeInTheDocument()
     expect(screen.getByText('Max')).toBeInTheDocument()
   })
 
   it('falls back to the raw id for a model outside the known flavour/tier whitelist', () => {
-    render(<KoiosModelPicker models={['gpt-4o', 'snel']} value="gpt-4o" onChange={vi.fn()} t={t} />)
+    render(<KoiosModelPicker models={['gpt-4o', 'snel']} value="gpt-4o" onChange={vi.fn()} t={t} i18n={i18n} />)
     expect(screen.getByText('gpt-4o')).toBeInTheDocument()
   })
 
   it('renders nothing with fewer than two selectable models (single-model tenants)', () => {
-    const { container } = render(<KoiosModelPicker models={['snel']} value="snel" onChange={vi.fn()} t={t} />)
+    const { container } = render(<KoiosModelPicker models={['snel']} value="snel" onChange={vi.fn()} t={t} i18n={i18n} />)
     expect(container).toBeEmptyDOMElement()
   })
 
@@ -47,7 +47,7 @@ describe('KoiosModelPicker — stand names, never the vendor id', () => {
     const options: KoiosModelOption[] = [
       { id: 'custom-vendor-id', label: 'Custom vendor model', hint: 'Server-provided hint text', cost_rank: 2 },
     ]
-    render(<KoiosModelPicker models={['custom-vendor-id', 'snel']} options={options} value="custom-vendor-id" onChange={vi.fn()} t={t} />)
+    render(<KoiosModelPicker models={['custom-vendor-id', 'snel']} options={options} value="custom-vendor-id" onChange={vi.fn()} t={t} i18n={i18n} />)
     expect(screen.getByText('Custom vendor model')).toBeInTheDocument()
     fireEvent.click(screen.getByRole('button', { name: 'Custom vendor model' }))
     expect(screen.getByText('Server-provided hint text')).toBeInTheDocument()
@@ -60,7 +60,7 @@ describe('KoiosModelPicker — stand names, never the vendor id', () => {
       { id: 'snel', label: 'Snelst en voordeligst', hint: 'Snelst en voordeligst — prima voor de meeste chats', cost_rank: 1 },
       { id: 'slim', label: 'Slimste keuze', hint: 'Slimste keuze voor de meeste taken', cost_rank: 2 },
     ]
-    render(<KoiosModelPicker models={FLAVORS} options={options} value="snel" onChange={vi.fn()} t={t} />)
+    render(<KoiosModelPicker models={FLAVORS} options={options} value="snel" onChange={vi.fn()} t={t} i18n={i18n} />)
     expect(screen.getByText('Snel')).toBeInTheDocument()
     expect(screen.queryByText('Snelst en voordeligst')).not.toBeInTheDocument()
   })

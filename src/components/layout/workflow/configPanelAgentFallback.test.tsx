@@ -12,7 +12,7 @@ import { render, screen, fireEvent, waitFor } from '@testing-library/react'
 import ConfigPanel from './ConfigPanel'
 import type { FlowNode } from '@/types/workflow'
 
-vi.mock('react-i18next', () => ({ initReactI18next: { type: '3rdParty', init: () => {} }, useTranslation: () => ({ t: (k: string, opts?: { defaultValue?: string }) => opts?.defaultValue ?? k, i18n: { language: 'nl', exists: () => false } }) }))
+vi.mock('react-i18next', () => ({ initReactI18next: { type: '3rdParty', init: () => {} }, useTranslation: () => ({ t: (k: string) => k, i18n: { language: 'nl', exists: () => false } }) }))
 vi.mock('@/components/layout/workflow/useModuleCatalog', () => ({ useModuleCatalog: () => ({ catalog: {} }) }))
 vi.mock('@/components/layout/workflow/AgentTestPanel', () => ({ default: () => null }))
 vi.mock('@/components/layout/workflow/OutputTree', () => ({ default: () => null }))
@@ -33,7 +33,7 @@ vi.mock('@/lib/api', () => ({
 }))
 
 function openAgentSelect() {
-  // The t mock echoes the defaultValue, i.e. the registry's English source label (MODULES-EN-1).
+  // The exists stub knows no key, so labelOrRaw renders the registry's English source label (MODULES-EN-1).
   const wrapper = screen.getByText('AI agent', { selector: 'label' }).closest('div')!
   const trigger = wrapper.querySelector('[aria-haspopup="listbox"]') as HTMLElement
   fireEvent.click(trigger)

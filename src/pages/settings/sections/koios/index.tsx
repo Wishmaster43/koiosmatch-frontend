@@ -42,7 +42,7 @@ interface KoiosSettingsData {
 
 // Koios AI settings screen (status/models/rates); a 403 degrades to a calm unavailable notice rather than an error (see file header).
 export default function KoiosSettings() {
-  const { t } = useTranslation('koios')
+  const { t, i18n } = useTranslation('koios')
   const [settings, setSettings] = useState<KoiosSettingsData | null>(null)
   const [phase, setPhase] = useState<'loading' | 'ready' | 'unavailable' | 'error'>('loading')
   // Sub-tab state: overview (status+models) vs the new learning report (C1-lane 2).
@@ -86,7 +86,7 @@ export default function KoiosSettings() {
           {tab === 'overview' && (
             <>
               <KoiosStatusCard status={settings?.status} t={t} />
-              <KoiosModelsCard models={settings?.models} t={t}
+              <KoiosModelsCard models={settings?.models} t={t} i18n={i18n}
                 onChanged={(model) => { setSettings((s) => (s ? { ...s, models: { ...s.models, active: model } } : s)); invalidateKoiosSettings() }} />
               <KoiosModeDefaultCard />
               <KoiosEffortDefaultCard />

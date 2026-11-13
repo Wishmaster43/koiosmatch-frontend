@@ -16,7 +16,7 @@ import type { FlowNode } from '@/types/workflow'
 vi.mock('react-i18next', async () => {
   const actual = await vi.importActual<typeof import('react-i18next')>('react-i18next')
   return { ...actual, useTranslation: () => ({
-    t: (k: string, opts?: { defaultValue?: string }) => opts?.defaultValue ?? k,
+    t: (k: string) => k,
     i18n: { language: 'nl', exists: () => false }
   }) }
 })

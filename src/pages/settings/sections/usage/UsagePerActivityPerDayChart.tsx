@@ -5,8 +5,7 @@
  */
 import { useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
-import type { TFunction } from 'i18next'
-import { labelOrRaw, type KeyChecker } from '@/lib/labelOrRaw'
+import { activityLabel } from './activityLabel'
 import { useDateFormat } from '@/lib/datetime'
 import WeeklyBarChartCard from '@/components/charts/WeeklyBarChartCard'
 import { SectionTitle } from '@/components/ui/typography'
@@ -17,11 +16,6 @@ import type { BillingUsageWorkflow } from '@/types/billingUsage'
 interface UsagePerActivityPerDayChartProps {
   workflow: BillingUsageWorkflow | undefined
   phase: 'loading' | 'ready' | 'empty' | 'error'
-}
-
-// Activity label translation fallback — activity codes are backend slugs, translated via the existing activity map key.
-function activityLabel(t: TFunction, i18n: KeyChecker, code: string): string {
-  return labelOrRaw(t, i18n, `billing.usage.activity.activityMap.${code}`, code, 'settings')
 }
 
 // Day × activity breakdown chart: stacks activities into daily bars.

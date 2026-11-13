@@ -11,7 +11,7 @@ import { render, screen } from '@testing-library/react'
 import ConfigPanel from './ConfigPanel'
 import type { FlowNode } from '@/types/workflow'
 
-vi.mock('react-i18next', () => ({ initReactI18next: { type: '3rdParty', init: () => {} }, useTranslation: () => ({ t: (k: string, opts?: { defaultValue?: string }) => opts?.defaultValue ?? k, i18n: { language: 'nl', exists: () => false } }) }))
+vi.mock('react-i18next', () => ({ initReactI18next: { type: '3rdParty', init: () => {} }, useTranslation: () => ({ t: (k: string) => k, i18n: { language: 'nl', exists: () => false } }) }))
 // The lookup fields on this schema are not under test: the client rejects every read explicitly (no network, no uncaught throw).
 vi.mock('@/lib/api', () => ({ default: { get: vi.fn(() => Promise.reject(new Error('network disabled in this test'))) }, unwrapList: (v: unknown) => v }))
 vi.mock('@/components/layout/workflow/useModuleCatalog', () => ({ useModuleCatalog: () => ({ catalog: {} }) }))

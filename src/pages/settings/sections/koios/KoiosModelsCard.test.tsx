@@ -11,8 +11,8 @@ import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { render, screen, fireEvent, waitFor } from '@testing-library/react'
 import KoiosModelsCard, { type KoiosModelsData } from './KoiosModelsCard'
 import type { TFn } from '@/types/koios'
-// Real i18n init so the component's useTranslation yields a working key checker.
-import '@/i18n'
+// Real i18n instance: the test passes it as the `i18n` prop the component reads its key checker from.
+import i18n from '@/i18n'
 
 // The API call itself is mocked — no live /api/ai/koios/* call ever fires (API-CREDITS-1).
 const mockUpdateKoiosModel = vi.fn()
@@ -58,7 +58,7 @@ describe('KoiosModelsCard', () => {
   // (a) the active flavour must be unmistakable: aria-checked=true AND a visible
   // check mark (lucide's Check renders class "lucide-check"), inactive cards carry neither.
   it('marks the active flavour with aria-checked and a visible check mark', () => {
-    render(<KoiosModelsCard models={models} t={t} />)
+    render(<KoiosModelsCard models={models} t={t} i18n={i18n} />)
     const activeRadio = screen.getByRole('radio', { name: /models.tier.smart/ })
     expect(activeRadio).toHaveAttribute('aria-checked', 'true')
     expect(activeRadio.querySelector('svg.lucide-check')).not.toBeNull()
@@ -72,18 +72,18 @@ describe('KoiosModelsCard', () => {
   // Opus F2: active ∉ selectable (a config-invariant slip) must render an honest
   // notice — never three unmarked radios, which is Danny's original complaint.
   it('renders an honest notice when the active flavour is not in the selectable set', () => {
-    render(<KoiosModelsCard models={{ active: 'claude-legacy-1', selectable: models.selectable }} t={t} />)
+    render(<KoiosModelsCard models={{ active: 'claude-legacy-1', selectable: models.selectable }} t={t} i18n={i18n} />)
     expect(screen.getByRole('status')).toHaveTextContent('models.activeUnknown')
     expect(screen.queryAllByRole('radio', { checked: true })).toHaveLength(0)
   })
 
   it('renders no notice when the active flavour is selectable', () => {
-    render(<KoiosModelsCard models={models} t={t} />)
+    render(<KoiosModelsCard models={models} t={t} i18n={i18n} />)
     expect(screen.queryByRole('status')).not.toBeInTheDocument()
   })
 
   it('hides the raw model id from a normal (non-super-admin) user', () => {
-    render(<KoiosModelsCard models={models} t={t} />)
+    render(<KoiosModelsCard models={models} t={t} i18n={i18n} />)
     expect(screen.queryByText(/claude-sonnet-5/)).not.toBeInTheDocument()
     expect(screen.queryByText(/claude-haiku-4-5/)).not.toBeInTheDocument()
     expect(screen.queryByText(/claude-opus-4-8/)).not.toBeInTheDocument()
@@ -93,7 +93,7 @@ describe('KoiosModelsCard', () => {
   // admin still sees every raw id, rendered in Mono.
   it('shows the raw model id to a super admin (legacy vendor-id contract)', () => {
     mockUseAuth.mockReturnValue({ isSuperAdmin: () => true })
-    render(<KoiosModelsCard models={legacyModels} t={t} />)
+    render(<KoiosModelsCard models={legacyModels} t={t} i18n={i18n} />)
     expect(screen.getByText('claude-sonnet-5')).toBeInTheDocument()
     expect(screen.getByText('claude-haiku-4-5')).toBeInTheDocument()
     expect(screen.getByText('claude-opus-4-8')).toBeInTheDocument()
@@ -104,7 +104,7 @@ describe('KoiosModelsCard', () => {
   it('still PUTs the exact listed value when picking another flavour (legacy vendor-id contract)', async () => {
     mockUpdateKoiosModel.mockResolvedValue({})
     const onChanged = vi.fn()
-    render(<KoiosModelsCard models={legacyModels} t={t} onChanged={onChanged} />)
+    render(<KoiosModelsCard models={legacyModels} t={t} i18n={i18n} onChanged={onChanged} />)
     fireEvent.click(screen.getByRole('radio', { name: /models\.tier\.max/ }))
     await waitFor(() => expect(mockUpdateKoiosModel).toHaveBeenCalledWith('claude-opus-4-8'))
     expect(onChanged).toHaveBeenCalledWith('claude-opus-4-8')
@@ -125,7 +125,7 @@ describe('KoiosModelsCard', () => {
         { id: 'max', label: 'Max', hint: 'Krachtigst', cost_rank: 3 },
       ],
     }
-    render(<KoiosModelsCard models={flavourModels} t={t} />)
+    render(<KoiosModelsCard models={flavourModels} t={t} i18n={i18n} />)
     const fast = screen.getByRole('radio', { name: /models\.tier\.fast/ })
     const smart = screen.getByRole('radio', { name: /models\.tier\.smart/ })
     const max = screen.getByRole('radio', { name: /models\.tier\.max/ })
@@ -139,19 +139,19 @@ describe('KoiosModelsCard', () => {
 
   // OL:KOIOS-MODEL-VOCAB-1: cost_note renders when non-empty; absent when missing or null.
   it('renders cost_note when present', () => {
-    render(<KoiosModelsCard models={modelsWithCostNote} t={t} />)
+    render(<KoiosModelsCard models={modelsWithCostNote} t={t} i18n={i18n} />)
     expect(screen.getByText('Kosten per token gelden volgens het tariefdocument.')).toBeInTheDocument()
   })
 
   it('renders no cost_note when absent', () => {
-    render(<KoiosModelsCard models={models} t={t} />)
+    render(<KoiosModelsCard models={models} t={t} i18n={i18n} />)
     expect(screen.queryByText(/kosten per token/)).not.toBeInTheDocument()
   })
 
   // OL:KOIOS-MODEL-VOCAB-1: picking a costlier model shows a warning + confirm/cancel,
   // and does NOT call the update until confirmed.
   it('shows a costlier-model warning when picking a more expensive model', () => {
-    render(<KoiosModelsCard models={models} t={t} />)
+    render(<KoiosModelsCard models={models} t={t} i18n={i18n} />)
     // Pick max (cost_rank 3) while active is slim (cost_rank 2).
     fireEvent.click(screen.getByRole('radio', { name: /models\.tier\.max/ }))
     // The warning appears with the model label (resolved via t()).
@@ -163,7 +163,7 @@ describe('KoiosModelsCard', () => {
   it('calls the update when confirming the costlier-model pick', async () => {
     mockUpdateKoiosModel.mockResolvedValue({})
     const onChanged = vi.fn()
-    render(<KoiosModelsCard models={models} t={t} onChanged={onChanged} />)
+    render(<KoiosModelsCard models={models} t={t} i18n={i18n} onChanged={onChanged} />)
     // Pick max (cost_rank 3).
     fireEvent.click(screen.getByRole('radio', { name: /models\.tier\.max/ }))
     // Confirm the warning.
@@ -174,7 +174,7 @@ describe('KoiosModelsCard', () => {
   })
 
   it('clears the warning when canceling the costlier-model pick', () => {
-    render(<KoiosModelsCard models={models} t={t} />)
+    render(<KoiosModelsCard models={models} t={t} i18n={i18n} />)
     // Pick max.
     fireEvent.click(screen.getByRole('radio', { name: /models\.tier\.max/ }))
     expect(screen.getByRole('status')).toBeInTheDocument()
@@ -188,7 +188,7 @@ describe('KoiosModelsCard', () => {
   it('calls the update immediately when picking a cheaper or equal-cost model', async () => {
     mockUpdateKoiosModel.mockResolvedValue({})
     const onChanged = vi.fn()
-    render(<KoiosModelsCard models={models} t={t} onChanged={onChanged} />)
+    render(<KoiosModelsCard models={models} t={t} i18n={i18n} onChanged={onChanged} />)
     // Pick snel (cost_rank 1) while active is slim (cost_rank 2) — cheaper.
     fireEvent.click(screen.getByRole('radio', { name: /models\.tier\.fast/ }))
     // No warning appears; the update is called immediately.
@@ -200,7 +200,7 @@ describe('KoiosModelsCard', () => {
   // SETTINGS-INCON-B1b: the confirmed active model reads as chosen via the §4
   // "aan/gelukt" success pair, same green as the super-admin package picker.
   it('paints the active (confirmed) model in the success pair', () => {
-    render(<KoiosModelsCard models={models} t={t} />)
+    render(<KoiosModelsCard models={models} t={t} i18n={i18n} />)
     const active = screen.getByRole('radio', { name: /models\.tier\.smart/ })
     expect(active.style.background).toBe('var(--color-success-bg)')
     expect(active.style.border).toBe('1px solid var(--color-success)')
@@ -209,7 +209,7 @@ describe('KoiosModelsCard', () => {
   // An unconfirmed costlier candidate must never be painted as if it already
   // succeeded — the success pair is suspended while a pick awaits confirmation.
   it('does not paint an unconfirmed costlier pending pick in the success pair', () => {
-    render(<KoiosModelsCard models={models} t={t} />)
+    render(<KoiosModelsCard models={models} t={t} i18n={i18n} />)
     fireEvent.click(screen.getByRole('radio', { name: /models\.tier\.max/ }))
     const pending = screen.getByRole('radio', { name: /models\.tier\.max/ })
     expect(pending.style.background).not.toBe('var(--color-success-bg)')
@@ -218,7 +218,7 @@ describe('KoiosModelsCard', () => {
   // SETTINGS-INCON-B1b: a real persist flashes the shared saved-state (SaveButton).
   it('flashes the saved state after a successful pick', async () => {
     mockUpdateKoiosModel.mockResolvedValue({})
-    render(<KoiosModelsCard models={models} t={t} />)
+    render(<KoiosModelsCard models={models} t={t} i18n={i18n} />)
     fireEvent.click(screen.getByRole('radio', { name: /models\.tier\.fast/ })) // cheaper, immediate
     await waitFor(() => expect(screen.getByText('models.saved')).toBeInTheDocument())
   })
@@ -227,7 +227,7 @@ describe('KoiosModelsCard', () => {
   // status line in this file (activeUnknown/pendingPick already carry role="status").
   it('announces a failed save via role="status"', async () => {
     mockUpdateKoiosModel.mockRejectedValue(new Error('boom'))
-    render(<KoiosModelsCard models={models} t={t} />)
+    render(<KoiosModelsCard models={models} t={t} i18n={i18n} />)
     fireEvent.click(screen.getByRole('radio', { name: /models\.tier\.fast/ })) // cheaper, immediate
     await waitFor(() => expect(screen.getByText('models.saveError')).toBeInTheDocument())
     expect(screen.getByText('models.saveError').closest('[role="status"]')).not.toBeNull()

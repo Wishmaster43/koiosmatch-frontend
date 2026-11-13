@@ -56,7 +56,7 @@ export default function KoiosPanel({ open, onClose, onNavigate, initialQuestion,
   onInitialQuestionConsumed?: () => void
 }) {
   // 'koios' alongside 'common' (VOICE-MODE-1: t(key, {ns:'koios'}) calls) — 'common' stays the default ns.
-  const { t } = useTranslation(['common', 'koios'])
+  const { t, i18n } = useTranslation(['common', 'koios'])
   const locale = useLocale()
   // All chat state + the synchronous /ai/koios/chat call live in the hook.
   const { messages, loading, model, setModel, effort, setEffort, voiceMode, setVoiceMode, send, reset } = useKoiosChat()
@@ -420,6 +420,7 @@ export default function KoiosPanel({ open, onClose, onNavigate, initialQuestion,
               value={model ?? settings?.models?.active}
               onChange={setModel}
               t={t}
+              i18n={i18n}
             />
 
             {/* K-147: per-chat effort override — capabilities-driven (hidden when the chosen

@@ -143,12 +143,8 @@ function ReportKpiBlock({ scopeId, catalogData }: { scopeId: ReportKpiScopeId; c
   const labelFor = (key: string): string => {
     const entry = availableCards.find(c => c.key === key)
     if (entry) {
-      // Try to use i18n label_key; fall back to BE label.
-      try {
-        return labelOrRaw(t, i18n, entry.label_key, entry.label, 'analytics')
-      } catch {
-        return entry.label
-      }
+      // Translated label_key, the server label as fallback.
+      return labelOrRaw(t, i18n, entry.label_key, entry.label, 'analytics')
     }
     return key
   }

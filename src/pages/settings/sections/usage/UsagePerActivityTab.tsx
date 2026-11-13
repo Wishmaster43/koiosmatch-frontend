@@ -11,8 +11,7 @@
  */
 import { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import type { TFunction } from 'i18next'
-import { labelOrRaw, type KeyChecker } from '@/lib/labelOrRaw'
+import { activityLabel } from './activityLabel'
 import api, { unwrap } from '@/lib/api'
 import { useNumberFormat } from '@/lib/formatters'
 import { SectionTitle, Mono } from '@/components/ui/typography'
@@ -29,12 +28,6 @@ interface UsagePerActivityTabProps {
   overviewPeriod: 'month' | 'prev_month'
   workflow: BillingUsageWorkflow | undefined
   workflowLoading: boolean
-}
-
-// Translate a raw activity code via the tenant-facing map, falling back to the
-// raw code itself so an unmapped future code still renders something (§0.5).
-function activityLabel(t: TFunction, i18n: KeyChecker, code: string): string {
-  return labelOrRaw(t, i18n, `billing.usage.activity.activityMap.${code}`, code, 'settings')
 }
 
 // AI-tokens-per-activity view (see the module doc above for the prev_month fallback and the split with the workflow-total endpoint).

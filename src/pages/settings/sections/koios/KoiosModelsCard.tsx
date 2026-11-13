@@ -22,7 +22,6 @@
 import { useState, useMemo } from 'react'
 import { Zap, Sparkles, Crown, Check, type LucideIcon } from 'lucide-react'
 import { updateKoiosModel } from './koiosApi'
-import { useTranslation } from 'react-i18next'
 import { tierKeyForModel, findModelOption, resolveModelLabel, resolveModelHint, type KoiosModelOption } from '@/lib/koiosModelTiers'
 import { useAuth } from '@/context/AuthContext'
 import SegmentedControl, { type SegmentedControlOption } from '@/components/ui/SegmentedControl'
@@ -30,6 +29,7 @@ import Button from '@/components/ui/Button'
 import SaveButton from '@/components/ui/SaveButton'
 import { SectionTitle, Caption, Mono, PageSubtitle } from '@/components/ui/typography'
 import type { TFn } from '@/types/koios'
+import type { KeyChecker } from '@/lib/labelOrRaw'
 
 // Frozen empty lists so a missing payload keeps one stable identity (memo deps).
 const EMPTY_SELECTABLE: string[] = []
@@ -61,14 +61,14 @@ export interface KoiosModelsData {
 interface KoiosModelsCardProps {
   models?: KoiosModelsData | null
   t: TFn
+  // The key checker for the model hints, passed by the settings index next to its t (same koios namespace).
+  i18n: KeyChecker
   onChanged?: (model: string) => void
 }
 
 // Tenant-facing model-tier picker (Snel/Slim/Max); the raw vendor id stays
 // super-admin-only (see the module doc comment above).
-export default function KoiosModelsCard({ models, t, onChanged }: KoiosModelsCardProps) {
-  // The key checker for model hints; t still arrives from the settings index (same koios namespace).
-  const { i18n } = useTranslation('koios')
+export default function KoiosModelsCard({ models, t, i18n, onChanged }: KoiosModelsCardProps) {
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [pendingPick, setPendingPick] = useState<string | null>(null)

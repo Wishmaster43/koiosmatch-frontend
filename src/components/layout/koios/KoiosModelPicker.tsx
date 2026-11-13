@@ -12,19 +12,17 @@
  */
 import { useEffect, useRef, useState } from 'react'
 import { ChevronDown, Check } from 'lucide-react'
-import { useTranslation } from 'react-i18next'
 import { resolveModelLabel, resolveModelHint, type KoiosModelOption } from '@/lib/koiosModelTiers'
 import type { TFn } from '@/types/koios'
+import type { KeyChecker } from '@/lib/labelOrRaw'
 // PORTAL-MARKER-1: a click inside an open portalled picker menu is never "outside".
 import { isInsideDropdownPortal } from '@/lib/useDropdownPlacement'
 
 // Model-flavour picker for the Koios panel; see the module doc comment above for the
 // shared options vocabulary this shares with the Settings model picker.
-export default function KoiosModelPicker({ models, options, value, onChange, t }: {
-  models?: string[]; options?: KoiosModelOption[]; value?: string | null; onChange: (m: string) => void; t: TFn
+export default function KoiosModelPicker({ models, options, value, onChange, t, i18n }: {
+  models?: string[]; options?: KoiosModelOption[]; value?: string | null; onChange: (m: string) => void; t: TFn; i18n: KeyChecker
 }) {
-  // The key checker for model hints; t still arrives from the panel (same koios namespace).
-  const { i18n } = useTranslation('koios')
   const [open, setOpen] = useState(false)
   const ref = useRef<HTMLDivElement>(null)
 
