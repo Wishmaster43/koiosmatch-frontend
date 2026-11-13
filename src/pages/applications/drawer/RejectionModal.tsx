@@ -73,7 +73,7 @@ interface Props {
  * affordance) until rejections get their own draft-persistence route.
  */
 export default function RejectionModal({ application: a, onCancel, onConfirm, submitting, mode = 'reject', initialReasonId, initialNote }: Props) {
-  const { t } = useTranslation(['applications', 'common'])
+  const { t, i18n } = useTranslation(['applications', 'common'])
   const aliveRef = useRef(true)
   const isCorrection = mode === 'correct'
   const [reasons, setReasons] = useState<RejectionReason[]>([])
@@ -104,7 +104,7 @@ export default function RejectionModal({ application: a, onCancel, onConfirm, su
   // existing advice block and the new reason-field proposal badge below.
   const koiosAdvisesReject = !isCorrection && a.ai?.advice === 'reject'
   // DEMO-TAAL: the reason sentence in the user's language (key-driven, server sentence as fallback).
-  const adviceReason = resolveAdviceReason(a.ai, t)
+  const adviceReason = resolveAdviceReason(a.ai, t, i18n)
 
   const reason = reasons.find(r => String(r.id) === String(reasonId))
   const reasonLabel = reason?.name ?? reason?.label ?? ''

@@ -19,6 +19,7 @@
  */
 import { useEffect, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
+import { labelOrRaw } from '@/lib/labelOrRaw'
 import { XCircle, Edit2 } from 'lucide-react'
 import { useAuth } from '@/context/AuthContext'
 import api, { unwrap } from '@/lib/api'
@@ -42,7 +43,7 @@ const card = {
 // The rejected-outcome card, with a permission-gated
 // pencil that reopens RejectionModal in correction mode.
 export default function RejectionSummary({ application: a }: { application: ApplicationDetail }) {
-  const { t } = useTranslation(['applications', 'common'])
+  const { t, i18n } = useTranslation(['applications', 'common'])
   const { formatDate } = useDateFormat()
   const auth = useAuth()
   const canManage = auth?.hasPermission?.('applications.update') ?? false
@@ -124,9 +125,9 @@ export default function RejectionSummary({ application: a }: { application: Appl
   }
 
   const { reason_label: reasonLabel, reason_id: reasonId, note, channel, sent_at: sentAt } = rejection
-  // An unknown/renamed tenant channel still shows its raw value via defaultValue,
+  // An unknown/renamed tenant channel still shows its raw value via labelOrRaw,
   // instead of a missing-key string.
-  const channelLabel = channel ? t(`rejection.channels.${channel}`, { defaultValue: channel }) : ''
+  const channelLabel = channel ? labelOrRaw(t, i18n, `rejection.channels.${channel}`, channel, 'applications') : ''
   // Join only the parts that actually exist — never a dangling ' · ' separator.
   const metaParts = [
     sentAt ? t('rejection.sentOn', { date: formatDate(sentAt) }) : t('rejection.notSent'),

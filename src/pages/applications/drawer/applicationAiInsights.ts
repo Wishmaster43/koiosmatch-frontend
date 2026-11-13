@@ -7,6 +7,7 @@ import type { KoiosAdviceInsight } from '@/components/ai/KoiosAdviceBlock'
 // drag the i18n init into this pure builder). `futureAsZero` keeps the clamp this
 // builder always had: a future `created` reads as 0 days, never as unknown.
 import { daysSince } from '@/lib/localDate'
+import type { KeyChecker } from '@/lib/labelOrRaw'
 
 // A bound-namespace translate function (the caller already resolved the namespace).
 type Tx = (key: string, opts?: Record<string, unknown>) => string
@@ -64,10 +65,13 @@ export function buildApplicationAdviceInsights(a: ApplicationDetail, t: Tx, now:
  * (with the failed criterion interpolated), and the server's own sentence is the
  * fallback when no key came along (older payloads). Null when there is nothing.
  */
-export function resolveAdviceReason(ai: ApplicationDetail['ai'], t: Tx): string | null {
+export function resolveAdviceReason(ai: ApplicationDetail['ai'], t: Tx, i18n: KeyChecker): string | null {
   if (!ai) return null
   if (ai.advice_reason_key) {
-    return t(`rejection.adviceReasons.${ai.advice_reason_key}`, { criterion: ai.advice_reason_criterion ?? '', defaultValue: ai.advice_reason ?? '' })
+    // Known key renders with the criterion; otherwise the server sentence stays the fallback.
+    const key = `rejection.adviceReasons.${ai.advice_reason_key}`
+    // (the exists guard mirrors labelOrRaw: a tree without an i18n instance falls back, never throws)
+    return typeof i18n?.exists === 'function' && i18n.exists(key, { ns: 'applications' }) ? t(key, { ns: 'applications', criterion: ai.advice_reason_criterion ?? '' }) : (ai.advice_reason ?? '')
   }
   return ai.advice_reason || null
 }

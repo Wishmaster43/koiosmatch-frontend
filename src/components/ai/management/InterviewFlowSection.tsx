@@ -23,7 +23,7 @@ const renderFieldType = (value: unknown): string => (typeof value === 'string' ?
 // Read-only view of an agent's interview-flow design (see file docblock above) —
 // display only, since no flow-editing endpoint exists yet.
 export function InterviewFlowSection({ flow }: { flow?: InterviewFlow | null }) {
-  const { t } = useTranslation('workflows')
+  const { t, i18n } = useTranslation('workflows')
   const [showPrompt, setShowPrompt] = useState(false)
 
   // Empty state: agent has no interview flow linked yet.
@@ -80,7 +80,7 @@ export function InterviewFlowSection({ flow }: { flow?: InterviewFlow | null }) 
         <div style={{ marginBottom: 10 }}>
           <GroupLabel style={{ marginBottom: 5 }}>{t('ai.agent.interviewFlow.statusesLabel')}</GroupLabel>
           <div style={{ display: 'flex', flexWrap: 'wrap', gap: 5 }}>
-            {statuses.map(s => <SoftChip key={s} label={translateInterviewStatus(t, s)} color="var(--color-primary)" />)}
+            {statuses.map(s => <SoftChip key={s} label={translateInterviewStatus(t, i18n, s)} color="var(--color-primary)" />)}
           </div>
         </div>
       )}

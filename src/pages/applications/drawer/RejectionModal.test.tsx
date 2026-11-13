@@ -20,7 +20,7 @@ import type { ApplicationDetail } from '@/types/application'
 // i18n's real (async-initialising) instance can finish loading mid-suite once
 // another file in the run awaits a promise, flipping assertions from raw keys
 // to actual NL copy depending on run order.
-vi.mock('react-i18next', () => ({ useTranslation: () => ({ t: (k: string) => k }) }))
+vi.mock('react-i18next', () => ({ useTranslation: () => ({ t: (k: string) => k, i18n: { exists: () => true } }) }))
 
 vi.mock('@/components/ui/RichTextEditor', () => ({
   default: ({ value, onChange }: { value?: string; onChange: (v: string) => void }) => (

@@ -20,7 +20,7 @@ import { fullInterview, bareInterview } from './InterviewStatusCard.testKit'
 // real vi.fn so a specific test can override it (e.g. to assert interpolation
 // options) without disturbing every other test's plain key-echo default.
 const mockT = vi.fn((k: string) => k)
-vi.mock('react-i18next', () => ({ useTranslation: () => ({ t: mockT }) }))
+vi.mock('react-i18next', () => ({ useTranslation: () => ({ t: mockT, i18n: { exists: () => true } }) }))
 
 // Deterministic date echo: keeps the real i18n singleton out of the unit test.
 vi.mock('@/lib/localDate', async () => ({ ...(await vi.importActual<object>('@/lib/localDate')), formatDateTimeStr: (v: string) => `dt(${v})` }))

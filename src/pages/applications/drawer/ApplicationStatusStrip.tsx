@@ -94,7 +94,7 @@ export default function ApplicationStatusStrip({ application: a, onNavigateTab }
   // Danny 22-08: the "+" on the appointment row — the SAME plan flow the
   // Afspraken tab mounts (PlanIntakeModal, mode appointment).
   const [planning, setPlanning] = useState(false)
-  const { t } = useTranslation(['applications', 'common'])
+  const { t, i18n } = useTranslation(['applications', 'common'])
   // Seeded lookup labels the server embedded in the row render in the user language.
   const seedLabel = useSeedLabel()
   const { formatDate, formatDateTime } = useDateFormat()
@@ -103,7 +103,7 @@ export default function ApplicationStatusStrip({ application: a, onNavigateTab }
   const interviewStatusLabel = (iv: NonNullable<ApplicationDetail['interview']>) => {
     const raw = iv.currentStatus
     if (!raw) return t(`interview.category.${iv.category}`)
-    return translateInterviewStatus(t, raw)
+    return translateInterviewStatus(t, i18n, raw)
   }
 
   // APP-STAGE-DURATIONS-1 (landed): the CURRENT stage's real entry timestamp,

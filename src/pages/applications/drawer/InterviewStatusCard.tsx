@@ -100,7 +100,7 @@ export default function InterviewStatusCard({
   vacancyId?: Id | null
   vacancyInterviewWorkflow?: InterviewWorkflowRef | null | undefined
 }) {
-  const { t } = useTranslation('applications')
+  const { t, i18n } = useTranslation('applications')
   const auth = useAuth()
   // Mirrors ApplicationsPage's own canManage gate and the route's own
   // `permission:applications.update` middleware — same permission string, same
@@ -220,7 +220,7 @@ export default function InterviewStatusCard({
             // whose current_status is a mid-flow step must never carry that step
             // name as the only status text with "finished" left to colour alone (§6).
             label={live.currentStatus && ['COMPLETED', 'DISQUALIFIED'].includes(live.currentStatus)
-              ? translateInterviewStatus(t, live.currentStatus)
+              ? translateInterviewStatus(t, i18n, live.currentStatus)
               : t(`interview.category.${category}`)}
             color={interviewCategoryColor(category)}
           />
@@ -241,7 +241,7 @@ export default function InterviewStatusCard({
             {(live.currentStatus || live.total > 0) && <MetaDot />}
             {live.currentStatus && (
               <span style={{ fontSize: 12, color: 'var(--text)' }}>
-                {translateInterviewStatus(t, live.currentStatus)}
+                {translateInterviewStatus(t, i18n, live.currentStatus)}
               </span>
             )}
             {/* INTERVIEW-STEP-COUNT-1: prefer the question-only count

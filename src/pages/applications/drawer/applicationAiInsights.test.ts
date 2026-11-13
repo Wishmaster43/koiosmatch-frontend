@@ -65,19 +65,28 @@ describe('buildApplicationAdviceInsights', () => {
 // DEMO-TAAL (CMBE 7f10f04c): the advice sentence is key-driven with the server
 // sentence as the fallback for older payloads — and never a raw t() of an unknown key.
 describe('resolveAdviceReason', () => {
-  const t = vi.fn((key: string, opts?: Record<string, unknown>) => `${key}|${String(opts?.criterion ?? '')}|${String(opts?.defaultValue ?? '')}`)
+  // The echo carries the namespace and the criterion t received, so a wrong-namespace lookup would show.
+  const t = vi.fn((key: string, opts?: Record<string, unknown>) => `${String(opts?.ns ?? '')}:${key}|${String(opts?.criterion ?? '')}`)
 
-  it('translates a known key with the failed criterion and the server sentence as defaultValue', () => {
-    const out = resolveAdviceReason({ advice: 'reject', advice_reason: 'Hard criterium niet gehaald: BIG.', advice_reason_key: 'hard_fail', advice_reason_criterion: 'BIG' }, t)
-    expect(out).toBe('rejection.adviceReasons.hard_fail|BIG|Hard criterium niet gehaald: BIG.')
+  const known = { exists: (_key: string, o?: { ns?: string }) => o?.ns === 'applications' }
+  const unknown = { exists: () => false }
+
+  it('translates a known key with the failed criterion', () => {
+    const out = resolveAdviceReason({ advice: 'reject', advice_reason: 'server sentence', advice_reason_key: 'hard_fail', advice_reason_criterion: 'BIG' }, t, known)
+    expect(out).toBe('applications:rejection.adviceReasons.hard_fail|BIG')
+  })
+
+  it('falls back to the server sentence when the key is unknown', () => {
+    const out = resolveAdviceReason({ advice: 'reject', advice_reason: 'server sentence', advice_reason_key: 'new_key' as never }, t, unknown)
+    expect(out).toBe('server sentence')
   })
 
   it('falls back to the server sentence when no key came along', () => {
-    expect(resolveAdviceReason({ advice: 'reject', advice_reason: 'Lage match op de geconfigureerde criteria.' }, t)).toBe('Lage match op de geconfigureerde criteria.')
+    expect(resolveAdviceReason({ advice: 'reject', advice_reason: 'server sentence' }, t, unknown)).toBe('server sentence')
   })
 
   it('returns null when there is no advice at all', () => {
-    expect(resolveAdviceReason(undefined, t)).toBeNull()
-    expect(resolveAdviceReason({ advice: 'proceed' }, t)).toBeNull()
+    expect(resolveAdviceReason(undefined, t, unknown)).toBeNull()
+    expect(resolveAdviceReason({ advice: 'proceed' }, t, unknown)).toBeNull()
   })
 })

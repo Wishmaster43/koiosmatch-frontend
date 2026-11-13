@@ -32,9 +32,9 @@ import type { ApplicationDetail } from '@/types/application'
 // Key-echo (repo-wide precedent, e.g. RejectionSummary.test.tsx) — avoids the
 // real i18n instance's async-init timing flipping assertions between raw keys
 // and translated copy.
-// Key-echoing stub, but it HONOURS defaultValue like the real t() does — the
-// interview status renders through a defaultValue fallback (RAW-KEY-1), and a
-// mock that ignored it would fail a component that is actually correct.
+// Key-echoing stub without an i18n instance: the interview status then comes from
+// labelOrRaw's raw fallback (the humanized status, RAW-KEY-1), the same output the
+// old defaultValue path gave; the mock still tolerates a defaultValue option.
 vi.mock('react-i18next', () => ({
   useTranslation: () => ({ t: (k: string, o?: { defaultValue?: string }) => o?.defaultValue ?? k }),
 }))

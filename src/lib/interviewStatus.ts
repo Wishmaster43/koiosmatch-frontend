@@ -17,6 +17,7 @@
  * interview-flow summary — shares ONE lookup instead of a copy each.
  */
 import type { TFunction } from 'i18next'
+import { labelOrRaw, type KeyChecker } from '@/lib/labelOrRaw'
 
 // SCREAMING_SNAKE → "Screaming snake" — the never-crash, never-raw fallback
 // for a tenant/flow-authored status this app has no fixed key for.
@@ -35,6 +36,7 @@ export function humanizeInterviewStatus(raw: string): string {
  * InterviewFlowSection (scoped to `workflows`) still resolves the same
  * shared key family instead of duplicating it.
  */
-export function translateInterviewStatus(t: TFunction, raw: string): string {
-  return t(`interview.currentStatus.${raw}`, { ns: 'applications', defaultValue: humanizeInterviewStatus(raw) })
+export function translateInterviewStatus(t: TFunction, i18n: KeyChecker, raw: string): string {
+  // Existing key wins; otherwise the humanized raw status (explicit data fallback).
+  return labelOrRaw(t, i18n, `interview.currentStatus.${raw}`, humanizeInterviewStatus(raw), 'applications')
 }

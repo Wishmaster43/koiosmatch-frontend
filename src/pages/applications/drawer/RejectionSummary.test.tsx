@@ -15,9 +15,9 @@ import type { ApplicationDetail } from '@/types/application'
 
 // Key-echo (repo-wide precedent, e.g. ApplicationTab.test.tsx) — avoids the
 // real i18n instance's async-init timing flipping assertions between raw keys
-// and translated NL copy depending on run order. `defaultValue` on the channel
-// key is intentionally ignored here (t is a pure key-echo), matching how a
-// literal key would render when no translation resource has loaded yet.
+// and translated NL copy depending on run order. The channel label goes through
+// labelOrRaw: without an i18n instance it shows the raw channel word, matching
+// how it renders before any translation resource has loaded.
 vi.mock('react-i18next', () => ({ useTranslation: () => ({ t: (k: string) => k }) }))
 // useDateFormat (@/lib/datetime) imports `@/i18n`, which needs a REAL
 // react-i18next (initReactI18next) to initialise — stub the whole module
