@@ -231,7 +231,7 @@ describe('ContactDetail · gender', () => {
   it('renders the lookup LABEL in read mode, not the stored slug', () => {
     render(<ContactDetail contact={baseContact({ gender: 'female' })} locations={locations} departments={departments}
       statuses={statuses} onSave={vi.fn()} onDelete={vi.fn()} close={vi.fn()} />)
-    expect(screen.getByText('Vrouw')).toBeInTheDocument()
+    expect(screen.getByText(i18n.t('common:lookupSeeds.genders.female'))).toBeInTheDocument()
     expect(screen.queryByText('female')).not.toBeInTheDocument()
   })
 
@@ -244,7 +244,7 @@ describe('ContactDetail · gender', () => {
     await user.click(screen.getAllByTitle(cm('edit'))[0])
     // Open the gender combobox (the row is label-span + control-div) and pick by label.
     await user.click(screen.getByText(ct('contacts.detail.gender')).parentElement!.querySelector('button')!)
-    await user.click(await screen.findByText('Man'))
+    await user.click(await screen.findByText(i18n.t('common:lookupSeeds.genders.male')))
     await user.click(screen.getByTitle(cm('save')))
 
     expect(onSave).toHaveBeenCalledWith('c1', expect.objectContaining({ gender: 'male' }))

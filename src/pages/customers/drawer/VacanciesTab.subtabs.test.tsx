@@ -14,7 +14,7 @@ import { describe, it, expect, vi, afterEach } from 'vitest'
 import { render, screen, cleanup } from '@testing-library/react'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import userEvent from '@testing-library/user-event'
-import '@/i18n'
+import i18n from '@/i18n'
 import VacanciesTab from './VacanciesTab'
 
 // K2-FE (13-08): the Vacatures sub-tab's vacancy fetch now runs through a real
@@ -59,21 +59,21 @@ describe('VacanciesTab · Sollicitaties sub-tab', () => {
     renderTab({ customerId: 'cust-1', customerName: 'Acme' })
     // Async query settles the Vacatures sub-tab's own /vacancy-statuses effect
     // before asserting, so it runs inside act() like the rest of this render.
-    expect(await screen.findByRole('tab', { name: 'Vacatures' })).toHaveAttribute('aria-selected', 'true')
-    expect(screen.getByRole('tab', { name: 'Sollicitaties' })).toBeInTheDocument()
+    expect(await screen.findByRole('tab', { name: i18n.t('customers:drawer.tabs.vacancies') })).toHaveAttribute('aria-selected', 'true')
+    expect(screen.getByRole('tab', { name: i18n.t('applications:title') })).toBeInTheDocument()
     expect(screen.queryByTestId('applications-list')).toBeNull()
   })
 
   it('does not mount the applications list before the sub-tab is opened (lazy)', async () => {
     renderTab({ customerId: 'cust-1', customerName: 'Acme' })
-    await screen.findByRole('tab', { name: 'Vacatures' })
+    await screen.findByRole('tab', { name: i18n.t('customers:drawer.tabs.vacancies') })
     expect(listProps).not.toHaveBeenCalled()
   })
 
   it('mounts the applications list, passed this customer id, once opened', async () => {
     const user = userEvent.setup()
     renderTab({ customerId: 'cust-1', customerName: 'Acme' })
-    await user.click(screen.getByRole('tab', { name: 'Sollicitaties' }))
+    await user.click(screen.getByRole('tab', { name: i18n.t('applications:title') }))
     expect(screen.getByTestId('applications-list')).toBeInTheDocument()
     expect(listProps).toHaveBeenCalledWith(expect.objectContaining({ customerId: 'cust-1' }))
   })

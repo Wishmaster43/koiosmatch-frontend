@@ -76,7 +76,7 @@ describe('CustomersTable · reference number column (JOB1)', () => {
     const withoutRef = { ...baseCustomer, id: 21, referenceNumber: '' }
     const { container } = render(<CustomersTable rows={[withRef, withoutRef]} statusMeta={statusMeta} />)
 
-    const headerCell = screen.getByText('Referentienr.').closest('th') as HTMLElement
+    const headerCell = screen.getByText(i18n.t('customers:cols.referenceNumber')).closest('th') as HTMLElement
     const colIndex = Array.from(headerCell.parentElement?.children ?? []).indexOf(headerCell)
     const rows = container.querySelectorAll('tbody tr')
     const values = Array.from(rows).map(r => r.children[colIndex].textContent)
@@ -91,7 +91,7 @@ describe('CustomersTable · reference number column (JOB1)', () => {
     const rowC = { ...baseCustomer, id: 32, referenceNumber: 'D-00002' }
     const { container } = render(<CustomersTable rows={[rowA, rowB, rowC]} statusMeta={statusMeta} />)
 
-    const headerCell = screen.getByText('Referentienr.').closest('th') as HTMLElement
+    const headerCell = screen.getByText(i18n.t('customers:cols.referenceNumber')).closest('th') as HTMLElement
     const colIndex = Array.from(headerCell.parentElement?.children ?? []).indexOf(headerCell)
     await user.click(within(headerCell).getByRole('button'))
 
@@ -111,7 +111,7 @@ describe('CustomersTable · backoffice coupling indicator (JOB2)', () => {
 
     expect(screen.getByRole('img', { name: 'HelloFlex: Gekoppeld' })).toBeInTheDocument()
     expect(screen.getByRole('img', { name: 'HelloFlex: Mislukt' })).toBeInTheDocument()
-    expect(screen.getByRole('img', { name: 'Niet gekoppeld aan HelloFlex' })).toBeInTheDocument()
+    expect(screen.getByRole('img', { name: i18n.t('common:backofficeLinks.helloflex.notLinked') })).toBeInTheDocument()
   })
 
   it('hides a system entirely when the tenant never enabled its app — never a fake "not linked"', () => {
@@ -137,7 +137,7 @@ describe('CustomersTable · coupling column deep-link (KOPPELING-KOLOM)', () => 
     const onSelect = vi.fn()
     render(<CustomersTable rows={[row]} statusMeta={statusMeta} onOpenTab={onOpenTab} onSelect={onSelect} />)
 
-    await user.click(screen.getByRole('button', { name: 'Koppeling' }))
+    await user.click(screen.getByRole('button', { name: i18n.t('customers:cols.coupling') }))
     expect(onOpenTab).toHaveBeenCalledWith(row, 'koppelingen')
     // stopPropagation: the row's own onSelect must not also fire.
     expect(onSelect).not.toHaveBeenCalled()
@@ -265,7 +265,7 @@ describe('CustomersTable · Koios column (Danny 05-08)', () => {
     render(<CustomersTable rows={[row]} statusMeta={statusMeta} />)
 
     expect(screen.getByRole('img', { name: 'Koios AI' })).toBeInTheDocument()
-    expect(screen.getByText('Opvolgen')).toBeInTheDocument()
+    expect(screen.getByText(i18n.t('common:koios.actions.follow_up'))).toBeInTheDocument()
   })
 
   it('renders an honest dash for a customer with an open vacancy', () => {

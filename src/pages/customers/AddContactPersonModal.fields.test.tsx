@@ -195,7 +195,7 @@ describe('AddContactPersonModal · geslacht', () => {
 
     await user.click(screen.getByRole('button', { name: ct('subModal.gender') }))
     // The seed lookup's human labels are what a recruiter picks from.
-    await user.click(screen.getByRole('button', { name: 'Vrouw' }))
+    await user.click(screen.getByRole('button', { name: i18n.t('common:lookupSeeds.genders.female') }))
     await user.click(screen.getByRole('button', { name: ct('subModal.create') }))
 
     expect(onCreate).toHaveBeenCalledWith(expect.objectContaining({ gender: 'female' }))
@@ -217,7 +217,7 @@ describe('AddContactPersonModal · geslacht', () => {
     render(<AddContactPersonModal onClose={() => {}} onCreate={vi.fn()} locations={locations} statuses={statuses}
       initial={contact({ gender: 'male' })} />)
     // The trigger shows the resolved LABEL for the stored slug.
-    expect(screen.getByRole('button', { name: ct('subModal.gender') })).toHaveTextContent('Man')
+    expect(screen.getByRole('button', { name: ct('subModal.gender') })).toHaveTextContent(i18n.t('common:lookupSeeds.genders.male'))
   })
 
   // CLEAR-SWEEP (Danny 13-08): gender is optional (useCustomerContacts.toApi
@@ -227,8 +227,8 @@ describe('AddContactPersonModal · geslacht', () => {
     render(<AddContactPersonModal onClose={() => {}} onCreate={vi.fn()} locations={locations} statuses={statuses} />)
 
     await user.click(screen.getByRole('button', { name: ct('subModal.gender') }))
-    await user.click(screen.getByRole('button', { name: 'Vrouw' }))
-    expect(screen.getByRole('button', { name: ct('subModal.gender') })).toHaveTextContent('Vrouw')
+    await user.click(screen.getByRole('button', { name: i18n.t('common:lookupSeeds.genders.female') }))
+    expect(screen.getByRole('button', { name: ct('subModal.gender') })).toHaveTextContent(i18n.t('common:lookupSeeds.genders.female'))
 
     const clear = screen.getByTitle(i18n.t('clearField', { ns: 'common', field: ct('subModal.gender') }))
     await user.click(clear)

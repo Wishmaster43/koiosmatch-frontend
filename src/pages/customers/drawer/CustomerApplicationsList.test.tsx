@@ -14,7 +14,7 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 import { render, screen, cleanup } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
-import '@/i18n'
+import i18n from '@/i18n'
 import CustomerApplicationsList from './CustomerApplicationsList'
 import type { Application } from '@/types/application'
 
@@ -77,19 +77,19 @@ describe('CustomerApplicationsList', () => {
   it('shows the loading state', () => {
     mockUseCustomerApplications.mockReturnValue({ rows: [], loading: true, error: false })
     render(<CustomerApplicationsList customerId="cust-1" />)
-    expect(screen.getByText('Sollicitaties laden…')).toBeInTheDocument()
+    expect(screen.getByText(i18n.t('applications:loading'))).toBeInTheDocument()
   })
 
   it('shows an honest error message, never a silently empty table', () => {
     mockUseCustomerApplications.mockReturnValue({ rows: [], loading: false, error: true })
     render(<CustomerApplicationsList customerId="cust-1" />)
-    expect(screen.getByRole('alert')).toHaveTextContent('Sollicitaties laden is mislukt.')
+    expect(screen.getByRole('alert')).toHaveTextContent(i18n.t('applications:error'))
   })
 
   it('shows the empty state with no rows', () => {
     mockUseCustomerApplications.mockReturnValue({ rows: [], loading: false, error: false })
     render(<CustomerApplicationsList customerId="cust-1" />)
-    expect(screen.getByText('Nog geen sollicitaties.')).toBeInTheDocument()
+    expect(screen.getByText(i18n.t('applications:empty'))).toBeInTheDocument()
   })
 
   it('renders a fixture row with its phase pill and score', () => {
@@ -109,7 +109,7 @@ describe('CustomerApplicationsList', () => {
     })
     render(<CustomerApplicationsList customerId="cust-1" />)
     expect(screen.getByText('John Smith')).toBeInTheDocument()
-    await user.type(screen.getByPlaceholderText('Zoek naar sollicitaties'), 'Jane')
+    await user.type(screen.getByPlaceholderText(i18n.t('applications:page.searchPlaceholder')), 'Jane')
     expect(screen.getByText('Jane Doe')).toBeInTheDocument()
     expect(screen.queryByText('John Smith')).toBeNull()
   })
@@ -166,8 +166,8 @@ describe('CustomerApplicationsList · action cluster (S-custlist-1)', () => {
     const { default: NoPerm } = await import('./CustomerApplicationsList')
     mockUseCustomerApplications.mockReturnValue({ rows: [row()], loading: false, error: false })
     render(<NoPerm customerId="cust-1" />)
-    expect(screen.queryByTitle('Sollicitatie bewerken')).toBeNull()
-    expect(screen.queryByTitle('Details tonen')).toBeNull()
+    expect(screen.queryByTitle(i18n.t('candidates:work.editApplication'))).toBeNull()
+    expect(screen.queryByTitle(i18n.t('candidates:work.showDetails'))).toBeNull()
   })
 
   it('pencil opens the reused candidate-drawer edit form; chevron expands the lazy detail panel', async () => {
@@ -179,13 +179,13 @@ describe('CustomerApplicationsList · action cluster (S-custlist-1)', () => {
     render(<WithPerm customerId="cust-1" />)
 
     // Pencil/chevron never trigger the row's own openEntity click-through.
-    await user.click(screen.getByTitle('Sollicitatie bewerken'))
+    await user.click(screen.getByTitle(i18n.t('candidates:work.editApplication')))
     expect(openEntity).not.toHaveBeenCalled()
 
-    const chevron = screen.getByTitle('Details tonen')
+    const chevron = screen.getByTitle(i18n.t('candidates:work.showDetails'))
     expect(chevron).toHaveAttribute('aria-expanded', 'false')
     await user.click(chevron)
-    expect(screen.getByTitle('Details verbergen')).toHaveAttribute('aria-expanded', 'true')
+    expect(screen.getByTitle(i18n.t('candidates:work.hideDetails'))).toHaveAttribute('aria-expanded', 'true')
     expect(openEntity).not.toHaveBeenCalled()
   })
 })
@@ -200,7 +200,7 @@ describe('CustomerApplicationsList · missing-appointment icon (V-appdetail-1)',
       loading: false, error: false,
     })
     render(<CustomerApplicationsList customerId="cust-1" />)
-    expect(screen.getAllByRole('img', { name: 'In een intakefase, maar nog geen afspraak gepland.' })).toHaveLength(1)
+    expect(screen.getAllByRole('img', { name: i18n.t('applications:missingAppointment') })).toHaveLength(1)
   })
 })
 
@@ -219,14 +219,14 @@ describe('CustomerApplicationsList · vacancyIds mode (location/department drill
     mockUseCustomerApplications.mockReturnValue({ rows: [], loading: false, error: false })
     mockUseApplicationsByVacancyIds.mockReturnValue({ rows: [], loading: false, error: false })
     render(<CustomerApplicationsList vacancyIds={[]} vacancyIdsLoading={true} />)
-    expect(screen.getByText('Sollicitaties laden…')).toBeInTheDocument()
+    expect(screen.getByText(i18n.t('applications:loading'))).toBeInTheDocument()
   })
 
   it('a step-1 failure lands in the same honest error state as a step-2 failure', () => {
     mockUseCustomerApplications.mockReturnValue({ rows: [], loading: false, error: false })
     mockUseApplicationsByVacancyIds.mockReturnValue({ rows: [], loading: false, error: false })
     render(<CustomerApplicationsList vacancyIds={[]} vacancyIdsLoading={false} vacancyIdsError />)
-    expect(screen.getByRole('alert')).toHaveTextContent('Sollicitaties laden is mislukt.')
+    expect(screen.getByRole('alert')).toHaveTextContent(i18n.t('applications:error'))
   })
 
   it('renders the rows step 2 resolves, once both steps are done', () => {

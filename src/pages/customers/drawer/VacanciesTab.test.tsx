@@ -15,9 +15,9 @@ import type { ComponentProps } from 'react'
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 import { render, screen, waitFor, cleanup } from '@testing-library/react'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
-// Side-effect import: initialises the real i18next instance so useTranslation
-// inside VacanciesTab does not warn (mirrors DepartmentsPanel.test.tsx/ContactsPanel.test.tsx).
-import '@/i18n'
+// Real i18n instance: initialises i18next so useTranslation inside VacanciesTab does not warn
+// and lets the tests read translated copy through i18n.t (mirrors DepartmentsPanel.test.tsx).
+import i18n from '@/i18n'
 import api from '@/lib/api'
 import { invalidateAllSettingsCache } from '@/lib/settings/useAllSettings'
 import { NavigationProvider } from '@/context/NavigationContext'
@@ -211,7 +211,7 @@ describe('VacanciesTab · tenant-configured default status filter (TENANT-DEFAUL
     // The explicit, reversible control lifts the published restriction — the row
     // becomes reachable, never silently unreachable (acceptance #2).
     const user = userEvent.setup()
-    await user.click(screen.getByTitle('Ook niet-gepubliceerd'))
+    await user.click(screen.getByTitle(i18n.t('customers:vacancies.showUnpublished')))
     await waitFor(() => expect(screen.getByText('Concept vacature')).toBeInTheDocument())
   })
 })
@@ -238,7 +238,7 @@ describe('VacanciesTab · K7c applications deep link + K7b edit pencil', () => {
     await waitFor(() => expect(screen.getByText('Openstaande vacature')).toBeInTheDocument())
 
     const user = userEvent.setup()
-    await user.click(screen.getByLabelText('Sollicitaties openen'))
+    await user.click(screen.getByLabelText(i18n.t('customers:vacancies.col.applicationsOpen')))
 
     // Asserts the REQUEST-equivalent intent: page + record id + target tab.
     expect(goTo).toHaveBeenCalledWith('vacancies', { open: 'v-open', tab: 'applicants' })
@@ -263,6 +263,6 @@ describe('VacanciesTab · create gate (OPENERS-HIDE-1)', () => {
     canCreateVacancy = false
     renderTab({ customerId: 'cust-1', customerName: 'Acme' })
     await waitFor(() => expect(screen.getByText('Openstaande vacature')).toBeInTheDocument())
-    expect(screen.queryByText('Nieuwe vacature')).toBeNull()
+    expect(screen.queryByText(i18n.t('customers:vacancies.add'))).toBeNull()
   })
 })

@@ -35,7 +35,7 @@ describe('LocationAddressTab · description parity with the customer Bedrijf tab
     renderTab()
     // EditableRichTextField only renders the ExternalLink icon button when its
     // `popout` prop is passed — this is the affordance itself, not a mock check.
-    expect(screen.getByTitle('Open op tweede scherm')).toBeInTheDocument()
+    expect(screen.getByTitle(i18n.t('common:openSecondScreen'))).toBeInTheDocument()
   })
 
   it('offers the Koios generate button once the block is opened for editing', async () => {
@@ -53,7 +53,7 @@ describe('LocationAddressTab · description parity with the customer Bedrijf tab
     const { onSave } = renderTab()
     const editButtons = screen.getAllByTitle('Bewerken')
     await user.click(editButtons[editButtons.length - 1])
-    await user.click(screen.getByTitle('Opslaan'))
+    await user.click(screen.getByTitle(i18n.t('common:save')))
     expect(onSave).toHaveBeenCalledWith('loc-1', { description: expect.any(String) })
   })
 })
@@ -83,7 +83,7 @@ describe('LocationAddressTab · billing email field (K-249 C.4)', () => {
     const input = label.nextElementSibling?.querySelector('input') as HTMLInputElement
     expect(input).toBeTruthy()
     await user.type(input, 'facturen@rotterdam.nl')
-    await user.click(screen.getByTitle('Opslaan'))
+    await user.click(screen.getByTitle(i18n.t('common:save')))
     expect(onSave).toHaveBeenCalledWith('loc-1', expect.objectContaining({ billingEmail: 'facturen@rotterdam.nl' }))
   })
 })
