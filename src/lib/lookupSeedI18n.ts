@@ -22,7 +22,7 @@ import { LABEL_KEYED, SEED_LABELS, SEED_LABEL_KEYS } from './lookupSeedCatalogue
 export interface SeedTranslatable { value?: string | null; label?: string | null }
 
 // Structural t: react-i18next's useTranslation(ns) stamps the bound namespace on the fixed t it returns.
-type TFn = ((key: string, opts?: { defaultValue?: string; ns?: string }) => string) & { ns?: string | readonly string[] }
+type TFn = ((key: string, opts?: { ns?: string }) => string) & { ns?: string | readonly string[] }
 
 // Namespace the caller's t is bound to; a plain stub has none and resolves in 'common', where every seed
 // family these hooks translate lives (useTranslation(['a', 'b']) binds its t to the first namespace).
@@ -80,22 +80,20 @@ export function seedKeyFor(family: string, item: SeedTranslatable): string | nul
 }
 
 /** One row's display label: translated when it is still the seeded default, else as typed. */
-export function translateSeedLabel(t: TFn, family: string, item: SeedTranslatable, i18n?: KeyChecker): string {
+export function translateSeedLabel(t: TFn, family: string, item: SeedTranslatable, i18n: KeyChecker): string {
   const label = item?.label ?? ''
   const key = seedKeyFor(family, item)
   if (!key) return label
-  const fullKey = `lookupSeeds.${family}.${key}`
-  // LOOKUPSEED-EXISTS-1 step 1: with a checker the fallback is explicit data (labelOrRaw, with its no-instance
-  // guard, in the namespace the caller's t is bound to); without one the i18next defaultValue path stays until
-  // every call site passes its i18n, then the checker becomes required.
-  return i18n ? labelOrRaw(t as unknown as TFunction, i18n, fullKey, label, boundNs(t)) : t(fullKey, { defaultValue: label })
+  // LOOKUPSEED-EXISTS-1: the seeded label is explicit data behind labelOrRaw (with its no-instance guard),
+  // resolved in the namespace the caller's t is bound to; never an i18next defaultValue.
+  return labelOrRaw(t as unknown as TFunction, i18n, `lookupSeeds.${family}.${key}`, label, boundNs(t))
 }
 
 /**
  * Same, for a whole list. Returns a NEW array, so every call site memoises it on
  * [items, t] — a fresh identity per render took the tasks page down on 25-08.
  */
-export function translateSeedList<T extends SeedTranslatable>(t: TFn, family: string, items: T[], i18n?: KeyChecker): T[] {
+export function translateSeedList<T extends SeedTranslatable>(t: TFn, family: string, items: T[], i18n: KeyChecker): T[] {
   if (!Array.isArray(items) || !items.length) return items
   return items.map(item => {
     const translated = translateSeedLabel(t, family, item, i18n)

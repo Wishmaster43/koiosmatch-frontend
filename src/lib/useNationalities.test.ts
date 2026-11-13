@@ -23,7 +23,8 @@ vi.mock('./useCachedLookup', () => ({
 vi.mock('react-i18next', () => ({
   useTranslation: () => ({
     t: (key: string) => key,
-    i18n: { language: 'nl' },
+    // No seed key is known here: the seed-label helper keeps every nationality name as data.
+    i18n: { language: 'nl', exists: () => false },
   }),
 }))
 

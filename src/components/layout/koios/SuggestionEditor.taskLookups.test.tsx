@@ -12,7 +12,8 @@ import SuggestionEditor from './SuggestionEditor'
 
 vi.mock('react-i18next', async (importOriginal) => ({
   ...(await importOriginal<typeof import('react-i18next')>()),
-  useTranslation: () => ({ t: (key: string) => key }),
+  // Key-echo t plus a checker that knows every key, so the seeded priority label stays the key path.
+  useTranslation: () => ({ t: (key: string) => key, i18n: { exists: () => true } }),
 }))
 
 // Never a live AI/API call (API-CREDITS-1): the priority lookup resolves from a

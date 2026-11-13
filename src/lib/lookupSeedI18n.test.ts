@@ -32,6 +32,8 @@ const LOCALES: Record<string, unknown> = { nl: nlCommon, en: enCommon, de: deCom
 
 // Stand-in for i18next: returns a marker so a translated value is unmistakable.
 const t = (key: string) => `T:${key}`
+// Checker that knows every key: these cases prove the key derivation, not the existence check.
+const known = { exists: () => true }
 
 describe('seedKeyFor — slug-keyed families (the value is the key)', () => {
   it('resolves a seeded default that still carries its seeded label', () => {
@@ -142,25 +144,25 @@ describe('SEED_LABEL_KEYS — the English key map (SEED-KEYS-EN-1)', () => {
 
 describe('translateSeedLabel / translateSeedList', () => {
   it('translates a seeded default and leaves a tenant value alone', () => {
-    expect(translateSeedLabel(t, 'statuses', { value: 'available', label: 'Beschikbaar' })).toBe('T:lookupSeeds.statuses.available')
-    expect(translateSeedLabel(t, 'statuses', { value: 'own', label: 'Eigen waarde' })).toBe('Eigen waarde')
+    expect(translateSeedLabel(t, 'statuses', { value: 'available', label: 'Beschikbaar' }, known)).toBe('T:lookupSeeds.statuses.available')
+    expect(translateSeedLabel(t, 'statuses', { value: 'own', label: 'Eigen waarde' }, known)).toBe('Eigen waarde')
   })
 
   it('keeps the untouched row object identical, so only translated rows are new objects', () => {
     const own = { value: 'own', label: 'Eigen waarde' }
     const rows = [{ value: 'available', label: 'Beschikbaar' }, own]
-    const out = translateSeedList(t, 'statuses', rows)
+    const out = translateSeedList(t, 'statuses', rows, known)
     expect(out[0].label).toBe('T:lookupSeeds.statuses.available')
     expect(out[1]).toBe(own)
   })
 
   it('passes an unknown family straight through', () => {
-    expect(translateSeedLabel(t, 'notAFamily', { value: 'x', label: 'Iets' })).toBe('Iets')
+    expect(translateSeedLabel(t, 'notAFamily', { value: 'x', label: 'Iets' }, known)).toBe('Iets')
   })
 
   it('returns the input array untouched when there is nothing to map', () => {
     const empty: { value: string; label: string }[] = []
-    expect(translateSeedList(t, 'statuses', empty)).toBe(empty)
+    expect(translateSeedList(t, 'statuses', empty, known)).toBe(empty)
   })
 })
 
@@ -200,7 +202,7 @@ describe('translateSeedList stays behaviour-identical after the key rename', () 
     // SEED-KEYS-EN-1 only moved the KEY NAME; every seeded row must still translate.
     for (const family of ['rejectionReasons', 'functions', 'pools']) {
       const rows = Object.entries(SEED_LABELS[family]).map(([, label]) => ({ value: 'x', label }))
-      const out = translateSeedList(t, family, rows)
+      const out = translateSeedList(t, family, rows, known)
       for (let i = 0; i < rows.length; i++) {
         expect(out[i].label.startsWith('T:lookupSeeds.'), `${family} row "${rows[i].label}" did not translate`).toBe(true)
       }
@@ -217,8 +219,8 @@ describe('translateSeedList stays behaviour-identical after the key rename', () 
     ]
     for (const [family, dutchLabel, expectedEn, expectedDe] of cases) {
       const row = { value: 'x', label: dutchLabel }
-      expect(translateSeedLabel(tEn, family, row)).toBe(expectedEn)
-      expect(translateSeedLabel(tDe, family, row)).toBe(expectedDe)
+      expect(translateSeedLabel(tEn, family, row, known)).toBe(expectedEn)
+      expect(translateSeedLabel(tDe, family, row, known)).toBe(expectedDe)
     }
   })
 })
@@ -226,12 +228,12 @@ describe('translateSeedList stays behaviour-identical after the key rename', () 
 describe('records that embed only the flat label (no lookup value)', () => {
   it('translates a seeded default that arrives without a value', () => {
     expect(seedKeyFor('funnelTypes', { label: 'Aangenomen' })).toBe('hired')
-    expect(translateSeedLabel(t, 'funnelTypes', { label: 'Aangenomen' })).toBe('T:lookupSeeds.funnelTypes.hired')
+    expect(translateSeedLabel(t, 'funnelTypes', { label: 'Aangenomen' }, known)).toBe('T:lookupSeeds.funnelTypes.hired')
   })
 
   it('still refuses a tenant label that matches no seed', () => {
     expect(seedKeyFor('funnelTypes', { label: 'Tweede gesprek' })).toBeNull()
-    expect(translateSeedLabel(t, 'funnelTypes', { label: 'Tweede gesprek' })).toBe('Tweede gesprek')
+    expect(translateSeedLabel(t, 'funnelTypes', { label: 'Tweede gesprek' }, known)).toBe('Tweede gesprek')
   })
 
   it('prefers the value when both are present and they disagree', () => {
@@ -240,8 +242,8 @@ describe('records that embed only the flat label (no lookup value)', () => {
   })
 })
 
-// LOOKUPSEED-EXISTS-1 step 1: with a checker the label resolves through labelOrRaw in the namespace the
-// caller's t is bound to (useTranslation stamps `ns` on its fixed t); without one the old path stays.
+// LOOKUPSEED-EXISTS-1: the label resolves through labelOrRaw in the namespace the caller's t is bound to
+// (useTranslation stamps `ns` on its fixed t); a plain stub resolves in common.
 describe('translateSeedLabel / translateSeedList with a KeyChecker', () => {
   // Echo t that carries the namespace it was given and the namespace it is bound to.
   const boundT = Object.assign((key: string, o?: { ns?: string; defaultValue?: string }) => `${o?.ns ?? ''}:${key}`, { ns: 'common' })

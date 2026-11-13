@@ -2,11 +2,13 @@ import { describe, it, expect, vi } from 'vitest'
 import { renderHook } from '@testing-library/react'
 import { useCustomerLookups } from './useCustomerLookups'
 
-// One stable `t` for the whole suite: a fresh function per render would defeat the memos under test.
+// One stable `t` and `i18n` for the whole suite: a fresh object per render would defeat the memos under test.
 const stableT = vi.hoisted(() => (k: string) => k)
-vi.mock('react-i18next', () => ({ useTranslation: () => ({ t: stableT }) }))
-// The seed translation is not under test: pass the rows through unchanged.
-vi.mock('./lookupSeedI18n', () => ({ translateSeedList: (_t: unknown, _k: string, list: unknown) => list }))
+const stableI18n = vi.hoisted(() => ({ exists: () => false }))
+vi.mock('react-i18next', () => ({ useTranslation: () => ({ t: stableT, i18n: stableI18n }) }))
+// The seed translation is not under test: pass the rows through unchanged, but record the call (the checker rides along as the fourth argument).
+const translateSeedList = vi.hoisted(() => vi.fn((_t: unknown, _k: string, list: unknown) => list))
+vi.mock('./lookupSeedI18n', () => ({ translateSeedList }))
 // The cached lookup answers one fixed object (its own memo keeps it stable in the real hook).
 const DATA = vi.hoisted(() => ({
   statuses: [{ value: 'active', label: 'Actief', color: 'c-success' }],
@@ -29,6 +31,14 @@ describe('useCustomerLookups · stable meta helpers', () => {
     expect(second.departmentStatusMeta).toBe(first.departmentStatusMeta)
     expect(second.contactStatusMeta).toBe(first.contactStatusMeta)
     expect(second.statuses).toBe(first.statuses)
+  })
+
+  // LOOKUPSEED-EXISTS-1: the hook hands its own i18n checker to the seed translation as the fourth argument.
+  it('passes the caller i18n checker to translateSeedList for every family', () => {
+    renderHook(() => useCustomerLookups())
+    for (const family of ['customerStatuses', 'subStatuses']) {
+      expect(translateSeedList).toHaveBeenCalledWith(stableT, family, expect.any(Array), stableI18n)
+    }
   })
 
   it('resolves a known value to its row and an unknown one to the neutral fallback', () => {

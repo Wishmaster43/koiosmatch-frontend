@@ -11,11 +11,10 @@
 import { describe, it, expect } from 'vitest'
 import { readFileSync, readdirSync, statSync } from 'node:fs'
 
-// Pinned ceiling: only goes down, never raise it. Measured 13-11 after DEFAULTVALUE-ROUNDS-1 (109 → 4): the
-// four leftovers are lib/lookupSeedI18n.translateSeedLabel (38 call-site files, own sweep LOOKUPSEED-EXISTS-1),
-// useCandidateStageBulk.axisConditionLabel (t arrives through a caller chain from CandidatesPage) and the two
-// technical '' fallbacks in settingsSearchIndex behind its SettingsTranslate type.
-const CEILING = 4
+// Pinned ceiling: only goes down, never raise it. Measured 13-11 after DEFAULTVALUE-ROUNDS-1 (109 → 4) and
+// LOOKUPSEED-EXISTS-1 (4 → 2): the two leftovers are the technical '' fallbacks in settingsSearchIndex behind
+// its SettingsTranslate type.
+const CEILING = 2
 
 // Collects every non-test .ts/.tsx/.js/.jsx source file under src.
 const sources = dir => readdirSync(dir).flatMap(name => {
