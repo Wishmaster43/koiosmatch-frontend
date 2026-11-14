@@ -15,6 +15,7 @@ import { SmLoadErrorBanner } from './SmLoadErrorBanner'
 import type { KpiSpec } from '@/components/insights/InsightsRow'
 import KpiDrillDownDrawer from '@/components/reports/KpiDrillDownDrawer'
 import DrillDownDrawer from '@/components/reports/DrillDownDrawer'
+import type { DrillDownTab } from '@/components/reports/DrillDownDrawer'
 import { calcAttention } from '@/components/reports/candidateAttention'
 import type { ReportCandidate } from '@/types/reports'
 import ShiftsChartsBlock from '@/components/shiftmanager/ShiftsChartsBlock'
@@ -96,36 +97,39 @@ export default function ShiftmanagerDashboard() {
     const inactive = list.filter(c => statusOf(c) === SM_STATUS.INACTIVE)
     // Aandachtskandidaten ("attention candidates") — the SAME function as the candidates
     // report (calcAttention: active + new <30d + not yet scheduled) so the KPIs on both
-    // screens match (Danny). The "active but never logged in" rule is not added yet:
-    // `last_login_at` IS on SmCandidateResource (CMBE 13-11), so the rows already carry it. The
-    // 2 "works less" rules wait on future per-candidate hours (shifts-per-candidate).
+    // screens match (Danny). calcAttention already includes the never-logged-in clause and the
+    // server attention.count (SM-STATS-3) implements the same rule; the 2 "works less" rules wait on hours.
     const attention = calcAttention(list as unknown as ReportCandidate[])
     return { newList, newCount, avg, active, inactive, all: list, bNever, bWorked, bPlanned, bIdle, attention }
   }, [candidates, useCandidateStats, candidateStats])
 
+  // Tile counts read the whole-mirror stats blocks (SM-STATS-3) when present; the lists stay the
+  // capped rows and carry the server total into the drawer. Absent block or gate closed: row fallback.
+  const act = useCandidateStats ? candidateStats?.activity : undefined
+  const attn = useCandidateStats ? candidateStats?.attention : undefined
   // One combined "Activity" donut over ACTIVE candidates (Worked this month /
   // Planned / Never worked / No recent activity) — replaces 3 separate tiles.
   const activityBuckets = useMemo(() => ([
-    { key: 'worked',  label: t('dashboard.stats.workedThisMonth'), title: t('dashboard.stats.workedThisMonthHint'), list: derived.bWorked,  color: 'var(--color-success-text)' },
-    { key: 'planned', label: t('dashboard.stats.planned'),         title: t('dashboard.stats.plannedHint'),         list: derived.bPlanned, color: 'var(--color-secondary)' },
-    { key: 'never',   label: t('dashboard.stats.neverWorked'),     title: t('dashboard.stats.neverWorkedHint'),     list: derived.bNever,   color: 'var(--color-danger-text)' },
-    { key: 'idle',    label: t('dashboard.stats.idle'),            title: t('dashboard.stats.idleHint'),            list: derived.bIdle,    color: 'var(--text-muted)' },
-  ]), [derived, t])
+    { key: 'worked',  label: t('dashboard.stats.workedThisMonth'), title: t('dashboard.stats.workedThisMonthHint'), list: derived.bWorked,  total: act?.worked_this_month, color: 'var(--color-success-text)' },
+    { key: 'planned', label: t('dashboard.stats.planned'),         title: t('dashboard.stats.plannedHint'),         list: derived.bPlanned, total: act?.planned, color: 'var(--color-secondary)' },
+    { key: 'never',   label: t('dashboard.stats.neverWorked'),     title: t('dashboard.stats.neverWorkedHint'),     list: derived.bNever,   total: act?.never_worked, color: 'var(--color-danger-text)' },
+    { key: 'idle',    label: t('dashboard.stats.idle'),            title: t('dashboard.stats.idleHint'),            list: derived.bIdle,    total: act?.idle, color: 'var(--text-muted)' },
+  ]), [derived, t, act])
   // Drill-down: a candidate KPI opens the shared drawer — 'average' shows the per-month
   // breakdown vs KPI target, other picks list their subset.
-  const [drill, setDrill] = useState<{ mode: string; title: string; candidates: ReportCandidate[]; tabs?: { key: string; label: string; candidates: ReportCandidate[]; title?: string }[]; initialTab?: string } | null>(null)
-  const openDrill = (mode: string, title: string, list: Array<Record<string, unknown>>) =>
-    setDrill({ mode, title, candidates: list as unknown as ReportCandidate[] })
+  const [drill, setDrill] = useState<{ mode: string; title: string; candidates: ReportCandidate[]; tabs?: DrillDownTab[]; initialTab?: string; total?: number } | null>(null)
+  const openDrill = (mode: string, title: string, list: Array<Record<string, unknown>>, total?: number) =>
+    setDrill({ mode, title, candidates: list as unknown as ReportCandidate[], total })
   // The Activiteit card opens the drill with a tab per bucket (Danny: "kunnen switchen"),
   // starting on the biggest bucket.
-  const activityTabs = activityBuckets.map(b => ({ key: b.key, label: b.label, title: b.title, candidates: b.list as unknown as ReportCandidate[] }))
+  const activityTabs = activityBuckets.map(b => ({ key: b.key, label: b.label, title: b.title, candidates: b.list as unknown as ReportCandidate[], total: b.total }))
   // Open the drill-down defaulted to whichever activity bucket currently has the most candidates.
   const openActivityDrill = () => {
-    const biggest = [...activityBuckets].sort((a, b) => b.list.length - a.list.length)[0]
+    const biggest = [...activityBuckets].sort((a, b) => (b.total ?? b.list.length) - (a.total ?? a.list.length))[0]
     setDrill({ mode: 'new', title: '', candidates: [], tabs: activityTabs, initialTab: biggest?.key })
   }
   // Aandachtskandidaten drill: the "nieuw & niet ingepland" list (X/actief).
-  const openAttentionDrill = () => openDrill('new', t('dashboard.stats.attnNewNotPlanned'), derived.attention)
+  const openAttentionDrill = () => openDrill('new', t('dashboard.stats.attnNewNotPlanned'), derived.attention, attn?.count)
 
   // Candidate cards (NOT filter-driven) — passed into ShiftsChartsBlock, which adds the
   // filter-driven shift cards → one combined 9-card row. Activiteit is a clearer channels
@@ -138,9 +142,9 @@ export default function ShiftmanagerDashboard() {
   // While the candidate rows load or failed the tiles show an empty value (never a misleading 0/0) and are not clickable.
   const tilesReady = !loading && !error
   const leadingKpis: KpiSpec[] = [
-    { key: 'activity',  label: t('dashboard.stats.workedActive'), value: tilesReady ? pair(derived.bWorked.length, derived.active.length) : null, color: 'var(--color-success-text)', onClick: tilesReady ? openActivityDrill : undefined },
+    { key: 'activity',  label: t('dashboard.stats.workedActive'), value: tilesReady ? pair(act?.worked_this_month ?? derived.bWorked.length, act?.active ?? derived.active.length) : null, color: 'var(--color-success-text)', onClick: tilesReady ? openActivityDrill : undefined },
     { key: 'new',       label: t('dashboard.stats.newThisMonthAvg', { avg: formatNumber(derived.avg) }), value: tilesReady ? pair(derived.newCount, target) : null, color: newColor, onClick: tilesReady ? () => openDrill('average', t('monthlyKpi.averageCalc'), derived.all) : undefined },
-    { key: 'attention', label: t('dashboard.stats.attentionCandidates'), value: tilesReady ? pair(derived.attention.length, derived.active.length) : null, color: derived.attention.length > 0 ? 'var(--color-danger)' : 'var(--color-success)', onClick: tilesReady ? openAttentionDrill : undefined },
+    { key: 'attention', label: t('dashboard.stats.attentionCandidates'), value: tilesReady ? pair(attn?.count ?? derived.attention.length, act?.active ?? derived.active.length) : null, color: (attn?.count ?? derived.attention.length) > 0 ? 'var(--color-danger)' : 'var(--color-success)', onClick: tilesReady ? openAttentionDrill : undefined },
   ]
 
   return (
@@ -149,7 +153,7 @@ export default function ShiftmanagerDashboard() {
           every list drill uses the rich DrillDownDrawer (full candidate cards) + tabs. */}
       {drill && (drill.mode === 'average'
         ? <KpiDrillDownDrawer mode="average" title={drill.title} candidates={drill.candidates} onClose={() => setDrill(null)} />
-        : <DrillDownDrawer title={drill.title} candidates={drill.candidates} tabs={drill.tabs} initialTab={drill.initialTab} onClose={() => setDrill(null)} />
+        : <DrillDownDrawer title={drill.title} candidates={drill.candidates} tabs={drill.tabs} initialTab={drill.initialTab} total={drill.total} onClose={() => setDrill(null)} />
       )}
 
       <SmLoadErrorBanner isError={error} onRetry={refetch} />

@@ -3,11 +3,11 @@
  * candidates table (§3A blueprint: config-driven donuts[] + kpis[], equal
  * footprint, click-to-filter). One status donut + 8 KPI cards: the status
  * donut and the active/inactive/intake/new-this-month counts read GET
- * /sm_candidates/stats (server COUNTS, SM-STATS-2); the row-derived tiles
- * (attention, no-shows, cancellations, ending soon) read the `candidates_per_page`
- * row page (server cap 500, SM-STATS-3 until the endpoint carries those
- * breakdowns). Neither depends on the table's own page, so the counts never
- * change when the user pages through the table.
+ * /sm_candidates/stats (server COUNTS, SM-STATS-2); attention, no-shows, ending
+ * soon read the stats blocks too (SM-STATS-3), while cancellations and the
+ * planned sub-label stay row-derived (no served count for either). Drill
+ * lists stay the capped `candidates_per_page` row page and pass the server
+ * count as `total`. None depends on the table's own page.
  *
  * Renders through the shared `components/insights/InsightsRow` — the same
  * component the native candidates page uses — so this strip has the identical
@@ -75,7 +75,7 @@ interface SmCandidatesInsightsRowProps {
   statusFilter: Array<string | number>
   onStatusPick: (status: string) => void
   onStatusClear: () => void
-  onDrillDown: (title: string, items: ReportCandidate[]) => void
+  onDrillDown: (title: string, items: ReportCandidate[], total?: number) => void
 }
 
 // Renders the Shiftmanager candidates page's KPI/insights strip through the shared
@@ -128,10 +128,9 @@ export default function SmCandidatesInsightsRow({
   // Existing report metrics (kept, same predicates as CandidatesKpiRow) plus two
   // data-derived additions (no-shows, cancellations) and one tied to the new
   // Uitschrijfdatum column (ending soon) to fill the shared 9-card footprint.
-  // SM-STATS-3 (backend ask, unresolved): attention/no-shows/cancellations/ending-soon
-  // need a per-candidate flag/date (missing_appointment, no_show_count, cancellations,
-  // end_date_employment window) the stats endpoint has no breakdown for — they stay
-  // row-derived over the capped `candidates` page (documented cap: useReportCandidates.ts).
+  // SM-STATS-3: attention/no-shows/ending-soon counts come from the stats blocks when
+  // present; the row subsets below feed the drill lists and are the loading/old-server
+  // fallback (capped page, documented in useReportCandidates.ts).
   const aandacht      = useMemo(() => calcAttention(candidates), [candidates])
   // Headcount feeding the "active" KPI card — server COUNT (by_status), rows only
   // as the stats-loading/error fallback (same population rule as the donut above).
@@ -139,7 +138,9 @@ export default function SmCandidatesInsightsRow({
     ? byStatusBuckets.filter(b => normalizeSmStatus(b.label) === SM_STATUS.ACTIVE).reduce((s, b) => s + b.total, 0)
     : candidates.filter(c => statusOf(c) === SM_STATUS.ACTIVE).length
   // Active candidates with a future shift already planned — surfaced as the active KPI's
-  // sub-label; no stats breakdown for this (SM-STATS-3), stays row-derived.
+  // sub-label. Row-derived on purpose: the server `activity.planned` is the exclusive dashboard
+  // bucket (never-worked and worked-this-month win first), not the 'planned ahead' population,
+  // so it stays row-derived until the BE serves a non-exclusive count.
   const plannedActive = useMemo(() => candidates.filter(c => {
     if (statusOf(c) !== SM_STATUS.ACTIVE) return false
     return c.last_planned_shift && new Date(c.last_planned_shift) > new Date()
@@ -174,6 +175,11 @@ export default function SmCandidatesInsightsRow({
   // Candidates with at least one recorded cancellation, for their own KPI card.
   const cancellations = useMemo(() => candidates.filter(c => cancellationsOf(c) > 0), [candidates])
   const endingSoon    = useMemo(() => calcEndingSoon(candidates), [candidates])
+  // Server counts for the attention and risk tiles (undefined while loading or on an older payload);
+  // the planned sub-label stays row-derived because activity.planned is an exclusive bucket, not "has a future shift".
+  const attentionTotal = useStats ? stats?.attention?.count : undefined
+  const noShowsTotal = useStats ? stats?.risk?.no_shows : undefined
+  const endingSoonTotal = useStats ? stats?.risk?.ending_soon : undefined
   // Locale-aware month name (app locale, not a hardcoded 'nl-NL' — §5).
   const monthLabel = formatDate(new Date(), { month: 'long' })
 
@@ -185,21 +191,22 @@ export default function SmCandidatesInsightsRow({
       color: 'var(--color-warning-text)', onClick: () => onStatusPick(SM_STATUS.INACTIVE), active: pickedStatus === SM_STATUS.INACTIVE },
     { key: 'intake', label: t('kpiRow.intake', { ns: 'reports' }), value: intakeTotal,
       color: 'var(--color-violet)', onClick: () => onStatusPick(SM_STATUS.INTAKE), active: pickedStatus === SM_STATUS.INTAKE },
-    { key: 'attention', label: t('kpiRow.attention', { ns: 'reports' }), value: aandacht.length,
+    { key: 'attention', label: t('kpiRow.attention', { ns: 'reports' }), value: attentionTotal ?? aandacht.length,
       sub: t('kpiRow.attentionNote', { ns: 'reports' }), color: 'var(--color-danger-text)',
-      onClick: () => onDrillDown(t('kpiRow.attention', { ns: 'reports' }), aandacht) },
+      onClick: () => onDrillDown(t('kpiRow.attention', { ns: 'reports' }), aandacht, attentionTotal) },
     { key: 'newThisMonth', label: t('kpiRow.newThisMonth', { ns: 'reports', month: monthLabel, avg: monthStats.avg }),
       value: monthStats.count, color: 'var(--color-primary-text)',
-      onClick: () => onDrillDown(t('kpiRow.drillNewIn', { ns: 'reports', month: monthLabel }), monthStats.items) },
-    { key: 'noShows', label: t('candidatesPage.kpi.noShows'), value: noShows.length,
+      onClick: () => onDrillDown(t('kpiRow.drillNewIn', { ns: 'reports', month: monthLabel }), monthStats.items, statsMonthTotal) },
+    { key: 'noShows', label: t('candidatesPage.kpi.noShows'), value: noShowsTotal ?? noShows.length,
       sub: t('candidatesPage.kpi.noShowsSub'), color: 'var(--color-danger-text)',
-      onClick: () => onDrillDown(t('candidatesPage.kpi.noShows'), noShows) },
+      onClick: () => onDrillDown(t('candidatesPage.kpi.noShows'), noShows, noShowsTotal) },
+    // Cancellations stay row-derived: the stats endpoint does not serve risk.cancellations.
     { key: 'cancellations', label: t('candidatesPage.kpi.cancellations'), value: cancellations.length,
       sub: t('candidatesPage.kpi.cancellationsSub'), color: 'var(--color-warning-text)',
       onClick: () => onDrillDown(t('candidatesPage.kpi.cancellations'), cancellations) },
-    { key: 'endingSoon', label: t('candidatesPage.kpi.endingSoon'), value: endingSoon.length,
+    { key: 'endingSoon', label: t('candidatesPage.kpi.endingSoon'), value: endingSoonTotal ?? endingSoon.length,
       sub: t('candidatesPage.kpi.endingSoonSub'), color: 'var(--color-info)',
-      onClick: () => onDrillDown(t('candidatesPage.kpi.endingSoon'), endingSoon) },
+      onClick: () => onDrillDown(t('candidatesPage.kpi.endingSoon'), endingSoon, endingSoonTotal) },
   ]
 
   return <InsightsRow donuts={donuts} kpis={kpis} clearTitle={t('clear', { ns: 'common' })} />

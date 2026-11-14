@@ -25,7 +25,7 @@ function wrapper({ children }: { children: ReactNode }) {
 }
 
 const SAMPLE_RESPONSE = {
-  total: 42,
+  total: 1000,
   by_status: [{ label: 'Actief', total: 30 }, { label: 'Onbekend', total: 12 }],
   by_position: [{ label: 'Verpleegkundige', total: 10 }],
   by_city: [{ label: 'Amsterdam', total: 5 }],
@@ -33,6 +33,9 @@ const SAMPLE_RESPONSE = {
   login_recency: { last_30_days: 20, last_90_days: 10, older: 5, never: 7 },
   registrations_per_month: Array.from({ length: 12 }, (_, i) => ({ month: i + 1, total: 0 })),
   departures_per_month: Array.from({ length: 12 }, (_, i) => ({ month: i + 1, total: 0 })),
+  activity: { active: 900, inactive: 100, never_worked: 300, worked_this_month: 400, planned: 150, idle: 50 },
+  attention: { count: 42 },
+  risk: { no_shows: 7, ending_soon: 3 },
 }
 
 describe('useSmCandidateStats', () => {
@@ -57,12 +60,27 @@ describe('useSmCandidateStats', () => {
     )
   })
 
+  it('sends a multi-value status, position and year as exact params', async () => {
+    mockedGet.mockResolvedValue({ data: SAMPLE_RESPONSE })
+    renderHook(() => useSmCandidateStats({ status: ['actief', 'intake'], position: 'Verzorgende', year: 2026 }), { wrapper })
+
+    await waitFor(() => expect(mockedGet).toHaveBeenCalled())
+
+    expect(mockedGet).toHaveBeenCalledWith(
+      '/sm_candidates/stats',
+      { params: { status: ['actief', 'intake'], position: 'Verzorgende', year: 2026 }, signal: expect.anything() },
+    )
+  })
+
   it('returns the server aggregates untouched (real counts, not derived from rows)', async () => {
     mockedGet.mockResolvedValue({ data: SAMPLE_RESPONSE })
     const { result } = renderHook(() => useSmCandidateStats(), { wrapper })
 
     await waitFor(() => expect(result.current.loading).toBe(false))
     expect(result.current.stats).toEqual(SAMPLE_RESPONSE)
+    expect(result.current.stats?.activity?.never_worked).toBe(300)
+    expect(result.current.stats?.attention?.count).toBe(42)
+    expect(result.current.stats?.risk?.no_shows).toBe(7)
     expect(result.current.error).toBe(false)
   })
 

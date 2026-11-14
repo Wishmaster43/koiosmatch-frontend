@@ -7,7 +7,7 @@
  * rows than the stats bucket says exist, so a test reading `stats.total` proves
  * the tile is not silently falling back to the under-counted row set.
  */
-import { render, screen, waitFor } from '@testing-library/react'
+import { render, screen, waitFor, fireEvent } from '@testing-library/react'
 import { describe, it, expect, vi, afterEach } from 'vitest'
 import { QueryClientProvider, QueryClient } from '@tanstack/react-query'
 import ShiftmanagerDashboard from './ShiftmanagerDashboard'
@@ -20,9 +20,9 @@ const t = (key: string, opts?: Record<string, unknown>) => i18n.t(key, { ns: 'sh
 // stub it down to just rendering the leadingKpis this dashboard hands it, so the
 // candidate-stats KPI values stay inspectable without pulling in its own fetches.
 vi.mock('@/components/shiftmanager/ShiftsChartsBlock', () => ({
-  default: ({ leadingKpis }: { leadingKpis: { key: string; label: string; value: string | number }[] }) => (
+  default: ({ leadingKpis }: { leadingKpis: { key: string; label: string; value: string | number; onClick?: () => void }[] }) => (
     <div>
-      {leadingKpis.map(k => <div key={k.key} data-testid={`kpi-${k.key}`}>{k.label}: {k.value}</div>)}
+      {leadingKpis.map(k => <div key={k.key} data-testid={`kpi-${k.key}`} onClick={k.onClick}>{k.label}: {k.value}</div>)}
     </div>
   ),
 }))
@@ -50,6 +50,9 @@ const STATS_RESPONSE = {
   login_recency: { last_30_days: 0, last_90_days: 0, older: 0, never: 0 },
   registrations_per_month: Array.from({ length: 12 }, (_, i) => ({ month: i + 1, total: i === thisMonth ? 5 : 20 })),
   departures_per_month: Array.from({ length: 12 }, (_, i) => ({ month: i + 1, total: 0 })),
+  activity: { active: 900, inactive: 100, never_worked: 300, worked_this_month: 400, planned: 150, idle: 50 },
+  attention: { count: 42 },
+  risk: { no_shows: 7, ending_soon: 3 },
 }
 
 // Eight row-level "new this month" candidates — deliberately different from the
@@ -171,6 +174,52 @@ describe('ShiftmanagerDashboard · card header links', () => {
     await screen.findByText('Completed sync')
     expect(screen.queryByText(t('dashboard.viewAll'))).toBeNull()
     expect(access.ids).toEqual(expect.arrayContaining(['details.runs', 'details.messages']))
+  })
+})
+
+// SM-STATS-3: activity and attention tiles read the server counts, and the drill carries the server total.
+describe('ShiftmanagerDashboard · server activity and attention counts (SM-STATS-3)', () => {
+  it('shows worked/active 400/900 and attention 42/900 from the stats blocks, not the 8 rows', async () => {
+    mockUseAuth.mockReturnValue({ activeTenant: { package: 'core' }, user: null })
+    renderDashboard()
+    await waitFor(() => expect(screen.getByTestId('kpi-activity').textContent).toContain('400/900'))
+    expect(screen.getByTestId('kpi-attention').textContent).toContain('42/900')
+    // REQUEST-ASSERT-1: the counts come from the stats route, requested for the current year.
+    expect(vi.mocked(api.get)).toHaveBeenCalledWith('/sm_candidates/stats', expect.objectContaining({ params: { year: new Date().getFullYear() } }))
+  })
+
+  it('opens the activity drill on the biggest server bucket and reads the shown-of header', async () => {
+    mockUseAuth.mockReturnValue({ activeTenant: { package: 'core' }, user: null })
+    renderDashboard()
+    await waitFor(() => expect(screen.getByTestId('kpi-activity').textContent).toContain('400/900'))
+    fireEvent.click(screen.getByTestId('kpi-activity'))
+    expect(await screen.findByText(i18n.t('drilldown.shownOf', { ns: 'reports', shown: 0, total: 400 }))).toBeInTheDocument()
+  })
+
+  it('opens the attention drill with the 8 attention rows under the server total 42', async () => {
+    mockUseAuth.mockReturnValue({ activeTenant: { package: 'core' }, user: null })
+    renderDashboard()
+    await waitFor(() => expect(screen.getByTestId('kpi-attention').textContent).toContain('42/900'))
+    fireEvent.click(screen.getByTestId('kpi-attention'))
+    expect(await screen.findByText(i18n.t('drilldown.shownOf', { ns: 'reports', shown: 8, total: 42 }))).toBeInTheDocument()
+  })
+
+  // An older payload without the blocks keeps the row-derived tiles (0 worked of 8 active, 8 attention of 8) and a plain drawer count.
+  it('falls back to the row-derived counts and the plain drawer count when the blocks are absent', async () => {
+    mockUseAuth.mockReturnValue({ activeTenant: { package: 'core' }, user: null })
+    const defaultImpl = vi.mocked(api.get).getMockImplementation()!
+    const noBlocks: Record<string, unknown> = { ...STATS_RESPONSE }
+    delete noBlocks.activity; delete noBlocks.attention; delete noBlocks.risk
+    vi.mocked(api.get).mockImplementation((url: string) => url === '/sm_candidates/stats' ? Promise.resolve({ data: noBlocks }) : defaultImpl(url))
+    try {
+      renderDashboard()
+      await waitFor(() => expect(screen.getByTestId('kpi-activity').textContent).toContain('0/8'))
+      expect(screen.getByTestId('kpi-attention').textContent).toContain('8/8')
+      fireEvent.click(screen.getByTestId('kpi-attention'))
+      expect(await screen.findByText(i18n.t('drilldown.candidatesCount', { ns: 'reports', count: 8 }))).toBeInTheDocument()
+    } finally {
+      vi.mocked(api.get).mockImplementation(defaultImpl)
+    }
   })
 })
 

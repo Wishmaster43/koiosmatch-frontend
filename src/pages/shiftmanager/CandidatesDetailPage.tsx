@@ -7,10 +7,11 @@
  * SmCandidatesInsightsRow (below) is what actually sources the KPI counts from
  * GET /sm_candidates/stats (SM-STATS-2) — the `allCandidates` row fetch here is
  * capped at `candidates_per_page` (server hard cap 500) and feeds ONLY the
- * right-panel filter option lists (year/status/position/features) and this
- * insights row's SM-STATS-3 row-derived tiles (attention/no-shows/cancellations/
- * ending-soon/new-this-month drill list), never a "full"/"server-wide" count on
- * its own. Status cards/donut filter the table in place;
+ * right-panel filter option lists (year/status/position/features) and the insights
+ * row's drill-down LISTS (attention/no-shows/ending-soon/new-this-month), plus the
+ * cancellations count and the active card's planned sub-label that have no stats
+ * block (SM-STATS-3); every other tile COUNT comes from GET /sm_candidates/stats,
+ * so the rows are never a "full"/"server-wide" count on their own. Status cards/donut filter the table in place;
  * attention/new/no-shows/cancellations/ending-soon open the rich drill-down.
  */
 import { useState, useMemo, useEffect } from 'react'
@@ -52,10 +53,10 @@ export default function CandidatesDetailPage() {
   const { candidates_per_page } = useKpiSettings()
   const { candidates, loading, error, page, pageSize, total, lastPage, setPage, handlePageSizeChange } = useSmCandidatesList()
   // Capped row page (server hard cap 500, `candidates_per_page` tenant setting) —
-  // NOT a full/server-wide set. Feeds the right-panel filter option lists and
-  // SmCandidatesInsightsRow's SM-STATS-3 row-derived tiles; the row's stats-backed
-  // KPI counts (SM-STATS-2) come from GET /sm_candidates/stats inside that
-  // component, not from this array. While loading this is simply empty — the
+  // NOT a full/server-wide set. Feeds the right-panel filter option lists, the
+  // insights row's drill-down lists, the cancellations count and the planned
+  // sub-label; every other KPI count (SM-STATS-2/3) comes from GET /sm_candidates/stats
+  // inside that component, not from this array. While loading this is simply empty — the
   // shared InsightsRow has no loading prop, so cards read their stats fallback.
   const { candidates: allCandidates } = useReportCandidates(candidates_per_page)
 
@@ -73,7 +74,7 @@ export default function CandidatesDetailPage() {
   const [selectedPositions, setSelectedPositions] = useState<Array<string | number>>([])
   const [selectedFeatures, setSelectedFeatures] = useState<Array<string | number>>([])
   // Attention/new/no-shows/… cards open the rich drill-down with their own filtered subset.
-  const [drill, setDrill] = useState<{ title: string; candidates: ReportCandidate[] } | null>(null)
+  const [drill, setDrill] = useState<{ title: string; candidates: ReportCandidate[]; total?: number } | null>(null)
   // Row click opens the rich per-candidate drill-down (Danny 24-07: "ik mis de
   // drill down" — the old reports table opened this drawer; restored blueprint-side).
   const [detail, setDetail] = useState<ReportCandidate | null>(null)
@@ -162,7 +163,7 @@ export default function CandidatesDetailPage() {
         statusFilter={statusFilter}
         onStatusPick={pickStatus}
         onStatusClear={() => setStatusFilter([])}
-        onDrillDown={(title, items) => setDrill({ title, candidates: items })}
+        onDrillDown={(title, items, total) => setDrill({ title, candidates: items, total })}
       />
 
       {/* Toolbar row — the one shared spacing spec (§4): identical KPI-row→button
@@ -188,7 +189,7 @@ export default function CandidatesDetailPage() {
       />
 
       {drill && (
-        <DrillDownDrawer title={drill.title} candidates={drill.candidates} onClose={() => setDrill(null)} />
+        <DrillDownDrawer title={drill.title} candidates={drill.candidates} total={drill.total} onClose={() => setDrill(null)} />
       )}
       {detail && (
         <CandidateDetailDrawer candidate={detail} onClose={() => setDetail(null)}

@@ -6,9 +6,10 @@
  * on the stats numbers proves the tiles are not silently reading rows instead
  * (one population per tile, §13 same-population rule).
  */
-import { render, screen, waitFor } from '@testing-library/react'
+import { render, screen, waitFor, fireEvent } from '@testing-library/react'
 import { describe, it, expect, vi } from 'vitest'
 import { QueryClientProvider, QueryClient } from '@tanstack/react-query'
+import i18n from '@/i18n'
 import SmCandidatesInsightsRow from './SmCandidatesInsightsRow'
 import type { ReportCandidate } from '@/types/reports'
 
@@ -36,7 +37,16 @@ vi.mock('@/lib/api', async () => {
   return { ...actual, default: { get: (...a: unknown[]) => (getMock as unknown as (...x: unknown[]) => unknown)(...a) } }
 })
 
-function renderRow() {
+// SM-STATS-3 blocks; the current-month registrations differ from no_shows (7) so each number is unique.
+const BLOCKS_RESPONSE = {
+  ...STATS_RESPONSE,
+  registrations_per_month: Array.from({ length: 12 }, (_, i) => ({ month: i + 1, total: i === new Date().getMonth() ? 5 : 1 })),
+  activity: { active: 100, inactive: 20, never_worked: 10, worked_this_month: 60, planned: 25, idle: 5 },
+  attention: { count: 42 },
+  risk: { no_shows: 7, ending_soon: 3 },
+}
+
+function renderRow(onDrillDown = vi.fn()) {
   const client = new QueryClient({ defaultOptions: { queries: { retry: false } } })
   return render(
     <QueryClientProvider client={client}>
@@ -45,7 +55,7 @@ function renderRow() {
         statusFilter={[]}
         onStatusPick={vi.fn()}
         onStatusClear={vi.fn()}
-        onDrillDown={vi.fn()}
+        onDrillDown={onDrillDown}
       />
     </QueryClientProvider>,
   )
@@ -80,5 +90,76 @@ describe('SmCandidatesInsightsRow · status KPI counts (SM-STATS-2)', () => {
 
     await waitFor(() => expect(screen.getByText('100')).toBeInTheDocument())
     expect(screen.queryByText('7')).not.toBeInTheDocument()
+  })
+})
+
+describe('SmCandidatesInsightsRow · stats blocks (SM-STATS-3)', () => {
+  it('shows the server attention / no-shows / ending-soon counts and a row-derived cancellations 0', async () => {
+    getMock.mockResolvedValueOnce({ data: BLOCKS_RESPONSE })
+    renderRow()
+
+    await waitFor(() => expect(screen.getByText('42')).toBeInTheDocument())
+    expect(screen.getByText('7')).toBeInTheDocument()
+    expect(screen.getByText('3')).toBeInTheDocument()
+    expect(screen.getByText('0')).toBeInTheDocument()
+  })
+
+  it('passes the server count as the third drill-down argument', async () => {
+    getMock.mockResolvedValueOnce({ data: BLOCKS_RESPONSE })
+    const onDrillDown = vi.fn()
+    renderRow(onDrillDown)
+
+    await waitFor(() => expect(screen.getByText('42')).toBeInTheDocument())
+    fireEvent.click(screen.getByText('42'))
+    expect(onDrillDown).toHaveBeenCalledTimes(1)
+    expect(onDrillDown.mock.calls[0][2]).toBe(42)
+    // The list stays the row subset: the one active row without a login is the only attention row.
+    expect(onDrillDown.mock.calls[0][1]).toEqual([rows[0]])
+  })
+
+  // Every tile with a served count hands that count to the drawer; the rows carry no no-shows, end dates or
+  // registration dates, so the lists are empty. The click lands on the card's label (it bubbles to the card).
+  it.each([
+    ['noShows', i18n.t('candidatesPage.kpi.noShows', { ns: 'shiftmanager' }), 7],
+    ['endingSoon', i18n.t('candidatesPage.kpi.endingSoon', { ns: 'shiftmanager' }), 3],
+  ])('passes the server count of the %s tile as its drill total', async (_key, label, total) => {
+    getMock.mockResolvedValueOnce({ data: BLOCKS_RESPONSE })
+    const onDrillDown = vi.fn()
+    renderRow(onDrillDown)
+
+    await waitFor(() => expect(screen.getByText('42')).toBeInTheDocument())
+    expect(screen.getAllByText(String(total)).length).toBeGreaterThan(0)
+    fireEvent.click(screen.getByText(label))
+    expect(onDrillDown).toHaveBeenCalledTimes(1)
+    expect(onDrillDown.mock.calls[0][2]).toBe(total)
+    expect(onDrillDown.mock.calls[0][1]).toEqual([])
+  })
+
+  // The new-this-month tile hands the server month count (5) to the drawer; its label carries the month, so click the value.
+  it('passes the server month count as the new-this-month drill total', async () => {
+    getMock.mockResolvedValueOnce({ data: BLOCKS_RESPONSE })
+    const onDrillDown = vi.fn()
+    renderRow(onDrillDown)
+
+    await waitFor(() => expect(screen.getByText('5')).toBeInTheDocument())
+    fireEvent.click(screen.getByText('5'))
+    expect(onDrillDown).toHaveBeenCalledTimes(1)
+    expect(onDrillDown.mock.calls[0][2]).toBe(5)
+    expect(onDrillDown.mock.calls[0][1]).toEqual([])
+  })
+
+  // An older payload without the blocks keeps every tile on its row-derived figure and passes no total.
+  it('falls back to the row-derived counts and an undefined total when the blocks are absent', async () => {
+    getMock.mockResolvedValueOnce({ data: STATS_RESPONSE })
+    const onDrillDown = vi.fn()
+    renderRow(onDrillDown)
+
+    await waitFor(() => expect(screen.getByText('100')).toBeInTheDocument())
+    expect(screen.queryByText('42')).not.toBeInTheDocument()
+    // The one active row without a login is the row-derived attention count; clicking its label hits the card.
+    fireEvent.click(screen.getByText(i18n.t('kpiRow.attention', { ns: 'reports' })))
+    expect(onDrillDown).toHaveBeenCalledTimes(1)
+    expect(onDrillDown.mock.calls[0][1]).toEqual([rows[0]])
+    expect(onDrillDown.mock.calls[0][2]).toBeUndefined()
   })
 })

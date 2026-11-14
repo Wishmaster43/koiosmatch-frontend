@@ -37,8 +37,13 @@ function InfoRow({ icon: Icon, label, value, highlight }: { icon: LucideIcon; la
   )
 }
 
+// One drill bucket: its rows, and optionally the server-side population they were cut from (SM-STATS-3).
+export interface DrillDownTab { key: string; label: ReactNode; candidates: ReportCandidate[]; title?: string; total?: number }
+
 // A right-hand drawer listing the candidates behind one report drilldown, optionally split into tabs, with a search box and a two-column-friendly width.
-export default function DrillDownDrawer({ title, subtitle, candidates = [], onClose, tabs, initialTab }: { title?: ReactNode; subtitle?: ReactNode; candidates?: ReportCandidate[]; onClose: () => void; tabs?: { key: string; label: ReactNode; candidates: ReportCandidate[]; title?: string }[]; initialTab?: string }) {
+// `total` (per drawer or per tab) is the server-side population behind a tile; when the row list is a capped page the header says "N of M shown"
+// instead of presenting the page as the whole population (card-drill invariant: tile and drill name the same population).
+export default function DrillDownDrawer({ title, subtitle, candidates = [], onClose, tabs, initialTab, total }: { title?: ReactNode; subtitle?: ReactNode; candidates?: ReportCandidate[]; onClose: () => void; tabs?: DrillDownTab[]; initialTab?: string; total?: number }) {
   const panelRef = useFocusTrap<HTMLDivElement>(onClose)
   const { t } = useTranslation('reports')
   // DATUM-1: every user-visible date renders DD-MM-YYYY via the house formatter —
@@ -54,6 +59,9 @@ export default function DrillDownDrawer({ title, subtitle, candidates = [], onCl
   const [activeTab, setActiveTab] = useState(initialTab ?? tabs?.[0]?.key)
   const currentTab = tabs?.find(tb => tb.key === activeTab)
   const shown = currentTab?.candidates ?? candidates
+  // The population the tile counted; only named when it is larger than the rows this drawer holds.
+  const population = currentTab ? currentTab.total : total
+  const capped = typeof population === 'number' && population > shown.length
 
   const filtered = shown.filter(c => {
     if (!search) return true
@@ -78,7 +86,7 @@ export default function DrillDownDrawer({ title, subtitle, candidates = [], onCl
           <div>
             <PageTitle>{currentTab?.label ?? title}</PageTitle>
             <div className="text-sm text-(--text-muted) mt-0.5">
-              {t('drilldown.candidatesCount', { count: shown.length })}
+              {capped ? t('drilldown.shownOf', { shown: shown.length, total: population }) : t('drilldown.candidatesCount', { count: shown.length })}
               {subtitle && <span className="ml-1 text-(--text-muted)">· {subtitle}</span>}
             </div>
           </div>
@@ -97,10 +105,10 @@ export default function DrillDownDrawer({ title, subtitle, candidates = [], onCl
           </div>
         </div>
 
-        {/* Bucket switcher (shared DrillTabs) — badge = count per bucket */}
+        {/* Bucket switcher (shared DrillTabs) — badge = the bucket's population (server total when given, else its rows) */}
         {tabs && tabs.length > 1 && activeTab && (
           <div className="shrink-0 px-4 py-3" style={{ borderBottom: '1px solid var(--hover-bg)' }}>
-            <DrillTabs tabs={tabs.map(tb => ({ key: tb.key, label: tb.label, count: tb.candidates.length, title: tb.title }))}
+            <DrillTabs tabs={tabs.map(tb => ({ key: tb.key, label: tb.label, count: tb.total ?? tb.candidates.length, title: tb.title }))}
               active={activeTab} onChange={setActiveTab} />
           </div>
         )}

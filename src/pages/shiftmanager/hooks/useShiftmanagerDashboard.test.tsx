@@ -46,6 +46,9 @@ const SAMPLE_STATS = {
   login_recency: { last_30_days: 0, last_90_days: 0, older: 0, never: 0 },
   registrations_per_month: Array.from({ length: 12 }, (_, i) => ({ month: i + 1, total: i === new Date().getMonth() ? 40 : 10 })),
   departures_per_month: Array.from({ length: 12 }, (_, i) => ({ month: i + 1, total: 0 })),
+  activity: { active: 900, inactive: 100, never_worked: 300, worked_this_month: 400, planned: 150, idle: 50 },
+  attention: { count: 42 },
+  risk: { no_shows: 7, ending_soon: 3 },
 }
 
 // Every endpoint the hook can call, so an un-awaited query never hangs a test.

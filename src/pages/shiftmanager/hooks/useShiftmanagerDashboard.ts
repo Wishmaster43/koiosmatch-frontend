@@ -1,6 +1,7 @@
 /**
- * useShiftmanagerDashboard — data layer for the Shiftmanager dashboard (§3): SM
- * candidates (feed the "new this month" KPI) and — only for AI/Workflow
+ * useShiftmanagerDashboard — data layer for the Shiftmanager dashboard (§3): the SM
+ * candidate rows (drill-down lists and row-derived fallbacks), the candidate stats
+ * COUNTS, and — only for AI/Workflow
  * packages — recent workflow runs + WhatsApp conversations. Via React Query: each
  * request dedups + caches + auto-cancels; the AI-only calls stay disabled until the
  * package is present (A-3 — replaces four raw useEffect fetches).
@@ -25,20 +26,15 @@ export interface ConvItem { name: string; msg: string; time: string }
 // identical in every app language, so no locale parameter is needed here.
 const hhmm = (iso?: string) => iso ? houseHhmm(new Date(iso)) : ''
 
-// PERF-1/SM-STATS-2 (audit): candidatesPerPage comes from the tenant's
-// `candidates_per_page` KPI setting (server hard cap 500, PageSize::from at
-// SmCandidateController::index) — this row fetch honours that configured cap
-// honestly (never "uncapped"/"full set"). Rows still feed the dashboard's
-// activity buckets (worked/planned/never/idle), the "active" headcount used as
-// those buckets' denominator, the attention list, and the "new this month"
-// tile's drill-down list — none of those have a matching stats breakdown yet
-// (SM-STATS-3: last_worked_shift, number_of_times_worked, last_planned_shift and
-// the missing_appointment flag). Only the "new this month" COUNT+AVG pair reads
-// GET /sm_candidates/stats below (registrations_per_month is a plain per-month
-// COUNT), so that one tile never undercounts past the row cap.
+// PERF-1/SM-STATS-3: the row fetch honours the tenant's `candidates_per_page` cap
+// (server hard cap 500) and feeds ONLY the drill-down lists plus the row-derived
+// fallbacks while stats load or fail. The tile COUNTS (active headcount, activity
+// buckets, attention, new this month) read GET /sm_candidates/stats (`activity`,
+// `attention`, `registrations_per_month`), so they never undercount past the row
+// cap; the activity and attention tiles pass that server count to the drill drawer as `total`.
 
 export function useShiftmanagerDashboard(candidatesPerPage: number, hasAI: boolean) {
-  // Candidates feed the (real) "new this month" KPI card.
+  // Candidate rows: the drill-down lists of every tile and the row-derived fallbacks while stats load or fail.
   const candidatesQ = useQuery({
     queryKey: ['sm_candidates', 'dash', candidatesPerPage],
     queryFn: async ({ signal }) => {
@@ -89,8 +85,8 @@ export function useShiftmanagerDashboard(candidatesPerPage: number, hasAI: boole
     },
   })
 
-  // Server-computed candidate COUNTS (unfiltered, this calendar year) for the
-  // "active" headcount and the "new this month" pair — see the module doc above.
+  // Server-computed candidate COUNTS (unfiltered, this calendar year) for the activity
+  // and attention tiles and the "new this month" pair (see the module doc above).
   const candidateStatsQ = useSmCandidateStats({ year: new Date().getFullYear() })
 
   return {
