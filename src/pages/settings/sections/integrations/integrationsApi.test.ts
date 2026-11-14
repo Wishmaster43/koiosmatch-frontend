@@ -106,28 +106,27 @@ describe('POST /integrations/{connector}/test', () => {
 })
 
 describe('mappings CRUD', () => {
-  // GET with domain param, unwrapped list.
+  // GET with domain param, unwrapped list; the served row comes back exactly as served.
   it('GETs mappings with the domain query param', async () => {
-    // Fixture carries the release-A stored (Dutch) spelling.
-    const rows = [{ id: '1', connector: 'helloflex', domain: 'schaal', koios_value: 'A', external_value: 'B', is_default: false }]
+    const rows = [{ id: '1', connector: 'helloflex', domain: 'scale', koios_value: 'A', external_value: 'B', is_default: false }]
     mockGet.mockResolvedValue({ data: { data: rows } })
     const result = await listMappings('helloflex', 'scale')
     expect(mockGet).toHaveBeenCalledWith('/integrations/helloflex/mappings', { params: { domain: 'scale' } })
-    expect(result).toEqual([{ ...rows[0], domain: 'scale' }])
+    expect(result).toEqual(rows)
   })
 
   // POST body shape — exactly the four accepted fields.
   it('POSTs the exact create body', async () => {
     const body = { domain: 'scale', koios_value: 'K1', external_value: 'E1', is_default: true }
-    mockPost.mockResolvedValue({ data: { data: { id: '2', connector: 'helloflex', ...body, domain: 'schaal' } } })
+    mockPost.mockResolvedValue({ data: { data: { id: '2', connector: 'helloflex', ...body } } })
     const created = await createMapping('helloflex', body)
-    expect(created).toEqual({ id: '2', connector: 'helloflex', ...body, domain: 'scale' })
+    expect(created).toEqual({ id: '2', connector: 'helloflex', ...body })
     expect(mockPost).toHaveBeenCalledWith('/integrations/helloflex/mappings', body, { quietStatuses: [422] })
   })
 
   // PUT partial update — only the changed fields go in the body.
   it('PUTs a partial update body to the row route', async () => {
-    mockPut.mockResolvedValue({ data: { data: { id: '2', connector: 'helloflex', domain: 'schaal', koios_value: 'K1', external_value: 'E2', is_default: true } } })
+    mockPut.mockResolvedValue({ data: { data: { id: '2', connector: 'helloflex', domain: 'scale', koios_value: 'K1', external_value: 'E2', is_default: true } } })
     const updated = await updateMapping('helloflex', '2', { external_value: 'E2' })
     expect(updated).toEqual({ id: '2', connector: 'helloflex', domain: 'scale', koios_value: 'K1', external_value: 'E2', is_default: true })
     expect(mockPut).toHaveBeenCalledWith('/integrations/helloflex/mappings/2', { external_value: 'E2' }, { quietStatuses: [422] })
