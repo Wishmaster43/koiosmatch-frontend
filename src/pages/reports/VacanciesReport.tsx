@@ -180,6 +180,7 @@ export default function VacanciesReport({ period, filters = EMPTY_REPORT_FILTERS
   // row below the fixed nine — same drill drawer, own definition-scoped route.
   const { customKpis, extraTitle: customKpiTitle } = useReportCustomKpis({
     data, drill, baseParams, windowSub, setDrill, entityPage: 'vacancies',
+    drawerUsesPageParams: true,
   })
 
   // Columns — soft chips for status/filled (§4), numeric cols right-aligned + sortable.

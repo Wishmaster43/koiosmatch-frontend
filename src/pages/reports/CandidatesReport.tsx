@@ -145,14 +145,15 @@ export default function CandidatesReport({ period, filters = EMPTY_REPORT_FILTER
       rowsParams: { ...buildReportQueryParams(period, 'candidates', filters), kpi },
     }))
 
-  // Tenant-defined KPI cards (KPI-BUILDER-1, §3.9): the definition drill route
-  // accepts only the panel-filter vocabulary — never phase_filter (candidates/
-  // leads is a client-side view switch, not a filter the definition route knows).
+  // Tenant-defined KPI cards (KPI-BUILDER-1, §3.9): the drawer passes the page params
+  // unchanged, so the Leads view's phase_filter[] reaches the definition drill as it
+  // reaches the card (REPORT-DRILL-UNKNOWN-PARAMS-1 FE ACTION 3).
   const { customKpis, extraTitle: customKpiTitle } = useReportCustomKpis({
     data, drill, baseParams,
     windowSub: () => reportWindowLabel(formatDate, data?.from, data?.to),
     setDrill,
     entityPage: 'candidates',
+    drawerUsesPageParams: true,
   })
 
   // Chart datum builders — the donut wears each lookup value's OWN colour with

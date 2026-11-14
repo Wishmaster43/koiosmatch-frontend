@@ -2,9 +2,9 @@
  * useReportCustomKpis — the tenant-defined KPI band wiring shared by every
  * report page (KPI-BUILDER-FE-1, CUSTOM-KPI-HOOK-1). Each page repeated the
  * same four lines: derive the active card id from the open drill's route,
- * strip the panel-filter params the definition-drill route does not accept
- * (`phase_filter` is a report-local view switch; `customer_id` is this page's
- * own key while the shared route expects `customer_ids`), build the "open"
+ * shape the panel-filter params the definition-drill route takes (by default
+ * `phase_filter` is dropped and `customer_id` is renamed to `customer_ids`;
+ * candidates and vacancies pass their own params unchanged), build the "open"
  * handler and map the envelope's `custom_kpis[]` onto KpiSpec cards.
  */
 import { useTranslation } from 'react-i18next'
@@ -21,6 +21,10 @@ export interface UseReportCustomKpisOpts {
   windowSub: () => string
   setDrill: (spec: DrillSpec | null) => void
   entityPage?: string
+  // true on the pages whose definition drawer must carry the page's own customer_id[] /
+  // phase_filter[] because the BE resolves the card with them (candidates, vacancies;
+  // REPORT-DRILL-UNKNOWN-PARAMS-1 FE ACTION 3); the other pages keep the renamed/stripped shape.
+  drawerUsesPageParams?: boolean
 }
 
 export interface UseReportCustomKpisResult {
@@ -28,9 +32,9 @@ export interface UseReportCustomKpisResult {
   extraTitle: string
 }
 
-// Drops the report-local `phase_filter` and renames `customer_id` to the
-// shared route's `customer_ids` — a no-op for pages whose baseParams carries
-// neither key, so every page can pass its own baseParams unchanged.
+// Default shape for pages that do not opt in: drops `phase_filter` (the BE
+// applies it only to candidate definitions) and renames `customer_id` to the
+// route's `customer_ids` alias; a no-op for baseParams carrying neither key.
 function toDefinitionDrillParams(baseParams: object): object {
   const withoutPhase = { ...baseParams } as Record<string, unknown> & { phase_filter?: unknown; customer_id?: unknown }
   delete withoutPhase.phase_filter
@@ -39,14 +43,14 @@ function toDefinitionDrillParams(baseParams: object): object {
 }
 
 export function useReportCustomKpis({
-  data, drill, baseParams, windowSub, setDrill, entityPage,
+  data, drill, baseParams, windowSub, setDrill, entityPage, drawerUsesPageParams,
 }: UseReportCustomKpisOpts): UseReportCustomKpisResult {
   const { t } = useTranslation('analytics')
   // The active card id comes from the currently open drill's own route, so a
   // reopened definition drill still highlights the card it came from.
   const activeCustomKpiId = drill?.rowsEndpoint?.match(/kpi-definitions\/([^/]+)\/drill/)?.[1] ?? null
   const openCustomKpi = makeOpenCustomKpiDrill({
-    baseParams: toDefinitionDrillParams(baseParams),
+    baseParams: drawerUsesPageParams ? baseParams : toDefinitionDrillParams(baseParams),
     windowSub,
     setDrill,
     ...(entityPage ? { entityPage } : {}),

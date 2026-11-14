@@ -42,11 +42,11 @@ vi.mock('@/lib/settings/useAllSettings', async () => {
   return { ...actual, useAllSettings: () => mockSettings() }
 })
 
-function renderReport() {
+function renderReport(initialView?: string) {
   const qc = new QueryClient()
   return render(
     <QueryClientProvider client={qc}>
-      <CandidatesReport period="month" />
+      <CandidatesReport period="month" initialView={initialView} />
     </QueryClientProvider>,
   )
 }
@@ -76,8 +76,8 @@ vi.mock('@/components/charts/BarChartCard', () => ({
 }))
 
 // KPI-BUILDER-FE-1 §3.9/§3.11: tenant-defined KPI cards ride a second band row,
-// customBase strips phase_filter (the definition drill route doesn't know it),
-// and a click hits the definition route with only the accepted params.
+// the definition drill carries the page's phase_filter on the Leads view
+// (REPORT-DRILL-UNKNOWN-PARAMS-1), and a click hits the definition route.
 describe('CandidatesReport — tenant-defined KPI cards (KPI-BUILDER-1)', () => {
   afterEach(() => {
     getSpy.mockReset()
@@ -105,7 +105,7 @@ describe('CandidatesReport — tenant-defined KPI cards (KPI-BUILDER-1)', () => 
     expect(screen.getByText('buiten doel · doel 15')).toBeInTheDocument()
   })
 
-  it('clicking the tenant card hits the definition drill route with only the accepted params (never phase_filter/kpi/date)', async () => {
+  it('clicking the tenant card hits the definition drill route without kpi/date and without phase_filter on the candidates view', async () => {
     const user = userEvent.setup()
     mockUseCandidatesReport.mockReturnValue({ data: customKpiData, loading: false, error: false })
     renderReport()
@@ -113,10 +113,18 @@ describe('CandidatesReport — tenant-defined KPI cards (KPI-BUILDER-1)', () => 
     const call = getSpy.mock.calls.find(c => c[0] === '/reports/kpi-definitions/kd-1/drill')
     expect(call).toBeDefined()
     const params = call?.[1]?.params as Record<string, unknown>
-    expect(params.period).toBe('month')
-    expect(params.kpi).toBeUndefined()
-    expect(params.date).toBeUndefined()
-    expect(params.phase_filter).toBeUndefined()
+    expect(params).toEqual({ period: 'month' })
+  })
+
+  it('on the Leads view the definition drill carries the page phase_filter and never customer_ids', async () => {
+    const user = userEvent.setup()
+    mockUseCandidatesReport.mockReturnValue({ data: customKpiData, loading: false, error: false })
+    renderReport('leads')
+    await user.click(screen.getByText('Nieuwe kandidaten'))
+    const call = getSpy.mock.calls.find(c => c[0] === '/reports/kpi-definitions/kd-1/drill')
+    expect(call).toBeDefined()
+    const params = call?.[1]?.params as Record<string, unknown>
+    expect(params).toEqual({ period: 'month', phase_filter: ['lead'] })
   })
 
   it('a null value renders a dash and stays unclickable (no request)', async () => {

@@ -5,6 +5,7 @@ import userEvent from '@testing-library/user-event'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import VacanciesReport from './VacanciesReport'
 import { data } from './VacanciesReport.testKit'
+import { EMPTY_REPORT_FILTERS, type ReportFilterState } from './reportFilterParams'
 
 // Data layer under test control (loading/error/empty/success — the four UI states).
 const mockUseVacanciesReport = vi.fn()
@@ -31,11 +32,11 @@ vi.mock('@/lib/settings/useAllSettings', async () => {
   return { ...actual, useAllSettings: () => mockSettings() }
 })
 
-function renderReport() {
+function renderReport(filters?: ReportFilterState) {
   const qc = new QueryClient()
   return render(
     <QueryClientProvider client={qc}>
-      <VacanciesReport period="month" />
+      <VacanciesReport period="month" filters={filters} />
     </QueryClientProvider>,
   )
 }
@@ -82,15 +83,24 @@ describe('VacanciesReport · tenant custom KPI cards (KPI-BUILDER-FE-1)', () => 
     expect(screen.getByText(/doel 70/)).toBeInTheDocument()
   })
 
-  it('clicking the tenant card opens the definition drill with the accepted params only', async () => {
+  it('clicking the tenant card without a panel filter opens the definition drill with the window params only', async () => {
     const user = userEvent.setup()
     mockUseVacanciesReport.mockReturnValue({ data: { ...data, custom_kpis: [customKpi] }, loading: false, error: false })
     renderReport()
     await user.click(screen.getByTitle('Eigen bezettingsgraad'))
-    expect(getSpy).toHaveBeenCalledWith('/reports/kpi-definitions/kd-2/drill', expect.objectContaining({ params: expect.objectContaining({ period: 'month' }) }))
+    expect(getSpy).toHaveBeenCalledWith('/reports/kpi-definitions/kd-2/drill', expect.anything())
     const call = getSpy.mock.calls.find(c => c[0] === '/reports/kpi-definitions/kd-2/drill')
-    expect(call?.[1].params).not.toHaveProperty('kpi')
-    expect(call?.[1].params).not.toHaveProperty('date')
+    expect(call?.[1].params).toEqual({ period: 'month' })
+  })
+
+  it('with a panel customer filter the definition drill carries customer_id as given and never customer_ids', async () => {
+    const user = userEvent.setup()
+    mockUseVacanciesReport.mockReturnValue({ data: { ...data, custom_kpis: [customKpi] }, loading: false, error: false })
+    renderReport({ ...EMPTY_REPORT_FILTERS, customerId: ['c-1'] })
+    await user.click(screen.getByTitle('Eigen bezettingsgraad'))
+    expect(getSpy).toHaveBeenCalledWith('/reports/kpi-definitions/kd-2/drill', expect.anything())
+    const call = getSpy.mock.calls.find(c => c[0] === '/reports/kpi-definitions/kd-2/drill')
+    expect(call?.[1].params).toEqual({ period: 'month', customer_id: ['c-1'] })
   })
 
   it('renders a dash with no click for a null-value tenant card', async () => {

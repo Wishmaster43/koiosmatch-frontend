@@ -1,6 +1,7 @@
 /**
  * useReportCustomKpis — wiring test. Asserts the definition-drill param
- * mapping (phase_filter dropped, customer_id renamed to customer_ids), the
+ * mapping (phase_filter dropped, customer_id renamed to customer_ids, or the page
+ * params passed through unchanged with drawerUsesPageParams), the
  * active-id derivation from the open drill's route, and that the shared
  * factory/mapping hooks receive what the report pages relied on before the
  * CUSTOM-KPI-HOOK-1 extraction.
@@ -67,6 +68,30 @@ describe('useReportCustomKpis', () => {
     expect(mockMakeOpenCustomKpiDrill).toHaveBeenCalledWith(expect.objectContaining({
       baseParams: { status: 'open', customer_ids: ['c-1', 'c-2'] },
     }))
+  })
+
+  it('with drawerUsesPageParams the page params reach the drill factory unchanged', () => {
+    const baseParams = { status: 'open', phase_filter: ['lead'], customer_id: ['c-1'] }
+    renderHook(() => useReportCustomKpis({
+      data: { custom_kpis: [] },
+      drill: null,
+      baseParams,
+      windowSub: () => 'window',
+      setDrill: vi.fn(),
+      drawerUsesPageParams: true,
+    }))
+    expect((mockMakeOpenCustomKpiDrill.mock.calls[0][0] as { baseParams: object }).baseParams).toEqual(baseParams)
+  })
+
+  it('without the flag phase_filter is absent and customer_id arrives as customer_ids', () => {
+    renderHook(() => useReportCustomKpis({
+      data: { custom_kpis: [] },
+      drill: null,
+      baseParams: { phase_filter: ['lead'], customer_id: ['c-1'] },
+      windowSub: () => 'window',
+      setDrill: vi.fn(),
+    }))
+    expect((mockMakeOpenCustomKpiDrill.mock.calls[0][0] as { baseParams: object }).baseParams).toEqual({ customer_ids: ['c-1'] })
   })
 
   it('is idempotent for a page with neither key', () => {
