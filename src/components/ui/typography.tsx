@@ -26,10 +26,17 @@ interface TypoProps {
   htmlFor?: string
 }
 
+// The reset is four longhands so a caller's marginTop/marginBottom never pairs with a shorthand
+// (React warns and clears that side of the reset when such a pair changes between renders, so a
+// <p> fell back to its browser margin on the HelloFlex mapping tab, measured 14-11); a caller
+// passing the `margin` shorthand replaces the reset.
+const MARGIN_RESET: CSSProperties = { marginTop: 0, marginRight: 0, marginBottom: 0, marginLeft: 0 }
+
 const make = (defaults: CSSProperties, defaultTag: ElementType) =>
   function Typo({ children, as, style, ...rest }: TypoProps) {
     const Tag = (as ?? defaultTag) as ElementType
-    return <Tag style={{ margin: 0, ...defaults, ...style }} {...rest}>{children}</Tag>
+    const reset = style && style.margin !== undefined ? {} : MARGIN_RESET
+    return <Tag style={{ ...reset, ...defaults, ...style }} {...rest}>{children}</Tag>
   }
 
 // Raw style identities — the ONE legal source when code genuinely needs the

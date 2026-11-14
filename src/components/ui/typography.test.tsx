@@ -3,7 +3,7 @@
  * 601 captions from re-drifting: identity comes from the atom (size/weight/
  * token colour), semantics from `as`, layout stays with the caller.
  */
-import { describe, it, expect } from 'vitest'
+import { describe, it, expect, vi, afterEach } from 'vitest'
 import { render, screen } from '@testing-library/react'
 import { PageTitle, SectionTitle, BodyText, Caption, GroupLabel, FormLabel, Mono } from './typography'
 
@@ -56,5 +56,35 @@ describe('typography atoms', () => {
     const el = screen.getByText('REF-001')
     expect(el.style.fontFamily).toContain('JetBrains Mono')
     expect(el.style.fontSize).toBe('')
+  })
+})
+
+describe('margin reset', () => {
+  afterEach(() => {
+    vi.restoreAllMocks()
+  })
+
+  // True when React logged a style-property conflict warning.
+  const styleWarned = (spy: { mock: { calls: unknown[][] } }) =>
+    spy.mock.calls.some((c: unknown[]) => typeof c[0] === 'string' && c[0].includes('style property'))
+
+  it('a caller longhand can appear and disappear across rerenders without a React style warning', () => {
+    const spy = vi.spyOn(console, 'error').mockImplementation(() => {})
+    const { rerender } = render(<Caption as="p" style={{ marginBottom: 16 }}>x</Caption>)
+    expect(screen.getByText('x').style.marginBottom).toBe('16px')
+    rerender(<Caption as="p">x</Caption>)
+    expect(screen.getByText('x').style.marginBottom).toBe('0px')
+    expect(styleWarned(spy)).toBe(false)
+  })
+
+  it('a caller margin shorthand replaces the reset and is kept verbatim', () => {
+    const spy = vi.spyOn(console, 'error').mockImplementation(() => {})
+    const { rerender } = render(<Caption style={{ margin: '8px 0 0' }}>x</Caption>)
+    const el = screen.getByText('x')
+    expect(el.style.marginTop).toBe('8px')
+    expect(el.style.marginBottom).toBe('0px')
+    rerender(<Caption>x</Caption>)
+    expect(screen.getByText('x').style.marginTop).toBe('0px')
+    expect(styleWarned(spy)).toBe(false)
   })
 })
