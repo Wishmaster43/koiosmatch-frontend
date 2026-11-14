@@ -4967,9 +4967,9 @@
       "preparationNotice": "These field mappings are preparation: they will only be used once synchronization is enabled in a future release.",
       "domains": {
         "cao": "CLA",
-        "schaal": "Scale",
-        "trede": "Step",
-        "functie": "Function"
+        "scale": "Scale",
+        "step": "Step",
+        "function": "Function"
       }
     }
   },

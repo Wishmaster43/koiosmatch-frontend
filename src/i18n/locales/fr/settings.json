@@ -4967,9 +4967,9 @@
       "preparationNotice": "Ces mappages de champs sont en préparation: ils ne seront utilisés qu’une fois la synchronisation activée dans une future version.",
       "domains": {
         "cao": "Convention collective",
-        "schaal": "Échelle",
-        "trede": "Échelon",
-        "functie": "Fonction"
+        "scale": "Échelle",
+        "step": "Échelon",
+        "function": "Fonction"
       }
     }
   },

@@ -4968,9 +4968,9 @@
       "preparationNotice": "Estes mapeamentos de campos são preparação: só serão usados quando a sincronização for ativada em uma versão futura.",
       "domains": {
         "cao": "CCT",
-        "schaal": "Escalão",
-        "trede": "Nível",
-        "functie": "Função"
+        "scale": "Escalão",
+        "step": "Nível",
+        "function": "Função"
       }
     }
   },

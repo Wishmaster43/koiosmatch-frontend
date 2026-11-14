@@ -7,7 +7,6 @@
 import { useState, useEffect, useMemo, useReducer } from 'react'
 import { useAuth }            from '@/context/AuthContext'
 import api                    from '@/lib/api'
-import { toWireMetric } from './shiftWire'
 import { useDefaultPageSize } from '@/lib/usePageSize'
 import type { OrderRow, EnrichedOrderRow } from '@/types/shiftmanager'
 
@@ -45,7 +44,7 @@ export function useOrdersTable({ selectedMonth, search, selectedStatuses, sort }
     api.get('/sm_reports/shifts-per-month/detail', {
       params: {
         ...(selectedMonth ? { month: selectedMonth } : {}),
-        metric: toWireMetric('total'), per_page: pageSize, page,
+        metric: 'total', per_page: pageSize, page,
       },
     })
       .then(res => {

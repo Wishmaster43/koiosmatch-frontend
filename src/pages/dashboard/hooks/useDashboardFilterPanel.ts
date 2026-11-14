@@ -25,8 +25,7 @@ interface UseDashboardFilterPanelArgs {
 export function useDashboardFilterPanel({
   dash, t, selPeriod, setSelPeriod, selBranch, setSelBranch, selStatus, setSelStatus,
 }: UseDashboardFilterPanelArgs) {
-  // The period ids are the English PERIOD_KEYS (periodWire.toWirePeriod in useDashboardFilterState
-  // turns them into the Dutch wire value until the BE hash); labels are translated here (hook scope has t()).
+  // The period ids are the English PERIOD_KEYS and travel as-is; labels are translated here (hook scope has t()).
   const periodOptions = useMemo(() =>
     PERIOD_KEYS.map(value => ({ value, label: t(`filters.period.${value}`) })), [t])
   // K-173 fase 3 — branch options come from the shared useBranchOptions hook (the

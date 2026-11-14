@@ -21,7 +21,6 @@ import { SERIES, CURRENT_YEAR } from "./shiftsChartsConfig"
 import { BarChartWidget, YearIndicator, ChartCard, ShiftsDataTable, PctToggle } from "./shiftsChartsWidgets"
 import { useShiftsChartData } from "./useShiftsChartData"
 import SmSyncButton            from "./SmSyncButton"
-import { toWireMetric } from "./shiftWire"
 import { buildShiftsFilterGroups } from "./buildShiftsFilterGroups"
 import { useSavedShiftFilters } from "./useSavedShiftFilters"
 import type { ShiftFilterState } from "./useSavedShiftFilters"
@@ -345,7 +344,7 @@ export default function ShiftsChartsBlock({
             metricOptions={SERIES.map(s => ({ value: s.key, label: seriesLabel(s.key) }))}
             periods={periods}
             initialPeriod={drill.initialPeriod}
-            buildUrl={(m, pk) => `/sm_reports/shifts-per-month/detail?${drill.baseQuery}${drill.baseQuery ? '&' : ''}${periodParam(pk)}&metric=${toWireMetric(m)}`}
+            buildUrl={(m, pk) => `/sm_reports/shifts-per-month/detail?${drill.baseQuery}${drill.baseQuery ? '&' : ''}${periodParam(pk)}&metric=${m}`}
             titleFor={(m, pk) => `${seriesLabel(m)}${drill.yearSuffix} — ${periods.find(p => p.key === pk)?.label ?? ''}`}
             countFor={(m, pk) => { const d = chartData.find(x => periodKeyOf(x) === pk); return d ? Number(d[`${drill.year}_${m}`] || 0) : 0 }}
             onClose={() => setDrill(null)}

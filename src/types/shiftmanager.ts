@@ -69,7 +69,7 @@ export interface SmLocationRow {
 // ── Shifts charts + orders cluster (ShiftsChartsBlock / OrdersTable) ──────────
 
 // The five Shiftmanager chart series, English ids (WIRE-IDS-ENGLISH-1): the Dutch
-// wire ids exist only inside components/shiftmanager/shiftWire.ts.
+// ids survive only as the saved-preset map LEGACY_PRESET_SERIES_ID in components/shiftmanager/shiftWire.ts.
 export type SeriesKey = 'total' | 'unfilled' | 'no_candidate' | 'forecast' | 'actual'
 // The hours twin of a series key as a per-month row carries it (`total_hours`, …).
 export type SeriesHoursKey = `${SeriesKey}_hours`

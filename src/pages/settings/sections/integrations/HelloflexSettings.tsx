@@ -10,6 +10,7 @@ import { useTranslation } from 'react-i18next'
 import ConnectorTabsShell from './ConnectorTabsShell'
 import IntegrationConnectionCard from './IntegrationConnectionCard'
 import IntegrationMappingsTable from './IntegrationMappingsTable'
+import { MAPPING_DOMAINS } from './mappingDomains'
 import HelloflexContractMapSettings from '../HelloflexContractMapSettings'
 import IntegrationLinksPanel from './links/IntegrationLinksPanel'
 
@@ -28,7 +29,7 @@ export default function HelloflexSettings() {
   return (
     <ConnectorTabsShell tabs={tabs} active={activeTab} onChange={setActiveTab}>
       {activeTab === 'connection' && <IntegrationConnectionCard connector="helloflex" />}
-      {activeTab === 'mapping' && <IntegrationMappingsTable connector="helloflex" domains={['cao', 'schaal', 'trede', 'functie']} />}
+      {activeTab === 'mapping' && <IntegrationMappingsTable connector="helloflex" domains={[...MAPPING_DOMAINS]} />}
       {activeTab === 'contractmap' && <HelloflexContractMapSettings />}
       {activeTab === 'links' && <IntegrationLinksPanel system="helloflex" />}
     </ConnectorTabsShell>

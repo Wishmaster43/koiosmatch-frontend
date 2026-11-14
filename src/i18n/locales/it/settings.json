@@ -4968,9 +4968,9 @@
       "preparationNotice": "Questi mappaggi di campi sono preparazione: verranno utilizzati solo una volta abilitata la sincronizzazione in una versione futura.",
       "domains": {
         "cao": "CCNL",
-        "schaal": "Scala",
-        "trede": "Livello",
-        "functie": "Funzione"
+        "scale": "Scala",
+        "step": "Livello",
+        "function": "Funzione"
       }
     }
   },

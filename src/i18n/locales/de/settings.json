@@ -4967,9 +4967,9 @@
       "preparationNotice": "Diese Feldzuordnungen sind Vorbereitung: Sie werden erst verwendet, wenn die Synchronisierung in einer zukünftigen Version aktiviert wird.",
       "domains": {
         "cao": "Tarifvertrag",
-        "schaal": "Stufe",
-        "trede": "Schritt",
-        "functie": "Funktion"
+        "scale": "Stufe",
+        "step": "Schritt",
+        "function": "Funktion"
       }
     }
   },

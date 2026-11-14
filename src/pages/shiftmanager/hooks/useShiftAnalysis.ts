@@ -30,7 +30,7 @@ export interface ShiftAnalysisRow {
   alarm: ShiftAlarm
 }
 
-// The four values a candidate has per month (English ids; today's wire keys are the Dutch-prefixed ones, see shiftWire).
+// The four values a candidate has per month (English ids, read as-is from /sm_reports/shifts-per-candidate).
 export type { MatrixCell }
 export type MetricKey = MatrixMetricKey
 export const METRIC_KEYS = MATRIX_METRIC_KEYS

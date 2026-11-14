@@ -31,10 +31,10 @@ describe('useDashboardFilterState · K-173 fase 3 branch_id[]', () => {
     expect(result.current.dashFilterParams).toEqual({ period: 'week', status: 'available', branch_id: ['2'] })
   })
 
-  // The wire still carries the Dutch period value until the BE hash.
-  it.each([['month', 'maand'], ['today', 'vandaag']])('sends period %s as %s', (id, wire) => {
+  // The wire is English since WIRE-IDS-ENGLISH-1 step 2.
+  it.each(['month', 'today'])('sends the English period id %s as-is on the wire', (id) => {
     const { result } = renderHook(() => useDashboardFilterState())
     act(() => result.current.setSelPeriod([id]))
-    expect(result.current.dashFilterParams).toEqual({ period: wire })
+    expect(result.current.dashFilterParams).toEqual({ period: id })
   })
 })

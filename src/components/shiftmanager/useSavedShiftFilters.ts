@@ -26,7 +26,7 @@ function read(key: string): SavedShiftFilter[] {
     const raw = localStorage.getItem(key)
     const parsed = raw ? JSON.parse(raw) : []
     if (!Array.isArray(parsed)) return []
-    // Presets saved with Dutch series ids load with English ones (delete with LEGACY_SERIES_KEY, WIRE-IDS-ENGLISH-1 step 3).
+    // Presets saved with Dutch series ids before 13-11-2026 load with English ones (FE-only localStorage migration, LEGACY_PRESET_SERIES_ID).
     return (parsed as SavedShiftFilter[]).map((set) => Array.isArray(set?.state?.visible)
       ? { ...set, state: { ...set.state, visible: migrateVisibleSeries(set.state.visible) } } : set)
   } catch { return [] }

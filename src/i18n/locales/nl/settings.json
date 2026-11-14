@@ -4967,9 +4967,9 @@
       "preparationNotice": "Deze veldkoppelingen zijn voorbereiding: ze worden pas gebruikt zodra de synchronisatie in een volgende release aan staat.",
       "domains": {
         "cao": "CAO",
-        "schaal": "Schaal",
-        "trede": "Trede",
-        "functie": "Functie"
+        "scale": "Schaal",
+        "step": "Trede",
+        "function": "Functie"
       }
     }
   },

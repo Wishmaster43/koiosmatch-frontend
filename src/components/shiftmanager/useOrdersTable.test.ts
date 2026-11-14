@@ -46,12 +46,12 @@ describe('useOrdersTable · error state', () => {
 })
 
 describe('useOrdersTable · request', () => {
-  it('sends the wire metric id for the English total series (the wire is still Dutch)', async () => {
+  it('sends the English total metric id on the wire', async () => {
     vi.mocked(api.get).mockResolvedValueOnce({ data: { data: [], meta: { total: 0, last_page: 1 } } })
     renderHook(() => useOrdersTable({ selectedMonth: '2026-09', search: '', selectedStatuses: [], sort: { key: 'date', dir: 'desc' } }))
     await waitFor(() => expect(api.get).toHaveBeenCalledTimes(1))
     expect(api.get).toHaveBeenCalledWith('/sm_reports/shifts-per-month/detail', {
-      params: { month: '2026-09', metric: 'totaal', per_page: 25, page: 1 },
+      params: { month: '2026-09', metric: 'total', per_page: 25, page: 1 },
     })
   })
 })

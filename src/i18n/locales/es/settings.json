@@ -4967,9 +4967,9 @@
       "preparationNotice": "Estos mapeos de campos son preparación: solo se utilizarán una vez que la sincronización se habilite en una versión futura.",
       "domains": {
         "cao": "Convenio",
-        "schaal": "Escala",
-        "trede": "Nivel",
-        "functie": "Función"
+        "scale": "Escala",
+        "step": "Nivel",
+        "function": "Función"
       }
     }
   },

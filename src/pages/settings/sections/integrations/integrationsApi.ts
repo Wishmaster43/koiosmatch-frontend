@@ -8,6 +8,7 @@
  */
 import api, { unwrap, unwrapList } from '@/lib/api'
 import { withIdempotencyKey } from '@/lib/idempotency'
+import { canonicalMappingDomain } from './mappingDomains'
 
 // The three supported connectors (contract §1).
 export type ConnectorId = 'shiftmanager' | 'helloflex' | 'werkzoeken'
@@ -176,13 +177,18 @@ export async function testIntegration(connector: ConnectorId): Promise<TestResul
   return unwrap<TestResult>(res)
 }
 
+// Release A of the BE echoes the stored (Dutch) domain spelling; normalise it to English.
+function withCanonicalDomain(row: MappingRow): MappingRow {
+  return { ...row, domain: canonicalMappingDomain(row.domain) }
+}
+
 // List mappings for one connector + domain.
 export async function listMappings(
   connector: ConnectorId,
   domain: string,
 ): Promise<MappingRow[]> {
   const res = await api.get(`/integrations/${connector}/mappings`, { params: { domain } })
-  return unwrapList<MappingRow>(res).rows
+  return unwrapList<MappingRow>(res).rows.map(withCanonicalDomain)
 }
 
 // Create a mapping row. 422 on duplicate (domain, koios_value) — thrown as-is.
@@ -191,7 +197,7 @@ export async function createMapping(
   body: CreateMappingBody,
 ): Promise<MappingRow> {
   const res = await api.post(`/integrations/${connector}/mappings`, body, { quietStatuses: [422] })
-  return unwrap<MappingRow>(res)
+  return withCanonicalDomain(unwrap<MappingRow>(res))
 }
 
 // Partially update a mapping row.
@@ -201,7 +207,7 @@ export async function updateMapping(
   body: UpdateMappingBody,
 ): Promise<MappingRow> {
   const res = await api.put(`/integrations/${connector}/mappings/${id}`, body, { quietStatuses: [422] })
-  return unwrap<MappingRow>(res)
+  return withCanonicalDomain(unwrap<MappingRow>(res))
 }
 
 // Delete a mapping row. Always allowed in v1 (contract: a later sync missing a

@@ -44,12 +44,12 @@ describe('IntegrationMappingsTable', () => {
   // Mount fetches the first domain; switching the SubTabBar refetches the new one.
   it('GETs on mount with the first domain and again on domain switch', async () => {
     mockList.mockResolvedValue([])
-    render(<IntegrationMappingsTable connector="werkzoeken" domains={['cao', 'schaal']} />)
+    render(<IntegrationMappingsTable connector="werkzoeken" domains={['cao', 'scale']} />)
     await waitFor(() => expect(mockList).toHaveBeenCalledWith('werkzoeken', 'cao'))
 
     const user = userEvent.setup()
     await user.click(screen.getByRole('tab', { name: /scale/i }))
-    await waitFor(() => expect(mockList).toHaveBeenCalledWith('werkzoeken', 'schaal'))
+    await waitFor(() => expect(mockList).toHaveBeenCalledWith('werkzoeken', 'scale'))
   })
 
   // Renders the honest empty state when the domain has no rows yet.

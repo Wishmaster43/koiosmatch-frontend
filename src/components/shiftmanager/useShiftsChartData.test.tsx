@@ -80,7 +80,7 @@ describe('useShiftsChartData — SM-2YR bar count', () => {
   })
 })
 
-// Wire tolerance: the BE still sends Dutch row keys; English keys must give the same chart data.
+// Wire: the English keys are the only ones read; a release-A dual-write row carries Dutch twins that are ignored.
 describe('useShiftsChartData — wire normalisation', () => {
   const mount = async (row: Record<string, unknown>) => {
     mockedGet.mockImplementation((url: string) => Promise.resolve({
@@ -94,11 +94,14 @@ describe('useShiftsChartData — wire normalisation', () => {
     await waitFor(() => expect(result.current.chartData.find((d) => d._monthIndex === 3)?.['2026_total']).toBe(10))
     return result.current
   }
-  const dutch = { maand: '2026-03', totaal: 10, totaal_uren: 80, geen_kandidaat: 1, geen_kandidaat_uren: 8 }
+  const dualWrite = {
+    maand: '2026-01', totaal: 99, totaal_uren: 999, geen_kandidaat: 9, geen_kandidaat_uren: 99,
+    month: '2026-03', total: 10, total_hours: 80, no_candidate: 1, no_candidate_hours: 8,
+  }
   const english = { month: '2026-03', total: 10, total_hours: 80, no_candidate: 1, no_candidate_hours: 8 }
 
-  it('maps Dutch wire rows onto English chart keys', async () => {
-    const r = await mount(dutch)
+  it('maps a release-A dual-write row onto the English chart keys from the English values', async () => {
+    const r = await mount(dualWrite)
     const march = r.chartData.find((d) => d._monthIndex === 3)!
     expect(march['2026_total']).toBe(10)
     expect(march['2026_total_hours']).toBe(80)
@@ -106,10 +109,28 @@ describe('useShiftsChartData — wire normalisation', () => {
     expect(String(mockedGet.mock.calls.find((c) => String(c[0]).includes('shifts-per-month'))?.[0])).toMatch(/^\/sm_reports\/shifts-per-month\?/)
   })
 
-  it('yields the identical chart entry for English wire rows', async () => {
-    const a = await mount(dutch)
+  it('yields the identical chart entry for a dual-write row and an English-only row', async () => {
+    const a = await mount(dualWrite)
     const entryA = a.chartData.find((d) => d._monthIndex === 3)
     const b = await mount(english)
     expect(b.chartData.find((d) => d._monthIndex === 3)).toEqual(entryA)
+  })
+
+  it('yields zero values for a row that carries only Dutch keys', async () => {
+    mockedGet.mockImplementation((url: string) => Promise.resolve({
+      data: url.includes('filter-options') ? { job_types: [], locations: [] } : { data: [{ maand: '2026-03', totaal: 10, totaal_uren: 80 }] },
+    }))
+    const { result } = renderHook(
+      () => useShiftsChartData({ ...baseArgs, selectedYears: [2026], multiYearMetric: null }),
+      { wrapper },
+    )
+    await waitFor(() => expect(result.current.loading).toBe(false))
+    // The feed was requested and the March entry exists (the hook always builds the selected months), so a zero here
+    // proves the Dutch keys were ignored rather than the row never having been read.
+    expect(mockedGet.mock.calls.some((c) => String(c[0]).startsWith('/sm_reports/shifts-per-month?'))).toBe(true)
+    const march = result.current.chartData.find((d) => d._monthIndex === 3)
+    expect(march).toBeDefined()
+    expect(march!['2026_total']).toBe(0)
+    expect(march!['2026_total_hours']).toBe(0)
   })
 })

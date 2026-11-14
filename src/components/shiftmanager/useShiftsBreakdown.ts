@@ -9,7 +9,6 @@
  */
 import { useQuery, keepPreviousData } from '@tanstack/react-query'
 import api from '@/lib/api'
-import { toWireMetric } from './shiftWire'
 
 export interface BreakdownRow {
   key: string; label: string; count: number; hours: number
@@ -25,10 +24,10 @@ export const BREAKDOWN_PALETTE = ['#1B60A9', '#19A5CA', '#F0AB00', '#16A34A', '#
 const toDonut = (rows: BreakdownRow[]): DonutDatum[] =>
   rows.slice(0, 7).map((r, i) => ({ name: r.label || '—', value: Number(r.hours) || 0, key: String(r.key), color: BREAKDOWN_PALETTE[i % BREAKDOWN_PALETTE.length] }))
 
-// Fetch one group_by breakdown (English metric id; today's wire id is Dutch, translated by toWireMetric).
+// Fetch one group_by breakdown (the English metric id travels as-is since WIRE-IDS-ENGLISH-1 step 2).
 const fetchBreakdown = (queryString: string, groupBy: 'customer' | 'job_type', metric: string, split?: boolean) =>
   async ({ signal }: { signal?: AbortSignal }) => {
-    const url = `/sm_reports/shifts-breakdown?${queryString}&metric=${toWireMetric(metric)}&group_by=${groupBy}${split ? '&split=month' : ''}`
+    const url = `/sm_reports/shifts-breakdown?${queryString}&metric=${metric}&group_by=${groupBy}${split ? '&split=month' : ''}`
     const data = (await api.get(url, { signal })).data?.data ?? []
     return (Array.isArray(data) ? data : []) as BreakdownRow[]
   }

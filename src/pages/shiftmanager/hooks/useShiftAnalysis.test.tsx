@@ -31,26 +31,26 @@ const wrapper = ({ children }: { children: ReactNode }) => (
 beforeEach(() => {
   get.mockReset()
   get.mockResolvedValue({ data: { data: [
-    { candidate_id: 'a', name: 'A', registration_date: recent, months: { [monthKey(-1)]: { werkelijk_hours: 20 } } },
-    { candidate_id: 'b', name: 'B', registration_date: recent, months: { [monthKey(-1)]: { werkelijk_hours: 20 }, [monthKey(0)]: { prognose_hours: 4 } } },
-    { candidate_id: 'c', name: 'C', registration_date: recent, months: { [monthKey(1)]: { prognose_hours: 12, prognose_shifts: 2 } } },
+    { candidate_id: 'a', name: 'A', registration_date: recent, months: { [monthKey(-1)]: { werkelijk_hours: 99, actual_hours: 20 } } },
+    { candidate_id: 'b', name: 'B', registration_date: recent, months: { [monthKey(-1)]: { werkelijk_hours: 99, actual_hours: 20 }, [monthKey(0)]: { prognose_hours: 99, forecast_hours: 4 } } },
+    { candidate_id: 'c', name: 'C', registration_date: recent, months: { [monthKey(1)]: { prognose_hours: 99, forecast_hours: 12, prognose_shifts: 9, forecast_shifts: 2 } } },
   ] } })
 })
 
 describe('useShiftAnalysis', () => {
-  it('requests the per-candidate feed and derives dropping_out, declining and rising', async () => {
+  it('requests the per-candidate feed and derives dropping_out, declining and rising from the English values of a dual-write row', async () => {
     const { result } = renderHook(() => useShiftAnalysis(), { wrapper })
     await waitFor(() => expect(result.current.loading).toBe(false))
     expect(get).toHaveBeenCalledWith('/sm_reports/shifts-per-candidate', expect.objectContaining({ signal: expect.anything() }))
     const alarms = Object.fromEntries(result.current.rows.map(r => [r.id, r.alarm]))
     expect(alarms).toEqual({ a: 'dropping_out', b: 'declining', c: 'rising' })
     // The matrix reads the NORMALISED English cell keys (ShiftMatrixTable: r.months[c]?.[metric]),
-    // and the planned count comes from the Dutch wire key prognose_shifts through the same seam.
+    // and the planned count comes from forecast_shifts; the Dutch twin is dropped.
     expect(result.current.matrixRows.find(r => r.id === 'a')?.months[monthKey(-1)]).toEqual({ actual_hours: 20 })
     expect(result.current.plannedPerMonth.find(p => p.month === monthKey(1))?.count).toBe(1)
   })
 
-  // English cell keys must derive the same rows and planned counts as the Dutch wire keys.
+  // The English-only feed derives the expected alarms and planned count per month.
   it('reads English cell keys and counts planned shifts per month', async () => {
     get.mockResolvedValue({ data: { data: [
       { candidate_id: 'a', name: 'A', registration_date: recent, months: { [monthKey(-1)]: { actual_hours: 20 } } },

@@ -9,8 +9,8 @@ import { tint } from '@/lib/tint'
 // Series key + colour; labels come from i18n via t('charts.series.<englishKey>').
 // Brand-aligned palette (Danny: black for the "total" series looked bad):
 // total = brand blue, unfilled = brand gold, no_candidate = red,
-// forecast = indigo, actual = green. The keys are English ids; the Dutch ids the
-// BE still sends live only in shiftWire.ts.
+// forecast = indigo, actual = green. The keys are English ids on the wire; the Dutch
+// ids survive only as the saved-preset migration map in shiftWire.ts.
 /* eslint-disable no-restricted-syntax -- fixed chart colour series (DATA), not UI styling: needs more distinct hues than the semantic token set provides */
 export const SERIES: ShiftSeries[] = [
   { key: "total",        color: "#1B60A9" },
