@@ -143,9 +143,9 @@ describe('CandidatesReport (RAPPORTEN-SUITE-1 inflow report)', () => {
     renderReport()
     await user.click(screen.getByText('Beschikbaar'))
     expect(getSpy).toHaveBeenCalledWith('/reports/candidates/drill',
-      expect.objectContaining({ params: { status: 'available', period: 'month' } }))
+      expect.objectContaining({ params: { segment_status: 'available', period: 'month' } }))
     expect(getSpy).toHaveBeenCalledWith('/reports/candidates/advice',
-      expect.objectContaining({ params: { status: 'available', period: 'month' } }))
+      expect.objectContaining({ params: { segment_status: 'available', period: 'month' } }))
   })
 
   it('sends the active panel filters to BOTH the report hook and a drill click (RAPPORT-FILTERS-1 — bar and lade never disagree)', async () => {
@@ -163,7 +163,7 @@ describe('CandidatesReport (RAPPORTEN-SUITE-1 inflow report)', () => {
     // A drill click layers its XOR param ON TOP of those same filters, never instead of them.
     await user.click(screen.getByText('Kandidaat'))
     expect(getSpy).toHaveBeenCalledWith('/reports/candidates/drill', expect.objectContaining({
-      params: { period: 'month', status: ['available'], owner_id: ['u1'], location_id: [7], phase: 'candidate' },
+      params: { period: 'month', status: ['available'], owner_id: ['u1'], location_id: [7], segment_phase: 'candidate' },
     }))
   })
 
@@ -173,7 +173,7 @@ describe('CandidatesReport (RAPPORTEN-SUITE-1 inflow report)', () => {
     renderReport()
     await user.click(screen.getByText('Anna de Vries'))
     expect(getSpy).toHaveBeenCalledWith('/reports/candidates/drill',
-      expect.objectContaining({ params: { owner: 'u1', period: 'month' } }))
+      expect.objectContaining({ params: { segment_owner: 'u1', period: 'month' } }))
   })
 
   // RETRO-CHECK (RAPPORTEN-SUITE-1 "portie 2" contract note): owner='none' (unassigned)
@@ -185,7 +185,7 @@ describe('CandidatesReport (RAPPORTEN-SUITE-1 inflow report)', () => {
     renderReport()
     await user.click(screen.getByText('Niet toegewezen'))
     expect(getSpy).toHaveBeenCalledWith('/reports/candidates/drill',
-      expect.objectContaining({ params: { owner: 'none', period: 'month' } }))
+      expect.objectContaining({ params: { segment_owner: 'none', period: 'month' } }))
   })
 
   // A week bucket click drills with date=<the bucket's machine key> + bucket=week, so
@@ -196,7 +196,7 @@ describe('CandidatesReport (RAPPORTEN-SUITE-1 inflow report)', () => {
     renderReport()
     await user.click(screen.getByText('Wk 32'))
     expect(getSpy).toHaveBeenCalledWith('/reports/candidates/drill',
-      expect.objectContaining({ params: { date: '2026-08-03', bucket: 'week', period: 'month' } }))
+      expect.objectContaining({ params: { segment_date: '2026-08-03', bucket: 'week', period: 'month' } }))
   })
 
   // RAPPORT-GEZICHT-WAVE2: the strip is the REAL suite (GET /reports/candidates/
@@ -283,7 +283,7 @@ describe('CandidatesReport (RAPPORTEN-SUITE-1 inflow report)', () => {
     getSpy.mockClear()
     await user.click(screen.getByText('Anna de Vries'))
     expect(getSpy).toHaveBeenCalledWith('/reports/candidates/drill',
-      expect.objectContaining({ params: { owner: 'u1', period: 'month' } }))
+      expect.objectContaining({ params: { segment_owner: 'u1', period: 'month' } }))
   })
 
   it('omits bucket when the timeseries is day-granular', async () => {
@@ -295,7 +295,7 @@ describe('CandidatesReport (RAPPORTEN-SUITE-1 inflow report)', () => {
     renderReport()
     await user.click(screen.getByText('03-08'))
     expect(getSpy).toHaveBeenCalledWith('/reports/candidates/drill',
-      expect.objectContaining({ params: { date: '2026-08-03', period: 'month' } }))
+      expect.objectContaining({ params: { segment_date: '2026-08-03', period: 'month' } }))
     const call = getSpy.mock.calls.find(c => c[0] === '/reports/candidates/drill')
     expect(call?.[1].params).not.toHaveProperty('bucket')
   })

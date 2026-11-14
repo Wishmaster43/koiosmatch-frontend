@@ -192,9 +192,9 @@ describe('OutreachReport (RAPPORTEN-SUITE-1 portie 6, bellijsten report)', () =>
     renderReport()
     await user.click(screen.getAllByText('Bellijst Q3 wondzorg').at(-1)!)
     expect(getSpy).toHaveBeenCalledWith('/reports/outreach/drill',
-      expect.objectContaining({ params: { campaign: 'camp-1', period: 'month' } }))
+      expect.objectContaining({ params: { segment_campaign: 'camp-1', period: 'month' } }))
     expect(getSpy).toHaveBeenCalledWith('/reports/outreach/advice',
-      expect.objectContaining({ params: { campaign: 'camp-1', period: 'month' } }))
+      expect.objectContaining({ params: { segment_campaign: 'camp-1', period: 'month' } }))
   })
 
   // 'others' = the exact complement of the top-20 — a real, clickable row.
@@ -204,7 +204,7 @@ describe('OutreachReport (RAPPORTEN-SUITE-1 portie 6, bellijsten report)', () =>
     renderReport()
     await user.click(screen.getByText('Overige bellijsten'))
     expect(getSpy).toHaveBeenCalledWith('/reports/outreach/drill',
-      expect.objectContaining({ params: { campaign: 'others', period: 'month' } }))
+      expect.objectContaining({ params: { segment_campaign: 'others', period: 'month' } }))
   })
 
   // An archived campaign keeps its real name (never "Onbekend") and its bar still
@@ -215,7 +215,7 @@ describe('OutreachReport (RAPPORTEN-SUITE-1 portie 6, bellijsten report)', () =>
     renderReport()
     await user.click(screen.getByText('Voorjaarsactie 2026'))
     expect(getSpy).toHaveBeenCalledWith('/reports/outreach/drill',
-      expect.objectContaining({ params: { campaign: 'camp-archived-uuid', period: 'month' } }))
+      expect.objectContaining({ params: { segment_campaign: 'camp-archived-uuid', period: 'month' } }))
   })
 
   it('clicking an assignee bar drills with the assignee XOR param (D2 shape: owner_id → assignee)', async () => {
@@ -224,10 +224,10 @@ describe('OutreachReport (RAPPORTEN-SUITE-1 portie 6, bellijsten report)', () =>
     renderReport()
     await user.click(screen.getByText('Anna de Vries'))
     expect(getSpy).toHaveBeenCalledWith('/reports/outreach/drill',
-      expect.objectContaining({ params: { assignee: 'u1', period: 'month' } }))
+      expect.objectContaining({ params: { segment_assignee: 'u1', period: 'month' } }))
     await user.click(screen.getAllByText('Niet toegewezen').at(-1)!)
     expect(getSpy).toHaveBeenCalledWith('/reports/outreach/drill',
-      expect.objectContaining({ params: { assignee: 'none', period: 'month' } }))
+      expect.objectContaining({ params: { segment_assignee: 'none', period: 'month' } }))
   })
 
   // DASH-FEEDS-V3 depth: the channel-funnel bar chart's onChannel seam — only
@@ -238,7 +238,7 @@ describe('OutreachReport (RAPPORTEN-SUITE-1 portie 6, bellijsten report)', () =>
     renderReport()
     await user.click(screen.getByText(`${i18n.t('outreach.depth.channel.call', { ns: 'analytics' })}-total`))
     expect(getSpy).toHaveBeenCalledWith('/reports/outreach/drill',
-      expect.objectContaining({ params: { channel: 'call', period: 'month' } }))
+      expect.objectContaining({ params: { segment_channel: 'call', period: 'month' } }))
   })
 
   it('clicking a channel bar drills with the channel XOR param (incl. the none sentinel)', async () => {
@@ -247,10 +247,10 @@ describe('OutreachReport (RAPPORTEN-SUITE-1 portie 6, bellijsten report)', () =>
     renderReport()
     await user.click(screen.getAllByText('Telefoon').at(-1)!)
     expect(getSpy).toHaveBeenCalledWith('/reports/outreach/drill',
-      expect.objectContaining({ params: { channel: 'phone', period: 'month' } }))
+      expect.objectContaining({ params: { segment_channel: 'phone', period: 'month' } }))
     await user.click(screen.getByText('Geen kanaal'))
     expect(getSpy).toHaveBeenCalledWith('/reports/outreach/drill',
-      expect.objectContaining({ params: { channel: 'none', period: 'month' } }))
+      expect.objectContaining({ params: { segment_channel: 'none', period: 'month' } }))
   })
 
   // Orphan-string status: a status value with no lookup row still renders its own
@@ -261,7 +261,7 @@ describe('OutreachReport (RAPPORTEN-SUITE-1 portie 6, bellijsten report)', () =>
     renderReport()
     await user.click(screen.getByText('Onbekend'))
     expect(getSpy).toHaveBeenCalledWith('/reports/outreach/drill',
-      expect.objectContaining({ params: { status: 'weird-legacy-status', period: 'month' } }))
+      expect.objectContaining({ params: { segment_status: 'weird-legacy-status', period: 'month' } }))
   })
 
   // The "Geen uitkomst" sentinel makes by_outcome sum to total — and drills on
@@ -272,10 +272,10 @@ describe('OutreachReport (RAPPORTEN-SUITE-1 portie 6, bellijsten report)', () =>
     renderReport()
     await user.click(screen.getAllByText('Geen uitkomst').at(-1)!)
     expect(getSpy).toHaveBeenCalledWith('/reports/outreach/drill',
-      expect.objectContaining({ params: { outcome: 'none', period: 'month' } }))
+      expect.objectContaining({ params: { segment_outcome: 'none', period: 'month' } }))
     await user.click(screen.getByText('Interested'))
     expect(getSpy).toHaveBeenCalledWith('/reports/outreach/drill',
-      expect.objectContaining({ params: { outcome: 'interested', period: 'month' } }))
+      expect.objectContaining({ params: { segment_outcome: 'interested', period: 'month' } }))
   })
 
   // XOR both directions on two axes: switching status → campaign → status never
@@ -286,13 +286,14 @@ describe('OutreachReport (RAPPORTEN-SUITE-1 portie 6, bellijsten report)', () =>
     renderReport()
     await user.click(screen.getByText('Nieuw'))
     expect(getSpy).toHaveBeenCalledWith('/reports/outreach/drill',
-      expect.objectContaining({ params: { status: 'new', period: 'month' } }))
+      expect.objectContaining({ params: { segment_status: 'new', period: 'month' } }))
     await user.click(screen.getByText('Overige bellijsten'))
     expect(getSpy).toHaveBeenCalledWith('/reports/outreach/drill',
-      expect.objectContaining({ params: { campaign: 'others', period: 'month' } }))
+      expect.objectContaining({ params: { segment_campaign: 'others', period: 'month' } }))
     // Neither call ever mixed the other axis's param onto its own.
     const statusCall = getSpy.mock.calls.find(c => c[0] === '/reports/outreach/drill'
-      && (c[1] as { params: Record<string, unknown> }).params.status === 'new')
+      && (c[1] as { params: Record<string, unknown> }).params.segment_status === 'new')
+    expect(statusCall?.[1].params).not.toHaveProperty('segment_campaign')
     expect(statusCall?.[1].params).not.toHaveProperty('campaign')
   })
 
@@ -304,7 +305,7 @@ describe('OutreachReport (RAPPORTEN-SUITE-1 portie 6, bellijsten report)', () =>
     renderReport()
     await user.click(screen.getByText('Wk 20'))
     expect(getSpy).toHaveBeenCalledWith('/reports/outreach/drill',
-      expect.objectContaining({ params: { date: '2026-05-14', bucket: 'week', period: 'month' } }))
+      expect.objectContaining({ params: { segment_date: '2026-05-14', bucket: 'week', period: 'month' } }))
   })
 
   it('omits bucket when the timeseries is day-granular', async () => {
@@ -316,7 +317,7 @@ describe('OutreachReport (RAPPORTEN-SUITE-1 portie 6, bellijsten report)', () =>
     renderReport()
     await user.click(screen.getByText('14-05'))
     const call = getSpy.mock.calls.find(c => c[0] === '/reports/outreach/drill'
-      && (c[1] as { params: Record<string, unknown> }).params.date === '2026-05-14')
+      && (c[1] as { params: Record<string, unknown> }).params.segment_date === '2026-05-14')
     expect(call?.[1].params).not.toHaveProperty('bucket')
   })
 
@@ -355,11 +356,11 @@ describe('OutreachReport (RAPPORTEN-SUITE-1 portie 6, bellijsten report)', () =>
     getSpy.mockClear()
     await user.click(screen.getByText('Nieuw')) // the status axis, non-default segment
     expect(getSpy).toHaveBeenCalledWith('/reports/outreach/drill',
-      expect.objectContaining({ params: { status: 'new', period: 'month' } }))
+      expect.objectContaining({ params: { segment_status: 'new', period: 'month' } }))
     // No request was fired for the channel axis's ALREADY-seeded default (phone) —
     // it stayed exactly as mount left it.
     expect(getSpy.mock.calls.some(c => c[0] === '/reports/outreach/drill'
-      && (c[1] as { params: Record<string, unknown> }).params.channel === 'phone')).toBe(false)
+      && (c[1] as { params: Record<string, unknown> }).params.segment_channel === 'phone')).toBe(false)
   })
 
   // RAPPORT-COMPARE-2 (§4): the compare window lives in the right-hand filter
@@ -376,7 +377,7 @@ describe('OutreachReport (RAPPORTEN-SUITE-1 portie 6, bellijsten report)', () =>
     renderReport()
     await user.click(screen.getAllByText('Voorjaarsactie 2026').at(-1)!)
     expect(getSpy).toHaveBeenCalledWith('/reports/outreach/drill',
-      expect.objectContaining({ params: { campaign: 'camp-archived-uuid', period: 'month' } }))
+      expect.objectContaining({ params: { segment_campaign: 'camp-archived-uuid', period: 'month' } }))
   })
 
   // Outcome is a few-value categorical axis → a donut; its click still drills
@@ -387,6 +388,6 @@ describe('OutreachReport (RAPPORTEN-SUITE-1 portie 6, bellijsten report)', () =>
     renderReport()
     await user.click(screen.getAllByText('Interested').at(-1)!)
     expect(getSpy).toHaveBeenCalledWith('/reports/outreach/drill',
-      expect.objectContaining({ params: { outcome: 'interested', period: 'month' } }))
+      expect.objectContaining({ params: { segment_outcome: 'interested', period: 'month' } }))
   })
 })

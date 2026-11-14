@@ -28,9 +28,9 @@ describe('useSeriesDrill — date-series pick', () => {
           value: 42,
           subtitle: '01-08-2026 – 31-08-2026',
           rowsEndpoint: '/reports/tasks/drill',
-          rowsParams: { period: 'month', status: ['open'], date: '2026-08-03', bucket: 'week' },
+          rowsParams: { period: 'month', status: ['open'], segment_date: '2026-08-03', bucket: 'week' },
           adviceEndpoint: '/reports/tasks/advice',
-          adviceParams: { period: 'month', status: ['open'], date: '2026-08-03', bucket: 'week' },
+          adviceParams: { period: 'month', status: ['open'], segment_date: '2026-08-03', bucket: 'week' },
         }),
       )
     }
@@ -49,7 +49,7 @@ describe('useSeriesDrill — date-series pick', () => {
     if (typeof handler === 'function') {
       handler('2026-08-01')
       const call = setDrill.mock.calls[0]?.[0]
-      expect(call?.rowsParams).toEqual({ period: 'month', date: '2026-08-01' })
+      expect(call?.rowsParams).toEqual({ period: 'month', segment_date: '2026-08-01' })
       expect(call?.rowsParams).not.toHaveProperty('bucket')
     }
   })

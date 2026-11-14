@@ -128,7 +128,7 @@ describe('MatchesReport (MATCH-SOORT-1, by_contract_form axis)', () => {
     expect(mockUseMatchesReport).toHaveBeenCalledWith('month', filters)
     await user.click(screen.getByText('Detachering'))
     expect(getSpy).toHaveBeenCalledWith('/reports/matches/drill', expect.objectContaining({
-      params: { period: 'month', status: ['open'], owner_id: ['u1'], location_id: [7], contract_form: 'secondment' },
+      params: { period: 'month', status: ['open'], owner_id: ['u1'], location_id: [7], segment_contract_form: 'secondment' },
     }))
   })
 
@@ -140,8 +140,9 @@ describe('MatchesReport (MATCH-SOORT-1, by_contract_form axis)', () => {
     renderReport()
     await user.click(screen.getByText('Geen contractvorm'))
     expect(getSpy).toHaveBeenCalledWith('/reports/matches/drill',
-      expect.objectContaining({ params: { contract_form: 'none', period: 'month' } }))
+      expect.objectContaining({ params: { segment_contract_form: 'none', period: 'month' } }))
     const call = getSpy.mock.calls.filter(c => c[0] === '/reports/matches/drill').at(-1)
+    expect(call?.[1].params).not.toHaveProperty('segment_origin')
     expect(call?.[1].params).not.toHaveProperty('origin')
   })
 
@@ -154,7 +155,7 @@ describe('MatchesReport (MATCH-SOORT-1, by_contract_form axis)', () => {
     renderReport()
     await user.click(screen.getByText('Onbekend (verwijderde contractvorm)'))
     expect(getSpy).toHaveBeenCalledWith('/reports/matches/drill',
-      expect.objectContaining({ params: { contract_form: 'zzz-deleted-form', period: 'month' } }))
+      expect.objectContaining({ params: { segment_contract_form: 'zzz-deleted-form', period: 'month' } }))
   })
 
   // SUPERSEDE (KPI-MATCHES-1): the origin KPI cards (funnel/direct/total) that
@@ -168,8 +169,9 @@ describe('MatchesReport (MATCH-SOORT-1, by_contract_form axis)', () => {
     renderReport()
     await user.click(screen.getByText('Uitzend'))
     expect(getSpy).toHaveBeenCalledWith('/reports/matches/drill',
-      expect.objectContaining({ params: { contract_form: 'temp_agency', period: 'month' } }))
+      expect.objectContaining({ params: { segment_contract_form: 'temp_agency', period: 'month' } }))
     const call = getSpy.mock.calls.filter(c => c[0] === '/reports/matches/drill').at(-1)
+    expect(call?.[1].params).not.toHaveProperty('segment_origin')
     expect(call?.[1].params).not.toHaveProperty('origin')
   })
 })
@@ -225,9 +227,9 @@ describe('MatchesReport (RAPPORTEN-SUITE-1 portie 7, closing enrichment)', () =>
     mockUseMatchesReport.mockReturnValue({ data, loading: false, error: false })
     renderReport()
     await user.click(screen.getByText('Wk 31'))
-    expect(lastDrillParams()).toEqual({ date: '2026-07-27', bucket: 'week', period: 'month' })
+    expect(lastDrillParams()).toEqual({ segment_date: '2026-07-27', bucket: 'week', period: 'month' })
     expect(getSpy).toHaveBeenCalledWith('/reports/matches/advice',
-      expect.objectContaining({ params: { date: '2026-07-27', bucket: 'week', period: 'month' } }))
+      expect.objectContaining({ params: { segment_date: '2026-07-27', bucket: 'week', period: 'month' } }))
   })
 
   // Day granularity opens exactly on `from` (no ghost bucket) and omits `bucket`.
@@ -239,7 +241,7 @@ describe('MatchesReport (RAPPORTEN-SUITE-1 portie 7, closing enrichment)', () =>
     })
     renderReport()
     await user.click(screen.getByText('01-08'))
-    expect(lastDrillParams()).toEqual({ date: '2026-08-01', period: 'month' })
+    expect(lastDrillParams()).toEqual({ segment_date: '2026-08-01', period: 'month' })
   })
 
   // Each under_contract tile drills contract_status=<its key> — drill AND advice.
@@ -251,13 +253,13 @@ describe('MatchesReport (RAPPORTEN-SUITE-1 portie 7, closing enrichment)', () =>
     // labels the new suite's own 'active' KPI card (KPI-MATCHES-1, kpi=active
     // drill) — so click the LAST match, always the StatTile below the strip.
     await user.click(screen.getAllByText('Verzonden')[0])
-    expect(lastDrillParams()).toEqual({ contract_status: 'sent', period: 'month' })
+    expect(lastDrillParams()).toEqual({ segment_contract_status: 'sent', period: 'month' })
     expect(getSpy).toHaveBeenCalledWith('/reports/matches/advice',
-      expect.objectContaining({ params: { contract_status: 'sent', period: 'month' } }))
+      expect.objectContaining({ params: { segment_contract_status: 'sent', period: 'month' } }))
     await user.click(screen.getAllByText('Actief').at(-1)!)
-    expect(lastDrillParams()).toEqual({ contract_status: 'active', period: 'month' })
+    expect(lastDrillParams()).toEqual({ segment_contract_status: 'active', period: 'month' })
     await user.click(screen.getAllByText('Beëindigd')[0])
-    expect(lastDrillParams()).toEqual({ contract_status: 'ended', period: 'month' })
+    expect(lastDrillParams()).toEqual({ segment_contract_status: 'ended', period: 'month' })
   })
 
   // The 'none' tile reads the explicit envelope count (7925ce15), falling back to
@@ -270,7 +272,7 @@ describe('MatchesReport (RAPPORTEN-SUITE-1 portie 7, closing enrichment)', () =>
     expect(tile).not.toBeNull()
     expect(tile).toHaveTextContent('3')
     await user.click(screen.getByText('Geen contract'))
-    expect(lastDrillParams()).toEqual({ contract_status: 'none', period: 'month' })
+    expect(lastDrillParams()).toEqual({ segment_contract_status: 'none', period: 'month' })
   })
 
   it('falls back to the derived none count when the envelope predates the explicit key', () => {
@@ -289,9 +291,9 @@ describe('MatchesReport (RAPPORTEN-SUITE-1 portie 7, closing enrichment)', () =>
     renderReport()
     await user.click(screen.getByText('Detachering'))
     expect(getSpy).toHaveBeenCalledWith('/reports/matches/drill',
-      expect.objectContaining({ params: { contract_form: 'secondment', period: 'month' } }))
+      expect.objectContaining({ params: { segment_contract_form: 'secondment', period: 'month' } }))
     expect(getSpy).toHaveBeenCalledWith('/reports/matches/advice',
-      expect.objectContaining({ params: { contract_form: 'secondment', period: 'month' } }))
+      expect.objectContaining({ params: { segment_contract_form: 'secondment', period: 'month' } }))
   })
 
   // XOR proof across the remaining axes: every drill call carries exactly ONE
@@ -303,13 +305,13 @@ describe('MatchesReport (RAPPORTEN-SUITE-1 portie 7, closing enrichment)', () =>
     mockUseMatchesReport.mockReturnValue({ data, loading: false, error: false })
     renderReport()
     await user.click(screen.getByText('Uitzend'))
-    expect(lastDrillParams()).toEqual({ contract_form: 'temp_agency', period: 'month' })
+    expect(lastDrillParams()).toEqual({ segment_contract_form: 'temp_agency', period: 'month' })
     await user.click(screen.getByText('Verzonden'))
-    expect(lastDrillParams()).toEqual({ contract_status: 'sent', period: 'month' })
+    expect(lastDrillParams()).toEqual({ segment_contract_status: 'sent', period: 'month' })
     await user.click(screen.getByText('Wk 32'))
-    expect(lastDrillParams()).toEqual({ date: '2026-08-03', bucket: 'week', period: 'month' })
+    expect(lastDrillParams()).toEqual({ segment_date: '2026-08-03', bucket: 'week', period: 'month' })
     await user.click(screen.getByText('Klant stopt'))
-    expect(lastDrillParams()).toEqual({ stop_reason: 'client_stop', period: 'month' })
+    expect(lastDrillParams()).toEqual({ segment_stop_reason: 'client_stop', period: 'month' })
   })
 
   // terminations.by_reason drills stop_reason=<value> — the FIFTH XOR leg
@@ -320,8 +322,8 @@ describe('MatchesReport (RAPPORTEN-SUITE-1 portie 7, closing enrichment)', () =>
     renderReport()
     expect(screen.getByText('Beëindigingsredenen')).toBeInTheDocument()
     await user.click(screen.getByText('Klant stopt'))
-    expect(lastDrillParams()).toEqual({ stop_reason: 'client_stop', period: 'month' })
-    expect(lastAdviceParams()).toEqual({ stop_reason: 'client_stop', period: 'month' })
+    expect(lastDrillParams()).toEqual({ segment_stop_reason: 'client_stop', period: 'month' })
+    expect(lastAdviceParams()).toEqual({ segment_stop_reason: 'client_stop', period: 'month' })
   })
 
   // Every drill source targets the ONE matches drill/advice pair — never a sibling

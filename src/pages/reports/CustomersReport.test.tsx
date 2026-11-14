@@ -140,9 +140,9 @@ describe('CustomersReport (RAPPORTEN-SUITE-1 portie 3, customers inflow report)'
     renderReport()
     await user.click(screen.getByText('Actief'))
     expect(getSpy).toHaveBeenCalledWith('/reports/customers/drill',
-      expect.objectContaining({ params: { status: 'active', period: 'month' } }))
+      expect.objectContaining({ params: { segment_status: 'active', period: 'month' } }))
     expect(getSpy).toHaveBeenCalledWith('/reports/customers/advice',
-      expect.objectContaining({ params: { status: 'active', period: 'month' } }))
+      expect.objectContaining({ params: { segment_status: 'active', period: 'month' } }))
   })
 
   // RAPPORT-GEZICHT-WAVE2: status is a coloured tenant lookup axis, so it now
@@ -153,7 +153,7 @@ describe('CustomersReport (RAPPORTEN-SUITE-1 portie 3, customers inflow report)'
     renderReport()
     await user.click(screen.getByText('Klant'))
     expect(getSpy).toHaveBeenCalledWith('/reports/customers/drill',
-      expect.objectContaining({ params: { phase: 'customer', period: 'month' } }))
+      expect.objectContaining({ params: { segment_phase: 'customer', period: 'month' } }))
   })
 
   it('sends the active panel filters to BOTH the report hook and a drill click (RAPPORT-FILTERS-1 — bar and lade never disagree)', async () => {
@@ -171,7 +171,7 @@ describe('CustomersReport (RAPPORTEN-SUITE-1 portie 3, customers inflow report)'
     // A drill click layers its XOR param ON TOP of those same filters, never instead of them.
     await user.click(screen.getByText('Klant'))
     expect(getSpy).toHaveBeenCalledWith('/reports/customers/drill', expect.objectContaining({
-      params: { period: 'month', status: ['active'], owner_id: ['u1'], location_id: [7], phase: 'customer' },
+      params: { period: 'month', status: ['active'], owner_id: ['u1'], location_id: [7], segment_phase: 'customer' },
     }))
   })
 
@@ -181,7 +181,7 @@ describe('CustomersReport (RAPPORTEN-SUITE-1 portie 3, customers inflow report)'
     renderReport()
     await user.click(screen.getByText('Zorg'))
     expect(getSpy).toHaveBeenCalledWith('/reports/customers/drill',
-      expect.objectContaining({ params: { industry: 'healthcare', period: 'month' } }))
+      expect.objectContaining({ params: { segment_industry: 'healthcare', period: 'month' } }))
   })
 
   it('clicking an owner bar drills with the owner XOR param (D2 shape: owner_id → owner)', async () => {
@@ -190,7 +190,7 @@ describe('CustomersReport (RAPPORTEN-SUITE-1 portie 3, customers inflow report)'
     renderReport()
     await user.click(screen.getByText('Anna de Vries'))
     expect(getSpy).toHaveBeenCalledWith('/reports/customers/drill',
-      expect.objectContaining({ params: { owner: 'u1', period: 'month' } }))
+      expect.objectContaining({ params: { segment_owner: 'u1', period: 'month' } }))
   })
 
   it('clicking the "Niet toegewezen" owner row drills with owner=none', async () => {
@@ -199,7 +199,7 @@ describe('CustomersReport (RAPPORTEN-SUITE-1 portie 3, customers inflow report)'
     renderReport()
     await user.click(screen.getByText('Niet toegewezen'))
     expect(getSpy).toHaveBeenCalledWith('/reports/customers/drill',
-      expect.objectContaining({ params: { owner: 'none', period: 'month' } }))
+      expect.objectContaining({ params: { segment_owner: 'none', period: 'month' } }))
   })
 
   // Orphan-value drill (review-aanvulling): a deleted lookup row still renders its own
@@ -212,7 +212,7 @@ describe('CustomersReport (RAPPORTEN-SUITE-1 portie 3, customers inflow report)'
     expect(screen.getByText('Onbekend (verwijderde status)')).toBeInTheDocument()
     await user.click(screen.getByText('Onbekend (verwijderde status)'))
     expect(getSpy).toHaveBeenCalledWith('/reports/customers/drill',
-      expect.objectContaining({ params: { status: 'zzz-deleted-status', period: 'month' } }))
+      expect.objectContaining({ params: { segment_status: 'zzz-deleted-status', period: 'month' } }))
   })
 
   // KPI-CUSTOMERS-SIGNALS-1 (supersedes the old axis-topsegment strip pin,
@@ -281,7 +281,7 @@ describe('CustomersReport (RAPPORTEN-SUITE-1 portie 3, customers inflow report)'
     renderReport()
     await user.click(screen.getByText('Wk 32'))
     expect(getSpy).toHaveBeenCalledWith('/reports/customers/drill',
-      expect.objectContaining({ params: { date: '2026-08-03', bucket: 'week', period: 'month' } }))
+      expect.objectContaining({ params: { segment_date: '2026-08-03', bucket: 'week', period: 'month' } }))
   })
 
   it('omits bucket when the timeseries is day-granular', async () => {
@@ -293,7 +293,7 @@ describe('CustomersReport (RAPPORTEN-SUITE-1 portie 3, customers inflow report)'
     renderReport()
     await user.click(screen.getByText('03-08'))
     expect(getSpy).toHaveBeenCalledWith('/reports/customers/drill',
-      expect.objectContaining({ params: { date: '2026-08-03', period: 'month' } }))
+      expect.objectContaining({ params: { segment_date: '2026-08-03', period: 'month' } }))
     const call = getSpy.mock.calls.find(c => c[0] === '/reports/customers/drill')
     expect(call?.[1].params).not.toHaveProperty('bucket')
   })
@@ -317,7 +317,7 @@ describe('CustomersReport (RAPPORTEN-SUITE-1 portie 3, customers inflow report)'
     // to differ from the mount default and fire a fresh request.
     await user.click(screen.getByText('Inactief'))
     expect(getSpy).toHaveBeenCalledWith('/reports/customers/drill',
-      expect.objectContaining({ params: { status: 'inactive', period: 'month' } }))
+      expect.objectContaining({ params: { segment_status: 'inactive', period: 'month' } }))
     // The industry section was never re-fetched by the status click.
     expect(getSpy).not.toHaveBeenCalledWith('/reports/customers/drill',
       expect.objectContaining({ params: expect.objectContaining({ industry: expect.anything() }) }))

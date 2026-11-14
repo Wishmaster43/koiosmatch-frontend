@@ -86,7 +86,7 @@ describe('VacanciesReport (RAPPORTEN-SUITE-1 portie 4, additive on C-34)', () =>
     expect(mockUseVacanciesReport).toHaveBeenCalledWith('month', filters)
     await user.click(screen.getByText('Utrecht'))
     expect(getSpy).toHaveBeenCalledWith('/reports/vacancies/drill', expect.objectContaining({
-      params: { period: 'month', status: ['open-uuid'], owner_id: ['u1'], location_id: [7], customer_id: ['c1'], branch: 'utrecht' },
+      params: { period: 'month', status: ['open-uuid'], owner_id: ['u1'], location_id: [7], customer_id: ['c1'], segment_branch: 'utrecht' },
     }))
   })
 
@@ -96,9 +96,9 @@ describe('VacanciesReport (RAPPORTEN-SUITE-1 portie 4, additive on C-34)', () =>
     renderReport()
     await user.click(screen.getByText('Gepubliceerd'))
     expect(getSpy).toHaveBeenCalledWith('/reports/vacancies/drill',
-      expect.objectContaining({ params: { status: 'st-uuid-1', period: 'month' } }))
+      expect.objectContaining({ params: { segment_status: 'st-uuid-1', period: 'month' } }))
     expect(getSpy).toHaveBeenCalledWith('/reports/vacancies/advice',
-      expect.objectContaining({ params: { status: 'st-uuid-1', period: 'month' } }))
+      expect.objectContaining({ params: { segment_status: 'st-uuid-1', period: 'month' } }))
   })
 
   // 'none' sentinel: drills with the axis param only — NO other XOR param rides along.
@@ -107,7 +107,7 @@ describe('VacanciesReport (RAPPORTEN-SUITE-1 portie 4, additive on C-34)', () =>
     mockUseVacanciesReport.mockReturnValue({ data, loading: false, error: false })
     renderReport()
     await user.click(screen.getByText('Geen status'))
-    expect(lastDrillParams()).toEqual({ status: 'none', period: 'month' })
+    expect(lastDrillParams()).toEqual({ segment_status: 'none', period: 'month' })
   })
 
   // Orphan-value drill: a deleted vacancy-status lookup row still renders its own bar
@@ -117,7 +117,7 @@ describe('VacanciesReport (RAPPORTEN-SUITE-1 portie 4, additive on C-34)', () =>
     mockUseVacanciesReport.mockReturnValue({ data, loading: false, error: false })
     renderReport()
     await user.click(screen.getByText('Onbekend (verwijderde status)'))
-    expect(lastDrillParams()).toEqual({ status: '9c1d-deleted-status-uuid', period: 'month' })
+    expect(lastDrillParams()).toEqual({ segment_status: '9c1d-deleted-status-uuid', period: 'month' })
   })
 
   // 'others' = the exact complement of the top-10 — a real, clickable row.
@@ -127,7 +127,7 @@ describe('VacanciesReport (RAPPORTEN-SUITE-1 portie 4, additive on C-34)', () =>
     renderReport()
     const [customerOthers] = screen.getAllByText('Overig')
     await user.click(customerOthers)
-    expect(lastDrillParams()).toEqual({ customer: 'others', period: 'month' })
+    expect(lastDrillParams()).toEqual({ segment_customer: 'others', period: 'month' })
   })
 
   it('clicking the customer "Geen klant" bar drills with customer=none', async () => {
@@ -135,7 +135,7 @@ describe('VacanciesReport (RAPPORTEN-SUITE-1 portie 4, additive on C-34)', () =>
     mockUseVacanciesReport.mockReturnValue({ data, loading: false, error: false })
     renderReport()
     await user.click(screen.getByText('Geen klant'))
-    expect(lastDrillParams()).toEqual({ customer: 'none', period: 'month' })
+    expect(lastDrillParams()).toEqual({ segment_customer: 'none', period: 'month' })
   })
 
   // Function is a raw-string axis: the string is the drill value AND the label.
@@ -144,7 +144,7 @@ describe('VacanciesReport (RAPPORTEN-SUITE-1 portie 4, additive on C-34)', () =>
     mockUseVacanciesReport.mockReturnValue({ data, loading: false, error: false })
     renderReport()
     await user.click(screen.getByText('Verzorgende IG'))
-    expect(lastDrillParams()).toEqual({ function: 'Verzorgende IG', period: 'month' })
+    expect(lastDrillParams()).toEqual({ segment_function: 'Verzorgende IG', period: 'month' })
   })
 
   // Industry is zero-filled over the lookup on NAME strings — the name is the value.
@@ -153,7 +153,7 @@ describe('VacanciesReport (RAPPORTEN-SUITE-1 portie 4, additive on C-34)', () =>
     mockUseVacanciesReport.mockReturnValue({ data, loading: false, error: false })
     renderReport()
     await user.click(screen.getByText('Zorg'))
-    expect(lastDrillParams()).toEqual({ industry: 'Zorg', period: 'month' })
+    expect(lastDrillParams()).toEqual({ segment_industry: 'Zorg', period: 'month' })
   })
 
   it('clicking an owner bar drills with the owner XOR param (D2 shape: owner_id → owner)', async () => {
@@ -161,7 +161,7 @@ describe('VacanciesReport (RAPPORTEN-SUITE-1 portie 4, additive on C-34)', () =>
     mockUseVacanciesReport.mockReturnValue({ data, loading: false, error: false })
     renderReport()
     await user.click(screen.getByText('Anna de Vries'))
-    expect(lastDrillParams()).toEqual({ owner: 'u1', period: 'month' })
+    expect(lastDrillParams()).toEqual({ segment_owner: 'u1', period: 'month' })
   })
 
   // VESTIGING-2: the branch axis groups via the CUSTOMER's mirrored branch and drills
@@ -172,7 +172,7 @@ describe('VacanciesReport (RAPPORTEN-SUITE-1 portie 4, additive on C-34)', () =>
     renderReport()
     await user.click(screen.getByText('Utrecht'))
     expect(getSpy).toHaveBeenCalledWith('/reports/vacancies/drill',
-      expect.objectContaining({ params: { branch: 'utrecht', period: 'month' } }))
+      expect.objectContaining({ params: { segment_branch: 'utrecht', period: 'month' } }))
     expect(getSpy.mock.calls.some(c => String(c[0]).startsWith('/vacancies'))).toBe(false)
   })
 
@@ -183,7 +183,7 @@ describe('VacanciesReport (RAPPORTEN-SUITE-1 portie 4, additive on C-34)', () =>
     mockUseVacanciesReport.mockReturnValue({ data, loading: false, error: false })
     renderReport()
     await user.click(screen.getByText('Wk 32'))
-    expect(lastDrillParams()).toEqual({ date: '2026-08-03', bucket: 'week', period: 'month' })
+    expect(lastDrillParams()).toEqual({ segment_date: '2026-08-03', bucket: 'week', period: 'month' })
   })
 
   it('omits bucket when the timeseries is day-granular', async () => {
@@ -194,7 +194,7 @@ describe('VacanciesReport (RAPPORTEN-SUITE-1 portie 4, additive on C-34)', () =>
     })
     renderReport()
     await user.click(screen.getByText('03-08'))
-    expect(lastDrillParams()).toEqual({ date: '2026-08-03', period: 'month' })
+    expect(lastDrillParams()).toEqual({ segment_date: '2026-08-03', period: 'month' })
   })
 
   // Legacy 'vacancy' segment (unchanged C-34 behaviour): a table row drills into that
@@ -204,8 +204,8 @@ describe('VacanciesReport (RAPPORTEN-SUITE-1 portie 4, additive on C-34)', () =>
     mockUseVacanciesReport.mockReturnValue({ data, loading: false, error: false })
     renderReport()
     await user.click(screen.getByText('Verpleegkundige IC'))
-    expect(lastDrillParams()).toEqual({ vacancy: 'v1', period: 'month' })
+    expect(lastDrillParams()).toEqual({ segment_vacancy: 'v1', period: 'month' })
     expect(getSpy).toHaveBeenCalledWith('/reports/vacancies/advice',
-      expect.objectContaining({ params: { vacancy: 'v1', period: 'month' } }))
+      expect.objectContaining({ params: { segment_vacancy: 'v1', period: 'month' } }))
   })
 })

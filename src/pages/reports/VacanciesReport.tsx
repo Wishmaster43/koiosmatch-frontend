@@ -41,7 +41,7 @@ import { unitAwareServerKpiSpecs, thresholdCaption } from './lib/kpiSpecs'
 import { ReportStateFlow } from './components/ReportStateFlow'
 import { ReportDataWindow } from './components/ReportDataWindow'
 import { reportWindowLabel } from './lib/reportWindowLabel'
-import { makeOpenSegment, makeOpenKpiDrill } from './lib/drillFactories'
+import { makeOpenSegment, makeOpenKpiDrill, segmentParams } from './lib/drillFactories'
 import { useReportCustomKpis } from './hooks/useReportCustomKpis'
 
 // Number cell: emphasised when > 0, muted when zero (mirrors the SM entity tables).
@@ -76,8 +76,8 @@ export default function VacanciesReport({ period, filters = EMPTY_REPORT_FILTERS
       { label: t('vacancies.cols.applications'), value: v.applications },
       { label: t('vacancies.cols.matched'),      value: v.matched },
     ],
-    rowsEndpoint: '/reports/vacancies/drill', rowsParams: { ...baseParams, vacancy: v.key },
-    adviceEndpoint: '/reports/vacancies/advice', adviceParams: { ...baseParams, vacancy: v.key },
+    rowsEndpoint: '/reports/vacancies/drill', rowsParams: { ...baseParams, ...segmentParams({ vacancy: v.key }) },
+    adviceEndpoint: '/reports/vacancies/advice', adviceParams: { ...baseParams, ...segmentParams({ vacancy: v.key }) },
   })
   // Portie-4 segment drill: exactly one XOR param per open drill (vacancy rows
   // behind it) — entityPage deep-links the drawer's rows to the vacancy drilldown.
@@ -95,17 +95,17 @@ export default function VacanciesReport({ period, filters = EMPTY_REPORT_FILTERS
       { label: t('vacancies.depth.aging.cols.inProcess'), value: row.candidates_in_process },
       { label: t('vacancies.depth.aging.cols.daysOpen'), value: row.days_open },
     ],
-    rowsEndpoint: '/reports/vacancies/drill', rowsParams: { ...baseParams, vacancy: row.id },
-    adviceEndpoint: '/reports/vacancies/advice', adviceParams: { ...baseParams, vacancy: row.id },
+    rowsEndpoint: '/reports/vacancies/drill', rowsParams: { ...baseParams, ...segmentParams({ vacancy: row.id }) },
+    adviceEndpoint: '/reports/vacancies/advice', adviceParams: { ...baseParams, ...segmentParams({ vacancy: row.id }) },
   })
   const openBucket = (pt: CandidateTimeseriesPoint) => setDrill({
     title: pt.label, value: pt.value, subtitle: windowSub(),
     // A week bar's `date` is the point's own key; the drawer then counts the WHOLE
     // week (bucket=week) so bar and drawer total always agree.
     rowsEndpoint: '/reports/vacancies/drill',
-    rowsParams: { ...baseParams, date: pt.date, ...(data?.timeseries.bucket === 'week' ? { bucket: 'week' } : {}) },
+    rowsParams: { ...baseParams, ...segmentParams({ date: pt.date }), ...(data?.timeseries.bucket === 'week' ? { bucket: 'week' } : {}) },
     adviceEndpoint: '/reports/vacancies/advice',
-    adviceParams: { ...baseParams, date: pt.date, ...(data?.timeseries.bucket === 'week' ? { bucket: 'week' } : {}) },
+    adviceParams: { ...baseParams, ...segmentParams({ date: pt.date }), ...(data?.timeseries.bucket === 'week' ? { bucket: 'week' } : {}) },
   })
 
   // PDF signal "vacancies without any applications": `rows` is the report's own

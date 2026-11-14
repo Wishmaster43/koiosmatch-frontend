@@ -102,7 +102,7 @@ describe('OpportunitiesReport · panel filters reach hook and drill', () => {
     mockUseOpportunitiesReport.mockReturnValue({ data, loading: false, error: false })
     render(<QueryClientProvider client={new QueryClient()}><OpportunitiesReport period="month" filters={filters} /></QueryClientProvider>)
     await user.click(screen.getByText('Voorstel'))
-    const wantParams = { stage: 'proposal', period: 'month', status: ['won'], owner_id: ['u1'], location_id: [7], customer_id: ['c1'], value_min: 1000, value_max: 5000 }
+    const wantParams = { segment_stage: 'proposal', period: 'month', status: ['won'], owner_id: ['u1'], location_id: [7], customer_id: ['c1'], value_min: 1000, value_max: 5000 }
     expect(getSpy).toHaveBeenCalledWith('/reports/opportunities/drill', expect.objectContaining({ params: expect.objectContaining(wantParams) }))
     expect(getSpy).toHaveBeenCalledWith('/reports/opportunities/advice', expect.objectContaining({ params: expect.objectContaining(wantParams) }))
   })
@@ -170,9 +170,9 @@ describe('OpportunitiesReport (RAPPORTEN-SUITE-1 portie 5, kansen pipeline repor
     renderReport()
     await user.click(screen.getByText('Voorstel'))
     expect(getSpy).toHaveBeenCalledWith('/reports/opportunities/drill',
-      expect.objectContaining({ params: { stage: 'proposal', period: 'month' } }))
+      expect.objectContaining({ params: { segment_stage: 'proposal', period: 'month' } }))
     expect(getSpy).toHaveBeenCalledWith('/reports/opportunities/advice',
-      expect.objectContaining({ params: { stage: 'proposal', period: 'month' } }))
+      expect.objectContaining({ params: { segment_stage: 'proposal', period: 'month' } }))
   })
 
   // 'none' sentinel: drills with the axis param only — NO other XOR param rides along.
@@ -181,7 +181,7 @@ describe('OpportunitiesReport (RAPPORTEN-SUITE-1 portie 5, kansen pipeline repor
     mockUseOpportunitiesReport.mockReturnValue({ data, loading: false, error: false })
     renderReport()
     await user.click(screen.getByText('Geen fase'))
-    expect(lastDrillParams()).toEqual({ stage: 'none', period: 'month' })
+    expect(lastDrillParams()).toEqual({ segment_stage: 'none', period: 'month' })
   })
 
   // Orphan-value drill: opportunity_stage_id carries no FK, so a deleted stage still
@@ -191,7 +191,7 @@ describe('OpportunitiesReport (RAPPORTEN-SUITE-1 portie 5, kansen pipeline repor
     mockUseOpportunitiesReport.mockReturnValue({ data, loading: false, error: false })
     renderReport()
     await user.click(screen.getByText('Onbekend (verwijderde fase)'))
-    expect(lastDrillParams()).toEqual({ stage: '9c1d-deleted-stage-uuid', period: 'month' })
+    expect(lastDrillParams()).toEqual({ segment_stage: '9c1d-deleted-stage-uuid', period: 'month' })
   })
 
   // 'others' = the exact complement of the top-20 — a real, clickable row.
@@ -200,7 +200,7 @@ describe('OpportunitiesReport (RAPPORTEN-SUITE-1 portie 5, kansen pipeline repor
     mockUseOpportunitiesReport.mockReturnValue({ data, loading: false, error: false })
     renderReport()
     await user.click(screen.getByText('Overig'))
-    expect(lastDrillParams()).toEqual({ customer: 'others', period: 'month' })
+    expect(lastDrillParams()).toEqual({ segment_customer: 'others', period: 'month' })
   })
 
   it('clicking the customer "Geen klant" bar drills with customer=none', async () => {
@@ -208,7 +208,7 @@ describe('OpportunitiesReport (RAPPORTEN-SUITE-1 portie 5, kansen pipeline repor
     mockUseOpportunitiesReport.mockReturnValue({ data, loading: false, error: false })
     renderReport()
     await user.click(screen.getByText('Geen klant'))
-    expect(lastDrillParams()).toEqual({ customer: 'none', period: 'month' })
+    expect(lastDrillParams()).toEqual({ segment_customer: 'none', period: 'month' })
   })
 
   // Wees-klant-les (portie 5 review HIGH): a hard-deleted customer's "Onbekend" bar
@@ -218,7 +218,7 @@ describe('OpportunitiesReport (RAPPORTEN-SUITE-1 portie 5, kansen pipeline repor
     mockUseOpportunitiesReport.mockReturnValue({ data, loading: false, error: false })
     renderReport()
     await user.click(screen.getByText('Onbekend'))
-    expect(lastDrillParams()).toEqual({ customer: 'f0a3-deleted-customer-uuid', period: 'month' })
+    expect(lastDrillParams()).toEqual({ segment_customer: 'f0a3-deleted-customer-uuid', period: 'month' })
   })
 
   it('clicking an owner bar drills with the owner XOR param (D2 shape: owner_id → owner)', async () => {
@@ -230,10 +230,10 @@ describe('OpportunitiesReport (RAPPORTEN-SUITE-1 portie 5, kansen pipeline repor
     // (any matching call, mount-seeded or click-fired), never "the last call".
     await user.click(screen.getByText('Anna de Vries'))
     expect(getSpy).toHaveBeenCalledWith('/reports/opportunities/drill',
-      expect.objectContaining({ params: { owner: 'u1', period: 'month' } }))
+      expect.objectContaining({ params: { segment_owner: 'u1', period: 'month' } }))
     // "Niet toegewezen" differs from the mount default, so it always fires fresh.
     await user.click(screen.getByText('Niet toegewezen'))
-    expect(lastDrillParams()).toEqual({ owner: 'none', period: 'month' })
+    expect(lastDrillParams()).toEqual({ segment_owner: 'none', period: 'month' })
   })
 
   // Branch axis runs on the deal's OWN location_id column and drills through the
@@ -243,9 +243,9 @@ describe('OpportunitiesReport (RAPPORTEN-SUITE-1 portie 5, kansen pipeline repor
     mockUseOpportunitiesReport.mockReturnValue({ data, loading: false, error: false })
     renderReport()
     await user.click(screen.getByText('Utrecht'))
-    expect(lastDrillParams()).toEqual({ branch: 'loc-1', period: 'month' })
+    expect(lastDrillParams()).toEqual({ segment_branch: 'loc-1', period: 'month' })
     await user.click(screen.getByText('Geen vestiging'))
-    expect(lastDrillParams()).toEqual({ branch: 'none', period: 'month' })
+    expect(lastDrillParams()).toEqual({ segment_branch: 'none', period: 'month' })
     expect(getSpy.mock.calls.some(c => String(c[0]).startsWith('/opportunities'))).toBe(false)
   })
 
@@ -256,7 +256,7 @@ describe('OpportunitiesReport (RAPPORTEN-SUITE-1 portie 5, kansen pipeline repor
     mockUseOpportunitiesReport.mockReturnValue({ data, loading: false, error: false })
     renderReport()
     await user.click(screen.getByText('Wk 32'))
-    expect(lastDrillParams()).toEqual({ date: '2026-08-03', bucket: 'week', period: 'month' })
+    expect(lastDrillParams()).toEqual({ segment_date: '2026-08-03', bucket: 'week', period: 'month' })
   })
 
   it('omits bucket when the timeseries is day-granular', async () => {
@@ -271,9 +271,9 @@ describe('OpportunitiesReport (RAPPORTEN-SUITE-1 portie 5, kansen pipeline repor
     // point, so the click may hit the react-query cache — assert via
     // toHaveBeenCalledWith (any matching call), never "the last call".
     expect(getSpy).toHaveBeenCalledWith('/reports/opportunities/drill',
-      expect.objectContaining({ params: { date: '2026-08-03', period: 'month' } }))
+      expect.objectContaining({ params: { segment_date: '2026-08-03', period: 'month' } }))
     const call = getSpy.mock.calls.find(c => c[0] === '/reports/opportunities/drill' &&
-      (c[1] as { params: Record<string, unknown> }).params.date === '2026-08-03')
+      (c[1] as { params: Record<string, unknown> }).params.segment_date === '2026-08-03')
     expect(call?.[1].params).not.toHaveProperty('bucket')
   })
 
@@ -347,7 +347,7 @@ describe('OpportunitiesReport (RAPPORTEN-SUITE-1 portie 5, kansen pipeline repor
     // guaranteed to differ from the mount default and fire a fresh request.
     await user.click(screen.getByText('Geen vestiging'))
     expect(getSpy).toHaveBeenCalledWith('/reports/opportunities/drill',
-      expect.objectContaining({ params: { branch: 'none', period: 'month' } }))
+      expect.objectContaining({ params: { segment_branch: 'none', period: 'month' } }))
     // The stage section was never re-fetched by the branch click.
     expect(getSpy).not.toHaveBeenCalledWith('/reports/opportunities/drill',
       expect.objectContaining({ params: expect.objectContaining({ stage: expect.anything() }) }))

@@ -68,8 +68,9 @@ const KPI_LABEL_KEYS: Record<string, string> = {
 }
 
 // The plain axes (single-value XOR param, same shape as CandidatesReport). The
-// funnel-bucket axis is handled separately below — its param name ('bucket')
-// doubles as the timeseries granularity companion (see the note above openBucket).
+// funnel-bucket axis is handled separately below: it leaves as `segment_bucket`
+// (REPORT-DRILL-SEGMENT-KEYS-FE-1), distinct from the bare `bucket=week` granularity
+// modifier of the timeseries drill.
 type Axis = 'stage' | 'source' | 'customer' | 'vacancy'
 
 // Fixed funnel-bucket vocabulary: flag-driven on the backend, not a tenant lookup,
@@ -154,9 +155,9 @@ export default function ApplicationsReport({ period, filters = EMPTY_REPORT_FILT
   const pickOwnerBar = (segs: CandidateOwnerSegment[]) =>
     gateDrillClick('applications', ownerClick(segs, openSegment))
 
-  // Funnel-bucket donut: `bucket` here is the SEGMENT value (see the dual-role
-  // note above openBucket) — sent without `date`, so it never collides with the
-  // granularity role. Only four fixed values, no lookup colour field, so the
+  // Funnel-bucket donut: the clicked bucket is a SEGMENT value and goes out through
+  // segmentParams as `segment_bucket`, so it can never collide with the bare
+  // `bucket=week` granularity modifier. Only four fixed values, no lookup colour field, so the
   // semantic BUCKET_COLOR map drives the slices.
   const bucketDonutData = (counts: ApplicationBucketCounts): { data: ChartDatum[]; colors: string[] } => ({
     data: BUCKET_KEYS.map(k => ({ name: t(`applications.buckets.${k}`), value: counts[k], key: k })),

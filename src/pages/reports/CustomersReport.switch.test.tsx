@@ -124,7 +124,28 @@ describe('CustomersReport — Klanten/Prospects switch (RAPPORTEN-CONSOLIDATIE-1
     getSpy.mockClear()
     await user.click(screen.getByText(`${i18n.t('analytics:customers.axes.status')}: Actief`))
     expect(getSpy).toHaveBeenCalledWith('/reports/customers/drill',
-      expect.objectContaining({ params: expect.objectContaining({ status: 'active', phase_filter: ['lead'] }) }))
+      expect.objectContaining({ params: expect.objectContaining({ segment_status: 'active', phase_filter: ['lead'] }) }))
+  })
+
+  // ACTIVE-KPI-CARD-1 under the segment_ prefix: the Prospects axis card whose segment drill is
+  // open reads prospectOpen.segment_<axis>, so a later prefix change can never drop the active
+  // border silently. jsdom cannot resolve CSS vars via toHaveStyle: the raw style string is asserted.
+  it('marks the Prospects axis card active while its segment drill is open, and clears it when another segment opens', async () => {
+    const user = userEvent.setup()
+    mockUseCustomersReport.mockReturnValue({ data, loading: false, error: false })
+    render(
+      <QueryClientProvider client={new QueryClient()}>
+        <CustomersReport period="month" initialView="prospects" />
+      </QueryClientProvider>,
+    )
+    const label = screen.getByText(`${i18n.t('analytics:customers.axes.status')}: Actief`)
+    const card = label.closest('[role="button"]')
+    expect(card?.getAttribute('style')).toContain('border-color: var(--border)')
+    await user.click(label)
+    expect(card?.getAttribute('style')).toContain('border-color: var(--color-primary)')
+    // Another segment of the same axis takes the drill over: the Actief card drops its border.
+    await user.click(screen.getByText('Inactief'))
+    expect(card?.getAttribute('style')).toContain('border-color: var(--border)')
   })
 
   it('a drill list opened on the Prospects position carries the `phase` filter — bar, list and switch position never disagree', async () => {
@@ -140,7 +161,7 @@ describe('CustomersReport — Klanten/Prospects switch (RAPPORTEN-CONSOLIDATIE-1
     // on mount) — clicking it guarantees a genuinely fresh request.
     await user.click(screen.getByText('Inactief'))
     expect(getSpy).toHaveBeenCalledWith('/reports/customers/drill',
-      expect.objectContaining({ params: { status: 'inactive', period: 'month', phase_filter: ['lead'] } }))
+      expect.objectContaining({ params: { segment_status: 'inactive', period: 'month', phase_filter: ['lead'] } }))
   })
 
   it('the active position lives in the URL — a link to Prospects opens on Prospects and survives a switch flip', async () => {
@@ -225,6 +246,7 @@ describe('CustomersReport · tenant custom KPI cards (KPI-BUILDER-FE-1)', () => 
     const call = getSpy.mock.calls.find(c => c[0] === '/reports/kpi-definitions/kd-3/drill')
     expect(call?.[1].params).not.toHaveProperty('phase_filter')
     expect(call?.[1].params).not.toHaveProperty('kpi')
+    expect(call?.[1].params).not.toHaveProperty('segment_date')
     expect(call?.[1].params).not.toHaveProperty('date')
   })
 

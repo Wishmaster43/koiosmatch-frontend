@@ -123,7 +123,7 @@ describe('CustomersReport · server prospect_kpis strip (SERVER-KPIS-1)', () => 
     getSpy.mockClear()
     await user.click(screen.getByText('Amersfoort'))
     expect(getSpy).toHaveBeenCalledWith('/reports/customers/drill',
-      expect.objectContaining({ params: expect.objectContaining({ branch: 'amersfoort', phase_filter: expect.any(Array) }) }))
+      expect.objectContaining({ params: expect.objectContaining({ segment_branch: 'amersfoort', phase_filter: expect.any(Array) }) }))
   })
 
   it('shows the strip for a standing signal even when the windowed prospect total is 0', () => {

@@ -48,6 +48,7 @@ import { ReportStateFlow } from './components/ReportStateFlow'
 import { ReportDataWindow } from './components/ReportDataWindow'
 import { donutData, barData, ownerBarData } from './lib/chartData'
 import { segmentClick, ownerClick } from './lib/drillClick'
+import { segmentParams, SEGMENT_PREFIX } from './lib/drillFactories'
 import { reportWindowLabel } from './lib/reportWindowLabel'
 import ErrorBanner from '@/components/ui/ErrorBanner'
 import { useReportCustomKpis } from './hooks/useReportCustomKpis'
@@ -121,8 +122,8 @@ export default function CandidatesReport({ period, filters = EMPTY_REPORT_FILTER
     setDrill({
       title: seg.label, value: seg.count, subtitle: reportWindowLabel(formatDate, data?.from, data?.to),
       entityPage: 'candidates',
-      rowsEndpoint: '/reports/candidates/drill', rowsParams: { ...baseParams, ...xorParam },
-      adviceEndpoint: '/reports/candidates/advice', adviceParams: { ...baseParams, ...xorParam },
+      rowsEndpoint: '/reports/candidates/drill', rowsParams: { ...baseParams, ...segmentParams(xorParam) },
+      adviceEndpoint: '/reports/candidates/advice', adviceParams: { ...baseParams, ...segmentParams(xorParam) },
     })
   const openBucket = (pt: CandidateTimeseriesPoint) => setDrill({
     title: pt.label, value: pt.value, subtitle: reportWindowLabel(formatDate, data?.from, data?.to),
@@ -130,9 +131,9 @@ export default function CandidatesReport({ period, filters = EMPTY_REPORT_FILTER
     // A week bar's `date` is the point's own key; the drawer then counts the
     // WHOLE week (bucket=week) so bar and drawer total always agree.
     rowsEndpoint: '/reports/candidates/drill',
-    rowsParams: { ...baseParams, date: pt.date, ...(data?.timeseries.bucket === 'week' ? { bucket: 'week' } : {}) },
+    rowsParams: { ...baseParams, ...segmentParams({ date: pt.date }), ...(data?.timeseries.bucket === 'week' ? { bucket: 'week' } : {}) },
     adviceEndpoint: '/reports/candidates/advice',
-    adviceParams: { ...baseParams, date: pt.date, ...(data?.timeseries.bucket === 'week' ? { bucket: 'week' } : {}) },
+    adviceParams: { ...baseParams, ...segmentParams({ date: pt.date }), ...(data?.timeseries.bucket === 'week' ? { bucket: 'week' } : {}) },
   })
   // A suite card drills its OWN key — the drill shares the card's predicate
   // (CandidatesReport::kpiSegmentQuery), so number and drawer always agree.
@@ -196,7 +197,7 @@ export default function CandidatesReport({ period, filters = EMPTY_REPORT_FILTER
     })
     const axisKpis = buildAxisKpis(axisConfigs, 8,
       (axis, key) => onAxisKpiPick?.(axis, key),
-      (axis, key) => openKpiParams?.[axis] === key)
+      (axis, key) => openKpiParams?.[`${SEGMENT_PREFIX}${axis}`] === key)
     const lk = data?.lead_kpis
     const totalSub = totalCompare ? <ReportCompareMetric metric={totalCompare} polarity="up-good" /> : undefined
     if (lk) {
@@ -205,12 +206,12 @@ export default function CandidatesReport({ period, filters = EMPTY_REPORT_FILTER
       // lines in the nine-card strip and lost the threshold (screen check 12-11).
       const branchCards: KpiSpec[] = lk.by_branch.slice(0, 7).map(b => ({
         key: `branch:${b.value}`, label: b.label, value: b.count,
-        active: openKpiParams?.branch === b.value,
+        active: openKpiParams?.segment_branch === b.value,
         onClick: gateDrillClick('candidates', () => openSegment('branch', { label: b.label, count: b.count }, { branch: b.value })),
       }))
       const head: KpiSpec[] = [
         { key: 'total', label: t('leads.total'), value: lk.total, sub: totalSub,
-          active: openKpiParams?.phase === leadPhaseValue,
+          active: openKpiParams?.segment_phase === leadPhaseValue,
           onClick: leadPhaseValue
             ? gateDrillClick('candidates', () => openSegment('phase', { label: t('leads.total'), count: lk.total }, { phase: leadPhaseValue }))
             : undefined },
@@ -218,7 +219,7 @@ export default function CandidatesReport({ period, filters = EMPTY_REPORT_FILTER
           sub: Number.isFinite(lk.stale_days_threshold) ? t('leads.kpis.staleThreshold', { days: lk.stale_days_threshold }) : undefined },
       ]
       const fill = buildAxisKpis(axisConfigs.filter(c => c.axis !== 'branch'), Math.max(0, 9 - head.length - branchCards.length),
-        (axis, key) => onAxisKpiPick?.(axis, key), (axis, key) => openKpiParams?.[axis] === key)
+        (axis, key) => onAxisKpiPick?.(axis, key), (axis, key) => openKpiParams?.[`${SEGMENT_PREFIX}${axis}`] === key)
       kpis = [...head, ...branchCards, ...fill]
     } else {
       kpis = [{ key: 'total', label: t('leads.total'), value: total, sub: totalSub }, ...axisKpis]

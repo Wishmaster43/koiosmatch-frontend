@@ -7,6 +7,7 @@
 import type { CandidateTimeseriesPoint } from '@/types/analytics'
 import { gateDrillClick, type DrillableReport } from '../reportDrillGate'
 import type { DrillSpec } from '../ReportDrillDrawer'
+import { segmentParams } from '../lib/drillFactories'
 
 export function useSeriesDrill(
   reportKey: string,
@@ -24,9 +25,9 @@ export function useSeriesDrill(
       value: pt.value,
       subtitle: windowSub(),
       rowsEndpoint: `/reports/${reportKey}/drill`,
-      rowsParams: { ...params, date: pt.date, ...(data?.timeseries?.bucket === 'week' ? { bucket: 'week' } : {}) },
+      rowsParams: { ...params, ...segmentParams({ date: pt.date }), ...(data?.timeseries?.bucket === 'week' ? { bucket: 'week' } : {}) },
       adviceEndpoint: `/reports/${reportKey}/advice`,
-      adviceParams: { ...params, date: pt.date, ...(data?.timeseries?.bucket === 'week' ? { bucket: 'week' } : {}) },
+      adviceParams: { ...params, ...segmentParams({ date: pt.date }), ...(data?.timeseries?.bucket === 'week' ? { bucket: 'week' } : {}) },
     }
     if (entityPage) {
       drill.entityPage = entityPage as DrillableReport

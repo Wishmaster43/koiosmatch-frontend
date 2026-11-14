@@ -16,7 +16,7 @@
  * status|type|priority|assignee|team|branch|date — status/type/priority key on
  * the lookup ID, never the slug).
  * REPORTS-DRILL-2 (2026-08-15): **intakes** verified live against the real
- * controller (`GET /reports/intakes/drill`, ReportDrillController::intakes —
+ * controller (`GET /reports/applications/intakes/drill`, ReportDrillController::intakes —
  * candidates.view gate, at most one of recruiter|location|source|function|region)
  * — flipped from false to true now the route genuinely accepts and answers it
  * (was previously reported landed while the route 422'd; re-verified this time

@@ -55,7 +55,7 @@ import { ReportCompareStatus } from './components/ReportCompareStatus'
 import { useNavigation } from '@/context/NavigationContext'
 import CustomerDepthSections from './depth/CustomerDepthSections'
 import { barData, ownerBarData } from './lib/chartData'
-import { makeOpenSegment } from './lib/drillFactories'
+import { makeOpenSegment, segmentParams, SEGMENT_PREFIX } from './lib/drillFactories'
 import { segmentClick, ownerClick } from './lib/drillClick'
 import { useReportCustomKpis } from './hooks/useReportCustomKpis'
 
@@ -67,7 +67,7 @@ type Axis = 'status' | 'phase' | 'industry' | 'branch'
 // fixed strip and drill via GET /reports/customers/kpis/drill (nine KD10 keys only). The three
 // Prospects server cards drill via GET /reports/customers/signals/drill, which takes the window
 // params but no phase_filter. REPORT-INTAKES-FILTERS-1 (BE 6fdf12208) named these two canonical
-// paths; the old kpi-drill / kpi-signal-drill aliases stay until the BE retire row that follows this landing.
+// paths (FE since bffc43db3); the kpi-drill / kpi-signal-drill aliases retire in MINI-BUNDLE-2.
 // Server prospect card key -> its label key; an unknown server key is skipped, never shown in server English.
 const PROSPECT_KPI_LABEL_KEYS: Record<string, string> = {
   customers_prospect: 'prospects.total',
@@ -147,9 +147,9 @@ export default function CustomersReport({ period, filters = EMPTY_REPORT_FILTERS
     // A week bar's `date` is the point's own key; the drawer then counts the WHOLE
     // week (bucket=week) so bar and drawer total always agree.
     rowsEndpoint: '/reports/customers/drill',
-    rowsParams: { ...baseParams, date: pt.date, ...(data?.timeseries.bucket === 'week' ? { bucket: 'week' } : {}) },
+    rowsParams: { ...baseParams, ...segmentParams({ date: pt.date }), ...(data?.timeseries.bucket === 'week' ? { bucket: 'week' } : {}) },
     adviceEndpoint: '/reports/customers/advice',
-    adviceParams: { ...baseParams, date: pt.date, ...(data?.timeseries.bucket === 'week' ? { bucket: 'week' } : {}) },
+    adviceParams: { ...baseParams, ...segmentParams({ date: pt.date }), ...(data?.timeseries.bucket === 'week' ? { bucket: 'week' } : {}) },
   })
 
   // Chart datum builders — the donut wears each lookup value's OWN colour with
@@ -242,7 +242,7 @@ export default function CustomersReport({ period, filters = EMPTY_REPORT_FILTERS
   })
   const axisKpis: KpiSpec[] = buildAxisKpis(axisConfigs, 8,
     (axis, key) => onAxisKpiPick?.(axis, key),
-    (axis, key) => (drill?.rowsParams as Record<string, unknown> | undefined)?.[axis] === key)
+    (axis, key) => (drill?.rowsParams as Record<string, unknown> | undefined)?.[`${SEGMENT_PREFIX}${axis}`] === key)
 
   // ReportKpiBand renders EXACTLY nine cards, never ten (house invariant). Klanten's
   // nine ARE the fixed signal suite (KPI-CUSTOMERS-SIGNALS-1) — no separate pinned
@@ -274,12 +274,12 @@ export default function CustomersReport({ period, filters = EMPTY_REPORT_FILTERS
     // real branch off the nine-card strip (screen probe 13-11: 'Geen vestiging 0' as the ninth card).
     const branches = pk.by_branch.filter(b => b.count > 0).slice(0, Math.max(0, 9 - cards.length)).map((b): KpiSpec => ({
       key: `branch:${b.value}`, label: b.label, value: b.count,
-      active: prospectOpen?.branch === b.value,
+      active: prospectOpen?.segment_branch === b.value,
       onClick: gateDrillClick('customers', () => openSegment({ label: b.label, count: b.count }, { branch: b.value })),
     }))
     const fill = buildAxisKpis(axisConfigs.filter(c => c.axis !== 'branch'), Math.max(0, 9 - cards.length - branches.length),
       (axis, key) => onAxisKpiPick?.(axis, key),
-      (axis, key) => prospectOpen?.[axis] === key)
+      (axis, key) => prospectOpen?.[`${SEGMENT_PREFIX}${axis}`] === key)
     serverProspectKpis = [...cards, ...branches, ...fill]
   }
   const kpis: KpiSpec[] = isProspects && pk

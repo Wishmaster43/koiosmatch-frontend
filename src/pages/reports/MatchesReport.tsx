@@ -25,6 +25,7 @@ import { EMPTY_REPORT_FILTERS, buildReportQueryParams } from './reportFilterPara
 import type { ReportFilterState } from './reportFilterParams'
 import PieChartCard from '@/components/charts/PieChartCard'
 import { donutData } from './lib/chartData'
+import { segmentParams } from './lib/drillFactories'
 import { unitAwareServerKpiSpecs } from './lib/kpiSpecs'
 import { useReportCustomKpis } from './hooks/useReportCustomKpis'
 import ReportTimeseriesChart from './ReportTimeseriesChart'
@@ -76,8 +77,8 @@ export default function MatchesReport({ period, filters = EMPTY_REPORT_FILTERS, 
   const openContractForm = (label: string, value: number, slug: string) => setDrill({
     title: label, value, subtitle: windowSub(),
     entityPage: 'matches',
-    rowsEndpoint: '/reports/matches/drill', rowsParams: { ...baseParams, contract_form: slug },
-    adviceEndpoint: '/reports/matches/advice', adviceParams: { ...baseParams, contract_form: slug },
+    rowsEndpoint: '/reports/matches/drill', rowsParams: { ...baseParams, ...segmentParams({ contract_form: slug }) },
+    adviceEndpoint: '/reports/matches/advice', adviceParams: { ...baseParams, ...segmentParams({ contract_form: slug }) },
   })
   const contractFormSegs = data?.by_contract_form ?? []
   // Donut data builder — each lookup value wears its OWN colour, house series as fallback.
@@ -95,8 +96,8 @@ export default function MatchesReport({ period, filters = EMPTY_REPORT_FILTERS, 
     if (!seg) return
     setDrill({
       title: seg.label, value: seg.count, subtitle: windowSub(), entityPage: 'matches',
-      rowsEndpoint: '/reports/matches/drill', rowsParams: { ...baseParams, origin: seg.value },
-      adviceEndpoint: '/reports/matches/advice', adviceParams: { ...baseParams, origin: seg.value },
+      rowsEndpoint: '/reports/matches/drill', rowsParams: { ...baseParams, ...segmentParams({ origin: seg.value }) },
+      adviceEndpoint: '/reports/matches/advice', adviceParams: { ...baseParams, ...segmentParams({ origin: seg.value }) },
     })
   })
   const onContractFormPick = gateDrillClick('matches', (d: unknown) => {
@@ -109,8 +110,8 @@ export default function MatchesReport({ period, filters = EMPTY_REPORT_FILTERS, 
   const openContractStatus = (label: string, value: number, key: (typeof CONTRACT_STATUS_TILES)[number]) => setDrill({
     title: label, value, subtitle: windowSub(),
     entityPage: 'matches',
-    rowsEndpoint: '/reports/matches/drill', rowsParams: { ...baseParams, contract_status: key },
-    adviceEndpoint: '/reports/matches/advice', adviceParams: { ...baseParams, contract_status: key },
+    rowsEndpoint: '/reports/matches/drill', rowsParams: { ...baseParams, ...segmentParams({ contract_status: key }) },
+    adviceEndpoint: '/reports/matches/advice', adviceParams: { ...baseParams, ...segmentParams({ contract_status: key }) },
   })
   // 'none' now arrives explicitly in the envelope (7925ce15); the old derivation
   // stays as fallback for a cached pre-update response, never fabricated.
@@ -123,9 +124,9 @@ export default function MatchesReport({ period, filters = EMPTY_REPORT_FILTERS, 
   const openBucket = (pt: CandidateTimeseriesPoint) => setDrill({
     title: pt.label, value: pt.value, subtitle: windowSub(),
     rowsEndpoint: '/reports/matches/drill',
-    rowsParams: { ...baseParams, date: pt.date, ...(data?.timeseries.bucket === 'week' ? { bucket: 'week' } : {}) },
+    rowsParams: { ...baseParams, ...segmentParams({ date: pt.date }), ...(data?.timeseries.bucket === 'week' ? { bucket: 'week' } : {}) },
     adviceEndpoint: '/reports/matches/advice',
-    adviceParams: { ...baseParams, date: pt.date, ...(data?.timeseries.bucket === 'week' ? { bucket: 'week' } : {}) },
+    adviceParams: { ...baseParams, ...segmentParams({ date: pt.date }), ...(data?.timeseries.bucket === 'week' ? { bucket: 'week' } : {}) },
   })
   const onSeriesPick = gateDrillClick('matches', (dateKey: string) => {
     const pt = data?.timeseries.series.find(p => p.date === dateKey)
@@ -144,8 +145,8 @@ export default function MatchesReport({ period, filters = EMPTY_REPORT_FILTERS, 
     setDrill({
       title: seg.label, value: seg.count, subtitle: windowSub(),
       entityPage: 'matches',
-      rowsEndpoint: '/reports/matches/drill', rowsParams: { ...baseParams, stop_reason: seg.value },
-      adviceEndpoint: '/reports/matches/advice', adviceParams: { ...baseParams, stop_reason: seg.value },
+      rowsEndpoint: '/reports/matches/drill', rowsParams: { ...baseParams, ...segmentParams({ stop_reason: seg.value }) },
+      adviceEndpoint: '/reports/matches/advice', adviceParams: { ...baseParams, ...segmentParams({ stop_reason: seg.value }) },
     })
   })
 

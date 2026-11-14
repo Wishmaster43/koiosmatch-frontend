@@ -4,7 +4,7 @@
  * (§13: a test that does not touch the seam proves nothing about the seam).
  */
 import { describe, it, expect, vi } from 'vitest'
-import { makeOpenKpiDrill, makeOpenSegment, makeOpenCustomKpiDrill } from './drillFactories'
+import { makeOpenKpiDrill, makeOpenSegment, makeOpenCustomKpiDrill, segmentParams } from './drillFactories'
 import type { CustomKpiCard } from '@/types/analytics'
 
 describe('makeOpenKpiDrill', () => {
@@ -43,6 +43,15 @@ describe('makeOpenKpiDrill', () => {
   })
 })
 
+describe('segmentParams', () => {
+  it('prefixes every XOR key with segment_ and keeps the values untouched', () => {
+    expect(segmentParams({ date: '2026-08-03', stage: 'applied' })).toEqual({ segment_date: '2026-08-03', segment_stage: 'applied' })
+  })
+  it('returns an empty object for no segment', () => {
+    expect(segmentParams({})).toEqual({})
+  })
+})
+
 describe('makeOpenSegment', () => {
   it('keeps rowsEndpoint and adviceEndpoint distinct — a swap at the call site would now be a compile error, not a silent mixup', () => {
     const setDrill = vi.fn()
@@ -53,8 +62,8 @@ describe('makeOpenSegment', () => {
     open({ label: 'Stale', count: 4 }, { stale: 1 })
     expect(setDrill).toHaveBeenCalledWith({
       title: 'Stale', value: 4, subtitle: 'Sep 2026', entityPage: 'vacancies',
-      rowsEndpoint: '/reports/vacancies/drill', rowsParams: { period: 'month', stale: 1 },
-      adviceEndpoint: '/reports/vacancies/advice', adviceParams: { period: 'month', stale: 1 },
+      rowsEndpoint: '/reports/vacancies/drill', rowsParams: { period: 'month', segment_stale: 1 },
+      adviceEndpoint: '/reports/vacancies/advice', adviceParams: { period: 'month', segment_stale: 1 },
     })
   })
 
@@ -89,6 +98,7 @@ describe('makeOpenCustomKpiDrill', () => {
     })
     const params = setDrill.mock.calls[0][0].rowsParams
     expect(params).not.toHaveProperty('kpi')
+    expect(params).not.toHaveProperty('segment_date')
     expect(params).not.toHaveProperty('date')
     expect(params).not.toHaveProperty('phase_filter')
   })

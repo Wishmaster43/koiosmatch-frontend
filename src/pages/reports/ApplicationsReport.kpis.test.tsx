@@ -219,7 +219,7 @@ describe('ApplicationsReport (RAPPORTEN-SUITE-1 portie 2)', () => {
     renderReport()
     await user.click(screen.getByText('03-08'))
     expect(getSpy).toHaveBeenCalledWith('/reports/applications/drill',
-      expect.objectContaining({ params: { date: '2026-08-03', period: 'month' } }))
+      expect.objectContaining({ params: { segment_date: '2026-08-03', period: 'month' } }))
     const call = getSpy.mock.calls.find(c => c[0] === '/reports/applications/drill')
     expect(call?.[1].params).not.toHaveProperty('bucket')
   })
@@ -242,7 +242,7 @@ describe('ApplicationsReport (RAPPORTEN-SUITE-1 portie 2)', () => {
     getSpy.mockClear()
     await user.click(screen.getByText('Applied'))
     expect(getSpy).toHaveBeenCalledWith('/reports/applications/drill',
-      expect.objectContaining({ params: { stage: 'applied', period: 'month' } }))
+      expect.objectContaining({ params: { segment_stage: 'applied', period: 'month' } }))
   })
 
   // RAPPORT-APPS-VERDIEPING-1 + REPORT-KPI-CARDS-MISSING-1: the catalogue is the nine fixed

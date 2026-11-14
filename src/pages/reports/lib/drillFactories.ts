@@ -53,6 +53,17 @@ export interface OpenSegmentOpts {
   entityPage?: string
 }
 
+// Wire prefix of every XOR segment key a report drill sends (BE rule: `segment_k` wins;
+// a bare scalar `k` is the release-A alias; a bare array `k` is always a panel filter).
+// The alias is removed by REPORT-DRILL-SEGMENT-KEYS-2 on the BE. KPI, axis/value,
+// dimension_value, period and the `bucket=week` series modifier stay bare.
+export const SEGMENT_PREFIX = 'segment_'
+
+// Prefixes every entry of an XOR segment param so the BE can tell it from a panel filter.
+export function segmentParams(xor: Record<string, unknown>): Record<string, unknown> {
+  return Object.fromEntries(Object.entries(xor).map(([k, v]) => [`${SEGMENT_PREFIX}${k}`, v]))
+}
+
 // Builds the "open this axis segment's drill" handler: an arbitrary XOR param
 // (e.g. `{ stage: value }`) layered on baseParams, plus the matching advice
 // endpoint — the shape every axis/bucket click shares across the report pages.
@@ -61,8 +72,8 @@ export function makeOpenSegment(o: OpenSegmentOpts) {
     o.setDrill({
       title: seg.label, value: seg.count, subtitle: o.windowSub(),
       ...(o.entityPage ? { entityPage: o.entityPage } : {}),
-      rowsEndpoint: o.rowsEndpoint, rowsParams: { ...o.baseParams, ...xorParam },
-      adviceEndpoint: o.adviceEndpoint, adviceParams: { ...o.baseParams, ...xorParam },
+      rowsEndpoint: o.rowsEndpoint, rowsParams: { ...o.baseParams, ...segmentParams(xorParam) },
+      adviceEndpoint: o.adviceEndpoint, adviceParams: { ...o.baseParams, ...segmentParams(xorParam) },
     })
 }
 

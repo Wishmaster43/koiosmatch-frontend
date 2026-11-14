@@ -92,11 +92,11 @@ describe('CandidatesReport · server lead_kpis strip (SERVER-KPIS-1)', () => {
     getSpy.mockClear()
     await user.click(screen.getByText(i18n.t('analytics:leads.total')))
     expect(getSpy).toHaveBeenCalledWith('/reports/candidates/drill',
-      expect.objectContaining({ params: expect.objectContaining({ phase: 'lead', phase_filter: ['lead'] }) }))
+      expect.objectContaining({ params: expect.objectContaining({ segment_phase: 'lead', phase_filter: ['lead'] }) }))
     getSpy.mockClear()
     await user.click(screen.getByText('Amersfoort'))
     expect(getSpy).toHaveBeenCalledWith('/reports/candidates/drill',
-      expect.objectContaining({ params: expect.objectContaining({ branch: 'amersfoort' }) }))
+      expect.objectContaining({ params: expect.objectContaining({ segment_branch: 'amersfoort' }) }))
   })
 
   it('without lead_kpis the old axis cards render', () => {

@@ -199,7 +199,7 @@ describe('TasksReport (RAPPORTEN-SUITE-1 portie 6, tasks report)', () => {
     // request path a bar click uses.
     await user.click(screen.getByText('Recruitment'))
     expect(getSpy).toHaveBeenCalledWith('/reports/tasks/drill', expect.objectContaining({
-      params: { period: 'month', status: ['status-uuid-1'], owner_id: ['u1'], location_id: [7], team: 'team-1' },
+      params: { period: 'month', status: ['status-uuid-1'], owner_id: ['u1'], location_id: [7], segment_team: 'team-1' },
     }))
   })
 
@@ -214,9 +214,9 @@ describe('TasksReport (RAPPORTEN-SUITE-1 portie 6, tasks report)', () => {
     renderReport()
     await user.click(screen.getByText('Te doen'))
     expect(getSpy).toHaveBeenCalledWith('/reports/tasks/drill',
-      expect.objectContaining({ params: { status: 'status-uuid-1', period: 'month' } }))
+      expect.objectContaining({ params: { segment_status: 'status-uuid-1', period: 'month' } }))
     expect(getSpy).toHaveBeenCalledWith('/reports/tasks/advice',
-      expect.objectContaining({ params: { status: 'status-uuid-1', period: 'month' } }))
+      expect.objectContaining({ params: { segment_status: 'status-uuid-1', period: 'month' } }))
   })
 
   // 'none' folding (NULL/'' statuses): drills with status=none and nothing else.
@@ -226,7 +226,7 @@ describe('TasksReport (RAPPORTEN-SUITE-1 portie 6, tasks report)', () => {
     renderReport()
     await user.click(screen.getByText('Onbekend (geen status)'))
     expect(getSpy).toHaveBeenCalledWith('/reports/tasks/drill',
-      expect.objectContaining({ params: { status: 'none', period: 'month' } }))
+      expect.objectContaining({ params: { segment_status: 'none', period: 'month' } }))
   })
 
   // Orphan-value drill: a deleted status still renders its own bar with the
@@ -237,7 +237,7 @@ describe('TasksReport (RAPPORTEN-SUITE-1 portie 6, tasks report)', () => {
     renderReport()
     await user.click(screen.getByText('Onbekend (verwijderde status)'))
     expect(getSpy).toHaveBeenCalledWith('/reports/tasks/drill',
-      expect.objectContaining({ params: { status: '9c1d-deleted-status-uuid', period: 'month' } }))
+      expect.objectContaining({ params: { segment_status: '9c1d-deleted-status-uuid', period: 'month' } }))
   })
 
   it('clicking a priority bar drills with priority=<lookup id> and the none sentinel with priority=none', async () => {
@@ -246,10 +246,10 @@ describe('TasksReport (RAPPORTEN-SUITE-1 portie 6, tasks report)', () => {
     renderReport()
     await user.click(screen.getByText('Hoog'))
     expect(getSpy).toHaveBeenCalledWith('/reports/tasks/drill',
-      expect.objectContaining({ params: { priority: 'prio-uuid-1', period: 'month' } }))
+      expect.objectContaining({ params: { segment_priority: 'prio-uuid-1', period: 'month' } }))
     await user.click(screen.getByText('Geen prioriteit'))
     expect(getSpy).toHaveBeenCalledWith('/reports/tasks/drill',
-      expect.objectContaining({ params: { priority: 'none', period: 'month' } }))
+      expect.objectContaining({ params: { segment_priority: 'none', period: 'month' } }))
   })
 
   it('clicking an assignee bar drills with the assignee XOR param (D2 shape: owner_id → assignee)', async () => {
@@ -258,12 +258,12 @@ describe('TasksReport (RAPPORTEN-SUITE-1 portie 6, tasks report)', () => {
     renderReport()
     await user.click(screen.getByText('Anna de Vries'))
     expect(getSpy).toHaveBeenCalledWith('/reports/tasks/drill',
-      expect.objectContaining({ params: { assignee: 'u1', period: 'month' } }))
+      expect.objectContaining({ params: { segment_assignee: 'u1', period: 'month' } }))
     // A NULL assignee arrives as the 'none' row ("Niet toegewezen") and drills
     // assignee=none — the label now renders twice (bar + the unassigned KPI card).
     await user.click(screen.getAllByText('Niet toegewezen')[0])
     expect(getSpy).toHaveBeenCalledWith('/reports/tasks/drill',
-      expect.objectContaining({ params: { assignee: 'none', period: 'month' } }))
+      expect.objectContaining({ params: { segment_assignee: 'none', period: 'month' } }))
   })
 
   it('clicking a team bar and a branch bar drill with their own XOR params', async () => {
@@ -272,10 +272,10 @@ describe('TasksReport (RAPPORTEN-SUITE-1 portie 6, tasks report)', () => {
     renderReport()
     await user.click(screen.getByText('Recruitment'))
     expect(getSpy).toHaveBeenCalledWith('/reports/tasks/drill',
-      expect.objectContaining({ params: { team: 'team-1', period: 'month' } }))
+      expect.objectContaining({ params: { segment_team: 'team-1', period: 'month' } }))
     await user.click(screen.getByText('Utrecht'))
     expect(getSpy).toHaveBeenCalledWith('/reports/tasks/drill',
-      expect.objectContaining({ params: { branch: 'loc-1', period: 'month' } }))
+      expect.objectContaining({ params: { segment_branch: 'loc-1', period: 'month' } }))
     // Report drill endpoints only — never the /tasks list route.
     expect(getSpy.mock.calls.some(c => String(c[0]).startsWith('/tasks'))).toBe(false)
   })
@@ -289,10 +289,10 @@ describe('TasksReport (RAPPORTEN-SUITE-1 portie 6, tasks report)', () => {
     renderReport()
     await user.click(screen.getByText('Onbekend (geen status)'))
     expect(getSpy).toHaveBeenCalledWith('/reports/tasks/drill',
-      expect.objectContaining({ params: { status: 'none', period: 'month' } }))
+      expect.objectContaining({ params: { segment_status: 'none', period: 'month' } }))
     await user.click(screen.getByText('Geen type'))
     expect(getSpy).toHaveBeenCalledWith('/reports/tasks/drill',
-      expect.objectContaining({ params: { type: 'none', period: 'month' } }))
+      expect.objectContaining({ params: { segment_type: 'none', period: 'month' } }))
   })
 
   // GRANULARITY role of `bucket` (dual-role contract): a week timeseries bar drills
@@ -303,7 +303,7 @@ describe('TasksReport (RAPPORTEN-SUITE-1 portie 6, tasks report)', () => {
     renderReport()
     await user.click(screen.getByText('Wk 31'))
     expect(getSpy).toHaveBeenCalledWith('/reports/tasks/drill',
-      expect.objectContaining({ params: { date: '2026-08-01', bucket: 'week', period: 'month' } }))
+      expect.objectContaining({ params: { segment_date: '2026-08-01', bucket: 'week', period: 'month' } }))
   })
 
   it('omits bucket when the timeseries is day-granular', async () => {
@@ -314,7 +314,7 @@ describe('TasksReport (RAPPORTEN-SUITE-1 portie 6, tasks report)', () => {
     })
     renderReport()
     await user.click(screen.getByText('01-08'))
-    const call = getSpy.mock.calls.find(c => c[0] === '/reports/tasks/drill' && (c[1] as { params: Record<string, unknown> }).params.date === '2026-08-01')
+    const call = getSpy.mock.calls.find(c => c[0] === '/reports/tasks/drill' && (c[1] as { params: Record<string, unknown> }).params.segment_date === '2026-08-01')
     expect(call?.[1].params).not.toHaveProperty('bucket')
   })
 
@@ -353,10 +353,10 @@ describe('TasksReport (RAPPORTEN-SUITE-1 portie 6, tasks report)', () => {
     await user.click(screen.getByText('Onbekend (geen status)')) // the status axis, non-default segment
     // The status axis's own list updated…
     expect(getSpy).toHaveBeenCalledWith('/reports/tasks/drill',
-      expect.objectContaining({ params: { status: 'none', period: 'month' } }))
+      expect.objectContaining({ params: { segment_status: 'none', period: 'month' } }))
     // …but no request was fired for the team axis's ALREADY-seeded default (Recruitment) —
     // it stayed exactly as mount left it.
     expect(getSpy.mock.calls.some(c => c[0] === '/reports/tasks/drill'
-      && (c[1] as { params: Record<string, unknown> }).params.team === 'team-1')).toBe(false)
+      && (c[1] as { params: Record<string, unknown> }).params.segment_team === 'team-1')).toBe(false)
   })
 })

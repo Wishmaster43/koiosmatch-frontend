@@ -173,9 +173,9 @@ describe('VacanciesReport (RAPPORTEN-SUITE-1 portie 4, additive on C-34)', () =>
     expect(screen.getByText(i18n.t('vacancies.depth.fillRateBranch.title', { ns: 'analytics' }))).toBeInTheDocument()
     expect(screen.getByText(i18n.t('vacancies.depth.aging.title', { ns: 'analytics' }))).toBeInTheDocument()
     await user.click(screen.getByText('Aging vacature'))
-    expect(lastDrillParams()).toEqual({ vacancy: 'v9', period: 'month' })
+    expect(lastDrillParams()).toEqual({ segment_vacancy: 'v9', period: 'month' })
     expect(getSpy).toHaveBeenCalledWith('/reports/vacancies/advice',
-      expect.objectContaining({ params: { vacancy: 'v9', period: 'month' } }))
+      expect.objectContaining({ params: { segment_vacancy: 'v9', period: 'month' } }))
     // CMBE 0ecd0bf5: the drawer headline is row.applications (5), the full
     // drilled population — candidates_in_process (2) moves to the breakdown.
     // Scoped to the drill drawer's own dialog to avoid colliding with the
@@ -215,9 +215,9 @@ describe('VacanciesReport (RAPPORTEN-SUITE-1 portie 4, additive on C-34)', () =>
     renderReport()
     await user.click(screen.getByText(i18n.t('analytics:vacancies.noApplicants.title', { count: 1 })))
     expect(getSpy).toHaveBeenCalledWith('/reports/vacancies/drill',
-      expect.objectContaining({ params: expect.objectContaining({ zero_applications: 1 }) }))
+      expect.objectContaining({ params: expect.objectContaining({ segment_zero_applications: 1 }) }))
     expect(getSpy.mock.calls.some(c => c[0] === '/reports/vacancies/drill' &&
-      (c[1] as { params: Record<string, unknown> }).params.zero_applications === 1 &&
+      (c[1] as { params: Record<string, unknown> }).params.segment_zero_applications === 1 &&
       'stale_online' in (c[1] as { params: Record<string, unknown> }).params)).toBe(false)
 
     getSpy.mockClear()
@@ -240,7 +240,7 @@ describe('VacanciesReport (RAPPORTEN-SUITE-1 portie 4, additive on C-34)', () =>
     header.focus()
     expect(header).toHaveFocus()
     await user.keyboard('{Enter}')
-    expect(lastDrillParams()).toEqual({ zero_applications: 1, period: 'month' })
+    expect(lastDrillParams()).toEqual({ segment_zero_applications: 1, period: 'month' })
   })
 
   // Integration proof (WCAG 2.2 AA audit, §6): the "Vacature" column stays wired with

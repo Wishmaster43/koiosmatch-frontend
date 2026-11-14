@@ -145,7 +145,7 @@ describe('ApplicationsReport (RAPPORTEN-SUITE-1 portie 2)', () => {
     expect(mockUseApplicationsReport).toHaveBeenCalledWith('month', filters)
     await user.click(screen.getByText('Applied'))
     expect(getSpy).toHaveBeenCalledWith('/reports/applications/drill', expect.objectContaining({
-      params: { period: 'month', status: ['active'], owner_id: ['u1'], location_id: [7], customer_id: ['c1'], stage: 'applied' },
+      params: { period: 'month', status: ['active'], owner_id: ['u1'], location_id: [7], customer_id: ['c1'], segment_stage: 'applied' },
     }))
   })
 
@@ -155,9 +155,9 @@ describe('ApplicationsReport (RAPPORTEN-SUITE-1 portie 2)', () => {
     renderReport()
     await user.click(screen.getByText('Applied'))
     expect(getSpy).toHaveBeenCalledWith('/reports/applications/drill',
-      expect.objectContaining({ params: { stage: 'applied', period: 'month' } }))
+      expect.objectContaining({ params: { segment_stage: 'applied', period: 'month' } }))
     expect(getSpy).toHaveBeenCalledWith('/reports/applications/advice',
-      expect.objectContaining({ params: { stage: 'applied', period: 'month' } }))
+      expect.objectContaining({ params: { segment_stage: 'applied', period: 'month' } }))
   })
 
   // REPORT-FUNNEL-DIRECT-1 (BE 862508c3): the per-stage direct-entries caption —
@@ -179,7 +179,7 @@ describe('ApplicationsReport (RAPPORTEN-SUITE-1 portie 2)', () => {
     renderReport()
     await user.click(screen.getByText('Geen fase'))
     expect(getSpy).toHaveBeenCalledWith('/reports/applications/drill',
-      expect.objectContaining({ params: { stage: 'none', period: 'month' } }))
+      expect.objectContaining({ params: { segment_stage: 'none', period: 'month' } }))
   })
 
   // REPORTS-DRILL-2: stage_duration is its OWN param, never mixed with `stage`
@@ -190,9 +190,10 @@ describe('ApplicationsReport (RAPPORTEN-SUITE-1 portie 2)', () => {
     renderReport()
     await user.click(screen.getByText('Intake (duration)'))
     expect(getSpy).toHaveBeenCalledWith('/reports/applications/drill',
-      expect.objectContaining({ params: { stage_duration: 'intake', period: 'month' } }))
+      expect.objectContaining({ params: { segment_stage_duration: 'intake', period: 'month' } }))
     const call = getSpy.mock.calls.find(c => c[0] === '/reports/applications/drill'
-      && (c[1] as { params: Record<string, unknown> }).params.stage_duration === 'intake')
+      && (c[1] as { params: Record<string, unknown> }).params.segment_stage_duration === 'intake')
+    expect(call?.[1].params).not.toHaveProperty('segment_stage')
     expect(call?.[1].params).not.toHaveProperty('stage')
   })
 
@@ -202,7 +203,7 @@ describe('ApplicationsReport (RAPPORTEN-SUITE-1 portie 2)', () => {
     renderReport()
     await user.click(screen.getByText('Anna de Vries'))
     expect(getSpy).toHaveBeenCalledWith('/reports/applications/drill',
-      expect.objectContaining({ params: { owner: 'u1', period: 'month' } }))
+      expect.objectContaining({ params: { segment_owner: 'u1', period: 'month' } }))
   })
 
   // Sentinel drawer: owner='none' (unassigned) is a real, clickable row.
@@ -212,7 +213,7 @@ describe('ApplicationsReport (RAPPORTEN-SUITE-1 portie 2)', () => {
     renderReport()
     await user.click(screen.getByText('Niet toegewezen'))
     expect(getSpy).toHaveBeenCalledWith('/reports/applications/drill',
-      expect.objectContaining({ params: { owner: 'none', period: 'month' } }))
+      expect.objectContaining({ params: { segment_owner: 'none', period: 'month' } }))
   })
 
   it('clicking the customer "Overig" bar drills with customer=others', async () => {
@@ -222,7 +223,7 @@ describe('ApplicationsReport (RAPPORTEN-SUITE-1 portie 2)', () => {
     const [customerOthers] = screen.getAllByText('Overig')
     await user.click(customerOthers)
     expect(getSpy).toHaveBeenCalledWith('/reports/applications/drill',
-      expect.objectContaining({ params: { customer: 'others', period: 'month' } }))
+      expect.objectContaining({ params: { segment_customer: 'others', period: 'month' } }))
   })
 
   it('clicking the customer "Geen klant" bar drills with customer=none', async () => {
@@ -231,7 +232,7 @@ describe('ApplicationsReport (RAPPORTEN-SUITE-1 portie 2)', () => {
     renderReport()
     await user.click(screen.getByText('Geen klant'))
     expect(getSpy).toHaveBeenCalledWith('/reports/applications/drill',
-      expect.objectContaining({ params: { customer: 'none', period: 'month' } }))
+      expect.objectContaining({ params: { segment_customer: 'none', period: 'month' } }))
   })
 
   it('an archived vacancy row keeps its real title and drills with vacancy=<id>', async () => {
@@ -240,7 +241,7 @@ describe('ApplicationsReport (RAPPORTEN-SUITE-1 portie 2)', () => {
     renderReport()
     await user.click(screen.getByText('Verpleegkundige (gearchiveerd)'))
     expect(getSpy).toHaveBeenCalledWith('/reports/applications/drill',
-      expect.objectContaining({ params: { vacancy: 'v1', period: 'month' } }))
+      expect.objectContaining({ params: { segment_vacancy: 'v1', period: 'month' } }))
   })
 
   // FUNNEL role of `bucket`: a bucket bar drills with `bucket=<funnel value>`
@@ -252,9 +253,10 @@ describe('ApplicationsReport (RAPPORTEN-SUITE-1 portie 2)', () => {
     renderReport()
     await user.click(screen.getByText('Geplaatst'))
     expect(getSpy).toHaveBeenCalledWith('/reports/applications/drill',
-      expect.objectContaining({ params: { bucket: 'placed', period: 'month' } }))
+      expect.objectContaining({ params: { segment_bucket: 'placed', period: 'month' } }))
     const call = getSpy.mock.calls.find(c => c[0] === '/reports/applications/drill' &&
-      (c[1] as { params: Record<string, unknown> }).params.bucket === 'placed')
+      (c[1] as { params: Record<string, unknown> }).params.segment_bucket === 'placed')
+    expect(call?.[1].params).not.toHaveProperty('segment_date')
     expect(call?.[1].params).not.toHaveProperty('date')
   })
 
@@ -267,6 +269,6 @@ describe('ApplicationsReport (RAPPORTEN-SUITE-1 portie 2)', () => {
     renderReport()
     await user.click(screen.getByText('Wk 32'))
     expect(getSpy).toHaveBeenCalledWith('/reports/applications/drill',
-      expect.objectContaining({ params: { date: '2026-08-03', bucket: 'week', period: 'month' } }))
+      expect.objectContaining({ params: { segment_date: '2026-08-03', bucket: 'week', period: 'month' } }))
   })
 })

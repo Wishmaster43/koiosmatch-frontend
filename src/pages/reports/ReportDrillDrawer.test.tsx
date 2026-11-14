@@ -96,8 +96,8 @@ const createI18nInstance = (lng: 'en' | 'nl' = 'en') => {
 
 const baseDrill: DrillSpec = {
   title: 'Applied', value: 60, subtitle: 'This month',
-  rowsEndpoint: '/reports/flow/drill', rowsParams: { period: 'month' },
-  adviceEndpoint: '/reports/flow/advice', adviceParams: { period: 'month' },
+  rowsEndpoint: '/reports/candidates/drill', rowsParams: { period: 'month' },
+  adviceEndpoint: '/reports/candidates/advice', adviceParams: { period: 'month' },
 }
 
 describe('ReportDrillDrawer — shown-of footer (SM idiom)', () => {

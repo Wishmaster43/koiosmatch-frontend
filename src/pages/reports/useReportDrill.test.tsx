@@ -36,13 +36,13 @@ describe('useReportDrill — request shape per report', () => {
     mockedGet.mockResolvedValue({ data: { data: [], meta: { total: 0 } } })
     const drill: DrillSpec = {
       title: 'x', value: 1,
-      rowsEndpoint: '/reports/flow/drill',
-      rowsParams: { phase: 'applied', period: 'month', view: 'reached' },
+      rowsEndpoint: '/reports/candidates/drill',
+      rowsParams: { segment_phase: 'applied', period: 'month', view: 'reached' },
     }
     renderHook(() => useReportDrill(drill), { wrapper: makeWrapper() })
     await waitFor(() => expect(mockedGet).toHaveBeenCalled())
-    expect(mockedGet).toHaveBeenCalledWith('/reports/flow/drill', expect.objectContaining({
-      params: { phase: 'applied', period: 'month', view: 'reached' },
+    expect(mockedGet).toHaveBeenCalledWith('/reports/candidates/drill', expect.objectContaining({
+      params: { segment_phase: 'applied', period: 'month', view: 'reached' },
     }))
   })
 
@@ -51,12 +51,12 @@ describe('useReportDrill — request shape per report', () => {
     const drill: DrillSpec = {
       title: 'x', value: 1,
       rowsEndpoint: '/reports/matches/drill',
-      rowsParams: { origin: 'funnel', period: 'month' },
+      rowsParams: { segment_origin: 'funnel', period: 'month' },
     }
     renderHook(() => useReportDrill(drill), { wrapper: makeWrapper() })
     await waitFor(() => expect(mockedGet).toHaveBeenCalled())
     expect(mockedGet).toHaveBeenCalledWith('/reports/matches/drill', expect.objectContaining({
-      params: { origin: 'funnel', period: 'month' },
+      params: { segment_origin: 'funnel', period: 'month' },
     }))
   })
 
@@ -64,12 +64,12 @@ describe('useReportDrill — request shape per report', () => {
     mockedGet.mockResolvedValue({ data: { data: [], meta: { total: 0 } } })
     const drill: DrillSpec = {
       title: 'x', value: 1,
-      rowsEndpoint: '/reports/recruiters/drill',
+      rowsEndpoint: '/reports/tasks/drill',
       rowsParams: { recruiter: 'uuid-1', period: 'month' },
     }
     renderHook(() => useReportDrill(drill), { wrapper: makeWrapper() })
     await waitFor(() => expect(mockedGet).toHaveBeenCalled())
-    expect(mockedGet).toHaveBeenCalledWith('/reports/recruiters/drill', expect.objectContaining({
+    expect(mockedGet).toHaveBeenCalledWith('/reports/tasks/drill', expect.objectContaining({
       params: { recruiter: 'uuid-1', period: 'month' },
     }))
   })
@@ -79,12 +79,12 @@ describe('useReportDrill — request shape per report', () => {
     const drill: DrillSpec = {
       title: 'x', value: 1,
       rowsEndpoint: '/reports/vacancies/drill',
-      rowsParams: { status: 'open', period: 'month' },
+      rowsParams: { segment_status: 'open', period: 'month' },
     }
     renderHook(() => useReportDrill(drill), { wrapper: makeWrapper() })
     await waitFor(() => expect(mockedGet).toHaveBeenCalled())
     expect(mockedGet).toHaveBeenCalledWith('/reports/vacancies/drill', expect.objectContaining({
-      params: { status: 'open', period: 'month' },
+      params: { segment_status: 'open', period: 'month' },
     }))
   })
 })
@@ -92,7 +92,7 @@ describe('useReportDrill — request shape per report', () => {
 describe('useReportDrill — envelope + truncation', () => {
   it('unwraps { data, meta: { total } } into rows + rowsTotal', async () => {
     mockedGet.mockResolvedValue({ data: { data: [{ id: '1' }, { id: '2' }], meta: { total: 137 } } })
-    const drill: DrillSpec = { title: 'x', value: 1, rowsEndpoint: '/reports/flow/drill', rowsParams: { period: 'month' } }
+    const drill: DrillSpec = { title: 'x', value: 1, rowsEndpoint: '/reports/candidates/drill', rowsParams: { period: 'month' } }
     const { result } = renderHook(() => useReportDrill(drill), { wrapper: makeWrapper() })
     await waitFor(() => expect(result.current.rows).toHaveLength(2))
     expect(result.current.rowsTotal).toBe(137)
@@ -102,7 +102,7 @@ describe('useReportDrill — envelope + truncation', () => {
 describe('useReportDrill — 403 on a segment without data permission', () => {
   it('flags rowsForbidden without throwing, while advice still loads', async () => {
     mockedGet.mockImplementation(async (url: string) => {
-      if (url === '/reports/flow/drill') {
+      if (url === '/reports/candidates/drill') {
         const err = new Error('Forbidden') as Error & { response: { status: number } }
         err.response = { status: 403 }
         throw err
@@ -111,8 +111,8 @@ describe('useReportDrill — 403 on a segment without data permission', () => {
     })
     const drill: DrillSpec = {
       title: 'x', value: 1,
-      rowsEndpoint: '/reports/flow/drill', rowsParams: { period: 'month' },
-      adviceEndpoint: '/reports/flow/advice', adviceParams: { period: 'month' },
+      rowsEndpoint: '/reports/candidates/drill', rowsParams: { period: 'month' },
+      adviceEndpoint: '/reports/candidates/advice', adviceParams: { period: 'month' },
     }
     const { result } = renderHook(() => useReportDrill(drill), { wrapper: makeWrapper() })
     await waitFor(() => expect(result.current.rowsForbidden).toBe(true))
@@ -142,7 +142,7 @@ describe('useReportDrill — advice degrades to null while rows are present', ()
 describe('useReportDrill — a non-403 failure is a real error, never the calm empty state', () => {
   it('flags rowsError (not rowsForbidden) on a 500, and exposes rowsRefetch', async () => {
     mockedGet.mockImplementation(async (url: string) => {
-      if (url === '/reports/flow/drill') {
+      if (url === '/reports/candidates/drill') {
         const err = new Error('Server error') as Error & { response: { status: number } }
         err.response = { status: 500 }
         throw err
@@ -151,7 +151,7 @@ describe('useReportDrill — a non-403 failure is a real error, never the calm e
     })
     const drill: DrillSpec = {
       title: 'x', value: 1,
-      rowsEndpoint: '/reports/flow/drill', rowsParams: { period: 'month' },
+      rowsEndpoint: '/reports/candidates/drill', rowsParams: { period: 'month' },
     }
     const { result } = renderHook(() => useReportDrill(drill), { wrapper: makeWrapper() })
     await waitFor(() => expect(result.current.rowsError).toBe(true))
@@ -164,7 +164,7 @@ describe('useReportDrill — a non-403 failure is a real error, never the calm e
     mockedGet.mockRejectedValue(new Error('Network error'))
     const drill: DrillSpec = {
       title: 'x', value: 1,
-      adviceEndpoint: '/reports/flow/advice', adviceParams: { period: 'month' },
+      adviceEndpoint: '/reports/candidates/advice', adviceParams: { period: 'month' },
     }
     const { result } = renderHook(() => useReportDrill(drill), { wrapper: makeWrapper() })
     await waitFor(() => expect(result.current.adviceError).toBe(true))
@@ -178,7 +178,7 @@ describe('useReportDrill — advicePromptLogId (KOIOS-FEEDBACK-REPORT-ADVICE)', 
     mockedGet.mockResolvedValue({ data: { advice: 'Fresh.', prompt_log_id: '11111111-2222-3333-4444-555555555555' } })
     const drill: DrillSpec = {
       title: 'x', value: 1,
-      adviceEndpoint: '/reports/flow/advice', adviceParams: { period: 'month' },
+      adviceEndpoint: '/reports/candidates/advice', adviceParams: { period: 'month' },
     }
     const { result } = renderHook(() => useReportDrill(drill), { wrapper: makeWrapper() })
     await waitFor(() => expect(result.current.advice).toBe('Fresh.'))
@@ -189,7 +189,7 @@ describe('useReportDrill — advicePromptLogId (KOIOS-FEEDBACK-REPORT-ADVICE)', 
     mockedGet.mockResolvedValue({ data: { advice: 'Cached.', prompt_log_id: null } })
     const drill: DrillSpec = {
       title: 'x', value: 1,
-      adviceEndpoint: '/reports/flow/advice', adviceParams: { period: 'month' },
+      adviceEndpoint: '/reports/candidates/advice', adviceParams: { period: 'month' },
     }
     const { result } = renderHook(() => useReportDrill(drill), { wrapper: makeWrapper() })
     await waitFor(() => expect(result.current.advice).toBe('Cached.'))
