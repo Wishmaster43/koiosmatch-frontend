@@ -72,6 +72,23 @@ describe('apiErrorKey · sm_credentials_unsatisfied (ONIX G-014)', () => {
   })
 })
 
+describe('apiErrorKey / apiErrorMessage · AUTHZ-REFUSAL-CODE-2 codes', () => {
+  it('maps permission_denied (403) to its i18n key', () => {
+    expect(apiErrorKey({ response: { data: { code: 'permission_denied' } } })).toBe('errors.permissionDenied')
+  })
+  it('maps invalid_signature to its i18n key', () => {
+    expect(apiErrorKey({ response: { data: { code: 'invalid_signature' } } })).toBe('errors.invalidSignature')
+  })
+  it('maps module_not_enabled to its i18n key', () => {
+    expect(apiErrorKey({ response: { data: { code: 'module_not_enabled' } } })).toBe('errors.moduleNotEnabled')
+  })
+  it('renders the translated copy for permission_denied, never the bureau-language server message', () => {
+    const t = (key: string) => `TRANSLATED:${key}`
+    const err = { response: { data: { code: 'permission_denied', message: 'Onvoldoende rechten.' } } }
+    expect(apiErrorMessage(err, t, 'fallback')).toBe('TRANSLATED:errors.permissionDenied')
+  })
+})
+
 describe('apiErrorKey · numbering_frozen (DANNY-0511-D)', () => {
   it('maps numbering_frozen (422) to its i18n key', () => {
     expect(apiErrorKey({ response: { data: { code: 'numbering_frozen' } } })).toBe('errors.numberingFrozen')

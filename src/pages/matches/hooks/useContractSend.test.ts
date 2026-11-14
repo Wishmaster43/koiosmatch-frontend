@@ -59,12 +59,21 @@ describe('useContractSend', () => {
     expect(out.message).toContain('Utrecht')
   })
 
-  it('maps the code-less module 403 to the module-off sentence', async () => {
-    post.mockRejectedValue({ response: { status: 403, data: { message: 'Deze module (hf) zit niet in het pakket' } } })
+  it('maps the module_not_enabled 403 to the HelloFlex module-off sentence', async () => {
+    post.mockRejectedValue({ response: { status: 403, data: { code: 'module_not_enabled', message: 'Deze module (hf) zit niet in het pakket' } } })
     const { result } = renderHook(() => useContractSend('m1'))
     let out: { message?: string | null } = {}
     await act(async () => { out = (await result.current.send()) as typeof out })
     expect(['en', 'nl'].map(lng => i18n.t('errors.helloflexModuleOff', { ns: 'common', lng }))).toContain(out.message)
+  })
+
+  it('maps a permission_denied 403 to the translated permission sentence, not the module-off one', async () => {
+    post.mockRejectedValue({ response: { status: 403, data: { code: 'permission_denied', message: 'Onvoldoende rechten.' } } })
+    const { result } = renderHook(() => useContractSend('m1'))
+    let out: { message?: string | null } = {}
+    await act(async () => { out = (await result.current.send()) as typeof out })
+    expect(['en', 'nl'].map(lng => i18n.t('errors.permissionDenied', { ns: 'common', lng }))).toContain(out.message)
+    expect(out.message).not.toBe('Onvoldoende rechten.')
   })
 
   it('returns 422 field errors per field', async () => {

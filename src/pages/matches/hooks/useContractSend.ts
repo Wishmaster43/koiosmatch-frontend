@@ -35,9 +35,10 @@ export function useContractSend(matchId: Id | undefined) {
     } catch (err) {
       const bag = extractFormErrorsWithMessages(err, {})
       if (bag) return { ok: false, message: null, fieldErrors: bag.messages }
-      // The module gate answers a code-less 403 (EnsureTenantModule): the HelloFlex module is off.
+      // The connector module gate answers 403 module_not_enabled (AUTHZ-REFUSAL-CODE-2): the HelloFlex
+      // module is off for this bureau, so say that specifically instead of the generic module sentence.
       const res = (err as { response?: { status?: number; data?: { code?: string } } }).response
-      if (res?.status === 403 && !res.data?.code) return { ok: false, message: t('errors.helloflexModuleOff', { ns: 'common' }), fieldErrors: {} }
+      if (res?.status === 403 && res.data?.code === 'module_not_enabled') return { ok: false, message: t('errors.helloflexModuleOff', { ns: 'common' }), fieldErrors: {} }
       // A 5xx without a code carries the server's own (Dutch) sentence: show ours instead (§5).
       const rawServerText = (res?.status ?? 0) >= 500 && !res?.data?.code
       const fallback = t('drawer.contractSend.error')

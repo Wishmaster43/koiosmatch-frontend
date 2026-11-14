@@ -88,6 +88,10 @@ const ERROR_CODE_KEYS: Record<string, string> = {
   inbound_scenario_number_missing: 'errors.inboundScenarioNumberMissing',
   // ONIX G-014 (422): a Shiftmanager sync whose stored credentials do not fill the keys of the connection's auth type sends nothing.
   sm_credentials_unsatisfied: 'errors.smCredentialsUnsatisfied',
+  // AUTHZ-REFUSAL-CODE-2 (BE 5727786ac): every authorization refusal is coded, so the copy renders in the user's UI language instead of the bureau-language server sentence.
+  permission_denied: 'errors.permissionDenied',
+  invalid_signature: 'errors.invalidSignature',
+  module_not_enabled: 'errors.moduleNotEnabled',
   // DANNY-0511-D (422): the numbering start value is frozen once the first number was issued.
   numbering_frozen: 'errors.numberingFrozen',
 }
