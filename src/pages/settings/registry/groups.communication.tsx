@@ -38,7 +38,7 @@ export const communicationGroups: NavGroup[] = [
     key: 'communication', icon: Mail,
     items: [
       // EmailSettings keys its stored settings as email_customers_* / email_candidates_* /
-      // email_planning_*; the route tokens stay Dutch via lib/emailContexts.ts.
+      // email_planning_*; the same English context is the BE route segment (SETTINGS-ALIAS-RETIRE-1).
       { id: 'email_customers', icon: Mail, render: () => <EmailSettings context="customers" /> },
       { id: 'email_candidates', icon: Mail, render: () => <EmailSettings context="candidates" /> },
       { id: 'email_planning', icon: Mail, render: () => <EmailSettings context="planning" /> },

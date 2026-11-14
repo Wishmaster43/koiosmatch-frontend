@@ -105,9 +105,7 @@ describe('parseHash — hash query (G-009)', () => {
   afterEach(() => { window.location.hash = '' })
 
   it('derives the email tab from the callback context when no tab is given', () => {
-    window.location.hash = '#settings/communication?email_oauth=connected&context=klanten'
-    expect(parseHash()).toEqual({ category: 'communication', tab: 'email_customers' })
-    window.location.hash = '#settings/communication?email_oauth=error&context=kandidaten'
+    window.location.hash = '#settings/communication?email_oauth=error&context=candidates'
     expect(parseHash()).toEqual({ category: 'communication', tab: 'email_candidates' })
     window.location.hash = '#settings/communication?email_oauth=connected&context=customers'
     expect(parseHash()).toEqual({ category: 'communication', tab: 'email_customers' })
@@ -126,6 +124,9 @@ describe('parseHash — hash query (G-009)', () => {
     window.location.hash = '#settings/communication'
     expect(parseHash()).toBeNull()
     window.location.hash = '#settings/communication?context=unknown'
+    expect(parseHash()).toBeNull()
+    // The retired Dutch callback token no longer names a tab (SETTINGS-ALIAS-RETIRE-1).
+    window.location.hash = '#settings/communication?context=klanten'
     expect(parseHash()).toBeNull()
   })
 })

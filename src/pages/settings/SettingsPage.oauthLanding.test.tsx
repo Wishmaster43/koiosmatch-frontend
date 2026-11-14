@@ -29,8 +29,8 @@ vi.mock('./registry', () => ({
     {
       key: 'communication', icon: null,
       items: [
-        { id: 'email_customers', render: () => <OauthSection context="klanten" /> },
-        { id: 'email_candidates', render: () => <OauthSection context="kandidaten" /> },
+        { id: 'email_customers', render: () => <OauthSection context="customers" /> },
+        { id: 'email_candidates', render: () => <OauthSection context="candidates" /> },
       ],
     },
   ],
@@ -45,7 +45,7 @@ afterEach(() => { window.location.hash = ''; vi.clearAllMocks() })
 
 describe('SettingsPage OAuth landing', () => {
   it('shows the connected result on the context tab and settles on the plain tab hash', async () => {
-    window.location.hash = '#settings/communication?email_oauth=connected&context=klanten&email=info%40yesway.nl'
+    window.location.hash = '#settings/communication?email_oauth=connected&context=customers&email=info%40yesway.nl'
     render(<SettingsPage />)
     expect(await screen.findByText('connected:info@yesway.nl')).toBeInTheDocument()
     await waitFor(() => expect(window.location.hash).not.toContain('email_oauth'))
@@ -53,7 +53,7 @@ describe('SettingsPage OAuth landing', () => {
   })
 
   it('shows an error result with its reason on the candidate tab', async () => {
-    window.location.hash = '#settings/communication?email_oauth=error&context=kandidaten&reason=browser_mismatch'
+    window.location.hash = '#settings/communication?email_oauth=error&context=candidates&reason=browser_mismatch'
     render(<SettingsPage />)
     expect(await screen.findByText('error:browser_mismatch')).toBeInTheDocument()
     await waitFor(() => expect(window.location.hash).toBe('#settings/communication/email_candidates'))

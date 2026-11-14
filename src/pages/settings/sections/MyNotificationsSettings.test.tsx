@@ -50,7 +50,7 @@ beforeEach(() => {
 
 describe('MyNotificationsSettings', () => {
   it('GETs /settings/my-notifications on mount and renders one row per returned context', async () => {
-    vi.mocked(api.get).mockResolvedValue({ data: { contexts: { sollicitaties: null, matches: false } } })
+    vi.mocked(api.get).mockResolvedValue({ data: { contexts: { applications: null, matches: false } } })
     render(<MyNotificationsSettings />)
 
     await waitFor(() => expect(api.get).toHaveBeenCalledWith('/settings/my-notifications'))
@@ -59,7 +59,7 @@ describe('MyNotificationsSettings', () => {
   })
 
   it('renders an honest "not available yet" e-mail marker next to in-app/popup, not a second control (O-27)', async () => {
-    vi.mocked(api.get).mockResolvedValue({ data: { contexts: { sollicitaties: null, matches: false }, popup: {} } })
+    vi.mocked(api.get).mockResolvedValue({ data: { contexts: { applications: null, matches: false }, popup: {} } })
     render(<MyNotificationsSettings />)
     await screen.findByText(t('notifications.context.applications.title'))
 
@@ -72,7 +72,7 @@ describe('MyNotificationsSettings', () => {
 
   it('reflects the loaded tri-state per row: inherit for null, off for false, on both in-app and popup', async () => {
     vi.mocked(api.get).mockResolvedValue({
-      data: { contexts: { sollicitaties: null, matches: false }, popup: { sollicitaties: true, matches: null } },
+      data: { contexts: { applications: null, matches: false }, popup: { applications: true, matches: null } },
     })
     render(<MyNotificationsSettings />)
     await screen.findByText(t('notifications.context.applications.title'))
@@ -85,8 +85,8 @@ describe('MyNotificationsSettings', () => {
     expect(within(rows[3]).getByRole('radio', { name: t('notifications.my.inherit') })).toHaveAttribute('aria-checked', 'true')
   })
 
-  it('PUTs { contexts: { sollicitaties: false } } when switching the in-app row to Off', async () => {
-    vi.mocked(api.get).mockResolvedValue({ data: { contexts: { sollicitaties: null }, popup: {} } })
+  it('PUTs { contexts: { applications: false } } when switching the in-app row to Off', async () => {
+    vi.mocked(api.get).mockResolvedValue({ data: { contexts: { applications: null }, popup: {} } })
     vi.mocked(api.put).mockResolvedValue({ data: {} })
     const user = userEvent.setup()
     render(<MyNotificationsSettings />)
@@ -95,12 +95,12 @@ describe('MyNotificationsSettings', () => {
     await user.click(screen.getAllByRole('radio', { name: t('notifications.my.off') })[0])
 
     await waitFor(() => expect(api.put).toHaveBeenCalledWith('/settings/my-notifications', {
-      contexts: { sollicitaties: false },
+      contexts: { applications: false },
     }))
   })
 
-  it('PUTs { contexts: { sollicitaties: null } } when switching the in-app row back to Inherit', async () => {
-    vi.mocked(api.get).mockResolvedValue({ data: { contexts: { sollicitaties: true }, popup: {} } })
+  it('PUTs { contexts: { applications: null } } when switching the in-app row back to Inherit', async () => {
+    vi.mocked(api.get).mockResolvedValue({ data: { contexts: { applications: true }, popup: {} } })
     vi.mocked(api.put).mockResolvedValue({ data: {} })
     const user = userEvent.setup()
     render(<MyNotificationsSettings />)
@@ -109,12 +109,12 @@ describe('MyNotificationsSettings', () => {
     await user.click(screen.getAllByRole('radio', { name: t('notifications.my.inherit') })[0])
 
     await waitFor(() => expect(api.put).toHaveBeenCalledWith('/settings/my-notifications', {
-      contexts: { sollicitaties: null },
+      contexts: { applications: null },
     }))
   })
 
-  it('PUTs { popup: { sollicitaties: false } } when switching the popup row to Off (NOTIF-POPUP-1)', async () => {
-    vi.mocked(api.get).mockResolvedValue({ data: { contexts: { sollicitaties: null }, popup: { sollicitaties: null } } })
+  it('PUTs { popup: { applications: false } } when switching the popup row to Off (NOTIF-POPUP-1)', async () => {
+    vi.mocked(api.get).mockResolvedValue({ data: { contexts: { applications: null }, popup: { applications: null } } })
     vi.mocked(api.put).mockResolvedValue({ data: {} })
     const user = userEvent.setup()
     render(<MyNotificationsSettings />)
@@ -124,14 +124,14 @@ describe('MyNotificationsSettings', () => {
     await user.click(within(screen.getAllByRole('radiogroup')[1]).getByRole('radio', { name: t('notifications.my.off') }))
 
     await waitFor(() => expect(api.put).toHaveBeenCalledWith('/settings/my-notifications', {
-      popup: { sollicitaties: false },
+      popup: { applications: false },
     }))
     // The popup PUT never touches the in-app `contexts` map.
     expect(api.put).not.toHaveBeenCalledWith('/settings/my-notifications', { contexts: expect.anything() })
   })
 
-  it('NOTIF-PARITY-1: a no-emitter context (facturering) shows a muted marker instead of working in-app/popup overrides, and never PUTs', async () => {
-    vi.mocked(api.get).mockResolvedValue({ data: { contexts: { facturering: null }, popup: {} } })
+  it('NOTIF-PARITY-1: a no-emitter context (billing) shows a muted marker instead of working in-app/popup overrides, and never PUTs', async () => {
+    vi.mocked(api.get).mockResolvedValue({ data: { contexts: { billing: null }, popup: {} } })
     render(<MyNotificationsSettings />)
     await screen.findByText(t('notifications.context.billing.title'))
 
@@ -144,7 +144,7 @@ describe('MyNotificationsSettings', () => {
   })
 
   it('rolls back the in-app row and toasts on a failed PUT', async () => {
-    vi.mocked(api.get).mockResolvedValue({ data: { contexts: { sollicitaties: null }, popup: {} } })
+    vi.mocked(api.get).mockResolvedValue({ data: { contexts: { applications: null }, popup: {} } })
     vi.mocked(api.put).mockRejectedValue(new Error('network'))
     const user = userEvent.setup()
     render(<MyNotificationsSettings />)
@@ -157,7 +157,7 @@ describe('MyNotificationsSettings', () => {
   })
 
   it('rolls back the popup row and toasts on a failed PUT (NOTIF-POPUP-1)', async () => {
-    vi.mocked(api.get).mockResolvedValue({ data: { contexts: { sollicitaties: null }, popup: { sollicitaties: null } } })
+    vi.mocked(api.get).mockResolvedValue({ data: { contexts: { applications: null }, popup: { applications: null } } })
     vi.mocked(api.put).mockRejectedValue(new Error('network'))
     const user = userEvent.setup()
     render(<MyNotificationsSettings />)
@@ -186,7 +186,7 @@ describe('MyNotificationsSettings', () => {
   // on load for subscribed users — the browser-push row at the top of the screen
   // already carries the subscribe state ONCE. The rows stay hint-free.
   it('renders NO per-row push hint — the top push row carries that state once', async () => {
-    vi.mocked(api.get).mockResolvedValue({ data: { contexts: { sollicitaties: null, matches: null }, popup: { sollicitaties: null } } })
+    vi.mocked(api.get).mockResolvedValue({ data: { contexts: { applications: null, matches: null }, popup: { applications: null } } })
     vi.mocked(pushSubscription.isSubscribed).mockResolvedValue(false)
     render(<MyNotificationsSettings />)
     await screen.findByText(t('notifications.context.applications.title'))
@@ -195,7 +195,7 @@ describe('MyNotificationsSettings', () => {
   })
 
   it('renders no per-row push hint when subscribed either (NOTIF-POPUP-1)', async () => {
-    vi.mocked(api.get).mockResolvedValue({ data: { contexts: { sollicitaties: null }, popup: { sollicitaties: null } } })
+    vi.mocked(api.get).mockResolvedValue({ data: { contexts: { applications: null }, popup: { applications: null } } })
     vi.mocked(pushSubscription.isSubscribed).mockResolvedValue(true)
     render(<MyNotificationsSettings />)
     await screen.findByText(t('notifications.context.applications.title'))
@@ -277,7 +277,7 @@ describe('MyNotificationsSettings', () => {
 // ON) — the first version displayed 'Uit' for the common real-world response.
 describe('MyNotificationsSettings — popup absent-key tolerance', () => {
   it('shows inherit for a context the popup map omits', async () => {
-    vi.mocked(api.get).mockResolvedValue({ data: { contexts: { sollicitaties: null }, popup: {} } })
+    vi.mocked(api.get).mockResolvedValue({ data: { contexts: { applications: null }, popup: {} } })
     render(<MyNotificationsSettings />)
     const groups = await screen.findAllByRole('radiogroup')
     const popupGroup = groups.find(g => (g.getAttribute('aria-label') ?? '').includes(t('notifications.popup.label')))

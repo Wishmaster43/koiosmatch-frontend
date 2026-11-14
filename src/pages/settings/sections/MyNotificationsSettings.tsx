@@ -53,7 +53,7 @@ import SoftChip from '@/components/ui/SoftChip'
 import Toggle from '@/components/ui/Toggle'
 import { isSupported as isPushSupported, permissionState, isSubscribed, subscribe, unsubscribe } from '@/lib/pushSubscription'
 import { SettingCardList, SettingRow, SkeletonRows } from '../components/SettingsKit'
-import { hasNoEmitterYet, toCanonicalContext } from '../lib/notificationContexts'
+import { hasNoEmitterYet } from '../lib/notificationContexts'
 import { PageTitle, PageSubtitle } from '@/components/ui/typography'
 
 // The API's tri-state per context: null = inherit the tenant default, true/false
@@ -257,15 +257,15 @@ export default function MyNotificationsSettings() {
       ) : (
         <SettingCardList>
           {known.map(context => {
-            // Wire token (Dutch) stays on the request; labels and emitter gate use the canonical name.
-            const canonical = toCanonicalContext(context)
-            const title = labelOrRaw(t, i18n, `notifications.context.${canonical}.title`, canonical, 'settings')
+            // GET /settings/my-notifications lists English contexts (SETTINGS-ALIAS-RETIRE-1, BE ce191ec61):
+            // the key is both the label key and the emitter gate.
+            const title = labelOrRaw(t, i18n, `notifications.context.${context}.title`, context, 'settings')
             // NOTIF-PARITY-1: a per-user override is exactly as fake as the tenant-wide
             // toggle when the context has no working backend emitter yet — never render a
             // working SegmentedControl that changes nothing (§3 no fake affordance).
-            const noEmitterYet = hasNoEmitterYet(canonical)
+            const noEmitterYet = hasNoEmitterYet(context)
             return (
-              <SettingRow key={context} label={title} description={labelOrRaw(t, i18n, `notifications.context.${canonical}.desc`, '', 'settings')}>
+              <SettingRow key={context} label={title} description={labelOrRaw(t, i18n, `notifications.context.${context}.desc`, '', 'settings')}>
                 {/* Three columns, side by side: a real working in-app override, the
                     (currently honest, non-functional) e-mail marker — see the O-27 note
                     at the top of this file for why e-mail isn't a control yet — and a

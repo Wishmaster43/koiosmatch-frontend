@@ -31,29 +31,3 @@ export const CONTEXTS_WITHOUT_EMITTER = new Set(['billing'])
 export function hasNoEmitterYet(context: string): boolean {
   return CONTEXTS_WITHOUT_EMITTER.has(context)
 }
-
-/**
- * Canonical (English) notification context -> the Dutch token that
- * GET/PUT /settings/my-notifications still speaks (BE contract unchanged).
- * Removal trigger: SETTINGS-ALIAS-RETIRE-1 / X-47-BE (the BE retires the Dutch
- * tokens); then delete this map and toCanonicalContext() and send canonical names.
- */
-export const LEGACY_NOTIFICATION_CONTEXT: Record<string, string> = {
-  applications: 'sollicitaties',
-  vacancies: 'vacatures',
-  billing: 'facturering',
-  candidates: 'kandidaten',
-  customers: 'klanten',
-  tasks: 'taken',
-  conversations: 'gesprekken',
-}
-
-// Reverse lookup: Dutch wire token -> canonical English context.
-const CANONICAL_BY_LEGACY: Record<string, string> = Object.fromEntries(
-  Object.entries(LEGACY_NOTIFICATION_CONTEXT).map(([canonical, legacy]) => [legacy, canonical]),
-)
-
-/** Map a wire context (Dutch token or already canonical) to the canonical English name. */
-export function toCanonicalContext(context: string): string {
-  return CANONICAL_BY_LEGACY[context] ?? context
-}
