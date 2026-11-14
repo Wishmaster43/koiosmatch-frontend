@@ -1057,7 +1057,12 @@
       "none": "Sin contrato",
       "pending": "Pendiente",
       "active": "Activo",
-      "ended": "Finalizado"
+      "ended": "Finalizado",
+      "sending": "Enviando",
+      "sent": "Enviado",
+      "signed": "Firmado",
+      "failed": "Fallido",
+      "rejected": "Rechazado"
     },
     "openMatch": "Abrir match",
     "searchPlaceholder": "Buscar match…",

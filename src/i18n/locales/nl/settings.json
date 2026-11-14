@@ -1824,7 +1824,8 @@
         "leads": "Leads",
         "interviews": "Interviews",
         "opportunities": "Kansen",
-        "settings": "Instellingen"
+        "settings": "Instellingen",
+        "helloflex": "HelloFlex"
       },
       "fieldsTitle": "Velden die meegaan: {{fields}}",
       "piiTitle": "Bevat persoonsgegevens",
@@ -1880,7 +1881,10 @@
         "approval_overdue": "Goedkeuring te laat",
         "approved": "Goedgekeurd",
         "rejected": "Afgewezen",
-        "blank_fallback": "Instelling teruggevallen op standaard"
+        "blank_fallback": "Instelling teruggevallen op standaard",
+        "state_changed": "Statuswijziging",
+        "new_version": "Nieuwe versie",
+        "signed": "Ondertekend"
       }
     },
     "meta": {

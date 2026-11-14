@@ -7,6 +7,9 @@
  * and group-for-group with `config/webhooks.php` (koiosmatch-api) so the fallback
  * stays a faithful stand-in; `webhookEvents.test.js` guards that parity.
  *
+ * Re-verified 14-11 against config/webhooks.php at 75223afc8: 88 events in 15 groups
+ * (HF-WEBHOOK-1 added the `helloflex` group and `contract.signed`).
+ *
  * REPAIR N6 (2026-09-04): re-verified every key against config/webhooks.php by
  * hand (59 events; 66 after ADOPT-A2's five-key catch-up, 17-09). Five groups this file used to carry — `location`, `contact_person`,
  * `order`, `shift`, `shift.scheduling.*` — have NO backend catalogue entry at all
@@ -58,6 +61,8 @@ export const EVENT_GROUPS: WebhookEventGroup[] = [
     // ADOPT-A2 addendum (SETTINGS-INCONSISTENCIES-BE-1): the approval lifecycle,
     // MATCH-APPROVAL-PROCES — ids only, no rejection reason (§9).
     'match.approval_pending', 'match.approval_overdue', 'match.approved', 'match.rejected',
+    // HF-WEBHOOK-1: the HelloFlex contract signature, ids only.
+    'contract.signed',
   ] },
   { group: 'vacancies', events: [
     'vacancy.created', 'vacancy.status_changed', 'vacancy.published', 'vacancy.updated',
@@ -88,6 +93,12 @@ export const EVENT_GROUPS: WebhookEventGroup[] = [
   // ADOPT-A2 addendum: RETENTION-CONSENT-BLANK-1 — a tenant setting fell back to
   // its default (key/section/label only, never a stored value, §6).
   { group: 'settings', events: ['settings.blank_fallback'] },
+  // HF-WEBHOOK-1: HelloFlex receipt events, ids only (receipt_id, entity_guid, entity_type, entity_id), never the fetched entity.
+  { group: 'helloflex', events: [
+    'helloflex.candidate.created', 'helloflex.candidate.updated', 'helloflex.employer.created', 'helloflex.employer.updated', 'helloflex.cost_center.created', 'helloflex.cost_center.updated',
+    'helloflex.agency.created', 'helloflex.agency.updated', 'helloflex.activity.created', 'helloflex.activity.updated', 'helloflex.activity.deleted', 'helloflex.contract.created',
+    'helloflex.contract.updated', 'helloflex.contract.deleted', 'helloflex.contract.state_changed', 'helloflex.contract.new_version', 'helloflex.timecard.deleted', 'helloflex.illness.deleted',
+  ] },
 ]
 
 // Flat list of every event key (e.g. for "select all" and validation).

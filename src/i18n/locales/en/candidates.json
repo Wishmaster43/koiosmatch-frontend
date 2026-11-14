@@ -1080,7 +1080,12 @@
       "none": "No contract",
       "pending": "Pending",
       "active": "Active",
-      "ended": "Ended"
+      "ended": "Ended",
+      "sending": "Sending",
+      "sent": "Sent",
+      "signed": "Signed",
+      "failed": "Failed",
+      "rejected": "Rejected"
     },
     "openMatch": "Open match",
     "searchPlaceholder": "Search match…",

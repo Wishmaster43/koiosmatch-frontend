@@ -1824,7 +1824,8 @@
         "leads": "Leads",
         "interviews": "Interviews",
         "opportunities": "Opportunities",
-        "settings": "Settings"
+        "settings": "Settings",
+        "helloflex": "HelloFlex"
       },
       "fieldsTitle": "Fields that leave: {{fields}}",
       "piiTitle": "Contains personal data",
@@ -1880,7 +1881,10 @@
         "approval_overdue": "Approval overdue",
         "approved": "Approved",
         "rejected": "Rejected",
-        "blank_fallback": "Setting fell back to its default"
+        "blank_fallback": "Setting fell back to its default",
+        "state_changed": "State changed",
+        "new_version": "New version",
+        "signed": "Signed"
       }
     },
     "meta": {

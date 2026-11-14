@@ -135,3 +135,40 @@ export type WorkflowEventKey = (typeof WORKFLOW_EVENT_KEYS)[number]
 export function eventKeyToI18nKey(key: string): string {
   return key.replace(/\./g, '_')
 }
+
+// HF-WORKFLOWS-1: the HelloFlex webhook events a `helloflex_inbound` start node
+// can listen to. Keys mirror the HelloFlex event names in
+// koiosmatch-api/docs/providers/helloflex-webhook-filters.json (CreateCandidate
+// -> helloflex.candidate.created). Kept apart from WORKFLOW_EVENT_KEYS on
+// purpose: that list is the exact mirror of TriggerModule::configSchema().
+// `label` is the English source text of the select option (fieldOptions key).
+export const HELLOFLEX_EVENTS = [
+  { key: 'helloflex.candidate.created',      label: 'HelloFlex: candidate created', filter: 'CreateCandidate' },
+  { key: 'helloflex.candidate.updated',      label: 'HelloFlex: candidate updated', filter: 'UpdateCandidate' },
+  { key: 'helloflex.employer.created',       label: 'HelloFlex: employer created', filter: 'CreateEmployer' },
+  { key: 'helloflex.employer.updated',       label: 'HelloFlex: employer updated', filter: 'UpdateEmployer' },
+  { key: 'helloflex.cost_center.created',    label: 'HelloFlex: cost center created', filter: 'CreateCostCenter' },
+  { key: 'helloflex.cost_center.updated',    label: 'HelloFlex: cost center updated', filter: 'UpdateCostCenter' },
+  { key: 'helloflex.agency.created',         label: 'HelloFlex: agency created', filter: 'CreateAgency' },
+  { key: 'helloflex.agency.updated',         label: 'HelloFlex: agency updated', filter: 'UpdateAgency' },
+  { key: 'helloflex.activity.created',       label: 'HelloFlex: activity created', filter: 'CreateActivity' },
+  { key: 'helloflex.activity.updated',       label: 'HelloFlex: activity updated', filter: 'UpdateActivity' },
+  { key: 'helloflex.activity.deleted',       label: 'HelloFlex: activity deleted', filter: 'DeleteActivity' },
+  { key: 'helloflex.contract.created',       label: 'HelloFlex: contract created', filter: 'CreateContract' },
+  { key: 'helloflex.contract.updated',       label: 'HelloFlex: contract updated', filter: 'UpdateContract' },
+  { key: 'helloflex.contract.deleted',       label: 'HelloFlex: contract deleted', filter: 'DeleteContract' },
+  { key: 'helloflex.contract.state_changed', label: 'HelloFlex: contract state changed', filter: 'ContractStateChanged' },
+  { key: 'helloflex.contract.new_version',   label: 'HelloFlex: contract new version created', filter: 'ContractNewVersionCreated' },
+  { key: 'helloflex.timecard.deleted',       label: 'HelloFlex: timecard deleted', filter: 'DeleteTimecard' },
+  { key: 'helloflex.illness.deleted',        label: 'HelloFlex: illness deleted', filter: 'DeleteIllness' },
+] as const
+
+// The 18 dotted keys, and the HelloFlex filter NAMES the webhook registration and the inbound module config use.
+export const HELLOFLEX_EVENT_KEYS = HELLOFLEX_EVENTS.map(e => e.key)
+export const HELLOFLEX_FILTER_NAMES = HELLOFLEX_EVENTS.map(e => e.filter)
+
+// Event groups for pickers: `core` is the dispatched domain vocabulary, `helloflex` the provider webhook group.
+export const WORKFLOW_EVENT_GROUPS = {
+  core: WORKFLOW_EVENT_KEYS as readonly string[],
+  helloflex: HELLOFLEX_EVENT_KEYS as readonly string[],
+} as const

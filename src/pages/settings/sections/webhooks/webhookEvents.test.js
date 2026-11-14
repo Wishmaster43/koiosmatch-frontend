@@ -13,7 +13,7 @@ import { describe, it, expect } from 'vitest'
 import { EVENT_GROUPS, ALL_EVENTS, actionOf } from './webhookEvents'
 
 // Manual mirror of config/webhooks.php's `events` array (koiosmatch-api) — hand-
-// counted 2026-09-17: 66 rows, 68 since lane D f0855053 (16-10), 69 since lane C b8b7dabd4 (21-10), 14 groups (ADOPT-A2 addendum added the match
+// counted 2026-09-17: 66 rows, 68 since lane D f0855053 (16-10), 69 since lane C b8b7dabd4 (21-10), 88 rows / 15 groups since 75223afc8 (14-11), 14 groups before that (ADOPT-A2 addendum added the match
 // approval lifecycle + the new `settings` group's `settings.blank_fallback`).
 // Re-verify by re-grepping `'key' => '...'` in that file if this ever needs updating.
 const BACKEND_WEBHOOK_EVENTS = [
@@ -44,6 +44,11 @@ const BACKEND_WEBHOOK_EVENTS = [
   'settings.blank_fallback',
   // ONIX K-013 (lane D f0855053): fired after an AVG erasure committed — ids only.
   'candidate.erased', 'contact.erased',
+  // HF-WEBHOOK-1 (BE 75223afc8): the HelloFlex receipt events + contract.signed in matches
+  'contract.signed',
+  'helloflex.candidate.created', 'helloflex.candidate.updated', 'helloflex.employer.created', 'helloflex.employer.updated', 'helloflex.cost_center.created', 'helloflex.cost_center.updated',
+  'helloflex.agency.created', 'helloflex.agency.updated', 'helloflex.activity.created', 'helloflex.activity.updated', 'helloflex.activity.deleted', 'helloflex.contract.created',
+  'helloflex.contract.updated', 'helloflex.contract.deleted', 'helloflex.contract.state_changed', 'helloflex.contract.new_version', 'helloflex.timecard.deleted', 'helloflex.illness.deleted',
 ]
 
 // Every shipped locale's settings.json, loaded like localeParity.test.ts does.
@@ -51,9 +56,9 @@ const settingsLocales = import.meta.glob('../../../../i18n/locales/*/settings.js
 const LOCALES = ['nl', 'en', 'de', 'fr', 'es', 'it', 'pt']
 
 describe('EVENT_GROUPS · backend parity (REPAIR N6)', () => {
-  it('mirrors exactly 69 backend webhook events', () => {
-    expect(BACKEND_WEBHOOK_EVENTS.length).toBe(69)
-    expect(ALL_EVENTS.length).toBe(69)
+  it('mirrors exactly 88 backend webhook events', () => {
+    expect(BACKEND_WEBHOOK_EVENTS.length).toBe(88)
+    expect(ALL_EVENTS.length).toBe(88)
   })
 
   it('contains every event the backend catalogue has (no missing subscription option)', () => {

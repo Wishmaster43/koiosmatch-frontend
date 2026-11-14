@@ -204,3 +204,19 @@ describe('MatchCard · icon-only glyphs have accessible names', () => {
     expect(screen.getByRole('img', { name: 'Gekoppeld met backoffice (HelloFlex)' })).toBeInTheDocument()
   })
 })
+
+// BE vocabulary (JobMatch::CONTRACT_STATUSES, HF-WEBHOOK-1 75223afc8): none, sending, sent, signed, active, ended, failed, rejected.
+describe('MatchCard · contract status labels (HF-WEBHOOK-1)', () => {
+  it.each(['sending', 'sent', 'signed', 'failed', 'rejected'])('renders the translated %s label, never the raw status word', (value) => {
+    render(<MatchCard {...base} contractStatus={value} />)
+    expect(screen.getByText(ct(`matchesView.contractStatus.${value}`))).toBeInTheDocument()
+    expect(screen.queryByText(value)).toBeNull()
+  })
+
+  it('renders an unknown status word raw (the labelOrRaw fallback)', () => {
+    render(<MatchCard {...base} contractStatus="archived_legacy" />)
+    expect(screen.getByText('archived_legacy')).toBeInTheDocument()
+    // The raw word wins over the none fallback: an unknown status is never shown as "no contract".
+    expect(screen.queryByText(ct('matchesView.contractStatus.none'))).toBeNull()
+  })
+})

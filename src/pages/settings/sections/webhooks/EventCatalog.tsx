@@ -11,6 +11,7 @@ import { useTranslation } from 'react-i18next'
 import { Search, ShieldAlert } from 'lucide-react'
 import { actionOf } from './webhookEvents'
 import { labelOrRaw } from '@/lib/labelOrRaw'
+import { eventKeyToI18nKey } from '@/components/layout/workflow/eventCatalog'
 import { useWebhookEventCatalog } from './useWebhookEventCatalog'
 import { PermissionToggle } from '@/pages/settings/components/SettingsControls'
 import Spinner from '@/components/ui/Spinner'
@@ -32,7 +33,7 @@ function activateOnKey(e: KeyboardEvent<HTMLSpanElement>, run: () => void) {
 // Controlled event-picker for a webhook subscription: grouped pill toggles with
 // search and per-group/global select-all (see file docblock above).
 export default function EventCatalog({ value = [], onChange }: EventCatalogProps) {
-  const { t, i18n } = useTranslation('settings')
+  const { t, i18n } = useTranslation(['settings', 'workflows'])
   const [query, setQuery] = useState('')
   const { groups: EVENT_GROUPS, isLoading, isFallback, meta } = useWebhookEventCatalog()
   const ALL_EVENTS = useMemo(() => EVENT_GROUPS.flatMap((g) => g.events), [EVENT_GROUPS])
@@ -43,8 +44,12 @@ export default function EventCatalog({ value = [], onChange }: EventCatalogProps
   // time) shows its raw key instead of a leaked i18n path.
   const groupLabel  = (g: string) => labelOrRaw(t, i18n, `webhooks.events.groups.${g}`, g, 'settings')
   const actionLabel = (a: string) => labelOrRaw(t, i18n, `webhooks.events.actions.${a}`, a, 'settings')
+  // A HelloFlex key is helloflex.<entity>.<verb>: the verb alone would make eight "created" rows
+  // indistinguishable, so the row reads the full event label the trigger picker already has in the
+  // workflows namespace (one source of truth); every other row keeps its action label.
+  const eventLabel = (ev: string) => ev.startsWith('helloflex.') ? labelOrRaw(t, i18n, `triggers.events.${eventKeyToI18nKey(ev)}`, ev, 'workflows') : actionLabel(actionOf(ev) ?? '')
 
-  // Filter events by raw key, group label or action label.
+  // Filter events by raw key, group label or event label.
   const q = query.trim().toLowerCase()
   // Groups narrowed to the events matching the search query; a group with no
   // matching events drops out entirely rather than rendering empty.
@@ -52,10 +57,10 @@ export default function EventCatalog({ value = [], onChange }: EventCatalogProps
     .map(({ group, events }) => ({
       group,
       events: events.filter((ev: string) =>
-        !q || ev.toLowerCase().includes(q) || groupLabel(group).toLowerCase().includes(q) || actionLabel(actionOf(ev) ?? '').toLowerCase().includes(q)),
+        !q || ev.toLowerCase().includes(q) || groupLabel(group).toLowerCase().includes(q) || eventLabel(ev).toLowerCase().includes(q)),
     }))
     .filter((g) => g.events.length > 0),
-    // eslint-disable-next-line react-hooks/exhaustive-deps -- intentionally keyed on q + EVENT_GROUPS only; groupLabel/actionLabel are recomputed on every render so they never go stale
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- intentionally keyed on q + EVENT_GROUPS only; groupLabel/actionLabel/eventLabel are recomputed on every render so they never go stale
     [q, EVENT_GROUPS])
 
   // Toggle a single event on/off.
@@ -131,7 +136,7 @@ export default function EventCatalog({ value = [], onChange }: EventCatalogProps
                   <div key={ev} title={title} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '9px 14px', borderTop: '1px solid var(--border)' }}>
                     <PermissionToggle checked={selected.has(ev)} onChange={() => toggle(ev)} />
                     <span role="button" tabIndex={0} onClick={() => toggle(ev)} onKeyDown={(e) => activateOnKey(e, () => toggle(ev))}
-                      style={{ cursor: 'pointer' }}><BodyText as="span">{actionLabel(actionOf(ev) ?? '')}</BodyText></span>
+                      style={{ cursor: 'pointer' }}><BodyText as="span">{eventLabel(ev)}</BodyText></span>
                     {m?.pii && <ShieldAlert size={12} aria-label={piiTitle} style={{ color: 'var(--text-muted)', flexShrink: 0 }} />}
                     <Caption as="code" style={{ ...monoStyle, marginLeft: 'auto' }}>{ev}</Caption>
                   </div>

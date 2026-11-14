@@ -8,7 +8,7 @@
  * back to the raw dotted key.
  */
 import { describe, it, expect } from 'vitest'
-import { WORKFLOW_EVENT_KEYS, eventKeyToI18nKey } from './eventCatalog'
+import { WORKFLOW_EVENT_KEYS, HELLOFLEX_EVENT_KEYS, HELLOFLEX_EVENTS, WORKFLOW_EVENT_GROUPS, eventKeyToI18nKey } from './eventCatalog'
 
 // Manual mirror of TriggerModule::configSchema()'s `event.options` (koiosmatch-api,
 // app/Workflow/Modules/TriggerModule.php ~L68-135) — every key here has a real
@@ -47,7 +47,8 @@ const BACKEND_DISPATCHED_EVENTS = [
 
 // Every shipped locale's workflows.json, loaded eagerly like registryI18n.test.ts does.
 const workflowsLocales = import.meta.glob('../../../i18n/locales/*/workflows.json', { eager: true, import: 'default' }) as Record<string, {
-  triggers?: { events?: Record<string, string> }
+  triggers?: { events?: Record<string, string>; groups?: Record<string, string> }
+  fieldOptions?: Record<string, string>
 }>
 const LOCALES = ['nl', 'en', 'de', 'fr', 'es', 'it', 'pt']
 
@@ -85,6 +86,34 @@ describe('WORKFLOW_EVENT_KEYS · i18n coverage', () => {
         .map(key => eventKeyToI18nKey(key))
         .filter(i18nKey => typeof events[i18nKey] !== 'string' || events[i18nKey].trim() === '')
       expect(missing, `missing triggers.events labels in ${loc}: ${missing.join(', ')}`).toEqual([])
+    })
+  }
+})
+
+describe('HelloFlex event group', () => {
+  it('holds exactly the 18 HelloFlex webhook events, unique, helloflex-prefixed', () => {
+    expect(HELLOFLEX_EVENT_KEYS.length).toBe(18)
+    expect(new Set(HELLOFLEX_EVENT_KEYS).size).toBe(18)
+    expect(HELLOFLEX_EVENT_KEYS.every(k => k.startsWith('helloflex.'))).toBe(true)
+    expect(WORKFLOW_EVENT_GROUPS.helloflex).toEqual(HELLOFLEX_EVENT_KEYS)
+  })
+
+  it('stays out of the TriggerModule mirror (67 core events untouched)', () => {
+    expect(WORKFLOW_EVENT_GROUPS.core.length).toBe(67)
+    expect(WORKFLOW_EVENT_KEYS.some(k => k.startsWith('helloflex.'))).toBe(false)
+  })
+
+  for (const loc of LOCALES) {
+    it(`${loc}/workflows.json labels the group, all 18 events and their select options`, () => {
+      const file = Object.entries(workflowsLocales).find(([p]) => p.includes(`/${loc}/`))?.[1]
+      expect(file?.triggers?.groups?.helloflex).toBeTruthy()
+      const events = file?.triggers?.events ?? {}
+      const options = file?.fieldOptions ?? {}
+      const missing = HELLOFLEX_EVENTS.flatMap(e => [
+        events[eventKeyToI18nKey(e.key)] ? '' : `events:${e.key}`,
+        options[e.label.replace(/[.:]/g, '')] ? '' : `option:${e.label}`,
+      ]).filter(Boolean)
+      expect(missing).toEqual([])
     })
   }
 })

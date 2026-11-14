@@ -1080,7 +1080,12 @@
       "none": "Nessun contratto",
       "pending": "In lavorazione",
       "active": "Attivo",
-      "ended": "Terminato"
+      "ended": "Terminato",
+      "sending": "In invio",
+      "sent": "Inviato",
+      "signed": "Firmato",
+      "failed": "Non riuscito",
+      "rejected": "Rifiutato"
     },
     "openMatch": "Apri match",
     "searchPlaceholder": "Cerca match…",

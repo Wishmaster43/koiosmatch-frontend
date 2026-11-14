@@ -1564,7 +1564,8 @@
         "leads": "Leads",
         "interviews": "Interviews",
         "opportunities": "Chancen",
-        "settings": "Einstellungen"
+        "settings": "Einstellungen",
+        "helloflex": "HelloFlex"
       },
       "fieldsTitle": "Übertragene Felder: {{fields}}",
       "piiTitle": "Enthält personenbezogene Daten",
@@ -1620,7 +1621,10 @@
         "approval_overdue": "Genehmigung überfällig",
         "approved": "Genehmigt",
         "rejected": "Abgelehnt",
-        "blank_fallback": "Einstellung auf Standard zurückgefallen"
+        "blank_fallback": "Einstellung auf Standard zurückgefallen",
+        "state_changed": "Statusänderung",
+        "new_version": "Neue Version",
+        "signed": "Unterschrieben"
       }
     },
     "meta": {

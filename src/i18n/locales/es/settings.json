@@ -1564,7 +1564,8 @@
         "leads": "Leads",
         "interviews": "Entrevistas",
         "opportunities": "Oportunidades",
-        "settings": "Ajustes"
+        "settings": "Ajustes",
+        "helloflex": "HelloFlex"
       },
       "fieldsTitle": "Campos que se envían: {{fields}}",
       "piiTitle": "Contiene datos personales",
@@ -1620,7 +1621,10 @@
         "approval_overdue": "Aprobación atrasada",
         "approved": "Aprobado",
         "rejected": "Rechazado",
-        "blank_fallback": "Ajuste volvió a su valor predeterminado"
+        "blank_fallback": "Ajuste volvió a su valor predeterminado",
+        "state_changed": "Cambio de estado",
+        "new_version": "Nueva versión",
+        "signed": "Firmado"
       }
     },
     "meta": {

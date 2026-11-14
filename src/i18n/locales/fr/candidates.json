@@ -1057,7 +1057,12 @@
       "none": "Aucun contrat",
       "pending": "En cours",
       "active": "Actif",
-      "ended": "Terminé"
+      "ended": "Terminé",
+      "sending": "Envoi en cours",
+      "sent": "Envoyé",
+      "signed": "Signé",
+      "failed": "Échoué",
+      "rejected": "Refusé"
     },
     "openMatch": "Ouvrir le match",
     "searchPlaceholder": "Rechercher un match…",

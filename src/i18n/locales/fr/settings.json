@@ -1564,7 +1564,8 @@
         "leads": "Prospects",
         "interviews": "Entretiens",
         "opportunities": "Opportunités",
-        "settings": "Paramètres"
+        "settings": "Paramètres",
+        "helloflex": "HelloFlex"
       },
       "fieldsTitle": "Champs transmis : {{fields}}",
       "piiTitle": "Contient des données personnelles",
@@ -1620,7 +1621,10 @@
         "approval_overdue": "Approbation en retard",
         "approved": "Approuvé",
         "rejected": "Rejeté",
-        "blank_fallback": "Paramètre revenu à sa valeur par défaut"
+        "blank_fallback": "Paramètre revenu à sa valeur par défaut",
+        "state_changed": "État modifié",
+        "new_version": "Nouvelle version",
+        "signed": "Signé"
       }
     },
     "meta": {
