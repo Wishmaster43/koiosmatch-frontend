@@ -4841,6 +4841,7 @@
     "vat": "VAT validation (VIES)"
   },
   "integrations": {
+    "shiftmanagerModuleOff": "The Shiftmanager module is not enabled for this bureau.",
     "tabs": {
       "connection": "Connection",
       "mapping": "Mapping",
@@ -4852,7 +4853,7 @@
       "ok": "Connection works",
       "error": "Connection failed",
       "unknown": "Not checked yet",
-      "checkedAt": "checked at {{time}}"
+      "checkedAt": "checked on {{time}}"
     },
     "webhook": {
       "registered": "Webhook registered",
@@ -4878,7 +4879,7 @@
       "clientId": "Client ID",
       "clientSecret": "Client secret",
       "subdomain": "Subdomain",
-      "subdomainHint": "yesway → yesway.shiftmanager.pro",
+      "subdomainHint": "e.g. yourbureau → yourbureau.shiftmanager.pro",
       "company": "Company",
       "authToken": "Auth token",
       "tokenApiTitle": "Token API",
@@ -4904,6 +4905,8 @@
       "undoClear": "Undo clear"
     },
     "reason": {
+      "limit_reached": "This connector has reached its configured limit. Try again later.",
+      "unexpected": "Unexpected error at the external service.",
       "auth_failed": "Invalid credentials",
       "unreachable": "Unreachable",
       "timeout": "Timeout",
@@ -4964,7 +4967,7 @@
       "loadError": "Failed to load mappings.",
       "saveError": "Saving failed.",
       "deleteError": "Delete failed.",
-      "preparationNotice": "These field mappings are preparation: they will only be used once synchronization is enabled in a future release.",
+      "preparationNotice": "These mappings translate Koios values into the values of the external party. HelloFlex reads them when a contract is sent (CAO, scale, step, function).",
       "domains": {
         "cao": "CLA",
         "scale": "Scale",

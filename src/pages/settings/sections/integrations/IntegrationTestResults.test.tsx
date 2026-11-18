@@ -83,4 +83,23 @@ describe('IntegrationTestResults', () => {
     expect(screen.getByText(expected)).toBeInTheDocument()
     expect(expected).not.toContain('\u2014')
   })
+
+  // A cap hit is a warning alert with the translated title; a network failure stays danger.
+  it('renders limit_reached as a warning alert and unreachable as danger', () => {
+    const { unmount } = render(<IntegrationTestResults t={t} result={{ ok: false, reason_code: 'limit_reached', message: 'Cap hit', correlation_id: 'corr-3' }} />)
+    expect(screen.getByRole('alert')).toHaveAttribute('data-variant', 'warning')
+    expect(screen.getByText(t('integrations.reason.limit_reached'))).toBeInTheDocument()
+    unmount()
+    render(<IntegrationTestResults t={t} result={{ ok: false, reason_code: 'unreachable', message: 'down', correlation_id: 'corr-5' }} />)
+    expect(screen.getByRole('alert')).toHaveAttribute('data-variant', 'danger')
+  })
+
+  // An empty correlation id renders no reference line; a real id still does.
+  it('renders the reference line only when a correlation id exists', () => {
+    const prefix = t('integrations.connection.correlation', { id: 'X' }).replace('X', '')
+    const { rerender } = render(<IntegrationTestResults t={t} result={{ ok: false, reason_code: 'unreachable', message: 'down', correlation_id: '' }} />)
+    expect(screen.queryByText((c) => c.startsWith(prefix))).not.toBeInTheDocument()
+    rerender(<IntegrationTestResults t={t} result={{ ok: false, reason_code: 'unreachable', message: 'down', correlation_id: 'corr-4' }} />)
+    expect(screen.getByText(t('integrations.connection.correlation', { id: 'corr-4' }))).toBeInTheDocument()
+  })
 })

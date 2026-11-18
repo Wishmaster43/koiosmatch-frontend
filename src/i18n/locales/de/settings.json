@@ -4841,6 +4841,7 @@
     "vat": "USt-ID-Validierung (VIES)"
   },
   "integrations": {
+    "shiftmanagerModuleOff": "Das Shiftmanager-Modul ist für diese Agentur nicht aktiviert.",
     "tabs": {
       "connection": "Verbindung",
       "mapping": "Mapping",
@@ -4852,7 +4853,7 @@
       "ok": "Verbindung funktioniert",
       "error": "Verbindung fehlgeschlagen",
       "unknown": "Noch nicht geprüft",
-      "checkedAt": "geprüft um {{time}}"
+      "checkedAt": "geprüft am {{time}}"
     },
     "webhook": {
       "registered": "Webhook registriert",
@@ -4878,7 +4879,7 @@
       "clientId": "Client-ID",
       "clientSecret": "Client-Secret",
       "subdomain": "Subdomain",
-      "subdomainHint": "yesway → yesway.shiftmanager.pro",
+      "subdomainHint": "z. B. ihreagentur → ihreagentur.shiftmanager.pro",
       "company": "Unternehmen",
       "authToken": "Auth-Token",
       "tokenApiTitle": "Token-API",
@@ -4904,6 +4905,8 @@
       "undoClear": "Löschen rückgängig machen"
     },
     "reason": {
+      "limit_reached": "Diese Verbindung hat das eingestellte Limit erreicht. Versuchen Sie es später erneut.",
+      "unexpected": "Unerwarteter Fehler beim externen Dienst.",
       "auth_failed": "Zugangsdaten ungültig",
       "unreachable": "Nicht erreichbar",
       "timeout": "Zeitüberschreitung",
@@ -4964,7 +4967,7 @@
       "loadError": "Mappings konnten nicht geladen werden.",
       "saveError": "Speichern fehlgeschlagen.",
       "deleteError": "Löschen fehlgeschlagen.",
-      "preparationNotice": "Diese Feldzuordnungen sind Vorbereitung: Sie werden erst verwendet, wenn die Synchronisierung in einer zukünftigen Version aktiviert wird.",
+      "preparationNotice": "Diese Zuordnungen übersetzen Koios-Werte in die Werte der externen Partei. HelloFlex liest sie beim Versand eines Vertrags (Tarifvertrag, Skala, Stufe, Funktion).",
       "domains": {
         "cao": "Tarifvertrag",
         "scale": "Stufe",

@@ -7,6 +7,7 @@
  */
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
+import { BodyText } from '@/components/ui/typography'
 import { useAuth } from '@/context/AuthContext'
 import ConnectorTabsShell from './integrations/ConnectorTabsShell'
 import SchemaSection, { type Schema } from '../components/SchemaSection'
@@ -27,11 +28,10 @@ export default function ShiftmanagerModuleSettings() {
 
   // Deep-link guard: the module is the only truth (ONIX G-012); without it there is nothing to show.
   if (!moduleOn) {
-    return <p style={{ fontSize: 13, color: 'var(--text-muted)' }}>{t('shell.empty')}</p>
+    return <BodyText style={{ color: 'var(--text-muted)' }}>{t('integrations.shiftmanagerModuleOff')}</BodyText>
   }
 
-  // ONIX G-012: no Mapping tab for Shiftmanager, because the SM side reads no
-  // mapping store yet (BE fact); helloflex/werkzoeken keep theirs.
+  // No Mapping tab for Shiftmanager: a product decision (scout Q3); helloflex/werkzoeken keep theirs.
   const tabs = [
     { id: 'connection', label: t('integrations.tabs.connection') },
     { id: 'kpis', label: t('smKpis.title') },

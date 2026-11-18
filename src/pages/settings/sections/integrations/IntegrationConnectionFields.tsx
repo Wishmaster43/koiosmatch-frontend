@@ -47,17 +47,19 @@ function SecretField({ fieldKey, hasSecret, value, onChange, t }: {
 }) {
   const labelKey = fieldKey === 'client_secret' ? 'clientSecret' : fieldKey === 'auth_token' ? 'authToken' : 'apiKey'
   const inputId = `integration-secret-${fieldKey}`
+  // Stable id of the state line so the input can point at it (aria-describedby).
+  const stateId = `${inputId}-state`
   return (
     <div>
       <label htmlFor={inputId} style={labelStyle}>{t(`integrations.connection.${labelKey}`)}</label>
       {/* Pending clear is a visible, undoable intent — not a silent state flip. */}
       {value === null ? (
-        <Caption style={{ color: 'var(--color-danger-text)' }}>{t('integrations.connection.secretPendingClear')}</Caption>
+        <Caption id={stateId} style={{ color: 'var(--color-danger-text)' }}>{t('integrations.connection.secretPendingClear')}</Caption>
       ) : (
-        <Caption>{hasSecret ? t('integrations.connection.secretSet') : t('integrations.connection.secretNotSet')}</Caption>
+        <Caption id={stateId}>{hasSecret ? t('integrations.connection.secretSet') : t('integrations.connection.secretNotSet')}</Caption>
       )}
       <div style={{ display: 'flex', gap: 8, marginTop: 4 }}>
-        <input id={inputId} type="password" autoComplete="new-password"
+        <input id={inputId} aria-describedby={stateId} type="password" autoComplete="new-password"
           value={value === null ? '' : (value ?? '')}
           placeholder={t('integrations.connection.secretPlaceholder')}
           onChange={(e) => onChange(e.target.value)}
@@ -128,17 +130,21 @@ export default function IntegrationConnectionFields({ visibleSpec, hasGroups, se
               : field.key === 'subdomain' ? 'subdomain'
                 : field.key === 'company' ? 'company' : 'clientId'
             const val = (settings as unknown as Record<string, unknown>)[field.key]
+            // The help or error text an input points at: the client-id notice only while it shows, the subdomain hint always.
+            const describedBy = field.key === 'client_id' && clientIdInvalid ? `integration-${field.key}-notice`
+              : field.key === 'subdomain' ? `integration-${field.key}-hint` : undefined
             return (
               <div key={field.key}>
                 <label htmlFor={`integration-${field.key}`} style={labelStyle}>{t(`integrations.connection.${labelKey}`)}</label>
-                <input id={`integration-${field.key}`} aria-invalid={field.key === 'client_id' && clientIdInvalid ? true : undefined} value={typeof val === 'string' ? val : ''}
+                <input id={`integration-${field.key}`} aria-invalid={field.key === 'client_id' && clientIdInvalid ? true : undefined}
+                  aria-describedby={describedBy} value={typeof val === 'string' ? val : ''}
                   onChange={(e) => setField({ [field.key]: e.target.value } as Partial<WorkingSettings>)}
                   style={fieldInputStyle} />
                 {field.key === 'client_id' && clientIdInvalid && (
-                  <FieldNotice text={t('integrations.connection.clientIdInvalid')} />
+                  <div id={`integration-${field.key}-notice`}><FieldNotice text={t('integrations.connection.clientIdInvalid')} /></div>
                 )}
                 {field.key === 'subdomain' && (
-                  <Caption as="p" style={{ marginTop: 4 }}>{t('integrations.connection.subdomainHint')}</Caption>
+                  <Caption as="p" id={`integration-${field.key}-hint`} style={{ marginTop: 4 }}>{t('integrations.connection.subdomainHint')}</Caption>
                 )}
               </div>
             )
@@ -148,7 +154,10 @@ export default function IntegrationConnectionFields({ visibleSpec, hasGroups, se
             return (
               <div key={field.key}>
                 <label id="integration-environment-label" style={labelStyle}>{t('integrations.connection.environment')}</label>
+                {/* DROPDOWN-CLEAR-1: exactly two valid values (uat/live) and the BE in-rule
+                    refuses an empty environment, so a cleared value could never be saved. */}
                 <SelectMenu
+                  clearable={false}
                   aria-labelledby="integration-environment-label"
                   value={settings.environment ?? 'uat'}
                   onChange={(v) => setField({ environment: v as 'uat' | 'live' })}

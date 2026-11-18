@@ -8,7 +8,7 @@
  */
 import { CheckCircle2, XCircle } from 'lucide-react'
 import CalloutBox from '@/components/ui/CalloutBox'
-import { Caption, SectionTitle } from '@/components/ui/typography'
+import { BodyText, Caption, SectionTitle } from '@/components/ui/typography'
 import type { TestFailure, TestSuccess, DualTestResult, DualTestOutcome, TestReasonCode } from './integrationsApi'
 
 export type TestOutcome = TestSuccess | TestFailure | DualTestResult
@@ -29,13 +29,13 @@ function failureText(t: Props['t'], outcome: DualTestOutcome): string {
 // the connected-as name or the translated reason + server message.
 function ResultLine({ titleKey, outcome, t }: { titleKey: string; outcome: DualTestOutcome; t: Props['t'] }) {
   const Icon = outcome.ok ? CheckCircle2 : XCircle
-  const color = outcome.ok ? 'var(--color-success)' : 'var(--color-danger)'
+  const color = outcome.ok ? 'var(--color-success-text)' : 'var(--color-danger-text)'
   return (
     <div style={{ display: 'flex', alignItems: 'flex-start', gap: 8, padding: '4px 0' }}>
       <Icon size={16} color={color} style={{ flexShrink: 0, marginTop: 2 }} aria-hidden="true" />
       <div>
         <SectionTitle as="div">{t(titleKey)}</SectionTitle>
-        <Caption as="p" style={{ margin: 0 }}>
+        <Caption as="p">
           {outcome.ok
             ? (outcome.connected_as ? t('integrations.connection.testOk', { name: outcome.connected_as }) : t('integrations.connection.testOk', { name: '' }).trim())
             : failureText(t, outcome)}
@@ -64,10 +64,12 @@ export default function IntegrationTestResults({ result, t }: Props) {
     return <CalloutBox variant="success">{t('integrations.connection.testOk', { name: result.connected_as })}</CalloutBox>
   }
 
+  // A cap hit is a calm warning, every other failure stays danger.
+  const variant = result.reason_code === 'limit_reached' ? 'warning' : 'danger'
   return (
-    <CalloutBox variant="danger" title={t([`integrations.reason.${result.reason_code}`, 'integrations.connection.testFailed'])}>
-      <p style={{ margin: 0 }}>{result.message}</p>
-      <Caption>{t('integrations.connection.correlation', { id: result.correlation_id })}</Caption>
+    <CalloutBox variant={variant} title={t([`integrations.reason.${result.reason_code}`, 'integrations.connection.testFailed'])}>
+      <BodyText>{result.message}</BodyText>
+      {result.correlation_id && <Caption>{t('integrations.connection.correlation', { id: result.correlation_id })}</Caption>}
     </CalloutBox>
   )
 }

@@ -1,8 +1,8 @@
 /**
  * integrationsApi — typed client for the Shiftmanager / HelloFlex / Werkzoeken
- * integration settings (INTEGRATIONS-SETTINGS-1). These routes are NOT yet in
- * src/types/api-generated.ts (BE lands them separately per the contract), so
- * every shape below is hand-written against
+ * integration settings (INTEGRATIONS-SETTINGS-1). The routes are typed in
+ * src/types/api-generated.ts (request shapes only, no 2xx schema), so
+ * every response shape below is hand-written against
  * koiosmatch-api/docs/contract/INTEGRATIONS-CONTRACT.md (CLAUDE.md §10 type-gen
  * rule: hand-write what the generated spec doesn't cover).
  */
@@ -15,9 +15,7 @@ export type ConnectorId = 'shiftmanager' | 'helloflex' | 'werkzoeken'
 // Per-connector GET /integrations/{connector}/settings shapes (contract §2).
 // SM-CREDS-2 (CONTRACT-CHANGELOG.md): Shiftmanager carries TWO credential sets —
 // the tenant API (subdomain + api_key, Bearer) and the open API (company +
-// auth_token). `subdomain`/`company`/`has_auth_token` are optional: a BE that
-// has not landed SM-CREDS-2 yet returns the old shape without them, and the
-// card feature-detects their absence to keep the old face.
+// auth_token). `subdomain`/`company`/`has_auth_token` stay optional in the type; the BE always sends them.
 export interface ShiftmanagerSettings {
   two_way: boolean
   subdomain?: string | null
@@ -68,6 +66,8 @@ export type TestReasonCode =
   | 'scope_missing'
   | 'not_configured'
   | 'not_found'
+  | 'limit_reached'
+  | 'unexpected'
 
 export interface TestSuccess {
   ok: true
@@ -132,7 +132,7 @@ export interface IntegrationSummary {
   connected_as: string | null
   last_sync_at: string | null
   // HF-CONNECTION-STATUS-1 (BE e05628ddd): ok | unknown (never probed) | a failure code; hand-written,
-  // the spec carries no 2xx schema. `health_error` is tolerated from older rows but no longer sent.
+  // the spec carries no 2xx schema. `health_error` is sent by the BE (IntegrationController).
   health: 'ok' | 'unknown' | 'auth_failed' | 'invalid_config' | 'unreachable' | 'timeout' | 'error'
   health_error?: string | null
   health_error_message?: string | null

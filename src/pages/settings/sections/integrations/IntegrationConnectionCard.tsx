@@ -11,14 +11,8 @@
  * or explicitly cleared it (contract: koiosmatch-api/docs/contract/
  * INTEGRATIONS-CONTRACT.md, "PUT same route").
  *
- * Types below are hand-written (CLAUDE.md §10 type-gen rule): the integrations
- * routes are not yet in src/types/api-generated.ts (backend lands them
- * alongside this lane) — replace with generated types once the spec ships them.
- *
- * SM-CREDS-2 (CONTRACT-CHANGELOG.md): Shiftmanager's `company_api` credential
- * group (company + auth_token) only renders once the GET response carries
- * `has_auth_token` — FEATURE DETECTION, so the card looks exactly as it did
- * before until the backend half lands (protocol: nothing fake ever shows).
+ * Types below are hand-written: the spec carries request shapes only (routes are typed in
+ * src/types/api-generated.ts, no 2xx schema).
  */
 import { useEffect, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
@@ -96,19 +90,9 @@ export default function IntegrationConnectionCard({ connector }: { connector: Co
   }, [connector, loadTick])
 
   const spec = FIELD_SPEC[connector]
-  // SM-CREDS-2 feature detection: the token_api group (subdomain) only shows once
-  // the GET response actually carried that key — a BE that has not landed the
-  // change yet omits it, and the card renders exactly as it did before (old face).
-  const hasSmCreds2 = !!initial && Object.prototype.hasOwnProperty.call(initial, 'subdomain')
-  const visibleSpec = spec.filter((f) => {
-    if (f.key === 'base_url') return !!initial?.base_url
-    if (f.key === 'subdomain') return hasSmCreds2
-    // Feature detection, not value detection: the GET carrying the flag key at
-    // all (even false) proves the BE half landed, so an as-yet-empty company/
-    // auth_token pair still shows and can be filled in for the first time.
-    if (f.requiresFlag) return !!initial && Object.prototype.hasOwnProperty.call(initial, f.requiresFlag)
-    return true
-  })
+  // Only the base_url override is value-gated; every other spec field always shows.
+  const hasGroups = connector === 'shiftmanager'
+  const visibleSpec = spec.filter((f) => f.key !== 'base_url' || !!initial?.base_url)
   const secretKeys = visibleSpec.filter((f) => f.kind === 'secret').map((f) => f.key)
   const dirty =
     JSON.stringify(settings) !== JSON.stringify(initial) ||
@@ -227,7 +211,7 @@ export default function IntegrationConnectionCard({ connector }: { connector: Co
       )}
 
       <div style={{ display: 'flex', flexDirection: 'column', gap: 16, margin: '16px 0 20px' }}>
-        <IntegrationConnectionFields visibleSpec={visibleSpec} hasGroups={hasSmCreds2} settings={settings} secrets={secrets}
+        <IntegrationConnectionFields visibleSpec={visibleSpec} hasGroups={hasGroups} settings={settings} secrets={secrets}
           setField={setField} setSecret={(k, v) => setSecrets((prev) => ({ ...prev, [k]: v }))}
           clientIdInvalid={clientIdInvalid} t={t} />
       </div>
@@ -236,7 +220,7 @@ export default function IntegrationConnectionCard({ connector }: { connector: Co
       <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 12 }}>
         <Button variant="secondary" onClick={runTest} disabled={testing || dirty}>
           {testing && <Spinner size={12} />}
-          {testing ? t('integrations.connection.testing') : t(hasSmCreds2 ? 'integrations.connection.testBoth' : 'integrations.connection.test')}
+          {testing ? t('integrations.connection.testing') : t(hasGroups ? 'integrations.connection.testBoth' : 'integrations.connection.test')}
         </Button>
         {dirty && <Caption>{t('integrations.connection.saveBeforeTest')}</Caption>}
       </div>

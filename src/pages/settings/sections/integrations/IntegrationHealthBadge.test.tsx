@@ -1,14 +1,20 @@
-/** IntegrationHealthBadge: three states, HH:mm check time, error code label or server text. */
-import { describe, it, expect, vi } from 'vitest'
-import { render, screen } from '@testing-library/react'
+/** IntegrationHealthBadge: three states, DD-MM-YYYY HH:mm check stamp, error code label or server text. */
+import { describe, it, expect, vi, beforeAll, afterEach } from 'vitest'
+import { render, screen, renderHook } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import i18n from '@/i18n'
+import { useDateFormat } from '@/lib/datetime'
 import IntegrationHealthBadge from './IntegrationHealthBadge'
 
 const t = (key: string, opts?: Record<string, unknown>) => i18n.t(key, { ns: 'settings', ...opts })
 const none = { errorCode: null, errorMessage: null, checkedAt: null }
 
 describe('IntegrationHealthBadge', () => {
+  // Remember the language once and restore it after every test.
+  let prevLanguage = ''
+  beforeAll(() => { prevLanguage = i18n.language })
+  afterEach(async () => { await i18n.changeLanguage(prevLanguage) })
+
   // The three states render their own text.
   it('renders ok, error and unknown texts', () => {
     const { rerender } = render(<IntegrationHealthBadge health={{ ...none, state: 'ok' }} />)
@@ -19,11 +25,25 @@ describe('IntegrationHealthBadge', () => {
     expect(screen.getByText(t('integrations.health.unknown'))).toBeInTheDocument()
   })
 
-  // The check time is a local HH:mm, never an ISO string.
-  it('shows the check time as HH:mm', () => {
+  // The check stamp carries the date and the time through the house formatter, never ISO.
+  it('shows the check stamp as date and time', () => {
     render(<IntegrationHealthBadge health={{ ...none, state: 'ok', checkedAt: '2026-11-12T10:05:00' }} />)
-    expect(screen.getByText(t('integrations.health.checkedAt', { time: '10:05' }))).toBeInTheDocument()
+    const { result } = renderHook(() => useDateFormat())
+    const stamp = result.current.formatDateTime('2026-11-12T10:05:00')
+    expect(stamp).toContain('12-11-2026')
+    expect(stamp).toContain('10:05')
+    expect(screen.getByText(t('integrations.health.checkedAt', { time: stamp }))).toBeInTheDocument()
     expect(screen.queryByText(/2026-11-12/)).not.toBeInTheDocument()
+  })
+
+  // Connector-prefixed BE codes resolve to the bare translated copy in en and nl.
+  it.each(['en', 'nl'])('translates prefixed codes (%s)', async (lng) => {
+    await i18n.changeLanguage(lng)
+    const tl = (key: string) => i18n.t(key, { ns: 'settings', lng })
+    const { rerender } = render(<IntegrationHealthBadge health={{ state: 'error', errorCode: 'sm_auth_failed', errorMessage: 'raw', checkedAt: null }} />)
+    expect(screen.getByText(tl('integrations.reason.auth_failed'))).toBeInTheDocument()
+    rerender(<IntegrationHealthBadge health={{ state: 'error', errorCode: 'wz_unexpected', errorMessage: 'raw', checkedAt: null }} />)
+    expect(screen.getByText(tl('integrations.reason.unexpected'))).toBeInTheDocument()
   })
 
   // A known code shows its translated label; an unknown code falls back to the server text.

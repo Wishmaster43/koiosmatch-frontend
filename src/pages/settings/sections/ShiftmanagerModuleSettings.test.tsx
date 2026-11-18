@@ -74,7 +74,8 @@ describe('ShiftmanagerModuleSettings — module x app flag matrix', () => {
     mockApps.mockReturnValue({ isAppEnabled: (id: string) => id === 'shiftmanager' })
     render(<ShiftmanagerModuleSettings />)
 
-    expect(screen.getByText(st('shell.empty'))).toBeInTheDocument()
+    expect(screen.getByText(st('integrations.shiftmanagerModuleOff'))).toBeInTheDocument()
+    expect(screen.queryByText(st('shell.empty'))).not.toBeInTheDocument()
     expect(screen.queryByRole('tablist')).not.toBeInTheDocument()
   })
 
@@ -83,7 +84,8 @@ describe('ShiftmanagerModuleSettings — module x app flag matrix', () => {
     mockApps.mockReturnValue({ isAppEnabled: () => false })
     render(<ShiftmanagerModuleSettings />)
 
-    expect(screen.getByText(st('shell.empty'))).toBeInTheDocument()
+    expect(screen.getByText(st('integrations.shiftmanagerModuleOff'))).toBeInTheDocument()
+    expect(screen.queryByText(st('shell.empty'))).not.toBeInTheDocument()
     expect(screen.queryByRole('tablist')).not.toBeInTheDocument()
   })
 
@@ -92,6 +94,7 @@ describe('ShiftmanagerModuleSettings — module x app flag matrix', () => {
     mockApps.mockReturnValue(undefined)
     render(<ShiftmanagerModuleSettings />)
 
-    expect(screen.getByText(st('shell.empty'))).toBeInTheDocument()
+    expect(screen.getByText(st('integrations.shiftmanagerModuleOff'))).toBeInTheDocument()
+    expect(screen.queryByText(st('shell.empty'))).not.toBeInTheDocument()
   })
 })

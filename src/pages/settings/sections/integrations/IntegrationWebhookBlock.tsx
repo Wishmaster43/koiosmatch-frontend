@@ -4,7 +4,7 @@
  */
 import { useTranslation } from 'react-i18next'
 import { CheckCircle2, AlertTriangle, CircleDashed } from 'lucide-react'
-import { BodyText, Caption } from '@/components/ui/typography'
+import { SectionTitle, Caption } from '@/components/ui/typography'
 import { useDateFormat } from '@/lib/datetime'
 import type { IntegrationSummary } from './integrationsApi'
 
@@ -30,7 +30,7 @@ export default function IntegrationWebhookBlock({ webhook }: { webhook: Integrat
   return (
     <div data-testid="integration-webhook" style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 8, color }}>
       <Icon size={14} aria-hidden="true" />
-      <BodyText as="span" style={{ color, fontWeight: 600 }}>{t(`integrations.webhook.${state}`)}</BodyText>
+      <SectionTitle as="span" style={{ color }}>{t(`integrations.webhook.${state}`)}</SectionTitle>
       {detail && <Caption>{detail}</Caption>}
     </div>
   )

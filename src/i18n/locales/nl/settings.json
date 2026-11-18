@@ -4841,6 +4841,7 @@
     "vat": "BTW-validatie (VIES)"
   },
   "integrations": {
+    "shiftmanagerModuleOff": "De Shiftmanager-module staat niet aan voor dit bureau.",
     "tabs": {
       "connection": "Koppeling",
       "mapping": "Mapping",
@@ -4852,7 +4853,7 @@
       "ok": "Verbinding werkt",
       "error": "Verbinding mislukt",
       "unknown": "Nog niet gecontroleerd",
-      "checkedAt": "gecontroleerd om {{time}}"
+      "checkedAt": "gecontroleerd op {{time}}"
     },
     "webhook": {
       "registered": "Webhook geregistreerd",
@@ -4878,7 +4879,7 @@
       "clientId": "Client-ID",
       "clientSecret": "Client-secret",
       "subdomain": "Subdomein",
-      "subdomainHint": "yesway → yesway.shiftmanager.pro",
+      "subdomainHint": "bijv. jouwbureau → jouwbureau.shiftmanager.pro",
       "company": "Bedrijf",
       "authToken": "Auth-token",
       "tokenApiTitle": "Token-API",
@@ -4904,6 +4905,8 @@
       "undoClear": "Wissen ongedaan maken"
     },
     "reason": {
+      "limit_reached": "Deze koppeling heeft de ingestelde limiet bereikt. Probeer het later opnieuw.",
+      "unexpected": "Onverwachte fout bij de externe partij.",
       "auth_failed": "Inloggegevens onjuist",
       "unreachable": "Niet bereikbaar",
       "timeout": "Time-out",
@@ -4964,7 +4967,7 @@
       "loadError": "Mappings laden mislukt.",
       "saveError": "Opslaan mislukt.",
       "deleteError": "Verwijderen mislukt.",
-      "preparationNotice": "Deze veldkoppelingen zijn voorbereiding: ze worden pas gebruikt zodra de synchronisatie in een volgende release aan staat.",
+      "preparationNotice": "Deze veldkoppelingen vertalen Koios-waarden naar de waarden van de externe partij. HelloFlex leest ze bij het versturen van een contract (cao, schaal, trede, functie).",
       "domains": {
         "cao": "CAO",
         "scale": "Schaal",

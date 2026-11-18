@@ -39,10 +39,8 @@ async function renderCard(connector: 'shiftmanager' | 'helloflex' | 'werkzoeken'
   await screen.findByText(t('integrations.connection.title'))
 }
 
-// SM-CREDS-2: both Shiftmanager credential sets on one card, feature-detected
-// on `subdomain`/`has_auth_token` so a BE that has not landed it yet leaves the
-// card exactly as the field-spec tests in integrationConnectionCard.test.tsx
-// (old face, old PUT body).
+// SM-CREDS-2: both Shiftmanager credential sets on one card; the BE always sends
+// subdomain/company/has_auth_token, so every spec field shows.
 describe('SM-CREDS-2 dual credentials', () => {
   // (b) new GET shape → both groups render.
   it('renders both credential groups once the GET carries subdomain + has_auth_token', async () => {
@@ -58,19 +56,7 @@ describe('SM-CREDS-2 dual credentials', () => {
     expect(screen.getByText(t('integrations.connection.authToken'))).toBeInTheDocument()
   })
 
-  // Feature detection: has_auth_token key ABSENT → company_api group stays hidden
-  // (the BE half genuinely has not landed that field yet).
-  it('hides the company_api group when has_auth_token is absent entirely', async () => {
-    mockGet.mockResolvedValue({
-      two_way: true, subdomain: 'yesway', base_url: null, has_api_key: true, connected_as: null,
-    })
-    await renderCard('shiftmanager')
-    expect(screen.getByText(t('integrations.connection.tokenApiTitle'))).toBeInTheDocument()
-    expect(screen.queryByText(t('integrations.connection.companyApiTitle'))).not.toBeInTheDocument()
-  })
-
-  // Feature detection is on the KEY, not the value: has_auth_token: false still
-  // shows the group (Yesway's first save, before any auth_token was ever set).
+  // has_auth_token: false shows the group (Yesway's first save, before any auth_token was ever set).
   it('shows the company_api group when has_auth_token is present but false', async () => {
     mockGet.mockResolvedValue({
       two_way: true, subdomain: 'yesway', base_url: null, has_api_key: true,
@@ -249,6 +235,31 @@ describe('connection health and honest test', () => {
     await userEvent.click(screen.getByRole('button', { name: t('common.save') }))
     await waitFor(() => expect(mockPut).toHaveBeenCalledWith('helloflex', expect.objectContaining({ client_id: guid })))
     await waitFor(() => expect(mockRefresh).toHaveBeenCalled())
+  })
+
+  // F4: the two-value environment picker has no clear button while a value is set.
+  it('shows no clear button on the environment picker', async () => {
+    mockGet.mockResolvedValue({ two_way: false, environment: 'uat', client_id: '', has_client_secret: false, connected_as: null })
+    await renderCard('helloflex')
+    expect(screen.queryByRole('button', { name: i18n.t('clear', { ns: 'common' }) })).not.toBeInTheDocument()
+  })
+
+  // F10: hints and notices are linked to their inputs through aria-describedby.
+  it('links the secret state line and the client-id notice to their inputs', async () => {
+    mockGet.mockResolvedValue({ two_way: false, environment: 'uat', client_id: '', has_client_secret: true, connected_as: null })
+    await renderCard('helloflex')
+    const secret = screen.getByLabelText(t('integrations.connection.clientSecret'))
+    expect(document.getElementById(secret.getAttribute('aria-describedby') ?? '')).toHaveTextContent(t('integrations.connection.secretSet'))
+    const input = screen.getByLabelText(t('integrations.connection.clientId'))
+    await userEvent.type(input, 'not-a-guid')
+    expect(document.getElementById(input.getAttribute('aria-describedby') ?? '')).toHaveTextContent(t('integrations.connection.clientIdInvalid'))
+  })
+
+  it('links the subdomain hint to the subdomain input', async () => {
+    mockGet.mockResolvedValue({ two_way: true, subdomain: 'yesway', base_url: null, has_api_key: true, company: null, has_auth_token: false, active: true, last_synced_at: null })
+    await renderCard('shiftmanager')
+    const input = screen.getByLabelText(t('integrations.connection.subdomain'))
+    expect(document.getElementById(input.getAttribute('aria-describedby') ?? '')).toHaveTextContent(t('integrations.connection.subdomainHint'))
   })
 
   // Running the test refreshes the stored health.

@@ -20,7 +20,8 @@ export interface IntegrationHealth {
 
 // Maps one summary row to the UI shape: 'ok' and 'unknown' (never probed, or no row) pass through,
 // every other value is a failure whose code is the value itself (auth_failed, invalid_config,
-// unreachable, timeout); the badge translates the code and falls back to the server sentence.
+// unreachable, timeout, or a connector-prefixed BE code); the badge normalizes and translates the code
+// and falls back to the server sentence.
 export function mapHealth(row: IntegrationSummary | undefined): IntegrationHealth {
   const raw = row?.health
   const state: IntegrationHealth['state'] = raw === 'ok' ? 'ok' : raw == null || raw === 'unknown' ? 'unknown' : 'error'

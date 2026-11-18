@@ -36,6 +36,11 @@ vi.mock('./integrationsApi', () => ({
 const t = (key: string, opts?: Record<string, unknown>) => i18n.t(key, { ns: 'settings', ...opts })
 const mockGet = getIntegrationSettings as unknown as ReturnType<typeof vi.fn>
 const mockPut = putIntegrationSettings as unknown as ReturnType<typeof vi.fn>
+// Real BE GET shape for Shiftmanager (SmCredentials), neutral example values.
+const SM_GET = {
+  two_way: true, connected_as: 'Bureau X', subdomain: 'acme', base_url: 'https://sm.example', has_api_key: true,
+  company: 'acme', has_auth_token: false, active: true, last_synced_at: null,
+}
 const mockTest = testIntegration as unknown as ReturnType<typeof vi.fn>
 
 afterEach(() => { vi.clearAllMocks(); mockWebhook = null })
@@ -59,7 +64,7 @@ describe('webhook block', () => {
 describe('per-connector field spec', () => {
   // shiftmanager: two_way + base_url + api_key (secret) — no environment picker.
   it('renders the shiftmanager fields', async () => {
-    mockGet.mockResolvedValue({ two_way: true, base_url: 'https://sm.example', has_api_key: true, connected_as: 'Bureau X' })
+    mockGet.mockResolvedValue({ ...SM_GET })
     await renderCard('shiftmanager')
     expect(screen.getByDisplayValue('https://sm.example')).toBeInTheDocument()
     expect(screen.getByText(t('integrations.connection.secretSet'))).toBeInTheDocument()
@@ -100,8 +105,8 @@ describe('per-connector field spec', () => {
 describe('save request body', () => {
   // Untouched secret: the PUT body carries no api_key field at all.
   it('omits the secret field when untouched', async () => {
-    mockGet.mockResolvedValue({ two_way: true, base_url: 'https://sm.example', has_api_key: true, connected_as: 'Bureau X' })
-    mockPut.mockResolvedValue({ two_way: false, base_url: 'https://sm.example', has_api_key: true, connected_as: 'Bureau X' })
+    mockGet.mockResolvedValue({ ...SM_GET })
+    mockPut.mockResolvedValue({ ...SM_GET, two_way: false })
     const user = userEvent.setup()
     await renderCard('shiftmanager')
 
@@ -118,12 +123,12 @@ describe('save request body', () => {
 
   // Typed secret: the PUT body carries the new value verbatim.
   it('sends the typed value when the secret is edited', async () => {
-    mockGet.mockResolvedValue({ two_way: true, base_url: 'https://sm.example', has_api_key: true, connected_as: 'Bureau X' })
-    mockPut.mockResolvedValue({ two_way: true, base_url: 'https://sm.example', has_api_key: true, connected_as: 'Bureau X' })
+    mockGet.mockResolvedValue({ ...SM_GET })
+    mockPut.mockResolvedValue({ ...SM_GET })
     const user = userEvent.setup()
     await renderCard('shiftmanager')
 
-    const secretInput = screen.getByPlaceholderText(t('integrations.connection.secretPlaceholder'))
+    const secretInput = screen.getByLabelText(t('integrations.connection.apiKey'))
     await user.type(secretInput, 'new-secret-value')
     await user.click(screen.getByRole('button', { name: t('common.save') }))
 
@@ -134,8 +139,8 @@ describe('save request body', () => {
 
   // Explicit clear: the PUT body carries null, never absence or an empty string.
   it('sends null when the secret is explicitly cleared', async () => {
-    mockGet.mockResolvedValue({ two_way: true, base_url: 'https://sm.example', has_api_key: true, connected_as: 'Bureau X' })
-    mockPut.mockResolvedValue({ two_way: true, base_url: 'https://sm.example', has_api_key: false, connected_as: 'Bureau X' })
+    mockGet.mockResolvedValue({ ...SM_GET })
+    mockPut.mockResolvedValue({ ...SM_GET, has_api_key: false })
     const user = userEvent.setup()
     await renderCard('shiftmanager')
 
@@ -151,26 +156,26 @@ describe('save request body', () => {
 describe('test connection', () => {
   // Success: renders the connected-as message with the server's name.
   it('shows testOk with the connected name on success', async () => {
-    mockGet.mockResolvedValue({ two_way: true, base_url: null, has_api_key: false, connected_as: null })
+    mockGet.mockResolvedValue({ ...SM_GET, base_url: null, has_api_key: false, connected_as: null })
     mockTest.mockResolvedValue({ ok: true, connected_as: 'Bureau Y', details: {} })
     const user = userEvent.setup()
     await renderCard('shiftmanager')
 
-    await user.click(screen.getByRole('button', { name: t('integrations.connection.test') }))
+    await user.click(screen.getByRole('button', { name: t('integrations.connection.testBoth') }))
     const matches = await screen.findAllByText(t('integrations.connection.testOk', { name: 'Bureau Y' }))
     expect(matches.length).toBeGreaterThan(0)
   })
 
   // 422: renders the reason-code label, the server message and the correlation id.
   it('shows the reason, message and correlation id on a 422', async () => {
-    mockGet.mockResolvedValue({ two_way: true, base_url: null, has_api_key: false, connected_as: null })
+    mockGet.mockResolvedValue({ ...SM_GET, base_url: null, has_api_key: false, connected_as: null })
     mockTest.mockRejectedValue({
       response: { data: { ok: false, reason_code: 'auth_failed', message: 'Invalid API key.', correlation_id: 'corr-123' } },
     })
     const user = userEvent.setup()
     await renderCard('shiftmanager')
 
-    await user.click(screen.getByRole('button', { name: t('integrations.connection.test') }))
+    await user.click(screen.getByRole('button', { name: t('integrations.connection.testBoth') }))
     await screen.findByText(t('integrations.reason.auth_failed'))
     expect(screen.getByText('Invalid API key.')).toBeInTheDocument()
     expect(screen.getByText(t('integrations.connection.correlation', { id: 'corr-123' }))).toBeInTheDocument()
@@ -181,7 +186,7 @@ describe('states', () => {
   // Load error renders the error message and a retry button, never a blank screen.
   it('renders a load error whose retry button is NAMED retry and really refetches', async () => {
     mockGet.mockRejectedValueOnce(new Error('network'))
-    mockGet.mockResolvedValueOnce({ two_way: true, base_url: null, has_api_key: false, connected_as: null })
+    mockGet.mockResolvedValueOnce({ ...SM_GET, base_url: null, has_api_key: false, connected_as: null })
     render(<IntegrationConnectionCard connector="shiftmanager" />)
     await screen.findByText(t('integrations.connection.loadError'))
 
@@ -195,24 +200,22 @@ describe('states', () => {
 
   // Regression (verify finding): the PUT body never carries server-derived fields.
   it('save body carries only writable keys — never has_* or connected_as', async () => {
-    mockGet.mockResolvedValue({ two_way: true, base_url: 'https://sm.example', has_api_key: true, connected_as: 'Bureau X' })
-    mockPut.mockResolvedValue({ two_way: false, base_url: 'https://sm.example', has_api_key: true, connected_as: 'Bureau X' })
+    mockGet.mockResolvedValue({ ...SM_GET })
+    mockPut.mockResolvedValue({ ...SM_GET, two_way: false })
     const user = userEvent.setup()
     await renderCard('shiftmanager')
     await user.click(screen.getByRole('switch'))
     await user.click(screen.getByRole('button', { name: t('common.save') }))
     await waitFor(() => expect(mockPut).toHaveBeenCalled())
     const [, body] = mockPut.mock.calls[0]
-    expect(body).not.toHaveProperty('has_api_key')
-    expect(body).not.toHaveProperty('connected_as')
-    // base_url is unchanged, so it never rides the PUT (super-admin-only override).
-    expect(Object.keys(body).sort()).toEqual(['two_way'])
+    // Whole body: no has_* or connected_as; base_url is unchanged, so it never rides the PUT.
+    expect(body).toEqual({ two_way: false, subdomain: 'acme', company: 'acme' })
   })
 
   // base_url IS sent when the user actually edits it.
   it('sends base_url when it was actually edited', async () => {
-    mockGet.mockResolvedValue({ two_way: true, base_url: 'https://sm.example', has_api_key: true, connected_as: 'Bureau X' })
-    mockPut.mockResolvedValue({ two_way: true, base_url: 'https://sm2.example', has_api_key: true, connected_as: 'Bureau X' })
+    mockGet.mockResolvedValue({ ...SM_GET })
+    mockPut.mockResolvedValue({ ...SM_GET, base_url: 'https://sm2.example' })
     const user = userEvent.setup()
     await renderCard('shiftmanager')
     const baseUrlInput = screen.getByDisplayValue('https://sm.example')
@@ -226,18 +229,18 @@ describe('states', () => {
 
   // Regression (verify finding): a successful test never makes the form dirty.
   it('a successful connection test leaves Save disabled', async () => {
-    mockGet.mockResolvedValue({ two_way: true, base_url: null, has_api_key: false, connected_as: null })
+    mockGet.mockResolvedValue({ ...SM_GET, base_url: null, has_api_key: false, connected_as: null })
     mockTest.mockResolvedValue({ ok: true, connected_as: 'Bureau Y', details: {} })
     const user = userEvent.setup()
     await renderCard('shiftmanager')
-    await user.click(screen.getByRole('button', { name: t('integrations.connection.test') }))
+    await user.click(screen.getByRole('button', { name: t('integrations.connection.testBoth') }))
     await screen.findAllByText(t('integrations.connection.testOk', { name: 'Bureau Y' }))
     expect(screen.getByRole('button', { name: t('common.save') })).toBeDisabled()
   })
 
   // Regression (verify finding): clearing a secret is a visible, undoable intent.
   it('clear shows the pending-clear line; undo restores the untouched state', async () => {
-    mockGet.mockResolvedValue({ two_way: true, base_url: null, has_api_key: true, connected_as: null })
+    mockGet.mockResolvedValue({ ...SM_GET, base_url: null, connected_as: null })
     const user = userEvent.setup()
     await renderCard('shiftmanager')
     await user.click(screen.getByRole('button', { name: t('integrations.connection.clearSecret') }))

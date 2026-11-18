@@ -4841,6 +4841,7 @@
     "vat": "Validation TVA (VIES)"
   },
   "integrations": {
+    "shiftmanagerModuleOff": "Le module Shiftmanager n’est pas activé pour cette agence.",
     "tabs": {
       "connection": "Connexion",
       "mapping": "Mapping",
@@ -4852,7 +4853,7 @@
       "ok": "La connexion fonctionne",
       "error": "Échec de la connexion",
       "unknown": "Pas encore vérifié",
-      "checkedAt": "vérifié à {{time}}"
+      "checkedAt": "vérifié le {{time}}"
     },
     "webhook": {
       "registered": "Webhook enregistré",
@@ -4878,7 +4879,7 @@
       "clientId": "ID client",
       "clientSecret": "Secret client",
       "subdomain": "Sous-domaine",
-      "subdomainHint": "yesway → yesway.shiftmanager.pro",
+      "subdomainHint": "p. ex. votreagence → votreagence.shiftmanager.pro",
       "company": "Entreprise",
       "authToken": "Jeton d’authentification",
       "tokenApiTitle": "API à jeton",
@@ -4904,6 +4905,8 @@
       "undoClear": "Annuler l’effacement"
     },
     "reason": {
+      "limit_reached": "Cette connexion a atteint la limite configurée. Réessayez plus tard.",
+      "unexpected": "Erreur inattendue du service externe.",
       "auth_failed": "Identifiants invalides",
       "unreachable": "Injoignable",
       "timeout": "Délai dépassé",
@@ -4964,7 +4967,7 @@
       "loadError": "Échec du chargement des mappings.",
       "saveError": "Échec de l’enregistrement.",
       "deleteError": "Échec de la suppression.",
-      "preparationNotice": "Ces mappages de champs sont en préparation: ils ne seront utilisés qu’une fois la synchronisation activée dans une future version.",
+      "preparationNotice": "Ces correspondances traduisent les valeurs Koios en valeurs de la partie externe. HelloFlex les lit lors de l’envoi d’un contrat (convention collective, échelle, échelon, fonction).",
       "domains": {
         "cao": "Convention collective",
         "scale": "Échelle",

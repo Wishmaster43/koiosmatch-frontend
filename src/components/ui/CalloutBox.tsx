@@ -62,7 +62,8 @@ export default function CalloutBox({ variant, title, children, onDismiss, dismis
   const role = live === 'polite' ? 'status' : live === 'off' ? undefined
     : (variant === 'danger' || variant === 'warning' ? 'alert' : undefined)
   return (
-    <div role={role} aria-live={live === 'polite' ? 'polite' : undefined}
+    // data-variant names the tone for tests and styling hooks (a test never reads a colour).
+    <div role={role} aria-live={live === 'polite' ? 'polite' : undefined} data-variant={variant}
       style={{
         background: TOKEN_BG[variant],
         border: `1px solid ${tint(token, 40)}`,
