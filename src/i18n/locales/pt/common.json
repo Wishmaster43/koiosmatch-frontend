@@ -838,6 +838,8 @@
     "helloflexCandidateUnlinked": "O candidato não está ligado à HelloFlex.",
     "helloflexBranchUnlinked": "A filial {{branch}} não está ligada à HelloFlex.",
     "helloflexModuleOff": "O módulo HelloFlex não está ativado para esta agência.",
+    "helloflexContractAmbiguous": "O HelloFlex contém mais do que um contrato para este match; nada foi enviado. Verifique no HelloFlex.",
+    "helloflexUnreachable": "O HelloFlex está inacessível ou respondeu de forma ilegível; nada foi enviado. Tente novamente mais tarde.",
     "aiDisclosureMissing": "A introdução da entrevista não tem a menção obrigatória de IA; ajuste o modelo antes de ativar.",
     "fieldRequired": "{{field}} é obrigatório."
   },
@@ -1632,6 +1634,10 @@
       "reordered": "Ordem alterada"
     },
     "match": {
+      "contract": {
+        "adopted": "Contrato HelloFlex existente adotado (nada enviado)",
+        "ambiguous": "O HelloFlex contém mais do que um contrato para este match; nada enviado"
+      },
       "approved": "Match aprovado",
       "blocked": "Match bloqueado no workflow",
       "client_changed": "Match atribuído a outro cliente",

@@ -147,6 +147,7 @@
       "costCenter": "Kostenplaats",
       "submit": "Versturen",
       "success": "Contract naar HelloFlex verstuurd.",
+      "adopted": "Bestaand HelloFlex-contract overgenomen; er is niets opnieuw verstuurd.",
       "error": "Het contract kon niet worden verstuurd. Probeer het opnieuw.",
       "intro": "HelloFlex bouwt het contract uit de opgeslagen matchgegevens. Controleer ze en verstuur.",
       "missing": "niet ingevuld",

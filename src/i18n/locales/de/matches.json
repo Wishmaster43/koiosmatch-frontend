@@ -147,6 +147,7 @@
       "costCenter": "Kostenstelle",
       "submit": "Senden",
       "success": "Vertrag an HelloFlex gesendet.",
+      "adopted": "Bestehender HelloFlex-Vertrag übernommen; es wurde nichts erneut gesendet.",
       "error": "Der Vertrag konnte nicht gesendet werden. Bitte versuche es erneut.",
       "intro": "HelloFlex erstellt den Vertrag aus den gespeicherten Match-Daten. Prüfen und senden.",
       "missing": "nicht ausgefüllt",

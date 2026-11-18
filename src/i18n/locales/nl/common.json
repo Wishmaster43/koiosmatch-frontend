@@ -838,6 +838,8 @@
     "helloflexCandidateUnlinked": "De kandidaat is niet gekoppeld aan HelloFlex.",
     "helloflexBranchUnlinked": "Vestiging {{branch}} is niet gekoppeld aan HelloFlex.",
     "helloflexModuleOff": "De HelloFlex-module staat niet aan voor dit bureau.",
+    "helloflexContractAmbiguous": "HelloFlex bevat meer dan een contract voor deze match; er is niets verstuurd. Controleer het in HelloFlex.",
+    "helloflexUnreachable": "HelloFlex is niet bereikbaar of gaf een onleesbaar antwoord; er is niets verstuurd. Probeer het later opnieuw.",
     "aiDisclosureMissing": "De interview-intro mist de verplichte AI-vermelding; pas de template aan voordat je dit activeert.",
     "fieldRequired": "{{field}} is verplicht."
   },
@@ -1632,6 +1634,10 @@
       "reordered": "Volgorde gewijzigd"
     },
     "match": {
+      "contract": {
+        "adopted": "Bestaand HelloFlex-contract overgenomen (niets verstuurd)",
+        "ambiguous": "HelloFlex bevat meer dan een contract voor deze match; niets verstuurd"
+      },
       "approved": "Match goedgekeurd",
       "blocked": "Match-aanmaak overgeslagen (geblokkeerd)",
       "client_changed": "Match aan andere klant gehangen",

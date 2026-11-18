@@ -73,7 +73,8 @@ export default function MatchContractSendModal({ match, onClose, onUpdate }: Pro
     const out = await send()
     if (out.ok) {
       onUpdate?.(match.id, { contractStatus: out.data.contract_status ?? 'sent', helloflexContractGuid: out.data.guid ?? match.helloflexContractGuid ?? null })
-      notifySuccess(t('drawer.contractSend.success'))
+      // An adopted contract was not sent by us (HF-IDEMPOTENT-1), so the toast says it was taken over.
+      notifySuccess(t(out.data.outcome === 'adopted' ? 'drawer.contractSend.adopted' : 'drawer.contractSend.success'))
       onClose()
       return
     }

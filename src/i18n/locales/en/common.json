@@ -838,6 +838,8 @@
     "helloflexCandidateUnlinked": "The candidate is not linked to HelloFlex.",
     "helloflexBranchUnlinked": "Branch {{branch}} is not linked to HelloFlex.",
     "helloflexModuleOff": "The HelloFlex module is not enabled for this agency.",
+    "helloflexContractAmbiguous": "HelloFlex holds more than one contract for this match; nothing was sent. Check it in HelloFlex.",
+    "helloflexUnreachable": "HelloFlex is unreachable or answered unreadably; nothing was sent. Try again later.",
     "aiDisclosureMissing": "The interview intro is missing the mandatory AI disclosure; adjust the template before you activate this.",
     "fieldRequired": "{{field}} is required."
   },
@@ -1632,6 +1634,10 @@
       "reordered": "Order changed"
     },
     "match": {
+      "contract": {
+        "adopted": "Existing HelloFlex contract adopted (nothing sent)",
+        "ambiguous": "HelloFlex holds more than one contract for this match; nothing sent"
+      },
       "approved": "Match approved",
       "blocked": "Match creation skipped (blocked)",
       "client_changed": "Match moved to another customer",

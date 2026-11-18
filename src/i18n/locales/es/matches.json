@@ -147,6 +147,7 @@
       "costCenter": "Centro de costes",
       "submit": "Enviar",
       "success": "Contrato enviado a HelloFlex.",
+      "adopted": "Contrato HelloFlex existente adoptado; no se ha vuelto a enviar nada.",
       "error": "No se pudo enviar el contrato. Inténtalo de nuevo.",
       "intro": "HelloFlex crea el contrato a partir de los datos guardados del match. Revísalos y envía.",
       "missing": "sin rellenar",

@@ -50,6 +50,29 @@ describe('useContractSend', () => {
     expect(out.message).not.toBe('raw server text')
   })
 
+  // HF-IDEMPOTENT-1: an adopted 200 passes outcome and the real bureau status through untouched.
+  it('returns an adopted 200 whole, outcome and contract_status untouched', async () => {
+    const data = { guid: 'g', contract_status: 'active', outcome: 'adopted' }
+    post.mockResolvedValue({ data: { data } })
+    const { result } = renderHook(() => useContractSend('m1'))
+    let out: unknown
+    await act(async () => { out = await result.current.send() })
+    expect(out).toEqual({ ok: true, data })
+  })
+
+  // A CODED 502 must stay on the apiErrorMessage path; only a code-less 5xx shows the generic sentence.
+  it.each([
+    [409, 'helloflex_contract_ambiguous', 'errors.helloflexContractAmbiguous'],
+    [502, 'helloflex_unreachable', 'errors.helloflexUnreachable'],
+  ])('renders the translated sentence for %s %s in the active language, never the server text', async (status, code, key) => {
+    post.mockRejectedValue({ response: { status, data: { code, message: 'raw server text' } } })
+    const { result } = renderHook(() => useContractSend('m1'))
+    let out: { message?: string | null } = {}
+    await act(async () => { out = (await result.current.send()) as typeof out })
+    expect(out.message).toBe(i18n.t(key, { ns: 'common', lng: i18n.language }))
+    expect(out.message).not.toBe('raw server text')
+  })
+
   it('interpolates branch_name for helloflex_branch_unlinked', async () => {
     post.mockRejectedValue({ response: { status: 409, data: { code: 'helloflex_branch_unlinked', branch_name: 'Utrecht', message: 'raw' } } })
     const { result } = renderHook(() => useContractSend('m1'))

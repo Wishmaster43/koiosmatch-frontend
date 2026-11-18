@@ -122,6 +122,17 @@ describe('apiErrorMessage', () => {
   })
 })
 
+// HF-IDEMPOTENT-1: the two coded refusals of the retried contract send map to their errors.* keys.
+describe('HF-IDEMPOTENT-1 codes', () => {
+  it('maps the 409 ambiguous code', () => {
+    expect(apiErrorKey({ response: { data: { code: 'helloflex_contract_ambiguous', message: 'x' } } })).toBe('errors.helloflexContractAmbiguous')
+  })
+
+  it('maps the 502 unreachable code', () => {
+    expect(apiErrorKey({ response: { data: { code: 'helloflex_unreachable', message: 'x' } } })).toBe('errors.helloflexUnreachable')
+  })
+})
+
 // C2: the inbound-scenario 422 codes render translated copy; the clash names its holder; unknown codes keep the fallback.
 describe('inbound scenario codes', () => {
   const t = (key: string, o?: { ns: string; clash_name?: string }) => `${key}|${o?.clash_name ?? ''}`

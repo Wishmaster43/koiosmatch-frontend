@@ -15,8 +15,10 @@ import { apiErrorMessage } from '@/lib/extractApiError'
 import { extractFormErrorsWithMessages } from '@/lib/extractFormErrors'
 import type { Id } from '@/types/common'
 
-// Hand-written: the spec carries no 2xx schema; the server answers status (+ GUID, never shown).
-export interface ContractSendResult { guid?: string | null; contract_status?: string | null }
+// Hand-written: the spec carries no 2xx schema. BE 80d2c127f (HF-IDEMPOTENT-1): `outcome` 'adopted' means
+// NOTHING was sent, an existing HelloFlex contract was taken over; contract_status stays a wide string
+// (sent, active, ended, signed or rejected).
+export interface ContractSendResult { guid?: string | null; contract_status?: string | null; outcome?: 'sent' | 'adopted' }
 
 export type ContractSendOutcome =
   | { ok: true; data: ContractSendResult }

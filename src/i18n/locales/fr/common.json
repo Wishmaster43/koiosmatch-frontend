@@ -838,6 +838,8 @@
     "helloflexCandidateUnlinked": "Le candidat n’est pas relié à HelloFlex.",
     "helloflexBranchUnlinked": "L’agence {{branch}} n’est pas reliée à HelloFlex.",
     "helloflexModuleOff": "Le module HelloFlex n’est pas activé pour ce bureau.",
+    "helloflexContractAmbiguous": "HelloFlex contient plusieurs contrats pour ce match. Rien n’a été envoyé. Vérifiez-le dans HelloFlex.",
+    "helloflexUnreachable": "HelloFlex est injoignable ou a répondu de façon illisible. Rien n’a été envoyé. Réessayez plus tard.",
     "aiDisclosureMissing": "L’introduction de l’entretien ne contient pas la mention IA obligatoire ; modifiez le modèle avant de l’activer.",
     "fieldRequired": "{{field}} est obligatoire."
   },
@@ -1632,6 +1634,10 @@
       "reordered": "Ordre modifié"
     },
     "match": {
+      "contract": {
+        "adopted": "Contrat HelloFlex existant repris (rien envoyé)",
+        "ambiguous": "HelloFlex contient plusieurs contrats pour ce match. Rien envoyé"
+      },
       "approved": "Match approuvé par Koios",
       "blocked": "Création de Match bloquée par workflow",
       "client_changed": "Match rattaché à un autre client",

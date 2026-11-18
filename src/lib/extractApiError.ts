@@ -72,6 +72,9 @@ const ERROR_CODE_KEYS: Record<string, string> = {
   contract_unconfirmed: 'errors.contractUnconfirmed',
   contract_sent: 'errors.contractSent',
   two_way_off: 'errors.twoWayOff',
+  // HF-IDEMPOTENT-1 (BE 80d2c127f): the retried contract send's coded refusals, 409 ambiguous and 502 unreachable.
+  helloflex_contract_ambiguous: 'errors.helloflexContractAmbiguous',
+  helloflex_unreachable: 'errors.helloflexUnreachable',
   // The proposal send is refused up front (422) for a suppressed recipient address.
   recipient_suppressed: 'errors.recipientSuppressed',
   // UPLOADS-SCAN-1 (423): the file is not clean yet, or was rejected by the scanner.

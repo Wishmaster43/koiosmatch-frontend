@@ -147,6 +147,7 @@
       "costCenter": "Cost center",
       "submit": "Send",
       "success": "Contract sent to HelloFlex.",
+      "adopted": "Existing HelloFlex contract adopted; nothing was sent again.",
       "error": "The contract could not be sent. Please try again.",
       "intro": "HelloFlex builds the contract from the stored match data. Check it and send.",
       "missing": "not filled in",

@@ -21,6 +21,14 @@ describe('describeChangelog', () => {
     expect(describeChangelog('lookup.reordered', t, makeI18n(dict))).toBe('translated.lookup.reordered')
   })
 
+  // HF-IDEMPOTENT-1: the two new contract descriptions resolve through the real i18n instance.
+  it.each(['match.contract.adopted', 'match.contract.ambiguous'])('translates %s through the real i18n instance', async (desc) => {
+    const { default: i18n } = await import('@/i18n')
+    const copy = i18n.t(`changelogDescriptions.${desc}`, { ns: 'common', lng: 'en' })
+    expect(copy).not.toContain('changelogDescriptions')
+    expect(describeChangelog(desc, i18n.getFixedT('en') as unknown as TFunction, i18n)).toBe(copy)
+  })
+
   it('leaves a legacy Dutch literal unchanged', () => {
     const t = makeT({})
     expect(describeChangelog('Dossier geopend', t, makeI18n({}))).toBe('Dossier geopend')

@@ -8,6 +8,7 @@ import { render, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { I18nextProvider } from 'react-i18next'
 import i18n from '@/i18n'
+import { notifySuccess } from '@/lib/notify'
 import MatchContractSendModal from './MatchContractSendModal'
 import type { MatchRow } from '@/types/match'
 
@@ -73,6 +74,18 @@ describe('MatchContractSendModal', () => {
     await waitFor(() => expect(mockSend).toHaveBeenCalledWith())
     expect(onUpdate).toHaveBeenCalledWith('m1', { contractStatus: 'sent', helloflexContractGuid: null })
     expect(onClose).toHaveBeenCalled()
+  })
+
+  // HF-IDEMPOTENT-1: the toast tells an adopted contract apart from a sent one, and the real status is kept.
+  it.each([
+    ['adopted', 'drawer.contractSend.adopted', 'active'],
+    ['sent', 'drawer.contractSend.success', 'sent'],
+  ])('shows the %s toast', async (outcome, key, status) => {
+    mockSend.mockResolvedValue({ ok: true, data: { contract_status: status, outcome } })
+    const { onUpdate } = renderModal({})
+    await userEvent.click(screen.getByRole('button', { name: tm('drawer.contractSend.submit') }))
+    await waitFor(() => expect(notifySuccess).toHaveBeenCalledWith(tm(key)))
+    expect(onUpdate).toHaveBeenCalledWith('m1', expect.objectContaining({ contractStatus: status }))
   })
 
   it('shows the mapped refusal in an alert banner and stays open', async () => {
