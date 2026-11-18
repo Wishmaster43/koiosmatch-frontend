@@ -309,8 +309,7 @@ describe('AddApplicationModal · W30 (search + source/custom_fields)', () => {
     await user.click(screen.getByRole('button', { name: /work\.vacancy/ }))
     await user.type(screen.getByPlaceholderText('work.pickVacancy'), 'zorg')
 
-    await new Promise(r => setTimeout(r, 300))
-    expect(useVacancyOptions).toHaveBeenLastCalledWith(true, 'zorg')
+    await waitFor(() => expect(useVacancyOptions).toHaveBeenLastCalledWith(true, 'zorg'))
   })
 
   // Golf-1 verify (mirrors pages/applications/AddApplicationModal.test.tsx's
@@ -328,11 +327,10 @@ describe('AddApplicationModal · W30 (search + source/custom_fields)', () => {
 
     await user.click(screen.getByRole('button', { name: /work\.vacancy/ }))
     await user.type(screen.getByPlaceholderText('work.pickVacancy'), 'far')
-    await new Promise(r => setTimeout(r, 300))
     await user.click(await screen.findByText('Verre Vacature'))
     // The pick resets the query; after the debounce the unfiltered list (without
-    // vac-far) is back — label and owner data must survive that swap.
-    await new Promise(r => setTimeout(r, 300))
+    // vac-far) is back: label and owner data must survive that swap.
+    await waitFor(() => expect(vi.mocked(useVacancyOptions).mock.calls.at(-1)?.[1]).not.toBe('far'))
     expect(screen.getByText('Verre Vacature')).toBeInTheDocument()
     expect(screen.queryByText('vac-far')).toBeNull()
 

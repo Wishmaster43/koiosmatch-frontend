@@ -5,9 +5,9 @@
  * Shiftmanager now carries TWO credential groups on one card (contract:
  * koiosmatch-api/docs/contract/CONTRACT-CHANGELOG.md, SM-CREDS-2): the tenant
  * API (subdomain + api_key, Bearer) and the open API (company + auth_token,
- * `company`/`authtoken` headers). `requiresFlag` gates a group behind FEATURE
- * DETECTION — a BE that has not landed SM-CREDS-2 yet omits `has_auth_token`
- * from the GET response, and the card then looks exactly as it did before.
+ * `company`/`authtoken` headers). Both groups always render: the BE sends
+ * `has_auth_token` on every GET (SmCredentials.php:46-57), so the card has no
+ * feature-detection flag; only `base_url` is value-gated, by the card itself.
  */
 import type { ConnectorId } from './integrationsApi'
 
@@ -17,9 +17,6 @@ export interface FieldSpecEntry {
   // Groups two or more fields under one titled GroupLabel (Shiftmanager's two
   // credential sets). Undefined = ungrouped, rendered as it always has been.
   group?: { id: 'token_api' | 'company_api'; titleKey: string; hintKey?: string }
-  // Field/group is hidden until the GET response carries this flag — feature
-  // detection so nothing fake ever shows before the backend half lands.
-  requiresFlag?: 'has_auth_token'
 }
 
 // Per-connector field layout — the single source that drives which inputs render.
@@ -38,12 +35,10 @@ export const FIELD_SPEC: Record<ConnectorId, FieldSpecEntry[]> = {
     {
       key: 'company', kind: 'text',
       group: { id: 'company_api', titleKey: 'integrations.connection.companyApiTitle', hintKey: 'integrations.connection.companyApiHint' },
-      requiresFlag: 'has_auth_token',
     },
     {
       key: 'auth_token', kind: 'secret',
       group: { id: 'company_api', titleKey: 'integrations.connection.companyApiTitle' },
-      requiresFlag: 'has_auth_token',
     },
   ],
   // Question 119 (Danny 08-09, A): HelloFlex and Werkzoeken have no push-sync yet, so
