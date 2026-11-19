@@ -2,6 +2,8 @@
  * useSmLastSync — the Shiftmanager mirror's last sync timestamp, so the charts can
  * show how old the data is. Reads GET /dashboard's sync_sources (already the source
  * of truth on the main dashboard) and picks the Shiftmanager/planning entry. Cached.
+ * SM-SYNC-STAMP-1: dashboard scope only (ShiftsChartsBlock); the Shiftmanager settings card
+ * reads the same column from its own GET /integrations/shiftmanager/settings instead.
  */
 import { useQuery } from '@tanstack/react-query'
 import { heavyGet } from '@/lib/heavyGet'

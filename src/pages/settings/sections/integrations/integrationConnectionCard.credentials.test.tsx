@@ -10,10 +10,6 @@ import {
   testIntegration,
 } from './integrationsApi'
 
-// The dashboard sync lookup is mocked: no QueryClient, no network.
-const mockSync = vi.fn()
-vi.mock('@/components/shiftmanager/useSmLastSync', () => ({ useSmLastSync: (enabled: boolean) => mockSync(enabled) }))
-
 // The health hook is mocked: no QueryClient; refresh is asserted in the health tests.
 const mockRefresh = vi.fn()
 vi.mock('./useIntegrationHealth', () => ({
@@ -168,30 +164,36 @@ describe('SM-CREDS-2 dual credentials', () => {
   })
 })
 
+// SM-SYNC-STAMP-1: the line reads `active` + `last_synced_at` from the card's own settings GET
+// (the connection row); no dashboard lookup is made from this screen.
 describe('Shiftmanager sync status line (ONIX G-012)', () => {
-  it('saved connection and no sync yet: shows "not active yet"', async () => {
-    mockSync.mockReturnValue(null)
-    mockGet.mockResolvedValue({ two_way: true, base_url: 'https://sm.example', has_api_key: true, connected_as: null })
+  it('saved connection and no sync yet: shows "not active yet" from the settings GET', async () => {
+    mockGet.mockResolvedValue({ two_way: true, base_url: 'https://sm.example', has_api_key: true, connected_as: null, active: false, last_synced_at: null })
     await renderCard('shiftmanager')
     expect(screen.getByText(t('integrations.connection.notActiveYet'))).toBeInTheDocument()
-    expect(mockSync).toHaveBeenCalledWith(true)
+    expect(mockGet).toHaveBeenCalledTimes(1)
+    expect(mockGet).toHaveBeenCalledWith('shiftmanager')
   })
 
-  it('saved connection with a sync timestamp: shows the formatted time instead', async () => {
-    mockSync.mockReturnValue('2026-10-09T12:30:00')
-    mockGet.mockResolvedValue({ two_way: true, base_url: 'https://sm.example', has_api_key: true, connected_as: 'Bureau X' })
+  it('active connection with a sync timestamp: shows the formatted time instead', async () => {
+    mockGet.mockResolvedValue({ two_way: true, base_url: 'https://sm.example', has_api_key: true, connected_as: 'Bureau X', active: true, last_synced_at: '2026-10-09T12:30:00' })
     await renderCard('shiftmanager')
     expect(screen.queryByText(t('integrations.connection.notActiveYet'))).not.toBeInTheDocument()
     expect(screen.getByText(/09-10-2026 12:30/)).toBeInTheDocument()
   })
 
-  it('helloflex renders neither line and does not enable the lookup', async () => {
-    mockSync.mockReturnValue(null)
+  it('inactive connection with an old stamp keeps "not active yet" (the dashboard lists active rows only)', async () => {
+    mockGet.mockResolvedValue({ two_way: true, base_url: 'https://sm.example', has_api_key: true, connected_as: 'Bureau X', active: false, last_synced_at: '2026-10-09T12:30:00' })
+    await renderCard('shiftmanager')
+    expect(screen.getByText(t('integrations.connection.notActiveYet'))).toBeInTheDocument()
+    expect(screen.queryByText(/09-10-2026/)).not.toBeInTheDocument()
+  })
+
+  it('helloflex renders neither line', async () => {
     mockGet.mockResolvedValue({ two_way: false, environment: 'uat', client_id: 'c', has_client_secret: true, connected_as: 'X' })
     await renderCard('helloflex')
     expect(screen.queryByText(t('integrations.connection.notActiveYet'))).not.toBeInTheDocument()
     expect(screen.queryByText(/09-10-2026/)).not.toBeInTheDocument()
-    expect(mockSync).toHaveBeenCalledWith(false)
   })
 })
 

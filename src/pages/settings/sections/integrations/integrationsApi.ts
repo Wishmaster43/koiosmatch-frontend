@@ -24,6 +24,11 @@ export interface ShiftmanagerSettings {
   company?: string | null
   has_auth_token?: boolean
   connected_as: string | null
+  // SM-SYNC-STAMP-1: the connection row's own state (SmCredentials::read, PlanningConnection
+  // `active` + `last_synced_at`, the column the dashboard's sync_sources reads too). Hand-written:
+  // the spec carries no 2xx schema for this GET.
+  active?: boolean
+  last_synced_at?: string | null
 }
 
 export interface HelloflexSettings {

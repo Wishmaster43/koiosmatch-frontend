@@ -31,6 +31,9 @@ export interface WorkingSettings {
   company?: string | null
   has_auth_token?: boolean
   connected_as: string | null
+  // SM-SYNC-STAMP-1: Shiftmanager's read-only row state, shown by the card, never a field.
+  active?: boolean
+  last_synced_at?: string | null
 }
 
 // Field-label identity from the typography atom (stijlfabriek clause) — layout only here.

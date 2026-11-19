@@ -22,7 +22,6 @@ import SaveButton from '@/components/ui/SaveButton'
 import CalloutBox from '@/components/ui/CalloutBox'
 import Spinner from '@/components/ui/Spinner'
 import { PageTitle, Caption } from '@/components/ui/typography'
-import { useSmLastSync } from '@/components/shiftmanager/useSmLastSync'
 import { useDateFormat } from '@/lib/datetime'
 import { notifyError } from '@/lib/notify'
 import { extractApiError } from '@/lib/extractApiError'
@@ -46,8 +45,6 @@ import {
 export default function IntegrationConnectionCard({ connector }: { connector: ConnectorId }) {
   const { t } = useTranslation('settings')
   const { formatDateTime } = useDateFormat()
-  // Shiftmanager only: the mirror's last sync time (no dashboard GET for other connectors).
-  const smLastSync = useSmLastSync(connector === 'shiftmanager')
   // Permanent connection health (hourly BE probe + manual test), refreshed after save and test.
   const { health, webhook, refresh: refreshHealth, isError: healthUnavailable } = useIntegrationHealth(connector)
   const [settings, setSettings] = useState<WorkingSettings | null>(null)
@@ -201,11 +198,14 @@ export default function IntegrationConnectionCard({ connector }: { connector: Co
           return name ? t('integrations.connection.connectedAs', { name }) : t('integrations.connection.notConnected')
         })()}
       </Caption>
-      {/* ONIX G-012: a saved Shiftmanager connection is "not active yet" until a sync ran. */}
+      {/* ONIX G-012: a saved Shiftmanager connection is "not active yet" until a sync ran.
+          SM-SYNC-STAMP-1: the stamp is this GET's own `last_synced_at` (the connection row, the
+          column the dashboard reads too); only an ACTIVE row shows it, as the dashboard lists
+          active rows only, so an inactive row keeps "not active yet". */}
       {connector === 'shiftmanager' && (settings.connected_as || settings.has_api_key || settings.has_auth_token) && (
         <Caption as="p" style={{ marginTop: 2 }}>
-          {smLastSync
-            ? t('integrations.connection.lastSyncedAt', { date: formatDateTime(smLastSync) })
+          {settings.active && settings.last_synced_at
+            ? t('integrations.connection.lastSyncedAt', { date: formatDateTime(settings.last_synced_at) })
             : t('integrations.connection.notActiveYet')}
         </Caption>
       )}
