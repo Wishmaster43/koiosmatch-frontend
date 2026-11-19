@@ -840,6 +840,7 @@
     "helloflexModuleOff": "Il modulo HelloFlex non è attivo per questa agenzia.",
     "helloflexContractAmbiguous": "HelloFlex contiene più di un contratto per questo match; non è stato inviato nulla. Controlla in HelloFlex.",
     "helloflexUnreachable": "HelloFlex non è raggiungibile o ha risposto in modo illeggibile; non è stato inviato nulla. Riprova più tardi.",
+    "tenantPackageWriteOutsideSeam": "Questa modifica del pacchetto è stata rifiutata: pacchetti, add-on e moduli si salvano solo dalla schermata dei pacchetti; non è stato salvato nulla.",
     "aiDisclosureMissing": "Nell’introduzione del colloquio manca l’informativa obbligatoria sull’IA; modifica il modello prima di attivarlo.",
     "fieldRequired": "{{field}} è obbligatorio."
   },

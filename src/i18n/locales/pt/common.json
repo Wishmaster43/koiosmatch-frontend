@@ -840,6 +840,7 @@
     "helloflexModuleOff": "O módulo HelloFlex não está ativado para esta agência.",
     "helloflexContractAmbiguous": "O HelloFlex contém mais do que um contrato para este match; nada foi enviado. Verifique no HelloFlex.",
     "helloflexUnreachable": "O HelloFlex está inacessível ou respondeu de forma ilegível; nada foi enviado. Tente novamente mais tarde.",
+    "tenantPackageWriteOutsideSeam": "Esta alteração do pacote foi recusada: pacotes, add-ons e módulos só são gravados através do ecrã de pacotes; nada foi guardado.",
     "aiDisclosureMissing": "A introdução da entrevista não tem a menção obrigatória de IA; ajuste o modelo antes de ativar.",
     "fieldRequired": "{{field}} é obrigatório."
   },

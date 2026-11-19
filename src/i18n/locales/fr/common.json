@@ -840,6 +840,7 @@
     "helloflexModuleOff": "Le module HelloFlex n’est pas activé pour ce bureau.",
     "helloflexContractAmbiguous": "HelloFlex contient plusieurs contrats pour ce match. Rien n’a été envoyé. Vérifiez-le dans HelloFlex.",
     "helloflexUnreachable": "HelloFlex est injoignable ou a répondu de façon illisible. Rien n’a été envoyé. Réessayez plus tard.",
+    "tenantPackageWriteOutsideSeam": "Cette modification du forfait a été refusée. Les forfaits, add-ons et modules ne s’enregistrent que depuis l’écran des forfaits. Rien n’a été enregistré.",
     "aiDisclosureMissing": "L’introduction de l’entretien ne contient pas la mention IA obligatoire ; modifiez le modèle avant de l’activer.",
     "fieldRequired": "{{field}} est obligatoire."
   },

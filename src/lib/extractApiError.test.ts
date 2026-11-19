@@ -133,6 +133,19 @@ describe('HF-IDEMPOTENT-1 codes', () => {
   })
 })
 
+// TENANT-PACKAGE-SEAM-RUNTIME-1: the coded 409 of the last-net guard on a package write outside the package seam.
+describe('tenant_package_write_outside_seam', () => {
+  it('maps the code to its i18n key', () => {
+    expect(apiErrorKey({ response: { status: 409, data: { code: 'tenant_package_write_outside_seam', message: 'x' } } })).toBe('errors.tenantPackageWriteOutsideSeam')
+  })
+
+  it('renders the translated copy and never the server sentence', () => {
+    const t = (key: string) => `TRANSLATED:${key}`
+    const err = { response: { status: 409, data: { code: 'tenant_package_write_outside_seam', message: 'Pakketwijziging geweigerd.' } } }
+    expect(apiErrorMessage(err, t, 'fallback')).toBe('TRANSLATED:errors.tenantPackageWriteOutsideSeam')
+  })
+})
+
 // C2: the inbound-scenario 422 codes render translated copy; the clash names its holder; unknown codes keep the fallback.
 describe('inbound scenario codes', () => {
   const t = (key: string, o?: { ns: string; clash_name?: string }) => `${key}|${o?.clash_name ?? ''}`

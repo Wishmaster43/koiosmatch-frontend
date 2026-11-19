@@ -840,6 +840,7 @@
     "helloflexModuleOff": "The HelloFlex module is not enabled for this agency.",
     "helloflexContractAmbiguous": "HelloFlex holds more than one contract for this match; nothing was sent. Check it in HelloFlex.",
     "helloflexUnreachable": "HelloFlex is unreachable or answered unreadably; nothing was sent. Try again later.",
+    "tenantPackageWriteOutsideSeam": "This package change was refused: packages, add-ons and modules are only written through the package screen; nothing was saved.",
     "aiDisclosureMissing": "The interview intro is missing the mandatory AI disclosure; adjust the template before you activate this.",
     "fieldRequired": "{{field}} is required."
   },

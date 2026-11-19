@@ -840,6 +840,7 @@
     "helloflexModuleOff": "Das HelloFlex-Modul ist für diese Agentur nicht aktiviert.",
     "helloflexContractAmbiguous": "HelloFlex enthält mehr als einen Vertrag für diesen Match; es wurde nichts gesendet. Prüfen Sie es in HelloFlex.",
     "helloflexUnreachable": "HelloFlex ist nicht erreichbar oder hat unlesbar geantwortet; es wurde nichts gesendet. Versuchen Sie es später erneut.",
+    "tenantPackageWriteOutsideSeam": "Diese Paketänderung wurde abgelehnt: Pakete, Add-ons und Module werden nur über die Paketseite geschrieben; es wurde nichts gespeichert.",
     "aiDisclosureMissing": "Im Interview-Intro fehlt der verpflichtende KI-Hinweis; passen Sie die Vorlage an, bevor Sie dies aktivieren.",
     "fieldRequired": "{{field}} ist erforderlich."
   },

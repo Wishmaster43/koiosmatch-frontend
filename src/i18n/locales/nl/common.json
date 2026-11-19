@@ -840,6 +840,7 @@
     "helloflexModuleOff": "De HelloFlex-module staat niet aan voor dit bureau.",
     "helloflexContractAmbiguous": "HelloFlex bevat meer dan een contract voor deze match; er is niets verstuurd. Controleer het in HelloFlex.",
     "helloflexUnreachable": "HelloFlex is niet bereikbaar of gaf een onleesbaar antwoord; er is niets verstuurd. Probeer het later opnieuw.",
+    "tenantPackageWriteOutsideSeam": "Deze pakketwijziging is geweigerd: pakketten, add-ons en modules worden alleen via het pakketscherm opgeslagen; er is niets bewaard.",
     "aiDisclosureMissing": "De interview-intro mist de verplichte AI-vermelding; pas de template aan voordat je dit activeert.",
     "fieldRequired": "{{field}} is verplicht."
   },
