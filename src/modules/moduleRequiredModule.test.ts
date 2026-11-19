@@ -9,6 +9,12 @@ describe('MODULE_REQUIRED_MODULE · Shiftmanager package gate', () => {
       expect(MODULE_REQUIRED_MODULE[type]).toBe('sm')
     })
 
+  // HF-ENTITY-SYNC-1a: the five HelloFlex write steps carry both the hf module and the hf app (either offers them).
+  it.each(['helloflex_ensure_candidate', 'helloflex_ensure_contact', 'helloflex_activity_create', 'helloflex_candidate_update', 'helloflex_candidate_deactivate'])(
+    '%s requires the hf module and names the hf app', (type) => {
+      expect(MODULE_REQUIRED_MODULE[type]).toBe('hf')
+      expect(MODULE_APP_MAP[type]).toBe('hf')
+    })
   // CONNECTOR-VS-REPORTING-1: the backoffice link step is gated on the connector apps only (BE ConnectorRequirements).
   it('backoffice_sync carries no package gate, only the two connector apps', () => {
     expect(MODULE_REQUIRED_MODULE['backoffice_sync']).toBeUndefined()

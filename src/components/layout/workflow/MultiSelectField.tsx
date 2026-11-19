@@ -73,7 +73,11 @@ export default function MultiSelectField({ field, value, onChange }: {
     if (field.source && bySource[field.source]) {
       return bySource[field.source].map(o => ({ value: o.value, label: o.label }))
     }
-    return ((field.options ?? []) as string[]).map(o => ({ value: o, label: optionLabel(t, i18n, o) }))
+    // Both accepted option shapes, like the select branch in fields.tsx: a plain string, or {value, label}
+    // (the HelloFlex inbound node's events: value = the filter name, label = the catalogue event label).
+    return (field.options ?? []).map(o => typeof o === 'object' && o !== null
+      ? { value: String(o.value), label: optionLabel(t, i18n, String(o.label ?? o.value)) }
+      : { value: String(o), label: optionLabel(t, i18n, String(o)) })
   }, [endpoint, remoteOpts, field.source, field.options, lookups, t, i18n])
 
   // An endpoint field is never free-entry (an unmatched value would never resolve to a
