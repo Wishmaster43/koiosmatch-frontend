@@ -319,7 +319,10 @@
       "helloflex_zzp_not_supported": "contrato freelance não suportado",
       "helloflex_employer_unlinked": "cliente não associado ao HelloFlex",
       "helloflex_candidate_unlinked": "candidato não associado ao HelloFlex",
-      "helloflex_branch_unlinked": "filial não associada ao HelloFlex"
+      "helloflex_branch_unlinked": "filial não associada ao HelloFlex",
+      "unknown_id": "não encontrado nesta agência",
+      "blocked": "bloqueado por uma regra de ação",
+      "hf_ensurer_owned": "criado pelo passo do fluxo de trabalho do HelloFlex"
     }
   },
   "filters": {

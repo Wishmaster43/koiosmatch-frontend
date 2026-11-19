@@ -665,7 +665,14 @@
     "coupleQueued": "{{count}} Kunde(n) zur Kopplung mit {{target}} eingereiht.",
     "coupleQueuedPartial": "{{queued}} von {{total}} zur Kopplung mit {{target}} eingereiht; {{skipped}} übersprungen.",
     "coupleQueuedPartialAlreadyQueued": "{{queued}} von {{total}} zur Kopplung mit {{target}} eingereiht; {{already}} liefen bereits, {{skipped}} übersprungen.",
-    "coupleUnavailable": "Backoffice-Kopplung ist noch nicht verfügbar."
+    "coupleQueuedPartialAlreadyQueuedReasoned": "{{queued}} von {{total}} zur Kopplung mit {{target}} eingereiht; {{already}} liefen bereits, {{skipped}} übersprungen ({{breakdown}}).",
+    "coupleQueuedPartialReasoned": "{{queued}} von {{total}} für die Verknüpfung mit {{target}} eingereiht; {{skipped}} übersprungen ({{breakdown}}).",
+    "coupleUnavailable": "Backoffice-Kopplung ist noch nicht verfügbar.",
+    "skipReasons": {
+      "unknown_id": "in dieser Agentur nicht gefunden",
+      "blocked": "durch eine Aktionsregel blockiert",
+      "hf_ensurer_owned": "wird vom HelloFlex-Workflow-Schritt angelegt"
+    }
   },
   "modal": {
     "title": "Neuer Kunde",

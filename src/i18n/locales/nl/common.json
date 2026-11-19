@@ -591,6 +591,7 @@
       "linking": "Koppelen…",
       "linkStarted": "Koppeling gestart",
       "alreadyQueued": "Koppeling loopt al",
+      "skippedEnsurerOwned": "Deze persoon wordt via de workflowstap in HelloFlex aangemaakt, er is niets in de wachtrij gezet.",
       "linkFailed": "Koppelen mislukt",
       "linkedByOn": "Gekoppeld door {{name}} op {{date}}",
       "statusLinked": "Gekoppeld",

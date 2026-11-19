@@ -129,12 +129,17 @@
       "already_on_phase": "già in questa fase",
       "not_found": "non trovato",
       "validation_failed": "convalida non riuscita",
-      "guard_blocked": "bloccato da un controllo"
+      "guard_blocked": "bloccato da un controllo",
+      "unknown_id": "non trovato in questa agenzia",
+      "blocked": "bloccato da una regola di azione",
+      "hf_ensurer_owned": "creato dal passaggio del flusso di lavoro HelloFlex"
     },
     "couple": "Collega al backoffice",
     "coupleQueued": "{{count}} candidati messi in coda per il collegamento con {{target}}.",
     "coupleQueuedPartial": "{{queued}} di {{total}} messi in coda per il collegamento con {{target}}; {{skipped}} saltati.",
     "coupleQueuedPartialAlreadyQueued": "{{queued}} di {{total}} messi in coda per il collegamento con {{target}}; {{already}} già in corso, {{skipped}} saltati.",
+    "coupleQueuedPartialAlreadyQueuedReasoned": "{{queued}} di {{total}} messi in coda per il collegamento con {{target}}; {{already}} già in corso, {{skipped}} saltati ({{breakdown}}).",
+    "coupleQueuedPartialReasoned": "{{queued}} di {{total}} messi in coda per il collegamento con {{target}}; {{skipped}} saltati ({{breakdown}}).",
     "coupleUnavailable": "Il collegamento al backoffice non è ancora disponibile.",
     "scopeSelected": "{{count}} selezionati",
     "scopeUseFilters": "Tutti i {{count}} risultati di questi filtri",

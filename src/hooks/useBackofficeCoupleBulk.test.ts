@@ -202,3 +202,37 @@ describe('useBackofficeCoupleBulk · buildRequest and moduleGatedTargets overrid
     expect(notify).toHaveBeenCalledWith('warning', t('bulk.coupleQueuedPartialReasoned', { target: 'helloflex', queued: 1, total: 2, skipped: 1, breakdown: '1 helloflex_start_date_missing' }))
   })
 })
+
+// HF-ENTITY-SYNC-1a: the bulk route adds `skip_reasons` ({id: code}) next to the bare `skipped` list.
+describe('useBackofficeCoupleBulk · skip_reasons map', () => {
+  it('derives the reasoned breakdown from the map through the shared helper when the caller passes none', async () => {
+    mockPost.mockResolvedValue({ data: { queued: ['a'], skipped: ['b'], skip_reasons: { b: 'hf_ensurer_owned' } } })
+    const { notify, action } = useBuildFixture()
+    action('helloflex')
+    await vi.waitFor(() => expect(notify).toHaveBeenCalled())
+    expect(mockPost).toHaveBeenCalledWith('/sync/candidates/bulk', { ids: ['a', 'b'], system: 'helloflex' })
+    expect(notify).toHaveBeenCalledWith('warning', t('bulk.coupleQueuedPartialReasoned', { target: 'helloflex', queued: 1, total: 2, skipped: 1, breakdown: `1 ${t('bulk.skipReasons.hf_ensurer_owned')}` }))
+  })
+
+  it('hands a caller-supplied reasonBreakdown the reasoned rows built from the map', async () => {
+    mockPost.mockResolvedValue({ data: { queued: ['a'], skipped: ['b', 'c'], skip_reasons: { b: 'blocked' } } })
+    const notify = vi.fn()
+    const reasonBreakdown = vi.fn(() => '1 blocked')
+    const action = useBackofficeCoupleBulk({
+      entity: 'matches', selectedIds: new Set(['a', 'b', 'c']), setSelectedIds: vi.fn(), notify, t,
+      targetLabel: (target) => target, reasonBreakdown,
+    })
+    action('helloflex')
+    await vi.waitFor(() => expect(notify).toHaveBeenCalled())
+    expect(reasonBreakdown).toHaveBeenCalledWith([{ id: 'b', reason_code: 'blocked' }, 'c'])
+    expect(notify).toHaveBeenCalledWith('warning', t('bulk.coupleQueuedPartialReasoned', { target: 'helloflex', queued: 1, total: 3, skipped: 2, breakdown: '1 blocked' }))
+  })
+
+  it('keeps the plain partial toast when skip_reasons is empty ({}), the pre-1a shape', async () => {
+    mockPost.mockResolvedValue({ data: { queued: ['a'], skipped: ['b'], skip_reasons: {} } })
+    const { notify, action } = useBuildFixture()
+    action('helloflex')
+    await vi.waitFor(() => expect(notify).toHaveBeenCalled())
+    expect(notify).toHaveBeenCalledWith('warning', t('bulk.coupleQueuedPartial', { target: 'helloflex', queued: 1, total: 2, skipped: 1 }))
+  })
+})

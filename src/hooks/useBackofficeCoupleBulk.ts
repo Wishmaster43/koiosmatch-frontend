@@ -22,6 +22,7 @@
 import type { Dispatch, SetStateAction } from 'react'
 import type { TFunction } from 'i18next'
 import api, { isServiceUnavailable } from '@/lib/api'
+import { reasonBreakdown as computeReasonBreakdown } from '@/lib/bulkSkipReasons'
 import type { Id } from '@/types/common'
 
 type CoupleTarget = 'helloflex' | 'shiftmanager'
@@ -59,6 +60,13 @@ export function useBackofficeCoupleBulk({ entity, selectedIds, setSelectedIds, n
         const queued = Array.isArray(res.data?.queued) ? res.data.queued.length : 0
         const skippedArr = Array.isArray(res.data?.skipped) ? res.data.skipped : []
         const skipped = skippedArr.length
+        // HF-ENTITY-SYNC-1a: the additive `skip_reasons` map ({id: code}: unknown_id, blocked,
+        // hf_ensurer_owned) turns a bare skipped id into a reasoned row; an id the map does not
+        // name stays bare, so the pre-1a shape renders exactly as before.
+        const skipMap: Record<string, unknown> = res.data?.skip_reasons && typeof res.data.skip_reasons === 'object' ? res.data.skip_reasons : {}
+        const skippedRows: unknown[] = skippedArr.map((id: unknown) => (typeof id === 'string' && typeof skipMap[id] === 'string' ? { id, reason_code: skipMap[id] } : id))
+        // The caller's own breakdown wins (matches); every other caller reads the reasoned rows through the shared helper.
+        const breakdownOf = (rows: unknown[]): string => (reasonBreakdown ? reasonBreakdown(rows) : computeReasonBreakdown(rows, t))
         // CLAIM-1: a third list `already_queued` next to `queued`/`skipped` — rows
         // whose sync claim was already live; these are NEVER counted as failures.
         const alreadyArr = Array.isArray(res.data?.already_queued) ? res.data.already_queued : []
@@ -68,11 +76,11 @@ export function useBackofficeCoupleBulk({ entity, selectedIds, setSelectedIds, n
           // A mixed already_queued + skipped batch still owes the per-reason
           // breakdown (HF-CONTRACTMAP-1) — before CLAIM-1 those already-live
           // rows sat in `queued` and the breakdown showed; keep showing it.
-          const breakdown = skipped > 0 ? reasonBreakdown?.(skippedArr) : ''
+          const breakdown = skipped > 0 ? breakdownOf(skippedRows) : ''
           if (breakdown) notify(partialTone, t('bulk.coupleQueuedPartialAlreadyQueuedReasoned', { target: label, queued, total, already, skipped, breakdown }))
           else notify(partialTone, t('bulk.coupleQueuedPartialAlreadyQueued', { target: label, queued, total, already, skipped }))
         } else if (skipped > 0) {
-          const breakdown = reasonBreakdown?.(skippedArr)
+          const breakdown = breakdownOf(skippedRows)
           if (breakdown) notify(partialTone, t('bulk.coupleQueuedPartialReasoned', { target: label, queued, total, skipped, breakdown }))
           else notify(partialTone, t('bulk.coupleQueuedPartial', { target: label, queued, total, skipped }))
         } else notify('success', t('bulk.coupleQueued', { target: label, count: queued }))

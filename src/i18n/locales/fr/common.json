@@ -591,6 +591,7 @@
       "linking": "Connexion…",
       "linkStarted": "Connexion démarrée",
       "alreadyQueued": "Connexion déjà en cours",
+      "skippedEnsurerOwned": "Cette personne est créée dans HelloFlex par l’étape de workflow, rien n’a été mis en file.",
       "linkFailed": "Échec de la connexion",
       "linkedByOn": "Connecté par {{name}} le {{date}}",
       "statusLinked": "Connecté",

@@ -665,7 +665,14 @@
     "coupleQueued": "{{count}} customer(s) queued for coupling with {{target}}.",
     "coupleQueuedPartial": "{{queued}} of {{total}} queued for coupling with {{target}}; {{skipped}} skipped.",
     "coupleQueuedPartialAlreadyQueued": "{{queued}} of {{total}} queued for coupling with {{target}}; {{already}} already in progress, {{skipped}} skipped.",
-    "coupleUnavailable": "Backoffice coupling isn't available yet."
+    "coupleQueuedPartialAlreadyQueuedReasoned": "{{queued}} of {{total}} queued for coupling with {{target}}; {{already}} already in progress, {{skipped}} skipped ({{breakdown}}).",
+    "coupleQueuedPartialReasoned": "{{queued}} of {{total}} queued for linking with {{target}}; {{skipped}} skipped ({{breakdown}}).",
+    "coupleUnavailable": "Backoffice coupling isn't available yet.",
+    "skipReasons": {
+      "unknown_id": "not found in this bureau",
+      "blocked": "blocked by an action rule",
+      "hf_ensurer_owned": "created by the HelloFlex workflow step"
+    }
   },
   "modal": {
     "title": "New customer",

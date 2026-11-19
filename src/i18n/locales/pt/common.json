@@ -591,6 +591,7 @@
       "linking": "A ligar…",
       "linkStarted": "Ligação iniciada",
       "alreadyQueued": "Ligação já em curso",
+      "skippedEnsurerOwned": "Esta pessoa é criada no HelloFlex pelo passo do fluxo de trabalho, nada foi colocado na fila.",
       "linkFailed": "Falha ao ligar",
       "linkedByOn": "Ligado por {{name}} em {{date}}",
       "statusLinked": "Associado",

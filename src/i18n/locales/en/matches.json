@@ -322,7 +322,10 @@
       "helloflex_zzp_not_supported": "freelance contract not supported",
       "helloflex_employer_unlinked": "customer not linked to HelloFlex",
       "helloflex_candidate_unlinked": "candidate not linked to HelloFlex",
-      "helloflex_branch_unlinked": "branch not linked to HelloFlex"
+      "helloflex_branch_unlinked": "branch not linked to HelloFlex",
+      "unknown_id": "not found in this bureau",
+      "blocked": "blocked by an action rule",
+      "hf_ensurer_owned": "created by the HelloFlex workflow step"
     }
   },
   "filters": {

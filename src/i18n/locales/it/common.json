@@ -591,6 +591,7 @@
       "linking": "Collegamento…",
       "linkStarted": "Collegamento avviato",
       "alreadyQueued": "Collegamento già in corso",
+      "skippedEnsurerOwned": "Questa persona viene creata in HelloFlex dal passaggio del flusso di lavoro, non è stato messo in coda nulla.",
       "linkFailed": "Collegamento non riuscito",
       "linkedByOn": "Collegato da {{name}} il {{date}}",
       "statusLinked": "Collegato",

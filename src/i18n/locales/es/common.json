@@ -591,6 +591,7 @@
       "linking": "Vinculando…",
       "linkStarted": "Vinculación iniciada",
       "alreadyQueued": "Vinculación ya en curso",
+      "skippedEnsurerOwned": "Esta persona la crea en HelloFlex el paso del flujo de trabajo, no se ha puesto nada en cola.",
       "linkFailed": "Error al vincular",
       "linkedByOn": "Vinculado por {{name}} el {{date}}",
       "statusLinked": "Vinculado",

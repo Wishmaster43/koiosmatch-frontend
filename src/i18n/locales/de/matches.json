@@ -319,7 +319,10 @@
       "helloflex_zzp_not_supported": "Freelancer-Vertrag wird nicht unterstützt",
       "helloflex_employer_unlinked": "Kunde nicht mit HelloFlex verknüpft",
       "helloflex_candidate_unlinked": "Kandidat nicht mit HelloFlex verknüpft",
-      "helloflex_branch_unlinked": "Niederlassung nicht mit HelloFlex verknüpft"
+      "helloflex_branch_unlinked": "Niederlassung nicht mit HelloFlex verknüpft",
+      "unknown_id": "in dieser Agentur nicht gefunden",
+      "blocked": "durch eine Aktionsregel blockiert",
+      "hf_ensurer_owned": "wird vom HelloFlex-Workflow-Schritt angelegt"
     }
   },
   "filters": {

@@ -99,6 +99,22 @@ describe('BackofficeLinksTab · entity-agnostic "Koppelen" POST (§13: asserts t
     expect(mockNotifySuccess).not.toHaveBeenCalledWith('backofficeLinks.common.linkStarted')
   })
 
+  // HF-ENTITY-SYNC-1a (D-H3b): a HelloFlex person is created by the ensure step; the sync
+  // answers 202 skipped with the real row (or null), queues nothing and must not overlay pending.
+  it('shows the "created by the workflow step" info toast, no pending chip and still refetches when the 202 carries skipped: true', async () => {
+    mockPost.mockResolvedValue({ data: { link: null, already_queued: false, skipped: true } })
+    mockGet.mockResolvedValue({ data: { backoffice_links: [] } })
+    const user = userEvent.setup()
+    render(<BackofficeLinksTab entity="matches" id="7" helloflexLink={null} shiftmanagerLink={null} canLink />)
+    const [helloflexBtn] = screen.getAllByRole('button', { name: /backofficeLinks.common.linkButton/ })
+    await user.click(helloflexBtn)
+    expect(mockPost).toHaveBeenCalledWith('/sync/matches/7', { system: 'helloflex' })
+    await waitFor(() => expect(mockNotify).toHaveBeenCalledWith('info', 'backofficeLinks.common.skippedEnsurerOwned'))
+    expect(mockNotifySuccess).not.toHaveBeenCalled()
+    expect(screen.queryByText('backofficeLinks.common.statusPending')).not.toBeInTheDocument()
+    await waitFor(() => expect(mockGet).toHaveBeenCalledWith('/matches/7'))
+  })
+
   // HF-CONTRACTMAP-1: a 409 `helloflex_contract_type_unmapped` is a known, honest
   // notice (points at Settings → HelloFlex), never the raw server message.
   it('shows the translated "unmapped" notice on a 409 helloflex_contract_type_unmapped, not the raw message', async () => {

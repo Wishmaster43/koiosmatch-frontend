@@ -591,6 +591,7 @@
       "linking": "Verknüpfen…",
       "linkStarted": "Verknüpfung gestartet",
       "alreadyQueued": "Verknüpfung läuft bereits",
+      "skippedEnsurerOwned": "Diese Person wird über den Workflow-Schritt in HelloFlex angelegt, es wurde nichts eingereiht.",
       "linkFailed": "Verknüpfen fehlgeschlagen",
       "linkedByOn": "Verknüpft von {{name}} am {{date}}",
       "statusLinked": "Verknüpft",

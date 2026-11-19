@@ -106,12 +106,17 @@
       "already_on_phase": "bereits in dieser Phase",
       "not_found": "nicht gefunden",
       "validation_failed": "Prüfung fehlgeschlagen",
-      "guard_blocked": "durch eine Prüfung blockiert"
+      "guard_blocked": "durch eine Prüfung blockiert",
+      "unknown_id": "in dieser Agentur nicht gefunden",
+      "blocked": "durch eine Aktionsregel blockiert",
+      "hf_ensurer_owned": "wird vom HelloFlex-Workflow-Schritt angelegt"
     },
     "couple": "Mit Backoffice koppeln",
     "coupleQueued": "{{count}} Kandidat(en) zur Kopplung mit {{target}} eingereiht.",
     "coupleQueuedPartial": "{{queued}} von {{total}} zur Kopplung mit {{target}} eingereiht; {{skipped}} übersprungen.",
     "coupleQueuedPartialAlreadyQueued": "{{queued}} von {{total}} zur Kopplung mit {{target}} eingereiht; {{already}} liefen bereits, {{skipped}} übersprungen.",
+    "coupleQueuedPartialAlreadyQueuedReasoned": "{{queued}} von {{total}} zur Kopplung mit {{target}} eingereiht; {{already}} liefen bereits, {{skipped}} übersprungen ({{breakdown}}).",
+    "coupleQueuedPartialReasoned": "{{queued}} von {{total}} für die Verknüpfung mit {{target}} eingereiht; {{skipped}} übersprungen ({{breakdown}}).",
     "coupleUnavailable": "Backoffice-Kopplung ist noch nicht verfügbar.",
     "scopeSelected": "{{count}} ausgewählt",
     "scopeUseFilters": "Alle {{count}} Ergebnisse dieser Filter",

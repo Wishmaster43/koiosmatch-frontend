@@ -40,6 +40,14 @@ export const STEP_REASON_CODES = [
   'planning_no_shift_matched',
   // BE ARCHIVED-AUTOMATION-MAIL-1: a mail/WhatsApp step whose every recipient is archived is skipped.
   'archived',
+  // BE HF-ENTITY-SYNC-1a (D-M1b): the five HelloFlex steps and the backoffice step skip with these.
+  'already_linked', 'not_linked', 'no_contact', 'no_changes', 'candidate_missing', 'match_missing',
+  'helloflex_candidate_email_missing', 'helloflex_candidate_name_missing', 'helloflex_candidate_ambiguous',
+  'helloflex_candidate_unconfirmed', 'helloflex_contact_unconfirmed', 'helloflex_contact_name_missing',
+  'helloflex_branch_unlinked', 'helloflex_employer_unlinked', 'helloflex_owner_unlinked',
+  'helloflex_contract_not_sent', 'helloflex_activity_defaults_missing', 'inactive_state_unmapped', 'no_target',
+  // D-M3b: a backoffice_sync step whose every HelloFlex target is created by the ensure step.
+  'all_targets_ensurer_owned',
 ] as const
 
 export type StepReasonCode = (typeof STEP_REASON_CODES)[number]

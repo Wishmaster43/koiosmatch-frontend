@@ -129,12 +129,17 @@
       "already_on_phase": "already in this phase",
       "not_found": "not found",
       "validation_failed": "validation failed",
-      "guard_blocked": "blocked by a check"
+      "guard_blocked": "blocked by a check",
+      "unknown_id": "not found in this bureau",
+      "blocked": "blocked by an action rule",
+      "hf_ensurer_owned": "created by the HelloFlex workflow step"
     },
     "couple": "Couple to backoffice",
     "coupleQueued": "{{count}} candidate(s) queued for coupling with {{target}}.",
     "coupleQueuedPartial": "{{queued}} of {{total}} queued for coupling with {{target}}; {{skipped}} skipped.",
     "coupleQueuedPartialAlreadyQueued": "{{queued}} of {{total}} queued for coupling with {{target}}; {{already}} already in progress, {{skipped}} skipped.",
+    "coupleQueuedPartialAlreadyQueuedReasoned": "{{queued}} of {{total}} queued for coupling with {{target}}; {{already}} already in progress, {{skipped}} skipped ({{breakdown}}).",
+    "coupleQueuedPartialReasoned": "{{queued}} of {{total}} queued for linking with {{target}}; {{skipped}} skipped ({{breakdown}}).",
     "coupleUnavailable": "Backoffice coupling isn't available yet.",
     "scopeSelected": "{{count}} selected",
     "scopeUseFilters": "All {{count}} results matching these filters",

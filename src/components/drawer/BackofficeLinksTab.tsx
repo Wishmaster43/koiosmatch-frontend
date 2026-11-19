@@ -122,12 +122,18 @@ export default function BackofficeLinksTab({ entity, id, helloflexLink, shiftman
     try {
       const body: SyncBody = { system }
       const { data } = await api.post(`/sync/${entity}/${id}`, body)
-      setQueuedStatus(s => ({ ...s, [system]: data?.link?.status ?? 'pending' }))
-      // CLAIM-1: a double click inside an already-live sync claim (<15 min) answers
-      // `already_queued: true` on the same 202 — show "koppeling loopt al" instead
-      // of the fresh "link started" toast, since nothing new was actually queued.
-      if (data?.already_queued) notify('info', t('backofficeLinks.common.alreadyQueued'))
-      else notifySuccess(t('backofficeLinks.common.linkStarted'))
+      if (data?.skipped) {
+        // HF-ENTITY-SYNC-1a (D-H3b): a HelloFlex person is created by the ensure step of a workflow;
+        // the sync queued nothing, so no pending overlay, only the honest notice (link = real row or null).
+        notify('info', t('backofficeLinks.common.skippedEnsurerOwned'))
+      } else {
+        setQueuedStatus(s => ({ ...s, [system]: data?.link?.status ?? 'pending' }))
+        // CLAIM-1: a double click inside an already-live sync claim (<15 min) answers
+        // `already_queued: true` on the same 202: show "koppeling loopt al" instead
+        // of the fresh "link started" toast, since nothing new was actually queued.
+        if (data?.already_queued) notify('info', t('backofficeLinks.common.alreadyQueued'))
+        else notifySuccess(t('backofficeLinks.common.linkStarted'))
+      }
       // KOPPELINGEN-REFRESH-1: pull the real record right after the sync call
       // resolves, so the card shows the actual linked/failed result without a
       // hard reload — the async worker often lands the result within this window.

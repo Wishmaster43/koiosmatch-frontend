@@ -319,7 +319,10 @@
       "helloflex_zzp_not_supported": "zzp-contract wordt niet ondersteund",
       "helloflex_employer_unlinked": "klant niet gekoppeld aan HelloFlex",
       "helloflex_candidate_unlinked": "kandidaat niet gekoppeld aan HelloFlex",
-      "helloflex_branch_unlinked": "vestiging niet gekoppeld aan HelloFlex"
+      "helloflex_branch_unlinked": "vestiging niet gekoppeld aan HelloFlex",
+      "unknown_id": "niet gevonden in dit bureau",
+      "blocked": "geblokkeerd door een actieregel",
+      "hf_ensurer_owned": "wordt door de HelloFlex-workflowstap aangemaakt"
     }
   },
   "filters": {

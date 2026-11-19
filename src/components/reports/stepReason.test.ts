@@ -39,8 +39,9 @@ describe('stepReasonLabel', () => {
   })
 
   it('has a translated sentence for every code in all seven locales, without an em dash (§5)', () => {
-    // 20 engine codes + the three E1 planning skip codes (BE WAVE2-HIGH-PRIVACY-SCOPE-1).
-    expect(STEP_REASON_CODES).toHaveLength(24)
+    // 20 engine codes + the three E1 planning skip codes (BE WAVE2-HIGH-PRIVACY-SCOPE-1) + archived
+    // + the 20 HelloFlex entity-sync codes (BE HF-ENTITY-SYNC-1a D-M1b/D-M3b).
+    expect(STEP_REASON_CODES).toHaveLength(44)
     for (const [lc, json] of Object.entries({ nl, en, de, fr, es, it: it_, pt })) {
       const labels = (json as { runs: { stepReasons: Record<string, string> } }).runs.stepReasons
       for (const code of STEP_REASON_CODES) {

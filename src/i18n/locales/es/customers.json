@@ -665,7 +665,14 @@
     "coupleQueued": "{{count}} cliente(s) en cola para vincular con {{target}}.",
     "coupleQueuedPartial": "{{queued}} de {{total}} en cola para vincular con {{target}}; {{skipped}} omitido(s).",
     "coupleQueuedPartialAlreadyQueued": "{{queued}} de {{total}} en cola para vincular con {{target}}; {{already}} ya en curso, {{skipped}} omitido(s).",
-    "coupleUnavailable": "La vinculación con el backoffice aún no está disponible."
+    "coupleQueuedPartialAlreadyQueuedReasoned": "{{queued}} de {{total}} en cola para vincular con {{target}}; {{already}} ya en curso, {{skipped}} omitido(s) ({{breakdown}}).",
+    "coupleQueuedPartialReasoned": "{{queued}} de {{total}} en cola para vincular con {{target}}; {{skipped}} omitidos ({{breakdown}}).",
+    "coupleUnavailable": "La vinculación con el backoffice aún no está disponible.",
+    "skipReasons": {
+      "unknown_id": "no encontrado en esta agencia",
+      "blocked": "bloqueado por una regla de acción",
+      "hf_ensurer_owned": "lo crea el paso del flujo de trabajo de HelloFlex"
+    }
   },
   "modal": {
     "title": "Nuevo cliente",

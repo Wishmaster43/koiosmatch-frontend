@@ -591,6 +591,7 @@
       "linking": "Linking…",
       "linkStarted": "Link started",
       "alreadyQueued": "Link already in progress",
+      "skippedEnsurerOwned": "This person is created in HelloFlex by the workflow step, nothing was queued.",
       "linkFailed": "Linking failed",
       "linkedByOn": "Linked by {{name}} on {{date}}",
       "statusLinked": "Linked",
