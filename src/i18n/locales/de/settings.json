@@ -4841,7 +4841,7 @@
     "vat": "USt-ID-Validierung (VIES)"
   },
   "integrations": {
-    "shiftmanagerModuleOff": "Das Shiftmanager-Modul ist für diese Agentur nicht aktiviert.",
+    "shiftmanagerConnectorOff": "Die Shiftmanager-Anbindung ist für diese Agentur nicht aktiviert.",
     "tabs": {
       "connection": "Verbindung",
       "mapping": "Mapping",

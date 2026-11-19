@@ -24,7 +24,11 @@ export default function MatchContractSendAction({ match, onUpdate }: Props) {
   const apps = useApps()
   const [open, setOpen] = useState(false)
 
-  const allowed = !!auth?.hasPermission?.('matches.update') && !!auth?.hasModule?.('hf') && !!apps?.isAppEnabled('hf')
+  // CONNECTOR-VS-REPORTING-1 (Danny 19-11): the contract send is a connector feature, so the
+  // HelloFlex app (connector switch) OR the hf module (a legacy package) allows it; the
+  // reporting add-on alone never gates it.
+  const connectorOn = !!apps?.isAppEnabled('hf') || !!auth?.hasModule?.('hf')
+  const allowed = !!auth?.hasPermission?.('matches.update') && connectorOn
   // Complementary to the resolve action (only on 'sending'): sendable from none/failed, with no GUID yet.
   const sendable = (!match.contractStatus || ['none', 'failed'].includes(match.contractStatus)) && !match.helloflexContractGuid
   if (!allowed || !sendable || match.archived) return null

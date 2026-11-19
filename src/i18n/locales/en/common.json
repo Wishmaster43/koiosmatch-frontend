@@ -842,6 +842,7 @@
     "helloflexContractAmbiguous": "HelloFlex holds more than one contract for this match; nothing was sent. Check it in HelloFlex.",
     "helloflexUnreachable": "HelloFlex is unreachable or answered unreadably; nothing was sent. Try again later.",
     "tenantPackageWriteOutsideSeam": "This package change was refused: packages, add-ons and modules are only written through the package screen; nothing was saved.",
+    "connectorRequiredByReporting": "This connector cannot be switched off: the reporting add-on for this system is still on. Switch the reporting off on the package screen first; nothing was saved.",
     "aiDisclosureMissing": "The interview intro is missing the mandatory AI disclosure; adjust the template before you activate this.",
     "fieldRequired": "{{field}} is required."
   },
@@ -1283,12 +1284,15 @@
       "aiPlanner": "AI Planner",
       "aiRecruiter": "AI Recruiter",
       "koiosAI": "Koios AI",
-      "shiftmanagerReporting": "Shiftmanager Reporting",
+      "koiosHF": "Koios ↔ HF",
+      "koiosSM": "Koios ↔ SM",
+      "reportingSM": "Reporting SM",
+      "reportingHF": "Reporting HF",
       "shiftmanagerAutomations": "Shiftmanager Automations",
-      "elanzaConnection": "Elanza connection",
-      "aelioConnection": "Aelio connection",
-      "intusConnection": "Intus connection",
-      "sdbConnection": "SDB connection"
+      "koiosElanza": "Koios ↔ Elanza",
+      "koiosAelio": "Koios ↔ Aelio",
+      "koiosIntus": "Koios ↔ Intus",
+      "koiosSDB": "Koios ↔ SDB"
     },
     "workflowNames": {
       "reactivation": "Reactivation",

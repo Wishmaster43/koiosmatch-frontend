@@ -842,6 +842,7 @@
     "helloflexContractAmbiguous": "HelloFlex bevat meer dan een contract voor deze match; er is niets verstuurd. Controleer het in HelloFlex.",
     "helloflexUnreachable": "HelloFlex is niet bereikbaar of gaf een onleesbaar antwoord; er is niets verstuurd. Probeer het later opnieuw.",
     "tenantPackageWriteOutsideSeam": "Deze pakketwijziging is geweigerd: pakketten, add-ons en modules worden alleen via het pakketscherm opgeslagen; er is niets bewaard.",
+    "connectorRequiredByReporting": "Deze koppeling kan niet uit: de rapportage-add-on van dit systeem staat nog aan. Zet eerst de rapportage uit op het pakketscherm; er is niets opgeslagen.",
     "aiDisclosureMissing": "De interview-intro mist de verplichte AI-vermelding; pas de template aan voordat je dit activeert.",
     "fieldRequired": "{{field}} is verplicht."
   },
@@ -1283,12 +1284,15 @@
       "aiPlanner": "AI Planner",
       "aiRecruiter": "AI Recruiter",
       "koiosAI": "Koios AI",
-      "shiftmanagerReporting": "Shiftmanager Rapportage",
+      "koiosHF": "Koios ↔ HF",
+      "koiosSM": "Koios ↔ SM",
+      "reportingSM": "Rapportage SM",
+      "reportingHF": "Rapportage HF",
       "shiftmanagerAutomations": "Shiftmanager Automaties",
-      "elanzaConnection": "Koppeling Elanza",
-      "aelioConnection": "Koppeling Aelio",
-      "intusConnection": "Koppeling Intus",
-      "sdbConnection": "Koppeling SDB"
+      "koiosElanza": "Koios ↔ Elanza",
+      "koiosAelio": "Koios ↔ Aelio",
+      "koiosIntus": "Koios ↔ Intus",
+      "koiosSDB": "Koios ↔ SDB"
     },
     "workflowNames": {
       "reactivation": "Heractivering",

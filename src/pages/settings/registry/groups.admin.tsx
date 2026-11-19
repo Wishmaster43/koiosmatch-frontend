@@ -43,8 +43,13 @@ export const adminGroups: NavGroup[] = [
       // here — the former Modules-group screens move in unchanged (same gates,
       // same components); old deep-links resolve via SLUG_ALIASES. The Koppeling/
       // Mapping sub-tabs land with CMBE's contract, never as empty fakes (§3).
-      { id: 'shiftmanager', icon: BarChart2, component: ShiftmanagerModuleSettings, requiresPage: 'shiftmanager' },
-      { id: 'helloflex', icon: Boxes, component: HelloflexSettings, requiresPage: 'helloflex' },
+      // CONNECTOR-VS-REPORTING-1 (Danny 19-11: the connector sections must show when the
+      // connector APP is on at superadmin/apps while the reporting add-on is OFF; the add-on
+      // only unlocks reporting). Visible on EITHER signal: the app (connector switch) or the
+      // module (a legacy package carries sm/hf through the package). Supersedes the ONIX
+      // G-012 module-only gate; the reporting pages themselves stay on the module (access.ts).
+      { id: 'shiftmanager', icon: BarChart2, component: ShiftmanagerModuleSettings, requiresModuleOrApp: { module: 'sm', app: 'shiftmanager' } },
+      { id: 'helloflex', icon: Boxes, component: HelloflexSettings, requiresModuleOrApp: { module: 'hf', app: 'hf' } },
       // Werkzoeken connector (INTEGRATIONS-CONTRACT §1) — gated on the new 'wz'
       // module via access.ts; v1 = the connection card only.
       { id: 'werkzoeken', icon: Globe, component: WerkzoekenSettings, requiresPage: 'werkzoeken' },

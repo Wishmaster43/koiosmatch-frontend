@@ -1,6 +1,7 @@
 /**
  * MatchContractSendAction — hidden without matches.update, without the HelloFlex
- * app, or while a send is in flight; shown otherwise (HF-CONTRACT-SEND-1).
+ * connector (app OR hf module, CONNECTOR-VS-REPORTING-1), or while a send is in
+ * flight; shown otherwise (HF-CONTRACT-SEND-1).
  */
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { render, screen } from '@testing-library/react'
@@ -33,14 +34,20 @@ describe('MatchContractSendAction', () => {
     renderAction()
     expect(screen.queryByRole('button')).toBeNull()
   })
-  it('is hidden without the hf module', () => {
+  it('stays visible on the HelloFlex app alone (hf module off: connector, not reporting)', () => {
     mockHasModule.mockReturnValue(false)
     renderAction()
-    expect(screen.queryByRole('button')).toBeNull()
+    expect(screen.getByRole('button', { name: label() })).toBeInTheDocument()
+  })
+  it('stays visible on the hf module alone (a legacy package without the app flag)', () => {
+    mockIsAppEnabled.mockReturnValue(false)
+    renderAction()
+    expect(screen.getByRole('button', { name: label() })).toBeInTheDocument()
     expect(mockHasModule).toHaveBeenCalledWith('hf')
   })
-  it('is hidden without the HelloFlex app', () => {
+  it('is hidden when both the HelloFlex app and the hf module are off', () => {
     mockIsAppEnabled.mockReturnValue(false)
+    mockHasModule.mockReturnValue(false)
     renderAction()
     expect(screen.queryByRole('button')).toBeNull()
   })

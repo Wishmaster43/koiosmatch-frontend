@@ -842,6 +842,7 @@
     "helloflexContractAmbiguous": "O HelloFlex contém mais do que um contrato para este match; nada foi enviado. Verifique no HelloFlex.",
     "helloflexUnreachable": "O HelloFlex está inacessível ou respondeu de forma ilegível; nada foi enviado. Tente novamente mais tarde.",
     "tenantPackageWriteOutsideSeam": "Esta alteração do pacote foi recusada: pacotes, add-ons e módulos só são gravados através do ecrã de pacotes; nada foi guardado.",
+    "connectorRequiredByReporting": "Este conector não pode ser desativado: o add-on de relatórios deste sistema ainda está ativo. Desative primeiro os relatórios no ecrã de pacotes; nada foi guardado.",
     "aiDisclosureMissing": "A introdução da entrevista não tem a menção obrigatória de IA; ajuste o modelo antes de ativar.",
     "fieldRequired": "{{field}} é obrigatório."
   },
@@ -1283,12 +1284,15 @@
       "aiPlanner": "AI Planner",
       "aiRecruiter": "AI Recruiter",
       "koiosAI": "Koios AI",
-      "shiftmanagerReporting": "Relatórios Shiftmanager",
+      "koiosHF": "Koios ↔ HF",
+      "koiosSM": "Koios ↔ SM",
+      "reportingSM": "Relatórios SM",
+      "reportingHF": "Relatórios HF",
       "shiftmanagerAutomations": "Automações Shiftmanager",
-      "elanzaConnection": "Ligação Elanza",
-      "aelioConnection": "Ligação Aelio",
-      "intusConnection": "Ligação Intus",
-      "sdbConnection": "Ligação SDB"
+      "koiosElanza": "Koios ↔ Elanza",
+      "koiosAelio": "Koios ↔ Aelio",
+      "koiosIntus": "Koios ↔ Intus",
+      "koiosSDB": "Koios ↔ SDB"
     },
     "workflowNames": {
       "reactivation": "Reativação",

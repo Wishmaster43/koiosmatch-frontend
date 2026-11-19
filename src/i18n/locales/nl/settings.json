@@ -4841,7 +4841,7 @@
     "vat": "BTW-validatie (VIES)"
   },
   "integrations": {
-    "shiftmanagerModuleOff": "De Shiftmanager-module staat niet aan voor dit bureau.",
+    "shiftmanagerConnectorOff": "De Shiftmanager-koppeling staat niet aan voor dit bureau.",
     "tabs": {
       "connection": "Koppeling",
       "mapping": "Mapping",

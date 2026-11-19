@@ -10,7 +10,7 @@
  * isolates the NEW executability gate from the pre-existing app/module gates, so a
  * type appearing or vanishing in these tests is caused by the catalog, nothing else.
  */
-import { describe, it, expect, vi } from 'vitest'
+import { describe, it, expect, vi, afterEach } from 'vitest'
 import { render, screen } from '@testing-library/react'
 import ModulePicker from './ModulePicker'
 import { MODULE_META } from '@/modules/index'
@@ -22,10 +22,13 @@ vi.mock('react-i18next', async () => {
   return { ...actual, useTranslation: () => ({ t: (k: string) => k, i18n: { language: 'en', exists: () => false } }) }
 })
 
-// Every app/module-gated type is disabled, so only ungated registry entries survive
-// isModuleEnabled — the fixed baseline the executability gate is layered on top of.
-vi.mock('@/context/AppsContext', () => ({ useApps: () => ({ isAppEnabled: () => false }) }))
-vi.mock('@/context/AuthContext', () => ({ useAuth: () => ({ hasModule: () => false }) }))
+// Gate state per test. Empty sets = every app/module-gated type disabled, so only ungated
+// registry entries survive isModuleEnabled, the fixed baseline the executability gate is
+// layered on top of; the connector matrix below switches one signal at a time.
+const gateState = vi.hoisted(() => ({ apps: new Set<string>(), modules: new Set<string>() }))
+vi.mock('@/context/AppsContext', () => ({ useApps: () => ({ isAppEnabled: (a: string) => gateState.apps.has(a) }) }))
+vi.mock('@/context/AuthContext', () => ({ useAuth: () => ({ hasModule: (m: string) => gateState.modules.has(m) }) }))
+afterEach(() => { gateState.apps.clear(); gateState.modules.clear() })
 
 // The catalog the mocked hook hands back — each test sets it before rendering.
 let mockCatalog: ModuleCatalog = {}
@@ -118,5 +121,48 @@ describe('ModulePicker · category tabs', () => {
     const offered = Object.values(MODULE_META).some(m => (m as { category?: string }).category === 'outreach')
     expect(offered).toBe(true)
     expect(screen.getByRole('button', { name: /call lists|categories\.outreach/i })).toBeInTheDocument()
+  })
+})
+
+// CONNECTOR-VS-REPORTING-1: a module that names a connector app AND a package module is a
+// connector write step and either signal offers it (sm_employee_create); the backoffice link step
+// names the two connector apps only; a module-only read mirror stays on its module.
+describe('ModulePicker · connector write modules gate on the app OR the module', () => {
+  const LINK_LABEL = MODULE_META.backoffice_sync.label
+  const CREATE_LABEL = MODULE_META.sm_employee_create.label
+  // sm_employees: a module-only SM read mirror with a label no native module shares (sm_candidates reads "Candidates").
+  const MIRROR_LABEL = MODULE_META.sm_employees.label
+
+  it('offers the connector write steps on the shiftmanager app alone and keeps the sm read mirror hidden', () => {
+    mockCatalog = {}
+    gateState.apps.add('shiftmanager')
+    render(<ModulePicker insertAfterEdgeId={null} onSelect={noop} onClose={noop} />)
+    expect(screen.getByTitle(LINK_LABEL)).toBeInTheDocument()
+    expect(screen.getByTitle(CREATE_LABEL)).toBeInTheDocument()
+    expect(screen.queryByTitle(MIRROR_LABEL)).not.toBeInTheDocument()
+  })
+
+  it('offers the both-gated write step and the read mirror on the sm module alone (a legacy package), not the app-only link step', () => {
+    mockCatalog = {}
+    gateState.modules.add('sm')
+    render(<ModulePicker insertAfterEdgeId={null} onSelect={noop} onClose={noop} />)
+    expect(screen.getByTitle(CREATE_LABEL)).toBeInTheDocument()
+    expect(screen.getByTitle(MIRROR_LABEL)).toBeInTheDocument()
+    expect(screen.queryByTitle(LINK_LABEL)).not.toBeInTheDocument()
+  })
+
+  it('offers the backoffice link on the hf app alone and hides the Shiftmanager-only write step', () => {
+    mockCatalog = {}
+    gateState.apps.add('hf')
+    render(<ModulePicker insertAfterEdgeId={null} onSelect={noop} onClose={noop} />)
+    expect(screen.getByTitle(LINK_LABEL)).toBeInTheDocument()
+    expect(screen.queryByTitle(CREATE_LABEL)).not.toBeInTheDocument()
+  })
+
+  it('hides every connector write step with neither signal', () => {
+    mockCatalog = {}
+    render(<ModulePicker insertAfterEdgeId={null} onSelect={noop} onClose={noop} />)
+    expect(screen.queryByTitle(LINK_LABEL)).not.toBeInTheDocument()
+    expect(screen.queryByTitle(CREATE_LABEL)).not.toBeInTheDocument()
   })
 })

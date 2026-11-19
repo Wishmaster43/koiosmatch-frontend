@@ -15,10 +15,12 @@ vi.mock('@/lib/api', async () => {
   const actual = await vi.importActual('@/lib/api')
   return { ...actual, default: { get: vi.fn(), post: vi.fn(), patch: vi.fn(), put: vi.fn(), delete: vi.fn() } }
 })
-const mockModules = vi.hoisted(() => ({ on: new Set<string>(), perms: new Set<string>(['settings.update']) }))
+const mockModules = vi.hoisted(() => ({ on: new Set<string>(), apps: new Set<string>(), perms: new Set<string>(['settings.update']) }))
 vi.mock('@/context/AuthContext', () => ({
   useAuth: () => ({ hasModule: (k: string) => mockModules.on.has(k), hasPermission: (k: string) => mockModules.perms.has(k) }),
 }))
+// The connector switch (settings/apps) is the second signal the columns read (CONNECTOR-VS-REPORTING-1).
+vi.mock('@/context/AppsContext', () => ({ useApps: () => ({ isAppEnabled: (k: string) => mockModules.apps.has(k) }) }))
 vi.mock('@/lib/notify', () => ({ notifyError: vi.fn(), notifySuccess: vi.fn() }))
 
 const st = (key: string) => i18n.t(key, { ns: 'settings' })
@@ -29,10 +31,23 @@ const location = () => ({
   id: 'loc1', name: 'Kantoor Rotterdam', street: 'Coolsingel', house_number: '1', postal_code: '3011AD', city: 'Rotterdam',
   address: 'Coolsingel 1, 3011AD Rotterdam', created_at: '2026-07-01T10:00:00Z', in_use: false,
 })
-afterEach(() => { vi.clearAllMocks(); mockModules.on.clear(); mockModules.perms.clear(); mockModules.perms.add('settings.update') })
+afterEach(() => { vi.clearAllMocks(); mockModules.on.clear(); mockModules.apps.clear(); mockModules.perms.clear(); mockModules.perms.add('settings.update') })
 
 describe('LocationsSettings connector columns', () => {
-  it('VESTIGINGEN-LINKS-FE-1: the connector columns are absent when both modules are off', async () => {
+  it('CONNECTOR-VS-REPORTING-1: the shiftmanager app alone (no module) shows the Shiftmanager column and reads the mapping', async () => {
+    mockModules.apps.add('shiftmanager')
+    mockedApi.get.mockImplementation((path) => Promise.resolve(path === '/external-id-mappings'
+      ? { data: { data: { hf_id: null, hf_status: 'unlinked', sm_id: null } } }
+      : { data: { data: [location()] } }))
+    renderPage()
+    await waitFor(() => expect(screen.getByText('Kantoor Rotterdam')).toBeInTheDocument())
+    expect(screen.getByText(st('locations.colShiftmanager'))).toBeInTheDocument()
+    expect(screen.queryByText(st('locations.colHelloflex'))).not.toBeInTheDocument()
+    await waitFor(() => expect(mockedApi.get).toHaveBeenCalledWith('/external-id-mappings',
+      expect.objectContaining({ params: { entity_type: 'branch', entity_id: 'loc1' } })))
+  })
+
+  it('VESTIGINGEN-LINKS-FE-1: the connector columns are absent when both apps and both modules are off', async () => {
     mockedApi.get.mockResolvedValue({ data: { data: [location()] } })
     renderPage()
     await waitFor(() => expect(screen.getByText('Kantoor Rotterdam')).toBeInTheDocument())

@@ -4841,7 +4841,7 @@
     "vat": "Validation TVA (VIES)"
   },
   "integrations": {
-    "shiftmanagerModuleOff": "Le module Shiftmanager n’est pas activé pour cette agence.",
+    "shiftmanagerConnectorOff": "Le connecteur Shiftmanager n’est pas activé pour cette agence.",
     "tabs": {
       "connection": "Connexion",
       "mapping": "Mapping",

@@ -185,3 +185,16 @@ describe('cv scan refusals', () => {
     expect(apiErrorKey({ response: { data: { code: 'cv_infected', message: 'x' } } })).toBe('errors.cvInfected')
   })
 })
+
+// CONNECTOR-VS-REPORTING-1: the apps PUT refuses a connector switch-off while its reporting add-on is bought.
+describe('connector_required_by_reporting (409)', () => {
+  it('maps the code to its translated key', () => {
+    expect(apiErrorKey({ response: { status: 409, data: { code: 'connector_required_by_reporting', message: 'x' } } })).toBe('errors.connectorRequiredByReporting')
+  })
+
+  it('renders the translated copy and never the server sentence', () => {
+    const t = (key: string) => `TRANSLATED:${key}`
+    const err = { response: { status: 409, data: { code: 'connector_required_by_reporting', message: 'Zet eerst de rapportage uit.' } } }
+    expect(apiErrorMessage(err, t, 'fallback')).toBe('TRANSLATED:errors.connectorRequiredByReporting')
+  })
+})

@@ -38,9 +38,11 @@ export default function MatchesBulkBar({
   const apps = useApps()
   const isAppEnabled = apps?.isAppEnabled ?? (() => false)
   const canCouple = hasPermission('matches.update')
-  // The couple route is module-gated server-side, so the app flag alone would end in a 403.
-  const showHelloflex = isAppEnabled('hf') && hasModule('hf')
-  const showShiftmanager = isAppEnabled('shiftmanager')
+  // CONNECTOR-VS-REPORTING-1 (Danny 19-11): coupling is a connector feature; the app
+  // (connector switch) OR the module (a legacy package) offers a system, the reporting
+  // add-on alone never gates it (the couple route accepts either, BE in lockstep).
+  const showHelloflex = isAppEnabled('hf') || hasModule('hf')
+  const showShiftmanager = isAppEnabled('shiftmanager') || hasModule('sm')
 
   // Declarative bulk-action tree; coupling drills into whichever systems are
   // actually enabled for this tenant (never offer a switched-off system).

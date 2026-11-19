@@ -1,7 +1,8 @@
 /**
- * ShiftmanagerModuleSettings — INTEGRATIONS-SETTINGS-1 tab model: the
- * connector front door (Connection/Mapping, on module 'sm' only (ONIX G-012: the app flag is ignored, the Mapping tab is hidden until a BE reader exists)) plus the two
- * original reporting sub-tabs (module-only, Danny 04-08). This suite asserts
+ * ShiftmanagerModuleSettings, INTEGRATIONS-SETTINGS-1 tab model: the connector
+ * tabs (Connection, Links) on the connector app OR the sm module, the two reporting
+ * sub-tabs (KPI targets, display limits) on the sm module only (CONNECTOR-VS-REPORTING-1,
+ * Danny 19-11; the Mapping tab stays hidden until a BE reader exists). This suite asserts
  * the full module x app combination matrix on the RENDERED tab set.
  */
 import { describe, it, expect, afterEach, vi } from 'vitest'
@@ -69,22 +70,36 @@ describe('ShiftmanagerModuleSettings — module x app flag matrix', () => {
     expect(screen.getByRole('tab', { name: st('display.title') })).toBeInTheDocument()
   })
 
-  it('module off, app on: the app arm is gone, the empty state shows', () => {
+  it('module off, app on: only the connector tabs (Connection, Links), the card renders first', () => {
     mockAuth.mockReturnValue({ hasModule: () => false })
     mockApps.mockReturnValue({ isAppEnabled: (id: string) => id === 'shiftmanager' })
     render(<ShiftmanagerModuleSettings />)
 
-    expect(screen.getByText(st('integrations.shiftmanagerModuleOff'))).toBeInTheDocument()
-    expect(screen.queryByText(st('shell.empty'))).not.toBeInTheDocument()
-    expect(screen.queryByRole('tablist')).not.toBeInTheDocument()
+    const tabs = screen.getAllByRole('tab')
+    expect(tabs.map(tab => tab.textContent)).toEqual([st('integrations.tabs.connection'), st('integrations.tabs.links')])
+    expect(screen.getByText('connection:shiftmanager')).toBeInTheDocument()
+    expect(screen.queryByRole('tab', { name: st('smKpis.title') })).not.toBeInTheDocument()
+    expect(screen.queryByRole('tab', { name: st('display.title') })).not.toBeInTheDocument()
+    expect(screen.queryByText(st('integrations.shiftmanagerConnectorOff'))).not.toBeInTheDocument()
   })
 
-  it('module off, app off: shows the calm role-empty state (deep-link guard)', () => {
+  it('module off, app on: the Links tab opens the links panel (a connector tab, not a reporting one)', async () => {
+    mockAuth.mockReturnValue({ hasModule: () => false })
+    mockApps.mockReturnValue({ isAppEnabled: (id: string) => id === 'shiftmanager' })
+    render(<ShiftmanagerModuleSettings />)
+
+    await userEvent.click(screen.getByRole('tab', { name: st('integrations.tabs.links') }))
+
+    expect(screen.getByText('links:shiftmanager')).toBeInTheDocument()
+    expect(screen.queryByText(/^schema:/)).not.toBeInTheDocument()
+  })
+
+  it('module off, app off: shows the calm connector-off empty state (deep-link guard)', () => {
     mockAuth.mockReturnValue({ hasModule: () => false })
     mockApps.mockReturnValue({ isAppEnabled: () => false })
     render(<ShiftmanagerModuleSettings />)
 
-    expect(screen.getByText(st('integrations.shiftmanagerModuleOff'))).toBeInTheDocument()
+    expect(screen.getByText(st('integrations.shiftmanagerConnectorOff'))).toBeInTheDocument()
     expect(screen.queryByText(st('shell.empty'))).not.toBeInTheDocument()
     expect(screen.queryByRole('tablist')).not.toBeInTheDocument()
   })
@@ -94,7 +109,7 @@ describe('ShiftmanagerModuleSettings — module x app flag matrix', () => {
     mockApps.mockReturnValue(undefined)
     render(<ShiftmanagerModuleSettings />)
 
-    expect(screen.getByText(st('integrations.shiftmanagerModuleOff'))).toBeInTheDocument()
+    expect(screen.getByText(st('integrations.shiftmanagerConnectorOff'))).toBeInTheDocument()
     expect(screen.queryByText(st('shell.empty'))).not.toBeInTheDocument()
   })
 })

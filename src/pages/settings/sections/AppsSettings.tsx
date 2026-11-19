@@ -5,7 +5,7 @@ import { labelOrRaw } from '@/lib/labelOrRaw'
 import SaveButton from '@/components/ui/SaveButton'
 import api from '@/lib/api'
 import { notifyError } from '@/lib/notify'
-import { extractApiError } from '@/lib/extractApiError'
+import { apiErrorMessage } from '@/lib/extractApiError'
 import { useAuth } from '@/context/AuthContext'
 import { useApps, AVAILABLE_APPS } from '@/context/AppsContext'
 import { canAccessPage } from '@/lib/access'
@@ -65,9 +65,9 @@ export default function AppsSettings() {
       await queryClient.invalidateQueries({ queryKey: ['integrations'] })
       setSaved(true); setTimeout(() => setSaved(false), 2000)
     } catch (err) {
-      // Surface the real reason (422 invalid slug / 403 no super-admin/package) —
-      // the silent noop hid the hf-slug 422 entirely (Danny 23-07).
-      notifyError(extractApiError(err, t('common:actionFailed')))
+      // Surface the real reason (422 invalid slug / 403 no super-admin/package / the coded 409
+      // connector_required_by_reporting, translated); the silent noop hid the hf-slug 422 entirely (Danny 23-07).
+      notifyError(apiErrorMessage(err, t, t('common:actionFailed')))
     }
     setSaving(false)
   }

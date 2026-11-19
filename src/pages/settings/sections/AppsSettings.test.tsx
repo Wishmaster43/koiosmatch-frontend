@@ -12,7 +12,6 @@ const mockPut = vi.fn()
 vi.mock('@/lib/api', () => ({ default: { put: (...a: unknown[]) => mockPut(...a) } }))
 const mockNotifyError = vi.fn()
 vi.mock('@/lib/notify', () => ({ notifyError: (...a: unknown[]) => mockNotifyError(...a) }))
-vi.mock('@/lib/extractApiError', () => ({ extractApiError: (err: { response?: { data?: { message?: string } } }, fb: string) => err?.response?.data?.message ?? fb }))
 // Key-echo t plus an exists flag: true = every catalogue label has a key, false = brand names fall back to the raw label.
 const i18nState = vi.hoisted(() => ({ keyExists: true }))
 vi.mock('react-i18next', () => ({ useTranslation: () => ({ t: (k: string) => k, i18n: { exists: () => i18nState.keyExists } }) }))
@@ -140,6 +139,17 @@ describe('AppsSettings', () => {
     fireEvent.click(screen.getByRole('button', { name: /^save$/ }))
     await waitFor(() => expect(mockRefreshUser).toHaveBeenCalledTimes(1))
     await waitFor(() => expect(invalidate).toHaveBeenCalledWith({ queryKey: ['integrations'] }))
+  })
+
+  it('renders the coded 409 connector_required_by_reporting as its translated key, never the server sentence', async () => {
+    mockEnabled = ['shiftmanager']
+    mockPut.mockRejectedValue({ response: { status: 409, data: { code: 'connector_required_by_reporting', message: 'Zet eerst de rapportage uit.' } } })
+    renderApps()
+    fireEvent.click(screen.getAllByTitle('apps.disable')[0])
+    fireEvent.click(screen.getByRole('button', { name: /^save$/ }))
+    await waitFor(() => expect(mockNotifyError).toHaveBeenCalledWith('errors.connectorRequiredByReporting'))
+    expect(mockPut).toHaveBeenCalledWith('/settings/apps', { enabled: [] })
+    expect(mockSetApps).not.toHaveBeenCalled()
   })
 
   it('neither refreshes the session nor touches the caches when the save fails', async () => {

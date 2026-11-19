@@ -45,15 +45,19 @@ export default function ModulePicker({ insertAfterEdgeId, onSelect, onClose }: {
   const modLabel = (type: string, label: string) => labelOrRaw(t, i18n, 'modules.' + type, label, 'workflows')
   const catLabel = (cat: string) => labelOrRaw(t, i18n, 'categories.' + categorySlug(cat), cat, 'workflows')
 
-  // Hide a module when its connector-app is disabled OR its billing module is off.
   // Two axes: MODULE_APP_MAP → AppsContext connectors; MODULE_REQUIRED_MODULE → package add-ons.
+  // CONNECTOR-VS-REPORTING-1 (Danny 19-11): a module that names BOTH is a connector write step
+  // (backoffice_sync, sm_employee_*): the app (connector switch) OR the module (a legacy package)
+  // offers it, the reporting add-on alone never gates it. A module-only entry (the SM read
+  // mirrors) stays on its module, an app-only entry on its app; no AuthContext = no module signal.
   const isModuleEnabled = (type: string) => {
     const reqModule = MODULE_REQUIRED_MODULE[type]
-    if (reqModule && !(hasModule?.(reqModule) ?? true)) return false
+    const moduleOn = reqModule && hasModule ? hasModule(reqModule) : null
     const req = MODULE_APP_MAP[type]
-    if (!req) return true
+    if (!req) return moduleOn ?? true
     const apps = Array.isArray(req) ? req : [req]
-    return apps.some(a => isAppEnabled?.(a))
+    const appOn = apps.some(a => isAppEnabled?.(a))
+    return moduleOn === null ? appOn : appOn || moduleOn
   }
 
   // PICKER-INTERSECT: only offer a module the engine can actually run. An EMPTY

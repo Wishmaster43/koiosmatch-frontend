@@ -99,7 +99,7 @@ describe('WorkflowFolderSidebar · seeded folder name i18n (LOOKUP-I18N-1)', () 
 describe('WorkflowFolderSidebar — locked app-gated folders stay hidden', () => {
   const folders: WorkflowFolder[] = [
     { id: 'f1', name: 'Onboarding' },
-    { id: 'f2', name: 'Koppeling Elanza', locked: true, unlocked_by_app: 'elanza' },
+    { id: 'f2', name: 'Koios ↔ Elanza', locked: true, unlocked_by_app: 'elanza' },
   ]
 
   const props = {
@@ -118,7 +118,7 @@ describe('WorkflowFolderSidebar — locked app-gated folders stay hidden', () =>
   it('renders the unlocked folder and never the locked one', () => {
     render(<WorkflowFolderSidebar {...props} />)
     expect(screen.getByText('Onboarding')).toBeInTheDocument()
-    expect(screen.queryByText('Koppeling Elanza')).toBeNull()
+    expect(screen.queryByText('Koios ↔ Elanza')).toBeNull()
   })
 })
 

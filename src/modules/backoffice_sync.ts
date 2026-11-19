@@ -7,18 +7,19 @@ import { Link2 } from 'lucide-react'
 
 export default {
   type:     'backoffice_sync',
-  // SM-WRITE-GATE-1 (api d36a4406, WorkflowWriter::MODULE_REQUIRES): saving a workflow with this
-  // step 422s for a tenant without the sm package — the picker shows it as "requires Shiftmanager".
-  module: 'sm',
+  // CONNECTOR-VS-REPORTING-1 (Danny 19-11): a connector WRITE step gated on the connector APPS only
+  // (no package module: WorkflowWriter::MODULE_REQUIRES no longer names it, the BE checks the connector
+  // predicate per step-config `system` through ConnectorRequirements, BE CONNECTOR-VS-REPORTING-BE-1).
   label:    'Link to backoffice',
   category: 'candidates',
   Icon:     Link2,
   color:    'var(--module-cyan)',
   bg:       'var(--color-info-bg)',
-  // Visible when EITHER connector app is on (MODULE_APP_MAP is any-of).
+  // Either connector app offers it (MODULE_APP_MAP is any-of).
   app:      ['hf', 'shiftmanager'],
   schema: [
-    { key: 'system', label: 'System', type: 'select', options: ['helloflex', 'shiftmanager'] },
+    // Required: BE D-M1 answers 422 workflow.backoffice_sync_system_unknown for an empty or unknown system.
+    { key: 'system', label: 'System', type: 'select', required: true, options: ['helloflex', 'shiftmanager'] },
     { key: 'include_children', label: 'Including child locations/departments/contacts', type: 'boolean', help: 'Only relevant when the linked entity is a customer.' },
     { key: 'only_unlinked', label: 'Only not yet linked', type: 'boolean', help: 'Skip records that already have a link with this system. Recommended for bulk.' },
   ],

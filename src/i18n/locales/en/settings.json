@@ -4841,7 +4841,7 @@
     "vat": "VAT validation (VIES)"
   },
   "integrations": {
-    "shiftmanagerModuleOff": "The Shiftmanager module is not enabled for this bureau.",
+    "shiftmanagerConnectorOff": "The Shiftmanager connector is not enabled for this bureau.",
     "tabs": {
       "connection": "Connection",
       "mapping": "Mapping",

@@ -63,14 +63,25 @@ describe('MatchesBulkBar · SYNC-BULK-1 permission + module gating', () => {
     expect(props.onCoupleHelloFlex).toHaveBeenCalledTimes(1)
   })
 
-  it('hides HelloFlex without the hf module even when the app flag is on (the route would answer 403)', async () => {
+  it('offers HelloFlex on the app flag alone, hf module off (CONNECTOR-VS-REPORTING-1: connector, not reporting)', async () => {
     mockUseAuth.mockReturnValue({ hasPermission: () => true, hasModule: () => false })
     mockUseApps.mockReturnValue({ isAppEnabled: () => true })
     const user = userEvent.setup()
     render(<MatchesBulkBar {...baseProps()} />)
     await user.click(screen.getByText('bulk.actions'))
     await user.click(screen.getByText('bulk.couple'))
-    expect(screen.queryByText('bulk.target.helloflex')).toBeNull()
+    expect(screen.getByText('bulk.target.helloflex')).toBeTruthy()
+    expect(screen.getByText('bulk.target.shiftmanager')).toBeTruthy()
+  })
+
+  it('offers both systems on the modules alone (a legacy package without app flags)', async () => {
+    mockUseAuth.mockReturnValue({ hasPermission: () => true, hasModule: (k: string) => k === 'hf' || k === 'sm' })
+    mockUseApps.mockReturnValue({ isAppEnabled: () => false })
+    const user = userEvent.setup()
+    render(<MatchesBulkBar {...baseProps()} />)
+    await user.click(screen.getByText('bulk.actions'))
+    await user.click(screen.getByText('bulk.couple'))
+    expect(screen.getByText('bulk.target.helloflex')).toBeTruthy()
     expect(screen.getByText('bulk.target.shiftmanager')).toBeTruthy()
   })
 })

@@ -83,6 +83,8 @@ const ERROR_CODE_KEYS: Record<string, string> = {
   tenant_not_ready: 'errors.tenantNotReady',
   // TENANT-PACKAGE-SEAM-RUNTIME-1 (BE 0fe1ebe46, 409): the last-net guard refuses a package, add-on or module write that bypasses the package seam; nothing is saved.
   tenant_package_write_outside_seam: 'errors.tenantPackageWriteOutsideSeam',
+  // CONNECTOR-VS-REPORTING-1: a connector app switched off while its reporting add-on is still bought (409).
+  connector_required_by_reporting: 'errors.connectorRequiredByReporting',
   // The interview intro / workflow / Koios toggle lacks the mandatory AI disclosure (422).
   ai_disclosure_missing: 'errors.aiDisclosureMissing',
   // ONIX C-007: one generic 422 for a taken e-mail (never reveals why or where it is in use).

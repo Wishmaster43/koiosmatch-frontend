@@ -27,12 +27,18 @@ const workflowFolders: Record<string, string> = {
   aiPlanner: "AI Planner",
   aiRecruiter: "AI Recruiter",
   koiosAI: "Koios AI",
-  shiftmanagerRapportage: "Shiftmanager Rapportage",
+  // CONNECTOR-VS-REPORTING-1 (Danny 19-11, BE CONNECTOR-VS-REPORTING-BE-1): the connector folders
+  // "Koios ↔ <system>" and the two reporting folders as WorkflowFolderSeeder seeds them; the retired
+  // "Shiftmanager Automaties" label stays translatable for a bureau that still holds that folder.
+  koiosHF: "Koios ↔ HF",
+  koiosSM: "Koios ↔ SM",
+  rapportageSM: "Rapportage SM",
+  rapportageHF: "Rapportage HF",
   shiftmanagerAutomaties: "Shiftmanager Automaties",
-  koppelingElanza: "Koppeling Elanza",
-  koppelingAelio: "Koppeling Aelio",
-  koppelingIntus: "Koppeling Intus",
-  koppelingSDB: "Koppeling SDB",
+  koiosElanza: "Koios ↔ Elanza",
+  koiosAelio: "Koios ↔ Aelio",
+  koiosIntus: "Koios ↔ Intus",
+  koiosSDB: "Koios ↔ SDB",
 }
 // Seeded workflow TEMPLATES (TemplateLibrary, all groups) + the one demo-dashboard
 // workflow (SeedDemoDashboard::seedWorkflowRuns). LABEL_KEYED for the same reason as

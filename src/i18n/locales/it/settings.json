@@ -4842,7 +4842,7 @@
     "vat": "Convalida IVA (VIES)"
   },
   "integrations": {
-    "shiftmanagerModuleOff": "Il modulo Shiftmanager non è attivo per questa agenzia.",
+    "shiftmanagerConnectorOff": "Il connettore Shiftmanager non è attivo per questa agenzia.",
     "tabs": {
       "connection": "Connessione",
       "mapping": "Mapping",

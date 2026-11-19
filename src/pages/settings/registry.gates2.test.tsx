@@ -14,6 +14,22 @@ describe('registry — view_customers page gate', () => {
   })
 })
 
+describe('registry: connector sections gate on the app OR the module (CONNECTOR-VS-REPORTING-1)', () => {
+  it('shiftmanager declares requiresModuleOrApp { module: sm, app: shiftmanager } and no requiresPage', () => {
+    const group = NAV_GROUPS.find((g) => g.key === 'integrations')
+    const item = group?.items.find((i) => i.id === 'shiftmanager')
+    expect(item?.requiresModuleOrApp).toEqual({ module: 'sm', app: 'shiftmanager' })
+    expect(item?.requiresPage).toBeUndefined()
+  })
+
+  it('helloflex declares requiresModuleOrApp { module: hf, app: hf } and no requiresPage', () => {
+    const group = NAV_GROUPS.find((g) => g.key === 'integrations')
+    const item = group?.items.find((i) => i.id === 'helloflex')
+    expect(item?.requiresModuleOrApp).toEqual({ module: 'hf', app: 'hf' })
+    expect(item?.requiresPage).toBeUndefined()
+  })
+})
+
 describe('registry — vacancy_generation permission gate', () => {
   it('vacancy_generation declares requiresPermission: vacancy_generation.manage', () => {
     const aiGroup = NAV_GROUPS.find((g) => g.key === 'ai')

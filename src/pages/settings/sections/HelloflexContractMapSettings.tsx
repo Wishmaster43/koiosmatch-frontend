@@ -12,9 +12,9 @@
  * path and the bulk coupling honestly skip/409 that contract form until the tenant fills it
  * in here (no silent wrong-contract sends).
  *
- * Gated in the registry on `requiresPage: 'helloflex'` (→ canAccessPage → hasModule
- * ('helloflex'), mirrors the sm/hf module-gated planning/whatsapp sections) — a tenant
- * without the HelloFlex module never sees this sub-tab.
+ * Gated in the registry through the HelloFlex section's requiresModuleOrApp gate (the hf
+ * connector app OR the hf module, CONNECTOR-VS-REPORTING-1): a tenant without the HelloFlex
+ * connector never sees this sub-tab.
  */
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'

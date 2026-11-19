@@ -842,6 +842,7 @@
     "helloflexContractAmbiguous": "HelloFlex contiene más de un contrato para este match; no se ha enviado nada. Compruébalo en HelloFlex.",
     "helloflexUnreachable": "HelloFlex no está disponible o respondió de forma ilegible; no se ha enviado nada. Inténtalo de nuevo más tarde.",
     "tenantPackageWriteOutsideSeam": "Este cambio de paquete se rechazó: los paquetes, los add-ons y los módulos solo se guardan desde la pantalla de paquetes; no se guardó nada.",
+    "connectorRequiredByReporting": "Este conector no se puede desactivar: el complemento de informes de este sistema sigue activo. Desactive primero los informes en la pantalla de paquetes; no se ha guardado nada.",
     "aiDisclosureMissing": "Falta la mención obligatoria de IA en la introducción de la entrevista; modifica la plantilla antes de activarlo.",
     "fieldRequired": "{{field}} es obligatorio."
   },
@@ -1283,12 +1284,15 @@
       "aiPlanner": "AI Planner",
       "aiRecruiter": "AI Recruiter",
       "koiosAI": "Koios AI",
-      "shiftmanagerReporting": "Shiftmanager Informes",
+      "koiosHF": "Koios ↔ HF",
+      "koiosSM": "Koios ↔ SM",
+      "reportingSM": "Informes SM",
+      "reportingHF": "Informes HF",
       "shiftmanagerAutomations": "Shiftmanager Automatizaciones",
-      "elanzaConnection": "Conexión Elanza",
-      "aelioConnection": "Conexión Aelio",
-      "intusConnection": "Conexión Intus",
-      "sdbConnection": "Conexión SDB"
+      "koiosElanza": "Koios ↔ Elanza",
+      "koiosAelio": "Koios ↔ Aelio",
+      "koiosIntus": "Koios ↔ Intus",
+      "koiosSDB": "Koios ↔ SDB"
     },
     "workflowNames": {
       "reactivation": "Reactivación",

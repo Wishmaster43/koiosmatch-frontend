@@ -12,6 +12,7 @@ import LocationsTable from './locations/LocationsTable'
 import { useBranchLinks } from './locations/useBranchLinks'
 import type { LinkSystem } from './locations/useBranchLinks'
 import { useAuth } from '@/context/AuthContext'
+import { useApps } from '@/context/AppsContext'
 import { apiErrorMessage } from '@/lib/extractApiError'
 import LocationFormModal from './locations/LocationFormModal'
 import ErrorBanner from '@/components/ui/ErrorBanner'
@@ -98,6 +99,7 @@ function formatUsageCounts(counts: Record<string, number> | undefined, t: (key: 
 export default function LocationsSettings() {
   const { t } = useTranslation(['settings', 'common'])
   const auth = useAuth()
+  const apps = useApps()
   const [locations, setLocations] = useState<LocationRow[]>([])
   const [loading,   setLoading]   = useState(true)
   const [loadError, setLoadError] = useState(false)
@@ -213,13 +215,15 @@ export default function LocationsSettings() {
   const safePage = Math.min(page, totalPages) || 1
   const paginated = locations.slice((safePage - 1) * PER_PAGE, safePage * PER_PAGE)
 
-  // Optional HelloFlex / Shiftmanager id columns, visible only when that connector module is on.
+  // Optional HelloFlex / Shiftmanager id columns, visible when that connector is on: the app
+  // (connector switch) or the module (a legacy package), never gated on the reporting add-on
+  // alone (CONNECTOR-VS-REPORTING-1, Danny 19-11).
   // MAPPING-TABLE-BE-1: a branch mapping is READ with settings.view (viewPermissionFor) and
   // WRITTEN with settings.update, so a viewer sees the ids read-only and an admin edits them.
   const canEditLinks = auth?.hasPermission('settings.update') ?? false
   const canLinks = canEditLinks || (auth?.hasPermission('settings.view') ?? false)
-  const showHelloflex = canLinks && (auth?.hasModule('hf') ?? false)
-  const showShiftmanager = canLinks && (auth?.hasModule('sm') ?? false)
+  const showHelloflex = canLinks && ((apps?.isAppEnabled('hf') ?? false) || (auth?.hasModule('hf') ?? false))
+  const showShiftmanager = canLinks && ((apps?.isAppEnabled('shiftmanager') ?? false) || (auth?.hasModule('sm') ?? false))
   const branchLinks = useBranchLinks(paginated.map(l => l.id), showHelloflex || showShiftmanager)
   // Save one external id; toast the outcome and rethrow so the cell keeps its draft on failure.
   const saveLink = async (id: string, system: LinkSystem, value: string | null) => {

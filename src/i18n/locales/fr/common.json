@@ -842,6 +842,7 @@
     "helloflexContractAmbiguous": "HelloFlex contient plusieurs contrats pour ce match. Rien n’a été envoyé. Vérifiez-le dans HelloFlex.",
     "helloflexUnreachable": "HelloFlex est injoignable ou a répondu de façon illisible. Rien n’a été envoyé. Réessayez plus tard.",
     "tenantPackageWriteOutsideSeam": "Cette modification du forfait a été refusée. Les forfaits, add-ons et modules ne s’enregistrent que depuis l’écran des forfaits. Rien n’a été enregistré.",
+    "connectorRequiredByReporting": "Ce connecteur ne peut pas être désactivé. L’add-on de reporting de ce système est encore actif. Désactivez d’abord le reporting dans l’écran des forfaits. Rien n’a été enregistré.",
     "aiDisclosureMissing": "L’introduction de l’entretien ne contient pas la mention IA obligatoire ; modifiez le modèle avant de l’activer.",
     "fieldRequired": "{{field}} est obligatoire."
   },
@@ -1283,12 +1284,15 @@
       "aiPlanner": "AI Planner",
       "aiRecruiter": "AI Recruiter",
       "koiosAI": "Koios AI",
-      "shiftmanagerReporting": "Shiftmanager Rapports",
+      "koiosHF": "Koios ↔ HF",
+      "koiosSM": "Koios ↔ SM",
+      "reportingSM": "Rapports SM",
+      "reportingHF": "Rapports HF",
       "shiftmanagerAutomations": "Shiftmanager Automatisations",
-      "elanzaConnection": "Connexion Elanza",
-      "aelioConnection": "Connexion Aelio",
-      "intusConnection": "Connexion Intus",
-      "sdbConnection": "Connexion SDB"
+      "koiosElanza": "Koios ↔ Elanza",
+      "koiosAelio": "Koios ↔ Aelio",
+      "koiosIntus": "Koios ↔ Intus",
+      "koiosSDB": "Koios ↔ SDB"
     },
     "workflowNames": {
       "reactivation": "Réactivation",

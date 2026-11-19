@@ -5,8 +5,9 @@ import { SM_CONNECTION_FIELD, smLimitField } from './_smFields'
 
 export default {
   type:  'sm_employee_update',
-  // SM-WRITE-GATE-1 (api d36a4406, WorkflowWriter::MODULE_REQUIRES): saving a workflow with this
-  // step 422s for a tenant without the sm package — the picker shows it as "requires Shiftmanager".
+  // CONNECTOR-VS-REPORTING-1 (Danny 19-11): a connector WRITE step. The picker offers it on the
+  // connector app OR the module (either signal) and the BE WorkflowWriter checks the same connector
+  // predicate, so the reporting add-on alone never gates it (BE CONNECTOR-VS-REPORTING-BE-1).
   module: 'sm',
   app:   'shiftmanager',
   category: 'shiftmanager',
