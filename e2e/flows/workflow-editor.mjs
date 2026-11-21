@@ -99,9 +99,12 @@ export async function workflowEditorGraph({ page, errors }) {
     }
 
     // 3b. Connect A → B by dragging the xyflow source handle onto B's target
-    //     handle — the FAB append creates NO edge (useWorkflowEditor.insertModule,
-    //     append branch), so without this drag the connections-assert below would
-    //     compare [] to [] and prove nothing (verify-les r2).
+    //     handle. The FAB append already draws A → B (useWorkflowGraph.insertModule,
+    //     append branch, measured 21-11), so this drag REPEATS an existing edge and
+    //     must be a no-op (WORKFLOW-CONNECT-SPLICE-1): before that fix it spliced a
+    //     router and, under StrictMode, left a dangling second router that the BE
+    //     refused as a second start (VERTREKMODULE-1). The connections-assert below
+    //     then proves the persisted edge either way.
     const srcHandle = page.locator('.react-flow__node').nth(0).locator('.react-flow__handle-right, [data-handleid="out"]').first()
     const tgtHandle = page.locator('.react-flow__node').nth(1).locator('.react-flow__handle-left, [data-handleid="in"]').first()
     await srcHandle.hover(); await page.mouse.down()
@@ -126,7 +129,10 @@ export async function workflowEditorGraph({ page, errors }) {
     workflowId = probe.id
 
     const graphBeforeReload = await fetchGraph(page, workflowId)
-    expect(graphBeforeReload.length >= 2, `expected >=2 persisted steps, got ${graphBeforeReload.length}`)
+    // Exactly the two appended steps and no router: a splice on the repeated drag would add a
+    // router the BE may still accept (WORKFLOW-CONNECT-SPLICE-1 lens nit, 21-11).
+    expect(graphBeforeReload.length === 2, `expected exactly 2 persisted steps, got ${graphBeforeReload.length}`)
+    expect(!graphBeforeReload.some(st => st.type === 'router'), 'a router was spliced into the two-step probe')
     expect(graphBeforeReload.some(st => st.connections.length > 0),
       'no persisted connection — the edge drag failed, the graph assert would be vacuous')
 

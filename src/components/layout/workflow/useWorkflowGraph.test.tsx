@@ -7,6 +7,7 @@
  * is the regression test the split's acceptance criteria call for.
  */
 import { describe, it, expect, vi, afterEach } from 'vitest'
+import { StrictMode } from 'react'
 import { renderHook, act, waitFor } from '@testing-library/react'
 import type { Connection } from '@xyflow/react'
 import { useWorkflowGraph } from './useWorkflowGraph'
@@ -174,5 +175,43 @@ describe('useWorkflowGraph · handleNodeRun surfaces a 422 reason', () => {
     const { result } = renderHook(() => useWorkflowGraph({ workflow: wf([{ id: 'n1', type: 'candidates', config: {}, position: { x: 0, y: 0 } }]) }))
     await act(async () => { await result.current.handleNodeRun('n1', { type: 'candidates', config: {} }) })
     expect(result.current.nodes.find(n => n.id === 'n1')?.data.output).toEqual([{ id: 1 }])
+  })
+})
+
+// WORKFLOW-CONNECT-SPLICE-1 (smoke 21-11): the FAB append already draws A→B, so the editor's edge drag between the
+// same two nodes used to hit the router splice, which minted its router inside a state updater; under StrictMode
+// that left a second, dangling router node that the BE refuses as a second start (VERTREKMODULE-1).
+describe('useWorkflowGraph · onConnect is pure and idempotent (WORKFLOW-CONNECT-SPLICE-1)', () => {
+  const twoNodes = () => wf([
+    { id: 'n1', type: 'customers', config: {}, position: { x: 80, y: 180 }, next: [{ target: 'n2' }] },
+    { id: 'n2', type: 'candidates_fetch', config: {}, position: { x: 300, y: 180 } },
+  ])
+
+  it('a drag that repeats an existing edge is a no-op: no router, no duplicate edge', async () => {
+    const { result } = renderHook(() => useWorkflowGraph({ workflow: twoNodes() }))
+    await waitFor(() => expect(result.current.edges).toHaveLength(1))
+    act(() => result.current.onConnect(conn('n1', 'n2')))
+    expect(result.current.edges.map(e => [e.source, e.target])).toEqual([['n1', 'n2']])
+    expect(result.current.nodes.map(n => n.data.type)).toEqual(['customers', 'candidates_fetch'])
+  })
+
+  it('a second source onto an already-targeted node splices exactly ONE router with the existing edge data kept, also under StrictMode', async () => {
+    const { result } = renderHook(() => useWorkflowGraph({ workflow: wf([
+      { id: 'n1', type: 'customers', config: {}, position: { x: 80, y: 180 }, next: [{ target: 'n2' }] },
+      { id: 'n2', type: 'candidates_fetch', config: {}, position: { x: 300, y: 180 } },
+      { id: 'n3', type: 'vacancies', config: {}, position: { x: 80, y: 400 } },
+    ]) }), { wrapper: StrictMode })
+    await waitFor(() => expect(result.current.edges).toHaveLength(1))
+    // CONSENT-BEHOUD-1 under StrictMode too: the existing edge's filter must ride onto the n1 → router edge.
+    act(() => result.current.saveEdgeFilter(result.current.edges[0].id, CONSENT_FILTERS, 'Consent'))
+    act(() => result.current.onConnect(conn('n3', 'n2')))
+    const routers = result.current.nodes.filter(n => n.data.type === 'router')
+    expect(routers).toHaveLength(1)
+    const r = routers[0].id
+    expect(result.current.edges.map(e => [e.source, e.target]).sort()).toEqual([['n1', r], ['n3', r], [r, 'n2']].sort())
+    expect(result.current.edges.find(e => e.source === 'n1' && e.target === r)?.data?.filters).toEqual(CONSENT_FILTERS)
+    // only the two sources lack an incoming edge: no dangling router the BE would read as a second start
+    const targeted = new Set(result.current.edges.map(e => e.target))
+    expect(result.current.nodes.filter(n => !targeted.has(n.id)).map(n => n.id).sort()).toEqual(['n1', 'n3'])
   })
 })

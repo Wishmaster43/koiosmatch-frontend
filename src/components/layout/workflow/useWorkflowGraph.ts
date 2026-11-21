@@ -110,20 +110,28 @@ export function useWorkflowGraph({ workflow, onNodeRunOutput }: {
 
   // User dragged a new connection between two handles: a plain add unless the
   // target already has an incoming edge, in which case a router node is spliced
-  // in so both sources can feed the same target.
+  // in so both sources can feed the same target. WORKFLOW-CONNECT-SPLICE-1 (smoke
+  // 21-11): the decision reads the current edges, the router id is minted ONCE and
+  // both updaters are pure, so React StrictMode's double invocation can no longer
+  // leave a second, dangling router behind (the BE refuses that node as a second
+  // start, VERTREKMODULE-1); and a drag that repeats an existing edge is a no-op.
   const onConnect = useCallback((params: Connection) => {
-    setEdges(eds => {
-      const targetAlreadyHasIncoming = eds.some(e => e.target === params.target)
-      if (!targetAlreadyHasIncoming) {
-        return addEdge({ ...params, type: 'addable' }, eds)
-      }
+    const sameEdge = (e: FlowEdge) => e.source === params.source && e.target === params.target
+      && (e.sourceHandle ?? 'out') === (params.sourceHandle ?? 'out') && (e.targetHandle ?? 'in') === (params.targetHandle ?? 'in')
+    if (edges.some(sameEdge)) return
 
-      // Target already has an incoming edge → insert a router between them
-      const routerId = uid()
+    const targetAlreadyHasIncoming = edges.some(e => e.target === params.target)
+    if (!targetAlreadyHasIncoming) {
+      setEdges(eds => addEdge({ ...params, type: 'addable' }, eds))
+      return
+    }
+
+    // Target already has an incoming edge → insert a router between them
+    const routerId = uid()
+    setEdges(eds => {
       const existingIncoming = eds.filter(e => e.target === params.target)
       const otherEdges = eds.filter(e => e.target !== params.target)
-
-      const newEdges = [
+      return [
         ...otherEdges,
         // CONSENT-BEHOUD-1 / ROUTER-EDGE-FILTERS-1 D3 (centralised helper): the
         // existing incoming edge's data (filters/label/sourceHandleRaw) must
@@ -134,27 +142,26 @@ export function useWorkflowGraph({ workflow, onNodeRunOutput }: {
         // Router connects to original target
         mkEdge(routerId, params.target),
       ]
-
-      // Add router node at midpoint
-      setNodes(nds => {
-        const targetNode = nds.find(n => n.id === params.target)
-        const sourceNode = nds.find(n => n.id === params.source)
-        const x = targetNode ? targetNode.position.x - 220 : (sourceNode?.position.x ?? 300) + 220
-        const y = targetNode ? targetNode.position.y : (sourceNode?.position.y ?? 180)
-        // DEFAULT-PERSIST-1: same seeding as insertModule (router's own schema is
-        // empty today, so this is a no-op — kept for consistency, not behaviour).
-        const routerNode: FlowNode = {
-          id: routerId, type: 'module',
-          position: { x, y },
-          data: { type: 'router', config: defaultConfigFor('router') },
-          width: NODE_W, height: NODE_H,
-        }
-        return [...nds, routerNode]
-      })
-
-      return newEdges
     })
-  }, [setEdges, setNodes])
+
+    // Add router node at midpoint (idempotent: the same id is never added twice)
+    setNodes(nds => {
+      if (nds.some(n => n.id === routerId)) return nds
+      const targetNode = nds.find(n => n.id === params.target)
+      const sourceNode = nds.find(n => n.id === params.source)
+      const x = targetNode ? targetNode.position.x - 220 : (sourceNode?.position.x ?? 300) + 220
+      const y = targetNode ? targetNode.position.y : (sourceNode?.position.y ?? 180)
+      // DEFAULT-PERSIST-1: same seeding as insertModule (router's own schema is
+      // empty today, so this is a no-op: kept for consistency, not behaviour).
+      const routerNode: FlowNode = {
+        id: routerId, type: 'module',
+        position: { x, y },
+        data: { type: 'router', config: defaultConfigFor('router') },
+        width: NODE_W, height: NODE_H,
+      }
+      return [...nds, routerNode]
+    })
+  }, [edges, setEdges, setNodes])
 
   // Picker chose a module type: append it as a new tail node, or splice it into
   // an existing edge (keeping that edge's filter/consent data on the upstream half).
