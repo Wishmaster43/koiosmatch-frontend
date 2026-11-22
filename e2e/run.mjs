@@ -5,7 +5,7 @@
  *   npm run smoke boards     → only flows whose name contains "boards"
  * Requires: Vite dev server on :5173 + Herd API + seeded dev DB.
  */
-import { boot, API, APP } from './lib.mjs'
+import { boot, API, APP, pageState } from './lib.mjs'
 import { pagesRender, drillDowns } from './flows/nav.mjs'
 import { boardsDrag } from './flows/boards.mjs'
 import { statusWithReason, archiveAndFindBack, noteWithChannel, superSearch } from './flows/candidates.mjs'
@@ -58,6 +58,9 @@ for (const [name, fn] of FLOWS) {
   } catch (e) {
     results.push([name, false, Date.now() - t0, String(e.message ?? e)])
     console.log(`✗ ${name}\n    ${String(e.message ?? e).slice(0, 500)}`)
+    // What the page showed when the flow died (route, login form, sidebar, dialogs): the 22-11 runs had
+    // five "sidebar button not found" reds in a row and no way to tell a lost session from a slow shell.
+    console.log(`    page: ${JSON.stringify(await pageState(ctx.page))}`)
   }
   // Reset error window between flows so one failure doesn't bleed into the next.
   ctx.errors.length = 0

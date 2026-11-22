@@ -122,6 +122,23 @@ export function trackInflight(page) {
   return state
 }
 
+// Safe snapshot of the page a red flow left behind (22-11: five flows in one run timed out on the
+// sidebar click right after the between-flow reset, and the log could not tell a lost session from a
+// slow shell). Route with ids masked, login form present, nav button count, open dialogs: enough to
+// separate "login page", "empty shell" and "no sidebar"; never page text or the title (a record name is PII, §8).
+export async function pageState(page) {
+  try {
+    return await page.evaluate(() => ({
+      route: (location.pathname + location.hash).replace(/[0-9a-f]{8}-[0-9a-f-]{27}|\b\d{2,}\b/gi, ':id'),
+      login: !!document.querySelector('#login-email'),
+      navButtons: document.querySelectorAll('nav button').length,
+      dialogs: document.querySelectorAll('[role="dialog"]').length,
+    }))
+  } catch (e) {
+    return { unavailable: String(e?.message ?? e).slice(0, 120) }
+  }
+}
+
 // Wait until no API request has been pending for `quietMs`; capped, never throws (a polling page must not fail a flow).
 export async function quiet(page, { quietMs = 300, timeout = 8000 } = {}) {
   const state = trackInflight(page)
