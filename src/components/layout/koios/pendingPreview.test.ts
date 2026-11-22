@@ -17,6 +17,14 @@ describe('shapePreviewRows', () => {
     expect(english[0].label).toBe('Title')
   })
 
+  // KOIOS-TOOL-RESULT-KEYS-1: naam/functie resolve like name/function (no fields.* copy, so the humanised label).
+  it('maps the naam and functie aliases onto the same labels as name and function', () => {
+    const legacy = shapePreviewRows([{ label: 'naam', text: 'Acme' }, { label: 'functie', text: 'Nurse' }], t, i18n).rows
+    const english = shapePreviewRows([{ label: 'name', text: 'Acme' }, { label: 'function', text: 'Nurse' }], t, i18n).rows
+    expect(legacy.map((r) => r.label)).toEqual(['Name', 'Function'])
+    expect(english.map((r) => r.label)).toEqual(['Name', 'Function'])
+  })
+
   it('falls back to a humanised label for an unknown key', () => {
     const { rows } = shapePreviewRows([{ label: 'employer_name', text: 'Acme' }], t, i18n)
     expect(rows[0].label).toBe('Employer name')

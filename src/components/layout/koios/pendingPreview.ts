@@ -18,6 +18,9 @@ import type { KeyChecker } from '@/lib/labelOrRaw'
 // to English — the fallback below already handles any key it does not cover.
 export const LEGACY_FIELD_KEYS: Record<string, string> = {
   titel: 'title',
+  // KOIOS-TOOL-RESULT-KEYS-1: the two families of the BE result-key rename the map lacked (naam, functie).
+  naam: 'name',
+  functie: 'function',
   deadline: 'due_date',
   vervaldatum: 'due_date',
   omschrijving: 'description',

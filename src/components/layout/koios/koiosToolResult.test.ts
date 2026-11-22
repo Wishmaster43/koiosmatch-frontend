@@ -12,6 +12,11 @@ describe('createdRefFromToolResult', () => {
       .toEqual({ type: 'task', id: 't-2', label: 'Call Sem' })
   })
 
+  it('KOIOS-TOOL-RESULT-KEYS-1: an English-only create_task result (no Dutch twins at all) links the task', () => {
+    expect(createdRefFromToolResult({ ok: true, task_id: 't-3', title: 'Call Sem', due_date: null }, 'Task'))
+      .toEqual({ type: 'task', id: 't-3', label: 'Call Sem' })
+  })
+
   it('KOIOS-EN-1 phase B: an English-only refusal (ok: false) links nothing', () => {
     expect(createdRefFromToolResult({ ok: false, task_id: 't-2' }, 'x')).toBeNull()
   })
