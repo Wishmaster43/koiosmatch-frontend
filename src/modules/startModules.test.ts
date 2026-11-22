@@ -10,11 +10,13 @@ describe('START_MODULE_TYPES · Koios master data + webhook only', () => {
   it('contains every entity node and the webhook', () => {
     for (const t of ['candidates', 'customers', 'vacancies', 'applications', 'tasks', 'matches', 'opportunities', 'planning', 'webhook',
       'sm_employees', 'sm_schedules', 'sm_candidates', 'sm_customers', 'sm_shifts',
-      'candidate_filter', 'candidates_fetch', 'whatsapp_inbound',
+      'candidate_filter', 'candidates_fetch', 'whatsapp_inbound', 'helloflex_inbound',
       'customer_locations', 'customer_departments', 'customer_contacts', 'outreach_campaigns',
-      'system_events']) {
+      'system_events', 'appointments']) {
       expect(START_MODULE_TYPES.has(t), t).toBe(true)
     }
+    // The set equals the BE engine's StartModules::TYPES (24 since HF-WORKFLOWS-1): a start node the engine does not know is refused on save.
+    expect(START_MODULE_TYPES.size).toBe(24)
   })
 
   it('never an action or send step', () => {

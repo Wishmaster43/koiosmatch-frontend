@@ -48,6 +48,15 @@ export const STEP_REASON_CODES = [
   'helloflex_contract_not_sent', 'helloflex_activity_defaults_missing', 'inactive_state_unmapped', 'no_target',
   // D-M3b: a backoffice_sync step whose every HelloFlex target is created by the ensure step.
   'all_targets_ensurer_owned',
+  // BE HF-WORKFLOWS-1: the contract send (claim and payload refusals) and the employer / cost center link.
+  'helloflex_candidate_unlinked', 'helloflex_start_date_missing', 'helloflex_job_title_missing',
+  'helloflex_contract_type_unmapped', 'helloflex_zzp_not_supported', 'contract_sent', 'contract_in_flight',
+  'contract_unconfirmed', 'helloflex_contract_ambiguous', 'helloflex_not_configured', 'contracts_disabled',
+  'record_missing', 'helloflex_employer_not_found', 'helloflex_employer_ambiguous',
+  'helloflex_cost_center_not_found', 'helloflex_cost_center_ambiguous', 'helloflex_cost_center_code_missing',
+  // BE HF-WORKFLOWS-1 (HelloFlexInboundModule): the inbound start node skips a test run that carries no event and a
+  // contract state that moves no status.
+  'helloflex_event_missing', 'contract_status_unchanged',
 ] as const
 
 export type StepReasonCode = (typeof STEP_REASON_CODES)[number]

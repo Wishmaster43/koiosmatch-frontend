@@ -28,6 +28,12 @@ describe('stepReasonLabel', () => {
     expect(stepReasonLabel('archived', mockT)).toBe('runs.stepReasons.archived')
   })
 
+  it('resolves the HF-WORKFLOWS-1 contract-send and employer-link skip codes instead of leaving a raw code', () => {
+    for (const code of ['helloflex_candidate_unlinked', 'contract_in_flight', 'contracts_disabled', 'helloflex_cost_center_code_missing']) {
+      expect(stepReasonLabel(code, mockT)).toBe(`runs.stepReasons.${code}`)
+    }
+  })
+
   it('returns null for an unknown code, so the caller keeps the server sentence (never a raw code)', () => {
     expect(stepReasonLabel('some_future_reason', mockT)).toBeNull()
   })
@@ -40,8 +46,9 @@ describe('stepReasonLabel', () => {
 
   it('has a translated sentence for every code in all seven locales, without an em dash (§5)', () => {
     // 20 engine codes + the three E1 planning skip codes (BE WAVE2-HIGH-PRIVACY-SCOPE-1) + archived
-    // + the 20 HelloFlex entity-sync codes (BE HF-ENTITY-SYNC-1a D-M1b/D-M3b).
-    expect(STEP_REASON_CODES).toHaveLength(44)
+    // + the 20 HelloFlex entity-sync codes (BE HF-ENTITY-SYNC-1a D-M1b/D-M3b)
+    // + the 19 HelloFlex contract-send, employer-link and inbound start-node codes (BE HF-WORKFLOWS-1).
+    expect(STEP_REASON_CODES).toHaveLength(63)
     for (const [lc, json] of Object.entries({ nl, en, de, fr, es, it: it_, pt })) {
       const labels = (json as { runs: { stepReasons: Record<string, string> } }).runs.stepReasons
       for (const code of STEP_REASON_CODES) {

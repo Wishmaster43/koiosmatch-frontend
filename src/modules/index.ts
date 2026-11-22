@@ -24,6 +24,12 @@ import helloflex_ensure_contact from './helloflex_ensure_contact'
 import helloflex_activity_create from './helloflex_activity_create'
 import helloflex_candidate_update from './helloflex_candidate_update'
 import helloflex_candidate_deactivate from './helloflex_candidate_deactivate'
+// HF-WORKFLOWS-1: the HelloFlex inbound start node, the links-check enricher, the contract send, the contact update and the employer link.
+import helloflex_inbound from './helloflex_inbound'
+import helloflex_links_check from './helloflex_links_check'
+import helloflex_contract_send from './helloflex_contract_send'
+import helloflex_contact_update from './helloflex_contact_update'
+import helloflex_link_employer from './helloflex_link_employer'
 import application_lookup from './application_lookup'
 import match_application_lookup from './match_application_lookup'
 import sm_candidates     from './sm_candidates'
@@ -205,12 +211,18 @@ const MODULES: ModuleDef[] = [
   customer_contacts,
   outreach_campaigns,
   whatsapp_inbound,
+  helloflex_inbound,
   // HF-ENTITY-SYNC-1a: the five HelloFlex write steps (connector predicate: app OR module).
   helloflex_ensure_candidate,
   helloflex_ensure_contact,
   helloflex_activity_create,
   helloflex_candidate_update,
   helloflex_candidate_deactivate,
+  // HF-WORKFLOWS-1: the links-check enricher (HF-MATCH-ROUTER-1), the contract send, the contact update and the employer or cost-center link.
+  helloflex_links_check,
+  helloflex_contract_send,
+  helloflex_contact_update,
+  helloflex_link_employer,
   system_events,
   application_lookup,
   match_application_lookup,
@@ -235,6 +247,8 @@ export const START_MODULE_TYPES = new Set([
   'sm_candidates', 'sm_customers', 'sm_shifts',
   'candidate_filter', 'candidates_fetch',
   'whatsapp_inbound',
+  // HF-WORKFLOWS-1: the HelloFlex webhook start node (also isStart-marked).
+  'helloflex_inbound',
 ])
 
 export const MODULE_SCHEMAS = Object.fromEntries(
