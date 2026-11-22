@@ -843,6 +843,9 @@
     "helloflexUnreachable": "HelloFlex is niet bereikbaar of gaf een onleesbaar antwoord; er is niets verstuurd. Probeer het later opnieuw.",
     "tenantPackageWriteOutsideSeam": "Deze pakketwijziging is geweigerd: pakketten, add-ons en modules worden alleen via het pakketscherm opgeslagen; er is niets bewaard.",
     "connectorRequiredByReporting": "Deze koppeling kan niet uit: de rapportage-add-on van dit systeem staat nog aan. Zet eerst de rapportage uit op het pakketscherm; er is niets opgeslagen.",
+    "workflowStepContractStatusUnknown": "Een matches-stap zet een onbekende contractstatus. Toegestane waarden: {{allowed}}.",
+    "workflowStepContractStatusUnknownStep": "Stap {{step}} zet de onbekende contractstatus '{{value}}'. Toegestane waarden: {{allowed}}.",
+    "workflowStepContractStatusUnknownStepLabel": "Stap {{step}} ({{label}}) zet de onbekende contractstatus '{{value}}'. Toegestane waarden: {{allowed}}.",
     "aiDisclosureMissing": "De interview-intro mist de verplichte AI-vermelding; pas de template aan voordat je dit activeert.",
     "fieldRequired": "{{field}} is verplicht."
   },

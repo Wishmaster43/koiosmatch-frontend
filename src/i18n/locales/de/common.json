@@ -843,6 +843,9 @@
     "helloflexUnreachable": "HelloFlex ist nicht erreichbar oder hat unlesbar geantwortet; es wurde nichts gesendet. Versuchen Sie es später erneut.",
     "tenantPackageWriteOutsideSeam": "Diese Paketänderung wurde abgelehnt: Pakete, Add-ons und Module werden nur über die Paketseite geschrieben; es wurde nichts gespeichert.",
     "connectorRequiredByReporting": "Diese Anbindung kann nicht ausgeschaltet werden: Das Berichts-Add-on für dieses System ist noch aktiv. Schalten Sie zuerst die Berichte im Paketbildschirm aus; es wurde nichts gespeichert.",
+    "workflowStepContractStatusUnknown": "Ein Matches-Schritt setzt einen unbekannten Vertragsstatus. Zulässige Werte: {{allowed}}.",
+    "workflowStepContractStatusUnknownStep": "Schritt {{step}} setzt den unbekannten Vertragsstatus '{{value}}'. Zulässige Werte: {{allowed}}.",
+    "workflowStepContractStatusUnknownStepLabel": "Schritt {{step}} ({{label}}) setzt den unbekannten Vertragsstatus '{{value}}'. Zulässige Werte: {{allowed}}.",
     "aiDisclosureMissing": "Im Interview-Intro fehlt der verpflichtende KI-Hinweis; passen Sie die Vorlage an, bevor Sie dies aktivieren.",
     "fieldRequired": "{{field}} ist erforderlich."
   },

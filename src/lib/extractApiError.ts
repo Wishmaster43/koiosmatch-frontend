@@ -5,7 +5,7 @@
  * server `message` → the caller's fallback (an i18n'd string — never leak a
  * raw axios/network string to the UI).
  */
-interface ServerErrorBody { message?: string; code?: string; errors?: Record<string, string[]>; clash_name?: string; params?: { clash_name?: string }; meta?: { clash_name?: string } }
+interface ServerErrorBody { message?: string; code?: string; errors?: Record<string, string[]>; clash_name?: string; params?: { clash_name?: string }; meta?: { clash_name?: string }; allowed?: string[]; step?: number; label?: string | null; value?: string }
 
 // KAND-ACHTERGROND-VERPLICHT-1 (2026-08-17): Laravel's OWN default "required"
 // validation copy (vendor lang/en/validation.php: 'The :attribute field is
@@ -85,6 +85,9 @@ const ERROR_CODE_KEYS: Record<string, string> = {
   tenant_package_write_outside_seam: 'errors.tenantPackageWriteOutsideSeam',
   // CONNECTOR-VS-REPORTING-1: a connector app switched off while its reporting add-on is still bought (409).
   connector_required_by_reporting: 'errors.connectorRequiredByReporting',
+  // WORKFLOW-CONTRACT-STATUS-VALIDATION-1 (BE 3ffd68b53, 422): a matches step's free key/value fields set a contract_status outside
+  // JobMatch::CONTRACT_STATUSES; the body carries `allowed`, the vocabulary the translated sentence lists.
+  workflow_step_contract_status_unknown: 'errors.workflowStepContractStatusUnknown',
   // The interview intro / workflow / Koios toggle lacks the mandatory AI disclosure (422).
   ai_disclosure_missing: 'errors.aiDisclosureMissing',
   // ONIX C-007: one generic 422 for a taken e-mail (never reveals why or where it is in use).
@@ -121,7 +124,7 @@ export function apiErrorKey(err: unknown): string | null {
  */
 export function apiErrorMessage(
   err: unknown,
-  t: (key: string, options?: { ns: string; clash_name?: string; branch?: string }) => string,
+  t: (key: string, options?: { ns: string; clash_name?: string; branch?: string; allowed?: string; step?: number; label?: string; value?: string }) => string,
   fallback: string,
 ): string {
   const key = apiErrorKey(err)
@@ -135,6 +138,20 @@ export function apiErrorMessage(
     // The branch refusal names the unlinked branch; without a name the generic chain is more honest.
     const name = (err as { response?: { data?: ServerErrorBody & { branch_name?: string } } })?.response?.data?.branch_name
     return name ? t(key, { ns: 'common', branch: name }) : extractApiError(err, fallback)
+  }
+  if (key === ERROR_CODE_KEYS.workflow_step_contract_status_unknown) {
+    // The refusal lists the allowed vocabulary; without it the server sentence (which names the step) is more honest than an empty list.
+    const body = (err as { response?: { data?: ServerErrorBody } })?.response?.data
+    const list = body?.allowed
+    const allowed = Array.isArray(list) && list.length > 0 ? list.join(', ') : null
+    if (allowed === null) return extractApiError(err, fallback)
+    // BE batch G adds step (1-based), label (null when the step has none) and value: the sentence names them when they are there.
+    if (body && typeof body.step === 'number' && typeof body.value === 'string') {
+      return body.label
+        ? t('errors.workflowStepContractStatusUnknownStepLabel', { ns: 'common', step: body.step, label: body.label, value: body.value, allowed })
+        : t('errors.workflowStepContractStatusUnknownStep', { ns: 'common', step: body.step, value: body.value, allowed })
+    }
+    return t('errors.workflowStepContractStatusUnknown', { ns: 'common', allowed })
   }
   return key ? t(key, { ns: 'common' }) : extractApiError(err, fallback)
 }

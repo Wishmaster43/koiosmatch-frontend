@@ -843,6 +843,9 @@
     "helloflexUnreachable": "HelloFlex is unreachable or answered unreadably; nothing was sent. Try again later.",
     "tenantPackageWriteOutsideSeam": "This package change was refused: packages, add-ons and modules are only written through the package screen; nothing was saved.",
     "connectorRequiredByReporting": "This connector cannot be switched off: the reporting add-on for this system is still on. Switch the reporting off on the package screen first; nothing was saved.",
+    "workflowStepContractStatusUnknown": "A matches step sets an unknown contract status. Allowed values: {{allowed}}.",
+    "workflowStepContractStatusUnknownStep": "Step {{step}} sets the unknown contract status '{{value}}'. Allowed values: {{allowed}}.",
+    "workflowStepContractStatusUnknownStepLabel": "Step {{step}} ({{label}}) sets the unknown contract status '{{value}}'. Allowed values: {{allowed}}.",
     "aiDisclosureMissing": "The interview intro is missing the mandatory AI disclosure; adjust the template before you activate this.",
     "fieldRequired": "{{field}} is required."
   },

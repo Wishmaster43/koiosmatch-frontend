@@ -843,6 +843,9 @@
     "helloflexUnreachable": "HelloFlex no está disponible o respondió de forma ilegible; no se ha enviado nada. Inténtalo de nuevo más tarde.",
     "tenantPackageWriteOutsideSeam": "Este cambio de paquete se rechazó: los paquetes, los add-ons y los módulos solo se guardan desde la pantalla de paquetes; no se guardó nada.",
     "connectorRequiredByReporting": "Este conector no se puede desactivar: el complemento de informes de este sistema sigue activo. Desactive primero los informes en la pantalla de paquetes; no se ha guardado nada.",
+    "workflowStepContractStatusUnknown": "Un paso de matches establece un estado de contrato desconocido. Valores permitidos: {{allowed}}.",
+    "workflowStepContractStatusUnknownStep": "El paso {{step}} establece el estado de contrato desconocido '{{value}}'. Valores permitidos: {{allowed}}.",
+    "workflowStepContractStatusUnknownStepLabel": "El paso {{step}} ({{label}}) establece el estado de contrato desconocido '{{value}}'. Valores permitidos: {{allowed}}.",
     "aiDisclosureMissing": "Falta la mención obligatoria de IA en la introducción de la entrevista; modifica la plantilla antes de activarlo.",
     "fieldRequired": "{{field}} es obligatorio."
   },

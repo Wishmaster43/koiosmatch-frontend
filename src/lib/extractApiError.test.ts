@@ -198,3 +198,36 @@ describe('connector_required_by_reporting (409)', () => {
     expect(apiErrorMessage(err, t, 'fallback')).toBe('TRANSLATED:errors.connectorRequiredByReporting')
   })
 })
+
+// WORKFLOW-CONTRACT-STATUS-VALIDATION-1: the workflow save refuses a matches step whose contract_status is outside the vocabulary (422, body carries `allowed`).
+describe('workflow_step_contract_status_unknown (422)', () => {
+  it('maps the code to its translated key', () => {
+    expect(apiErrorKey({ response: { status: 422, data: { code: 'workflow_step_contract_status_unknown', message: 'x', allowed: ['none'] } } })).toBe('errors.workflowStepContractStatusUnknown')
+  })
+
+  // A key-echo t that prints the interpolation values it received, in a fixed order.
+  const t = (key: string, options?: { ns: string; step?: number; label?: string; value?: string; allowed?: string }) =>
+    [options?.ns, key, options?.step, options?.label, options?.value, options?.allowed].filter((v) => v !== undefined).join('|')
+  const allowed = ['none', 'sending', 'sent']
+
+  it('names the step, its label and the offending value with the allowed list joined (batch G body)', () => {
+    const err = { response: { status: 422, data: { code: 'workflow_step_contract_status_unknown', message: 'x', allowed, step: 2, label: 'Matches', value: 'foo' } } }
+    expect(apiErrorMessage(err, t, 'fallback')).toBe('common|errors.workflowStepContractStatusUnknownStepLabel|2|Matches|foo|none, sending, sent')
+  })
+
+  it('names the step alone when the step has no label (label null)', () => {
+    const err = { response: { status: 422, data: { code: 'workflow_step_contract_status_unknown', message: 'x', allowed, step: 3, label: null, value: 'foo' } } }
+    expect(apiErrorMessage(err, t, 'fallback')).toBe('common|errors.workflowStepContractStatusUnknownStep|3|foo|none, sending, sent')
+  })
+
+  it('renders the bare sentence with the allowed list when the body carries no step or value (pre-batch-G shape)', () => {
+    const err = { response: { status: 422, data: { code: 'workflow_step_contract_status_unknown', message: "Step 2 ('Matches'): contract status 'foo' is unknown.", allowed } } }
+    expect(apiErrorMessage(err, t, 'fallback')).toBe('common|errors.workflowStepContractStatusUnknown|none, sending, sent')
+  })
+
+  it('falls back to the server sentence when the body carries no allowed list', () => {
+    const t = (key: string) => `TRANSLATED:${key}`
+    const err = { response: { status: 422, data: { code: 'workflow_step_contract_status_unknown', message: 'server sentence' } } }
+    expect(apiErrorMessage(err, t, 'fallback')).toBe('server sentence')
+  })
+})

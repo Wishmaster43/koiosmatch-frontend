@@ -843,6 +843,9 @@
     "helloflexUnreachable": "HelloFlex est injoignable ou a répondu de façon illisible. Rien n’a été envoyé. Réessayez plus tard.",
     "tenantPackageWriteOutsideSeam": "Cette modification du forfait a été refusée. Les forfaits, add-ons et modules ne s’enregistrent que depuis l’écran des forfaits. Rien n’a été enregistré.",
     "connectorRequiredByReporting": "Ce connecteur ne peut pas être désactivé. L’add-on de reporting de ce système est encore actif. Désactivez d’abord le reporting dans l’écran des forfaits. Rien n’a été enregistré.",
+    "workflowStepContractStatusUnknown": "Une étape matches définit un statut de contrat inconnu. Valeurs autorisées : {{allowed}}.",
+    "workflowStepContractStatusUnknownStep": "L’étape {{step}} définit le statut de contrat inconnu '{{value}}'. Valeurs autorisées : {{allowed}}.",
+    "workflowStepContractStatusUnknownStepLabel": "L’étape {{step}} ({{label}}) définit le statut de contrat inconnu '{{value}}'. Valeurs autorisées : {{allowed}}.",
     "aiDisclosureMissing": "L’introduction de l’entretien ne contient pas la mention IA obligatoire ; modifiez le modèle avant de l’activer.",
     "fieldRequired": "{{field}} est obligatoire."
   },

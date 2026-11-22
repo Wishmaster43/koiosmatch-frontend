@@ -843,6 +843,9 @@
     "helloflexUnreachable": "HelloFlex non è raggiungibile o ha risposto in modo illeggibile; non è stato inviato nulla. Riprova più tardi.",
     "tenantPackageWriteOutsideSeam": "Questa modifica del pacchetto è stata rifiutata: pacchetti, add-on e moduli si salvano solo dalla schermata dei pacchetti; non è stato salvato nulla.",
     "connectorRequiredByReporting": "Questo connettore non può essere disattivato: il componente aggiuntivo dei report di questo sistema è ancora attivo. Disattiva prima i report nella schermata dei pacchetti; non è stato salvato nulla.",
+    "workflowStepContractStatusUnknown": "Un passaggio matches imposta uno stato contratto sconosciuto. Valori consentiti: {{allowed}}.",
+    "workflowStepContractStatusUnknownStep": "Il passaggio {{step}} imposta lo stato contratto sconosciuto '{{value}}'. Valori consentiti: {{allowed}}.",
+    "workflowStepContractStatusUnknownStepLabel": "Il passaggio {{step}} ({{label}}) imposta lo stato contratto sconosciuto '{{value}}'. Valori consentiti: {{allowed}}.",
     "aiDisclosureMissing": "Nell’introduzione del colloquio manca l’informativa obbligatoria sull’IA; modifica il modello prima di attivarlo.",
     "fieldRequired": "{{field}} è obbligatorio."
   },
