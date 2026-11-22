@@ -21,6 +21,7 @@
  */
 import { createContext, useContext, useState, useEffect, useCallback, useMemo } from 'react'
 import { clearDeviceCaches } from '@/lib/deviceCaches'
+import { BOOT_PROBE_DELAYS_MS, BOOT_PROBE_TIMEOUT_MS, BootProbeAborted, isAuthVerdict, probeSessionWithRetry } from './authBootProbe'
 import { setBureauTimezone } from '@/lib/bureauTime'
 import type { ReactNode } from 'react'
 import api, { primeCsrf } from '../lib/api'
@@ -76,8 +77,9 @@ const AuthContext = createContext<AuthContextValue | null>(null)
 // that once flooded the global rate bucket and 429'd the login itself.
 let meProbe: Promise<import('axios').AxiosResponse> | null = null
 // Return the shared in-flight /auth/me probe if one exists, else start one; concurrent remounts share it instead of stacking calls.
+// AUTH-BOOT-TRANSIENT-1: a short timeout per attempt keeps the retry ceiling near 40 s on a hanging backend.
 const probeMe = () => {
-  meProbe ??= api.get('/auth/me').finally(() => { meProbe = null })
+  meProbe ??= api.get('/auth/me', { timeout: BOOT_PROBE_TIMEOUT_MS }).finally(() => { meProbe = null })
   return meProbe
 }
 
@@ -169,16 +171,23 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       return
     }
 
-    probeMe()
+    // AUTH-BOOT-TRANSIENT-1: a network blip or a 5xx on the probe is retried with a backoff while the boot
+    // loader stays up; only an auth verdict, spent retries or a failed tenant setup end on the login page. `alive` stops the chain
+    // of an unmounted owner (StrictMode runs setup, cleanup, setup) at its next backoff.
+    let alive = true
+    probeSessionWithRetry(probeMe, { delays: BOOT_PROBE_DELAYS_MS, isAlive: () => alive })
       .then(async res => {
         const u = applyAuthResponse(res.data)
         await setupTenants(u)
       })
-      .catch(() => {
-        clearDeviceCaches()
+      .catch(err => {
+        if (err instanceof BootProbeAborted) return
+        // The device caches go only on a verdict: after a transient outage the session may still be valid.
+        if (isAuthVerdict(err)) clearDeviceCaches()
         setUser(null)
       })
-      .finally(() => setLoading(false))
+      .finally(() => { if (alive) setLoading(false) })
+    return () => { alive = false }
   }, [applyAuthResponse, setupTenants])
 
   // ── Login ────────────────────────────────────────────────────────────────────
