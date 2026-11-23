@@ -12,6 +12,9 @@ import {
 
 // The health hook is mocked: no QueryClient; refresh is asserted in the health tests.
 const mockRefresh = vi.fn()
+// The webhook block owns its own query and permission gate (covered in IntegrationWebhookBlock.test).
+vi.mock('./useHelloflexWebhook', () => ({ useHelloflexWebhook: () => ({ status: null, isLoading: false, register: () => {}, unregister: () => {}, busy: false }) }))
+vi.mock('@/context/AuthContext', () => ({ useAuth: () => ({ hasPermission: () => false }) }))
 vi.mock('./useIntegrationHealth', () => ({
   useIntegrationHealth: () => ({ health: { state: 'unknown', errorCode: null, errorMessage: null, checkedAt: null }, refresh: mockRefresh }),
 }))

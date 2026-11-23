@@ -189,7 +189,7 @@ export default function IntegrationConnectionCard({ connector }: { connector: Co
       {/* Permanent connection status (HF-CONNECTION-STATUS-1): green / red with reason / grey, plus the check time. */}
       <IntegrationHealthBadge health={health} unavailable={healthUnavailable} onRetry={refreshHealth} />
       {/* HF-WEBHOOK-1: hidden until the BE row carries a webhook object. */}
-      <IntegrationWebhookBlock webhook={webhook} />
+      <IntegrationWebhookBlock webhook={webhook} connector={connector} onChanged={refreshHealth} />
       {/* The freshest identity wins: a passed test's connected_as over the loaded one. */}
       <Caption>
         {(() => {

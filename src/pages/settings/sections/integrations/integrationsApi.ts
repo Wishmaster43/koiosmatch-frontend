@@ -214,3 +214,29 @@ export async function updateMapping(
 export async function deleteMapping(connector: ConnectorId, id: string): Promise<void> {
   await api.delete(`/integrations/${connector}/mappings/${id}`)
 }
+
+// HF-WEBHOOK-FE-1: HelloFlex webhook registration status. Hand-written, the spec has no 2xx schema.
+export interface HelloflexWebhookStatus {
+  registered: boolean
+  registration_id: string | null
+  filters: string[]
+  last_received_at: string | null
+  verified_at: string | null
+}
+
+// Fetch the HelloFlex webhook registration status.
+export async function getHelloflexWebhookStatus(): Promise<HelloflexWebhookStatus> {
+  const res = await api.get('/integrations/helloflex/webhook')
+  return unwrap<HelloflexWebhookStatus>(res)
+}
+
+// Register (or rotate: the BE retires every previous registration) the HelloFlex webhook.
+export async function registerHelloflexWebhook(): Promise<HelloflexWebhookStatus> {
+  const res = await api.post('/integrations/helloflex/webhook', undefined, { quietStatuses: [409, 422], timeout: 120000 })
+  return unwrap<HelloflexWebhookStatus>(res)
+}
+
+// Unregister the HelloFlex webhook at HelloFlex and drop the local row.
+export async function unregisterHelloflexWebhook(): Promise<void> {
+  await api.delete('/integrations/helloflex/webhook', { quietStatuses: [409, 422], timeout: 120000 })
+}

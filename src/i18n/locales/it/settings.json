@@ -4861,7 +4861,18 @@
       "paused": "Webhook in pausa",
       "notRegistered": "Webhook non registrato",
       "lastReceived": "ultima ricezione {{date}}",
-      "nothingReceived": "ancora nulla ricevuto"
+      "nothingReceived": "ancora nulla ricevuto",
+      "register": "Registra webhook",
+      "rotate": "Rinnova webhook",
+      "unregister": "Annulla registrazione webhook",
+      "verifiedAt": "verificato {{date}}",
+      "notVerified": "non ancora verificato",
+      "confirmUnregisterTitle": "Annullare la registrazione del webhook?",
+      "confirmUnregisterBody": "HelloFlex smetterà di inviare eventi a Koios Match finché non registri di nuovo il webhook.",
+      "registeredSuccess": "Webhook registrato",
+      "rotatedSuccess": "Webhook rinnovato",
+      "unregisteredSuccess": "Registrazione webhook annullata",
+      "actionFailed": "L’azione sul webhook non è riuscita. Riprova."
     },
     "connection": {
       "testFailedDetail": "{{reason}}: {{message}}",

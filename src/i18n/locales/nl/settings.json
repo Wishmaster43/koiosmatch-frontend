@@ -4860,7 +4860,18 @@
       "paused": "Webhook gepauzeerd",
       "notRegistered": "Webhook niet geregistreerd",
       "lastReceived": "laatste ontvangst {{date}}",
-      "nothingReceived": "nog niets ontvangen"
+      "nothingReceived": "nog niets ontvangen",
+      "register": "Webhook registreren",
+      "rotate": "Webhook vernieuwen",
+      "unregister": "Webhook afmelden",
+      "verifiedAt": "geverifieerd {{date}}",
+      "notVerified": "nog niet geverifieerd",
+      "confirmUnregisterTitle": "Webhook afmelden?",
+      "confirmUnregisterBody": "HelloFlex stuurt geen gebeurtenissen meer naar Koios Match totdat je de webhook opnieuw registreert.",
+      "registeredSuccess": "Webhook geregistreerd",
+      "rotatedSuccess": "Webhook vernieuwd",
+      "unregisteredSuccess": "Webhook afgemeld",
+      "actionFailed": "De webhook-actie is mislukt. Probeer het opnieuw."
     },
     "connection": {
       "testFailedDetail": "{{reason}}: {{message}}",
