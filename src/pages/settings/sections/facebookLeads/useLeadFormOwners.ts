@@ -5,8 +5,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import api, { unwrap } from '@/lib/api'
-import { notifyError } from '@/lib/notify'
-import { apiErrorMessage } from '@/lib/extractApiError'
+import { notifyApiError } from '@/lib/extractApiError'
 
 // Hand-written (the spec carries no schema for these routes): the unwrapped body is {"owners":{"<formId>":"<userId>"|null}}.
 interface OwnersBody { owners?: Record<string, string | null> }
@@ -79,7 +78,7 @@ export function useLeadFormOwners() {
       if (savedTimer.current) clearTimeout(savedTimer.current)
       savedTimer.current = setTimeout(() => setSaved(false), 2000)
     } catch (err) {
-      notifyError(apiErrorMessage(err, t, t('facebookLeads.formOwners.saveError')))
+      notifyApiError(err, t, t('facebookLeads.formOwners.saveError'))
     } finally {
       setSaving(false)
     }

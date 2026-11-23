@@ -17,7 +17,7 @@ import { useTranslation } from 'react-i18next'
 import { useQueryClient } from '@tanstack/react-query'
 import api, { unwrap } from '@/lib/api'
 import { notifyError, notifySuccess } from '@/lib/notify'
-import { apiErrorMessage } from '@/lib/extractApiError'
+import { notifyApiError } from '@/lib/extractApiError'
 import { useLookups } from '@/context/LookupsContext'
 import { useCvSettings } from '@/lib/useCvSettings'
 import { useAllSettings, getJsonSetting, getStringSetting } from '@/lib/settings/useAllSettings'
@@ -345,7 +345,7 @@ export function useProposeForm(application: ApplicationDetail) {
         return false
       }
       // A coded refusal (422 recipient_suppressed) reads as translated copy, never the English server message.
-      notifyError(apiErrorMessage(err, t, t('common:actionFailed')))
+      notifyApiError(err, t, t('common:actionFailed'))
       return false
     } finally {
       setSubmitting(false)

@@ -5,7 +5,7 @@
 import { useState, useEffect, useRef } from 'react'
 import { useQueryClient } from '@tanstack/react-query'
 import { useTranslation } from 'react-i18next'
-import { apiErrorMessage } from '@/lib/extractApiError'
+import { notifyApiError } from '@/lib/extractApiError'
 import api, { unwrap, unwrapList } from '@/lib/api'
 import { notifyError } from '@/lib/notify'
 import { useConfirm } from '@/hooks/useConfirm'
@@ -79,7 +79,7 @@ export function FlowsTab() {
       return true
     } catch (err) {
       // A coded 422 (ai_disclosure_missing) reads as translated copy, never the raw server sentence.
-      notifyError(apiErrorMessage(err, t, t('common:actionFailed')))
+      notifyApiError(err, t, t('common:actionFailed'), { canFix: auth?.isSuperAdmin?.() === true })
       setSaving(false)
       return false
     }

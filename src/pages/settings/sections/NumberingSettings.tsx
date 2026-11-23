@@ -18,8 +18,7 @@ import { useTranslation } from 'react-i18next'
 import { labelOrRaw } from '@/lib/labelOrRaw'
 import { useAllSettings, saveSettingsKeys, invalidateAllSettingsCache } from '@/lib/settings/useAllSettings'
 import { useNumberingEntities, type NumberingEntity } from '@/lib/useNumberingEntities'
-import { notifyError } from '@/lib/notify'
-import { apiErrorMessage } from '@/lib/extractApiError'
+import { notifyApiError } from '@/lib/extractApiError'
 import { PageTitle, Caption, Mono, PageSubtitle, tableHeadStyle } from '@/components/ui/typography'
 
 const cellInput: CSSProperties = {
@@ -81,7 +80,7 @@ function EntityRow({ entity, settings }: EntityRowProps) {
       invalidateAllSettingsCache()
     } catch (err) {
       setter(prevValue)
-      notifyError(apiErrorMessage(err, t, t('numbering.saveFailed')))
+      notifyApiError(err, t, t('numbering.saveFailed'))
     }
   }
 

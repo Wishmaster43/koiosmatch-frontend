@@ -16,8 +16,7 @@
 import { useEffect, useState, useCallback } from 'react'
 import { useTranslation } from 'react-i18next'
 import api, { unwrap } from '@/lib/api'
-import { apiErrorMessage } from '@/lib/extractApiError'
-import { notifyError } from '@/lib/notify'
+import { notifyApiError } from '@/lib/extractApiError'
 import type { WorkflowRelation } from '@/types/workflow'
 
 // Recursively patches the matching node's status inside a server-built tree
@@ -89,7 +88,7 @@ export function useWorkflowRelations(workflowId?: string | number) {
     } catch (err: unknown) {
       // Roll back, then say why (a coded 422 refusal renders its translated copy).
       apply(prevStatus)
-      notifyError(apiErrorMessage(err, t, t('common:actionFailed')))
+      notifyApiError(err, t, t('common:actionFailed'))
     }
   }, [t])
 

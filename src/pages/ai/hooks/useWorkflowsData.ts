@@ -16,7 +16,7 @@ import api, { unwrap, unwrapList } from '@/lib/api'
 import { withIdempotencyKey } from '@/lib/idempotency'
 import { useAuth } from '@/context/AuthContext'
 import { useConfirm } from '@/hooks/useConfirm'
-import { extractApiError, apiErrorMessage } from '@/lib/extractApiError'
+import { extractApiError, apiErrorMessage, notifyApiError } from '@/lib/extractApiError'
 import { useSeedLabel } from '@/lib/useSeedLabel'
 import { resolveWorkflowBaseURL } from '@/lib/workflowApi'
 import { normalizeWorkflow, denormalizeWorkflow } from '../data/workflowMap'
@@ -40,7 +40,8 @@ export function useWorkflowsData(showArchived: boolean) {
   // WORKFLOW-PERMS-1 (BE 29b86bd4): folder writes, restore and unmark are workflows.update-
   // gated now (settings.* no longer gates those routes); canDo stays open until the
   // family is seeded, exact once it is (lib/access).
-  const canManageFolders = canDo(useAuth(), 'workflows', 'update')
+  const auth = useAuth()
+  const canManageFolders = canDo(auth, 'workflows', 'update')
   const [workflows, setWorkflows] = useState<Workflow[]>([])
   const [folders,   setFolders]   = useState<WorkflowFolder[]>([])
   const [loading,   setLoading]   = useState(true)
@@ -254,7 +255,7 @@ export function useWorkflowsData(showArchived: boolean) {
     setWorkflows(prev => prev.map(w => w.id === wf.id ? { ...w, status: nextStatus } : w))
     api.put(`/workflows/${wf.id}`, { status: nextStatus, active: nextStatus === 'active' }).catch((err: unknown) => {
       setWorkflows(prev => prev.map(w => w.id === wf.id ? { ...w, status: wf.status } : w))
-      notifyError(apiErrorMessage(err, t, t('common:actionFailed')))
+      notifyApiError(err, t, t('common:actionFailed'), { canFix: auth?.isSuperAdmin?.() === true })
     })
   }
 
@@ -374,7 +375,7 @@ export function useWorkflowsData(showArchived: boolean) {
     api.put(`/workflows/${workflowId}`, { folder_id: folderId }).catch((err: unknown) => {
       // Roll back the optimistic move and say so — mirrors handleToggleStatus's rollback+toast.
       setWorkflows(prev => prev.map(w => w.id === workflowId ? { ...w, folder_id: wf.folder_id } : w))
-      notifyError(apiErrorMessage(err, t, t('common:actionFailed')))
+      notifyApiError(err, t, t('common:actionFailed'), { canFix: auth?.isSuperAdmin?.() === true })
     })
   }
 

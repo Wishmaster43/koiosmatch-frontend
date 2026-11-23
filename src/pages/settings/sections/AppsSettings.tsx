@@ -4,8 +4,7 @@ import { useTranslation } from 'react-i18next'
 import { labelOrRaw } from '@/lib/labelOrRaw'
 import SaveButton from '@/components/ui/SaveButton'
 import api from '@/lib/api'
-import { notifyError } from '@/lib/notify'
-import { apiErrorMessage } from '@/lib/extractApiError'
+import { notifyApiError } from '@/lib/extractApiError'
 import { useAuth } from '@/context/AuthContext'
 import { useApps, AVAILABLE_APPS } from '@/context/AppsContext'
 import { canAccessPage } from '@/lib/access'
@@ -67,7 +66,7 @@ export default function AppsSettings() {
     } catch (err) {
       // Surface the real reason (422 invalid slug / 403 no super-admin/package / the coded 409
       // connector_required_by_reporting, translated); the silent noop hid the hf-slug 422 entirely (Danny 23-07).
-      notifyError(apiErrorMessage(err, t, t('common:actionFailed')))
+      notifyApiError(err, t, t('common:actionFailed'), { canFix: auth?.isSuperAdmin?.() === true })
     }
     setSaving(false)
   }

@@ -7,8 +7,7 @@ import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useQueryClient } from '@tanstack/react-query'
 import api, { unwrap } from '@/lib/api'
-import { apiErrorMessage } from '@/lib/extractApiError'
-import { notifyError } from '@/lib/notify'
+import { notifyApiError } from '@/lib/extractApiError'
 import type { operations } from '@/types/api-generated'
 
 type PatchBody = operations['patchSmCandidatesCandidate']['requestBody'] extends infer R
@@ -39,7 +38,7 @@ export function useSmEmployeeAiOptOut(id: string | number | undefined, serverVal
       await queryClient.invalidateQueries({ queryKey: ['sm_candidates'] })
     } catch (err) {
       setOverride(previous === undefined ? null : { id, value: previous })
-      notifyError(apiErrorMessage(err, t, failMessage))
+      notifyApiError(err, t, failMessage)
     } finally {
       setSaving(false)
     }

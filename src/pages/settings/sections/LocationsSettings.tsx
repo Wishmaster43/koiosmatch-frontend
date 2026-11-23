@@ -13,7 +13,7 @@ import { useBranchLinks } from './locations/useBranchLinks'
 import type { LinkSystem } from './locations/useBranchLinks'
 import { useAuth } from '@/context/AuthContext'
 import { useApps } from '@/context/AppsContext'
-import { apiErrorMessage } from '@/lib/extractApiError'
+import { notifyApiError } from '@/lib/extractApiError'
 import LocationFormModal from './locations/LocationFormModal'
 import ErrorBanner from '@/components/ui/ErrorBanner'
 import DrawerAddButton from '@/components/drawer/DrawerAddButton'
@@ -231,7 +231,7 @@ export default function LocationsSettings() {
       await branchLinks.save(id, system, value)
       notifySuccess(t('locations.linkSaved'))
     } catch (err) {
-      notifyError(apiErrorMessage(err, t, t('locations.linkSaveFailed')))
+      notifyApiError(err, t, t('locations.linkSaveFailed'), { canFix: auth?.isSuperAdmin?.() === true })
       throw err
     }
   }

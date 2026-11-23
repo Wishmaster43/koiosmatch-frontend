@@ -850,7 +850,7 @@
     "smCredentialsUnsatisfied": "The Shiftmanager connection has incomplete or invalid credentials and cannot fetch anything. Check the connection under Settings → Shiftmanager.",
     "permissionDenied": "You do not have permission for this action.",
     "invalidSignature": "This link is invalid or has expired.",
-    "moduleNotEnabled": "This module is not enabled for your organisation.",
+    "moduleNotEnabled": "This module is not enabled for your organisation. A super admin can switch it on in Settings, Super Admin.",
     "numberingFrozen": "This series has already issued a number: prefix, digit count and start value are locked.",
     "helloflexStartDateMissing": "The match has no start date.",
     "helloflexJobTitleMissing": "The match has no job title.",

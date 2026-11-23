@@ -850,7 +850,7 @@
     "smCredentialsUnsatisfied": "De Shiftmanager-koppeling heeft onvolledige of ongeldige inloggegevens en kan niets ophalen. Controleer de koppeling bij Instellingen → Shiftmanager.",
     "permissionDenied": "Je hebt geen rechten voor deze actie.",
     "invalidSignature": "Deze link is ongeldig of verlopen.",
-    "moduleNotEnabled": "Deze module is niet actief voor jouw organisatie.",
+    "moduleNotEnabled": "Deze module is niet actief voor jouw organisatie. Een superbeheerder kan dit aanzetten in Instellingen, Super Admin.",
     "numberingFrozen": "Deze reeks heeft al een nummer uitgegeven: prefix, aantal cijfers en startwaarde liggen vast.",
     "helloflexStartDateMissing": "Startdatum ontbreekt op de match.",
     "helloflexJobTitleMissing": "Functietitel ontbreekt op de match.",

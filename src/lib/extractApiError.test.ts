@@ -3,7 +3,7 @@
  * → caller fallback; never throws on malformed/absent error shapes.
  */
 import { describe, it, expect } from 'vitest'
-import { extractApiError, apiErrorKey, apiErrorMessage } from './extractApiError'
+import { extractApiError, apiErrorKey, apiErrorMessage, apiErrorToast, notifyApiError, APPS_SETTINGS_HASH } from './extractApiError'
 
 describe('extractApiError', () => {
   it('prefers the first validation error over the generic message', () => {
@@ -229,5 +229,42 @@ describe('workflow_step_contract_status_unknown (422)', () => {
     const t = (key: string) => `TRANSLATED:${key}`
     const err = { response: { status: 422, data: { code: 'workflow_step_contract_status_unknown', message: 'server sentence' } } }
     expect(apiErrorMessage(err, t, 'fallback')).toBe('server sentence')
+  })
+})
+
+// MODULE-403-DEEPLINK-1: module_not_enabled toasts deep-link to the super admin screen, only for a super admin.
+describe('apiErrorToast / notifyApiError · MODULE-403-DEEPLINK-1', () => {
+  const t = (key: string) => key
+  const moduleOff = { response: { status: 403, data: { code: 'module_not_enabled', message: 'x' } } }
+  const other = { response: { status: 409, data: { code: 'connector_required_by_reporting', message: 'x' } } }
+
+  it('links to the modules screen by default, with a 10 s duration', () => {
+    expect(apiErrorToast(moduleOff, t, 'fb', { canFix: true })).toEqual({ message: 'errors.moduleNotEnabled', options: { deepLink: '#settings/superadmin/modules', duration: 10000 } })
+  })
+
+  it('lets the caller override the settings hash', () => {
+    expect(apiErrorToast(moduleOff, t, 'fb', { canFix: true, settingsHash: APPS_SETTINGS_HASH }).options?.deepLink).toBe('#settings/superadmin/apps')
+  })
+
+  it('carries no link when canFix is false or absent', () => {
+    expect(apiErrorToast(moduleOff, t, 'fb', { canFix: false })).toEqual({ message: 'errors.moduleNotEnabled' })
+    expect(apiErrorToast(moduleOff, t, 'fb')).toEqual({ message: 'errors.moduleNotEnabled' })
+  })
+
+  it('returns no options for another code', () => {
+    expect(apiErrorToast(other, t, 'fb', { canFix: true })).toEqual({ message: 'errors.connectorRequiredByReporting' })
+  })
+
+  it('dispatches the km:toast event with type, message, deepLink and duration', () => {
+    const seen: unknown[] = []
+    const listener = (e: Event) => seen.push((e as CustomEvent).detail)
+    window.addEventListener('km:toast', listener)
+    notifyApiError(moduleOff, t, 'fb', { canFix: true })
+    notifyApiError(other, t, 'fb', { canFix: true })
+    window.removeEventListener('km:toast', listener)
+    expect(seen).toEqual([
+      { type: 'error', message: 'errors.moduleNotEnabled', deepLink: '#settings/superadmin/modules', duration: 10000 },
+      { type: 'error', message: 'errors.connectorRequiredByReporting' },
+    ])
   })
 })

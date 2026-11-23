@@ -850,7 +850,7 @@
     "smCredentialsUnsatisfied": "La conexión con Shiftmanager tiene credenciales incompletas o no válidas y no puede obtener nada. Revisa la conexión en Configuración → Shiftmanager.",
     "permissionDenied": "No tienes permiso para esta acción.",
     "invalidSignature": "Este enlace no es válido o ha caducado.",
-    "moduleNotEnabled": "Este módulo no está activado para tu organización.",
+    "moduleNotEnabled": "Este módulo no está activado para tu organización. Un superadministrador puede activarlo en Ajustes, Súper Admin.",
     "numberingFrozen": "Esta serie ya ha emitido un número: el prefijo, el número de dígitos y el valor inicial están bloqueados.",
     "helloflexStartDateMissing": "Falta la fecha de inicio en el match.",
     "helloflexJobTitleMissing": "Falta el título del puesto en el match.",

@@ -850,7 +850,7 @@
     "smCredentialsUnsatisfied": "La connexion Shiftmanager a des identifiants incomplets ou invalides et ne peut rien récupérer. Vérifiez la connexion dans Paramètres → Shiftmanager.",
     "permissionDenied": "Vous n’avez pas l’autorisation pour cette action.",
     "invalidSignature": "Ce lien est invalide ou a expiré.",
-    "moduleNotEnabled": "Ce module n’est pas activé pour votre organisation.",
+    "moduleNotEnabled": "Ce module n’est pas activé pour votre organisation. Un super administrateur peut l’activer dans Paramètres, Super Admin.",
     "numberingFrozen": "Cette série a déjà attribué un numéro : le préfixe, le nombre de chiffres et la valeur de départ sont verrouillés.",
     "helloflexStartDateMissing": "La date de début manque sur le match.",
     "helloflexJobTitleMissing": "L’intitulé de poste manque sur le match.",

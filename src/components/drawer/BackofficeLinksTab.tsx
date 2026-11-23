@@ -15,9 +15,10 @@
 import { useState, useEffect, useRef } from 'react'
 import type { ReactNode } from 'react'
 import { useApps } from '@/context/AppsContext'
+import { useAuth } from '@/context/AuthContext'
 import api, { unwrap } from '@/lib/api'
 import { notify, notifySuccess, notifyError } from '@/lib/notify'
-import { apiErrorMessage } from '@/lib/extractApiError'
+import { notifyApiError, APPS_SETTINGS_HASH } from '@/lib/extractApiError'
 import { useTranslation } from 'react-i18next'
 import { HelloflexCard, ShiftmanagerCard } from './backofficeLinkCards'
 import { backofficeLinkOf } from '@/lib/backofficeLink'
@@ -55,6 +56,9 @@ interface BackofficeLinksTabProps {
 
 // Renders the linking tab: gates the HelloFlex/Shiftmanager cards on which connector apps are enabled, and owns the link/sync mutations below.
 export default function BackofficeLinksTab({ entity, id, helloflexLink, shiftmanagerLink, canLink, refetchUrl, children }: BackofficeLinksTabProps) {
+  // MODULE-403-DEEPLINK-1: only a super admin can open the connectors screen the toast links to.
+  const auth = useAuth()
+  const canFix = auth?.isSuperAdmin?.() === true
   const { t } = useTranslation('common')
   // GATING-MATRIX (Danny 23-07): the link cards gate on the CONNECTOR APP ONLY —
   // the sm/hf MODULE is the read/reports side and must NOT reveal the linking
@@ -141,7 +145,7 @@ export default function BackofficeLinksTab({ entity, id, helloflexLink, shiftman
     } catch (err) {
       // HF-CONTRACTMAP-1: an unmapped contract form is an honest, actionable notice
       // (points at Settings → HelloFlex), never the raw 409 server message.
-      notifyError(apiErrorMessage(err, t, t('backofficeLinks.common.linkFailed')))
+      notifyApiError(err, t, t('backofficeLinks.common.linkFailed'), { settingsHash: APPS_SETTINGS_HASH, canFix })
     } finally {
       setLinking(s => ({ ...s, [system]: false }))
     }
@@ -173,7 +177,8 @@ export default function BackofficeLinksTab({ entity, id, helloflexLink, shiftman
       const code = (err as { response?: { data?: { code?: string } } })?.response?.data?.code
       const codeKey = code === 'sm_not_found' ? 'backofficeLinks.shiftmanager.syncNotFound'
         : code === 'sm_unexpected_response' ? 'backofficeLinks.shiftmanager.syncUnexpected' : null
-      notifyError(codeKey ? t(codeKey) : apiErrorMessage(err, t, t('backofficeLinks.shiftmanager.syncFailed')))
+      if (codeKey) notifyError(t(codeKey))
+      else notifyApiError(err, t, t('backofficeLinks.shiftmanager.syncFailed'), { settingsHash: APPS_SETTINGS_HASH, canFix })
     } finally {
       setSyncing(false)
     }

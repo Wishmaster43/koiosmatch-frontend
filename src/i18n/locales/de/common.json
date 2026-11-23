@@ -850,7 +850,7 @@
     "smCredentialsUnsatisfied": "Die Shiftmanager-Verbindung hat unvollständige oder ungültige Zugangsdaten und kann nichts abrufen. Prüfen Sie die Verbindung unter Einstellungen → Shiftmanager.",
     "permissionDenied": "Sie haben keine Berechtigung für diese Aktion.",
     "invalidSignature": "Dieser Link ist ungültig oder abgelaufen.",
-    "moduleNotEnabled": "Dieses Modul ist für Ihre Organisation nicht aktiviert.",
+    "moduleNotEnabled": "Dieses Modul ist für Ihre Organisation nicht aktiviert. Ein Superadmin kann es unter Einstellungen, Super-Admin aktivieren.",
     "numberingFrozen": "Diese Reihe hat bereits eine Nummer vergeben: Präfix, Stellenanzahl und Startwert sind gesperrt.",
     "helloflexStartDateMissing": "Auf dem Match fehlt das Startdatum.",
     "helloflexJobTitleMissing": "Auf dem Match fehlt die Funktionsbezeichnung.",

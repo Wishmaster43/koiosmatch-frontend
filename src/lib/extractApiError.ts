@@ -5,6 +5,8 @@
  * server `message` → the caller's fallback (an i18n'd string — never leak a
  * raw axios/network string to the UI).
  */
+import { notify, notifyError } from './notify'
+
 interface ServerErrorBody { message?: string; code?: string; errors?: Record<string, string[]>; clash_name?: string; params?: { clash_name?: string }; meta?: { clash_name?: string }; allowed?: string[]; step?: number; label?: string | null; value?: string }
 
 // KAND-ACHTERGROND-VERPLICHT-1 (2026-08-17): Laravel's OWN default "required"
@@ -154,4 +156,38 @@ export function apiErrorMessage(
     return t('errors.workflowStepContractStatusUnknown', { ns: 'common', allowed })
   }
   return key ? t(key, { ns: 'common' }) : extractApiError(err, fallback)
+}
+
+// MODULE-403-DEEPLINK-1 (Danny 23-11, Q25): a module_not_enabled refusal also deep-links to the super admin screen that switches it on.
+// Package modules (EnsureTenantModule) live under Modules; the connector-gated sites pass the Connectors (apps) hash instead.
+const MODULES_SETTINGS_HASH = '#settings/superadmin/modules'
+export const APPS_SETTINGS_HASH = '#settings/superadmin/apps'
+
+interface ApiToastOptions {
+  /** Settings hash the link opens; defaults to the Modules screen. */
+  settingsHash?: string
+  /** True only for a super admin: both target screens are super-admin-only, so nobody else gets the link (§3 no fake affordance). */
+  canFix?: boolean
+}
+
+export function apiErrorToast(
+  err: unknown,
+  t: Parameters<typeof apiErrorMessage>[1],
+  fallback: string,
+  opts: ApiToastOptions = {},
+): { message: string; options?: { deepLink: string; duration: number } } {
+  const message = apiErrorMessage(err, t, fallback)
+  const code = (err as { response?: { data?: ServerErrorBody } })?.response?.data?.code
+  // A linked toast stays 10 s so the link can be reached.
+  return code === 'module_not_enabled' && opts.canFix === true
+    ? { message, options: { deepLink: opts.settingsHash ?? MODULES_SETTINGS_HASH, duration: 10000 } }
+    : { message }
+}
+
+// Shows the error toast for a failed call: translated message plus the optional deep link.
+export function notifyApiError(err: unknown, t: Parameters<typeof apiErrorMessage>[1], fallback: string, opts: ApiToastOptions = {}): void {
+  const { message, options } = apiErrorToast(err, t, fallback, opts)
+  // The two-argument shorthand keeps consumer tests that mock '@/lib/notify' with only notifyError valid.
+  if (options) notify('error', message, options)
+  else notifyError(message)
 }
