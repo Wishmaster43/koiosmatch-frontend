@@ -1157,7 +1157,14 @@
       "timeline_events": "Timeline events",
       "conversations": "Conversations"
     },
-    "markedForDeletionNamed": "{{name}} moved to trash"
+    "markedForDeletionNamed": "{{name}} moved to trash",
+    "erasePerson": "Erase personal data",
+    "eraseIntro": "{{name}} will be made unidentifiable: name, contact details and documents disappear from the dossier, the conversations and the audit trail. Applications, matches and notes remain without a name.",
+    "personErased": "Personal data erased.",
+    "openMatch_one": "This candidate still has {{count}} open match. End the match first, or close it through the erasure request.",
+    "openMatch_other": "This candidate still has {{count}} open matches. End the matches first, or close them through the erasure request.",
+    "openMatchUnknown": "This candidate still has one or more open matches. End them first, or close them through the erasure request.",
+    "closeMatchesAndErase": "Close open matches and erase"
   },
   "archiveGuard": {
     "title": "Open items found",

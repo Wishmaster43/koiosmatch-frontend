@@ -1157,7 +1157,14 @@
       "timeline_events": "Tijdlijn-items",
       "conversations": "Gesprekken"
     },
-    "markedForDeletionNamed": "{{name}} naar prullenbak verplaatst"
+    "markedForDeletionNamed": "{{name}} naar prullenbak verplaatst",
+    "erasePerson": "Persoonsgegevens wissen",
+    "eraseIntro": "{{name}} wordt onherkenbaar gemaakt: naam, contactgegevens en documenten verdwijnen uit het dossier, de gesprekken en de audit. Sollicitaties, matches en notities blijven bestaan zonder naam.",
+    "personErased": "Persoonsgegevens gewist.",
+    "openMatch_one": "Deze kandidaat heeft nog {{count}} open match. Beëindig eerst de match, of sluit de match via het verwijderverzoek.",
+    "openMatch_other": "Deze kandidaat heeft nog {{count}} open matches. Beëindig eerst de matches, of sluit ze via het verwijderverzoek.",
+    "openMatchUnknown": "Deze kandidaat heeft nog een of meer open matches. Beëindig die eerst, of sluit ze via het verwijderverzoek.",
+    "closeMatchesAndErase": "Open matches sluiten en wissen"
   },
   "archiveGuard": {
     "title": "Lopende zaken gevonden",

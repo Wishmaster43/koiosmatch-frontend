@@ -1157,7 +1157,14 @@
       "timeline_events": "Timeline-Einträge",
       "conversations": "Gespräche"
     },
-    "markedForDeletionNamed": "{{name}} in den Papierkorb verschoben"
+    "markedForDeletionNamed": "{{name}} in den Papierkorb verschoben",
+    "erasePerson": "Personenbezogene Daten löschen",
+    "eraseIntro": "{{name}} wird unkenntlich gemacht: Name, Kontaktdaten und Dokumente verschwinden aus der Akte, den Gesprächen und dem Audit. Bewerbungen, Matches und Notizen bleiben ohne Namen bestehen.",
+    "personErased": "Personenbezogene Daten gelöscht.",
+    "openMatch_one": "Dieser Kandidat hat noch {{count}} offenes Match. Beenden Sie zuerst das Match, oder schließen Sie es über den Löschantrag.",
+    "openMatch_other": "Dieser Kandidat hat noch {{count}} offene Matches. Beenden Sie zuerst die Matches, oder schließen Sie sie über den Löschantrag.",
+    "openMatchUnknown": "Dieser Kandidat hat noch ein oder mehrere offene Matches. Beenden Sie diese zuerst, oder schließen Sie sie über den Löschantrag.",
+    "closeMatchesAndErase": "Offene Matches schließen und löschen"
   },
   "archiveGuard": {
     "title": "Offene Vorgänge gefunden",

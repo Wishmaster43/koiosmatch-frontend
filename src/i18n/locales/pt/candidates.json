@@ -1157,7 +1157,14 @@
       "timeline_events": "Itens da cronologia",
       "conversations": "Conversas"
     },
-    "markedForDeletionNamed": "{{name}} movido para a reciclagem"
+    "markedForDeletionNamed": "{{name}} movido para a reciclagem",
+    "erasePerson": "Apagar dados pessoais",
+    "eraseIntro": "{{name}} ficará irreconhecível: nome, contactos e documentos desaparecem do processo, das conversas e da auditoria. Candidaturas, matches e notas mantêm-se sem nome.",
+    "personErased": "Dados pessoais apagados.",
+    "openMatch_one": "Este candidato ainda tem {{count}} match aberto. Termine primeiro o match, ou feche-o através do pedido de apagamento.",
+    "openMatch_other": "Este candidato ainda tem {{count}} matches abertos. Termine primeiro os matches, ou feche-os através do pedido de apagamento.",
+    "openMatchUnknown": "Este candidato ainda tem um ou mais matches abertos. Termine-os primeiro, ou feche-os através do pedido de apagamento.",
+    "closeMatchesAndErase": "Fechar os matches abertos e apagar"
   },
   "archiveGuard": {
     "title": "Foram encontrados assuntos em curso",

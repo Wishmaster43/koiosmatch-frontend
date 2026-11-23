@@ -63,6 +63,23 @@ describe('CandidateHeaderActions — right-of-access export', () => {
   })
 })
 
+// CANDIDATE-ERASE-FE-1: the right to erasure beside the right of access, privacy.erase only (the drawer passes canErase).
+describe('CandidateHeaderActions: erase personal data', () => {
+  it('is absent without canErase, and without onErased', () => {
+    render(<CandidateHeaderActions {...base} />)
+    expect(screen.queryByRole('button', { name: i18n.t('candidates:erase.erasePerson') })).toBeNull()
+    render(<CandidateHeaderActions {...base} canErase />)
+    expect(screen.queryByRole('button', { name: i18n.t('candidates:erase.erasePerson') })).toBeNull()
+  })
+
+  it('renders the erase button once canErase and onErased are passed, and opens the password dialog', async () => {
+    const user = userEvent.setup()
+    render(<CandidateHeaderActions {...base} canErase onErased={vi.fn()} />)
+    await user.click(screen.getByRole('button', { name: i18n.t('candidates:erase.erasePerson') }))
+    expect(screen.getByRole('dialog', { name: i18n.t('candidates:erase.erasePerson') })).toBeInTheDocument()
+  })
+})
+
 describe('CandidateHeaderActions — CV download', () => {
   beforeEach(() => vi.clearAllMocks())
 

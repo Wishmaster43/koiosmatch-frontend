@@ -1157,7 +1157,14 @@
       "timeline_events": "Eventos",
       "conversations": "Conversaciones"
     },
-    "markedForDeletionNamed": "{{name}} movido a la papelera"
+    "markedForDeletionNamed": "{{name}} movido a la papelera",
+    "erasePerson": "Borrar datos personales",
+    "eraseIntro": "{{name}} se hará irreconocible: el nombre, los datos de contacto y los documentos desaparecen del expediente, las conversaciones y la auditoría. Las candidaturas, los matches y las notas se conservan sin nombre.",
+    "personErased": "Datos personales borrados.",
+    "openMatch_one": "Este candidato aún tiene {{count}} match abierto. Finaliza primero el match o ciérralo mediante la solicitud de borrado.",
+    "openMatch_other": "Este candidato aún tiene {{count}} matches abiertos. Finaliza primero los matches o ciérralos mediante la solicitud de borrado.",
+    "openMatchUnknown": "Este candidato aún tiene uno o más matches abiertos. Finalízalos primero o ciérralos mediante la solicitud de borrado.",
+    "closeMatchesAndErase": "Cerrar los matches abiertos y borrar"
   },
   "archiveGuard": {
     "title": "Asuntos pendientes encontrados",

@@ -1157,7 +1157,14 @@
       "timeline_events": "Événements",
       "conversations": "Conversations"
     },
-    "markedForDeletionNamed": "{{name}} déplacé vers la corbeille"
+    "markedForDeletionNamed": "{{name}} déplacé vers la corbeille",
+    "erasePerson": "Effacer les données personnelles",
+    "eraseIntro": "{{name}} sera rendu méconnaissable : le nom, les coordonnées et les documents disparaissent du dossier, des conversations et de l’audit. Les candidatures, les matchs et les notes subsistent sans nom.",
+    "personErased": "Données personnelles effacées.",
+    "openMatch_one": "Ce candidat a encore {{count}} match ouvert. Terminez d’abord le match, ou fermez-le via la demande d’effacement.",
+    "openMatch_other": "Ce candidat a encore {{count}} matchs ouverts. Terminez d’abord les matchs, ou fermez-les via la demande d’effacement.",
+    "openMatchUnknown": "Ce candidat a encore un ou plusieurs matchs ouverts. Terminez-les d’abord, ou fermez-les via la demande d’effacement.",
+    "closeMatchesAndErase": "Fermer les matchs ouverts et effacer"
   },
   "archiveGuard": {
     "title": "Éléments en cours détectés",

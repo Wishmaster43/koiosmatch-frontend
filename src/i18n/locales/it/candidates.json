@@ -1157,7 +1157,14 @@
       "timeline_events": "Voci della cronologia",
       "conversations": "Conversazioni"
     },
-    "markedForDeletionNamed": "{{name}} spostato nel cestino"
+    "markedForDeletionNamed": "{{name}} spostato nel cestino",
+    "erasePerson": "Cancella i dati personali",
+    "eraseIntro": "{{name}} verrà reso irriconoscibile: nome, recapiti e documenti scompaiono dal fascicolo, dalle conversazioni e dall’audit. Candidature, match e note restano senza nome.",
+    "personErased": "Dati personali cancellati.",
+    "openMatch_one": "Questo candidato ha ancora {{count}} match aperto. Termina prima il match, oppure chiudilo tramite la richiesta di cancellazione.",
+    "openMatch_other": "Questo candidato ha ancora {{count}} match aperti. Termina prima i match, oppure chiudili tramite la richiesta di cancellazione.",
+    "openMatchUnknown": "Questo candidato ha ancora uno o più match aperti. Terminali prima, oppure chiudili tramite la richiesta di cancellazione.",
+    "closeMatchesAndErase": "Chiudi i match aperti e cancella"
   },
   "archiveGuard": {
     "title": "Trovate pratiche aperte",

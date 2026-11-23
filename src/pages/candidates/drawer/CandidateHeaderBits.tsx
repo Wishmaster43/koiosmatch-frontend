@@ -25,6 +25,7 @@ import { chipInk, tintBg, tintBorder } from '@/lib/tint'
 import type { Candidate } from '@/types/candidate'
 import type { Id, LookupOption } from '@/types/common'
 import type { HeaderForm } from '../hooks/useCandidateHeaderEdit'
+import CandidateEraseAction from './CandidateEraseAction'
 
 // Canon field style (G33/fieldMetrics) — was its own padding-6/radius-6 copy;
 // `minWidth: 0` stays local since it only matters inside this header's grid.
@@ -88,12 +89,16 @@ export function CandidateTitle({ c, editing, hf, setHF }: {
 }
 
 // Header actions: convert (entry phase) or CV download, plus the edit/save/cancel toggles.
-export function CandidateHeaderActions({ c, isEntryPhase, nextPhase, converting, onConvert, headerEditing, onStartEdit, onSaveEdit, onCancelEdit, canSubjectExport = false }: {
+export function CandidateHeaderActions({ c, isEntryPhase, nextPhase, converting, onConvert, headerEditing, onStartEdit, onSaveEdit, onCancelEdit, canSubjectExport = false, canErase = false, onErased }: {
   c: Candidate; isEntryPhase: boolean; nextPhase?: LookupOption; converting: boolean
   onConvert: () => void; headerEditing: boolean
   onStartEdit: () => void; onSaveEdit: () => void; onCancelEdit: () => void
   // ONIX K-001 (Danny 8a = A): the right-of-access export, shown only to a user with privacy.subject-export.
   canSubjectExport?: boolean
+  // CANDIDATE-ERASE-FE-1: the right to erasure, shown only with privacy.erase; onErased runs after a successful erase
+  // (the drawer closes: tabs seeded once would otherwise keep the old personal data on screen).
+  canErase?: boolean
+  onErased?: (id: Id) => void | Promise<void>
 }) {
   const { t } = useTranslation('candidates')
   const { settings: cvSettings } = useCvSettings() as { settings?: unknown }
@@ -155,6 +160,8 @@ export function CandidateHeaderActions({ c, isEntryPhase, nextPhase, converting,
           <ShieldCheck size={13} />
         </Button>
       )}
+      {/* CANDIDATE-ERASE-FE-1: the right to erasure sits beside the right of access (K-005 idiom), privacy.erase only. */}
+      {canErase && onErased && <CandidateEraseAction c={c} onErased={onErased} />}
       {headerEditing ? (
         <>
           <Button variant="primary" size="sm" iconOnly onClick={onSaveEdit} title={t('common:save')} aria-label={t('common:save')}>

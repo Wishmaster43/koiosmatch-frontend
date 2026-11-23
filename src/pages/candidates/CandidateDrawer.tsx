@@ -343,6 +343,7 @@ export default function CandidateDrawer({ candidate: c, onClose, expanded, onTog
           actions={
             <CandidateHeaderActions c={c} isEntryPhase={status.isEntryPhase} nextPhase={status.nextPhase}
               canSubjectExport={hasPermission('privacy.subject-export')}
+              canErase={hasPermission('privacy.erase')} onErased={() => onClose()}
               converting={status.converting} onConvert={() => status.doConvert(setActiveTab)}
               headerEditing={headerEdit.headerEditing} onStartEdit={headerEdit.startHeaderEdit}
               onSaveEdit={headerEdit.saveHeader} onCancelEdit={() => headerEdit.setHeaderEditing(false)} />

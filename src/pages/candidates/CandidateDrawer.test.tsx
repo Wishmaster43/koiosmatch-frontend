@@ -137,6 +137,22 @@ describe('CandidateDrawer · archive icon (RECHTEN-DETAIL-1, candidates.archive)
   })
 })
 
+describe('CandidateDrawer · erase personal data (CANDIDATE-ERASE-FE-1, privacy.erase)', () => {
+  it('renders NO erase button without privacy.erase', async () => {
+    mockUseAuth.mockReturnValue({ hasModule: () => false, isSuperAdmin: () => false, hasRole: () => false, hasPermission: p => p === 'candidates.archive' })
+    await renderDrawer({ candidate: candidate() })
+    expect(screen.queryByRole('button', { name: ct('erase.erasePerson') })).toBeNull()
+  })
+
+  it('renders the erase button with privacy.erase, and clicking it opens the password dialog', async () => {
+    mockUseAuth.mockReturnValue({ hasModule: () => false, isSuperAdmin: () => false, hasRole: () => false, hasPermission: p => p === 'privacy.erase' })
+    const user = userEvent.setup()
+    await renderDrawer({ candidate: candidate() })
+    await user.click(screen.getByRole('button', { name: ct('erase.erasePerson') }))
+    expect(screen.getByRole('dialog', { name: ct('erase.erasePerson') })).toBeInTheDocument()
+  })
+})
+
 describe('CandidateDrawer · archived banner restore/mark-deletion (RECHTEN-DETAIL-1, candidates.archive)', () => {
   it('withholds BOTH restore and move-to-trash without candidates.archive, even though the callbacks are passed', async () => {
     mockUseAuth.mockReturnValue({ hasModule: () => false, isSuperAdmin: () => false, hasRole: () => false, hasPermission: () => false })

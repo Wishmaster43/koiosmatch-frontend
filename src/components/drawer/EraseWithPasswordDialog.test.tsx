@@ -83,3 +83,59 @@ describe('EraseWithPasswordDialog', () => {
     resolve()
   })
 })
+
+// CANDIDATE-ERASE-FE-1 / ERASURE-OPEN-MATCH-1: the optional conflict step.
+describe('EraseWithPasswordDialog · conflict step', () => {
+  const conflict409 = { response: { status: 409, data: { code: 'candidate_has_open_match' } } }
+  const conflict = { detect: (err: unknown) => ((err as { response?: { status?: number } })?.response?.status === 409 ? 'Open match.' : null), actionLabel: 'Close and erase' }
+
+  it('shows the detected sentence with the action, disables the plain confirm, and Enter no longer submits', async () => {
+    const user = userEvent.setup()
+    const onConfirm = vi.fn().mockRejectedValueOnce(conflict409).mockResolvedValueOnce(undefined)
+    render(<EraseWithPasswordDialog open title="t" intro="i" confirmLabel="Confirm" onConfirm={onConfirm} onClose={vi.fn()} conflict={conflict} />)
+
+    const input = screen.getByLabelText(cm('eraseDialog.password'), { exact: false })
+    await user.type(input, 'geheim')
+    await user.click(screen.getByRole('button', { name: 'Confirm' }))
+    expect(onConfirm).toHaveBeenCalledWith('geheim')
+
+    expect(await screen.findByText('Open match.')).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'Confirm' })).toBeDisabled()
+    // Focus moves to the only way forward (the footer confirm the user clicked is disabled now).
+    expect(screen.getByRole('button', { name: 'Close and erase' })).toHaveFocus()
+    await user.type(input, '{Enter}')
+    expect(onConfirm).toHaveBeenCalledTimes(1)
+
+    // The escalation is the explicit click only, and carries the flag.
+    await user.click(screen.getByRole('button', { name: 'Close and erase' }))
+    await waitFor(() => expect(onConfirm).toHaveBeenLastCalledWith('geheim', { resolveConflict: true }))
+    expect(onConfirm).toHaveBeenCalledTimes(2)
+  })
+
+  it('a changed password clears the conflict and re-enables the plain confirm', async () => {
+    const user = userEvent.setup()
+    const onConfirm = vi.fn().mockRejectedValueOnce(conflict409)
+    render(<EraseWithPasswordDialog open title="t" intro="i" confirmLabel="Confirm" onConfirm={onConfirm} onClose={vi.fn()} conflict={conflict} />)
+
+    const input = screen.getByLabelText(cm('eraseDialog.password'), { exact: false })
+    await user.type(input, 'geheim')
+    await user.click(screen.getByRole('button', { name: 'Confirm' }))
+    expect(await screen.findByText('Open match.')).toBeInTheDocument()
+
+    await user.type(input, '2')
+    expect(screen.queryByText('Open match.')).toBeNull()
+    expect(screen.queryByRole('button', { name: 'Close and erase' })).toBeNull()
+    expect(screen.getByRole('button', { name: 'Confirm' })).toBeEnabled()
+  })
+
+  it('an error the detector does not recognise still maps to the usual copy, without the action', async () => {
+    const user = userEvent.setup()
+    const onConfirm = vi.fn().mockRejectedValueOnce({ response: { status: 403 } })
+    render(<EraseWithPasswordDialog open title="t" intro="i" confirmLabel="Confirm" onConfirm={onConfirm} onClose={vi.fn()} conflict={conflict} />)
+
+    await user.type(screen.getByLabelText(cm('eraseDialog.password'), { exact: false }), 'x')
+    await user.click(screen.getByRole('button', { name: 'Confirm' }))
+    expect(await screen.findByRole('alert')).toHaveTextContent(cm('eraseDialog.wrongPassword'))
+    expect(screen.queryByRole('button', { name: 'Close and erase' })).toBeNull()
+  })
+})
