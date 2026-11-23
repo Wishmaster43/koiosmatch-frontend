@@ -81,12 +81,12 @@ function groupSearchResults(step: Record<string, unknown>, refs: KoiosResultRef[
     }
   }
 
-  // Collect skipped entities from the step's per-entity metadata (English-first
-  // `skipped`/`reason`, Dutch fallback `overgeslagen`/`reden`).
+  // Collect skipped entities from the step's per-entity metadata: `skipped` keeps its Dutch twin
+  // `overgeslagen` until KOIOS-TOOL-RESULT-KEYS-2, `reason` is English-only since KOIOS-TOOL-RESULT-KEYS-1.
   for (const [key, value] of Object.entries(bucketsByEntity)) {
     const entry = value as Record<string, unknown>
     const isSkipped = pick<boolean>(entry, 'skipped', 'overgeslagen') === true
-    const reason = pick<string>(entry, 'reason', 'reden')
+    const reason = entry.reason
     if (isSkipped && typeof reason === 'string') {
       const entityType = ENTITY_TYPE_MAP[key] || key
       skipped.push({ entity: entityType, reason })

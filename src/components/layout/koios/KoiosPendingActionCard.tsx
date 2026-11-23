@@ -15,7 +15,7 @@
  * cache) shows an honest "connection needed" notice and disables Confirm — never
  * a silent failure after click; (2) the tool's own consent-fail-closed refusal
  * (ToolExecutor::executePending still returns HTTP 200 "executed" — the tool
- * itself hands back `{ fout }` / `{ gelukt: false, reden }`, measured against
+ * itself hands back `{ fout }` / `{ gelukt: false, reason }`, measured against
  * VoorstelSollicitatie.php/StartInterview.php) renders as an honest refusal
  * instead of the generic "confirmed" state.
  */
@@ -141,15 +141,15 @@ export default function KoiosPendingActionCard({ action }: { action: KoiosPendin
         // shape), never a 4xx. Surface it honestly instead of a false "confirmed".
         // REFUSAL-CONVENTION-1 (gap-map, definitive): `ok`/`gelukt` is the ONLY
         // discriminator; `remembered`/`onthouden[]` marks a PARTIAL execution
-        // (deliberately skipped sub-actions); `reason`/`reden` is the translated
+        // (deliberately skipped sub-actions); `reason` is the translated
         // carrier — the slug is always present on refusal AND on every
         // withholding; `error`/`fout` is only the human fallback (and the path
-        // for the ~67 not-yet-normalised tools). KOIOS-EN-1 phase B: the tool
-        // result carries BOTH keys for one release — English-first, Dutch
-        // fallback via `pick`, so a not-yet-updated payload still resolves.
+        // for the ~67 not-yet-normalised tools). `reason` is English-only since
+        // KOIOS-TOOL-RESULT-KEYS-1 (BE batch H); the other three keep their Dutch
+        // twins via `pick` until KOIOS-TOOL-RESULT-KEYS-2.
         const data = (res as { data?: Record<string, unknown> })?.data
         const ok = pick<boolean>(data, 'ok', 'gelukt')
-        const reason = pick<string>(data, 'reason', 'reden')
+        const reason = typeof data?.reason === 'string' ? data.reason : undefined
         const error = pick<string>(data, 'error', 'fout')
         const remembered = pick<string[]>(data, 'remembered', 'onthouden')
         const hasOkKey = data != null && ('ok' in data || 'gelukt' in data)
@@ -184,14 +184,14 @@ export default function KoiosPendingActionCard({ action }: { action: KoiosPendin
         if (cv.handleOverrideError(e)) { setStatus('proposed'); return }
         const body = e?.response?.data as {
           status?: string; message?: string
-          // reason/error twins are read through pick() (KOIOS-EN-1 contract keys), so the type names only the English members.
+          // `reason` is English-only (KOIOS-TOOL-RESULT-KEYS-1); the type names the members this branch reads.
           data?: Record<string, unknown> & { budget?: ActionBudget; code?: string; ref?: { type: string; id: Id; archived?: boolean } }
         } | undefined
         if (body?.status === 'declined') {
           // §5: a decline's `message` is the BE's English fallback prose — translate via the slug instead of showing it.
           // Measured in the BE (BuildsToolResult.php): declinedDuplicate() stamps the slug as `code`, refused() carries it
-          // only as the reason/reden twins (REFUSAL-CONVENTION-1), so read code first and the twins after it.
-          const code = body.data?.code ?? pick<string>(body.data, 'reason', 'reden')
+          // only as `reason` (REFUSAL-CONVENTION-1), so read code first and the reason after it.
+          const code = body.data?.code ?? (typeof body.data?.reason === 'string' ? body.data.reason : undefined)
           if (code?.startsWith('duplicate_')) {
             setRefusedReason(t(code.endsWith('_archived')
               ? 'notesAssist.execute.declined.duplicate_archived'

@@ -153,7 +153,8 @@ describe('KoiosMessage — search results grouping', () => {
   })
 })
 
-// KOIOS-EN-1: the legacy `resultaten`/`overgeslagen`/`reden` payload renders the same groups and skipped lines as the English one.
+// KOIOS-EN-1 / KOIOS-TOOL-RESULT-KEYS-1 phase 2: the legacy `resultaten`/`overgeslagen` keys still render like the English
+// ones (their rename is KOIOS-TOOL-RESULT-KEYS-2), while `reason` is English-only: a `reden`-keyed skip shows no reason line.
 describe('KoiosMessage — legacy result key alias', () => {
   const refs = [{ type: 'candidate', id: 'c1', label: 'Ahmed Vos' }]
   const build = (step: Record<string, unknown>): KoiosChatMessage => ({
@@ -161,12 +162,15 @@ describe('KoiosMessage — legacy result key alias', () => {
   } as unknown as KoiosChatMessage)
 
   // The legacy keys are quoted: they are fixtures of the pre-KOIOS-EN-1 payload, not identifiers of ours.
-  it('renders identical output for the legacy and the English payload', () => {
+  it('renders identical output for the legacy and the English payload, and no reason line for a Dutch reason key', () => {
     const english = render(<KoiosMessage msg={build({ result: { candidates: { count: 1 }, tasks: { skipped: true, reason: 'no permission' } } })} t={t} />)
     const englishText = english.container.textContent
     english.unmount()
-    const legacy = render(<KoiosMessage msg={build({ 'resultaten': { candidates: { count: 1 }, tasks: { 'overgeslagen': true, 'reden': 'no permission' } } })} t={t} />)
+    const legacy = render(<KoiosMessage msg={build({ 'resultaten': { candidates: { count: 1 }, tasks: { 'overgeslagen': true, reason: 'no permission' } } })} t={t} />)
     expect(legacy.container.textContent).toBe(englishText)
     expect(legacy.container.textContent).toContain('no permission')
+    legacy.unmount()
+    const dutchReason = render(<KoiosMessage msg={build({ result: { candidates: { count: 1 }, tasks: { skipped: true, 'reden': 'no permission' } } })} t={t} />)
+    expect(dutchReason.container.textContent).not.toContain('no permission')
   })
 })

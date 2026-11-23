@@ -15,11 +15,11 @@ export function createdRefFromToolResult(data: unknown, fallbackLabel: string): 
   const d = data as Record<string, unknown>
   const ok = pick<boolean>(d, 'ok', 'gelukt')
   if (ok === false) return null
-  // create_task → { ok, task_id, title, due_date } (KOIOS-EN-1 phase B: English-first,
-  // Dutch fallback — { gelukt, taak_id, titel, deadline } — during the dual-key period).
-  const taskId = pick<unknown>(d, 'task_id', 'taak_id')
+  // create_task → { ok, task_id, title, due_date }: the result keys are English-only since
+  // KOIOS-TOOL-RESULT-KEYS-1 (BE batch H); `ok` keeps its Dutch twin until KOIOS-TOOL-RESULT-KEYS-2.
+  const taskId = d.task_id
   if (taskId != null && taskId !== '') {
-    const title = pick<string>(d, 'title', 'titel')
+    const title = d.title
     return { type: 'task', id: String(taskId), label: typeof title === 'string' && title ? title : fallbackLabel }
   }
   // CALLLIST-KEY-1: create_call_list → { ok, call_list_id, name, reused, warnings[] }.

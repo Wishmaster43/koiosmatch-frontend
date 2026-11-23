@@ -77,8 +77,8 @@ describe('KoiosPendingActionCard', () => {
   // REFUSAL-CONVENTION-1 definitive (BuildsToolResult): gelukt:true + onthouden[]
   // = a PARTIAL execution — its own honest state, never a bare "Bevestigd" and
   // never a full refusal either (the record DID land, only the mail was withheld).
-  it('renders the partial state when gelukt=true with onthouden + reden (mail withheld)', async () => {
-    mockConfirm.mockResolvedValue({ status: 'executed', data: { gelukt: true, onthouden: ['mail'], reden: 'no_email_consent' } })
+  it('renders the partial state when gelukt=true with onthouden + reason (mail withheld)', async () => {
+    mockConfirm.mockResolvedValue({ status: 'executed', data: { gelukt: true, onthouden: ['mail'], reason: 'no_email_consent' } })
     const user = userEvent.setup()
     renderCard(action())
     await user.click(screen.getByText('koios.pendingAction.confirm'))
@@ -87,9 +87,9 @@ describe('KoiosPendingActionCard', () => {
     expect(screen.queryByText('koios.pendingAction.confirmed')).not.toBeInTheDocument()
   })
 
-  // A full refusal under the definitive convention: gelukt:false + reden + fout.
-  it('renders refused on gelukt=false with a reden slug', async () => {
-    mockConfirm.mockResolvedValue({ status: 'executed', data: { gelukt: false, reden: 'customer_blocked', fout: 'Klant is geblokkeerd.' } })
+  // A full refusal under the definitive convention: gelukt:false + reason + fout (reason English-only since KOIOS-TOOL-RESULT-KEYS-1).
+  it('renders refused on gelukt=false with a reason slug', async () => {
+    mockConfirm.mockResolvedValue({ status: 'executed', data: { gelukt: false, reason: 'customer_blocked', fout: 'Klant is geblokkeerd.' } })
     const user = userEvent.setup()
     renderCard(action())
     await user.click(screen.getByText('koios.pendingAction.confirm'))
@@ -97,10 +97,10 @@ describe('KoiosPendingActionCard', () => {
     expect(screen.queryByText('koios.pendingAction.confirmed')).not.toBeInTheDocument()
   })
 
-  // MEASURED shape 2 (StartInterview): a fout sentence + reden slug — the slug
+  // MEASURED shape 2 (StartInterview): a fout sentence + reason slug. The slug
   // drives the translation, the prose is only the untranslated fallback.
-  it('renders the refusal for the fout+reden shape and never a false confirmed', async () => {
-    mockConfirm.mockResolvedValue({ status: 'executed', data: { fout: 'Interview kon niet starten.', reden: 'no_mobile_or_consent' } })
+  it('renders the refusal for the fout+reason shape and never a false confirmed', async () => {
+    mockConfirm.mockResolvedValue({ status: 'executed', data: { fout: 'Interview kon niet starten.', reason: 'no_mobile_or_consent' } })
     const user = userEvent.setup()
     renderCard(action())
     await user.click(screen.getByText('koios.pendingAction.confirm'))
