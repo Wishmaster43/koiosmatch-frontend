@@ -144,6 +144,25 @@ const workflowNames: Record<string, string> = {
   koiosPlanAfspraak: "Koios: plan afspraak",
   koiosStuurNotificatie: "Koios: stuur notificatie",
   koiosVoegToeAanBellijst: "Koios: voeg toe aan bellijst",
+  // SEED-HF-TEMPLATE-LABELS-1: the 18 seeded HelloFlex workflow templates (BE lang/nl/helloflex.php)
+  helloflexNieuweMatchNaarContract: "HelloFlex: nieuwe match naar contract",
+  helloflexNieuweKandidaat: "HelloFlex: nieuwe kandidaat",
+  helloflexKandidaatGewijzigd: "HelloFlex: kandidaat gewijzigd",
+  helloflexKandidaatGearchiveerd: "HelloFlex: kandidaat gearchiveerd",
+  helloflexContactpersonen: "HelloFlex: contactpersonen",
+  helloflexKlantKoppelen: "HelloFlex: klant koppelen",
+  helloflexKlantlocatiesKoppelen: "HelloFlex: klantlocaties koppelen",
+  helloflexAfdelingenKoppelen: "HelloFlex: afdelingen koppelen",
+  helloflexContractstatusGewijzigd: "HelloFlex: contractstatus gewijzigd",
+  helloflexContractVerwijderd: "HelloFlex: contract verwijderd",
+  helloflexNieuweContractversie: "HelloFlex: nieuwe contractversie",
+  helloflexKandidaatBijgewerkt: "HelloFlex: kandidaat bijgewerkt",
+  helloflexKandidaatAangemaakt: "HelloFlex: kandidaat aangemaakt",
+  helloflexWerkgeverAangemaakt: "HelloFlex: werkgever aangemaakt",
+  helloflexWerkgeverBijgewerkt: "HelloFlex: werkgever bijgewerkt",
+  helloflexActiviteitAangemaakt: "HelloFlex: activiteit aangemaakt",
+  helloflexKostenplaatsenGewijzigd: "HelloFlex: kostenplaatsen gewijzigd",
+  helloflexVestigingenGewijzigd: "HelloFlex: vestigingen gewijzigd",
 }
 
 // Merged into SEED_LABELS (lookupSeedCatalogue.ts) under the same two keys.

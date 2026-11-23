@@ -34,3 +34,22 @@ describe('workflowFolders seed catalogue', () => {
     expect(seedKeyFor('workflowFolders', { label: 'Koppeling Elanza' })).toBeNull()
   })
 })
+
+describe('workflowNames seed catalogue (HelloFlex templates, SEED-HF-TEMPLATE-LABELS-1)', () => {
+  const templates = Object.entries(WORKFLOW_SEED_LABELS.workflowNames).filter(([, label]) => label.startsWith('HelloFlex: '))
+
+  it('the 18 HelloFlex template ids equal labelKey(label)', () => {
+    expect(templates).toHaveLength(18)
+    for (const [id, label] of templates) expect(labelKey(label)).toBe(id)
+  })
+
+  it('every HelloFlex template label carries an English i18n key', () => {
+    for (const [, label] of templates) expect(SEED_LABEL_KEYS.workflowNames[label]).toBeTruthy()
+  })
+
+  it('template labels resolve to their English keys; a renamed label does not', () => {
+    expect(seedKeyFor('workflowNames', { label: 'HelloFlex: nieuwe match naar contract' })).toBe('helloflexNewMatchToContract')
+    expect(seedKeyFor('workflowNames', { label: 'HelloFlex: vestigingen gewijzigd' })).toBe('helloflexAgenciesChanged')
+    expect(seedKeyFor('workflowNames', { label: 'HelloFlex: eigen naam' })).toBeNull()
+  })
+})
