@@ -78,7 +78,7 @@ async function listRenders({ page, errors }) {
   }
   const fresh = errors.slice(at)
   expect(fresh.length === 0, `onverwachte fout tijdens laden: ${fresh.join(' | ')}`)
-  expect(Boolean(state), 'geen herkenbare staat (kaarten/lege-staat/site-niet-actief) binnen 6s — kale pagina of crash')
+  expect(Boolean(state), 'no recognisable state (cards, empty state or site-not-active) within 6 s: blank page or crash')
   console.log(`   staat gezien: ${state}`)
   ctx.listState = state
 }
@@ -97,15 +97,15 @@ async function detailAndSeo({ page, errors }) {
   await card.click()
   await page.waitForLoadState('networkidle')
   await sleep(600)
-  expect(await page.locator('h1').count(), 'detailpagina toont geen titel (h1)')
-  expect(await page.locator('.vacancy-detail__description').count(), 'detailpagina toont geen beschrijving-sectie')
+  expect(await page.locator('h1').count(), 'detail page shows no title (h1)')
+  expect(await page.locator('.vacancy-detail__description').count(), 'detail page shows no description section')
   const ld = page.locator('script[type="application/ld+json"]')
-  expect(await ld.count(), 'detailpagina mist het Google Jobs JSON-LD <script>-blok')
+  expect(await ld.count(), 'detail page lacks the Google Jobs JSON-LD <script> block')
   const ldContent = (await ld.first().textContent()) ?? ''
   // Must be real, parseable JSON — not just a present-but-empty tag.
   let ldIsValidJson = false
   try { JSON.parse(ldContent); ldIsValidJson = true } catch { /* left false */ }
-  expect(ldIsValidJson, 'json-ld is geen geldig JSON')
+  expect(ldIsValidJson, 'json-ld is not valid JSON')
   const fresh = errors.slice(at)
   expect(fresh.length === 0, `detailpagina gaf fouten: ${fresh.join(' | ')}`)
 }
@@ -131,12 +131,12 @@ async function applyFormBlocksInvalidSubmit({ page, errors }) {
   }
   page.on('request', onRequest)
   const submitBtn = page.locator('.apply-form button[type="submit"]')
-  expect(await submitBtn.count(), 'sollicitatieformulier (of submit-knop) niet gevonden op de detailpagina')
+  expect(await submitBtn.count(), 'application form (or submit button) not found on the detail page')
   await submitBtn.click()
   await sleep(500)
   const fieldErrors = await page.locator('.apply-form .field-error').count()
   page.off('request', onRequest)
-  expect(fieldErrors > 0, 'formulier toont geen client-validatiefouten bij een lege, niet-akkoord-gegeven inzending')
+  expect(fieldErrors > 0, 'form shows no client validation errors on an empty submission without consent')
   expect(!applyRequestSeen, 'het formulier deed toch een POST naar /apply ondanks ontbrekende verplichte velden/consent')
   const fresh = errors.slice(at)
   expect(fresh.length === 0, `formulier-check gaf fouten: ${fresh.join(' | ')}`)
@@ -162,9 +162,9 @@ async function applyFormShowsFormulierV2Sections({ page, errors }) {
 
   // Repeatable sections are unconditionally accepted server-side — always present.
   const experienceButton = page.locator('.apply-form button', { hasText: 'Werkervaring toevoegen' })
-  expect(await experienceButton.count() > 0, 'formulier mist de "Werkervaring toevoegen"-knop (nooit settings-gated)')
+  expect(await experienceButton.count() > 0, 'the form lacks the "Werkervaring toevoegen" button (never settings-gated)')
   const educationButton = page.locator('.apply-form button', { hasText: 'Opleiding toevoegen' })
-  expect(await educationButton.count() > 0, 'formulier mist de "Opleiding toevoegen"-knop (nooit settings-gated)')
+  expect(await educationButton.count() > 0, 'the form lacks the "Opleiding toevoegen" button (never settings-gated)')
 
   // Settings-gated fields — tolerant: report what the seeded vacancy shows, never fail either way.
   const fileInputCount = await page.locator('.apply-form input[type="file"]').count()
