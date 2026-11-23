@@ -6,17 +6,16 @@
  * assistant block and the pending-action card render the SAME chip.
  */
 import type { KoiosContextRef } from '@/types/koios'
-import { pick } from './koiosToolIds'
 
 // A tool result → the created record's ref, or null when the tool created nothing
 // we can link (search tools, refusals, older shapes).
 export function createdRefFromToolResult(data: unknown, fallbackLabel: string): KoiosContextRef | null {
   if (!data || typeof data !== 'object') return null
   const d = data as Record<string, unknown>
-  const ok = pick<boolean>(d, 'ok', 'gelukt')
+  const ok = d.ok
   if (ok === false) return null
-  // create_task → { ok, task_id, title, due_date }: the result keys are English-only since
-  // KOIOS-TOOL-RESULT-KEYS-1 (BE batch H); `ok` keeps its Dutch twin until KOIOS-TOOL-RESULT-KEYS-2.
+  // create_task → { ok, task_id, title, due_date }: every result key is English-only since
+  // KOIOS-TOOL-RESULT-KEYS-1 (entity keys, BE batch H) and KOIOS-TOOL-RESULT-KEYS-2 (outcome keys, batch I).
   const taskId = d.task_id
   if (taskId != null && taskId !== '') {
     const title = d.title

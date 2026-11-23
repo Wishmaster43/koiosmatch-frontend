@@ -67,7 +67,7 @@ describe('KoiosPendingActionCard', () => {
   })
 
   it('confirms a non-destructive action in one step', async () => {
-    mockConfirm.mockResolvedValue({ status: 'executed', data: { gelukt: true } })
+    mockConfirm.mockResolvedValue({ status: 'executed', data: { ok: true } })
     const user = userEvent.setup()
     renderCard(action())
     await user.click(screen.getByText('koios.pendingAction.confirm'))
@@ -79,7 +79,7 @@ describe('KoiosPendingActionCard', () => {
   })
 
   it('requires a second confirm step for a destructive action, with a "back" that does not call the API', async () => {
-    mockConfirm.mockResolvedValue({ status: 'executed', data: { gelukt: true } })
+    mockConfirm.mockResolvedValue({ status: 'executed', data: { ok: true } })
     const user = userEvent.setup()
     renderCard(action({ destructive: true }))
     await user.click(screen.getByText('koios.pendingAction.confirm'))

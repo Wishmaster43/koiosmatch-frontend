@@ -16,7 +16,7 @@ import KoiosFeedback from './KoiosFeedback'
 import type { KoiosResultRef, KoiosSearchResultsGrouped } from './koiosTypes'
 import type { KoiosChatMessage, TFn } from '@/types/koios'
 import { GRADIENT, resolveMessage, type KoiosGreeting } from './koiosMessageParts'
-import { canonicalToolId, pick } from './koiosToolIds'
+import { canonicalToolId } from './koiosToolIds'
 import { LEGACY_RESULT_BUCKET_TYPES } from './koiosResultBucketAliases'
 
 // ── Group search results by entity type ────────────────────────────────────────
@@ -44,11 +44,10 @@ function groupSearchResults(step: Record<string, unknown>, refs: KoiosResultRef[
   const groups: KoiosSearchResultsGrouped['groups'] = []
   const skipped: KoiosSearchResultsGrouped['skipped'] = []
 
-  // Try to extract per-entity metadata from the step if present (backend may
-  // include raw tool output as { query, result: {...} } — KOIOS-EN-1 phase B:
-  // English-first `result`, Dutch fallback `resultaten`, plus the pre-existing
-  // `results` alias — during the dual-key period).
-  const rawResult = (pick<Record<string, unknown>>(step, 'result', 'resultaten') ?? step.results) as Record<string, unknown> | undefined
+  // Try to extract per-entity metadata from the step if present (the backend may include raw
+  // tool output as { query, result: {...} }, older steps under `results`); the keys are English-only
+  // since KOIOS-TOOL-RESULT-KEYS-2 (BE batch I).
+  const rawResult = (step.result ?? step.results) as Record<string, unknown> | undefined
   const bucketsByEntity = rawResult || {}
 
   // Group refs by entity type in the canonical order
@@ -81,11 +80,11 @@ function groupSearchResults(step: Record<string, unknown>, refs: KoiosResultRef[
     }
   }
 
-  // Collect skipped entities from the step's per-entity metadata: `skipped` keeps its Dutch twin
-  // `overgeslagen` until KOIOS-TOOL-RESULT-KEYS-2, `reason` is English-only since KOIOS-TOOL-RESULT-KEYS-1.
+  // Collect skipped entities from the step's per-entity metadata (`skipped` + `reason`, English-only
+  // since KOIOS-TOOL-RESULT-KEYS-1 and -2).
   for (const [key, value] of Object.entries(bucketsByEntity)) {
     const entry = value as Record<string, unknown>
-    const isSkipped = pick<boolean>(entry, 'skipped', 'overgeslagen') === true
+    const isSkipped = entry.skipped === true
     const reason = entry.reason
     if (isSkipped && typeof reason === 'string') {
       const entityType = ENTITY_TYPE_MAP[key] || key

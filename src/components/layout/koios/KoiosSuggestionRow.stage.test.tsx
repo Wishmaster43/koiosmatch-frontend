@@ -109,7 +109,7 @@ describe('KoiosSuggestionRow · staged/confirm leg (unchanged, moved from KoiosA
       action: { key: 'search_candidates', tool: 'zoek_kandidaten', input: { vacature_id: 'v1' }, label: 'Kandidaten zoeken' },
     }
     mockPost.mockResolvedValueOnce({ data: { status: 'staged', action: { id: 'pa-1', title: 'Kandidaten zoeken', preview: [] } } })
-    mockPost.mockResolvedValueOnce({ data: { status: 'executed', data: { gelukt: true } } })
+    mockPost.mockResolvedValueOnce({ data: { status: 'executed', data: { ok: true } } })
     render(<KoiosSuggestionRow suggestion={suggestion} />)
     fireEvent.click(screen.getByRole('button', { name: 'Kandidaten zoeken' }))
     await screen.findByText(/pendingAction\.confirmed/)

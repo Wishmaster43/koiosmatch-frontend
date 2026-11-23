@@ -99,11 +99,3 @@ export function canonicalToolId(id: string): string {
   return LEGACY_TOOL_IDS[id] ?? id
 }
 
-// Reads a dual-key result field (KOIOS-EN-1 phase B: every tool result carries
-// BOTH the English and the Dutch key for one release) — English first, Dutch
-// fallback, so a still-Dutch-only payload keeps working during the alias period.
-export function pick<T = unknown>(obj: Record<string, unknown> | null | undefined, enKey: string, nlKey: string): T | undefined {
-  if (!obj) return undefined
-  if (obj[enKey] !== undefined) return obj[enKey] as T
-  return obj[nlKey] as T
-}

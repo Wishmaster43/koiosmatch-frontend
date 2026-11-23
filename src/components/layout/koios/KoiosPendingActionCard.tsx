@@ -15,7 +15,7 @@
  * cache) shows an honest "connection needed" notice and disables Confirm — never
  * a silent failure after click; (2) the tool's own consent-fail-closed refusal
  * (ToolExecutor::executePending still returns HTTP 200 "executed" — the tool
- * itself hands back `{ fout }` / `{ gelukt: false, reason }`, measured against
+ * itself hands back `{ error }` / `{ ok: false, reason }`, measured against
  * VoorstelSollicitatie.php/StartInterview.php) renders as an honest refusal
  * instead of the generic "confirmed" state.
  */
@@ -30,7 +30,6 @@ import SoftChip from '@/components/ui/SoftChip'
 import { useNumberFormat } from '@/lib/formatters'
 import { confirmPendingAction, cancelPendingAction } from './koiosApi'
 import { createdRefFromToolResult } from './koiosToolResult'
-import { pick } from './koiosToolIds'
 import { useProposalCvConfirm, PrepareFailure } from './useProposalCvConfirm'
 import { KoiosRefChip } from './KoiosResultCards'
 import { pageForResultRef } from './koiosResultLinks'
@@ -137,22 +136,21 @@ export default function KoiosPendingActionCard({ action }: { action: KoiosPendin
       .then((res: unknown) => {
         // ToolExecutor::executePending still answers HTTP 200 "executed" when the
         // tool itself refuses (consent fail-closed, not-found, …) — the refusal
-        // rides in `data.fout` / `data.reden` (VoorstelSollicitatie/StartInterview
+        // rides in `data.error` / `data.reason` (VoorstelSollicitatie/StartInterview
         // shape), never a 4xx. Surface it honestly instead of a false "confirmed".
-        // REFUSAL-CONVENTION-1 (gap-map, definitive): `ok`/`gelukt` is the ONLY
-        // discriminator; `remembered`/`onthouden[]` marks a PARTIAL execution
+        // REFUSAL-CONVENTION-1 (gap-map, definitive): `ok` is the ONLY
+        // discriminator; `remembered[]` marks a PARTIAL execution
         // (deliberately skipped sub-actions); `reason` is the translated
-        // carrier — the slug is always present on refusal AND on every
-        // withholding; `error`/`fout` is only the human fallback (and the path
-        // for the ~67 not-yet-normalised tools). `reason` is English-only since
-        // KOIOS-TOOL-RESULT-KEYS-1 (BE batch H); the other three keep their Dutch
-        // twins via `pick` until KOIOS-TOOL-RESULT-KEYS-2.
+        // carrier, the slug is always present on refusal AND on every
+        // withholding; `error` is only the human fallback (and the path
+        // for the ~67 not-yet-normalised tools). Every key is English-only since
+        // KOIOS-TOOL-RESULT-KEYS-1 (entity keys) and -2 (outcome keys).
         const data = (res as { data?: Record<string, unknown> })?.data
-        const ok = pick<boolean>(data, 'ok', 'gelukt')
+        const ok = typeof data?.ok === 'boolean' ? data.ok : undefined
         const reason = typeof data?.reason === 'string' ? data.reason : undefined
-        const error = pick<string>(data, 'error', 'fout')
-        const remembered = pick<string[]>(data, 'remembered', 'onthouden')
-        const hasOkKey = data != null && ('ok' in data || 'gelukt' in data)
+        const error = typeof data?.error === 'string' ? data.error : undefined
+        const remembered = Array.isArray(data?.remembered) ? (data.remembered as string[]) : undefined
+        const hasOkKey = data != null && 'ok' in data
         if (ok === false || (!hasOkKey && (reason || error))) {
           setRefusedReason(translateReason(reason, error))
           setStatus('refused')

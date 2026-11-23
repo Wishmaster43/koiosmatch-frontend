@@ -130,7 +130,7 @@ describe('KoiosPendingActionCard', () => {
   })
 
   it('renders refused on proposal_not_allowed slug', async () => {
-    mockConfirm.mockResolvedValue({ status: 'executed', data: { gelukt: false, reason: 'proposal_not_allowed' } })
+    mockConfirm.mockResolvedValue({ status: 'executed', data: { ok: false, reason: 'proposal_not_allowed' } })
     const user = userEvent.setup()
     renderCard(action())
     await user.click(screen.getByText('koios.pendingAction.confirm'))

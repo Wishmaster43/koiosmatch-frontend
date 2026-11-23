@@ -1,7 +1,7 @@
 // koiosToolIds — KOIOS-EN-1 phase B alias map (SHARED-UNIT-TEST-1: a new shared
 // unit ships with its own behaviour test).
 import { describe, it, expect } from 'vitest'
-import { LEGACY_TOOL_IDS, canonicalToolId, pick } from './koiosToolIds'
+import { LEGACY_TOOL_IDS, canonicalToolId } from './koiosToolIds'
 
 describe('canonicalToolId', () => {
   it('resolves a legacy (Dutch) tool id to its new English id', () => {
@@ -27,25 +27,3 @@ describe('canonicalToolId', () => {
   })
 })
 
-describe('pick', () => {
-  it('reads the English key when both are present', () => {
-    expect(pick({ ok: true, gelukt: false }, 'ok', 'gelukt')).toBe(true)
-  })
-
-  it('falls back to the Dutch key when only it is present', () => {
-    expect(pick({ gelukt: false }, 'ok', 'gelukt')).toBe(false)
-  })
-
-  it('reads the English key when only it is present', () => {
-    expect(pick({ ok: false }, 'ok', 'gelukt')).toBe(false)
-  })
-
-  it('returns undefined when neither key is present', () => {
-    expect(pick({ other: 1 }, 'ok', 'gelukt')).toBeUndefined()
-  })
-
-  it('returns undefined for a null/undefined object', () => {
-    expect(pick(null, 'ok', 'gelukt')).toBeUndefined()
-    expect(pick(undefined, 'ok', 'gelukt')).toBeUndefined()
-  })
-})
