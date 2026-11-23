@@ -13,7 +13,7 @@ import type { Connection } from '@xyflow/react'
 import { uid, mkEdge, NODE_W, NODE_H, stepsToFlow } from './serialization'
 import { defaultConfigFor } from './moduleDefaults'
 import { mkEdgePreservingData, buildVarFields } from './workflowEditorUtils'
-import { extractApiError } from '@/lib/extractApiError'
+import { apiErrorMessage } from '@/lib/extractApiError'
 import { notifyError } from '@/lib/notify'
 import type { Workflow, FlowNode, FlowEdge, FlowNodeData, EdgeFilters, FilterConditionGroup, WorkflowVarGroup } from '@/types/workflow'
 
@@ -83,7 +83,7 @@ export function useWorkflowGraph({ workflow, onNodeRunOutput }: {
       } catch (err) {
         // WORKFLOW-422: same extraction for the panel line and the toast, so the
         // two never disagree (e.g. "no active WhatsApp number").
-        const reason = extractApiError(err, t('config.testFailed'))
+        const reason = apiErrorMessage(err, t, t('config.testFailed'))
         output = { error: reason }
         notifyError(reason)
       }

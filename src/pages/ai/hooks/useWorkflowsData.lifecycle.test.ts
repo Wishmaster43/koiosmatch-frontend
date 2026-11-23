@@ -69,6 +69,23 @@ describe('useWorkflowsData · handleArchive / handleRestore (TRASH-OVERAL-1b)', 
     await waitFor(() => expect(notifyError).toHaveBeenCalledWith('common:actionFailed'))
   })
 
+  // SYSWF-LOCK-FE-1: a locked system workflow refuses the archive with a coded 409: the
+  // toast carries the translated refusal, not a blind "failed", and nothing refetches.
+  it('a 409 system_workflow_locked on archive toasts the translated refusal and does not refetch', async () => {
+    seedList()
+    mockedDelete.mockRejectedValue({ response: { status: 409, data: { code: 'system_workflow_locked', message: 'Dit is een systeemworkflow.' } } })
+    const { result } = renderHook(() => useWorkflowsData(false))
+    await waitFor(() => expect(result.current.loading).toBe(false))
+    const getCallsBefore = mockedGet.mock.calls.length
+
+    await act(async () => { result.current.handleArchive(result.current.workflows[0]) })
+
+    await waitFor(() => expect(notifyError).toHaveBeenCalledWith('errors.systemWorkflowLocked'))
+    expect(mockedDelete).toHaveBeenCalledWith('/workflows/wf-1')
+    expect(notify).not.toHaveBeenCalled()
+    expect(mockedGet.mock.calls.length).toBe(getCallsBefore)
+  })
+
   it('restores via POST /workflows/{id}/restore and refetches on success', async () => {
     seedList()
     mockedPost.mockResolvedValue({ data: {} })

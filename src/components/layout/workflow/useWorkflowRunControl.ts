@@ -12,7 +12,7 @@ import api from '@/lib/api'
 // DOUBLE-SUBMIT-FE-1 point 2: one Idempotency-Key per click on an irreversible action (BE IDEMP-1 replays).
 import { withIdempotencyKey } from '@/lib/idempotency'
 import { resolveWorkflowBaseURL } from '@/lib/workflowApi'
-import { extractApiError } from '@/lib/extractApiError'
+import { apiErrorCode, apiErrorMessage, SYSTEM_WORKFLOW_LOCKED } from '@/lib/extractApiError'
 import { notifyError } from '@/lib/notify'
 import type { RunRow } from '@/types/reports'
 import type { ActionBudget } from '@/types/actionBudget'
@@ -111,7 +111,9 @@ export function useWorkflowRunControl({ workflowId, initialRunId = null, onRunSt
       // RUN-CONTROL-1 single-flight: 409 = this workflow already has a live run.
       // Point the viewer at THAT run (poll + logs panel) and show "loopt al"
       // ("already running").
-      if (e.response?.status === 409) {
+      // SYSWF-LOCK-FE-1: a locked system workflow answers 409 as a refusal (code
+      // system_workflow_locked): that one takes the error path below, never the viewer.
+      if (e.response?.status === 409 && apiErrorCode(err) !== SYSTEM_WORKFLOW_LOCKED) {
         if (e.response.data?.run_id != null) setActiveRunId(e.response.data.run_id)
         setRunConflict(true)
         onRunStarted?.()
@@ -122,7 +124,7 @@ export function useWorkflowRunControl({ workflowId, initialRunId = null, onRunSt
         // PRIJSMODEL-C 30-08: a 422 { status: 'budget_exceeded', budget } already
         // falls in here for the message — also thread the staffel stand through
         // so the header can show its upgrade hint.
-        const reason = extractApiError(err, t('runControl.failed'))
+        const reason = apiErrorMessage(err, t, t('runControl.failed'))
         setRunError(reason)
         setRunBudget(e.response?.data?.status === 'budget_exceeded' ? (e.response.data.budget ?? null) : null)
         notifyError(reason)
@@ -176,7 +178,8 @@ export function useWorkflowRunControl({ workflowId, initialRunId = null, onRunSt
       const e = err as { response?: { status?: number; data?: {
         count?: number; matched_records?: number; threshold?: number; message?: string; run_id?: string | number
       } } }
-      if (e.response?.status === 409) {
+      // SYSWF-LOCK-FE-1: the locked-system-workflow 409 is a refusal, never a confirm or a conflict.
+      if (e.response?.status === 409 && apiErrorCode(err) !== SYSTEM_WORKFLOW_LOCKED) {
         const d = e.response.data ?? {}
         // Single-flight conflict FIRST — WorkflowAlreadyRunningException's body
         // carries `run_id`, never `threshold`. Mirrors handleRun's 409 branch.
@@ -192,7 +195,7 @@ export function useWorkflowRunControl({ workflowId, initialRunId = null, onRunSt
       // WORKFLOW-422: same extraction as handleRun, so a validation-bag 422
       // (only `errors`, no top-level `message`) still surfaces a real reason
       // instead of the old empty-string fallback.
-      const reason = extractApiError(err, t('runControl.failed'))
+      const reason = apiErrorMessage(err, t, t('runControl.failed'))
       setRunError(reason)
       notifyError(reason)
       return { status: 'error', message: reason }

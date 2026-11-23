@@ -852,6 +852,7 @@
     "invalidSignature": "Ce lien est invalide ou a expiré.",
     "moduleNotEnabled": "Ce module n’est pas activé pour votre organisation. Un super administrateur peut l’activer dans Paramètres, Super Admin.",
     "numberingFrozen": "Cette série a déjà attribué un numéro : le préfixe, le nombre de chiffres et la valeur de départ sont verrouillés.",
+    "systemWorkflowLocked": "Ceci est un workflow système : il ne peut pas être archivé, désactivé, lancé manuellement ni modifié dans ses étapes.",
     "helloflexStartDateMissing": "La date de début manque sur le match.",
     "helloflexJobTitleMissing": "L’intitulé de poste manque sur le match.",
     "helloflexZzpNotSupported": "Un contrat freelance (ZZP) ne peut pas être envoyé à HelloFlex.",

@@ -852,6 +852,7 @@
     "invalidSignature": "This link is invalid or has expired.",
     "moduleNotEnabled": "This module is not enabled for your organisation. A super admin can switch it on in Settings, Super Admin.",
     "numberingFrozen": "This series has already issued a number: prefix, digit count and start value are locked.",
+    "systemWorkflowLocked": "This is a system workflow: it cannot be archived, switched off, started by hand or changed in its steps.",
     "helloflexStartDateMissing": "The match has no start date.",
     "helloflexJobTitleMissing": "The match has no job title.",
     "helloflexZzpNotSupported": "A freelance (ZZP) contract cannot be sent to HelloFlex.",

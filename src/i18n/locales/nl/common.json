@@ -852,6 +852,7 @@
     "invalidSignature": "Deze link is ongeldig of verlopen.",
     "moduleNotEnabled": "Deze module is niet actief voor jouw organisatie. Een superbeheerder kan dit aanzetten in Instellingen, Super Admin.",
     "numberingFrozen": "Deze reeks heeft al een nummer uitgegeven: prefix, aantal cijfers en startwaarde liggen vast.",
+    "systemWorkflowLocked": "Dit is een systeemworkflow: hij kan niet worden gearchiveerd, uitgezet, handmatig gestart of in zijn stappen gewijzigd.",
     "helloflexStartDateMissing": "Startdatum ontbreekt op de match.",
     "helloflexJobTitleMissing": "Functietitel ontbreekt op de match.",
     "helloflexZzpNotSupported": "Een zzp-contract kan niet naar HelloFlex.",

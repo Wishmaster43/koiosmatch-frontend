@@ -90,6 +90,45 @@ describe('useWorkflowRunControl', () => {
     expect(onRunStarted).toHaveBeenCalledTimes(1)
   })
 
+  // SYSWF-LOCK-FE-1: the locked-system-workflow 409 is a refusal with a stable code, not a
+  // single-flight conflict: runError + the toast carry the translated key, the viewer stays shut.
+  it('a 409 system_workflow_locked takes the error path: translated runError + toast, no conflict, no viewer', async () => {
+    mockedPost.mockRejectedValue({ response: { status: 409, data: { code: 'system_workflow_locked', message: 'Dit is een systeemworkflow.' } } })
+    const onRunStarted = vi.fn()
+    const { result } = renderHook(
+      () => useWorkflowRunControl({ workflowId: 'w1', onRunStarted }),
+      { wrapper },
+    )
+
+    await act(async () => { await result.current.handleRun() })
+
+    expect(result.current.runError).toBe('errors.systemWorkflowLocked')
+    expect(result.current.runConflict).toBe(false)
+    expect(result.current.activeRunId).toBeNull()
+    expect(onRunStarted).not.toHaveBeenCalled()
+    expect(notifyError).toHaveBeenCalledWith('errors.systemWorkflowLocked')
+  })
+
+  it('a 409 system_workflow_locked on runBulk returns the error status with the key, never confirm or conflict', async () => {
+    mockedPost.mockRejectedValue({ response: { status: 409, data: { code: 'system_workflow_locked', message: 'Dit is een systeemworkflow.' } } })
+    const onRunStarted = vi.fn()
+    const { result } = renderHook(
+      () => useWorkflowRunControl({ workflowId: 'w1', onRunStarted }),
+      { wrapper },
+    )
+
+    let outcome: Awaited<ReturnType<typeof result.current.runBulk>> | undefined
+    await act(async () => { outcome = await result.current.runBulk() })
+
+    expect(outcome).toEqual({ status: 'error', message: 'errors.systemWorkflowLocked' })
+    expect(mockedPost).toHaveBeenCalledTimes(1)
+    expect(mockedPost).toHaveBeenCalledWith('/workflows/w1/run-bulk', undefined, expect.objectContaining({ quietStatuses: [409, 422] }))
+    expect(result.current.runConflict).toBe(false)
+    expect(result.current.runError).toBe('errors.systemWorkflowLocked')
+    expect(onRunStarted).not.toHaveBeenCalled()
+    expect(notifyError).toHaveBeenCalledWith('errors.systemWorkflowLocked')
+  })
+
   it('a non-409 failure surfaces the backend message, toasts it, and never sets runConflict', async () => {
     mockedPost.mockRejectedValue({ response: { status: 422, data: { message: 'Workflow is niet actief' } } })
     const onRunStarted = vi.fn()

@@ -125,6 +125,23 @@ describe('useWorkflowsData · handleRun (K-3 workflow-execution base URL)', () =
     expect(notify).not.toHaveBeenCalled()
   })
 
+  // SYSWF-LOCK-FE-1: a locked system workflow answers 409 with code system_workflow_locked:
+  // a refusal rendered in the UI language, never the "already running" builder focus.
+  it('on a 409 system_workflow_locked: toasts the translated refusal, never opens the builder, resolves false', async () => {
+    seedList()
+    mockedPost.mockRejectedValue({ response: { status: 409, data: { code: 'system_workflow_locked', message: 'Dit is een systeemworkflow.' } } })
+    const { result } = renderHook(() => useWorkflowsData(false))
+    await waitFor(() => expect(result.current.loading).toBe(false))
+
+    let runResult: boolean | undefined
+    await act(async () => { runResult = await result.current.handleRun('wf-1') })
+
+    expect(runResult).toBe(false)
+    expect(notifyError).toHaveBeenCalledWith('errors.systemWorkflowLocked')
+    expect(notify).not.toHaveBeenCalled()
+    expect(result.current.editingWorkflow).toBeNull()
+  })
+
   // N007-POINT3-FIX-1 verifier fix: a FAILED run must resolve `false` so
   // runWithDoneFlash never flashes "just started" over a run that never ran.
   it('on a 422: handleRun resolves false', async () => {
@@ -211,6 +228,24 @@ describe('useWorkflowsData · handleRunBulk (S1 run-bulk confirm)', () => {
     expect(result.current.focusRunId).toBe('r-existing')
     // Never mistaken for the threshold shape: exactly the ONE call this test made.
     expect(mockedPost).toHaveBeenCalledTimes(1)
+  })
+
+  // SYSWF-LOCK-FE-1: the locked 409 carries neither run_id nor threshold: it must never
+  // become a "0 records above threshold 0" confirm that re-POSTs forever.
+  it('409 system_workflow_locked: toasts the translated refusal, never the confirm dialog, exactly one POST', async () => {
+    seedList()
+    mockedPost.mockRejectedValue({ response: { status: 409, data: { code: 'system_workflow_locked', message: 'Dit is een systeemworkflow.' } } })
+    const { result } = renderHook(() => useWorkflowsData(false))
+    await waitFor(() => expect(result.current.loading).toBe(false))
+
+    await act(async () => { await result.current.handleRunBulk('wf-1') })
+
+    expect(notifyError).toHaveBeenCalledWith('errors.systemWorkflowLocked')
+    expect(notify).not.toHaveBeenCalled()
+    expect(result.current.editingWorkflow).toBeNull()
+    expect(mockedPost).toHaveBeenCalledTimes(1)
+    expect(mockedPost).toHaveBeenCalledWith('/workflows/wf-1/run-bulk', undefined,
+      { quietStatuses: [409], baseURL: expect.any(String), headers: expect.objectContaining({ 'Idempotency-Key': expect.any(String) }) })
   })
 
   it('409 above the threshold: opens the confirm dialog, then re-POSTs {confirm:true}', async () => {

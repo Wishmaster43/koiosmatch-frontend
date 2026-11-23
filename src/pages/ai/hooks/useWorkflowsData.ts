@@ -16,7 +16,7 @@ import api, { unwrap, unwrapList } from '@/lib/api'
 import { withIdempotencyKey } from '@/lib/idempotency'
 import { useAuth } from '@/context/AuthContext'
 import { useConfirm } from '@/hooks/useConfirm'
-import { extractApiError, apiErrorMessage, notifyApiError } from '@/lib/extractApiError'
+import { apiErrorCode, apiErrorMessage, notifyApiError, SYSTEM_WORKFLOW_LOCKED } from '@/lib/extractApiError'
 import { useSeedLabel } from '@/lib/useSeedLabel'
 import { resolveWorkflowBaseURL } from '@/lib/workflowApi'
 import { normalizeWorkflow, denormalizeWorkflow } from '../data/workflowMap'
@@ -187,14 +187,16 @@ export function useWorkflowsData(showArchived: boolean) {
       const e = err as { response?: { status?: number; data?: { run_id?: string | number } } }
       // RUN-CONTROL-1 single-flight 409: this workflow already has a live run —
       // say so (i18n) and open the builder pointed at that run (stop lives there).
-      if (e.response?.status === 409) {
+      // SYSWF-LOCK-FE-1: a locked system workflow answers 409 too, but as a refusal
+      // (code system_workflow_locked): translated toast, never the builder on a run.
+      if (e.response?.status === 409 && apiErrorCode(err) !== SYSTEM_WORKFLOW_LOCKED) {
         notify('info', t('runControl.alreadyRunning'))
         const wf = workflows.find(w => w.id === id)
         if (wf) openEditor(wf, e.response.data?.run_id ?? null)
         return false
       }
-      // AIK-05: the backend's own (already Dutch) reason, never one anonymous red toast.
-      notifyError(extractApiError(err, t('common:actionFailed')))
+      // AIK-05: the backend's own reason (a coded refusal in the UI language), never one anonymous red toast.
+      notifyApiError(err, t, t('common:actionFailed'))
       return false
     }
   }
@@ -228,7 +230,8 @@ export function useWorkflowsData(showArchived: boolean) {
       const e = err as { response?: { status?: number; data?: {
         count?: number; matched_records?: number; threshold?: number; run_id?: string | number
       } } }
-      if (e.response?.status === 409) {
+      // SYSWF-LOCK-FE-1: the locked-system-workflow 409 is a refusal, never the threshold confirm.
+      if (e.response?.status === 409 && apiErrorCode(err) !== SYSTEM_WORKFLOW_LOCKED) {
         const d = e.response.data ?? {}
         // Single-flight conflict FIRST — its body carries `run_id`, never `threshold`.
         if (d.run_id != null) {
@@ -241,7 +244,7 @@ export function useWorkflowsData(showArchived: boolean) {
         return
       }
       // §10: never a raw axios/network string — the same helper handleSave/deleteFolder use.
-      notifyError(extractApiError(err, t('common:actionFailed')))
+      notifyApiError(err, t, t('common:actionFailed'))
     }
   }
 
@@ -331,7 +334,7 @@ export function useWorkflowsData(showArchived: boolean) {
         setWorkflows(prev => prev.map(w => w.folder_id === folder.id ? { ...w, folder_id: null } : w))
         if (selectedFolder === folder.id) setSelectedFolder(null)
       } catch (e) {
-        notifyError(extractApiError(e, t('common:actionFailed')))
+        notifyApiError(e, t, t('common:actionFailed'))
       }
     }, { danger: true })
   }
@@ -346,8 +349,9 @@ export function useWorkflowsData(showArchived: boolean) {
         await api.delete(`/workflows/${wf.id}`)
         notify('success', t('page.archiveSuccess'))
         setFetchTick(v => v + 1)
-      } catch {
-        notifyError(t('common:actionFailed'))
+      } catch (err) {
+        // SYSWF-LOCK-FE-1: the server's coded reason (a locked system workflow) instead of a blind "failed".
+        notifyApiError(err, t, t('common:actionFailed'))
       }
     }, { danger: true })
   }
@@ -360,8 +364,8 @@ export function useWorkflowsData(showArchived: boolean) {
       await api.post(`/workflows/${wf.id}/restore`, undefined, withIdempotencyKey())
       notify('success', t('page.restoreSuccess'))
       setFetchTick(v => v + 1)
-    } catch {
-      notifyError(t('common:actionFailed'))
+    } catch (err) {
+      notifyApiError(err, t, t('common:actionFailed'))
     }
   }
 

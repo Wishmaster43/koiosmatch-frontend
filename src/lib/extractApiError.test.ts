@@ -3,7 +3,7 @@
  * → caller fallback; never throws on malformed/absent error shapes.
  */
 import { describe, it, expect } from 'vitest'
-import { extractApiError, apiErrorKey, apiErrorMessage, apiErrorToast, notifyApiError, APPS_SETTINGS_HASH } from './extractApiError'
+import { extractApiError, apiErrorKey, apiErrorCode, apiErrorMessage, apiErrorToast, notifyApiError, APPS_SETTINGS_HASH, SYSTEM_WORKFLOW_LOCKED } from './extractApiError'
 
 describe('extractApiError', () => {
   it('prefers the first validation error over the generic message', () => {
@@ -266,5 +266,23 @@ describe('apiErrorToast / notifyApiError · MODULE-403-DEEPLINK-1', () => {
       { type: 'error', message: 'errors.moduleNotEnabled', deepLink: '#settings/superadmin/modules', duration: 10000 },
       { type: 'error', message: 'errors.connectorRequiredByReporting' },
     ])
+  })
+})
+
+// SYSWF-LOCK-FE-1 (BE MANUAL-START-WORKFLOW-1): the locked-system-workflow 409 renders its own copy, by code.
+describe('system_workflow_locked', () => {
+  const locked = { response: { status: 409, data: { code: SYSTEM_WORKFLOW_LOCKED, message: 'Dit is een systeemworkflow.' } } }
+  const t = (key: string) => key
+
+  it('maps the code to the common key and never returns the server sentence', () => {
+    expect(apiErrorKey(locked)).toBe('errors.systemWorkflowLocked')
+    expect(apiErrorMessage(locked, t, 'fb')).toBe('errors.systemWorkflowLocked')
+  })
+
+  it('apiErrorCode reads the stable code and returns null without one', () => {
+    expect(apiErrorCode(locked)).toBe('system_workflow_locked')
+    expect(apiErrorCode({ response: { status: 409, data: { message: 'loopt al', run_id: 'r1' } } })).toBeNull()
+    expect(apiErrorCode({ response: { status: 409, data: { code: '' } } })).toBeNull()
+    expect(apiErrorCode(new Error('network'))).toBeNull()
   })
 })

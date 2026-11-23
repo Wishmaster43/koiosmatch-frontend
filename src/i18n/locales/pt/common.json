@@ -852,6 +852,7 @@
     "invalidSignature": "Esta ligação é inválida ou expirou.",
     "moduleNotEnabled": "Este módulo não está ativo para a sua organização. Um superadministrador pode ativá-lo em Definições, Super Admin.",
     "numberingFrozen": "Esta série já emitiu um número: o prefixo, o número de dígitos e o valor inicial estão bloqueados.",
+    "systemWorkflowLocked": "Este é um workflow de sistema: não pode ser arquivado, desativado, iniciado manualmente nem alterado nos seus passos.",
     "helloflexStartDateMissing": "Falta a data de início no match.",
     "helloflexJobTitleMissing": "Falta o título da função no match.",
     "helloflexZzpNotSupported": "Um contrato de freelancer (ZZP) não pode ser enviado para a HelloFlex.",

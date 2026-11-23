@@ -106,7 +106,19 @@ const ERROR_CODE_KEYS: Record<string, string> = {
   module_not_enabled: 'errors.moduleNotEnabled',
   // DANNY-0511-D (422): the numbering start value is frozen once the first number was issued.
   numbering_frozen: 'errors.numberingFrozen',
+  // MANUAL-START-WORKFLOW-1 (BE SystemWorkflows, 409): a seeded system workflow (the inbox composer's
+  // whatsapp_manual_send) refuses archive, switch-off, hand start and step edits; renaming stays allowed.
+  system_workflow_locked: 'errors.systemWorkflowLocked',
 }
+
+/** The stable backend error code of a refusal, or null when the body carries none. */
+export function apiErrorCode(err: unknown): string | null {
+  const code = (err as { response?: { data?: ServerErrorBody } })?.response?.data?.code
+  return typeof code === 'string' && code !== '' ? code : null
+}
+
+/** SYSWF-LOCK-FE-1: the 409 code a locked system workflow answers on every refused write or hand start. */
+export const SYSTEM_WORKFLOW_LOCKED = 'system_workflow_locked'
 
 /**
  * The `common` i18n key for a known backend error code, or null when the code is
@@ -115,7 +127,7 @@ const ERROR_CODE_KEYS: Record<string, string> = {
  * rewords its copy.
  */
 export function apiErrorKey(err: unknown): string | null {
-  const code = (err as { response?: { data?: ServerErrorBody } })?.response?.data?.code
+  const code = apiErrorCode(err)
   return (code && ERROR_CODE_KEYS[code]) ?? null
 }
 
@@ -177,9 +189,8 @@ export function apiErrorToast(
   opts: ApiToastOptions = {},
 ): { message: string; options?: { deepLink: string; duration: number } } {
   const message = apiErrorMessage(err, t, fallback)
-  const code = (err as { response?: { data?: ServerErrorBody } })?.response?.data?.code
   // A linked toast stays 10 s so the link can be reached.
-  return code === 'module_not_enabled' && opts.canFix === true
+  return apiErrorCode(err) === 'module_not_enabled' && opts.canFix === true
     ? { message, options: { deepLink: opts.settingsHash ?? MODULES_SETTINGS_HASH, duration: 10000 } }
     : { message }
 }
