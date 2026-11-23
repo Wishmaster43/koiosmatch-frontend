@@ -39,6 +39,7 @@ import { useModuleCatalog } from './workflow/useModuleCatalog'
 import type { Workflow } from '@/types/workflow'
 import type { RunRow } from '@/types/reports'
 import { useEscapeLayer } from '@/hooks/useEscapeLayer'
+import CalloutBox from '@/components/ui/CalloutBox'
 
 // ── Inner editor ──────────────────────────────────────────────────────────────
 
@@ -143,6 +144,7 @@ function EditorInner({ workflow, onClose, onSave, initialRunId }: {
           statusUnsaved={status !== serverStatus}
           isInterview={isInterview} onToggleInterview={() => setIsInterview(v => !v)}
           startInvalid={startInvalid}
+          isSystem={workflow.is_system === true}
           showLogs={showLogs} onToggleLogs={() => setShowLogs(s => !s)}
           runError={runError} runBudget={runBudget} onRunError={setRunError} runConflict={runConflict}
           liveRunActive={liveRunActive} activeRunId={activeRunId} onStopped={handleStopped}
@@ -153,6 +155,13 @@ function EditorInner({ workflow, onClose, onSave, initialRunId }: {
           onSaveClose={() => (liveRunActive ? confirm(t('editor.liveRunConfirm'), () => handleSave(true)) : handleSave(true))}
           onClose={confirmClose}
         />
+
+        {/* SYSWF-HIDE-FE-1: a system workflow is started by the platform; steps and status are locked, only name and folder save. */}
+        {workflow.is_system === true && (
+          <div style={{ padding: '10px 16px 0' }}>
+            <CalloutBox variant="info">{t('editor.systemNotice')}</CalloutBox>
+          </div>
+        )}
 
         {/* ── Body ── */}
         {view === 'history' ? (

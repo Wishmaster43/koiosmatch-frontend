@@ -87,10 +87,15 @@ function RelationRow({ row, onToggle, expander, modeChip }: { row: WorkflowRelat
           <QueueBadge workflowId={row.id} />
         </div>
       </div>
-      {/* §4: the active workflow toggle is a success surface. */}
-      <Toggle tone="success" checked={active} onChange={onToggle}
-        ariaLabel={t(active ? 'list.setInactive' : 'list.setActive')}
-        title={t(active ? 'list.setInactive' : 'list.setActive')} />
+      {/* §4: the active workflow toggle is a success surface. SYSWF-HIDE-FE-1: a system
+          workflow cannot be switched off, so the badge replaces the toggle (BE F-ADD-1b marker). */}
+      {row.is_system === true ? (
+        <SoftChip round label={t('list.systemBadge')} title={t('list.systemTitle')} color="var(--color-info)" />
+      ) : (
+        <Toggle tone="success" checked={active} onChange={onToggle}
+          ariaLabel={t(active ? 'list.setInactive' : 'list.setActive')}
+          title={t(active ? 'list.setInactive' : 'list.setActive')} />
+      )}
     </div>
   )
 }

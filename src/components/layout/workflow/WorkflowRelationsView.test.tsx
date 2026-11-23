@@ -232,3 +232,23 @@ describe('WorkflowRelationsView · queue badge', () => {
     expect(screen.queryByText(/in wachtrij/)).not.toBeInTheDocument()
   })
 })
+
+// SYSWF-HIDE-FE-1: a system workflow in the tree shows the badge instead of the active toggle (BE F-ADD-1b marker).
+describe('WorkflowRelationsView · system workflow row', () => {
+  it('renders the badge and no toggle for an is_system row, the toggle for the other row', async () => {
+    mockedGet.mockResolvedValue({ data: {
+      // Two parent rows (the children section renders from the server tree, not this flat list): one locked, one ordinary.
+      parents: [
+        { id: 'p1', name: 'Ouderflow', status: 'active', runs_count: 1, is_system: true },
+        { id: 'p2', name: 'Gewone flow', status: 'active', runs_count: 2 },
+      ],
+      children: [],
+    } })
+    render(<WorkflowRelationsView workflowId="wf-1" />)
+    expect(await screen.findByText('Ouderflow')).toBeInTheDocument()
+    expect(screen.getByText('Gewone flow')).toBeInTheDocument()
+    expect(screen.getByText(i18n.t('workflows:list.systemBadge'))).toBeInTheDocument()
+    expect(screen.getAllByRole('switch')).toHaveLength(1)
+    expect(api.put).not.toHaveBeenCalled()
+  })
+})

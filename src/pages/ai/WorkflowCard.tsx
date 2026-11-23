@@ -76,6 +76,8 @@ export default function WorkflowCard({ workflow, onRun, canRun = true, onEdit, c
   // The shared runWithDoneFlash (N007-POINT3-FIX-1) blocks a repeat click while
   // running or still flashing "just ran" — onRun itself only resolves once its
   // post-success refetch has landed, so `running` covers the whole window.
+  // Only an explicit true locks the card; an absent key (older API) keeps every control.
+  const isSystem = workflow.is_system === true
   const handleRun = (e: MouseEvent) => {
     e.stopPropagation()
     runWithDoneFlash(onRun, workflow.id)
@@ -199,22 +201,29 @@ export default function WorkflowCard({ workflow, onRun, canRun = true, onEdit, c
             )
           ) : (
             <>
-              {/* Run is this row's primary action — the solid house accent. */}
-              <Button variant="soft" onClick={handleRun} disabled={running || justRan || !canRun} title={canRun ? undefined : t('page.runNoPermission')}>
-                {running ? <Spinner size={12} /> : justRan ? <CheckCircle size={12} /> : <Play size={12} />}
-                {running ? t('page.running') : justRan ? t('page.justRan') : t('page.run')}
-              </Button>
+              {/* SYSWF-HIDE-FE-1: a system workflow shows the badge instead of run and archive (mirrors WorkflowListRow). */}
+              {isSystem ? (
+                <SoftChip round label={t('list.systemBadge')} title={t('list.systemTitle')} color="var(--color-info)" />
+              ) : (
+                <>
+                  {/* Run is this row's primary action: the solid house accent. */}
+                  <Button variant="soft" onClick={handleRun} disabled={running || justRan || !canRun} title={canRun ? undefined : t('page.runNoPermission')}>
+                    {running ? <Spinner size={12} /> : justRan ? <CheckCircle size={12} /> : <Play size={12} />}
+                    {running ? t('page.running') : justRan ? t('page.justRan') : t('page.run')}
+                  </Button>
 
-              {/* Archive (soft-delete) — settings.update-gated, mirrors WorkflowListRow.
-                  Archive is NOT destructive (excluded from the danger sweep, §4):
-                  secondary chrome + archive ink, the ContactDetail idiom. */}
-              {canManageFolders && onArchive && (
-                <Button variant="secondary" iconOnly style={{ color: 'var(--color-archive)' }}
-                  onClick={e => { e.stopPropagation(); onArchive() }}
-                  aria-label={t('list.archiveWorkflow')} title={t('list.archiveWorkflow')}
-                >
-                  <Trash2 size={13} />
-                </Button>
+                  {/* Archive (soft-delete): settings.update-gated, mirrors WorkflowListRow.
+                      Archive is NOT destructive (excluded from the danger sweep, §4):
+                      secondary chrome + archive ink, the ContactDetail idiom. */}
+                  {canManageFolders && onArchive && (
+                    <Button variant="secondary" iconOnly style={{ color: 'var(--color-archive)' }}
+                      onClick={e => { e.stopPropagation(); onArchive() }}
+                      aria-label={t('list.archiveWorkflow')} title={t('list.archiveWorkflow')}
+                    >
+                      <Trash2 size={13} />
+                    </Button>
+                  )}
+                </>
               )}
 
               <Button variant="secondary" iconOnly onClick={e => { e.stopPropagation(); onEdit() }}

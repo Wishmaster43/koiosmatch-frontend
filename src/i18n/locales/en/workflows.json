@@ -34,6 +34,8 @@
     "dryRunConfirmTitle": "Dry run?",
     "dryRunConfirmMessage": "Send steps (WhatsApp, email, Facebook, webhooks and Shiftmanager links) are skipped. Every other step still runs for real, exactly like a normal run.",
     "runRequiresActive": "Only an active workflow can run",
+    "systemNotice": "This is a system workflow: Koios starts it itself. Steps and status are locked; only the name and folder are saved.",
+    "systemChangesNotSaved": "Only the name and folder of a system workflow are saved. The other changes were not stored.",
     "runNoPermission": "You have no permission to run workflows",
     "saveNoPermission": "You have no permission to change workflows",
     "router": {
@@ -302,6 +304,8 @@
     "setInactive": "Set to inactive",
     "editWorkflow": "Edit workflow",
     "archivedBadge": "Archived",
+    "systemBadge": "System workflow",
+    "systemTitle": "Koios starts this workflow itself. It cannot be started by hand, switched off or archived.",
     "restore": "Restore",
     "restoreWorkflow": "Restore workflow",
     "archiveWorkflow": "Archive workflow",

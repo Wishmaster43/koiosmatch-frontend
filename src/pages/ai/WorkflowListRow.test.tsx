@@ -243,3 +243,27 @@ describe('WorkflowListRow · months grace window (S004)', () => {
     expect(screen.queryByText(/0[23]-03-2026/)).not.toBeInTheDocument()
   })
 })
+
+// SYSWF-HIDE-FE-1: a system workflow (is_system, BE MANUAL-START-WORKFLOW-1) is started by the platform;
+// the row shows the badge and hides run, the active toggle and archive (§3 no fake affordance); edit stays.
+describe('WorkflowListRow · system workflow', () => {
+  const wt = (k: string) => i18n.t(`workflows:${k}`)
+
+  it('shows the system badge and hides run, toggle and archive; edit stays', () => {
+    render(<WorkflowListRow workflow={{ ...baseWorkflow, is_system: true }} onRun={vi.fn()} onEdit={vi.fn()} onToggleStatus={vi.fn()}
+      canManageFolders onArchive={vi.fn()} />)
+    expect(screen.getByText(wt('list.systemBadge'))).toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: wt('page.run') })).toBeNull()
+    expect(screen.queryByRole('switch')).toBeNull()
+    expect(screen.queryByRole('button', { name: wt('list.archiveWorkflow') })).toBeNull()
+    expect(screen.getByRole('button', { name: wt('list.editWorkflow') })).toBeInTheDocument()
+  })
+
+  it('an absent key keeps every control (older API)', () => {
+    render(<WorkflowListRow workflow={baseWorkflow} onRun={vi.fn()} onEdit={vi.fn()} onToggleStatus={vi.fn()} canManageFolders onArchive={vi.fn()} />)
+    expect(screen.queryByText(wt('list.systemBadge'))).toBeNull()
+    expect(screen.getByRole('button', { name: wt('page.run') })).toBeInTheDocument()
+    expect(screen.getByRole('switch')).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: wt('list.archiveWorkflow') })).toBeInTheDocument()
+  })
+})

@@ -36,6 +36,8 @@ export interface WorkflowRelation {
   mode?: string
   cycle?: boolean
   truncated?: boolean
+  // SYSWF-HIDE-FE-1: the relations endpoint carries the same system marker (BE F-ADD-1b).
+  is_system?: boolean
   children?: WorkflowRelation[]
 }
 
@@ -66,6 +68,9 @@ export interface Workflow {
   // INTERVIEW-FLAG-1: maker-set flag, persisted verbatim (never derived); `kind`
   // above is now DERIVED from this on the backend, not from an ai_agent step.
   is_interview?: boolean
+  // MANUAL-START-WORKFLOW-1 / SYSWF-HIDE-FE-1: a seeded system workflow the platform starts itself
+  // (BE SystemWorkflows); absent until the BE lands, so consumers check `=== true` only.
+  is_system?: boolean
   agent?: { id: string | number; name: string } | null
   steps: WorkflowStep[]
   last_run?: WorkflowLastRun | null
@@ -97,6 +102,8 @@ export interface RawStep {
 }
 export interface RawWorkflow {
   trigger?: unknown
+  // SYSWF-HIDE-FE-1: passed through by normalizeWorkflow's spread; only `true` means locked.
+  is_system?: boolean
   trigger_type?: string
   status?: unknown
   active?: boolean

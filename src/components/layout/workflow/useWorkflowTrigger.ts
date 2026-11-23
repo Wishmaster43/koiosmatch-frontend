@@ -6,6 +6,9 @@
  * workflow payload. No ReactFlow node/edge mutation lives here.
  */
 import { useState, useCallback, useRef } from 'react'
+import { useTranslation } from 'react-i18next'
+import { notify } from '@/lib/notify'
+import { systemLockedPartChanged } from './systemWorkflowSave'
 import { computeWorkflowSnapshot, deriveStartTrigger, buildHeaderTriggerConfig } from './workflowEditorUtils'
 import type { Workflow, FlowNode, FlowEdge, ScheduleConfig } from '@/types/workflow'
 import { flowToSteps } from './serialization'
@@ -94,6 +97,7 @@ export function useWorkflowTrigger({ workflow, nodes, edges, initialNodes, initi
   // first is still in flight (sync or async onSave both covered) never calls
   // onSave twice. The ref is written only in the handler/its own settle paths.
   const savingRef = useRef(false)
+  const { t } = useTranslation('workflows')
   const handleSave = useCallback((closeAfter = false): boolean | Promise<boolean> => {
     if (savingRef.current) return false
     savingRef.current = true
@@ -121,19 +125,28 @@ export function useWorkflowTrigger({ workflow, nodes, edges, initialNodes, initi
       // The ONE builder the dirty-check snapshot uses too (workflowEditorUtils).
       const nextTriggerConfig = start ? start.triggerConfig : buildHeaderTriggerConfig(trigger, scheduleConfig, webhookId)
       const nextTrigger = start ? start.trigger : trigger
+      // SYSWF-HIDE-FE-1: on a system workflow only the name reaches the server (the list hook PUTs name + folder);
+      // any other change is dropped, so the save never counts as a success for it: no flash, the baseline stays,
+      // the exit guard keeps warning, and the user is told.
+      const dropped = workflow.is_system === true
+        && systemLockedPartChanged(computeWorkflowSnapshot(nodes, edges, name, trigger, scheduleConfig, webhookId, status, isInterview), savedSnapshotRef.current)
+      const settle = (ok: boolean): boolean => {
+        if (ok && dropped) notify('info', t('editor.systemChangesNotSaved'))
+        return finish(ok && !dropped)
+      }
       const result = onSave({ ...workflow, name, trigger: nextTrigger, trigger_config: nextTriggerConfig, status, steps, is_interview: isInterview }, closeAfter)
       if (result != null && typeof (result as Promise<unknown>).then === 'function') {
         // A rejected onSave must release the latch too, not only a resolved false.
-        return (result as Promise<void | boolean>).then(r => finish(r !== false), () => finish(false))
+        return (result as Promise<void | boolean>).then(r => settle(r !== false), () => finish(false))
       }
-      return finish(result !== false)
+      return settle(result !== false)
     } catch (err) {
       // A synchronous throw from flowToSteps/deriveStartTrigger/onSave must not leave the latch stuck.
       savingRef.current = false
       setSaving(false)
       throw err
     }
-  }, [nodes, edges, workflow, name, trigger, scheduleConfig, webhookId, status, isInterview, onSave])
+  }, [nodes, edges, workflow, name, trigger, scheduleConfig, webhookId, status, isInterview, onSave, t])
 
   // Dirty-check (item 19): true when the live graph/name/trigger/schedule/status/
   // interview-flag differ from the last-saved baseline — serialize-compare via

@@ -102,6 +102,8 @@
     "dryRunConfirmTitle": "Proefdraaien?",
     "dryRunConfirmMessage": "Verzendstappen (WhatsApp, e-mail, Facebook, webhooks en Shiftmanager-koppelingen) worden overgeslagen. Alle andere stappen voeren écht wijzigingen door, net als bij een normale uitvoering.",
     "runRequiresActive": "Alleen een actieve workflow kan draaien",
+    "systemNotice": "Dit is een systeemworkflow: Koios start hem zelf. Stappen en status zijn vergrendeld; alleen de naam en de map worden opgeslagen.",
+    "systemChangesNotSaved": "Alleen de naam en de map van een systeemworkflow worden opgeslagen. De overige wijzigingen zijn niet bewaard.",
     "runNoPermission": "Je hebt geen recht om workflows uit te voeren",
     "saveNoPermission": "Je hebt geen recht om workflows te wijzigen",
     "router": {
@@ -392,6 +394,8 @@
     "setInactive": "Zet op inactief",
     "editWorkflow": "Workflow bewerken",
     "archivedBadge": "Gearchiveerd",
+    "systemBadge": "Systeemworkflow",
+    "systemTitle": "Koios start deze workflow zelf. Hij kan niet handmatig gestart, uitgezet of gearchiveerd worden.",
     "restore": "Herstellen",
     "restoreWorkflow": "Workflow herstellen",
     "archiveWorkflow": "Workflow archiveren",

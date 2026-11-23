@@ -30,6 +30,8 @@
     "dryRunConfirmTitle": "¿Iniciar simulación?",
     "dryRunConfirmMessage": "Los pasos de envío (WhatsApp, correo electrónico, Facebook, webhooks y vínculos de Shiftmanager) se omiten. El resto de los pasos se ejecutan de verdad, igual que en una ejecución normal.",
     "runRequiresActive": "Solo un flujo de trabajo activo puede ejecutarse",
+    "systemNotice": "Este es un workflow del sistema: Koios lo inicia por sí mismo. Los pasos y el estado están bloqueados; solo se guardan el nombre y la carpeta.",
+    "systemChangesNotSaved": "Solo se guardan el nombre y la carpeta de un workflow del sistema. Los demás cambios no se han guardado.",
     "runNoPermission": "No tienes permiso para ejecutar workflows",
     "saveNoPermission": "No tienes permiso para modificar workflows",
     "router": {
@@ -298,6 +300,8 @@
     "setInactive": "Marcar como inactivo",
     "editWorkflow": "Editar workflow",
     "archivedBadge": "Archivado",
+    "systemBadge": "Workflow del sistema",
+    "systemTitle": "Koios inicia este workflow por sí mismo. No se puede iniciar manualmente, desactivar ni archivar.",
     "restore": "Restaurar",
     "restoreWorkflow": "Restaurar flujo de trabajo",
     "archiveWorkflow": "Archivar flujo de trabajo",

@@ -7,6 +7,11 @@ import { describe, it, expect, vi } from 'vitest'
 import { renderHook, act } from '@testing-library/react'
 import { useWorkflowTrigger } from './useWorkflowTrigger'
 import type { Workflow, FlowNode, FlowEdge } from '@/types/workflow'
+import { notify } from '@/lib/notify'
+
+// SYSWF-HIDE-FE-1: the hook now names a dropped system-workflow change; key-echo t, mocked toast.
+vi.mock('react-i18next', () => ({ useTranslation: () => ({ t: (k: string) => k }) }))
+vi.mock('@/lib/notify', () => ({ notify: vi.fn(), notifyError: vi.fn() }))
 
 const wf = (overrides: Partial<Workflow> = {}): Workflow =>
   ({ id: 'w1', name: 'My workflow', trigger: 'Manual', status: 'draft', steps: [], ...overrides })
@@ -178,5 +183,51 @@ describe('useWorkflowTrigger · handleSave re-entrancy latch (ONIX N-007)', () =
 
     await act(async () => { result.current.handleSave() })
     expect(onSave).toHaveBeenCalledTimes(2)
+  })
+})
+
+// SYSWF-HIDE-FE-1: on a system workflow only the rename is a real save; any other change is dropped and
+// never flashes "saved" or moves the dirty baseline (lens mustFix 2).
+describe('useWorkflowTrigger · system workflow save', () => {
+  const sys = wf({ is_system: true, name: 'Sys', status: 'active' })
+  const n2: FlowNode = { id: 'n2', type: 'module', position: { x: 100, y: 0 }, data: { type: 'email_send', config: {} } }
+
+  it('a rename alone saves: onSave fires, the result is true, the editor is clean, no notice', () => {
+    vi.mocked(notify).mockClear()
+    const onSave = vi.fn()
+    const { result } = renderHook(() => useWorkflowTrigger({ workflow: sys, nodes, edges, initialNodes: nodes, initialEdges: edges, onSave }))
+    act(() => result.current.setName('Renamed'))
+    expect(result.current.isDirty()).toBe(true)
+    let ok: boolean | Promise<boolean> | undefined
+    act(() => { ok = result.current.handleSave() })
+    expect(ok).toBe(true)
+    expect(onSave).toHaveBeenCalledWith(expect.objectContaining({ name: 'Renamed', is_system: true }), false)
+    expect(result.current.isDirty()).toBe(false)
+    expect(notify).not.toHaveBeenCalled()
+  })
+
+  it('a steps change is dropped: onSave still fires (the rename path), the result is false, the editor stays dirty, the notice shows', () => {
+    vi.mocked(notify).mockClear()
+    const onSave = vi.fn()
+    const { result } = renderHook(() => useWorkflowTrigger({ workflow: sys, nodes: [...nodes, n2], edges, initialNodes: nodes, initialEdges: edges, onSave }))
+    expect(result.current.isDirty()).toBe(true)
+    let ok: boolean | Promise<boolean> | undefined
+    act(() => { ok = result.current.handleSave() })
+    expect(ok).toBe(false)
+    expect(onSave).toHaveBeenCalledTimes(1)
+    expect(result.current.isDirty()).toBe(true)
+    expect(result.current.saved).toBe(false)
+    expect(notify).toHaveBeenCalledWith('info', 'editor.systemChangesNotSaved')
+  })
+
+  it('an ordinary workflow with the same steps change saves as before (no notice)', () => {
+    vi.mocked(notify).mockClear()
+    const onSave = vi.fn()
+    const { result } = renderHook(() => useWorkflowTrigger({ workflow: wf({ status: 'active' }), nodes: [...nodes, n2], edges, initialNodes: nodes, initialEdges: edges, onSave }))
+    let ok: boolean | Promise<boolean> | undefined
+    act(() => { ok = result.current.handleSave() })
+    expect(ok).toBe(true)
+    expect(result.current.isDirty()).toBe(false)
+    expect(notify).not.toHaveBeenCalled()
   })
 })

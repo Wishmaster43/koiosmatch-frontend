@@ -133,6 +133,8 @@ export default function WorkflowListRow({ workflow, folderName, onRun, canRun = 
   // The shared runWithDoneFlash (N007-POINT3-FIX-1) blocks a repeat click while
   // running or still flashing "just ran" — onRun itself only resolves once its
   // post-success refetch has landed, so `running` covers the whole window.
+  // Only an explicit true locks the row; an absent key (older API) keeps every control.
+  const isSystem = workflow.is_system === true
   const handleRun = (e: MouseEvent) => {
     e.stopPropagation()
     runWithDoneFlash(onRun, workflow.id)
@@ -213,34 +215,43 @@ export default function WorkflowListRow({ workflow, folderName, onRun, canRun = 
         </>
       ) : (
         <>
-          {/* Run is this row's primary action — the solid house accent (also fixes the
-              ink-twin: this used to read raw --color-primary on a tinted bg, unlike
-              WorkflowCard's already-correct --color-primary-text). */}
-          <Button variant="soft" onClick={handleRun} disabled={running || justRan || !canRun} style={{ flexShrink: 0 }}
-            title={canRun ? undefined : t('page.runNoPermission')}>
-            {running ? <Spinner size={11} /> : justRan ? <CheckCircle size={11} /> : <Play size={11} />}
-            {running ? t('page.running') : justRan ? t('page.justRan') : t('page.run')}
-          </Button>
+          {/* SYSWF-HIDE-FE-1: a system workflow (is_system, BE SystemWorkflows) is started by the platform
+              itself and cannot be run by hand, switched off or archived: the badge replaces those three
+              controls (§3 no fake affordance); edit stays, since renaming is allowed. */}
+          {isSystem ? (
+            <SoftChip round label={t('list.systemBadge')} title={t('list.systemTitle')} color="var(--color-info)" />
+          ) : (
+            <>
+              {/* Run is this row's primary action: the solid house accent (also fixes the
+                  ink-twin: this used to read raw --color-primary on a tinted bg, unlike
+                  WorkflowCard's already-correct --color-primary-text). */}
+              <Button variant="soft" onClick={handleRun} disabled={running || justRan || !canRun} style={{ flexShrink: 0 }}
+                title={canRun ? undefined : t('page.runNoPermission')}>
+                {running ? <Spinner size={11} /> : justRan ? <CheckCircle size={11} /> : <Play size={11} />}
+                {running ? t('page.running') : justRan ? t('page.justRan') : t('page.run')}
+              </Button>
 
-          {/* Active/draft toggle — same semantics as the editor's status switch (active <-> inactive). */}
-          <div onClick={e => e.stopPropagation()} style={{ flexShrink: 0 }}>
-            {/* §4 names the ACTIVE WORKFLOW TOGGLE as a success surface — the shared Toggle
-              carries that via tone, so house law and house component agree. */}
-          <Toggle tone="success" checked={active} onChange={() => onToggleStatus()}
-              ariaLabel={t(active ? 'list.setInactive' : 'list.setActive')}
-              title={t(active ? 'list.setInactive' : 'list.setActive')} />
-          </div>
+              {/* Active/draft toggle: same semantics as the editor's status switch (active <-> inactive). */}
+              <div onClick={e => e.stopPropagation()} style={{ flexShrink: 0 }}>
+                {/* §4 names the ACTIVE WORKFLOW TOGGLE as a success surface: the shared Toggle
+                  carries that via tone, so house law and house component agree. */}
+              <Toggle tone="success" checked={active} onChange={() => onToggleStatus()}
+                  ariaLabel={t(active ? 'list.setInactive' : 'list.setActive')}
+                  title={t(active ? 'list.setInactive' : 'list.setActive')} />
+              </div>
 
-          {/* Archive (soft-delete) — settings.update-gated, opens the confirm with the
-              open-runs notice. Not destructive (§4 danger-sweep exclusion): secondary
-              chrome + archive ink. */}
-          {canManageFolders && onArchive && (
-            <Button variant="secondary" iconOnly style={{ flexShrink: 0, color: 'var(--color-archive)' }}
-              onClick={e => { e.stopPropagation(); onArchive() }}
-              aria-label={t('list.archiveWorkflow')} title={t('list.archiveWorkflow')}
-            >
-              <Trash2 size={13} />
-            </Button>
+              {/* Archive (soft-delete): settings.update-gated, opens the confirm with the
+                  open-runs notice. Not destructive (§4 danger-sweep exclusion): secondary
+                  chrome + archive ink. */}
+              {canManageFolders && onArchive && (
+                <Button variant="secondary" iconOnly style={{ flexShrink: 0, color: 'var(--color-archive)' }}
+                  onClick={e => { e.stopPropagation(); onArchive() }}
+                  aria-label={t('list.archiveWorkflow')} title={t('list.archiveWorkflow')}
+                >
+                  <Trash2 size={13} />
+                </Button>
+              )}
+            </>
           )}
 
           {/* "…" menu — today: same action as the row click (edit) */}

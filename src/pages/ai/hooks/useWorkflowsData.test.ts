@@ -83,6 +83,53 @@ describe('useWorkflowsData · moveToFolder failure feedback', () => {
   })
 })
 
+// SYSWF-HIDE-FE-1: a system workflow saves its name and folder only; the BE refuses steps/active/status with 409.
+describe('useWorkflowsData · handleSave on a system workflow', () => {
+  it('PUTs exactly { name, folder_id } without steps', async () => {
+    seedList()
+    mockedPut.mockResolvedValue({ data: { data: { id: 'wf-1', name: 'Renamed', status: 'active', steps: [{ id: 's1', type: 'email_send' }], is_system: true } } })
+    const { result } = renderHook(() => useWorkflowsData(false))
+    await waitFor(() => expect(result.current.loading).toBe(false))
+
+    let ok: boolean | undefined
+    await act(async () => {
+      // The editor hands over an EDITED graph (a second step) that the server never receives.
+      ok = await result.current.handleSave({ id: 'wf-1', name: 'Renamed', status: 'active', is_system: true, folder_id: 'f1', steps: [{ id: 's1', type: 'email_send' }, { id: 's2', type: 'wait' }] }, false)
+    })
+
+    expect(ok).toBe(true)
+    expect(mockedPut).toHaveBeenCalledTimes(1)
+    expect(mockedPut).toHaveBeenCalledWith('/workflows/wf-1', { name: 'Renamed', folder_id: 'f1' })
+    // The row takes name + folder only: its steps stay the server's one step, and the graph cache is never seeded (lens mustFix 1).
+    const row = result.current.workflows.find(w => w.id === 'wf-1')
+    expect(row?.name).toBe('Renamed')
+    expect(row?.folder_id).toBe('f1')
+    expect(row?.steps).toHaveLength(1)
+    expect(row?.steps[0]).toMatchObject({ id: 's1', type: 'email_send' })
+    expect(localStorage.getItem('wf_graph_wf-1')).toBeNull()
+  })
+
+  it('a refused PUT (409 system_workflow_locked) fails through the save-failed toast with the translated reason and applies nothing', async () => {
+    seedList()
+    mockedPut.mockRejectedValue({ response: { status: 409, data: { code: 'system_workflow_locked', message: 'Dit is een systeemworkflow.' } } })
+    const { result } = renderHook(() => useWorkflowsData(false))
+    await waitFor(() => expect(result.current.loading).toBe(false))
+    // The editor is open, so "stays open" below is a real assertion (a refused Save & close must not close it).
+    act(() => result.current.openEditor(result.current.workflows[0]))
+    expect(result.current.editingWorkflow?.id).toBe('wf-1')
+
+    let ok: boolean | undefined
+    await act(async () => {
+      ok = await result.current.handleSave({ id: 'wf-1', name: 'Renamed', status: 'active', is_system: true, steps: [{ id: 's1', type: 'email_send' }] }, true)
+    })
+
+    expect(ok).toBe(false)
+    expect(notifyError).toHaveBeenCalledWith('page.saveFailed::errors.systemWorkflowLocked')
+    expect(result.current.workflows.find(w => w.id === 'wf-1')?.name).toBe('Welcome flow')
+    expect(result.current.editingWorkflow?.id).toBe('wf-1')
+  })
+})
+
 describe('useWorkflowsData · handleSave error message (never raw axios/network text)', () => {
   it('falls back through extractApiError + i18n fallback for a network-style failure', async () => {
     seedList()

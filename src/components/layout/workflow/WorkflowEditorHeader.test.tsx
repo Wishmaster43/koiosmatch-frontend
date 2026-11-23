@@ -199,3 +199,24 @@ describe('WorkflowEditorHeader · fit at narrow widths', () => {
     expect(group.style.flexShrink).toBe('1')
   })
 })
+
+// SYSWF-HIDE-FE-1: a system workflow hides the status toggle, dry run and run; save (rename) stays.
+describe('WorkflowEditorHeader · system workflow', () => {
+  it('isSystem replaces the status toggle with the badge and hides dry run and run, keeping save', () => {
+    render(<WorkflowEditorHeader {...baseProps} status="active" isSystem />)
+    expect(screen.getByText('list.systemBadge')).toBeInTheDocument()
+    expect(screen.queryByText('status.active')).toBeNull()
+    expect(screen.queryByRole('button', { name: /editor\.run$/ })).toBeNull()
+    expect(screen.queryByRole('button', { name: /editor\.dryRun$/ })).toBeNull()
+    expect(screen.getByRole('button', { name: /editor\.save$/ })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: /editor\.saveClose/ })).toBeInTheDocument()
+  })
+
+  it('without isSystem the status toggle, dry run and run render as before', () => {
+    render(<WorkflowEditorHeader {...baseProps} status="active" />)
+    expect(screen.queryByText('list.systemBadge')).toBeNull()
+    expect(screen.getByText('status.active')).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: /editor\.run$/ })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: /editor\.dryRun$/ })).toBeInTheDocument()
+  })
+})

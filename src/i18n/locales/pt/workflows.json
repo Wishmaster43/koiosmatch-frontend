@@ -102,6 +102,8 @@
     "dryRunConfirmTitle": "Executar em ensaio?",
     "dryRunConfirmMessage": "Os passos de envio (WhatsApp, e-mail, Facebook, webhooks e ligações Shiftmanager) são ignorados. Todos os outros passos aplicam alterações reais, tal como numa execução normal.",
     "runRequiresActive": "Só uma workflow ativa pode ser executada",
+    "systemNotice": "Este é um workflow de sistema: o Koios inicia-o por si próprio. Os passos e o estado estão bloqueados; apenas o nome e a pasta são guardados.",
+    "systemChangesNotSaved": "Apenas o nome e a pasta de um workflow de sistema são guardados. As restantes alterações não foram guardadas.",
     "runNoPermission": "Não tem permissão para executar workflows",
     "saveNoPermission": "Não tem permissão para alterar workflows",
     "router": {
@@ -392,6 +394,8 @@
     "setInactive": "Definir como inativo",
     "editWorkflow": "Editar workflow",
     "archivedBadge": "Arquivado",
+    "systemBadge": "Workflow de sistema",
+    "systemTitle": "O Koios inicia este workflow por si próprio. Não pode ser iniciado manualmente, desativado nem arquivado.",
     "restore": "Restaurar",
     "restoreWorkflow": "Restaurar workflow",
     "archiveWorkflow": "Arquivar workflow",

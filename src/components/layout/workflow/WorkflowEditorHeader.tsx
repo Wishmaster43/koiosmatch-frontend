@@ -21,6 +21,7 @@ import Button from '@/components/ui/Button'
 import { Caption } from '@/components/ui/typography'
 import SaveButton from '@/components/ui/SaveButton'
 import QuickViewToggle from '@/components/ui/QuickViewToggle'
+import SoftChip from '@/components/ui/SoftChip'
 import Spinner from '@/components/ui/Spinner'
 import type { ActionBudget } from '@/types/actionBudget'
 
@@ -42,6 +43,7 @@ export default function WorkflowEditorHeader({
   running, onRun, onRunDryRun, canRun = true, canSave = true,
   saved, saving = false, onSave, onSaveClose,
   startInvalid,
+  isSystem = false,
   onClose,
 }: {
   // Undefined for a brand-new, not-yet-saved workflow — the changelog icon then
@@ -58,6 +60,8 @@ export default function WorkflowEditorHeader({
   onOpenSchedule: () => void
   status: string
   onToggleStatus: () => void
+  // SYSWF-HIDE-FE-1: a system workflow hides the status toggle, dry run and run; save (rename) stays.
+  isSystem?: boolean
   // RUN-SAVES-FIRST-1: true while the local status differs from the server's —
   // the pill says so, and Run announces that it saves first.
   statusUnsaved?: boolean
@@ -183,20 +187,24 @@ export default function WorkflowEditorHeader({
           Block form: the flagged `style` prop sits several lines into this
           multi-line opening tag, past where eslint-disable-next-line reaches. */}
       {/* eslint-disable huisstijlLegacy/no-restricted-syntax */}
-      <button onClick={onToggleStatus} aria-pressed={status === 'active'}
-        // HEADER-FIT-2: the 'run requires active' hint lives in this always-focusable badge's tooltip (a disabled Run swallows its own), so Save and close stay in view at 1280px.
-        title={status !== 'active' ? t('editor.runRequiresActive') : undefined}
-        style={{
-          display: 'flex', alignItems: 'center', gap: 6, padding: '4px 10px', borderRadius: 999,
-          background: status === 'active' ? 'var(--color-success-bg)' : 'var(--hover-bg)',
-          color:      status === 'active' ? 'var(--color-on-success-bg)' : 'var(--text-muted)',
-          border:     `1px solid ${status === 'active' ? 'var(--color-success)' : 'var(--border)'}`,
-          cursor: 'pointer', fontSize: 11, fontWeight: 500,
-        }}>
-        <span style={{ width: 6, height: 6, borderRadius: '50%', background: status === 'active' ? 'var(--color-success)' : 'var(--border)' }} />
-        {status === 'active' ? t('status.active') : t('status.inactive')}
-        {statusUnsaved && <span style={{ fontWeight: 400 }}>{t('status.unsaved')}</span>}
-      </button>
+      {isSystem ? (
+        <SoftChip round label={t('list.systemBadge')} title={t('list.systemTitle')} color="var(--color-info)" />
+      ) : (
+        <button onClick={onToggleStatus} aria-pressed={status === 'active'}
+          // HEADER-FIT-2: the 'run requires active' hint lives in this always-focusable badge's tooltip (a disabled Run swallows its own), so Save and close stay in view at 1280px.
+          title={status !== 'active' ? t('editor.runRequiresActive') : undefined}
+          style={{
+            display: 'flex', alignItems: 'center', gap: 6, padding: '4px 10px', borderRadius: 999,
+            background: status === 'active' ? 'var(--color-success-bg)' : 'var(--hover-bg)',
+            color:      status === 'active' ? 'var(--color-on-success-bg)' : 'var(--text-muted)',
+            border:     `1px solid ${status === 'active' ? 'var(--color-success)' : 'var(--border)'}`,
+            cursor: 'pointer', fontSize: 11, fontWeight: 500,
+          }}>
+          <span style={{ width: 6, height: 6, borderRadius: '50%', background: status === 'active' ? 'var(--color-success)' : 'var(--border)' }} />
+          {status === 'active' ? t('status.active') : t('status.inactive')}
+          {statusUnsaved && <span style={{ fontWeight: 400 }}>{t('status.unsaved')}</span>}
+        </button>
+      )}
       {/* eslint-enable huisstijlLegacy/no-restricted-syntax */}
 
       {/* INTERVIEW-FLAG-1 (Danny 30-09, point 4): the maker marks this workflow as
@@ -291,21 +299,25 @@ export default function WorkflowEditorHeader({
       {/* DRAFT-DRYRUN-1 (BE 4bb21265): a dry run is allowed on draft/inactive — it
           replaces the previous test run and costs no runs or credits; only the
           real Run stays gated on active. */}
-      <Button variant="secondary" size="sm" onClick={onRunDryRun} disabled={running}
-        title={t('editor.dryRunTitle')}>
-        {running ? <Spinner size={13} /> : <FlaskConical size={13} />}
-        {running ? t('editor.dryRunning') : t('editor.dryRun')}
-      </Button>
+      {!isSystem && (
+        <Button variant="secondary" size="sm" onClick={onRunDryRun} disabled={running}
+          title={t('editor.dryRunTitle')}>
+          {running ? <Spinner size={13} /> : <FlaskConical size={13} />}
+          {running ? t('editor.dryRunning') : t('editor.dryRun')}
+        </Button>
+      )}
 
       {/* F4 (ROUTER-EDGE-FILTERS-1/D6): a draft workflow's run/dry-run is disabled
           up front with an honest i18n title, rather than firing and showing the
           raw Dutch 422 from the server (useWorkflowRunControl's message fallback
           stays as the belt-and-braces path for any other rejection reason). */}
-      <Button variant="primary" size="sm" onClick={onRun} disabled={running || status !== 'active' || !canRun}
-        title={!canRun ? t('editor.runNoPermission') : status !== 'active' ? t('editor.runRequiresActive') : statusUnsaved ? t('editor.runSavesFirst') : undefined}>
-        {running ? <Spinner size={13} /> : <Play size={13} />}
-        {running ? t('editor.running') : t('editor.run')}
-      </Button>
+      {!isSystem && (
+        <Button variant="primary" size="sm" onClick={onRun} disabled={running || status !== 'active' || !canRun}
+          title={!canRun ? t('editor.runNoPermission') : status !== 'active' ? t('editor.runRequiresActive') : statusUnsaved ? t('editor.runSavesFirst') : undefined}>
+          {running ? <Spinner size={13} /> : <Play size={13} />}
+          {running ? t('editor.running') : t('editor.run')}
+        </Button>
+      )}
 
       {/* Opslaan — blijft in editor. §4's "aan/gelukt" token pair (never
           re-approximated per screen) lives in the shared SaveButton. */}

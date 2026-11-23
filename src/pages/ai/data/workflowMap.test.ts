@@ -285,3 +285,11 @@ describe('denormalizeWorkflow · API round-trip keeps trigger_type + trigger_con
     expect(denormalizeWorkflow(wf)).toMatchObject({ trigger_type: 'event', trigger_config: { event: 'candidate.birthday' } })
   })
 })
+
+// SYSWF-HIDE-FE-1: the system marker passes through the normaliser untouched; an absent key stays absent.
+describe('normalizeWorkflow · is_system', () => {
+  it('keeps true and leaves an absent key undefined', () => {
+    expect(normalizeWorkflow({ id: 'w1', is_system: true, steps: [] } as never).is_system).toBe(true)
+    expect(normalizeWorkflow({ id: 'w2', steps: [] } as never).is_system).toBeUndefined()
+  })
+})

@@ -30,6 +30,8 @@
     "dryRunConfirmTitle": "Testlauf starten?",
     "dryRunConfirmMessage": "Versandschritte (WhatsApp, E-Mail, Facebook, Webhooks und Shiftmanager-Kopplungen) werden übersprungen. Alle anderen Schritte führen wie bei einer normalen Ausführung wirklich Änderungen durch.",
     "runRequiresActive": "Nur ein aktiver Workflow kann ausgeführt werden",
+    "systemNotice": "Dies ist ein Systemworkflow: Koios startet ihn selbst. Schritte und Status sind gesperrt; nur Name und Ordner werden gespeichert.",
+    "systemChangesNotSaved": "Bei einem Systemworkflow werden nur Name und Ordner gespeichert. Die übrigen Änderungen wurden nicht übernommen.",
     "runNoPermission": "Du hast kein Recht, Workflows auszuführen",
     "saveNoPermission": "Du hast kein Recht, Workflows zu ändern",
     "router": {
@@ -298,6 +300,8 @@
     "setInactive": "Auf inaktiv setzen",
     "editWorkflow": "Workflow bearbeiten",
     "archivedBadge": "Archiviert",
+    "systemBadge": "Systemworkflow",
+    "systemTitle": "Koios startet diesen Workflow selbst. Er kann nicht manuell gestartet, ausgeschaltet oder archiviert werden.",
     "restore": "Wiederherstellen",
     "restoreWorkflow": "Workflow wiederherstellen",
     "archiveWorkflow": "Workflow archivieren",

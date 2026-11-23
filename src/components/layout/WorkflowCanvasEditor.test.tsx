@@ -192,3 +192,16 @@ describe('WorkflowCanvasEditor · RUN-INSPECTOR-1b canvas-node inspector', () =>
     await waitFor(() => expect(screen.queryByRole('dialog')).not.toBeInTheDocument())
   })
 })
+
+// SYSWF-HIDE-FE-1: a system workflow shows the locked notice under the header and passes isSystem to it.
+describe('WorkflowCanvasEditor · system workflow notice', () => {
+  it('renders the notice and the badge for is_system, nothing of it otherwise', async () => {
+    const { unmount } = render(<WorkflowCanvasEditor workflow={{ ...workflow, is_system: true }} onClose={vi.fn()} onSave={vi.fn()} />, { wrapper })
+    expect(await screen.findByText(i18n.t('workflows:editor.systemNotice'))).toBeInTheDocument()
+    expect(screen.getByText(i18n.t('workflows:list.systemBadge'))).toBeInTheDocument()
+    unmount()
+    render(<WorkflowCanvasEditor workflow={workflow} onClose={vi.fn()} onSave={vi.fn()} />, { wrapper })
+    await waitFor(() => expect(screen.queryByText(i18n.t('workflows:editor.systemNotice'))).toBeNull())
+    expect(screen.queryByText(i18n.t('workflows:list.systemBadge'))).toBeNull()
+  })
+})

@@ -30,6 +30,8 @@
     "dryRunConfirmTitle": "Lancer une simulation ?",
     "dryRunConfirmMessage": "Les étapes d’envoi (WhatsApp, e-mail, Facebook, webhooks et liaisons Shiftmanager) sont ignorées. Toutes les autres étapes s’exécutent réellement, comme lors d’une exécution normale.",
     "runRequiresActive": "Seul un workflow actif peut s’exécuter",
+    "systemNotice": "Ceci est un workflow système : Koios le lance lui-même. Les étapes et le statut sont verrouillés ; seuls le nom et le dossier sont enregistrés.",
+    "systemChangesNotSaved": "Seuls le nom et le dossier d’un workflow système sont enregistrés. Les autres modifications n’ont pas été conservées.",
     "runNoPermission": "Vous n’avez pas le droit d’exécuter des workflows",
     "saveNoPermission": "Vous n’avez pas le droit de modifier des workflows",
     "router": {
@@ -298,6 +300,8 @@
     "setInactive": "Désactiver",
     "editWorkflow": "Modifier le workflow",
     "archivedBadge": "Archivé",
+    "systemBadge": "Workflow système",
+    "systemTitle": "Koios lance ce workflow lui-même. Il ne peut pas être lancé manuellement, désactivé ni archivé.",
     "restore": "Restaurer",
     "restoreWorkflow": "Restaurer le workflow",
     "archiveWorkflow": "Archiver le workflow",

@@ -20,6 +20,7 @@ import { apiErrorCode, apiErrorMessage, notifyApiError, SYSTEM_WORKFLOW_LOCKED }
 import { useSeedLabel } from '@/lib/useSeedLabel'
 import { resolveWorkflowBaseURL } from '@/lib/workflowApi'
 import { normalizeWorkflow, denormalizeWorkflow } from '../data/workflowMap'
+import { saveSystemWorkflow } from '@/components/layout/workflow/systemWorkflowSave'
 import type { Workflow, RawWorkflow } from '@/types/workflow'
 import { canDo } from '@/lib/access'
 
@@ -273,6 +274,8 @@ export function useWorkflowsData(showArchived: boolean) {
       notify('info', t('page.addModuleAlert'))
       return false
     }
+    // SYSWF-HIDE-FE-1: a system workflow saves name + folder only; the row takes those two fields, the graph cache stays untouched.
+    if (updated.is_system === true) return saveSystemWorkflow(updated, closeAfter, { put: body => api.put(`/workflows/${updated.id}`, body), applyRow: body => setWorkflows(prev => prev.map(w => w.id === updated.id ? { ...w, ...body } : w)), close: () => setEditingWorkflow(null), fail: err => notifyError(t('page.saveFailed', { msg: apiErrorMessage(err, t, t('common:actionFailed')) })) })
     const isNew = !updated.id || !workflows.some(w => w.id === updated.id)
     const payload = { ...denormalizeWorkflow(updated), folder_id: updated.folder_id ?? null }
     try {

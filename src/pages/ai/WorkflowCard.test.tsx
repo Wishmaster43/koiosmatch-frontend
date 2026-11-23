@@ -134,3 +134,23 @@ describe('WorkflowCard · seeded workflow name i18n (LOOKUP-I18N-1)', () => {
     await i18n.changeLanguage('nl')
   })
 })
+
+// SYSWF-HIDE-FE-1: mirrors WorkflowListRow: the badge replaces run and archive on a system workflow.
+describe('WorkflowCard · system workflow', () => {
+  const wt = (k: string) => i18n.t(`workflows:${k}`)
+
+  it('shows the system badge and hides run and archive; edit stays', () => {
+    render(<WorkflowCard workflow={{ ...baseWorkflow, is_system: true }} onRun={vi.fn()} onEdit={vi.fn()} canManageFolders onArchive={vi.fn()} />)
+    expect(screen.getByText(wt('list.systemBadge'))).toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: wt('page.run') })).toBeNull()
+    expect(screen.queryByRole('button', { name: wt('list.archiveWorkflow') })).toBeNull()
+    expect(screen.getByRole('button', { name: wt('list.editWorkflow') })).toBeInTheDocument()
+  })
+
+  it('an absent key keeps run and archive (older API)', () => {
+    render(<WorkflowCard workflow={baseWorkflow} onRun={vi.fn()} onEdit={vi.fn()} canManageFolders onArchive={vi.fn()} />)
+    expect(screen.queryByText(wt('list.systemBadge'))).toBeNull()
+    expect(screen.getByRole('button', { name: wt('page.run') })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: wt('list.archiveWorkflow') })).toBeInTheDocument()
+  })
+})
