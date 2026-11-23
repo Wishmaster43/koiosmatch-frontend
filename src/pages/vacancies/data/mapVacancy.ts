@@ -104,6 +104,8 @@ export function mapVacancy(v: ApiVacancy = {}): Vacancy {
     // VACANCY-LEADS-COUNT-1: the count's provenance — defensive/camelCase, null
     // when the backend never sent a state (count itself uncomputed).
     matchCountState: mapMatchCountState(v.match_count_state),
+    // LEADS-AI-1: keep absent distinct from false so the switch only renders once the BE emits the key.
+    koiosChoosesLeads: typeof v.koios_chooses_leads === 'boolean' ? v.koios_chooses_leads : undefined,
     applicationsCount: v.applications_count ?? v.applicationsCount ?? sumPhases(byPhase),
     applicationsByPhase: byPhase,
     // V-table-2: real match count, always a number (server-side default 0).

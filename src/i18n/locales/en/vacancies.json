@@ -377,7 +377,9 @@
     "rematchBusy": "A recalculation is already running for this vacancy.",
     "rematchMissing": "The workflow \"Recount leads (single vacancy)\" is off or missing. Switch it on under Workflows.",
     "rematchBudget": "The workflow tier is used up. The recalculation did not start.",
-    "aiAdvised": "Advised by Koios"
+    "aiAdvised": "Advised by Koios",
+    "koiosChoosesLeads": "Koios chooses the leads",
+    "koiosChoosesLeadsHelp": "On: only the candidates Koios advised within the match criteria count as leads. Off: every candidate within the match criteria."
   },
   "statistics": {
     "title": "Conversion",

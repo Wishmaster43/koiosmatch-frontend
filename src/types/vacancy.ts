@@ -65,6 +65,8 @@ export interface Vacancy {
   // number is stale/geo-incomplete/partial so the UI never presents a derived
   // number as more certain than it is.
   matchCountState?: MatchCountState | null
+  // LEADS-AI-1: undefined means the BE does not emit the key yet, so the UI hides the switch.
+  koiosChoosesLeads?: boolean
   applicationsCount: number
   applicationsByPhase: Loose
   // V-table-2: matches this vacancy has (VacancyListResource.php always emits a
@@ -260,6 +262,8 @@ export interface ApiVacancy {
   // VACANCY-LEADS-COUNT-1: the real match-count field, emitted once ticket
   // VACANCY-LEADS-COUNT-1 lands backend-side — the only field the mapper reads.
   candidate_match_count?: number
+  // LEADS-AI-1: per-vacancy "Koios chooses the leads" switch (list + detail resource)
+  koios_chooses_leads?: boolean
   // V-table-2: real match count (VacancyListResource.php:54, always an int, never null).
   matches_count?: number
   // VACANCY-LEADS-COUNT-1: the count's provenance, event-driven (15-min worker +

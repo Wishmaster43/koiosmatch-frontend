@@ -377,7 +377,9 @@
     "rematchBusy": "Für diese Stelle läuft bereits eine Neuberechnung.",
     "rematchMissing": "Der Workflow \"Leads neu berechnen (eine Stelle)\" ist aus oder fehlt. Aktivieren Sie ihn unter Workflows.",
     "rematchBudget": "Das Workflow-Kontingent ist aufgebraucht. Die Neuberechnung wurde nicht gestartet.",
-    "aiAdvised": "Von Koios empfohlen"
+    "aiAdvised": "Von Koios empfohlen",
+    "koiosChoosesLeads": "Koios wählt die Leads",
+    "koiosChoosesLeadsHelp": "An: nur die von Koios empfohlenen Kandidaten innerhalb der Matchkriterien zählen als Lead. Aus: alle Kandidaten innerhalb der Matchkriterien."
   },
   "statistics": {
     "title": "Konversion",

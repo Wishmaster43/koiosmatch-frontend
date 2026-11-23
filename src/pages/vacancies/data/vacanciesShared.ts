@@ -88,6 +88,8 @@ export const buildVacancyPatch = (patch: Record<string, unknown>): Record<string
   if ('channels'            in patch) body.published_channels   = patch.channels
   if ('applicationSettings' in patch) body.application_settings = patch.applicationSettings
   if ('matchWeights'        in patch) body.match_weights        = patch.matchWeights
+  // LEADS-AI-1: `in` check so an explicit false survives.
+  if ('koiosChoosesLeads'   in patch) body.koios_chooses_leads  = patch.koiosChoosesLeads
   // MATCH-TEMPLATE-1: assigning a template — the backend snapshots its weights onto
   // this vacancy and returns the resolved match_weights in the same response.
   if ('matchWeightTemplateId' in patch) body.match_weight_template_id = patch.matchWeightTemplateId

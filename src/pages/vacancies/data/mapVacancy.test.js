@@ -331,3 +331,12 @@ describe('mapVacancy / mapVacancyDetail · koiosAiAdvice', () => {
     expect(mapVacancy({ id: 'v1' }).koiosAiAdvice).toBeNull()
   })
 })
+
+// LEADS-AI-1: absent stays undefined so the switch stays hidden until the BE emits the key.
+describe('mapVacancy · koiosChoosesLeads', () => {
+  it('maps true and false, and leaves an absent key undefined', () => {
+    expect(mapVacancy({ id: 'v1', koios_chooses_leads: true }).koiosChoosesLeads).toBe(true)
+    expect(mapVacancy({ id: 'v1', koios_chooses_leads: false }).koiosChoosesLeads).toBe(false)
+    expect(mapVacancy({ id: 'v1' }).koiosChoosesLeads).toBeUndefined()
+  })
+})

@@ -377,7 +377,9 @@
     "rematchBusy": "Er loopt al een herberekening voor deze vacature.",
     "rematchMissing": "De workflow \"Leads herberekenen (één vacature)\" staat uit of ontbreekt. Zet hem aan bij Workflows.",
     "rematchBudget": "De workflow-staffel is vol. De herberekening is niet gestart.",
-    "aiAdvised": "Door Koios geadviseerd"
+    "aiAdvised": "Door Koios geadviseerd",
+    "koiosChoosesLeads": "Koios kiest de leads",
+    "koiosChoosesLeadsHelp": "Aan: alleen de door Koios geadviseerde kandidaten binnen de matchcriteria tellen als lead. Uit: alle kandidaten binnen de matchcriteria."
   },
   "statistics": {
     "title": "Conversie",

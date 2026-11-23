@@ -11,6 +11,7 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { renderHook, act, waitFor } from '@testing-library/react'
 import type { TFunction } from 'i18next'
+import type { Dispatch, SetStateAction } from 'react'
 import { useVacancyRecord } from './useVacancyRecord'
 import api from '@/lib/api'
 import { notifyError } from '@/lib/notify'
@@ -29,10 +30,10 @@ const mockNotifyError = notifyError as unknown as ReturnType<typeof vi.fn>
 const vacancyRow = { id: 'v1', title: 'Verpleegkundige' } as Vacancy
 const rawDetail = (over: Record<string, unknown> = {}) => ({ id: 'v1', title: 'Verpleegkundige', ai_agent: null, ...over })
 
-const setup = () => {
+const setup = (setVacancies: Dispatch<SetStateAction<Vacancy[]>> = vi.fn()) => {
   const t = ((k: string) => k) as unknown as TFunction
   return renderHook(() => useVacancyRecord({
-    setVacancies: vi.fn(), setTotal: vi.fn(), statusMeta: () => ({ label: '', color: '' }),
+    setVacancies, setTotal: vi.fn(), statusMeta: () => ({ label: '', color: '' }),
     users: [], customers: [], t,
   }))
 }
@@ -131,5 +132,46 @@ describe('useVacancyRecord · restoreVacancy re-entrancy guard', () => {
 
     await act(async () => { resolvePost?.(); await Promise.resolve() })
     await waitFor(() => expect(hook.current.restoring).toBe(false))
+  })
+})
+
+describe('useVacancyRecord · updateVacancy koiosChoosesLeads (LEADS-AI-1)', () => {
+  it('PATCHes the key and re-syncs the switch and the stale count state from the response', async () => {
+    mockGet.mockResolvedValue({ data: { data: rawDetail({ koios_chooses_leads: false }) } })
+    const setVacancies = vi.fn()
+    const { result: hook } = setup(setVacancies)
+    act(() => { hook.current.selectVacancy(vacancyRow) })
+    await waitFor(() => expect(hook.current.detail).not.toBeNull())
+    mockPatch.mockResolvedValue({ data: { data: rawDetail({ koios_chooses_leads: true, match_count_state: { computed_at: null, is_stale: true } }) } })
+
+    let ok: boolean | undefined
+    await act(async () => { ok = await hook.current.updateVacancy('v1', { koiosChoosesLeads: true }) })
+
+    expect(ok).toBe(true)
+    expect(mockPatch).toHaveBeenCalledWith('/vacancies/v1', { koios_chooses_leads: true })
+    expect(hook.current.detail?.koiosChoosesLeads).toBe(true)
+    expect(hook.current.detail?.matchCountState?.isStale).toBe(true)
+    expect(hook.current.selected?.matchCountState?.isStale).toBe(true)
+    const rows = setVacancies.mock.calls.at(-1)?.[0]([{ id: 'v1', koiosChoosesLeads: false }])
+    expect(rows[0].koiosChoosesLeads).toBe(true)
+  })
+
+  it('a rejected PATCH reverts the switch and resolves false', async () => {
+    mockGet.mockResolvedValue({ data: { data: rawDetail({ koios_chooses_leads: false }) } })
+    const setVacancies = vi.fn()
+    const { result: hook } = setup(setVacancies)
+    act(() => { hook.current.selectVacancy(vacancyRow) })
+    await waitFor(() => expect(hook.current.detail?.koiosChoosesLeads).toBe(false))
+    mockPatch.mockRejectedValue(new Error('boom'))
+
+    let ok: boolean | undefined
+    await act(async () => { ok = await hook.current.updateVacancy('v1', { koiosChoosesLeads: true }) })
+
+    expect(ok).toBe(false)
+    expect(hook.current.detail?.koiosChoosesLeads).toBe(false)
+    expect(hook.current.selected?.koiosChoosesLeads).toBe(false)
+    const rows = setVacancies.mock.calls.at(-1)?.[0]([{ id: 'v1', koiosChoosesLeads: true }])
+    expect(rows[0].koiosChoosesLeads).toBe(false)
+    expect(mockNotifyError).toHaveBeenCalled()
   })
 })

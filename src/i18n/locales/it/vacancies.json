@@ -377,7 +377,9 @@
     "rematchBusy": "È già in corso un ricalcolo per questa posizione.",
     "rematchMissing": "Il workflow \"Ricalcola lead (una posizione)\" è disattivato o mancante. Attivalo in Workflow.",
     "rematchBudget": "Il pacchetto di workflow è esaurito. Il ricalcolo non è partito.",
-    "aiAdvised": "Consigliato da Koios"
+    "aiAdvised": "Consigliato da Koios",
+    "koiosChoosesLeads": "Koios sceglie i lead",
+    "koiosChoosesLeadsHelp": "Attivo: solo i candidati consigliati da Koios entro i criteri di matching contano come lead. Disattivo: tutti i candidati entro i criteri di matching."
   },
   "statistics": {
     "title": "Conversione",

@@ -80,7 +80,7 @@ const TABS: { id: string; tKey: string; autoExpand?: boolean; render: (v: Vacanc
   // vacancy's radius/function/status filters, map + list side by side.
   // autoExpand (Danny 23-07): the map+list layout is unusable in the narrow
   // drawer width, so this tab widens the drawer while active and restores on leave.
-  { id: 'candidateSearch', tKey: 'candidateSearch', autoExpand: true, render: v => <CandidateSearchTab vacancy={v} /> },
+  { id: 'candidateSearch', tKey: 'candidateSearch', autoExpand: true, render: (v, onUpdate) => <CandidateSearchTab vacancy={v} onUpdate={onUpdate} /> },
   // VAC-AGENT-1 (Danny 21-07): its own tab — the agent picker + the read-only
   // interview flow that agent carries; placed right after matching (both feed the
   // application flow) and before publishing.

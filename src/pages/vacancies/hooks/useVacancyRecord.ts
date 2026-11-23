@@ -73,6 +73,10 @@ export function useVacancyRecord({ setVacancies, setTotal, statusMeta, users, cu
     if ('ownerId' in patch) { const u = users.find(x => x.id === patch.ownerId); local.owner = { id: patch.ownerId, name: u?.name ?? '', initials: initialsOf(u?.name ?? ''), color: null } }
     if ('clientId' in patch) { const c = customers.find(x => x.id === patch.clientId); local.clientName = c?.name ?? '' }
 
+    // LEADS-AI-1: remember the switch value so a failed PATCH can flip it back.
+    // Only the copy of THIS record counts as the previous value.
+    const prevKoios = 'koiosChoosesLeads' in patch ? (detail?.id === id ? detail?.koiosChoosesLeads : selected?.id === id ? selected?.koiosChoosesLeads : undefined) : undefined
+
     // ZZP-MERGE-1: deep-merge (never shallow-spread) so a patch touching only part
     // of a nested object (e.g. customFieldValues) keeps that object's other keys
     // instead of wiping them locally (mirrors updateCandidate).
@@ -95,9 +99,10 @@ export function useVacancyRecord({ setVacancies, setTotal, statusMeta, users, cu
     // (only the id). Without this re-sync, `isWorkflowLinked` flips true while
     // `v.interviewWorkflow` stays null and the derived line renders two dashes
     // until the drawer is closed and reopened.
-    if ('matchWeights' in patch || 'matchWeightTemplateId' in patch || 'interviewWorkflowId' in patch) {
+    if ('matchWeights' in patch || 'matchWeightTemplateId' in patch || 'interviewWorkflowId' in patch || 'koiosChoosesLeads' in patch) {
       return request.then(r => {
         const updated = mapVacancyDetail(unwrap(r))
+        const koiosResync = { koiosChoosesLeads: updated.koiosChoosesLeads, matchCountState: updated.matchCountState }
         setDetail(prev => (prev && prev.id === id ? {
           ...prev,
           ...(('matchWeights' in patch || 'matchWeightTemplateId' in patch)
@@ -106,9 +111,24 @@ export function useVacancyRecord({ setVacancies, setTotal, statusMeta, users, cu
           ...('interviewWorkflowId' in patch
             ? { interviewWorkflowId: updated.interviewWorkflowId, interviewWorkflow: updated.interviewWorkflow }
             : {}),
+          ...('koiosChoosesLeads' in patch ? koiosResync : {}),
         } : prev))
+        // LEADS-AI-1: the toggle marks the persisted count stale; mirror both fields into the row and selection.
+        if ('koiosChoosesLeads' in patch) {
+          setVacancies(prev => prev.map(x => x.id === id ? ({ ...x, ...koiosResync } as Vacancy) : x))
+          setSelected(prev => (prev && prev.id === id ? ({ ...prev, ...koiosResync } as Vacancy) : prev))
+        }
         return true
-      }).catch(err => { notifyError(extractApiError(err, t('common:actionFailed'))); return false })
+      }).catch(err => {
+        // LEADS-AI-1: a failed toggle must never leave the switch flipped.
+        if ('koiosChoosesLeads' in patch) {
+          const back = { koiosChoosesLeads: prevKoios }
+          setVacancies(prev => prev.map(x => x.id === id ? ({ ...x, ...back } as Vacancy) : x))
+          setSelected(prev => (prev && prev.id === id ? ({ ...prev, ...back } as Vacancy) : prev))
+          setDetail(prev => (prev && prev.id === id ? ({ ...prev, ...back } as VacancyDetail) : prev))
+        }
+        notifyError(extractApiError(err, t('common:actionFailed'))); return false
+      })
     }
     // ONIX D-003: a branch assignment outside the user's grants answers 403 with a
     // translated reason — surface the server's own message, never a generic toast.

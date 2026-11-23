@@ -377,7 +377,9 @@
     "rematchBusy": "Já está a decorrer um recálculo para esta vaga.",
     "rematchMissing": "O workflow \"Recalcular leads (uma vaga)\" está desligado ou em falta. Ative-o em Workflows.",
     "rematchBudget": "O plano de workflows está esgotado. O recálculo não foi iniciado.",
-    "aiAdvised": "Aconselhado pelo Koios"
+    "aiAdvised": "Aconselhado pelo Koios",
+    "koiosChoosesLeads": "Koios escolhe os leads",
+    "koiosChoosesLeadsHelp": "Ligado: apenas os candidatos recomendados pelo Koios dentro dos critérios de matching contam como lead. Desligado: todos os candidatos dentro dos critérios de matching."
   },
   "statistics": {
     "title": "Conversão",

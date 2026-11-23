@@ -47,10 +47,12 @@ import { notify, notifyError } from '@/lib/notify'
 import { toCoord } from '@/lib/coords'
 import { useAuth } from '@/context/AuthContext'
 import type { VacancyDetail } from '@/types/vacancy'
+import type { Id } from '@/types/common'
+import KoiosChoosesLeadsSwitch from './KoiosChoosesLeadsSwitch'
 
 // Thin container for the live scored candidate search (see file docblock above):
 // all data comes from useCandidateSearch, rendered through the shared GeoSearchShell.
-export default function CandidateSearchTab({ vacancy }: { vacancy: VacancyDetail }) {
+export default function CandidateSearchTab({ vacancy, onUpdate }: { vacancy: VacancyDetail; onUpdate?: (id: Id | undefined, patch: Record<string, unknown>) => void | Promise<boolean> }) {
   const { t } = useTranslation('vacancies')
   const { formatDate } = useDateFormat()
   const { formatDistanceKm } = useNumberFormat()
@@ -59,6 +61,8 @@ export default function CandidateSearchTab({ vacancy }: { vacancy: VacancyDetail
   // OPENERS-HIDE-1 (pass 5): POST /applications is gated on applications.create
   // (applications-matches.php:34) — hide "Solliciteren" rather than let it 422 (§3).
   const auth = useAuth()
+  // LEADS-AI-1: the Koios switch edits the vacancy, so it needs vacancies.update.
+  const canEditVacancy = auth?.hasPermission?.('vacancies.update') ?? false
   const canCreateApplication = auth?.hasPermission?.('applications.create') ?? false
   const {
     rows, loading, error, retry, radiusKm, setRadiusKm,
@@ -341,7 +345,7 @@ export default function CandidateSearchTab({ vacancy }: { vacancy: VacancyDetail
     </Caption>
   ) : null
 
-  const listPane = <div>{caveatLine}{shownOfLine}{summaryCard}{listBody}</div>
+  const listPane = <div><KoiosChoosesLeadsSwitch vacancy={vacancy} onUpdate={canEditVacancy ? onUpdate : undefined} />{caveatLine}{shownOfLine}{summaryCard}{listBody}</div>
 
   return (
     <>

@@ -377,7 +377,9 @@
     "rematchBusy": "Un recalcul est déjà en cours pour ce poste.",
     "rematchMissing": "Le workflow « Recalculer les leads (un poste) » est désactivé ou absent. Activez-le dans Workflows.",
     "rematchBudget": "Le forfait de workflows est épuisé. Le recalcul n’a pas démarré.",
-    "aiAdvised": "Recommandé par Koios"
+    "aiAdvised": "Recommandé par Koios",
+    "koiosChoosesLeads": "Koios choisit les leads",
+    "koiosChoosesLeadsHelp": "Activé : seuls les candidats recommandés par Koios dans les critères de matching comptent comme leads. Désactivé : tous les candidats dans les critères de matching."
   },
   "statistics": {
     "title": "Conversion",

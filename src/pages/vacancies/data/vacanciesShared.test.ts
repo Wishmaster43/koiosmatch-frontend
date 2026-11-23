@@ -109,3 +109,11 @@ describe('buildVacancyPatch · country (VAC-COUNTRY-1)', () => {
     expect(body).not.toHaveProperty('country')
   })
 })
+
+// LEADS-AI-1: an explicit false must reach the wire.
+describe('buildVacancyPatch · koiosChoosesLeads', () => {
+  it('maps false to koios_chooses_leads and omits the key otherwise', () => {
+    expect(buildVacancyPatch({ koiosChoosesLeads: false })).toEqual({ koios_chooses_leads: false })
+    expect(buildVacancyPatch({ title: 'x' })).not.toHaveProperty('koios_chooses_leads')
+  })
+})

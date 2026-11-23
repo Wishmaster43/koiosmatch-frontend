@@ -377,7 +377,9 @@
     "rematchBusy": "Ya hay un recálculo en curso para esta vacante.",
     "rematchMissing": "El flujo \"Recalcular leads (una vacante)\" está desactivado o no existe. Actívalo en Flujos de trabajo.",
     "rematchBudget": "El paquete de flujos de trabajo está agotado. El recálculo no se ha iniciado.",
-    "aiAdvised": "Recomendado por Koios"
+    "aiAdvised": "Recomendado por Koios",
+    "koiosChoosesLeads": "Koios elige los leads",
+    "koiosChoosesLeadsHelp": "Activado: solo los candidatos recomendados por Koios dentro de los criterios de matching cuentan como lead. Desactivado: todos los candidatos dentro de los criterios de matching."
   },
   "statistics": {
     "title": "Conversión",
