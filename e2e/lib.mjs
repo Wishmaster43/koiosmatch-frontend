@@ -174,6 +174,10 @@ export async function go(page, navLabel) {
 // green in a warmed full run. Wait for the first row (or a given label) to attach, never for a fixed time.
 export async function waitForContent(page, selector = 'table tbody tr', { timeout = 15000 } = {}) {
   await page.locator(selector).first().waitFor({ state: 'attached', timeout }).catch(() => {})
+  // SKELETON-ROW-1 (23-11, measured under load 20): the DataTable paints skeleton rows while the list loads and
+  // they satisfy the row selector, so a click on one opened nothing and the archive flow went red. The table says
+  // so itself (aria-busy), so wait for that to clear; a page without a busy table passes straight through.
+  await page.locator('table[aria-busy="true"]').first().waitFor({ state: 'hidden', timeout }).catch(() => {})
 }
 
 // Escape closes the open drawer; wait until its tab bar is gone instead of sleeping.

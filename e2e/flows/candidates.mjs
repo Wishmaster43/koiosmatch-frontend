@@ -16,7 +16,7 @@ async function openFirstCandidate(page, { withStatus = false } = {}) {
   const row = withStatus
     ? page.locator('table tbody tr:has-text("Beschikbaar"), table tbody tr:has-text("Ziek"), table tbody tr:has-text("Verlof")').first()
     : page.locator('table tbody tr').first()
-  expect(await row.count(), 'geen kandidaat-rijen')
+  expect(await row.count(), 'no candidate rows')
   const name = (await row.locator('td').nth(1).innerText()).split('\n')[0].trim()
   await row.click()
   await page.locator('[role="tablist"]').first().waitFor({ state: 'visible', timeout: 10000 })
@@ -32,7 +32,7 @@ export async function statusWithReason({ page, errors }) {
   // ("Niet beschikbaar" contains "Beschikbaar" — substring locators pick the wrong thing).
   const STATUSES = /^(Beschikbaar|Niet beschikbaar|Geplaatst|Ziek|Verlof|Blacklist)$/
   const picker = page.locator('button', { hasText: STATUSES }).last()
-  expect(await picker.count(), 'status-picker niet gevonden in de drawer')
+  expect(await picker.count(), 'status picker not found in the drawer')
   const current = (await picker.innerText()).trim()
   await picker.click()
   // Force a real transition to a reason/date status: Ziek, or Verlof when already Ziek.
@@ -73,7 +73,7 @@ export async function archiveAndFindBack({ page, errors }) {
   await waitForContent(page)
   let name = null
   const rowCount = Math.min(await page.locator('table tbody tr').count(), 10)
-  expect(rowCount > 0, 'geen kandidaat-rijen')
+  expect(rowCount > 0, 'no candidate rows')
   // ONE dialog handler for the whole loop — a `once` per iteration stacks stale
   // handlers and throws 'already handled' on the second confirm.
   const acceptDialog = (d) => d.accept().catch(() => {})
@@ -93,7 +93,7 @@ export async function archiveAndFindBack({ page, errors }) {
     await row.click()
     const trash = page.locator('button[title*="rchiveren"], button[aria-label*="rchiveren"]').first()
     await trash.waitFor({ state: 'visible', timeout: 10000 }).catch(() => {})
-    expect(await trash.count(), 'archiveer-knop niet gevonden in de drawer')
+    expect(await trash.count(), 'archive button not found in the drawer')
     await trash.click()
     // Archiving asks for confirmation in OUR OWN dialog now, not the browser's
     // window.confirm this flow was written against (caught 30-07: the suite hung
@@ -125,7 +125,7 @@ export async function archiveAndFindBack({ page, errors }) {
     name = rowName
   }
   page.off('dialog', acceptDialog)
-  expect(Boolean(name), 'geen archiveerbare kandidaat gevonden in de eerste 10 rijen (guard blokkeerde alles)')
+  expect(Boolean(name), 'no archivable candidate found in the first 10 rows (the guard blocked every one)')
   // Open the archived quick-view and look for the name.
   const archivedList = page.waitForResponse(r => r.url().includes('/candidates') && r.url().includes('include_archived=1') && r.request().method() === 'GET', { timeout: 15000 }).catch(() => null)
   await page.locator('button:has-text("Gearchiveerd")').first().click()
@@ -138,7 +138,7 @@ export async function archiveAndFindBack({ page, errors }) {
   await page.locator(`table tbody tr:has-text("${name}")`).first().click()
   const restoreBtn = page.locator('button[title="Herstellen"]')
   await restoreBtn.first().waitFor({ state: 'visible', timeout: 10000 }).catch(() => {})
-  expect(await restoreBtn.count(), 'gearchiveerde kandidaat opent NIET (drawer/banner ontbreekt)')
+  expect(await restoreBtn.count(), 'the archived candidate does not open (drawer or banner missing)')
   const restored = page.waitForResponse(r => r.url().includes('/restore') && r.request().method() === 'POST', { timeout: 15000 }).catch(() => null)
   await restoreBtn.first().click()
   await restored
@@ -183,7 +183,7 @@ export async function superSearch({ page, errors }) {
   const at = errors.length
   await go(page, 'Kandidaten')
   const search = page.locator('input[placeholder*="Zoek"]').first()
-  expect(await search.count(), 'zoekbalk niet gevonden')
+  expect(await search.count(), 'search bar not found')
   // Wait for the debounced search REQUEST's answer, not for the debounce timer.
   const searched = page.waitForResponse(r => r.url().includes('/candidates') && r.url().includes('search=ziek'), { timeout: 15000 }).catch(() => null)
   await search.fill('ziek')
