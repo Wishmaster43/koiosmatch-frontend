@@ -50,8 +50,8 @@ export const adminGroups: NavGroup[] = [
       // G-012 module-only gate; the reporting pages themselves stay on the module (access.ts).
       { id: 'shiftmanager', icon: BarChart2, component: ShiftmanagerModuleSettings, requiresModuleOrApp: { module: 'sm', app: 'shiftmanager' } },
       { id: 'helloflex', icon: Boxes, component: HelloflexSettings, requiresModuleOrApp: { module: 'hf', app: 'hf' } },
-      // Werkzoeken connector (INTEGRATIONS-CONTRACT §1) — gated on the new 'wz'
-      // module via access.ts; v1 = the connection card only.
+      // Werkzoeken connector (INTEGRATIONS-CONTRACT §1): free with the connector, no module key
+      // (DANNY-WZ-ADDON-1, 23-11), gated on accessible_pages only; v1 = the connection card only.
       { id: 'werkzoeken', icon: Globe, component: WerkzoekenSettings, requiresPage: 'werkzoeken' },
       { id: 'apikeys', icon: Key, component: ApiKeysSettings },
       { id: 'webhooks', icon: Webhook, component: WebhooksSettings },

@@ -54,9 +54,8 @@ const MODULE_TO_PAGES: Record<string, string[]> = {
   sm:                ['shiftmanager'],
   sm_ai:             ['shiftmanager'], // legacy alias → SM reporting
   hf:                ['helloflex'],
-  // INTEGRATIONS-CONTRACT §1: the Werkzoeken connector module (new) gates its
-  // settings section; BE still has to add 'wz' to Tenant::PACKAGES (open punt).
-  wz:                ['werkzoeken'],
+  // DANNY-WZ-ADDON-1 (Danny 23-11): Werkzoeken is free with the connector, so it has no module
+  // key; its settings section is permission-gated through accessible_pages only, like the BE.
   reports:           ['reports'],
   api:               [],               // REST API lives in settings (no top-level nav page)
   insights:          [],               // Insights+ within reporting/settings (no separate gate yet)
