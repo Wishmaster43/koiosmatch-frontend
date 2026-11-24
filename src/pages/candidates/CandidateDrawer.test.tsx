@@ -144,10 +144,20 @@ describe('CandidateDrawer · erase personal data (CANDIDATE-ERASE-FE-1, privacy.
     expect(screen.queryByRole('button', { name: ct('erase.erasePerson') })).toBeNull()
   })
 
+  // CANDIDATE-ERASED-STATE-FE-1: an erased dossier (erased_at set) hides the button even with the permission and shows the erased chip.
+  it('hides the erase button and shows the erased chip once erasedAt is set', async () => {
+    mockUseAuth.mockReturnValue({ hasModule: () => false, isSuperAdmin: () => false, hasRole: () => false, hasPermission: p => p === 'privacy.erase' })
+    await renderDrawer({ candidate: candidate({ erasedAt: '2026-11-20T10:00:00Z' }) })
+    expect(screen.queryByRole('button', { name: ct('erase.erasePerson') })).toBeNull()
+    expect(screen.getByText(i18n.t('candidates:erase.erasedOn', { date: '20-11-2026' }))).toBeInTheDocument()
+  })
+
   it('renders the erase button with privacy.erase, and clicking it opens the password dialog', async () => {
     mockUseAuth.mockReturnValue({ hasModule: () => false, isSuperAdmin: () => false, hasRole: () => false, hasPermission: p => p === 'privacy.erase' })
     const user = userEvent.setup()
     await renderDrawer({ candidate: candidate() })
+    // No stamp, no chip (CANDIDATE-ERASED-STATE-FE-1 absent-key case at drawer level).
+    expect(screen.queryByText(new RegExp(i18n.t('candidates:erase.erasedOn', { date: '' }).trim()))).toBeNull()
     await user.click(screen.getByRole('button', { name: ct('erase.erasePerson') }))
     expect(screen.getByRole('dialog', { name: ct('erase.erasePerson') })).toBeInTheDocument()
   })

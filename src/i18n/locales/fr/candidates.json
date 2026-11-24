@@ -1164,7 +1164,8 @@
     "openMatch_one": "Ce candidat a encore {{count}} match ouvert. Terminez d’abord le match, ou fermez-le via la demande d’effacement.",
     "openMatch_other": "Ce candidat a encore {{count}} matchs ouverts. Terminez d’abord les matchs, ou fermez-les via la demande d’effacement.",
     "openMatchUnknown": "Ce candidat a encore un ou plusieurs matchs ouverts. Terminez-les d’abord, ou fermez-les via la demande d’effacement.",
-    "closeMatchesAndErase": "Fermer les matchs ouverts et effacer"
+    "closeMatchesAndErase": "Fermer les matchs ouverts et effacer",
+    "erasedOn": "Données personnelles effacées le {{date}}"
   },
   "archiveGuard": {
     "title": "Éléments en cours détectés",

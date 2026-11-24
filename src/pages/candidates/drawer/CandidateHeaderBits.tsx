@@ -60,6 +60,7 @@ export function CandidateTitle({ c, editing, hf, setHF }: {
   // picker, and translate the read-only subtitle the same way (seeded default only).
   const { functionOptions, allowFreeEntry } = useFunctions()
   const seedLabel = useSeedLabel()
+  const { formatDate } = useDateFormat() as { formatDate: (d?: string | null) => string }
   if (editing) return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 6, minWidth: 0 }}>
       <div style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 1fr) minmax(0, 1fr)', gap: 6 }}>
@@ -84,6 +85,8 @@ export function CandidateTitle({ c, editing, hf, setHF }: {
   // via DrawerTitleRow with CustomerDrawer and VacancyDrawer (clone [10]).
   return (
     <DrawerTitleRow title={c.name} referenceNumber={c.referenceNumber} detachedCount={c.detachedCount}
+      // CANDIDATE-ERASED-STATE-FE-1: an anonymised dossier says so next to its placeholder name (§8: the state is visible, the data is gone).
+      trailing={c.erasedAt ? <SoftChip round color="var(--color-danger)" label={t('erase.erasedOn', { date: formatDate(c.erasedAt) })} /> : null}
       subtitle={c.title ? seedLabel('functions', { label: c.title }) : '—'} />
   )
 }

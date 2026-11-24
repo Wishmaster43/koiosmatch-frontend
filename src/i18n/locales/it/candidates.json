@@ -1164,7 +1164,8 @@
     "openMatch_one": "Questo candidato ha ancora {{count}} match aperto. Termina prima il match, oppure chiudilo tramite la richiesta di cancellazione.",
     "openMatch_other": "Questo candidato ha ancora {{count}} match aperti. Termina prima i match, oppure chiudili tramite la richiesta di cancellazione.",
     "openMatchUnknown": "Questo candidato ha ancora uno o più match aperti. Terminali prima, oppure chiudili tramite la richiesta di cancellazione.",
-    "closeMatchesAndErase": "Chiudi i match aperti e cancella"
+    "closeMatchesAndErase": "Chiudi i match aperti e cancella",
+    "erasedOn": "Dati personali cancellati il {{date}}"
   },
   "archiveGuard": {
     "title": "Trovate pratiche aperte",

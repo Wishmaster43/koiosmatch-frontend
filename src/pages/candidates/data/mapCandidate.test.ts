@@ -112,3 +112,14 @@ describe('mapCandidate · consent states and privacy notice (K-008)', () => {
     expect(c.privacyNotice).toEqual({ sentAt: null, due: null })
   })
 })
+
+// CANDIDATE-ERASED-STATE-FE-1: the erased marker passes through; an absent key (older API) reads as null.
+describe('mapCandidate · erased_at', () => {
+  it('maps erased_at to erasedAt and defaults to null', () => {
+    const api = { id: 'c1', first_name: 'Verwijderd', last_name: 'kandidaat', erased_at: '2026-11-20T10:00:00Z' } as unknown as ApiCandidate
+    expect(mapCandidate(api).erasedAt).toBe('2026-11-20T10:00:00Z')
+    expect(mapCandidate({ id: 'c2', first_name: 'Sem', last_name: 'Blom' } as unknown as ApiCandidate).erasedAt).toBeNull()
+    // An empty string is not a stamp: the mapper normalises it so the chip and the button gate agree.
+    expect(mapCandidate({ id: 'c3', first_name: 'Sem', last_name: 'Blom', erased_at: '' } as unknown as ApiCandidate).erasedAt).toBeNull()
+  })
+})

@@ -39,3 +39,14 @@ describe('DrawerTitleRow', () => {
     expect(container.querySelectorAll('span[title]')).toHaveLength(0)
   })
 })
+
+// CANDIDATE-ERASED-STATE-FE-1: the optional trailing slot renders after the badges and nothing when absent.
+describe('DrawerTitleRow · trailing slot', () => {
+  it('renders the trailing node inside the title row and nothing extra without it', () => {
+    const { unmount } = render(<DrawerTitleRow title="Sem Blom" subtitle="Nurse" trailing={<span data-testid="trail">erased</span>} />)
+    expect(screen.getByTestId('trail')).toBeInTheDocument()
+    unmount()
+    render(<DrawerTitleRow title="Sem Blom" subtitle="Nurse" />)
+    expect(screen.queryByTestId('trail')).toBeNull()
+  })
+})

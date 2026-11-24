@@ -1164,7 +1164,8 @@
     "openMatch_one": "Dieser Kandidat hat noch {{count}} offenes Match. Beenden Sie zuerst das Match, oder schließen Sie es über den Löschantrag.",
     "openMatch_other": "Dieser Kandidat hat noch {{count}} offene Matches. Beenden Sie zuerst die Matches, oder schließen Sie sie über den Löschantrag.",
     "openMatchUnknown": "Dieser Kandidat hat noch ein oder mehrere offene Matches. Beenden Sie diese zuerst, oder schließen Sie sie über den Löschantrag.",
-    "closeMatchesAndErase": "Offene Matches schließen und löschen"
+    "closeMatchesAndErase": "Offene Matches schließen und löschen",
+    "erasedOn": "Personenbezogene Daten gelöscht am {{date}}"
   },
   "archiveGuard": {
     "title": "Offene Vorgänge gefunden",

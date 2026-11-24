@@ -211,6 +211,7 @@ export function mapCandidate(c: ApiCandidate, locale: string = 'nl-NL'): Candida
     // Derived server-side from deleted_at + pending_erase_at (one source, no drift).
     lifecycle:       (c.lifecycle as string) ?? (c.pending_erase_at ? 'pending_erase' : (c.deleted_at || c.archived) ? 'archived' : 'active'),
     pendingEraseAt:  (c.pending_erase_at as string | null | undefined) ?? null,
+    erasedAt:        (c.erased_at as string | null | undefined) || null,
     archivedAt:      (c.deleted_at as string | null | undefined) ?? (c.archived_at as string | null | undefined) ?? null,
     archivedBy:      (typeof c.deleted_by === 'object'
       ? (c.deleted_by as { name?: string } | null)?.name ?? null

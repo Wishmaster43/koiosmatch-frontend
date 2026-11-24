@@ -247,6 +247,9 @@ export interface Candidate {
   // status-column chip + which delete/restore actions the drawer shows.
   lifecycle: string
   pendingEraseAt: string | null
+  // CANDIDATE-ERASED-MARKER-1 (BE MB13): when the dossier was anonymised (ISO), null while it still carries personal data
+  // or while the API predates the key; the erase affordance hides and the erased state shows on a value.
+  erasedAt: string | null
   // Archive audit (ARCH-2): when / by whom / why — feeds the drawer's archived banner.
   archivedAt: string | null
   archivedBy: string | null
@@ -390,6 +393,8 @@ export interface ApiCandidate {
   stage?: string
   lifecycle?: string
   pending_erase_at?: string | null
+  // CANDIDATE-ERASED-MARKER-1: ISO when the dossier was anonymised, null otherwise; absent before the BE lands.
+  erased_at?: string | null
   funnel_label?: string | null
   funnel_color?: string | null
   funnel_vacancy_id?: string | number

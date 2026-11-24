@@ -1164,7 +1164,8 @@
     "openMatch_one": "Deze kandidaat heeft nog {{count}} open match. Beëindig eerst de match, of sluit de match via het verwijderverzoek.",
     "openMatch_other": "Deze kandidaat heeft nog {{count}} open matches. Beëindig eerst de matches, of sluit ze via het verwijderverzoek.",
     "openMatchUnknown": "Deze kandidaat heeft nog een of meer open matches. Beëindig die eerst, of sluit ze via het verwijderverzoek.",
-    "closeMatchesAndErase": "Open matches sluiten en wissen"
+    "closeMatchesAndErase": "Open matches sluiten en wissen",
+    "erasedOn": "Persoonsgegevens gewist op {{date}}"
   },
   "archiveGuard": {
     "title": "Lopende zaken gevonden",

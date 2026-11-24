@@ -1164,7 +1164,8 @@
     "openMatch_one": "This candidate still has {{count}} open match. End the match first, or close it through the erasure request.",
     "openMatch_other": "This candidate still has {{count}} open matches. End the matches first, or close them through the erasure request.",
     "openMatchUnknown": "This candidate still has one or more open matches. End them first, or close them through the erasure request.",
-    "closeMatchesAndErase": "Close open matches and erase"
+    "closeMatchesAndErase": "Close open matches and erase",
+    "erasedOn": "Personal data erased on {{date}}"
   },
   "archiveGuard": {
     "title": "Open items found",

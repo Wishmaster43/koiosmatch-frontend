@@ -16,11 +16,13 @@ interface DrawerTitleRowProps {
   titleAs?: ElementType
   referenceNumber?: string | null
   detachedCount?: number
+  // Optional trailing marker after the badges (CANDIDATE-ERASED-STATE-FE-1: the erased chip); nothing renders when absent.
+  trailing?: ReactNode
   subtitle: ReactNode
 }
 
 // Title + reference chip + detached badge + a subtitle line, identical across every drill-down header.
-export default function DrawerTitleRow({ title, titleAs = 'span', referenceNumber, detachedCount, subtitle }: DrawerTitleRowProps) {
+export default function DrawerTitleRow({ title, titleAs = 'span', referenceNumber, detachedCount, trailing, subtitle }: DrawerTitleRowProps) {
   return (
     <>
       <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
@@ -29,6 +31,7 @@ export default function DrawerTitleRow({ title, titleAs = 'span', referenceNumbe
         <ReferenceNumberChip value={referenceNumber} />
         {/* ONTKOPPEL-TELLER-1: whole-history CURRENTLY-detached count, warning-only (hidden at 0). */}
         <DetachedCountBadge count={detachedCount} />
+        {trailing}
       </div>
       <div style={{ fontSize: 12, color: 'var(--text-muted)' }}>{subtitle}</div>
     </>
