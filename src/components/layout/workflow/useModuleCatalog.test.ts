@@ -78,3 +78,31 @@ describe('normalize · output_fields / outputFieldMeta', () => {
     expect(catalog.candidate_filter.outputFieldMeta).toEqual({ status: { label: 'Status', type: 'string', source: 'candidate_statuses' } })
   })
 })
+
+// HF-MOVED-TO-PICKER-1: a source-less field may carry inline enum options; a sourced field never does.
+describe('normalize · outputFieldMeta.options (inline enum)', () => {
+  it('keeps well-formed options on a source-less field, drops them next to a source, skips malformed entries', () => {
+    const catalog = normalize({
+      helloflex_inbound: {
+        emits: 'append',
+        output_fields: {
+          contract_status_moved_to: { label: 'Moved to', type: 'string', options: [{ value: 'sent', label: 'Verzonden' }, { value: '', label: 'x' }, { nope: 1 }, { value: 'signed' }] },
+          status: { label: 'Status', source: 'candidate_statuses', options: [{ value: 'a', label: 'A' }] },
+          plain: { label: 'Plain', options: [] },
+        },
+      },
+    } as never)
+    const meta = catalog.helloflex_inbound.outputFieldMeta!
+    expect(meta.contract_status_moved_to.options).toEqual([{ value: 'sent', label: 'Verzonden' }, { value: 'signed', label: 'signed' }])
+    expect(meta.status.source).toBe('candidate_statuses')
+    expect(meta.status.options).toBeUndefined()
+    expect(meta.plain.options).toBeUndefined()
+  })
+
+  it('collapses a repeated value to its first occurrence (no duplicate picker keys)', () => {
+    const catalog = normalize({
+      m: { emits: 'append', output_fields: { f: { label: 'F', options: [{ value: 'a', label: 'A1' }, { value: 'a', label: 'A2' }, { value: 'b', label: 'B' }] } } },
+    } as never)
+    expect(catalog.m.outputFieldMeta!.f.options).toEqual([{ value: 'a', label: 'A1' }, { value: 'b', label: 'B' }])
+  })
+})

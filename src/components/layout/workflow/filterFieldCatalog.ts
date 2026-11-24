@@ -41,6 +41,16 @@ export interface OutputFieldMeta {
   label: string
   type?: string
   source?: string
+  // HF-MOVED-TO-PICKER-1 (BE MB13): a STATIC enum the field's value is drawn from (e.g. JobMatch::CONTRACT_STATUSES),
+  // served inline because no tenant lookup exists for it; only on fields without a `source`. `value` is the
+  // stable English enum, `label` the bureau-language fallback (the FE's own fieldOptions key wins when it exists).
+  options?: FieldEnumOption[]
+}
+
+// One inline enum option of a catalogued field.
+export interface FieldEnumOption {
+  value: string
+  label: string
 }
 
 // One backend module type's static bundle-field catalog entry (GET /workflows/modules).
@@ -78,6 +88,8 @@ export interface FilterFieldOption {
   // the catalogue declares one — drives the value control's known-vocabulary
   // multi-select instead of the free chip editor.
   source?: string
+  // HF-MOVED-TO-PICKER-1: the inline enum of a source-less field (see OutputFieldMeta.options).
+  options?: FieldEnumOption[]
 }
 
 // One numbered group in the picker — one upstream module + its available fields.
@@ -139,7 +151,7 @@ export function collectUpstreamFilterFields(
       // Underscore keys (_list, …) are engine pipeline metadata, never user-facing fields;
       // every module (including sm_* ones) emits its bare field key.
       fields: Object.entries(outputFields).filter(([key]) => !key.startsWith('_'))
-        .map(([key, label]) => ({ key, label, source: outputFieldMeta[key]?.source })),
+        .map(([key, label]) => ({ key, label, source: outputFieldMeta[key]?.source, options: outputFieldMeta[key]?.options })),
     }
   })
 }
@@ -155,8 +167,8 @@ export function toFilterFieldOptions(
   groups: FilterFieldGroup[],
   moduleLabel: (type: string) => string,
   fieldLabelOf: (label: string) => string = label => label,
-): Array<{ value: string; label: string; source?: string }> {
+): Array<{ value: string; label: string; source?: string; options?: FieldEnumOption[] }> {
   return groups.flatMap(g =>
-    g.fields.map(f => ({ value: f.key, label: `${g.number}. ${moduleLabel(g.moduleType)} · ${fieldLabelOf(f.label)}`, source: f.source }))
+    g.fields.map(f => ({ value: f.key, label: `${g.number}. ${moduleLabel(g.moduleType)} · ${fieldLabelOf(f.label)}`, source: f.source, options: f.options }))
   )
 }

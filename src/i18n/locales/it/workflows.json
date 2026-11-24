@@ -1237,6 +1237,14 @@
     "WhatsApp — can be contacted now (derived)": "WhatsApp: contattabile ora (derivato)"
   },
   "fieldOptions": {
+    "none": "Nessun contratto",
+    "sending": "In invio",
+    "sent": "Inviato",
+    "signed": "Firmato",
+    "active": "Attivo",
+    "ended": "Terminato",
+    "failed": "Non riuscito",
+    "rejected": "Rifiutato",
     "first_name": "Nome",
     "function": "Funzione",
     "last_name": "Cognome",

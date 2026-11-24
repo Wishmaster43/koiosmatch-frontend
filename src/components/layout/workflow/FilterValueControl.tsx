@@ -30,6 +30,9 @@ import ListValueEditor from './ListValueEditor'
 import MappingPickerButton from './MappingPickerButton'
 import { mappedValueLabel } from './mappedValueLabel'
 import { lookupItemsForSource } from './lookupSourceTable'
+import type { FieldEnumOption } from './filterFieldCatalog'
+import { labelOrRaw } from '@/lib/labelOrRaw'
+import { i18nKey } from './moduleI18n'
 import { useLookupsOptional } from '@/context/LookupsContext'
 import type { WorkflowVarGroup } from '@/types/workflow'
 
@@ -106,12 +109,15 @@ export interface FilterValueControlProps {
   // FilterFieldOption.source) — present only once the backend catalogue names
   // one; drives the known-vocabulary picker for =/!=/in/not_in.
   source?: string
+  // HF-MOVED-TO-PICKER-1: a source-less field's inline enum (filterFieldCatalog's FilterFieldOption.options):
+  // the same picker, fed from the catalogue instead of a tenant lookup; ignored when `source` resolved.
+  options?: FieldEnumOption[]
 }
 
 // Picks the right value control for an operator/field combination — see the
 // module doc above for the full wire-format table.
-export default function FilterValueControl({ operator, field, value, onChange, ariaLabel, variables = [], source }: FilterValueControlProps) {
-  const { t } = useTranslation('workflows')
+export default function FilterValueControl({ operator, field, value, onChange, ariaLabel, variables = [], source, options }: FilterValueControlProps) {
+  const { t, i18n } = useTranslation('workflows')
   const text = textValue(value)
   // Names the yes/no value menu below — SelectMenu's trigger is a <button>, not
   // labelable by a plain <label>, so a hidden span + aria-labelledby names it.
@@ -124,9 +130,16 @@ export default function FilterValueControl({ operator, field, value, onChange, a
   // FILTER-MAPPING-1: the current field's lookup, when its catalogue entry
   // declares a `source` — null when there is none, falling back to free chips.
   const lookups = useLookupsOptional()
-  const sourceItems = lookups
+  const lookupItems = lookups
     ? lookupItemsForSource(source, { statuses: lookups.statuses, phases: lookups.phases, candidateTypes: lookups.candidateTypes, funnelTypes: lookups.funnelTypes })
     : null
+  // HF-MOVED-TO-PICKER-1: without a resolved lookup, a catalogued inline enum feeds the same picker; the label is
+  // the FE's own fieldOptions.<value> copy (UI language) when it exists, else the BE's bureau-language fallback
+  // (labelOrRaw, the house rule; an instance-less test tree shows the fallback).
+  const sourceItems: Array<{ value: string; label: string }> | null = lookupItems
+    ?? (options && options.length > 0
+      ? options.map(o => ({ value: o.value, label: labelOrRaw(t, i18n, 'fieldOptions.' + i18nKey(o.value), o.label, 'workflows') }))
+      : null)
   // Relative-date fields (direction/amount/unit) are component STATE, seeded
   // ONCE from the wire value — never recomputed from `text` on every render.
   // Recomputing from the serialised string was the bug: it round-tripped exact

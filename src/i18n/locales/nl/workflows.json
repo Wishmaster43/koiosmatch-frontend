@@ -1237,6 +1237,14 @@
     "WhatsApp — can be contacted now (derived)": "WhatsApp: nu benaderbaar (afgeleid)"
   },
   "fieldOptions": {
+    "none": "Geen contract",
+    "sending": "Wordt verzonden",
+    "sent": "Verzonden",
+    "signed": "Ondertekend",
+    "active": "Actief",
+    "ended": "Beëindigd",
+    "failed": "Mislukt",
+    "rejected": "Afgewezen",
     "first_name": "Voornaam",
     "function": "Functie",
     "last_name": "Achternaam",

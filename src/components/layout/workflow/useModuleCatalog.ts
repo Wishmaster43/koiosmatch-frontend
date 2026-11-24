@@ -9,7 +9,7 @@
  * `import('@/lib/api')` pattern used by FaqSelectField/WebhookSelectField).
  */
 import { useEffect, useState } from 'react'
-import type { ModuleCatalog, InstructionOutputField, OutputFieldMeta } from './filterFieldCatalog'
+import type { ModuleCatalog, InstructionOutputField, OutputFieldMeta, FieldEnumOption } from './filterFieldCatalog'
 import { unwrap } from '@/lib/api'
 
 let cache: ModuleCatalog | null = null
@@ -23,7 +23,7 @@ let inFlight: Promise<ModuleCatalog> | null = null
 // FILTER-MAPPING-1 (BE contract, additive): an output field is either the
 // legacy plain string label, or the richer `{label,type,source}` shape once
 // the backend lands it — both accepted, never assumed.
-type RawOutputField = string | { label?: string; type?: string; source?: string }
+type RawOutputField = string | { label?: string; type?: string; source?: string; options?: unknown }
 
 interface RawModuleDef {
   output_fields?: Record<string, RawOutputField>
@@ -49,10 +49,26 @@ function normalizeOutputFields(raw: Record<string, RawOutputField> | undefined):
     } else if (field && typeof field === 'object') {
       const label = typeof field.label === 'string' && field.label.length > 0 ? field.label : key
       outputFields[key] = label
-      outputFieldMeta[key] = { label, type: field.type, source: field.source }
+      // HF-MOVED-TO-PICKER-1: inline enum options ride along only on a source-less field (source wins, BE spec guard pins
+      // that no field carries both) and only when well-formed; an empty list means none (no fake picker).
+      const options = field.source ? undefined : normalizeEnumOptions(field.options)
+      outputFieldMeta[key] = { label, type: field.type, source: field.source, ...(options ? { options } : {}) }
     }
   }
   return { outputFields, outputFieldMeta }
+}
+
+// Keeps only { value: non-empty string, label: string } entries; null when nothing usable remains.
+function normalizeEnumOptions(raw: unknown): FieldEnumOption[] | null {
+  if (!Array.isArray(raw)) return null
+  const options = raw.flatMap(o => {
+    const value = (o as { value?: unknown })?.value
+    const label = (o as { label?: unknown })?.label
+    return typeof value === 'string' && value !== '' ? [{ value, label: typeof label === 'string' && label !== '' ? label : value }] : []
+  })
+  // A repeated value would give the picker duplicate React keys: keep the first occurrence only.
+  const unique = options.filter((o, i) => options.findIndex(p => p.value === o.value) === i)
+  return unique.length > 0 ? unique : null
 }
 
 // Normalizes the served `output_field.options` shape (array of {key,label}, or an

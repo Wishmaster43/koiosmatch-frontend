@@ -315,3 +315,32 @@ describe('FilterValueControl · known-vocabulary (source) picker', () => {
     expect(onChange).toHaveBeenCalledWith('')
   })
 })
+
+// HF-MOVED-TO-PICKER-1: a source-less field with inline enum options gets the known-vocabulary picker
+// (BE label as the fallback copy; no i18n instance here, so the BE label is what renders), never the free input.
+describe('FilterValueControl · inline enum options', () => {
+  const options = [{ value: 'sent', label: 'BE sent' }, { value: 'signed', label: 'BE signed' }]
+
+  it('= with options renders the picker whose menu lists the BE labels and writes the enum value', async () => {
+    const onChange = vi.fn()
+    render(<FilterValueControl operator="=" value="" onChange={onChange} ariaLabel="value" options={options} />)
+    expect(screen.queryByRole('textbox', { name: 'value' })).toBeNull()
+    // The picker's trigger is a listbox button (CreatableSelect), named through the hidden label.
+    fireEvent.click(screen.getByRole('button', { name: /value/ }))
+    fireEvent.click(await screen.findByText('BE signed'))
+    expect(onChange).toHaveBeenCalledWith('signed')
+  })
+
+  it('in with options renders the chip adder from the enum, not the typed input', () => {
+    render(<FilterValueControl operator="in" value={['sent']} onChange={vi.fn()} ariaLabel="value" options={options} />)
+    // The stored value renders as its BE-labelled chip and the adder is the listbox trigger, not a text input.
+    expect(screen.getByText('BE sent')).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: /value/ })).toHaveAttribute('aria-haspopup', 'listbox')
+    expect(screen.queryByRole('textbox', { name: 'value' })).toBeNull()
+  })
+
+  it('without options or a resolved source the plain input stays (no fake picker)', () => {
+    render(<FilterValueControl operator="=" value="" onChange={vi.fn()} ariaLabel="value" options={[]} />)
+    expect(screen.getByRole('textbox', { name: 'value' })).toBeInTheDocument()
+  })
+})

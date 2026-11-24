@@ -74,6 +74,8 @@ export function EdgeFilterPanel({ filters, label, sourceNodeId, nodes = [], edge
   // Flattened "N. <module label> · <field>" options for the field picker; the catalog field
   // label is English source text (KOIOS-EN-1) and translates through the shared fieldLabel.
   const fieldOptions = useMemo(() => toFilterFieldOptions(groupsUpstream, moduleLabel, label => fieldLabel(t, i18n, label)), [groupsUpstream, moduleLabel, t, i18n])
+  // The selected field's catalogue entry by path (its lookup source or inline enum options), one lookup per condition.
+  const fieldByPath = useMemo(() => new Map(fieldOptions.map(o => [o.value, o])), [fieldOptions])
 
   // The same chain, reshaped as the numbered mapping groups the value
   // control's "{ }" button offers (FILTER-MAPPING-1).
@@ -161,10 +163,12 @@ export function EdgeFilterPanel({ filters, label, sourceNodeId, nodes = [], edge
                         // FILTER-VALUE-1: the value control now depends on operator/field — a
                         // real date/day-count/chip picker instead of one bare text input.
                         // FILTER-MAPPING-1: `variables` offers the same numbered upstream chain
-                        // as the field picker; `source` is the SELECTED field's own lookup name.
+                        // as the field picker; `source` is the SELECTED field's own lookup name and
+                        // `options` its inline enum (HF-MOVED-TO-PICKER-1), read from one catalogue entry.
                         <FilterValueControl operator={c.operator ?? '='} field={c.field} value={c.value}
                           onChange={v => updCond(gi, ci, 'value', v)} ariaLabel={t('fields.valuePlaceholder')}
-                          variables={varGroups} source={fieldOptions.find(o => o.value === splitFieldFormat(c.field ?? '').path)?.source} />
+                          variables={varGroups} source={fieldByPath.get(splitFieldFormat(c.field ?? '').path)?.source}
+                          options={fieldByPath.get(splitFieldFormat(c.field ?? '').path)?.options} />
                       )}
                       {/* HUISSTIJL-1: same delete action as the group-delete Button above — dangerSoft carries this ink. */}
                       <Button variant="dangerSoft" size="sm" iconOnly onClick={() => delCond(gi, ci)}

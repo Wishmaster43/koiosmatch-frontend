@@ -128,3 +128,24 @@ describe('toFilterFieldOptions', () => {
     expect(options.map(o => o.label)).toEqual(['1. Candidates · T:Kandidaat-ID', '1. Candidates · T:Voornaam'])
   })
 })
+
+// HF-MOVED-TO-PICKER-1: a field's inline enum options ride from outputFieldMeta through the groups into the flat options.
+describe('inline enum options (HF-MOVED-TO-PICKER-1)', () => {
+  it('carries outputFieldMeta.options onto the group field and the flat option; a field without them has none', () => {
+    const enumCatalog: ModuleCatalog = {
+      helloflex_inbound: {
+        emits: 'append',
+        outputFields: { contract_status_moved_to: 'Moved to', id: 'ID' },
+        outputFieldMeta: { contract_status_moved_to: { label: 'Moved to', type: 'string', options: [{ value: 'sent', label: 'Verzonden' }] }, id: { label: 'ID' } },
+      },
+      router: { emits: 'passthrough', outputFields: {} },
+    }
+    const groups = collectUpstreamFilterFields('b', [{ id: 'a', type: 'helloflex_inbound' }, { id: 'b', type: 'router' }], [{ source: 'a', target: 'b' }], enumCatalog)
+    const moved = groups[0].fields.find(f => f.key === 'contract_status_moved_to')
+    expect(moved?.options).toEqual([{ value: 'sent', label: 'Verzonden' }])
+    expect(groups[0].fields.find(f => f.key === 'id')?.options).toBeUndefined()
+    const flat = toFilterFieldOptions(groups, type => type)
+    expect(flat.find(o => o.value === 'contract_status_moved_to')?.options).toEqual([{ value: 'sent', label: 'Verzonden' }])
+    expect(flat.find(o => o.value === 'id')?.options).toBeUndefined()
+  })
+})
