@@ -63,6 +63,19 @@ if [ -f ../koiosmatch-api/docs/openapi.yaml ]; then
     exit 1
   fi
 fi
+# gen:refusal-reasons freshness (KOIOS-TOOL-RESULT-KEYS-3): the generated refusal-slug mirror must
+# match the BE's exported enum JSON; same shape as the gen:types gate above.
+if [ -f ../koiosmatch-api/docs/reference/koios-tool-refusal-reasons.json ]; then
+  echo "▶ pre-commit: gen:refusal-reasons freshness…"
+  npm run --silent gen:refusal-reasons >/dev/null 2>&1 || {
+    echo "✗ gen:refusal-reasons itself failed (generator or JSON error): run: npm run gen:refusal-reasons"
+    exit 1
+  }
+  if ! git diff --quiet src/components/layout/koios/toolRefusalReasons.generated.ts; then
+    echo "✗ toolRefusalReasons.generated.ts was behind the BE export: just regenerated: git add it and commit again"
+    exit 1
+  fi
+fi
 # Dependency-audit gate (heraudit SEC-1/2/3): HIGH/CRITICAL advisories fail the
 # commit unless allowlisted in audit-ci.jsonc WITH a reason + revalidation date.
 echo "▶ pre-commit: dependency-audit…"

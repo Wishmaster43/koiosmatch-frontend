@@ -1,5 +1,6 @@
 import { describe, it, expect } from 'vitest'
-import { TOOL_REFUSAL_REASON_SLUGS } from './toolRefusalReasons'
+import { TOOL_REFUSAL_REASON_SLUGS, EXTRA_SOURCE_REFUSAL_SLUGS } from './toolRefusalReasons'
+import { BE_TOOL_REFUSAL_REASON_SLUGS } from './toolRefusalReasons.generated'
 import nl from '@/i18n/locales/nl/common.json'
 import en from '@/i18n/locales/en/common.json'
 import de from '@/i18n/locales/de/common.json'
@@ -13,6 +14,18 @@ const LOCALES: Record<string, Bundle> = { nl, en, de, fr, es, it: it_, pt } as u
 const reasonsOf = (loc: string) => LOCALES[loc].koios.pendingAction.reasons
 
 describe('tool refusal reason slugs', () => {
+  // The generated BE mirror is a sorted, unique, non-empty list of snake_case slugs
+  it('the generated BE list is sorted, unique, non-empty snake_case', () => {
+    expect(BE_TOOL_REFUSAL_REASON_SLUGS.length).toBeGreaterThan(0)
+    expect([...BE_TOOL_REFUSAL_REASON_SLUGS]).toEqual([...new Set(BE_TOOL_REFUSAL_REASON_SLUGS)].sort())
+    for (const slug of BE_TOOL_REFUSAL_REASON_SLUGS) expect(slug).toMatch(/^[a-z][a-z0-9_]*$/)
+  })
+
+  // A hand-listed extra that the BE enum now carries is a duplicate to remove from the extras
+  it('no extra-source slug duplicates a generated enum slug', () => {
+    for (const slug of EXTRA_SOURCE_REFUSAL_SLUGS) expect(BE_TOOL_REFUSAL_REASON_SLUGS, slug).not.toContain(slug)
+  })
+
   // Every slug has a non-empty translation in every locale
   it('has a non-empty value for every slug in all seven locales', () => {
     for (const loc of Object.keys(LOCALES)) {
