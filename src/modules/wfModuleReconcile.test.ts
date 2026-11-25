@@ -70,7 +70,7 @@ const EXPECTED_SCHEMA_KEYS: Record<string, string[]> = {
     'throttle_per_minute', 'recipient_field', 'session_text', 'body_parameters',
   ],
   email_send: ['subject', 'body', 'sender_context', 'purpose', 'skip_if_consent_field', 'recipient_role'],
-  notification_send: ['title', 'body', 'recipients', 'role', 'user_ids', 'type', 'link_entity'],
+  notification_send: ['title', 'body', 'recipients', 'role', 'permission', 'user_ids', 'type', 'link_entity'],
   candidate_filter: ['ai_enabled', 'pools', 'positions', 'status', 'last_contact_days', 'last_worked_days', 'no_show_max'],
   // effective_from deliberately absent: declared by the engine schema but never read by execute() (fake affordance).
   status_set: ['status', 'reason', 'return_date', 'blacklist_reason'],
@@ -111,6 +111,10 @@ describe('WF-BUILDER-VELDEN-1 · registry config-schema mirrors the engine exact
   it("notification_send's recipients options include 'users' (required for user_ids to be reachable)", () => {
     const recipients = (MODULE_SCHEMAS.notification_send ?? []).find(f => f.key === 'recipients')
     expect(recipients?.options).toContain('users')
+    expect(recipients?.options).toContain('permission')
+    expect(recipients?.options).toContain('opportunity_owner')
+    const permission = (MODULE_SCHEMAS.notification_send ?? []).find(f => f.key === 'permission')
+    expect(permission).toMatchObject({ type: 'lookup_select', endpoint: '/permissions', valueKey: 'name', responseKey: '*', showIf: { key: 'recipients', value: 'permission' } })
   })
 
   // A key-only check (the it.each above) survives a mutant that keeps the KEY

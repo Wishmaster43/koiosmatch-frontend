@@ -1410,6 +1410,7 @@
       "koiosAddToCallList": "Koios: zur Anrufliste hinzufügen",
       "helloflexNewMatchToContract": "HelloFlex: neue Zuordnung zum Vertrag",
       "helloflexNewCandidate": "HelloFlex: neuer Kandidat",
+      "helloflexContactPersonChanged": "HelloFlex: Kontaktperson geändert",
       "helloflexCandidateChanged": "HelloFlex: Kandidat geändert",
       "helloflexCandidateArchived": "HelloFlex: Kandidat archiviert",
       "helloflexContactPersons": "HelloFlex: Kontaktpersonen",

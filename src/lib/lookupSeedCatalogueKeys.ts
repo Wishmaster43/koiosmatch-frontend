@@ -342,7 +342,7 @@ export const SEED_LABEL_KEYS: Record<string, Record<string, string>> = {
     "Koios: plan afspraak": "koiosScheduleAppointment",
     "Koios: stuur notificatie": "koiosSendNotification",
     "Koios: voeg toe aan bellijst": "koiosAddToCallList",
-    // SEED-HF-TEMPLATE-LABELS-1: the 18 seeded HelloFlex workflow templates (BE lang/nl/helloflex.php)
+    // SEED-HF-TEMPLATE-LABELS-1: the 19 seeded HelloFlex workflow templates (BE lang/nl/helloflex.php)
     "HelloFlex: nieuwe match naar contract": "helloflexNewMatchToContract",
     "HelloFlex: nieuwe kandidaat": "helloflexNewCandidate",
     "HelloFlex: kandidaat gewijzigd": "helloflexCandidateChanged",
@@ -361,5 +361,6 @@ export const SEED_LABEL_KEYS: Record<string, Record<string, string>> = {
     "HelloFlex: activiteit aangemaakt": "helloflexActivityCreated",
     "HelloFlex: kostenplaatsen gewijzigd": "helloflexCostCentersChanged",
     "HelloFlex: vestigingen gewijzigd": "helloflexAgenciesChanged",
+    "HelloFlex: contactpersoon gewijzigd": "helloflexContactPersonChanged",
   },
 }

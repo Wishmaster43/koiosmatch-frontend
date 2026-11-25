@@ -109,6 +109,8 @@ export const WORKFLOW_EVENT_KEYS = [
   'candidate.missing_cv',
   // K-247 Lane C: customer-contact retention review signal.
   'contact.retention_due',
+  // HF-WORKFLOWS-1-SIBLINGS-1: a contact person changed.
+  'contact.updated',
   // TRIGGER-VOCAB-1 (KLEIN-BE-1, CONTRACT-CHANGELOG 2026-09-17): four dispatch
   // sites (opportunities:attention-due / vacancies:attention-due) that already
   // had a real WorkflowDispatcher producer and are used by seeded templates, but

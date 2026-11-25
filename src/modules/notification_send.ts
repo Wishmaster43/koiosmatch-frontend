@@ -30,7 +30,9 @@ export default {
     // reachable showIf and would be a fake affordance (§3, no dead-end controls).
     // K-245 (CMBE): 'match_and_candidate_owner' = union of the match owner and the
     // candidate owner, de-duplicated — the seeded "Match loopt af" template uses it.
-    { key: 'recipients', label: 'Recipients', type: 'select',   options: ['all', 'role', 'users', 'candidate_owner', 'customer_owner', 'vacancy_owner', 'match_and_candidate_owner'] },
+    // HF-WORKFLOWS-1-SIBLINGS-1: 'permission' (every user holding the permission) is new; 'opportunity_owner' was
+    // already in the BE RECIPIENTS list (NotificationSendModule::RECIPIENTS) and missing here, so it joins now.
+    { key: 'recipients', label: 'Recipients', type: 'select',   options: ['all', 'role', 'users', 'candidate_owner', 'customer_owner', 'vacancy_owner', 'match_and_candidate_owner', 'opportunity_owner', 'permission'] },
     // Only relevant when recipients === 'role'. Roles are tenant-real, resolved by the
     // backend via `roles.name` (resolveRecipients: whereHas('roles', name = config.role)),
     // so this is NOT a static list — it is a live GET /roles lookup, same dynamic-options
@@ -39,6 +41,11 @@ export default {
     // excludes the platform-only super_admin role server-side (RoleController::index).
     { key: 'role',       label: 'Role',        type: 'lookup_select', endpoint: '/roles', valueKey: 'name',
       showIf: { key: 'recipients', value: 'role' } },
+    // HF-WORKFLOWS-1-SIBLINGS-1: every user holding the permission receives the notification.
+    // GET /permissions answers an OBJECT of groups (PermissionsByGroup), hence responseKey '*'
+    // (useLookupOptions flattens every group array into one option list).
+    { key: 'permission', label: 'Permission', type: 'lookup_select', endpoint: '/permissions', valueKey: 'name', responseKey: '*',
+      showIf: { key: 'recipients', value: 'permission' } },
     // WF-BUILDER-VELDEN-1: explicit user picks — only reachable when recipients==='users'
     // (resolveRecipients' default branch). DL-08/WFB-11: the builder runs on settings.view,
     // which a genuinely settings-only role lacks alongside users.view — GET /users/options

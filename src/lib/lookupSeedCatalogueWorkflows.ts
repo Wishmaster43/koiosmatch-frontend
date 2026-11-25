@@ -144,7 +144,7 @@ const workflowNames: Record<string, string> = {
   koiosPlanAfspraak: "Koios: plan afspraak",
   koiosStuurNotificatie: "Koios: stuur notificatie",
   koiosVoegToeAanBellijst: "Koios: voeg toe aan bellijst",
-  // SEED-HF-TEMPLATE-LABELS-1: the 18 seeded HelloFlex workflow templates (BE lang/nl/helloflex.php)
+  // SEED-HF-TEMPLATE-LABELS-1: the 19 seeded HelloFlex workflow templates (BE lang/nl/helloflex.php)
   helloflexNieuweMatchNaarContract: "HelloFlex: nieuwe match naar contract",
   helloflexNieuweKandidaat: "HelloFlex: nieuwe kandidaat",
   helloflexKandidaatGewijzigd: "HelloFlex: kandidaat gewijzigd",
@@ -163,6 +163,7 @@ const workflowNames: Record<string, string> = {
   helloflexActiviteitAangemaakt: "HelloFlex: activiteit aangemaakt",
   helloflexKostenplaatsenGewijzigd: "HelloFlex: kostenplaatsen gewijzigd",
   helloflexVestigingenGewijzigd: "HelloFlex: vestigingen gewijzigd",
+  helloflexContactpersoonGewijzigd: "HelloFlex: contactpersoon gewijzigd",
 }
 
 // Merged into SEED_LABELS (lookupSeedCatalogue.ts) under the same two keys.

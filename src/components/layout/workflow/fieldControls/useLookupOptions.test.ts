@@ -27,6 +27,15 @@ describe('useLookupOptions', () => {
     await waitFor(() => expect(result.current.opts).toEqual([{ value: '2', label: 'Active' }]))
   })
 
+  it("flattens every group array of an object response when responseKey is '*'", async () => {
+    const api = (await import('@/lib/api')).default
+    // A non-array value (meta) must be skipped by the flatten, never spread into the options.
+    vi.mocked(api.get).mockResolvedValueOnce({ data: { candidates: [{ name: 'candidates.view' }], tasks: [{ name: 'tasks.view' }, { name: 'tasks.edit' }], meta: { total: 3 } } })
+    const { result } = renderHook(() => useLookupOptions('/permissions', o => ({ value: String(o.name), label: String(o.name) }), [], '*'))
+    await waitFor(() => expect(result.current.opts.map(o => o.value)).toEqual(['candidates.view', 'tasks.view', 'tasks.edit']))
+    expect(api.get).toHaveBeenCalledWith('/permissions')
+  })
+
   it('sets error on a failed fetch and clears it (with a fresh fetch) on retry', async () => {
     const api = (await import('@/lib/api')).default
     vi.mocked(api.get).mockRejectedValueOnce(new Error('network'))

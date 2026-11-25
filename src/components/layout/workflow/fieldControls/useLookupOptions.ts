@@ -4,7 +4,8 @@ import api, { unwrap, unwrapList } from '@/lib/api'
 // Loads a tenant lookup endpoint into typed options, with the alive-guard + error/retry
 // state every workflow lookup field repeats (LookupSelectField, WhatsappPhoneNumberField).
 // `mapRow` shapes each raw row into the caller's option type (or null to drop it);
-// `responseKey` reads one collection out of an object response instead of a plain list.
+// `responseKey` reads one collection out of an object response instead of a plain list;
+// '*' concatenates every array value of the object (grouped responses).
 export function useLookupOptions<T>(
   endpoint: string,
   mapRow: (row: Record<string, unknown>) => T | null,
@@ -40,9 +41,13 @@ export function useLookupOptions<T>(
     Promise.resolve()
       .then(() => api.get(endpoint))
       .then(r => {
-        const rows = (responseKey
-          ? ((unwrap(r) as Record<string, unknown> | null)?.[responseKey] ?? [])
-          : unwrapList(r).rows) as Array<Record<string, unknown>>
+        // '*' = every array value of the object response, concatenated (grouped endpoints such as /permissions).
+        const body = responseKey ? (unwrap(r) as Record<string, unknown> | null) : null
+        const rows = (responseKey === '*'
+          ? Object.values(body ?? {}).filter(Array.isArray).flat()
+          : responseKey
+            ? (body?.[responseKey] ?? [])
+            : unwrapList(r).rows) as Array<Record<string, unknown>>
         if (alive) setOpts(rows.map(mapRowRef.current).filter((o): o is T => o !== null))
       })
       .catch(() => { if (alive) setError(true) })

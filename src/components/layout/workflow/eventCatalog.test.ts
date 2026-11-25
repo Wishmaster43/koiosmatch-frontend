@@ -13,7 +13,8 @@ import { WORKFLOW_EVENT_KEYS, HELLOFLEX_EVENT_KEYS, HELLOFLEX_EVENTS, WORKFLOW_E
 // Manual mirror of TriggerModule::configSchema()'s `event.options` (koiosmatch-api,
 // app/Workflow/Modules/TriggerModule.php ~L68-135) — every key here has a real
 // WorkflowDispatcher::dispatch() call site backing it. REPAIR N5 (2026-09-04):
-// re-counted the backend's FULL options array by hand: 67 keys (66 earlier:
+// re-counted the backend's FULL options array by hand: 68 keys since HF-WORKFLOWS-1-SIBLINGS-1
+// added contact.updated (67 before that; 66 earlier:
 // 57 + 4 added by TRIGGER-VOCAB-1/KLEIN-BE-1 + 5 approval/blank-fallback keys;
 // plus match.reopened, BE lane C b8b7dabd4). The two tests below
 // make this an exact bidirectional mirror (no missing key, no fake affordance),
@@ -39,7 +40,7 @@ const BACKEND_DISPATCHED_EVENTS = [
   'candidate.availability_upcoming', 'candidate.availability_overdue',
   'candidate.leave_ending_soon', 'candidate.leave_overdue',
   'candidate.unavailable_ending_soon', 'candidate.unavailable_overdue',
-  'application.proposal_sent', 'candidate.archived', 'candidate.missing_cv', 'contact.retention_due',
+  'application.proposal_sent', 'candidate.archived', 'candidate.missing_cv', 'contact.retention_due', 'contact.updated',
   // TRIGGER-VOCAB-1 (KLEIN-BE-1, CONTRACT-CHANGELOG 2026-09-17).
   'opportunity.closing_soon', 'opportunity.stale', 'vacancy.closing_soon', 'vacancy.stale_online',
   'match.approval_pending', 'match.approval_overdue', 'match.approved', 'match.rejected', 'settings.blank_fallback',
@@ -68,11 +69,11 @@ describe('WORKFLOW_EVENT_KEYS · backend parity', () => {
   })
 
   // REPAIR N5 / TRIGGER-VOCAB-1: an explicit count pins the FULL mirror
-  // (67/67), not just "no diff either way" — a future backend addition that
+  // (68/68), not just "no diff either way": a future backend addition that
   // also updates BACKEND_DISPATCHED_EVENTS but not this number would still be caught.
-  it('mirrors exactly 67 backend-dispatched events', () => {
-    expect(BACKEND_DISPATCHED_EVENTS.length).toBe(67)
-    expect(WORKFLOW_EVENT_KEYS.length).toBe(67)
+  it('mirrors exactly 68 backend-dispatched events', () => {
+    expect(BACKEND_DISPATCHED_EVENTS.length).toBe(68)
+    expect(WORKFLOW_EVENT_KEYS.length).toBe(68)
   })
 })
 
@@ -98,8 +99,8 @@ describe('HelloFlex event group', () => {
     expect(WORKFLOW_EVENT_GROUPS.helloflex).toEqual(HELLOFLEX_EVENT_KEYS)
   })
 
-  it('stays out of the TriggerModule mirror (67 core events untouched)', () => {
-    expect(WORKFLOW_EVENT_GROUPS.core.length).toBe(67)
+  it('stays out of the TriggerModule mirror (68 core events untouched)', () => {
+    expect(WORKFLOW_EVENT_GROUPS.core.length).toBe(68)
     expect(WORKFLOW_EVENT_KEYS.some(k => k.startsWith('helloflex.'))).toBe(false)
   })
 

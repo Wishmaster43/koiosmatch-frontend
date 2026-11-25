@@ -13,13 +13,14 @@ describe('helloflex_inbound module', () => {
     expect(helloflexInbound.category).toBe('triggers')
   })
 
-  it('has a required events multi-select over the 18 HelloFlex filter names plus the two booleans', () => {
-    expect(helloflexInbound.schema).toHaveLength(3)
-    const [events, fetchEntity, onlyLinked] = helloflexInbound.schema as Array<Record<string, unknown>>
+  it('has a required events multi-select over the 18 HelloFlex filter names plus the three booleans', () => {
+    expect(helloflexInbound.schema).toHaveLength(4)
+    const [events, fetchEntity, onlyLinked, onlyUnlinked] = helloflexInbound.schema as Array<Record<string, unknown>>
     expect(events).toMatchObject({ key: 'events', type: 'multiselect', required: true })
     expect((events.options as Array<{ value: string }>).map(o => o.value)).toEqual(HELLOFLEX_FILTER_NAMES)
     expect(HELLOFLEX_FILTER_NAMES).toHaveLength(18)
     expect(fetchEntity).toMatchObject({ key: 'fetch_entity', type: 'boolean', default: false })
     expect(onlyLinked).toMatchObject({ key: 'only_linked', type: 'boolean', default: false })
+    expect(onlyUnlinked).toMatchObject({ key: 'only_unlinked', type: 'boolean', default: false })
   })
 })
