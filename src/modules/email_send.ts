@@ -27,8 +27,10 @@ export default {
     // main tab stays untouched). Empty per-field = falls back to subject/body (bureau language).
     { key: 'translations', label: 'Translations', type: 'translations', tab: 'translations',
       fields: ['subject', 'body'], languages: MESSAGING_LANGUAGES, mainFields: { subject: 'subject', body: 'body' } },
-    // Which mail sender/context this send uses (Settings → Communicatie contexts).
-    { key: 'sender_context',       label: 'Sender context',       type: 'select', options: ['kandidaten','algemeen'], default: 'kandidaten' },
+    // Which mail sender/context this send uses (Settings → Communication contexts). WORKFLOW-SENDER-CONTEXT-1
+    // (Danny 23-11 Q19, BE MINI-BUNDLE-13): the stored values are English; an older stored Dutch value is
+    // mapped on read by the BE and, belt and braces, by the editor (LEGACY_CONFIG_VALUES in constants.ts).
+    { key: 'sender_context',       label: 'Sender context',       type: 'select', options: ['candidates','general'], default: 'candidates' },
     // Tenant-lookup message purpose (message_purposes) — same lookup as whatsapp_send's
     // `purpose`, so the two channels share one badge/filter vocabulary on the timeline.
     { key: 'purpose',              label: 'Message purpose',            type: 'lookup_select', endpoint: '/message-purposes', default: 'manual' },

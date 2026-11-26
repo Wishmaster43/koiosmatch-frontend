@@ -7,6 +7,7 @@
  */
 
 import type { WorkflowStep, FlowNode, FlowEdge, FilterCondition, FilterConditionGroup, EdgeFilters } from '@/types/workflow'
+import { normalizeLegacyConfigValues } from './constants'
 
 // Stable id for a freshly created node. A REAL uuid: the backend honours the
 // editor's step id on create but validates it as uuid (steps.*.id) — a non-uuid
@@ -36,7 +37,8 @@ export function stepsToFlow(steps: WorkflowStep[]): { nodes: FlowNode[]; edges: 
     position: (s.position as { x: number; y: number } | undefined) ?? { x: 80 + i * GAP, y: 180 },
     // The per-step label (seeded templates name their steps) rides on the node so a
     // save round-trips it — flowToSteps below writes it back (WFB-04).
-    data:     { type: s.type, config: { ...s.config }, isFirst: i === 0, ...(s.label ? { label: s.label } : {}) },
+    // Legacy stored values (sender_context Dutch keys) become the English ones the select offers.
+    data:     { type: s.type, config: normalizeLegacyConfigValues(s.type, { ...s.config }), isFirst: i === 0, ...(s.label ? { label: s.label } : {}) },
     width:    NODE_W,
     height:   NODE_H,
   }))

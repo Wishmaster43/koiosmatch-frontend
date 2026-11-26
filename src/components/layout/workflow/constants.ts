@@ -54,3 +54,22 @@ const LEGACY_OPERATOR_MAP: Record<string, string> = {
 
 // Normalise a stored operator to its backend key (pass-through when already valid).
 export const normalizeOperator = (op?: string): string => LEGACY_OPERATOR_MAP[op ?? ''] ?? op ?? '='
+
+// Legacy persisted config VALUES per module field → the English key the BE stores now
+// (WORKFLOW-SENDER-CONTEXT-1: email_send.sender_context 'kandidaten'/'algemeen'). The BE maps
+// these on read too; this keeps an un-migrated row honest in the editor instead of an unknown option.
+const LEGACY_CONFIG_VALUES: Record<string, Record<string, Record<string, string>>> = {
+  email_send: { sender_context: { kandidaten: 'candidates', algemeen: 'general' } },
+}
+
+// Rewrites the legacy values of one step's config (a copy); every other key passes through untouched.
+export function normalizeLegacyConfigValues(type: string | undefined, config: Record<string, unknown>): Record<string, unknown> {
+  const fieldMaps = type ? LEGACY_CONFIG_VALUES[type] : undefined
+  if (!fieldMaps) return config
+  const next = { ...config }
+  for (const [key, map] of Object.entries(fieldMaps)) {
+    const value = next[key]
+    if (typeof value === 'string' && map[value] !== undefined) next[key] = map[value]
+  }
+  return next
+}

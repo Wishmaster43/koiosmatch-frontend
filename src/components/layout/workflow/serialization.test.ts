@@ -397,3 +397,21 @@ describe('stepsToFlow → flowToSteps keeps hidden config keys', () => {
     expect(flowToSteps(nodes, edges)[0].config).toEqual({ subject: 'x', mail_category: 'rejection' })
   })
 })
+
+// WORKFLOW-SENDER-CONTEXT-1: a stored Dutch sender_context value loads as the English option the select offers.
+describe('stepsToFlow · legacy config values', () => {
+  it('maps email_send.sender_context kandidaten/algemeen to candidates/general and leaves every other key alone', () => {
+    const steps = [
+      { id: 's1', type: 'email_send', config: { sender_context: 'kandidaten', subject: 'Hoi' } },
+      { id: 's2', type: 'email_send', config: { sender_context: 'algemeen' } },
+      { id: 's3', type: 'email_send', config: { sender_context: 'general' } },
+      { id: 's4', type: 'notification_send', config: { sender_context: 'kandidaten' } },
+    ] as unknown as Parameters<typeof stepsToFlow>[0]
+    const { nodes } = stepsToFlow(steps)
+    const cfg = (i: number) => (nodes[i].data as { config: Record<string, unknown> }).config
+    expect(cfg(0)).toEqual({ sender_context: 'candidates', subject: 'Hoi' })
+    expect(cfg(1)).toEqual({ sender_context: 'general' })
+    expect(cfg(2)).toEqual({ sender_context: 'general' })
+    expect(cfg(3)).toEqual({ sender_context: 'kandidaten' })
+  })
+})
