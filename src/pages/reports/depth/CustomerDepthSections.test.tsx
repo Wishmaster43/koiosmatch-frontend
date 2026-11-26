@@ -73,6 +73,17 @@ describe('CustomerDepthSections', () => {
     expect(screen.getAllByText("Fixed 12 months; does not follow this report's filters.").length).toBeGreaterThan(0)
   })
 
+  // REPORT-COHORT-DEFINITION-1: the cohort card says what a TRUE cohort means (key through the real i18n instance).
+  it('shows the cohort definition caption under the cohort card title', () => {
+    render(<CustomerDepthSections data={BASE_DATA} onOpenCustomer={vi.fn()} />)
+    expect(screen.getByText(i18n.t('analytics:customers.depth.cohorts.definition'))).toBeTruthy()
+  })
+
+  it('renders no cohort definition when the cohort block is absent', () => {
+    render(<CustomerDepthSections data={{ ...BASE_DATA, phase_cohorts: undefined }} onOpenCustomer={vi.fn()} />)
+    expect(screen.queryByText(i18n.t('analytics:customers.depth.cohorts.definition'))).toBeNull()
+  })
+
   // A real customer slice click drills onOpenCustomer with the exact id.
   it('drills a real concentration slice with its customer_id', () => {
     const onOpenCustomer = vi.fn()

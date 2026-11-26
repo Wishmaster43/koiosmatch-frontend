@@ -519,7 +519,8 @@
         "title": "Da prospect a cliente per coorte mensile",
         "prospects": "Prospect",
         "converted": "Convertiti",
-        "rate": "Conversione %"
+        "rate": "Conversione %",
+        "definition": "Per mese: la quota dei prospect entrati in quel mese che in seguito sono diventati clienti, indipendentemente dal momento della conversione. Una coorte non supera mai il 100 %."
       },
       "churn": {
         "title": "Clienti persi al mese",

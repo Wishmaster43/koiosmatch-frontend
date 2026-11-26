@@ -519,7 +519,8 @@
         "title": "Prospect to customer per monthly cohort",
         "prospects": "Prospects",
         "converted": "Converted",
-        "rate": "Conversion %"
+        "rate": "Conversion %",
+        "definition": "Per month: the share of the prospects that entered in that month and later became a customer, whenever that conversion happened. A cohort never exceeds 100 %."
       },
       "churn": {
         "title": "Churned customers per month",

@@ -519,7 +519,8 @@
         "title": "Prospect naar klant per maandcohort",
         "prospects": "Prospects",
         "converted": "Geconverteerd",
-        "rate": "Conversie %"
+        "rate": "Conversie %",
+        "definition": "Per maand: het aandeel van de prospects die in die maand binnenkwamen en later klant zijn geworden, ongeacht wanneer die overstap viel. Een cohort komt nooit boven 100 %."
       },
       "churn": {
         "title": "Verloren klanten per maand",

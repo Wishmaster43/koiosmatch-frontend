@@ -519,7 +519,8 @@
         "title": "Prospect à client par cohorte mensuelle",
         "prospects": "Prospects",
         "converted": "Convertis",
-        "rate": "Taux de conversion %"
+        "rate": "Taux de conversion %",
+        "definition": "Par mois : la part des prospects entrés ce mois-là qui sont devenus clients par la suite, quel que soit le moment de la conversion. Une cohorte ne dépasse jamais 100 %."
       },
       "churn": {
         "title": "Clients perdus par mois",

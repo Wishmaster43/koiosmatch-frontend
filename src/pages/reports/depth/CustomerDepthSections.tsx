@@ -99,6 +99,8 @@ export default function CustomerDepthSections({ data, onOpenCustomer }: {
         <ReportChartCard span={2} title={t('customers.depth.cohorts.title')} chart={
           <>
             <Caption>{t('customers.depth.fixedWindow12')}</Caption>
+            {/* REPORT-COHORT-DEFINITION-1 (Danny 23-11, Q29): the card computes a TRUE cohort, so say what the bars mean. */}
+            <Caption as="div" style={{ marginBottom: 6 }}>{t('customers.depth.cohorts.definition')}</Caption>
             <WeeklyBarChartCard
               data={data.phase_cohorts.map(c => ({ name: formatMonth(c.cohort), value: c.prospects, prospects: c.prospects, converted: c.converted, rate: c.rate == null ? null : Math.round(c.rate * 100) }))}
               series={[

@@ -519,7 +519,8 @@
         "title": "Prospect zu Kunde pro Monatskohorte",
         "prospects": "Prospects",
         "converted": "Konvertiert",
-        "rate": "Konversion %"
+        "rate": "Konversion %",
+        "definition": "Pro Monat: der Anteil der Prospects, die in diesem Monat eingegangen sind und später Kunde wurden, unabhängig vom Zeitpunkt der Konversion. Eine Kohorte liegt nie über 100 %."
       },
       "churn": {
         "title": "Verlorene Kunden pro Monat",
