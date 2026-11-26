@@ -194,13 +194,19 @@ export function PickerPopover({ variables, onInsert, onClose }: {
 
 // ── The text/textarea field with an attached variable picker ────────────────────
 
-export function TextFieldWithVars({ field, value, onChange, variables, multiline, insertMode = 'token' }: {
+export function TextFieldWithVars({ field, value, onChange, variables, multiline, insertMode = 'token', id, 'aria-labelledby': labelledBy, 'aria-required': ariaRequired }: {
   field: WorkflowField
   value?: unknown
   onChange: (key: string, value: unknown) => void
   variables: WorkflowVarGroup[]
   multiline?: boolean
   insertMode?: InsertMode
+  // VARPICKER-A11Y-FORWARD-1 (§6, REQUIRED-A11Y-3): the form kit's FieldRow/Field clone id, aria-labelledby and
+  // aria-required onto their single child; this control forwards them to its native element so the visible label
+  // associates (htmlFor → id) and a required field is announced. Without a label id the field's own aria-label names it.
+  id?: string
+  'aria-labelledby'?: string
+  'aria-required'?: boolean
 }) {
   const { t, i18n } = useTranslation('workflows')
   const [open, setOpen] = useState(false)
@@ -230,13 +236,15 @@ export function TextFieldWithVars({ field, value, onChange, variables, multiline
   return (
     <div style={{ position: 'relative', flex: 1, minWidth: 0 }}>
       {multiline ? (
-        <textarea ref={ref} value={(value as string) || ''} placeholder={fieldPlaceholder(t, i18n, field.placeholder)} aria-label={fieldLabel(t, i18n, field.label)}
+        <textarea ref={ref} id={id} aria-labelledby={labelledBy} aria-required={ariaRequired || undefined}
+          value={(value as string) || ''} placeholder={fieldPlaceholder(t, i18n, field.placeholder)} aria-label={fieldLabel(t, i18n, field.label)}
           onChange={e => onChange(field.key, e.target.value)} rows={4}
           style={{ ...base, fontFamily: 'monospace', resize: 'vertical', paddingRight: 9 }}
           onFocus={e => (e.target.style.borderColor = 'var(--color-primary)')}
           onBlur={e  => (e.target.style.borderColor = 'var(--border)')} />
       ) : (
-        <input ref={ref} type="text" value={(value as string) || ''} placeholder={fieldPlaceholder(t, i18n, field.placeholder)} aria-label={fieldLabel(t, i18n, field.label)}
+        <input ref={ref} type="text" id={id} aria-labelledby={labelledBy} aria-required={ariaRequired || undefined}
+          value={(value as string) || ''} placeholder={fieldPlaceholder(t, i18n, field.placeholder)} aria-label={fieldLabel(t, i18n, field.label)}
           onChange={e => onChange(field.key, e.target.value)}
           style={base}
           onFocus={e => (e.target.style.borderColor = 'var(--color-primary)')}

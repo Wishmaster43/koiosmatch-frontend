@@ -1,6 +1,7 @@
 import { describe, it, expect, vi, beforeAll } from 'vitest'
 import { render, screen, fireEvent } from '@testing-library/react'
 import { TextFieldWithVars } from './VariablePicker'
+import { FieldRow } from '@/components/forms/fields'
 import type { WorkflowField, WorkflowVarGroup } from '@/types/workflow'
 
 // No i18n instance in this suite: keys echo back and no key exists, so registry labels fall back to their raw text.
@@ -22,6 +23,33 @@ beforeAll(() => {
   if (!globalThis.requestAnimationFrame) {
     globalThis.requestAnimationFrame = (cb: FrameRequestCallback) => { cb(0); return 0 }
   }
+})
+
+describe('TextFieldWithVars · VARPICKER-A11Y-FORWARD-1 (label association through the form kit)', () => {
+  it('a FieldRow label names the textarea through htmlFor/id and announces required (aria-required)', () => {
+    render(<FieldRow label="Body text" required><TextFieldWithVars field={field} value="" onChange={() => {}} variables={variables} multiline /></FieldRow>)
+    const el = screen.getByLabelText(/Body text/)
+    expect(el.tagName).toBe('TEXTAREA')
+    expect(el).toHaveAttribute('aria-required', 'true')
+    expect(el.getAttribute('id')).toBeTruthy()
+    expect(el.getAttribute('aria-labelledby')).toBe(`${el.getAttribute('id')}-label`)
+  })
+
+  it('the single-line variant forwards the same three attributes to its input', () => {
+    render(<FieldRow label="Subject" required><TextFieldWithVars field={{ ...field, type: 'text' }} value="" onChange={() => {}} variables={variables} /></FieldRow>)
+    const el = screen.getByLabelText(/Subject/)
+    expect(el.tagName).toBe('INPUT')
+    expect(el).toHaveAttribute('aria-required', 'true')
+    expect(el.getAttribute('aria-labelledby')).toBe(`${el.getAttribute('id')}-label`)
+  })
+
+  it('without a form-kit parent the field keeps its own aria-label name and sets no aria-required', () => {
+    render(<TextFieldWithVars field={field} value="" onChange={() => {}} variables={variables} multiline />)
+    const el = screen.getByLabelText('Input')
+    expect(el.tagName).toBe('TEXTAREA')
+    expect(el).not.toHaveAttribute('aria-required')
+    expect(el).not.toHaveAttribute('aria-labelledby')
+  })
 })
 
 describe('TextFieldWithVars', () => {
