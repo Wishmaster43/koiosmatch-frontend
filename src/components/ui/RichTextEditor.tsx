@@ -17,6 +17,7 @@ import SelectMenu from './SelectMenu'
 import RichTextAssistBar from './RichTextAssistBar'
 import type { GenerateEntity, RichTextAssistMode } from './richtext/richTextAssistApi'
 import { bodyTextStyle, monoStyle, captionStyle } from './typography'
+import { SHIPPED_LOCALES } from '@/i18n/shippedLocales'
 
 // Toolbar-tooltip keys (common:editor.*) — the component translates its own
 // defaults (audit R2: four features each shipped a hardcoded-English copy of
@@ -27,7 +28,7 @@ type EditorLabels = Record<(typeof LABEL_KEYS)[number], string>
 
 // TAAL-SPELL-1 (Danny 06-08): the language menu on EVERY editor — codes match the
 // note `language` field contract (BE max:8) and the app locales.
-const EDITOR_LANGS = ['nl', 'en', 'de', 'fr', 'es', 'it', 'pt'] as const
+const EDITOR_LANGS = SHIPPED_LOCALES
 
 interface RichTextEditorProps {
   value?: string

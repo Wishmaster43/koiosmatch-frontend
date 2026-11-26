@@ -2,7 +2,7 @@
 // Notifications. Extracted from registry.tsx (REGISTRY-SPLIT-1) in original array
 // order; registry.tsx concatenates this with the other registry/groups.* modules
 // to build NAV_GROUPS.
-import { Mail, ClipboardList, Languages, MessageCircle, Bell } from 'lucide-react'
+import { Mail, ClipboardList, Languages, MessageCircle, MessageSquareText, Bell } from 'lucide-react'
 import type { NavGroup } from './types'
 
 import EmailSettings from '../sections/EmailSettings'
@@ -13,6 +13,7 @@ import MessagingLanguageSettings from '../sections/communication/MessagingLangua
 import EmailGeneralSettings from '../sections/EmailGeneralSettings'
 import WhatsAppSettings from '../sections/WhatsAppSettings'
 import WhatsAppWebNumbersSettings from '../sections/whatsapp/WhatsAppWebNumbersSettings'
+import WaTextTemplatesSettings from '../sections/whatsapp/WaTextTemplatesSettings'
 import WhatsAppLog from '../sections/WhatsAppLog'
 import { WaMessageTypeSettings } from '../sections/WaMessageTypeSettings'
 import NotificationsSettings from '../sections/NotificationsSettings'
@@ -61,6 +62,12 @@ export const communicationGroups: NavGroup[] = [
       // exists, so requiresModuleOrApp (not requiresPage) is the right gate.
       { id: 'whatsapp_web', icon: MessageCircle, component: WhatsAppWebNumbersSettings,
         requiresModuleOrApp: { module: 'whatsapp_web' }, requiresPermission: 'settings.view' },
+      // WA-WEB-TEMPLATES-1: tenant text templates for the wa_web channel. requiresPage 'whatsapp' mirrors
+      // the GET's own gate (page.whatsapp; every package with whatsapp_web also carries whatsapp), next to the
+      // module gate; logName = the audited table CMBE confirmed for this BE lane (AUDIT-LOG-NAMES.md row lands
+      // with it), so the changelog button reads a real log.
+      { id: 'wa_text_templates', icon: MessageSquareText, component: WaTextTemplatesSettings,
+        requiresPage: 'whatsapp', requiresModuleOrApp: { module: 'whatsapp_web' }, requiresPermission: 'settings.view', logName: 'whatsapp_text_templates' },
       { id: 'whatsapp_log', icon: ClipboardList, component: WhatsAppLog },
       // Message-type classification (priority_type on whatsapp_send; queue ordering).
       { id: 'wa_message_types', icon: MessageCircle, component: WaMessageTypeSettings, logName: 'whatsapp_message_types' },

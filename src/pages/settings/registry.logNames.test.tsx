@@ -161,6 +161,7 @@ const AUDITED_TABLES = new Set([
   'whatsapp_connections',
   'whatsapp_message_types',
   'whatsapp_phone_numbers',
+  'whatsapp_text_templates',
   'work_permit_types',
   'workflows',
   'workflow_folders',
