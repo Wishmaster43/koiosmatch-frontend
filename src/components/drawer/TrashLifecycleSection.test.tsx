@@ -3,7 +3,8 @@
  * the mark flow sends POST /{entity}/{id}/mark-deletion with and without
  * transfer_to_owner_id, the banner's unmark sends POST /{entity}/{id}/unmark-deletion,
  * both actions are HIDDEN without their permission, and the pending banner shows
- * the projected erase date in DD-MM-YYYY.
+ * the projected erase date in DD-MM-YYYY. TRASH-CODED-ERROR-FE-1: a coded 409 on the
+ * banner's unmark renders its translated sentence (real i18n instance), never the generic toast.
  */
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { render, screen, waitFor, within } from '@testing-library/react'
@@ -28,6 +29,7 @@ vi.mock('@/pages/settings/lib/settingsApi', () => ({
 }))
 // Toasts are side effects, not this test's subject.
 vi.mock('@/lib/notify', () => ({ notifyError: vi.fn(), notifySuccess: vi.fn() }))
+import { notifyError } from '@/lib/notify'
 
 const t = (key: string, opts?: Record<string, unknown>) => i18n.t(key, { ns: 'common', ...opts })
 
@@ -103,6 +105,19 @@ describe('TrashLifecycleSection — pending_erase banner', () => {
   it('hides the unmark action without the update permission', () => {
     renderSection({ lifecycle: 'pending_erase', pendingEraseAt: '2026-08-01T10:00:00Z', canUnmark: false })
     expect(screen.queryByRole('button', { name: t('trash.unmarkAction') as string })).toBeNull()
+  })
+
+  it('TRASH-CODED-ERROR-FE-1: a coded 409 on unmark renders the translated refusal, never the generic toast or the server text', async () => {
+    const user = userEvent.setup()
+    vi.mocked(api.post).mockRejectedValue({ response: { status: 409, data: { code: 'system_workflow_locked', message: 'server sentence' } } })
+    const { onUnmarked } = renderSection({
+      entityPath: 'vacancies', id: 'v-9', lifecycle: 'pending_erase', pendingEraseAt: '2026-08-01T10:00:00Z',
+    })
+    await user.click(screen.getByRole('button', { name: t('trash.unmarkAction') as string }))
+    await waitFor(() => expect(api.post).toHaveBeenCalledWith('/vacancies/v-9/unmark-deletion', undefined, expect.anything()))
+    await waitFor(() => expect(notifyError).toHaveBeenCalledWith(t('errors.systemWorkflowLocked')))
+    expect(notifyError).not.toHaveBeenCalledWith(t('actionFailed'))
+    expect(onUnmarked).not.toHaveBeenCalled()
   })
 
 // TRASH-ARCHIEF-EERST-1 (Danny 19-08, verbatim: "We doen altijd soft delete

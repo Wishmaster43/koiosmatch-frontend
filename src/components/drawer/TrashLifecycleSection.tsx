@@ -16,6 +16,7 @@ import { useDeletionLifecycle, eraseAroundDate } from '@/hooks/useDeletionLifecy
 import api from '@/lib/api'
 import { withIdempotencyKey } from '@/lib/idempotency'
 import { notifyError, notifySuccess } from '@/lib/notify'
+import { apiErrorMessage } from '@/lib/extractApiError'
 import { useDateFormat } from '@/lib/datetime'
 import type { Id } from '@/types/common'
 
@@ -69,8 +70,9 @@ export default function TrashLifecycleSection({
       setModalOpen(false)
       notifySuccess(t('trash.marked'))
       onMarked(id)
-    } catch {
-      notifyError(t('actionFailed'))
+    } catch (err) {
+      // TRASH-CODED-ERROR-FE-1: a coded refusal (409 system_workflow_locked, 403 permission_denied, ...) renders its translated sentence; anything else keeps the generic toast.
+      notifyError(apiErrorMessage(err, t, t('actionFailed')))
     } finally {
       setBusy(false)
     }
@@ -84,7 +86,8 @@ export default function TrashLifecycleSection({
     // IDEMP-KEY-BODYLESS-1: a bare unmark POST carries its own per-click key so a double click never double-fires.
     api.post(`/${entityPath}/${id}/unmark-deletion`, undefined, withIdempotencyKey())
       .then(() => { notifySuccess(t('trash.unmarked')); onUnmarked(id) })
-      .catch(() => notifyError(t('actionFailed')))
+      // TRASH-CODED-ERROR-FE-1: a coded refusal renders its translated sentence, never the generic toast.
+      .catch((err: unknown) => notifyError(apiErrorMessage(err, t, t('actionFailed'))))
       .finally(() => setUnmarkBusy(false))
   }
 

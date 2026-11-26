@@ -11,6 +11,7 @@ import { useTranslation } from 'react-i18next'
 import api from '@/lib/api'
 import { withIdempotencyKey } from '@/lib/idempotency'
 import { notifyError, notifySuccess } from '@/lib/notify'
+import { apiErrorMessage } from '@/lib/extractApiError'
 import type { GraceWindow } from '@/lib/graceWindow'
 import { eraseAroundDate, useDeletionLifecycle } from '@/hooks/useDeletionLifecycle'
 
@@ -59,8 +60,9 @@ export function useTrashFlow({ entityPath, onMarked, onUnmarked }: Args) {
       setTarget(null)
       notifySuccess(t('trash.marked'))
       onMarked?.(id)
-    } catch {
-      notifyError(t('actionFailed'))
+    } catch (err) {
+      // TRASH-CODED-ERROR-FE-1: a coded refusal (409 system_workflow_locked, 403 permission_denied, ...) renders its translated sentence; anything else keeps the generic toast.
+      notifyError(apiErrorMessage(err, t, t('actionFailed')))
     } finally {
       setBusy(false)
     }
@@ -77,8 +79,9 @@ export function useTrashFlow({ entityPath, onMarked, onUnmarked }: Args) {
       await api.post(`/${entityPath}/${id}/unmark-deletion`, undefined, withIdempotencyKey())
       notifySuccess(t('trash.unmarked'))
       onUnmarked?.(key)
-    } catch {
-      notifyError(t('actionFailed'))
+    } catch (err) {
+      // TRASH-CODED-ERROR-FE-1: a coded refusal (409 system_workflow_locked, 403 permission_denied, ...) renders its translated sentence; anything else keeps the generic toast.
+      notifyError(apiErrorMessage(err, t, t('actionFailed')))
     } finally {
       unmarkInFlight.current.delete(key)
       setUnmarkBusy(unmarkInFlight.current.size > 0)

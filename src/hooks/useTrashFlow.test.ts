@@ -5,10 +5,13 @@
  * this lane), the unmark POST for all three lane entities, the 409 in_use outcome
  * (modal stays open, blocked flag set, list NOT refreshed) and the composed
  * trash note (DD-MM-YYYY wording, honest fallback without a grace window).
+ * TRASH-CODED-ERROR-FE-1: a coded refusal (409 system_workflow_locked) on mark or unmark
+ * renders its translated sentence (read through the real i18n instance), never the generic toast.
  */
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { renderHook, act, waitFor } from '@testing-library/react'
 import api from '@/lib/api'
+import i18n from '@/i18n'
 import { __resetDeletionGraceCache } from '@/hooks/useDeletionLifecycle'
 import { useTrashFlow, buildTrashNote } from './useTrashFlow'
 
@@ -148,6 +151,32 @@ describe('useTrashFlow · unmark', () => {
     await act(async () => { await result.current.unmark('m1') })
     expect(onUnmarked).not.toHaveBeenCalled()
     expect(notifyError).toHaveBeenCalled()
+  })
+
+  it('TRASH-CODED-ERROR-FE-1: a coded 409 (system_workflow_locked) on unmark renders the translated refusal, never the generic toast or the server text', async () => {
+    const onUnmarked = vi.fn()
+    vi.mocked(api.post).mockRejectedValue({ response: { status: 409, data: { code: 'system_workflow_locked', message: 'server sentence' } } })
+    const { result } = renderHook(() => useTrashFlow({ entityPath: 'workflows', onUnmarked }))
+    await act(async () => { await result.current.unmark('wf1') })
+    expect(api.post).toHaveBeenCalledWith('/workflows/wf1/unmark-deletion', undefined, expect.anything())
+    expect(onUnmarked).not.toHaveBeenCalled()
+    expect(notifyError).toHaveBeenCalledTimes(1)
+    expect(notifyError).toHaveBeenCalledWith(i18n.t('errors.systemWorkflowLocked', { ns: 'common' }))
+    expect(notifyError).not.toHaveBeenCalledWith(i18n.t('actionFailed', { ns: 'common' }))
+  })
+
+  it('TRASH-CODED-ERROR-FE-1: a coded 409 on mark keeps the modal open and renders the translated refusal', async () => {
+    const onMarked = vi.fn()
+    vi.mocked(api.post).mockRejectedValue({ response: { status: 409, data: { code: 'system_workflow_locked', message: 'server sentence' } } })
+    const { result } = renderHook(() => useTrashFlow({ entityPath: 'workflows', onMarked }))
+    act(() => { result.current.openFor('wf1', 'Inbox send') })
+    await waitFor(() => expect(result.current.loading).toBe(false))
+    await act(async () => { await result.current.confirmMark(null) })
+    expect(api.post).toHaveBeenCalledWith('/workflows/wf1/mark-deletion', {}, expect.anything())
+    expect(result.current.target).not.toBeNull()
+    expect(result.current.blocked).toBe(false)
+    expect(onMarked).not.toHaveBeenCalled()
+    expect(notifyError).toHaveBeenCalledWith(i18n.t('errors.systemWorkflowLocked', { ns: 'common' }))
   })
 })
 
