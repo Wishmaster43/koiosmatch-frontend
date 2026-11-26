@@ -1391,6 +1391,8 @@
     "queued": "Bericht ingepland. Het gaat binnenkort uit.",
     "send": "Versturen",
     "waWebComposerHint": "Via WhatsApp Web (eigen nummer): vrij tekstbericht, wordt via de wachtrij verzonden",
+    "textTemplateLabel": "Tekstsjabloon",
+    "textTemplatePlaceholder": "Kies een sjabloon",
     "privacyNoticeIncluded": "Bij dit eerste bericht sturen we de privacyverklaring mee.",
     "sortLabel": "Sorteren",
     "messagesRegion": "Berichten",

@@ -82,7 +82,7 @@ export default function ConversationsSection({ threadsUrl, threadsParams, header
   const { formatDate, formatDateTime } = useDateFormat()
   const { rows, loading, error, openId, toggle, messages, setMessages, msgLoading, msgError, retryMessages, refreshRows, reloadThread } =
     useConversationThreads(threadsUrl, threadsParams)
-  const { composerText, setComposerText, sendingMsg, sendError, sendMessage } = useConversationSend(openId, setMessages, refreshRows)
+  const { composerText, setComposerText, textTemplateId, setTextTemplateId, sendingMsg, sendError, sendMessage } = useConversationSend(openId, setMessages, refreshRows)
   const { nowMs, sortOrder, changeSortOrder, sortMessages } = useThreadViewPrefs()
   // MANUAL-START-WORKFLOW-1: a bubble's run link opens the shared run drawer above this section.
   const { viewingRun, runLoading, viewRun, closeRun } = useWorkflowRunViewer()
@@ -217,6 +217,7 @@ export default function ConversationsSection({ threadsUrl, threadsParams, header
 
                 <ThreadComposerBlock row={row} win={win} hasMessages={msgs.length > 0} composerEnabled={composerEnabled}
                   composerNotice={composerNotice} draft={composerText} onDraftChange={setComposerText}
+                  textTemplateId={textTemplateId} onTextTemplateIdChange={setTextTemplateId}
                   sending={sendingMsg} sendError={sendError} onSend={() => sendMessage(row.id)}
                   onTemplateSent={() => reloadThread(row.id)} formatDateTime={formatDateTime} language={i18n.language} />
               </div>

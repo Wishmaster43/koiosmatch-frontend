@@ -1391,6 +1391,8 @@
     "queued": "Nachricht eingeplant. Sie geht in Kürze raus.",
     "send": "Senden",
     "waWebComposerHint": "Über WhatsApp Web (eigene Nummer): freier Text, wird über die Warteschlange gesendet",
+    "textTemplateLabel": "Textvorlage",
+    "textTemplatePlaceholder": "Vorlage wählen",
     "privacyNoticeIncluded": "Mit dieser ersten Nachricht senden wir die Datenschutzerklärung mit.",
     "sortLabel": "Sortierung",
     "messagesRegion": "Nachrichten",

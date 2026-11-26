@@ -11,6 +11,7 @@ import { Caption } from '@/components/ui/typography'
 import ConversationAssistSection from './ConversationAssistSection'
 import ThreadComposer from './ThreadComposer'
 import TemplateComposer from './TemplateComposer'
+import WaTextTemplatePicker from './WaTextTemplatePicker'
 import { windowLeftParts, type SessionWindowState } from './sessionWindow'
 import { isWaWeb, rowSubject, type ConversationRow } from './conversationRows'
 
@@ -23,6 +24,9 @@ interface ThreadComposerBlockProps {
   composerNotice?: ReactNode
   draft: string
   onDraftChange: (text: string) => void
+  // WA-WEB-TEMPLATES-1: the picked text template id (wa_web threads only).
+  textTemplateId: string | null
+  onTextTemplateIdChange: (id: string | null) => void
   sending: boolean
   sendError: string | null
   onSend: () => void
@@ -33,6 +37,7 @@ interface ThreadComposerBlockProps {
 
 // Composer for one open thread: free text in-window, template picker outside it.
 export default function ThreadComposerBlock({ row, win, hasMessages, composerEnabled, composerNotice, draft, onDraftChange,
+  textTemplateId, onTextTemplateIdChange,
   sending, sendError, onSend, onTemplateSent, formatDateTime, language }: ThreadComposerBlockProps) {
   const { t } = useTranslation('candidates')
   const left = windowLeftParts(win.msLeft)
@@ -74,7 +79,11 @@ export default function ThreadComposerBlock({ row, win, hasMessages, composerEna
             condition as the composer itself, so "Overnemen" always writes into a
             visibly rendered draft input (never an invisible/pending state). */}
         <ConversationAssistSection conversationId={row.id} hasMessages={hasMessages}
-          onApply={onDraftChange} language={language} />
+          onApply={text => { onDraftChange(text); onTextTemplateIdChange(null) }} language={language} />
+        {/* WA-WEB-TEMPLATES-1: text template picker, wa_web threads only. */}
+        {isWaWeb(row.primary_channel) && (
+          <WaTextTemplatePicker value={textTemplateId} onPick={onDraftChange} onIdChange={onTextTemplateIdChange} />
+        )}
         {/* WA-COMPOSER-1: the multi-line, auto-growing composer with the
             bold/italic/strikethrough + emoji toolbar (Danny's F5, 19-09) —
             Enter still sends, Shift+Enter still inserts a newline. */}

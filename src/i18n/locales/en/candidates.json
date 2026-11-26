@@ -1391,6 +1391,8 @@
     "queued": "Message scheduled. It goes out shortly.",
     "send": "Send",
     "waWebComposerHint": "Via WhatsApp Web (own number): free-text message, sent through the outbound queue",
+    "textTemplateLabel": "Text template",
+    "textTemplatePlaceholder": "Choose a template",
     "privacyNoticeIncluded": "The privacy notice is included with this first message.",
     "sortLabel": "Sort order",
     "messagesRegion": "Messages",

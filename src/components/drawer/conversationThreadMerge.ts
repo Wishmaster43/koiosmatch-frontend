@@ -6,7 +6,9 @@
 import type { MessageRow } from './ConversationMessage'
 import type { Id } from '@/types/common'
 
-export type PendingMessage = MessageRow & { _pendingOutboxId?: Id }
+// `_viaTextTemplate`: the send named a text template, so the BE renders placeholders and the
+// landed text differs from the raw draft the stub carries.
+export type PendingMessage = MessageRow & { _pendingOutboxId?: Id; _viaTextTemplate?: boolean }
 
 // WA-THREAD-UX-1 (verifier fix): a queued-refresh GET only ever carries what the
 // `messages` table already has — the drainer writes that row separately from the
@@ -23,8 +25,18 @@ export function mergeLandedMessages(serverRows: MessageRow[], prevRows: MessageR
   // (verifier round 2). The stub's own placeholder id is never a server id.
   const knownIds = new Set(prevRows.filter(m => (m as PendingMessage)._pendingOutboxId == null).map(m => String(m.id)))
   const unclaimedNewRows = serverRows.filter(r => !knownIds.has(String(r.id)))
-  const stillPending = stubs.filter(stub => {
+  // Pass 1: every stub with an exact outbound text twin is claimed first, so a template stub's
+  // fallback below can never take the twin of a plain stub that landed in the same refetch.
+  const afterExact = stubs.filter(stub => {
     const idx = unclaimedNewRows.findIndex(r => r.direction === 'outbound' && r.message_content === stub.message_content)
+    if (idx === -1) return true
+    unclaimedNewRows.splice(idx, 1)
+    return false
+  })
+  // Pass 2: a template stub has no exact text twin (rendered placeholders): claim the earliest new outbound row.
+  const stillPending = afterExact.filter(stub => {
+    if (!stub._viaTextTemplate) return true
+    const idx = unclaimedNewRows.findIndex(r => r.direction === 'outbound')
     if (idx === -1) return true
     unclaimedNewRows.splice(idx, 1)
     return false

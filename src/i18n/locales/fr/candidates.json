@@ -1391,6 +1391,8 @@
     "queued": "Message planifié. Il part sous peu.",
     "send": "Envoyer",
     "waWebComposerHint": "Via WhatsApp Web (numéro personnel) : message libre, envoyé via la file d’attente",
+    "textTemplateLabel": "Modèle de texte",
+    "textTemplatePlaceholder": "Choisir un modèle",
     "privacyNoticeIncluded": "La déclaration de confidentialité est jointe à ce premier message.",
     "sortLabel": "Trier",
     "messagesRegion": "Messages",

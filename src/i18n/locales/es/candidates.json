@@ -1391,6 +1391,8 @@
     "queued": "Mensaje programado. Sale en breve.",
     "send": "Enviar",
     "waWebComposerHint": "Vía WhatsApp Web (número propio): mensaje de texto libre, enviado mediante la cola de salida",
+    "textTemplateLabel": "Plantilla de texto",
+    "textTemplatePlaceholder": "Elegir una plantilla",
     "privacyNoticeIncluded": "Con este primer mensaje enviamos el aviso de privacidad.",
     "sortLabel": "Ordenar",
     "messagesRegion": "Mensajes",

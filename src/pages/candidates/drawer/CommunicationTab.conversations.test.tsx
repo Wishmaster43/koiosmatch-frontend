@@ -14,6 +14,8 @@ vi.mock('@/lib/api', async importOriginal => ({
   ...(await importOriginal<Record<string, unknown>>()),
   default: { get: apiGet },
 }))
+// WA-WEB-TEMPLATES-1: the wa_web composer mounts the picker; no templates here.
+vi.mock('@/components/whatsappWeb/useWhatsappTextTemplates', () => ({ useWhatsappTextTemplates: () => ({ templates: [], placeholders: [] }) }))
 vi.mock('@/lib/datetime', () => ({ useDateFormat: () => ({ formatDate: (v: string) => v, formatDateTime: (v: string) => v, formatTime: (v: string) => v, locale: 'nl-NL' }) }))
 vi.mock('@/lib/useNoteTypes', () => ({ useNoteTypes: () => ({ types: [], writableTypes: [] }), SYSTEM_NOTE_TYPES: new Set() }))
 vi.mock('@/lib/useLastContactTypes', () => ({ useLastContactTypes: () => ({ types: [] }) }))

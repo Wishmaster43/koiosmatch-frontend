@@ -39,6 +39,50 @@ describe('useConversationSend', () => {
     expect(result.current.composerText).toBe('')
   })
 
+  it('adds text_template_id only when picked, then clears it after a 201', async () => {
+    vi.mocked(api.post).mockResolvedValue({ status: 201, data: { id: 'm1' } })
+    const { result } = setup()
+    act(() => { result.current.setComposerText('hi'); result.current.setTextTemplateId('t1') })
+    await act(async () => { result.current.sendMessage('c1') })
+    expect(vi.mocked(api.post).mock.calls[0][1]).toEqual({ direction: 'outbound', message_content: 'hi', text_template_id: 't1' })
+    expect(result.current.textTemplateId).toBeNull()
+    act(() => result.current.setComposerText('again'))
+    await act(async () => { result.current.sendMessage('c1') })
+    expect(Object.keys(vi.mocked(api.post).mock.calls[1][1] as object)).toEqual(['direction', 'message_content'])
+  })
+
+  it('keeps the template id on a failed send and resets it when the thread changes', async () => {
+    vi.mocked(api.post).mockRejectedValue({ response: { status: 409, data: { message: 'no' } } })
+    let id = 'c1'
+    const hook = renderHook(() => useConversationSend(id, vi.fn(), vi.fn()))
+    act(() => { hook.result.current.setComposerText('hi'); hook.result.current.setTextTemplateId('t1') })
+    await act(async () => { hook.result.current.sendMessage('c1') })
+    expect(hook.result.current.textTemplateId).toBe('t1')
+    id = 'c2'
+    hook.rerender()
+    expect(hook.result.current.textTemplateId).toBeNull()
+  })
+
+  it('marks the 202 stub when a template was sent, and prefers the server text when echoed', async () => {
+    vi.mocked(api.post).mockResolvedValue({ status: 202, data: { outbox_id: 7 } })
+    const { result, setMessages } = setup()
+    act(() => { result.current.setComposerText('Hi {{first_name}}'); result.current.setTextTemplateId('t1') })
+    await act(async () => { result.current.sendMessage('c1') })
+    expect(vi.mocked(api.post).mock.calls[0][1]).toEqual({ direction: 'outbound', message_content: 'Hi {{first_name}}', text_template_id: 't1' })
+    const stub = (setMessages.mock.calls[0][0] as (m: Record<string, unknown[]>) => Record<string, Array<Record<string, unknown>>>)({}).c1[0]
+    expect(stub).toMatchObject({ message_content: 'Hi {{first_name}}', _viaTextTemplate: true })
+    expect(result.current.textTemplateId).toBeNull()
+    // A template send whose 202 echoes the rendered text: the stub carries the server text and no mark
+    // (an exact twin will land, so the merge fallback is not needed).
+    vi.mocked(api.post).mockResolvedValue({ status: 202, data: { outbox_id: 8, message_content: 'Hi Jan' } })
+    act(() => { result.current.setComposerText('Hi {{first_name}}'); result.current.setTextTemplateId('t1') })
+    await act(async () => { result.current.sendMessage('c1') })
+    expect(vi.mocked(api.post).mock.calls[1][1]).toEqual({ direction: 'outbound', message_content: 'Hi {{first_name}}', text_template_id: 't1' })
+    const stub2 = (setMessages.mock.calls[1][0] as (m: Record<string, unknown[]>) => Record<string, Array<Record<string, unknown>>>)({}).c1[0]
+    expect(stub2).toMatchObject({ message_content: 'Hi Jan' })
+    expect(stub2._viaTextTemplate).toBeUndefined()
+  })
+
   it('fires one request when send runs twice synchronously', async () => {
     vi.mocked(api.post).mockResolvedValue({ status: 201, data: { id: 'm1' } })
     const { result } = setup()

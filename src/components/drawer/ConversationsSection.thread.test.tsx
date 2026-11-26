@@ -16,6 +16,8 @@ vi.mock('@/lib/datetime', () => ({
 }))
 // WA-SEND-TRANSPORT-1: 409/502 must render INLINE, never a toast — mocked so the
 // negative "never called" assertions below are meaningful.
+// WA-WEB-TEMPLATES-1: the wa_web composer mounts the picker; no templates here.
+vi.mock('@/components/whatsappWeb/useWhatsappTextTemplates', () => ({ useWhatsappTextTemplates: () => ({ templates: [], placeholders: [] }) }))
 vi.mock('@/lib/notify', () => ({ notifyError: vi.fn(), notifySuccess: vi.fn() }))
 // G27: ConversationAssistSection makes its own real POST-capable call — mocked here
 // (it has its own dedicated test file) so the pre-existing tests above never fire it.

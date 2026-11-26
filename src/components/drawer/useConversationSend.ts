@@ -44,10 +44,12 @@ export function useConversationSend(
   const sendingRef = useRef(false)
   // The 409/502 inline explanation — never a toast, so it survives next to the draft.
   const [sendError, setSendError] = useState<string | null>(null)
+  // WA-WEB-TEMPLATES-1: the picked text template; the BE renders its placeholders at send time.
+  const [textTemplateId, setTextTemplateId] = useState<string | null>(null)
 
   // A newly opened thread starts with a clean draft — never leaks the previous
   // thread's unsent text (or its stale send error) into the one now expanded.
-  useEffect(() => { setComposerText(''); setSendError(null) }, [openId])
+  useEffect(() => { setComposerText(''); setSendError(null); setTextTemplateId(null) }, [openId])
 
   // POST the draft as an outbound session message and fold the answer into the thread.
   const sendMessage = useCallback((id: Id) => {
@@ -58,23 +60,31 @@ export function useConversationSend(
     sendingRef.current = true
     setSendingMsg(true)
     setSendError(null)
-    api.post(`/conversations/${id}/messages`, { direction: 'outbound', message_content: text }, withIdempotencyKey())
+    // The template key rides along only when a template was picked (body unchanged otherwise).
+    const body = { direction: 'outbound', message_content: text, ...(textTemplateId ? { text_template_id: textTemplateId } : {}) }
+    api.post(`/conversations/${id}/messages`, body, withIdempotencyKey())
       .then(r => {
         const res = r as { status?: number; data?: MessageRow & { outbox_id?: Id } }
         if (res.status === 202 && res.data?.outbox_id != null) {
           // Queued for the minute drainer: append a stub bubble marked pending so
           // the queued-refresh effect knows to keep polling this thread.
           const stub: PendingMessage = {
-            id: `pending-${res.data.outbox_id}`, direction: 'outbound', message_content: text,
+            id: `pending-${res.data.outbox_id}`, direction: 'outbound',
+            // Prefer the server's rendered text (template placeholders resolved) when the 202 echoes it.
+            message_content: res.data.message_content ?? text,
             // No sent_at: the server said "queued", so the bubble shows the queued marker,
             // never a timestamp plus a "Verzonden" tick it has not earned (verifier round 2).
+            // The mark is needed only when the stub still carries the RAW draft: an echoed rendered text
+            // matches the landed row exactly, so the merge needs no fallback for it.
             sent_at: null, _pendingOutboxId: res.data.outbox_id,
+            ...(textTemplateId && res.data.message_content == null ? { _viaTextTemplate: true } : {}),
           }
           setMessages(m => ({ ...m, [String(id)]: [...(m[String(id)] ?? []), stub] }))
         } else if (res.data) {
           setMessages(m => ({ ...m, [String(id)]: [...(m[String(id)] ?? []), res.data as MessageRow] }))
         }
         setComposerText('')
+        setTextTemplateId(null)
         // Refresh this dossier's threads after a real send — last_message_at/is_active
         // now come from the server, never a locally guessed bump.
         refreshRows()
@@ -92,9 +102,9 @@ export function useConversationSend(
         }
       })
       .finally(() => { sendingRef.current = false; setSendingMsg(false) })
-  }, [composerText, t, setMessages, refreshRows])
+  }, [composerText, textTemplateId, t, setMessages, refreshRows])
 
-  return { composerText, setComposerText, sendingMsg, sendError, sendMessage }
+  return { composerText, setComposerText, textTemplateId, setTextTemplateId, sendingMsg, sendError, sendMessage }
 }
 
 // WA-THREAD-UX-1 (F3): a wa_web thread's last send can still be `queued` while the
