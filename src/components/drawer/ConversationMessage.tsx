@@ -8,8 +8,9 @@
  * named + coloured by its sender through the shared avatar colour picker.
  */
 import { useTranslation } from 'react-i18next'
-import { Check, CheckCheck, Clock } from 'lucide-react'
+import { Check, CheckCheck, Clock, Workflow } from 'lucide-react'
 import SoftChip from '@/components/ui/SoftChip'
+import Button from '@/components/ui/Button'
 import { avatarColor } from '@/lib/avatarColor'
 import { tintBg, tintBorder } from '@/lib/tint'
 import { labelOrRaw } from '@/lib/labelOrRaw'
@@ -40,6 +41,9 @@ export interface MessageRow {
   // PUNT-2 (BE 0a8521df): who owned this turn — engine|workflow|human;
   // null/unknown = pre-flip row or future value, chip stays silent.
   handled_by?: string | null
+  // MANUAL-START-WORKFLOW-1 (BE ConversationMessageResource): the manual kick-off run this
+  // message ran as; null for a message that did not go through a run (no link rendered).
+  workflow_run_id?: string | null
 }
 
 
@@ -70,8 +74,10 @@ function DeliveryTicks({ sentAt, deliveredAt, readAt }: { sentAt?: string | null
 
 // Renders one WhatsApp bubble (see file docblock above): side/colour by direction
 // and sender, purpose badge, delivery ticks for outbound messages.
-export default function ConversationMessage({ message, formatDateTime }: {
+export default function ConversationMessage({ message, formatDateTime, onViewRun }: {
   message: MessageRow
+  // MANUAL-START-WORKFLOW-1: opens the run detail for `workflow_run_id`; absent = no link.
+  onViewRun?: (runId: string) => void
   // The host's locale-aware formatter — never a second date formatting rule (§5).
   formatDateTime: (value: string) => string
 }) {
@@ -108,6 +114,13 @@ export default function ConversationMessage({ message, formatDateTime }: {
             color={HANDLED_BY_COLORS[message.handled_by]} />
         )}
         {message.sent_at && <span style={{ fontSize: 10, color: 'var(--text-muted)' }}>{formatDateTime(message.sent_at)}</span>}
+        {/* MANUAL-START-WORKFLOW-1: a message sent as a manual kick-off run links to its run detail. */}
+        {out && message.workflow_run_id && onViewRun && (
+          <Button variant="ghost" onClick={() => onViewRun(message.workflow_run_id as string)}>
+            <Workflow size={12} />
+            {t('conversations.viewRun')}
+          </Button>
+        )}
         {/* A bubble the server answered with 202 "queued" (wa_web outbox) says so until the
             drainer's row lands — never a timestamp or a tick it has not earned. */}
         {(message as { _pendingOutboxId?: unknown })._pendingOutboxId != null && (

@@ -1434,6 +1434,8 @@
     "templateNeedsCandidate": "Cette conversation n’a pas de propriétaire connu ; l’envoi d’un modèle n’est pas encore possible ici.",
     "templateVarsUnsupported_one": "Ce modèle contient {{count}} variable qui ne peut pas encore être remplie ici. Choisissez un modèle sans variables.",
     "templateVarsUnsupported_other": "Ce modèle contient {{count}} variables qui ne peuvent pas encore être remplies ici. Choisissez un modèle sans variables.",
+    "viewRun": "Voir l’exécution du workflow",
+    "loadingRun": "Chargement de l’exécution…",
     "handledBy": {
       "engine": "Koios",
       "workflow": "Koios · workflow",

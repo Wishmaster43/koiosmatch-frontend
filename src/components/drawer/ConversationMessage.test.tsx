@@ -7,7 +7,7 @@
  * the chip reads channel/channel_label off the message row.
  */
 import { describe, it, expect, vi } from 'vitest'
-import { render, screen } from '@testing-library/react'
+import { render, screen, fireEvent } from '@testing-library/react'
 import ConversationMessage from './ConversationMessage'
 
 const baseMessage = {
@@ -70,5 +70,26 @@ describe('ConversationMessage · queued outbox stub', () => {
     expect(container.textContent).toMatch(/In wachtrij|delivery\.queued/)
     expect(container.textContent).not.toMatch(/Verzonden|delivery\.sent/)
     expect(fmt).not.toHaveBeenCalled()
+  })
+})
+
+// MANUAL-START-WORKFLOW-1: the run link renders only for an outbound message that carries a
+// run id AND a host that can open it; no i18n instance here, so the key echoes as the name.
+describe('ConversationMessage · run link (MANUAL-START-WORKFLOW-1)', () => {
+  it('renders the link for an outbound message with workflow_run_id and reports the id on click', () => {
+    const onViewRun = vi.fn()
+    render(<ConversationMessage message={{ ...baseMessage, workflow_run_id: 'r1' }} formatDateTime={formatDateTime} onViewRun={onViewRun} />)
+    fireEvent.click(screen.getByRole('button', { name: 'conversations.viewRun' }))
+    expect(onViewRun).toHaveBeenCalledTimes(1)
+    expect(onViewRun).toHaveBeenCalledWith('r1')
+  })
+
+  it('renders no link without a host handler, for a null id, or for an inbound message', () => {
+    const { rerender } = render(<ConversationMessage message={{ ...baseMessage, workflow_run_id: 'r1' }} formatDateTime={formatDateTime} />)
+    expect(screen.queryByRole('button', { name: 'conversations.viewRun' })).toBeNull()
+    rerender(<ConversationMessage message={{ ...baseMessage, workflow_run_id: null }} formatDateTime={formatDateTime} onViewRun={vi.fn()} />)
+    expect(screen.queryByRole('button', { name: 'conversations.viewRun' })).toBeNull()
+    rerender(<ConversationMessage message={{ ...baseMessage, direction: 'inbound', workflow_run_id: 'r1' }} formatDateTime={formatDateTime} onViewRun={vi.fn()} />)
+    expect(screen.queryByRole('button', { name: 'conversations.viewRun' })).toBeNull()
   })
 })

@@ -1434,6 +1434,8 @@
     "templateNeedsCandidate": "This conversation has no known owner; sending a template is not possible here yet.",
     "templateVarsUnsupported_one": "This template has {{count}} variable that cannot be filled in here yet. Pick a template without variables.",
     "templateVarsUnsupported_other": "This template has {{count}} variables that cannot be filled in here yet. Pick a template without variables.",
+    "viewRun": "View workflow run",
+    "loadingRun": "Loading run…",
     "handledBy": {
       "engine": "Koios",
       "workflow": "Koios · workflow",

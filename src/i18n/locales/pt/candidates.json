@@ -1434,6 +1434,8 @@
     "templateNeedsCandidate": "Esta conversa não tem um responsável conhecido, ainda não é possível enviar um modelo aqui.",
     "templateVarsUnsupported_one": "Este modelo tem {{count}} variável que ainda não pode ser preenchida aqui. Escolha um modelo sem variáveis.",
     "templateVarsUnsupported_other": "Este modelo tem {{count}} variáveis que ainda não podem ser preenchidas aqui. Escolha um modelo sem variáveis.",
+    "viewRun": "Ver execução do workflow",
+    "loadingRun": "A carregar execução…",
     "handledBy": {
       "engine": "Koios",
       "workflow": "Koios · workflow",

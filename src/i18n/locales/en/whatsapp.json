@@ -198,7 +198,8 @@
     "pauseConfirmTitle": "Pause the AI agent?",
     "pauseConfirm": "You take over this conversation. The AI agent sends no more messages until you resume it.",
     "pauseConfirmAction": "Pause",
-    "agentControlFailed": "Could not change the AI agent."
+    "agentControlFailed": "Could not change the AI agent.",
+    "loadingRun": "Loading run…"
   },
   "embeddedSignup": {
     "pending": "Number registered, waiting for activation by Meta.",

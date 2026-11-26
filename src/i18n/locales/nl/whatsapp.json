@@ -198,7 +198,8 @@
     "pauseConfirmTitle": "AI-agent pauzeren?",
     "pauseConfirm": "Jij neemt dit gesprek over. De AI-agent stuurt geen berichten meer tot je hem hervat.",
     "pauseConfirmAction": "Pauzeren",
-    "agentControlFailed": "Kon de AI-agent niet aanpassen."
+    "agentControlFailed": "Kon de AI-agent niet aanpassen.",
+    "loadingRun": "Run laden…"
   },
   "embeddedSignup": {
     "pending": "Nummer geregistreerd, wacht op activatie door Meta.",

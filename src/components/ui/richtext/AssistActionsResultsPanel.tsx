@@ -9,20 +9,18 @@
  * item's `run_id` — the shared RunDetailDrawer (fetched fresh; the execute
  * response only carries the id, not the full run row the drawer needs).
  */
-import { useRef, useState } from 'react'
+import { useRef } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Play, X } from 'lucide-react'
 import RunDetailDrawer from '@/components/reports/RunDetailDrawer'
+import { useWorkflowRunViewer } from '@/components/reports/useWorkflowRunViewer'
 import { Z } from '@/lib/zIndexScale'
-import { fetchWorkflowRun } from './assistActionsExecuteApi'
 import type { ExecuteSource } from './assistActionsExecuteApi'
 import { useAssistActionsExecute } from './useAssistActionsExecute'
 import { useEnsureProposalCv } from './useEnsureProposalCv'
 import AssistActionItemCard from './AssistActionItemCard'
 import type { RichTextAssistActionItem } from './richTextAssistApi'
-import type { RunRow } from '@/types/reports'
 import { humanizeIsoDates } from '@/lib/localDate'
-import { notifyError } from '@/lib/notify'
 import Spinner from '../Spinner'
 import Button from '../Button'
 import { Caption } from '../typography'
@@ -50,26 +48,9 @@ export default function AssistActionsResultsPanel({ items, source, onApplyAsText
   // appliedRef: after one apply, a re-run executes again but never re-appends
   // text (guards the 6x-duplicate class); deliberately NOT reset by exec.reset().
   const appliedRef = useRef(false)
-  // The run being inspected (fetched fresh from its id) — null = drawer closed.
-  const [viewingRun, setViewingRun] = useState<RunRow | null>(null)
-  const [runLoading, setRunLoading] = useState(false)
-
-  // Fetch the single run row (the execute response only carries the id) and
-  // open the SAME shared RunDetailDrawer the runs list uses — never a second
-  // hand-built run view (§3A reuse, never duplicate).
-  const viewRun = async (runId: string) => {
-    setRunLoading(true)
-    try {
-      setViewingRun(await fetchWorkflowRun(runId))
-    } catch {
-      // The card's own "Uitgevoerd" state already proved the action ran, so this
-      // is not fatal — but the click must still give visible feedback (R8), not
-      // silently do nothing.
-      notifyError(t('common:errorGeneric'))
-    } finally {
-      setRunLoading(false)
-    }
-  }
+  // The run being inspected (fetched fresh from its id) and the SAME shared RunDetailDrawer the
+  // runs list uses; the fetch + toast-on-failure live in the shared hook (MANUAL-START-WORKFLOW-1).
+  const { viewingRun, runLoading, viewRun, closeRun } = useWorkflowRunViewer()
 
   // Before "Uitvoeren": the plain preview list, unchanged from before this
   // feature, plus the three top-level actions.
@@ -129,7 +110,7 @@ export default function AssistActionsResultsPanel({ items, source, onApplyAsText
       {/* HUISSTIJL-1: RunDetailDrawer (src/components/reports, out of scope) types
           `zIndex?: number` — Z.confirm can't become a CSS var string without touching
           that file; kept as-is. */}
-      {viewingRun && <RunDetailDrawer run={viewingRun} onClose={() => setViewingRun(null)} zIndex={Z.confirm} />}
+      {viewingRun && <RunDetailDrawer run={viewingRun} onClose={closeRun} zIndex={Z.confirm} />}
     </div>
   )
 }

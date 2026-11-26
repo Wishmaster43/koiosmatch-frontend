@@ -18,6 +18,9 @@ import DataTable from '@/components/ui/DataTable'
 import type { Column } from '@/components/ui/DataTable'
 import EntityDrawer from '@/components/drawer/EntityDrawer'
 import ConversationMessage from '@/components/drawer/ConversationMessage'
+import RunDetailDrawer from '@/components/reports/RunDetailDrawer'
+import { useWorkflowRunViewer } from '@/components/reports/useWorkflowRunViewer'
+import { Z } from '@/lib/zIndexScale'
 import SoftChip from '@/components/ui/SoftChip'
 import EntityLink from '@/components/ui/EntityLink'
 import Button from '@/components/ui/Button'
@@ -42,6 +45,8 @@ const counterpartName = (row: WaConversationRow) =>
 export default function ConversationsTab({ openConversationId }: { openConversationId?: string | null }) {
   const { t, i18n } = useTranslation('whatsapp')
   const { formatDateTime } = useDateFormat()
+  // MANUAL-START-WORKFLOW-1: a bubble's run link opens the shared run drawer above the thread drawer.
+  const { viewingRun, runLoading, viewRun, closeRun } = useWorkflowRunViewer()
   const { openEntity } = useNavigation()
   const { registerFilters, unregisterFilters } = useRightPanel()
   const [escalated, setEscalated] = useState(false)
@@ -226,7 +231,7 @@ export default function ConversationsTab({ openConversationId }: { openConversat
                   <BodyText style={{ color: 'var(--text-muted)', textAlign: 'center' }}>{t('conversations.noMessages')}</BodyText>
                 )}
                 {thread.messages.map(m => (
-                  <ConversationMessage key={m.id} message={m} formatDateTime={formatDateTime} />
+                  <ConversationMessage key={m.id} message={m} formatDateTime={formatDateTime} onViewRun={viewRun} />
                 ))}
               </div>
             ),
@@ -237,6 +242,9 @@ export default function ConversationsTab({ openConversationId }: { openConversat
       <ConfirmDialog open={confirmPause} title={t('conversations.pauseConfirmTitle')} message={t('conversations.pauseConfirm')}
         confirmLabel={t('conversations.pauseConfirmAction')} onCancel={() => setConfirmPause(false)}
         onConfirm={async () => { if (selectedRow) await agentControl.run(selectedRow.id, 'pause'); setConfirmPause(false) }} />
+      {/* MANUAL-START-WORKFLOW-1: the run behind a manual kick-off message, the SAME shared drawer the runs list uses. */}
+      {runLoading && <Caption as="div">{t('conversations.loadingRun')}</Caption>}
+      {viewingRun && <RunDetailDrawer run={viewingRun} onClose={closeRun} zIndex={Z.confirm} />}
     </div>
   )
 }

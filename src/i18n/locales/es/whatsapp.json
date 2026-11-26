@@ -198,7 +198,8 @@
     "pauseConfirmTitle": "¿Pausar el agente de IA?",
     "pauseConfirm": "Tú asumes esta conversación. El agente de IA no envía más mensajes hasta que lo reanudes.",
     "pauseConfirmAction": "Pausar",
-    "agentControlFailed": "No se pudo cambiar el agente de IA."
+    "agentControlFailed": "No se pudo cambiar el agente de IA.",
+    "loadingRun": "Cargando ejecución…"
   },
   "embeddedSignup": {
     "pending": "Número registrado, a la espera de la activación por Meta.",

@@ -1434,6 +1434,8 @@
     "templateNeedsCandidate": "Questa conversazione non ha un responsabile noto: qui non è ancora possibile inviare un template.",
     "templateVarsUnsupported_one": "Questo template ha {{count}} variabile che qui non può ancora essere compilata. Scegli un template senza variabili.",
     "templateVarsUnsupported_other": "Questo template ha {{count}} variabili che qui non possono ancora essere compilate. Scegli un template senza variabili.",
+    "viewRun": "Vedi esecuzione del workflow",
+    "loadingRun": "Caricamento esecuzione…",
     "handledBy": {
       "engine": "Koios",
       "workflow": "Koios · workflow",

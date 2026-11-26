@@ -41,6 +41,9 @@ import { useConversationSend, useQueuedMessageRefresh } from './useConversationS
 import { useThreadViewPrefs } from './useThreadViewPrefs'
 import type { Id } from '@/types/common'
 import ErrorBanner from '@/components/ui/ErrorBanner'
+import RunDetailDrawer from '@/components/reports/RunDetailDrawer'
+import { useWorkflowRunViewer } from '@/components/reports/useWorkflowRunViewer'
+import { Z } from '@/lib/zIndexScale'
 import { Caption } from '@/components/ui/typography'
 import { labelOrRaw } from '@/lib/labelOrRaw'
 
@@ -81,6 +84,8 @@ export default function ConversationsSection({ threadsUrl, threadsParams, header
     useConversationThreads(threadsUrl, threadsParams)
   const { composerText, setComposerText, sendingMsg, sendError, sendMessage } = useConversationSend(openId, setMessages, refreshRows)
   const { nowMs, sortOrder, changeSortOrder, sortMessages } = useThreadViewPrefs()
+  // MANUAL-START-WORKFLOW-1: a bubble's run link opens the shared run drawer above this section.
+  const { viewingRun, runLoading, viewRun, closeRun } = useWorkflowRunViewer()
   // Scrolls the open thread's message list to the edge holding the newest message.
   const messageListRef = useRef<HTMLDivElement | null>(null)
   useQueuedMessageRefresh(openId, rows, messages, setMessages)
@@ -206,7 +211,7 @@ export default function ConversationsSection({ threadsUrl, threadsParams, header
                 <div ref={isOpen ? messageListRef : undefined} role="region" tabIndex={0} aria-label={t('conversations.messagesRegion')}
                   style={{ maxHeight: 420, overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: 6 }}>
                   {sortMessages(msgs).map(m => (
-                    <ConversationMessage key={m.id} message={m} formatDateTime={formatDateTime} />
+                    <ConversationMessage key={m.id} message={m} formatDateTime={formatDateTime} onViewRun={viewRun} />
                   ))}
                 </div>
 
@@ -219,6 +224,10 @@ export default function ConversationsSection({ threadsUrl, threadsParams, header
           </div>
         )
       })}
+
+      {/* MANUAL-START-WORKFLOW-1: the run behind a manual kick-off message, the SAME shared drawer the runs list uses. */}
+      {runLoading && <Caption as="div">{t('conversations.loadingRun')}</Caption>}
+      {viewingRun && <RunDetailDrawer run={viewingRun} onClose={closeRun} zIndex={Z.confirm} />}
 
       {/* Escalated-thread hint: a subtle note so the recruiter knows a human took over. */}
       {!loading && !error && rows.some(r => r.escalated) && (
