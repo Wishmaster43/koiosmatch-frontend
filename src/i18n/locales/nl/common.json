@@ -319,6 +319,7 @@
         "tool_refused": "Koios heeft deze actie geweigerd.",
         "unknown_note_type": "Dit notitietype is niet bekend.",
         "unknown_appointment_lookup": "Geen afspraak kwam overeen met deze zoekopdracht.",
+        "system_workflow_locked": "Dit is een systeemworkflow: hij kan niet handmatig worden gestart, uitgezet of gewijzigd.",
         "proposal_not_allowed": "Deze kandidaat kan niet worden voorgesteld (geblokkeerd of gearchiveerd)."
       },
       "partialTitle": "Gedeeltelijk uitgevoerd",

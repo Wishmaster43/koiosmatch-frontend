@@ -319,6 +319,7 @@
         "tool_refused": "Koios hat diese Aktion abgelehnt.",
         "unknown_note_type": "Dieser Notiztyp ist nicht bekannt.",
         "unknown_appointment_lookup": "Kein Termin passte zu dieser Suche.",
+        "system_workflow_locked": "Dies ist ein Systemworkflow: Er kann nicht manuell gestartet, ausgeschaltet oder geändert werden.",
         "proposal_not_allowed": "Dieser Kandidat kann nicht vorgeschlagen werden (gesperrt oder archiviert)."
       },
       "partialTitle": "Teilweise ausgeführt",

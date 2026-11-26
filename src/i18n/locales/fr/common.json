@@ -319,6 +319,7 @@
         "tool_refused": "Koios a refusé cette action.",
         "unknown_note_type": "Ce type de note n’est pas connu.",
         "unknown_appointment_lookup": "Aucun rendez-vous ne correspond à cette recherche.",
+        "system_workflow_locked": "Ceci est un workflow système : il ne peut pas être lancé manuellement, désactivé ni modifié.",
         "proposal_not_allowed": "Ce candidat ne peut pas être proposé (bloqué ou archivé)."
       },
       "partialTitle": "Partiellement exécuté",

@@ -18,6 +18,7 @@ export const BE_TOOL_REFUSAL_REASON_SLUGS: readonly string[] = [
   'proposal_not_allowed',
   'proposal_recently_sent',
   'rejection_reason_required',
+  'system_workflow_locked',
   'task_not_found',
   'tool_refused',
   'unknown_appointment_lookup',
