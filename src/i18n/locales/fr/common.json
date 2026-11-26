@@ -868,6 +868,11 @@
     "workflowStepContractStatusUnknown": "Une étape matches définit un statut de contrat inconnu. Valeurs autorisées : {{allowed}}.",
     "workflowStepContractStatusUnknownStep": "L’étape {{step}} définit le statut de contrat inconnu '{{value}}'. Valeurs autorisées : {{allowed}}.",
     "workflowStepContractStatusUnknownStepLabel": "L’étape {{step}} ({{label}}) définit le statut de contrat inconnu '{{value}}'. Valeurs autorisées : {{allowed}}.",
+    "workflowStepAppointmentLookupUnknown": "Une étape rendez-vous nomme une valeur qui n’est pas dans la liste de choix de ce bureau. Valeurs autorisées : {{allowed}}.",
+    "workflowStepAppointmentLookupUnknownStep": "L’étape {{step}} : {{field}} '{{value}}' n’est pas dans la liste de choix de ce bureau. Valeurs autorisées : {{allowed}}.",
+    "workflowStepAppointmentLookupUnknownStepLabel": "L’étape {{step}} ({{label}}) : {{field}} '{{value}}' n’est pas dans la liste de choix de ce bureau. Valeurs autorisées : {{allowed}}.",
+    "appointmentLookupFieldType": "type de rendez-vous",
+    "appointmentLookupFieldLocation": "lieu de rendez-vous",
     "aiDisclosureMissing": "L’introduction de l’entretien ne contient pas la mention IA obligatoire ; modifiez le modèle avant de l’activer.",
     "fieldRequired": "{{field}} est obligatoire."
   },

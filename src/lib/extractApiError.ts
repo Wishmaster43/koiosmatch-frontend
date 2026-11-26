@@ -7,7 +7,7 @@
  */
 import { notify, notifyError } from './notify'
 
-interface ServerErrorBody { message?: string; code?: string; errors?: Record<string, string[]>; clash_name?: string; params?: { clash_name?: string }; meta?: { clash_name?: string }; allowed?: string[]; step?: number; label?: string | null; value?: string }
+interface ServerErrorBody { message?: string; code?: string; errors?: Record<string, string[]>; clash_name?: string; params?: { clash_name?: string }; meta?: { clash_name?: string }; allowed?: string[]; step?: number; label?: string | null; field?: string; value?: string }
 
 // KAND-ACHTERGROND-VERPLICHT-1 (2026-08-17): Laravel's OWN default "required"
 // validation copy (vendor lang/en/validation.php: 'The :attribute field is
@@ -90,6 +90,9 @@ const ERROR_CODE_KEYS: Record<string, string> = {
   // WORKFLOW-CONTRACT-STATUS-VALIDATION-1 (BE 3ffd68b53, 422): a matches step's free key/value fields set a contract_status outside
   // JobMatch::CONTRACT_STATUSES; the body carries `allowed`, the vocabulary the translated sentence lists.
   workflow_step_contract_status_unknown: 'errors.workflowStepContractStatusUnknown',
+  // APPT-LOOKUP-422-FE-1 (BE StepConfigChecks::appointmentCreate, 422): an appointment step names a constant type or
+  // location outside the bureau's lookup; the body carries step, label, field ('type' | 'location'), value and allowed.
+  workflow_step_appointment_lookup_unknown: 'errors.workflowStepAppointmentLookupUnknown',
   // The interview intro / workflow / Koios toggle lacks the mandatory AI disclosure (422).
   ai_disclosure_missing: 'errors.aiDisclosureMissing',
   // ONIX C-007: one generic 422 for a taken e-mail (never reveals why or where it is in use).
@@ -131,6 +134,14 @@ export function apiErrorKey(err: unknown): string | null {
   return (code && ERROR_CODE_KEYS[code]) ?? null
 }
 
+// The WSCS-422-FIELDS-1 step refusals (contract status, appointment lookup) carry an `allowed` vocabulary: the body
+// with that list joined for the sentence, or null when the list is absent (the server sentence is then more honest).
+function stepRefusalBody(err: unknown): { body: ServerErrorBody; allowed: string } | null {
+  const body = (err as { response?: { data?: ServerErrorBody } })?.response?.data
+  const list = body?.allowed
+  return body && Array.isArray(list) && list.length > 0 ? { body, allowed: list.join(', ') } : null
+}
+
 /**
  * One call for the whole "coded refusal, else server text, else fallback" chain:
  * a known backend `code` renders its translated `common` copy (never the server's
@@ -138,7 +149,7 @@ export function apiErrorKey(err: unknown): string | null {
  */
 export function apiErrorMessage(
   err: unknown,
-  t: (key: string, options?: { ns: string; clash_name?: string; branch?: string; allowed?: string; step?: number; label?: string; value?: string }) => string,
+  t: (key: string, options?: { ns: string; clash_name?: string; branch?: string; allowed?: string; step?: number; label?: string; field?: string; value?: string }) => string,
   fallback: string,
 ): string {
   const key = apiErrorKey(err)
@@ -155,17 +166,31 @@ export function apiErrorMessage(
   }
   if (key === ERROR_CODE_KEYS.workflow_step_contract_status_unknown) {
     // The refusal lists the allowed vocabulary; without it the server sentence (which names the step) is more honest than an empty list.
-    const body = (err as { response?: { data?: ServerErrorBody } })?.response?.data
-    const list = body?.allowed
-    const allowed = Array.isArray(list) && list.length > 0 ? list.join(', ') : null
-    if (allowed === null) return extractApiError(err, fallback)
+    const hit = stepRefusalBody(err)
+    if (!hit) return extractApiError(err, fallback)
+    const { body, allowed } = hit
     // BE batch G adds step (1-based), label (null when the step has none) and value: the sentence names them when they are there.
-    if (body && typeof body.step === 'number' && typeof body.value === 'string') {
+    if (typeof body.step === 'number' && typeof body.value === 'string') {
       return body.label
         ? t('errors.workflowStepContractStatusUnknownStepLabel', { ns: 'common', step: body.step, label: body.label, value: body.value, allowed })
         : t('errors.workflowStepContractStatusUnknownStep', { ns: 'common', step: body.step, value: body.value, allowed })
     }
     return t('errors.workflowStepContractStatusUnknown', { ns: 'common', allowed })
+  }
+  if (key === ERROR_CODE_KEYS.workflow_step_appointment_lookup_unknown) {
+    // The refusal names the field (type | location), the offending value and the bureau's allowed list; without the list the server sentence is more honest.
+    const hit = stepRefusalBody(err)
+    if (!hit) return extractApiError(err, fallback)
+    const { body, allowed } = hit
+    // The field travels as its config key; the sentence names it in the user's language (an unknown field keeps the bare sentence).
+    const fieldKey = body.field === 'type' ? 'errors.appointmentLookupFieldType' : body.field === 'location' ? 'errors.appointmentLookupFieldLocation' : null
+    if (fieldKey && typeof body.step === 'number' && typeof body.value === 'string') {
+      const field = t(fieldKey, { ns: 'common' })
+      return body.label
+        ? t('errors.workflowStepAppointmentLookupUnknownStepLabel', { ns: 'common', step: body.step, label: body.label, field, value: body.value, allowed })
+        : t('errors.workflowStepAppointmentLookupUnknownStep', { ns: 'common', step: body.step, field, value: body.value, allowed })
+    }
+    return t('errors.workflowStepAppointmentLookupUnknown', { ns: 'common', allowed })
   }
   return key ? t(key, { ns: 'common' }) : extractApiError(err, fallback)
 }

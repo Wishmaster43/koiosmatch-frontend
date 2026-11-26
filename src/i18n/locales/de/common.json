@@ -868,6 +868,11 @@
     "workflowStepContractStatusUnknown": "Ein Matches-Schritt setzt einen unbekannten Vertragsstatus. Zulässige Werte: {{allowed}}.",
     "workflowStepContractStatusUnknownStep": "Schritt {{step}} setzt den unbekannten Vertragsstatus '{{value}}'. Zulässige Werte: {{allowed}}.",
     "workflowStepContractStatusUnknownStepLabel": "Schritt {{step}} ({{label}}) setzt den unbekannten Vertragsstatus '{{value}}'. Zulässige Werte: {{allowed}}.",
+    "workflowStepAppointmentLookupUnknown": "Ein Termin-Schritt nennt einen Wert, der nicht in der Auswahlliste dieses Büros steht. Zulässige Werte: {{allowed}}.",
+    "workflowStepAppointmentLookupUnknownStep": "Schritt {{step}}: {{field}} '{{value}}' steht nicht in der Auswahlliste dieses Büros. Zulässige Werte: {{allowed}}.",
+    "workflowStepAppointmentLookupUnknownStepLabel": "Schritt {{step}} ({{label}}): {{field}} '{{value}}' steht nicht in der Auswahlliste dieses Büros. Zulässige Werte: {{allowed}}.",
+    "appointmentLookupFieldType": "Terminart",
+    "appointmentLookupFieldLocation": "Terminort",
     "aiDisclosureMissing": "Im Interview-Intro fehlt der verpflichtende KI-Hinweis; passen Sie die Vorlage an, bevor Sie dies aktivieren.",
     "fieldRequired": "{{field}} ist erforderlich."
   },

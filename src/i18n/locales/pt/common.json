@@ -868,6 +868,11 @@
     "workflowStepContractStatusUnknown": "Um passo de matches define um estado de contrato desconhecido. Valores permitidos: {{allowed}}.",
     "workflowStepContractStatusUnknownStep": "O passo {{step}} define o estado de contrato desconhecido '{{value}}'. Valores permitidos: {{allowed}}.",
     "workflowStepContractStatusUnknownStepLabel": "O passo {{step}} ({{label}}) define o estado de contrato desconhecido '{{value}}'. Valores permitidos: {{allowed}}.",
+    "workflowStepAppointmentLookupUnknown": "Um passo de compromisso indica um valor que não está na lista de opções desta agência. Valores permitidos: {{allowed}}.",
+    "workflowStepAppointmentLookupUnknownStep": "O passo {{step}}: {{field}} '{{value}}' não está na lista de opções desta agência. Valores permitidos: {{allowed}}.",
+    "workflowStepAppointmentLookupUnknownStepLabel": "O passo {{step}} ({{label}}): {{field}} '{{value}}' não está na lista de opções desta agência. Valores permitidos: {{allowed}}.",
+    "appointmentLookupFieldType": "tipo de compromisso",
+    "appointmentLookupFieldLocation": "local do compromisso",
     "aiDisclosureMissing": "A introdução da entrevista não tem a menção obrigatória de IA; ajuste o modelo antes de ativar.",
     "fieldRequired": "{{field}} é obrigatório."
   },

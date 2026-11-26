@@ -232,6 +232,40 @@ describe('workflow_step_contract_status_unknown (422)', () => {
   })
 })
 
+// APPT-LOOKUP-422-FE-1: the workflow save refuses an appointment step whose constant type or location is outside the bureau's lookup
+// (422, BE StepConfigChecks::appointmentCreate; body carries step, label, field, value, allowed).
+describe('workflow_step_appointment_lookup_unknown (422)', () => {
+  it('maps the code to its translated key', () => {
+    expect(apiErrorKey({ response: { status: 422, data: { code: 'workflow_step_appointment_lookup_unknown', message: 'x', allowed: ['Intake'] } } })).toBe('errors.workflowStepAppointmentLookupUnknown')
+  })
+
+  // A key-echo t that prints the interpolation values it received, in a fixed order (field is itself a translated label).
+  const t = (key: string, options?: { ns: string; step?: number; label?: string; field?: string; value?: string; allowed?: string }) =>
+    [options?.ns, key, options?.step, options?.label, options?.field, options?.value, options?.allowed].filter((v) => v !== undefined).join('|')
+  const allowed = ['Intake', 'Evaluatie']
+
+  it('names the step, its label, the translated field (type), the offending value and the allowed list', () => {
+    const err = { response: { status: 422, data: { code: 'workflow_step_appointment_lookup_unknown', message: 'x', step: 2, label: 'Afspraak', field: 'type', value: 'Kennismaking', allowed } } }
+    expect(apiErrorMessage(err, t, 'fallback')).toBe('common|errors.workflowStepAppointmentLookupUnknownStepLabel|2|Afspraak|common|errors.appointmentLookupFieldType|Kennismaking|Intake, Evaluatie')
+  })
+
+  it('names the step alone with the translated field (location) when the step has no label (label null)', () => {
+    const err = { response: { status: 422, data: { code: 'workflow_step_appointment_lookup_unknown', message: 'x', step: 3, label: null, field: 'location', value: 'Kantoor Zuid', allowed: ['Hoofdkantoor'] } } }
+    expect(apiErrorMessage(err, t, 'fallback')).toBe('common|errors.workflowStepAppointmentLookupUnknownStep|3|common|errors.appointmentLookupFieldLocation|Kantoor Zuid|Hoofdkantoor')
+  })
+
+  it('renders the bare sentence with the allowed list when the field is not one it knows', () => {
+    const err = { response: { status: 422, data: { code: 'workflow_step_appointment_lookup_unknown', message: 'x', step: 2, label: 'Afspraak', field: 'other', value: 'x', allowed } } }
+    expect(apiErrorMessage(err, t, 'fallback')).toBe('common|errors.workflowStepAppointmentLookupUnknown|Intake, Evaluatie')
+  })
+
+  it('falls back to the server sentence when the body carries no allowed list', () => {
+    const t = (key: string) => `TRANSLATED:${key}`
+    const err = { response: { status: 422, data: { code: 'workflow_step_appointment_lookup_unknown', message: 'server sentence', step: 2, field: 'type', value: 'x' } } }
+    expect(apiErrorMessage(err, t, 'fallback')).toBe('server sentence')
+  })
+})
+
 // MODULE-403-DEEPLINK-1: module_not_enabled toasts deep-link to the super admin screen, only for a super admin.
 describe('apiErrorToast / notifyApiError · MODULE-403-DEEPLINK-1', () => {
   const t = (key: string) => key

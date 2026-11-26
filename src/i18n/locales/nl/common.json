@@ -868,6 +868,11 @@
     "workflowStepContractStatusUnknown": "Een matches-stap zet een onbekende contractstatus. Toegestane waarden: {{allowed}}.",
     "workflowStepContractStatusUnknownStep": "Stap {{step}} zet de onbekende contractstatus '{{value}}'. Toegestane waarden: {{allowed}}.",
     "workflowStepContractStatusUnknownStepLabel": "Stap {{step}} ({{label}}) zet de onbekende contractstatus '{{value}}'. Toegestane waarden: {{allowed}}.",
+    "workflowStepAppointmentLookupUnknown": "Een afspraak-stap noemt een waarde die niet in de keuzelijst van dit bureau staat. Toegestane waarden: {{allowed}}.",
+    "workflowStepAppointmentLookupUnknownStep": "Stap {{step}}: {{field}} '{{value}}' staat niet in de keuzelijst van dit bureau. Toegestane waarden: {{allowed}}.",
+    "workflowStepAppointmentLookupUnknownStepLabel": "Stap {{step}} ({{label}}): {{field}} '{{value}}' staat niet in de keuzelijst van dit bureau. Toegestane waarden: {{allowed}}.",
+    "appointmentLookupFieldType": "afspraaktype",
+    "appointmentLookupFieldLocation": "afspraaklocatie",
     "aiDisclosureMissing": "De interview-intro mist de verplichte AI-vermelding; pas de template aan voordat je dit activeert.",
     "fieldRequired": "{{field}} is verplicht."
   },

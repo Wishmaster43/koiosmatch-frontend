@@ -868,6 +868,11 @@
     "workflowStepContractStatusUnknown": "A matches step sets an unknown contract status. Allowed values: {{allowed}}.",
     "workflowStepContractStatusUnknownStep": "Step {{step}} sets the unknown contract status '{{value}}'. Allowed values: {{allowed}}.",
     "workflowStepContractStatusUnknownStepLabel": "Step {{step}} ({{label}}) sets the unknown contract status '{{value}}'. Allowed values: {{allowed}}.",
+    "workflowStepAppointmentLookupUnknown": "An appointment step names a value that is not in the pick list of this bureau. Allowed values: {{allowed}}.",
+    "workflowStepAppointmentLookupUnknownStep": "Step {{step}}: {{field}} '{{value}}' is not in the pick list of this bureau. Allowed values: {{allowed}}.",
+    "workflowStepAppointmentLookupUnknownStepLabel": "Step {{step}} ({{label}}): {{field}} '{{value}}' is not in the pick list of this bureau. Allowed values: {{allowed}}.",
+    "appointmentLookupFieldType": "appointment type",
+    "appointmentLookupFieldLocation": "appointment location",
     "aiDisclosureMissing": "The interview intro is missing the mandatory AI disclosure; adjust the template before you activate this.",
     "fieldRequired": "{{field}} is required."
   },

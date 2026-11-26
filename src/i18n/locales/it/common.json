@@ -868,6 +868,11 @@
     "workflowStepContractStatusUnknown": "Un passaggio matches imposta uno stato contratto sconosciuto. Valori consentiti: {{allowed}}.",
     "workflowStepContractStatusUnknownStep": "Il passaggio {{step}} imposta lo stato contratto sconosciuto '{{value}}'. Valori consentiti: {{allowed}}.",
     "workflowStepContractStatusUnknownStepLabel": "Il passaggio {{step}} ({{label}}) imposta lo stato contratto sconosciuto '{{value}}'. Valori consentiti: {{allowed}}.",
+    "workflowStepAppointmentLookupUnknown": "Un passaggio appuntamento indica un valore che non è nell’elenco di scelta di questa agenzia. Valori consentiti: {{allowed}}.",
+    "workflowStepAppointmentLookupUnknownStep": "Il passaggio {{step}}: {{field}} '{{value}}' non è nell’elenco di scelta di questa agenzia. Valori consentiti: {{allowed}}.",
+    "workflowStepAppointmentLookupUnknownStepLabel": "Il passaggio {{step}} ({{label}}): {{field}} '{{value}}' non è nell’elenco di scelta di questa agenzia. Valori consentiti: {{allowed}}.",
+    "appointmentLookupFieldType": "tipo di appuntamento",
+    "appointmentLookupFieldLocation": "sede dell’appuntamento",
     "aiDisclosureMissing": "Nell’introduzione del colloquio manca l’informativa obbligatoria sull’IA; modifica il modello prima di attivarlo.",
     "fieldRequired": "{{field}} è obbligatorio."
   },
