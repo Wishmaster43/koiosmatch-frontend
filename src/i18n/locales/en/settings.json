@@ -164,6 +164,7 @@
     "match_contract_line_rate_side": "Rate side",
     "outreach_statuses": "Statuses",
     "task_types": "Activity types",
+    "teams": "Teams",
     "task_priorities": "Priorities",
     "task_display": "Table display",
     "customer_phases": "Customer phase",
@@ -897,6 +898,22 @@
     "outcomeTitle": "Outcomes",
     "outcomeSubtitle": "The result of one call attempt, separate from the call-list status.",
     "outcomeAdd": "Add outcome"
+  },
+  "teams": {
+    "title": "Teams",
+    "subtitle": "Internal teams that tasks can be assigned to. A team without members receives no task reminders.",
+    "add": "Add team",
+    "members": "Members",
+    "membersTitle": "Members of {{team}}",
+    "membersIntro": "Choose the users who belong to this team. A team task goes to these members.",
+    "noMembersHint": "This team has no members; a team task will then reach nobody.",
+    "save": "Save",
+    "membersSaved": "Team members saved.",
+    "notBureauUser": "One of the chosen users does not belong to this organisation.",
+    "loadError": "Could not load the team members.",
+    "saveError": "Could not save the team members.",
+    "retry": "Try again",
+    "selectUsers": "Choose team members"
   },
   "tasks": {
     "statusTitle": "Statuses",

@@ -12,7 +12,7 @@ import type { StatusListItem, ExtraFieldDef, FlagFieldDef, NumberFieldDef, Defau
 
 export default function StatusListRow({
   item, items, showRank, withColor, resolvedIconPicker, rowPrefix, flagList, numberField, extraField, singletons,
-  busyDefaultKey, deleting, labelOf, commitRank, updateColor, updateIcon, setDefault, openEdit, remove, inUse, readOnly = false,
+  busyDefaultKey, deleting, labelOf, commitRank, updateColor, updateIcon, setDefault, openEdit, remove, inUse, readOnly = false, rowActions = null,
 }: {
   item: StatusListItem; items: StatusListItem[]; showRank: boolean; withColor: boolean
   resolvedIconPicker: IconPickerDef | null; rowPrefix: ((item: StatusListItem) => React.ReactNode) | null
@@ -29,6 +29,8 @@ export default function StatusListRow({
   // A read-only list (system values a screen depends on) keeps colour/icon and
   // drag-reorder, but the pencil/delete render disabled — never hidden (Danny 13-09).
   readOnly?: boolean
+  // Extra per-row actions rendered before the pencil.
+  rowActions?: ((item: StatusListItem) => React.ReactNode) | null
 }) {
   const { t } = useTranslation('settings')
   return (
@@ -111,6 +113,7 @@ export default function StatusListRow({
         )
       })}
       <div style={{ flex: 1 }} />
+      {rowActions?.(item)}
       {/* readOnly (Danny 13-09, rows 45/46): pencil renders DISABLED, never hidden —
           title/aria-description carry the reason; aria-label stays the plain verb. */}
       <Button variant="secondary" iconOnly disabled={readOnly} onClick={() => openEdit(item)}

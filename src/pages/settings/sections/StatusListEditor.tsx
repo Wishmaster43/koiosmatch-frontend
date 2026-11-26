@@ -90,7 +90,7 @@ export default function StatusListEditor({
   title, subtitle, endpoint, addLabel, withColor = true, compact = false, extraField = null, flagField = null,
   flagFields = null, numberField = null, defaultField = null, defaultFields = null, withIcon = false, iconPicker = null,
   allowAdd = true, showRank = false, entity = null, fetchEntity = undefined, postFilter = null, notFoundNotice = null,
-  withValueSlug = false, reorderable = true, rowPrefix = null, readOnly = false,
+  withValueSlug = false, reorderable = true, rowPrefix = null, rowActions = null, readOnly = false,
 }: StatusListEditorProps) {
   const { t } = useTranslation('settings')
   // defaultField (singular) is sugar for a one-element defaultFields array — both
@@ -326,7 +326,7 @@ export default function StatusListEditor({
               numberField={numberField} extraField={extraField} singletons={singletons}
               busyDefaultKey={busyDefaultKey} deleting={deleting} labelOf={labelOf} commitRank={commitRank}
               updateColor={updateColor} updateIcon={updateIcon} setDefault={setDefault} openEdit={openEdit}
-              remove={remove} inUse={inUse} readOnly={readOnly}
+              remove={remove} inUse={inUse} readOnly={readOnly} rowActions={rowActions}
             />
           )}
         />

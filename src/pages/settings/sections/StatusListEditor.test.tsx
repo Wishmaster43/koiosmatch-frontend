@@ -173,3 +173,14 @@ describe('StatusListEditor — multiple independent flagFields', () => {
       expect.objectContaining({ is_won: true, is_lost: false })))
   })
 })
+
+describe('StatusListEditor — rowActions', () => {
+  // The extra action node renders once per row and receives that row's item.
+  it('renders the rowActions node per row with the item', async () => {
+    api.get.mockResolvedValue({ data: [type({ id: 't1', name: 'Alpha' }), type({ id: 't2', name: 'Beta' })] })
+    render(<StatusListEditor title="X" subtitle="" endpoint="/x" addLabel="Add"
+      rowActions={item => <span data-testid="extra">{`extra-${String(item.name)}`}</span>} />)
+    await screen.findByText('Alpha')
+    expect(screen.getAllByTestId('extra').map(n => n.textContent)).toEqual(['extra-Alpha', 'extra-Beta'])
+  })
+})

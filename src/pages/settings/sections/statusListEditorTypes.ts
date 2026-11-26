@@ -88,6 +88,8 @@ export interface StatusListEditorProps {
   withValueSlug?: boolean
   reorderable?: boolean
   rowPrefix?: ((item: StatusListItem) => ReactNode) | null
+  // Extra per-row actions rendered before the edit pencil (e.g. a team's members button).
+  rowActions?: ((item: StatusListItem) => ReactNode) | null
   // System values a screen depends on (Danny 13-09, rows 45/46): the pencil,
   // delete and add controls render DISABLED (grey, always present — never
   // hidden), reason statusList.systemValueLocked; colour/icon and drag-reorder

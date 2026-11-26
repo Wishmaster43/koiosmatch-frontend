@@ -168,6 +168,7 @@
     "match_contract_line_rate_side": "Côté du tarif",
     "outreach_statuses": "Statuts",
     "task_types": "Types d’activité",
+    "teams": "Équipes",
     "task_priorities": "Priorités",
     "task_display": "Affichage tableau",
     "candidate_phases": "Phase",
@@ -2688,6 +2689,22 @@
     "outcomeTitle": "Résultats",
     "outcomeSubtitle": "Le résultat d’une tentative d’appel, distinct du statut de la liste d’appels.",
     "outcomeAdd": "Ajouter un résultat"
+  },
+  "teams": {
+    "title": "Équipes",
+    "subtitle": "Équipes internes auxquelles des tâches peuvent être attribuées. Une équipe sans membres ne reçoit aucun rappel de tâche.",
+    "add": "Ajouter une équipe",
+    "members": "Membres",
+    "membersTitle": "Membres de {{team}}",
+    "membersIntro": "Sélectionnez les utilisateurs qui font partie de cette équipe. Une tâche d’équipe est envoyée à ces membres.",
+    "noMembersHint": "Cette équipe n’a aucun membre ; une tâche d’équipe n’atteindra alors personne.",
+    "save": "Enregistrer",
+    "membersSaved": "Membres de l’équipe enregistrés.",
+    "notBureauUser": "L’un des utilisateurs sélectionnés n’appartient pas à cette organisation.",
+    "loadError": "Impossible de charger les membres de l’équipe.",
+    "saveError": "Impossible d’enregistrer les membres de l’équipe.",
+    "retry": "Réessayer",
+    "selectUsers": "Sélectionner les membres de l’équipe"
   },
   "tasks": {
     "statusTitle": "Statuts",

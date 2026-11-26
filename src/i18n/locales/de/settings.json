@@ -168,6 +168,7 @@
     "match_contract_line_rate_side": "Tarifseite",
     "outreach_statuses": "Status",
     "task_types": "Aktivitätstypen",
+    "teams": "Teams",
     "task_priorities": "Prioritäten",
     "task_display": "Tabellenansicht",
     "candidate_phases": "Phase",
@@ -2688,6 +2689,22 @@
     "outcomeTitle": "Ergebnisse",
     "outcomeSubtitle": "Das Ergebnis eines Anrufversuchs, getrennt vom Status der Anrufliste.",
     "outcomeAdd": "Ergebnis hinzufügen"
+  },
+  "teams": {
+    "title": "Teams",
+    "subtitle": "Interne Teams, denen Aufgaben zugewiesen werden können. Ein Team ohne Mitglieder erhält keine Aufgabenerinnerungen.",
+    "add": "Team hinzufügen",
+    "members": "Mitglieder",
+    "membersTitle": "Mitglieder von {{team}}",
+    "membersIntro": "Wählen Sie die Benutzer aus, die zu diesem Team gehören. Eine Teamaufgabe geht an diese Mitglieder.",
+    "noMembersHint": "Dieses Team hat keine Mitglieder; eine Teamaufgabe erreicht dann niemanden.",
+    "save": "Speichern",
+    "membersSaved": "Teammitglieder gespeichert.",
+    "notBureauUser": "Einer der gewählten Benutzer gehört nicht zu dieser Organisation.",
+    "loadError": "Die Teammitglieder konnten nicht geladen werden.",
+    "saveError": "Die Teammitglieder konnten nicht gespeichert werden.",
+    "retry": "Erneut versuchen",
+    "selectUsers": "Teammitglieder auswählen"
   },
   "tasks": {
     "statusTitle": "Status",

@@ -168,6 +168,7 @@
     "match_contract_line_rate_side": "Lado de la tarifa",
     "outreach_statuses": "Estados",
     "task_types": "Tipos de actividad",
+    "teams": "Equipos",
     "task_priorities": "Prioridades",
     "task_display": "Vista de tabla",
     "candidate_phases": "Fase",
@@ -2688,6 +2689,22 @@
     "outcomeTitle": "Resultados",
     "outcomeSubtitle": "El resultado de un intento de llamada, independiente del estado de la lista de llamadas.",
     "outcomeAdd": "Añadir resultado"
+  },
+  "teams": {
+    "title": "Equipos",
+    "subtitle": "Equipos internos a los que se pueden asignar tareas. Un equipo sin miembros no recibe recordatorios de tareas.",
+    "add": "Añadir equipo",
+    "members": "Miembros",
+    "membersTitle": "Miembros de {{team}}",
+    "membersIntro": "Elige los usuarios que pertenecen a este equipo. Una tarea de equipo va a estos miembros.",
+    "noMembersHint": "Este equipo no tiene miembros; una tarea de equipo no llegará a nadie.",
+    "save": "Guardar",
+    "membersSaved": "Miembros del equipo guardados.",
+    "notBureauUser": "Uno de los usuarios elegidos no pertenece a esta organización.",
+    "loadError": "No se pudieron cargar los miembros del equipo.",
+    "saveError": "No se pudieron guardar los miembros del equipo.",
+    "retry": "Reintentar",
+    "selectUsers": "Elegir miembros del equipo"
   },
   "tasks": {
     "statusTitle": "Estados",

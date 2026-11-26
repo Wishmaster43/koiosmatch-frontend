@@ -14,6 +14,7 @@ import VacancyMatchingSettings from '../sections/VacancyMatchingSettings'
 import VacancyCandidateTabSettings from '../sections/VacancyCandidateTabSettings'
 import MatchTemplatesSettings from '../sections/MatchTemplatesSettings'
 import CatalogSection from '../sections/CatalogSection'
+import TeamsSettings from '../sections/teams/TeamsSettings'
 import { TaskStatusSettings, TaskTypeSettings, TaskPrioritySettings } from '../sections/TaskSettings'
 import { MatchStatusSettings, ContractTypesSettings, MatchStopReasonSettings } from '../sections/MatchSettings'
 import MatchApprovalSettings from '../sections/MatchApprovalSettings'
@@ -75,6 +76,7 @@ export const vacancyGroups: NavGroup[] = [
       { id: 'task_statuses', icon: ListChecks, component: TaskStatusSettings, logName: 'task_statuses' },
       { id: 'task_types', icon: Tags, component: TaskTypeSettings, logName: 'task_types' },
       { id: 'task_priorities', icon: Flag, component: TaskPrioritySettings, logName: 'task_priorities' },
+      { id: 'teams', icon: Users, component: TeamsSettings, logName: 'teams' },
       { id: 'task_display', icon: Palette, schema: taskDisplay },
       // CATALOG-EMBED-1: the catalogue's "windows" section, tasks group.
       { id: 'task_windows', icon: Clock, render: () => <CatalogSection section="windows" group="tasks" /> },

@@ -164,6 +164,7 @@
     "match_contract_line_rate_side": "Lato della tariffa",
     "outreach_statuses": "Stati",
     "task_types": "Tipi di attività",
+    "teams": "Team",
     "task_priorities": "Priorità",
     "task_display": "Visualizzazione tabella",
     "customer_phases": "Fase cliente",
@@ -897,6 +898,22 @@
     "outcomeTitle": "Esiti",
     "outcomeSubtitle": "Il risultato di un tentativo di chiamata, indipendente dallo stato della lista di chiamate.",
     "outcomeAdd": "Aggiungi esito"
+  },
+  "teams": {
+    "title": "Team",
+    "subtitle": "Team interni a cui possono essere assegnate attività. Un team senza membri non riceve promemoria delle attività.",
+    "add": "Aggiungi team",
+    "members": "Membri",
+    "membersTitle": "Membri di {{team}}",
+    "membersIntro": "Scegli gli utenti che fanno parte di questo team. Un’attività di team va a questi membri.",
+    "noMembersHint": "Questo team non ha membri; un’attività di team non raggiungerà quindi nessuno.",
+    "save": "Salva",
+    "membersSaved": "Membri del team salvati.",
+    "notBureauUser": "Uno degli utenti scelti non appartiene a questa organizzazione.",
+    "loadError": "Impossibile caricare i membri del team.",
+    "saveError": "Impossibile salvare i membri del team.",
+    "retry": "Riprova",
+    "selectUsers": "Scegli i membri del team"
   },
   "tasks": {
     "statusTitle": "Stati",

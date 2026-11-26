@@ -164,6 +164,7 @@
     "match_contract_line_rate_side": "Tariefzijde",
     "outreach_statuses": "Statussen",
     "task_types": "Activiteit-types",
+    "teams": "Teams",
     "task_priorities": "Prioriteiten",
     "task_display": "Tabelweergave",
     "customer_phases": "Klantfase",
@@ -897,6 +898,22 @@
     "outcomeTitle": "Uitkomsten",
     "outcomeSubtitle": "Het resultaat van één belpoging, los van de bellijst-status.",
     "outcomeAdd": "Uitkomst toevoegen"
+  },
+  "teams": {
+    "title": "Teams",
+    "subtitle": "Interne teams waaraan taken toegewezen kunnen worden. Een team zonder leden ontvangt geen taakherinneringen.",
+    "add": "Team toevoegen",
+    "members": "Leden",
+    "membersTitle": "Leden van {{team}}",
+    "membersIntro": "Kies de gebruikers die bij dit team horen. Een teamtaak gaat naar deze leden.",
+    "noMembersHint": "Dit team heeft geen leden; een teamtaak bereikt dan niemand.",
+    "save": "Opslaan",
+    "membersSaved": "Teamleden opgeslagen.",
+    "notBureauUser": "Een van de gekozen gebruikers hoort niet bij dit bureau.",
+    "loadError": "Kon de teamleden niet laden.",
+    "saveError": "Kon de teamleden niet opslaan.",
+    "retry": "Opnieuw proberen",
+    "selectUsers": "Teamleden kiezen"
   },
   "tasks": {
     "statusTitle": "Statussen",
