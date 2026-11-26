@@ -873,6 +873,9 @@
     "workflowStepAppointmentLookupUnknownStepLabel": "Schritt {{step}} ({{label}}): {{field}} '{{value}}' steht nicht in der Auswahlliste dieses Büros. Zulässige Werte: {{allowed}}.",
     "appointmentLookupFieldType": "Terminart",
     "appointmentLookupFieldLocation": "Terminort",
+    "workflowStepFilterValueBlank": "Ein Filter in einem Schritt hat keinen Wert. Tragen Sie einen Wert ein oder entfernen Sie die Zeile. Es wurde nichts gespeichert.",
+    "workflowStepFilterValueBlankStep": "Schritt {{step}}: der Filter auf '{{field}}' hat keinen Wert. Tragen Sie einen Wert ein oder entfernen Sie die Zeile. Es wurde nichts gespeichert.",
+    "workflowStepFilterValueBlankStepLabel": "Schritt {{step}} ({{label}}): der Filter auf '{{field}}' hat keinen Wert. Tragen Sie einen Wert ein oder entfernen Sie die Zeile. Es wurde nichts gespeichert.",
     "aiDisclosureMissing": "Im Interview-Intro fehlt der verpflichtende KI-Hinweis; passen Sie die Vorlage an, bevor Sie dies aktivieren.",
     "fieldRequired": "{{field}} ist erforderlich."
   },

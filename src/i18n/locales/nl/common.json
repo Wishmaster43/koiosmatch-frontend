@@ -873,6 +873,9 @@
     "workflowStepAppointmentLookupUnknownStepLabel": "Stap {{step}} ({{label}}): {{field}} '{{value}}' staat niet in de keuzelijst van dit bureau. Toegestane waarden: {{allowed}}.",
     "appointmentLookupFieldType": "afspraaktype",
     "appointmentLookupFieldLocation": "afspraaklocatie",
+    "workflowStepFilterValueBlank": "Een filter in een stap heeft geen waarde. Vul de waarde in of verwijder de rij. Er is niets opgeslagen.",
+    "workflowStepFilterValueBlankStep": "Stap {{step}}: het filter op '{{field}}' heeft geen waarde. Vul de waarde in of verwijder de rij. Er is niets opgeslagen.",
+    "workflowStepFilterValueBlankStepLabel": "Stap {{step}} ({{label}}): het filter op '{{field}}' heeft geen waarde. Vul de waarde in of verwijder de rij. Er is niets opgeslagen.",
     "aiDisclosureMissing": "De interview-intro mist de verplichte AI-vermelding; pas de template aan voordat je dit activeert.",
     "fieldRequired": "{{field}} is verplicht."
   },

@@ -93,6 +93,9 @@ const ERROR_CODE_KEYS: Record<string, string> = {
   // APPT-LOOKUP-422-FE-1 (BE StepConfigChecks::appointmentCreate, 422): an appointment step names a constant type or
   // location outside the bureau's lookup; the body carries step, label, field ('type' | 'location'), value and allowed.
   workflow_step_appointment_lookup_unknown: 'errors.workflowStepAppointmentLookupUnknown',
+  // STEP-FILTER-BLANK-422-FE-1 (BE StepConfigChecks via refuseStep, batch P, 422): a step filter, or a ScenarioModule condition
+  // with = / !=, was saved with a blank value; the body carries step, label, field (the first blank member) and value null.
+  step_filter_value_blank: 'errors.workflowStepFilterValueBlank',
   // The interview intro / workflow / Koios toggle lacks the mandatory AI disclosure (422).
   ai_disclosure_missing: 'errors.aiDisclosureMissing',
   // ONIX C-007: one generic 422 for a taken e-mail (never reveals why or where it is in use).
@@ -191,6 +194,17 @@ export function apiErrorMessage(
         : t('errors.workflowStepAppointmentLookupUnknownStep', { ns: 'common', step: body.step, field, value: body.value, allowed })
     }
     return t('errors.workflowStepAppointmentLookupUnknown', { ns: 'common', allowed })
+  }
+  if (key === ERROR_CODE_KEYS.step_filter_value_blank) {
+    // The refusal names the step and the filter field whose value is blank (value is null by contract); without a step or
+    // field the bare translated sentence is still true, so this arm never falls back to the server text.
+    const body = (err as { response?: { data?: ServerErrorBody } })?.response?.data
+    if (typeof body?.step === 'number' && typeof body.field === 'string' && body.field !== '') {
+      return body.label
+        ? t('errors.workflowStepFilterValueBlankStepLabel', { ns: 'common', step: body.step, label: body.label, field: body.field })
+        : t('errors.workflowStepFilterValueBlankStep', { ns: 'common', step: body.step, field: body.field })
+    }
+    return t('errors.workflowStepFilterValueBlank', { ns: 'common' })
   }
   return key ? t(key, { ns: 'common' }) : extractApiError(err, fallback)
 }

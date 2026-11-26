@@ -266,6 +266,33 @@ describe('workflow_step_appointment_lookup_unknown (422)', () => {
   })
 })
 
+// STEP-FILTER-BLANK-422-FE-1: the workflow save refuses a step filter (or a ScenarioModule = / != condition) whose value is
+// blank (422, BE StepConfigChecks via refuseStep; the body carries step, label, field and value null, never an allowed list).
+describe('step_filter_value_blank (422)', () => {
+  it('maps the code to its translated key', () => {
+    expect(apiErrorKey({ response: { status: 422, data: { code: 'step_filter_value_blank', message: 'x' } } })).toBe('errors.workflowStepFilterValueBlank')
+  })
+
+  // A key-echo t that prints the interpolation values it received, in a fixed order.
+  const t = (key: string, options?: { ns: string; step?: number; label?: string; field?: string }) =>
+    [options?.ns, key, options?.step, options?.label, options?.field].filter((v) => v !== undefined).join('|')
+
+  it('names the step, its label and the blank filter field', () => {
+    const err = { response: { status: 422, data: { code: 'step_filter_value_blank', message: 'x', step: 2, label: 'Kandidaten', field: 'status_key', value: null } } }
+    expect(apiErrorMessage(err, t, 'fallback')).toBe('common|errors.workflowStepFilterValueBlankStepLabel|2|Kandidaten|status_key')
+  })
+
+  it('names the step alone when the step has no label (label null)', () => {
+    const err = { response: { status: 422, data: { code: 'step_filter_value_blank', message: 'x', step: 1, label: null, field: 'owner_id', value: null } } }
+    expect(apiErrorMessage(err, t, 'fallback')).toBe('common|errors.workflowStepFilterValueBlankStep|1|owner_id')
+  })
+
+  it('renders the bare translated sentence, never the server text, when the step or the field is missing', () => {
+    const err = { response: { status: 422, data: { code: 'step_filter_value_blank', message: 'server sentence', step: 2 } } }
+    expect(apiErrorMessage(err, t, 'fallback')).toBe('common|errors.workflowStepFilterValueBlank')
+  })
+})
+
 // MODULE-403-DEEPLINK-1: module_not_enabled toasts deep-link to the super admin screen, only for a super admin.
 describe('apiErrorToast / notifyApiError · MODULE-403-DEEPLINK-1', () => {
   const t = (key: string) => key

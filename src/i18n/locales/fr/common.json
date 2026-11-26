@@ -873,6 +873,9 @@
     "workflowStepAppointmentLookupUnknownStepLabel": "L’étape {{step}} ({{label}}) : {{field}} '{{value}}' n’est pas dans la liste de choix de ce bureau. Valeurs autorisées : {{allowed}}.",
     "appointmentLookupFieldType": "type de rendez-vous",
     "appointmentLookupFieldLocation": "lieu de rendez-vous",
+    "workflowStepFilterValueBlank": "Un filtre d’une étape n’a pas de valeur. Renseignez-la ou supprimez la ligne. Rien n’a été enregistré.",
+    "workflowStepFilterValueBlankStep": "L’étape {{step}} : le filtre sur '{{field}}' n’a pas de valeur. Renseignez-la ou supprimez la ligne. Rien n’a été enregistré.",
+    "workflowStepFilterValueBlankStepLabel": "L’étape {{step}} ({{label}}) : le filtre sur '{{field}}' n’a pas de valeur. Renseignez-la ou supprimez la ligne. Rien n’a été enregistré.",
     "aiDisclosureMissing": "L’introduction de l’entretien ne contient pas la mention IA obligatoire ; modifiez le modèle avant de l’activer.",
     "fieldRequired": "{{field}} est obligatoire."
   },

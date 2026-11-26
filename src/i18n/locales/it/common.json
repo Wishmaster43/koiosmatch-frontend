@@ -873,6 +873,9 @@
     "workflowStepAppointmentLookupUnknownStepLabel": "Il passaggio {{step}} ({{label}}): {{field}} '{{value}}' non è nell’elenco di scelta di questa agenzia. Valori consentiti: {{allowed}}.",
     "appointmentLookupFieldType": "tipo di appuntamento",
     "appointmentLookupFieldLocation": "sede dell’appuntamento",
+    "workflowStepFilterValueBlank": "Un filtro di un passaggio non ha valore. Compilalo o rimuovi la riga. Non è stato salvato nulla.",
+    "workflowStepFilterValueBlankStep": "Il passaggio {{step}}: il filtro su '{{field}}' non ha valore. Compilalo o rimuovi la riga. Non è stato salvato nulla.",
+    "workflowStepFilterValueBlankStepLabel": "Il passaggio {{step}} ({{label}}): il filtro su '{{field}}' non ha valore. Compilalo o rimuovi la riga. Non è stato salvato nulla.",
     "aiDisclosureMissing": "Nell’introduzione del colloquio manca l’informativa obbligatoria sull’IA; modifica il modello prima di attivarlo.",
     "fieldRequired": "{{field}} è obbligatorio."
   },

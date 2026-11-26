@@ -873,6 +873,9 @@
     "workflowStepAppointmentLookupUnknownStepLabel": "Step {{step}} ({{label}}): {{field}} '{{value}}' is not in the pick list of this bureau. Allowed values: {{allowed}}.",
     "appointmentLookupFieldType": "appointment type",
     "appointmentLookupFieldLocation": "appointment location",
+    "workflowStepFilterValueBlank": "A step filter has no value. Fill it in or remove the row. Nothing was saved.",
+    "workflowStepFilterValueBlankStep": "Step {{step}}: the filter on '{{field}}' has no value. Fill it in or remove the row. Nothing was saved.",
+    "workflowStepFilterValueBlankStepLabel": "Step {{step}} ({{label}}): the filter on '{{field}}' has no value. Fill it in or remove the row. Nothing was saved.",
     "aiDisclosureMissing": "The interview intro is missing the mandatory AI disclosure; adjust the template before you activate this.",
     "fieldRequired": "{{field}} is required."
   },
