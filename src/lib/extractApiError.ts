@@ -96,6 +96,9 @@ const ERROR_CODE_KEYS: Record<string, string> = {
   // STEP-FILTER-BLANK-422-FE-1 (BE StepConfigChecks via refuseStep, batch P, 422): a step filter, or a ScenarioModule condition
   // with = / !=, was saved with a blank value; the body carries step, label, field (the first blank member) and value null.
   step_filter_value_blank: 'errors.workflowStepFilterValueBlank',
+  // TASK-STATUS-LOOKUP-EMPTY-422-FE-1 (BE bootstrap/app.php renderer for TaskStatusLookupEmptyException, batch N, 422): a task
+  // create arrived while the bureau's task-status lookup is empty and no status_id was sent; the body is exactly {code, message}.
+  task_status_lookup_empty: 'errors.taskStatusLookupEmpty',
   // The interview intro / workflow / Koios toggle lacks the mandatory AI disclosure (422).
   ai_disclosure_missing: 'errors.aiDisclosureMissing',
   // ONIX C-007: one generic 422 for a taken e-mail (never reveals why or where it is in use).

@@ -876,6 +876,7 @@
     "workflowStepFilterValueBlank": "Un filtro de un paso no tiene valor. Rellénalo o elimina la fila. No se ha guardado nada.",
     "workflowStepFilterValueBlankStep": "El paso {{step}}: el filtro en '{{field}}' no tiene valor. Rellénalo o elimina la fila. No se ha guardado nada.",
     "workflowStepFilterValueBlankStepLabel": "El paso {{step}} ({{label}}): el filtro en '{{field}}' no tiene valor. Rellénalo o elimina la fila. No se ha guardado nada.",
+    "taskStatusLookupEmpty": "Esta agencia aún no tiene estados de tarea. Añade uno primero en Ajustes → Tareas → Estados. No se ha guardado nada.",
     "aiDisclosureMissing": "Falta la mención obligatoria de IA en la introducción de la entrevista; modifica la plantilla antes de activarlo.",
     "fieldRequired": "{{field}} es obligatorio."
   },

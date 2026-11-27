@@ -293,6 +293,18 @@ describe('step_filter_value_blank (422)', () => {
   })
 })
 
+describe('task_status_lookup_empty (422)', () => {
+  // TASK-STATUS-LOOKUP-EMPTY-422-FE-1: the BE body is exactly {code, message}; the FE renders its own translated sentence.
+  const err = { response: { status: 422, data: { code: 'task_status_lookup_empty', message: 'server sentence' } } }
+  it('maps the code to its translated key', () => {
+    expect(apiErrorKey(err)).toBe('errors.taskStatusLookupEmpty')
+  })
+  it('renders the translated sentence, never the server text', () => {
+    const t = (key: string, options?: { ns: string }) => `${options?.ns}|${key}`
+    expect(apiErrorMessage(err, t, 'fallback')).toBe('common|errors.taskStatusLookupEmpty')
+  })
+})
+
 // MODULE-403-DEEPLINK-1: module_not_enabled toasts deep-link to the super admin screen, only for a super admin.
 describe('apiErrorToast / notifyApiError · MODULE-403-DEEPLINK-1', () => {
   const t = (key: string) => key

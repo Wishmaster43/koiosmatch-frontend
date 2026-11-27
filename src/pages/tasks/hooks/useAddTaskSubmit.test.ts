@@ -46,3 +46,19 @@ describe('useAddTaskSubmit · unmapped 422 banner (ONIX N-005)', () => {
     expect(result.current.errors).toEqual({ title: true })
   })
 })
+
+// TASK-STATUS-LOOKUP-EMPTY-422-FE-1: a coded 422 on the create renders its translated key through apiErrorMessage,
+// never the server sentence (the tStub echoes key::options, so the ns must be common).
+describe('useAddTaskSubmit · coded 422 task_status_lookup_empty', () => {
+  it('POSTs /tasks and sets createError to the translated key, never the server message', async () => {
+    vi.mocked(api.post).mockRejectedValue({
+      response: { status: 422, data: { code: 'task_status_lookup_empty', message: 'server sentence' } },
+    })
+    const { result } = mountHook()
+    await act(async () => { await result.current.handleSubmit() })
+    expect(api.post).toHaveBeenCalledWith('/tasks', expect.objectContaining({ title: 'Bel kandidaat' }))
+    expect(result.current.createError).toBe('errors.taskStatusLookupEmpty::{"ns":"common"}')
+    expect(result.current.createError).not.toContain('server sentence')
+    expect(result.current.errors).toEqual({})
+  })
+})

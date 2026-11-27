@@ -9,7 +9,7 @@ import { useState } from 'react'
 import type { TFunction } from 'i18next'
 import api, { unwrap } from '@/lib/api'
 // DUP-04: one shared axios-error → message extractor, never a re-derived inline dance.
-import { extractApiError } from '@/lib/extractApiError'
+import { apiErrorMessage } from '@/lib/extractApiError'
 import { extractFormErrors, unmappedFormErrors } from '@/lib/extractFormErrors'
 import { formatUnmappedErrors } from '@/lib/formatUnmappedErrors'
 import { API_TO_FORM } from '../addmodal/formHelpers'
@@ -59,7 +59,8 @@ export function useAddTaskSubmit({
     if (fieldErrors) {
       setErrors(fieldErrors)
     } else {
-      setCreateError(extractApiError(err, t('common:errorGeneric')))
+      // A coded refusal (task_status_lookup_empty) renders its translated sentence; anything else keeps the generic chain.
+      setCreateError(apiErrorMessage(err, t, t('common:errorGeneric')))
     }
     // ONIX N-005: a 422 key no field renders (e.g. a required custom field) gets a banner too.
     const banner = formatUnmappedErrors(unmappedFormErrors(err, API_TO_FORM), t)
