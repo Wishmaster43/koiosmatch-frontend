@@ -143,4 +143,47 @@ describe('CustomersReport · server prospect_kpis strip (SERVER-KPIS-1)', () => 
     expect(screen.getByText(`${i18n.t('analytics:customers.axes.status')}: Actief`)).toBeInTheDocument()
     expect(screen.queryByText(i18n.t('analytics:customers.kpis.prospectsNoContact'))).not.toBeInTheDocument()
   })
+
+  // DANNY-DRILL-LASTCONTACT-1 (Danny 27-11: yes): the two standing prospect drills lead their rows with the
+  // server's date fields (MINI-BUNDLE-1), rendered DD-MM-YYYY (DATUM-1); a null date leaves the row as before.
+  describe('prospect drill date columns (DANNY-DRILL-LASTCONTACT-1)', () => {
+    const EMPTY = { data: { data: [], meta: { total: 0 } } }
+    const prospect = { id: 'c1', name: 'Bouwbedrijf Noord', status_label: 'Actief', city: 'Zwolle', owner: 'Sara' }
+    // The signal drill answers the given rows; every other GET keeps the empty default.
+    const drillRows = (rows: Record<string, unknown>[]) => getSpy.mockImplementation((url: string) =>
+      Promise.resolve(url === '/reports/customers/signals/drill' ? { data: { data: rows, meta: { total: rows.length } } } : EMPTY))
+    afterEach(() => { getSpy.mockReset(); getSpy.mockResolvedValue(EMPTY) })
+
+    it('prospects_no_contact rows lead with the last-contact date in DD-MM-YYYY, never the ISO string', async () => {
+      const user = userEvent.setup()
+      mockUseCustomersReport.mockReturnValue({ data: withKpis, loading: false, error: false })
+      drillRows([{ ...prospect, last_contact_at: '2026-11-15T10:00:00+01:00' }])
+      open()
+      await user.click(screen.getByText(i18n.t('analytics:customers.kpis.prospectsNoContact')))
+      expect(getSpy).toHaveBeenCalledWith('/reports/customers/signals/drill',
+        expect.objectContaining({ params: expect.objectContaining({ kpi: 'prospects_no_contact' }) }))
+      expect(await screen.findByText('15-11-2026 · Actief')).toBeInTheDocument()
+      expect(screen.queryByText(/2026-11-15T/)).not.toBeInTheDocument()
+    })
+
+    it('prospects_task_overdue rows lead with the oldest overdue due date', async () => {
+      const user = userEvent.setup()
+      mockUseCustomersReport.mockReturnValue({ data: withKpis, loading: false, error: false })
+      drillRows([{ ...prospect, oldest_overdue_due_at: '2026-11-03' }])
+      open()
+      await user.click(screen.getByText(i18n.t('analytics:customers.kpis.prospectsTaskOverdue')))
+      expect(getSpy).toHaveBeenCalledWith('/reports/customers/signals/drill',
+        expect.objectContaining({ params: expect.objectContaining({ kpi: 'prospects_task_overdue' }) }))
+      expect(await screen.findByText('03-11-2026 · Actief')).toBeInTheDocument()
+    })
+
+    it('a never-contacted prospect keeps the status · city row of before and shows no date word', async () => {
+      const user = userEvent.setup()
+      mockUseCustomersReport.mockReturnValue({ data: withKpis, loading: false, error: false })
+      drillRows([{ ...prospect, last_contact_at: null }])
+      open()
+      await user.click(screen.getByText(i18n.t('analytics:customers.kpis.prospectsNoContact')))
+      expect(await screen.findByText('Actief · Zwolle')).toBeInTheDocument()
+    })
+  })
 })

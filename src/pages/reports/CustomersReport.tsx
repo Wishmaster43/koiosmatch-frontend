@@ -74,6 +74,14 @@ const PROSPECT_KPI_LABEL_KEYS: Record<string, string> = {
   prospects_no_contact: 'customers.kpis.prospectsNoContact', prospects_task_overdue: 'customers.kpis.prospectsTaskOverdue',
 }
 
+// DANNY-DRILL-LASTCONTACT-1 (Danny 27-11: yes): the two standing prospect drills lead each row with the server's
+// date field (MINI-BUNDLE-1, shipped hidden until now): the latest contact moment, or the oldest overdue due date.
+// A null date shows nothing (never a "never" word) and the row keeps today's status · city sub; customers_prospect has no date.
+const PROSPECT_DRILL_ROW_FIELDS: Record<string, string[]> = {
+  prospects_no_contact: ['last_contact_at', 'status_label', 'city'],
+  prospects_task_overdue: ['oldest_overdue_due_at', 'status_label', 'city'],
+}
+
 // Semantic colour per signal key, applied only when the count is non-zero
 // (§4: colour carries meaning — a calm zero stays uncoloured). Mirrors
 // CandidatesReport's SUITE_COLOR idiom.
@@ -181,6 +189,7 @@ export default function CustomersReport({ period, filters = EMPTY_REPORT_FILTERS
     entityPage: 'customers',
     rowsEndpoint: '/reports/customers/signals/drill',
     rowsParams: { ...buildReportQueryParams(period, 'customers', filters), kpi },
+    rowFields: PROSPECT_DRILL_ROW_FIELDS[kpi],
   })
 
   const onSeriesPick = gateDrillClick('customers', (dateKey: string) => {
