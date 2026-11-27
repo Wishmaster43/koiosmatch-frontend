@@ -99,6 +99,9 @@ const ERROR_CODE_KEYS: Record<string, string> = {
   // TASK-STATUS-LOOKUP-EMPTY-422-FE-1 (BE bootstrap/app.php renderer for TaskStatusLookupEmptyException, batch N, 422): a task
   // create arrived while the bureau's task-status lookup is empty and no status_id was sent; the body is exactly {code, message}.
   task_status_lookup_empty: 'errors.taskStatusLookupEmpty',
+  // TASK-STATUS-LAST-ROW-FE-1 (BE TaskStatus `deleting` hook rendered on DELETE /task-statuses/{id}, batch R1, 409): the last
+  // task status of a bureau cannot be deleted; the body is exactly {code, message}, without the in_use key of the in-use 409.
+  task_status_last_row: 'errors.taskStatusLastRow',
   // The interview intro / workflow / Koios toggle lacks the mandatory AI disclosure (422).
   ai_disclosure_missing: 'errors.aiDisclosureMissing',
   // ONIX C-007: one generic 422 for a taken e-mail (never reveals why or where it is in use).

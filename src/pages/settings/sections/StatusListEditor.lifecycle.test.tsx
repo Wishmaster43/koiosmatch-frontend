@@ -78,6 +78,25 @@ describe('StatusListEditor — delete failures notify the user', () => {
     expect(notifyError).not.toHaveBeenCalled()
     expect(screen.getByTitle(st('statusList.inUse'))).toBeInTheDocument()
   })
+
+  // TASK-STATUS-LAST-ROW-FE-1: a coded 409 (the bureau's last task status) toasts the translated sentence and never flags the row in use.
+  it('toasts the translated sentence on a coded 409 (task_status_last_row) and leaves the row deletable', async () => {
+    api.get.mockResolvedValue({ data: [type({ id: 's1', name: 'Open' })] })
+    api.delete.mockRejectedValue({ response: { status: 409, data: { code: 'task_status_last_row', message: 'server sentence' } } })
+    const { notifyError } = await import('@/lib/notify')
+    const user = userEvent.setup()
+    render(<StatusListEditor title="Statussen" subtitle="" endpoint="/task-statuses" addLabel="Status toevoegen" />)
+
+    await screen.findByText('Open')
+    const editBtn = screen.getByRole('button', { name: st('statusList.edit') })
+    await user.click(editBtn.nextElementSibling as HTMLElement)
+    await user.click(await screen.findByRole('button', { name: i18n.t('confirm', { ns: 'common' }) }))
+
+    await waitFor(() => expect(api.delete).toHaveBeenCalledWith('/task-statuses/s1'))
+    await waitFor(() => expect(notifyError).toHaveBeenCalledWith(i18n.t('errors.taskStatusLastRow', { ns: 'common' })))
+    expect(vi.mocked(notifyError).mock.calls.at(-1)?.[0]).not.toBe('server sentence')
+    expect(screen.queryByTitle(st('statusList.inUse'))).not.toBeInTheDocument()
+  })
 })
 
 // Audit finding: the load effect never reset loading/loadError/notFound when the

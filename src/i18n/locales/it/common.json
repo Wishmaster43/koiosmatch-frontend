@@ -877,6 +877,7 @@
     "workflowStepFilterValueBlankStep": "Il passaggio {{step}}: il filtro su '{{field}}' non ha valore. Compilalo o rimuovi la riga. Non è stato salvato nulla.",
     "workflowStepFilterValueBlankStepLabel": "Il passaggio {{step}} ({{label}}): il filtro su '{{field}}' non ha valore. Compilalo o rimuovi la riga. Non è stato salvato nulla.",
     "taskStatusLookupEmpty": "Questa agenzia non ha ancora stati attività. Aggiungine prima uno in Impostazioni → Attività → Stati. Non è stato salvato nulla.",
+    "taskStatusLastRow": "Questo è l’ultimo stato attività di questa agenzia e non può essere eliminato. Aggiungi prima un altro stato. Non è stato modificato nulla.",
     "aiDisclosureMissing": "Nell’introduzione del colloquio manca l’informativa obbligatoria sull’IA; modifica il modello prima di attivarlo.",
     "fieldRequired": "{{field}} è obbligatorio."
   },

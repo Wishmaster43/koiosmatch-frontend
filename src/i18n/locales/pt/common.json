@@ -877,6 +877,7 @@
     "workflowStepFilterValueBlankStep": "O passo {{step}}: o filtro em '{{field}}' não tem valor. Preencha-o ou remova a linha. Nada foi guardado.",
     "workflowStepFilterValueBlankStepLabel": "O passo {{step}} ({{label}}): o filtro em '{{field}}' não tem valor. Preencha-o ou remova a linha. Nada foi guardado.",
     "taskStatusLookupEmpty": "Esta agência ainda não tem estados de tarefa. Adicione primeiro um em Definições → Tarefas → Estados. Nada foi guardado.",
+    "taskStatusLastRow": "Este é o último estado de tarefa desta agência e não pode ser eliminado. Adicione primeiro outro estado. Nada foi alterado.",
     "aiDisclosureMissing": "A introdução da entrevista não tem a menção obrigatória de IA; ajuste o modelo antes de ativar.",
     "fieldRequired": "{{field}} é obrigatório."
   },

@@ -30,6 +30,7 @@ import LookupValueMark from './LookupValueMark'
 import { FALLBACK_SWATCH } from './statusListEditorTypes'
 import { GENERIC_LOOKUP_ICON_NAMES, resolveGenericLookupIcon } from './lookupIcons'
 import { deleteLookupRow } from '../lib/deleteLookupRow'
+import { apiErrorMessage } from '@/lib/extractApiError'
 
 // One province row (Province model: country + name + position + active, plus
 // the optional BE-served ISO 3166-2 `code` and the icon/colour mark).
@@ -105,7 +106,7 @@ export default function ProvincesSettings() {
   const remove = (item: ProvinceItem) => {
     if (item.in_use) return
     confirm(t('statusList.confirmDelete', { name: item.name }), () =>
-      deleteLookupRow('/provinces', item, setItems, setDeleting, () => notifyError(t('statusList.deleteFailed'))),
+      deleteLookupRow('/provinces', item, setItems, setDeleting, (e) => notifyError(apiErrorMessage(e, t, t('statusList.deleteFailed')))),
     { danger: true })
   }
 

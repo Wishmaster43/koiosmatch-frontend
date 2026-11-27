@@ -877,6 +877,7 @@
     "workflowStepFilterValueBlankStep": "Step {{step}}: the filter on '{{field}}' has no value. Fill it in or remove the row. Nothing was saved.",
     "workflowStepFilterValueBlankStepLabel": "Step {{step}} ({{label}}): the filter on '{{field}}' has no value. Fill it in or remove the row. Nothing was saved.",
     "taskStatusLookupEmpty": "This bureau has no task statuses yet. Add one first under Settings → Tasks → Statuses. Nothing was saved.",
+    "taskStatusLastRow": "This is the last task status of this bureau and cannot be deleted. Add another status first. Nothing was changed.",
     "aiDisclosureMissing": "The interview intro is missing the mandatory AI disclosure; adjust the template before you activate this.",
     "fieldRequired": "{{field}} is required."
   },

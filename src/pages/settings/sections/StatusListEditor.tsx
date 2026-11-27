@@ -57,7 +57,7 @@ import { useTranslation } from 'react-i18next'
 import { GENERIC_LOOKUP_ICON_NAMES, resolveGenericLookupIcon } from './lookupIcons'
 import { AlertTriangle } from 'lucide-react'
 import api, { unwrap, unwrapList } from '@/lib/api'
-import { extractApiError } from '@/lib/extractApiError'
+import { extractApiError, apiErrorMessage } from '@/lib/extractApiError'
 import { notifyError } from '@/lib/notify'
 import { useConfirm } from '@/hooks/useConfirm'
 import { deleteLookupRow } from '../lib/deleteLookupRow'
@@ -192,11 +192,11 @@ export default function StatusListEditor({
     } finally { setSaving(false) }
   }
 
-  // Confirms and deletes a row, blocked upfront when it is in use; a 409 from the server still keeps the row and flags it, since another change could have made it in-use meanwhile.
+  // Confirms and deletes a row, blocked upfront when it is in use; an uncoded 409 still keeps the row and flags it (another change could have made it in-use meanwhile), a coded 409 (task_status_last_row) keeps the row and toasts its translated sentence.
   const remove = (item: StatusListItem) => {
     if (inUse(item) || item.is_system === true) return
     confirm(t('statusList.confirmDelete', { name: labelOf(item) }), () =>
-      deleteLookupRow(endpoint, item, setItems, setDeleting, () => notifyError(t('statusList.deleteFailed'))),
+      deleteLookupRow(endpoint, item, setItems, setDeleting, (e) => notifyError(apiErrorMessage(e, t, t('statusList.deleteFailed')))),
     { danger: true })
   }
 
