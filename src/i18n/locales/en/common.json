@@ -878,6 +878,9 @@
     "workflowStepFilterValueBlankStepLabel": "Step {{step}} ({{label}}): the filter on '{{field}}' has no value. Fill it in or remove the row. Nothing was saved.",
     "taskStatusLookupEmpty": "This bureau has no task statuses yet. Add one first under Settings → Tasks → Statuses. Nothing was saved.",
     "taskStatusLastRow": "This is the last task status of this bureau and cannot be deleted. Add another status first. Nothing was changed.",
+    "workflowStepUnknownAudience": "An AI agent step names an unknown audience. Allowed values: {{allowed}}. Nothing was saved.",
+    "workflowStepUnknownAudienceStep": "Step {{step}}: audience '{{value}}' is unknown. Allowed values: {{allowed}}. Nothing was saved.",
+    "workflowStepUnknownAudienceStepLabel": "Step {{step}} ({{label}}): audience '{{value}}' is unknown. Allowed values: {{allowed}}. Nothing was saved.",
     "aiDisclosureMissing": "The interview intro is missing the mandatory AI disclosure; adjust the template before you activate this.",
     "fieldRequired": "{{field}} is required."
   },

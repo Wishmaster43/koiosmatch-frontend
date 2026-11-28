@@ -2,6 +2,8 @@
  * FlowsTab — I-001: a coded 422 (ai_disclosure_missing) on the flow save reaches the
  * user as the translated common error, never the raw server sentence; the request
  * (method/route/body) is asserted at the seam (§13).
+ * AI-AGENT-STEP-LANGUAGE-FE-1: a successful save whose answer lists disclosure_fallback_languages
+ * toasts one info sentence naming those languages; an empty or absent list stays silent.
  */
 import { describe, it, expect, vi, afterEach } from 'vitest'
 import { render, screen, waitFor } from '@testing-library/react'
@@ -15,8 +17,14 @@ vi.mock('@/lib/api', async () => {
 })
 vi.mock('@/lib/notify', () => ({ notify: vi.fn(), notifyError: vi.fn() }))
 vi.mock('@/context/AuthContext', () => ({ useAuth: () => ({ hasPermission: () => true }) }))
-// Key-echo i18n stub.
-vi.mock('react-i18next', () => ({ useTranslation: () => ({ t: (key: string) => key }), initReactI18next: { type: '3rdParty', init: () => {} } }))
+// Key-echo i18n stub; the languages variable is echoed behind the key so the toast test sees the ICU names it carried.
+vi.mock('react-i18next', () => ({
+  useTranslation: () => ({
+    t: (key: string, options?: { languages?: string }) => (options?.languages ? `${key}|${options.languages}` : key),
+    i18n: { language: 'en' },
+  }),
+  initReactI18next: { type: '3rdParty', init: () => {} },
+}))
 // The panel is a stub that hands a fixed payload (active: true) to onSaved.
 vi.mock('@/components/ai/management/InterviewFlowsPanel', () => ({
   InterviewFlowsPanel: ({ onSaved }: { onSaved: (p: Record<string, unknown>) => void }) => (
@@ -25,7 +33,7 @@ vi.mock('@/components/ai/management/InterviewFlowsPanel', () => ({
 }))
 
 import api from '@/lib/api'
-import { notifyError } from '@/lib/notify'
+import { notify, notifyError } from '@/lib/notify'
 
 afterEach(() => vi.clearAllMocks())
 
@@ -41,5 +49,40 @@ describe('FlowsTab · coded save refusal', () => {
     await waitFor(() => expect(notifyError).toHaveBeenCalledWith('errors.aiDisclosureMissing'))
     expect(api.put).toHaveBeenCalledWith('/ai/interview-flows/fl-1', expect.objectContaining({ active: true }))
     expect(notifyError).not.toHaveBeenCalledWith('NL zin')
+  })
+})
+
+describe('FlowsTab · activation disclosure fallback (AI-AGENT-STEP-LANGUAGE-FE-1)', () => {
+  const flow = { id: 'fl-1', name: 'Intake', active: false }
+  const mountAndSave = async () => {
+    vi.mocked(api.get).mockImplementation((url: string) => Promise.resolve({ data: { data: url === '/ai/interview-flows' ? [flow] : flow } }))
+    render(<QueryClientProvider client={new QueryClient()}><FlowsTab /></QueryClientProvider>)
+    await userEvent.click(await screen.findByText('save-flow'))
+  }
+
+  it('toasts one info sentence with the platform language names (Meta underscore codes included) when the save answer lists fallback languages', async () => {
+    vi.mocked(api.put).mockResolvedValue({ data: { data: { ...flow, active: true }, disclosure_fallback_languages: ['fr', 'pt_BR'] } })
+    await mountAndSave()
+
+    await waitFor(() => expect(notify).toHaveBeenCalledWith('info', 'ai.flows.disclosureFallback|French, Brazilian Portuguese'))
+    expect(notify).toHaveBeenCalledTimes(1)
+    expect(api.put).toHaveBeenCalledWith('/ai/interview-flows/fl-1', { name: 'Intake', active: true })
+    expect(notifyError).not.toHaveBeenCalled()
+  })
+
+  it('stays silent when the list is empty', async () => {
+    vi.mocked(api.put).mockResolvedValue({ data: { data: { ...flow, active: true }, disclosure_fallback_languages: [] } })
+    await mountAndSave()
+
+    await waitFor(() => expect(api.put).toHaveBeenCalledTimes(1))
+    expect(notify).not.toHaveBeenCalled()
+  })
+
+  it('stays silent when the answer carries no list at all (a save that does not activate)', async () => {
+    vi.mocked(api.put).mockResolvedValue({ data: { data: { ...flow, active: true } } })
+    await mountAndSave()
+
+    await waitFor(() => expect(api.put).toHaveBeenCalledTimes(1))
+    expect(notify).not.toHaveBeenCalled()
   })
 })

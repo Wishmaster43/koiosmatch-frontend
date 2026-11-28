@@ -1,8 +1,9 @@
 // ai_agent module — WF-AI-AGENT-NODE-FE-1: one turn of the WhatsApp AI interview
 // loop (WA-INTERVIEW-1). The former FE card was a generic 13-field instruction
 // builder with no engine counterpart behind it ("generic agent" stays a later
-// product idea, not a node); this registers exactly the six fields of
-// App\Workflow\Modules\AiAgentModule::configSchema(). Sources decided CMBE 23-08
+// product idea, not a node); this mirrors App\Workflow\Modules\AiAgentModule::configSchema():
+// the pre-P1 six fields, the instructions list (MODULE-TERUG-1) and the audience
+// select (AI-AGENT-STEP-LANGUAGE-1). Sources decided CMBE 23-08
 // (WORKLIST.md): `agent` reads GET /ai/agents (a plain CRUD list, never an AI
 // call itself — id becomes the stored value, name the label); `phone_number_id`
 // reads the SAME /whatsapp-phone-numbers lookup the whatsapp_send step uses.
@@ -44,5 +45,13 @@ export default {
     { key: 'reply_timeout_hours', label: 'Fallback time without a reply (hours)', type: 'number', tab: 'advanced', default: 48,
       hint: 'If the candidate doesn\'t reply, the run falls back after this many hours (workflows:resume-due watchdog).' },
     { key: 'max_attempts', label: 'Max. attempts per turn (on a temporary API error)', type: 'number', tab: 'advanced', default: 3 },
+    // AI-AGENT-STEP-LANGUAGE-1 (Danny 27-11, Q21 yes; BE AiAgentModule::configSchema 'audience' + InterviewLanguage::AUDIENCE_OPTIONS):
+    // who the step talks to decides the language; null/'' means candidate, any other value than these two is refused (422).
+    { key: 'audience', label: 'Audience', type: 'select', tab: 'advanced', default: 'candidate',
+      options: [
+        { value: 'candidate', label: 'Candidate (their language)' },
+        { value: 'staff', label: 'Staff (company language)' },
+      ],
+      hint: 'Candidate = the preferred language of the candidate, else the bureau messaging default. Staff = the company language.' },
   ],
 }

@@ -500,7 +500,8 @@
       "confirmDelete": "Supprimer le flux « {{name}} » ?",
       "inUse": "Ce flux est utilisé et ne peut pas être supprimé.",
       "noPermission": "Vous n’avez pas le droit de gérer les flux.",
-      "selectOrNew": "Choisissez un flux ou créez-en un."
+      "selectOrNew": "Choisissez un flux ou créez-en un.",
+      "disclosureFallback": "L’introduction en {{languages}} ne contient pas sa propre mention IA ; le texte par défaut est utilisé pour ces langues."
     }
   },
   "filters": {
@@ -1168,7 +1169,8 @@
     "Shift-type preference": "Préférence de type de shift",
     "Shift ≥ 8 hours": "Shift ≥ 8 heures",
     "E-mail — can be contacted now (derived)": "E-mail : joignable maintenant (dérivé)",
-    "WhatsApp — can be contacted now (derived)": "WhatsApp : joignable maintenant (dérivé)"
+    "WhatsApp — can be contacted now (derived)": "WhatsApp : joignable maintenant (dérivé)",
+    "Audience": "Public"
   },
   "fieldOptions": {
     "none": "Aucun contrat",
@@ -1391,7 +1393,9 @@
     "Template message": "Message template",
     "WhatsApp Flow (shifts)": "WhatsApp Flow (shifts)",
     "Session message (24h window)": "Message de session (fenêtre de 24 h)",
-    "One vacancy": "Un poste"
+    "One vacancy": "Un poste",
+    "Candidate (their language)": "Candidat (sa langue)",
+    "Staff (company language)": "Collaborateur (langue de l’entreprise)"
   },
   "agentTest": {
     "title": "Variables de test",
@@ -1623,7 +1627,8 @@
     "Direct https URL for this step Leave blank to use the shared setting webhook_endpoint_<slug> below No credentials in the URL": "URL HTTPS directe pour cette étape. Laissez vide pour utiliser le paramètre partagé webhook_endpoint_<slug> ci-dessous. Aucune information d’identification dans l’URL.",
     "Only used if no URL is set above the tenant setting webhook_endpoint_<slug> then determines the URL": "Utilisé uniquement si aucune URL n’est définie ci-dessus : le paramètre locataire webhook_endpoint_<slug> détermine alors l’URL.",
     "A field name of the source record (mobile, phone, …), never a phone number Manual sending happens from the record itself": "Un nom de champ de l’enregistrement source (mobile, phone, …), jamais un numéro de téléphone. L’envoi manuel se fait depuis l’enregistrement lui-même.",
-    "This looks like a phone number Enter the source record’s field name, eg mobile": "Cela ressemble à un numéro de téléphone. Saisissez le nom du champ de l’enregistrement source, p. ex. mobile."
+    "This looks like a phone number Enter the source record’s field name, eg mobile": "Cela ressemble à un numéro de téléphone. Saisissez le nom du champ de l’enregistrement source, p. ex. mobile.",
+    "Candidate = the preferred language of the candidate, else the bureau messaging default Staff = the company language": "Candidat = la langue préférée du candidat, sinon la langue de messagerie du bureau. Collaborateur = la langue de l’entreprise."
   },
   "triggers": {
     "groups": {

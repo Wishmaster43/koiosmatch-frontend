@@ -594,7 +594,8 @@
       "confirmDelete": "Flow \"{{name}}\" verwijderen?",
       "inUse": "Deze flow is in gebruik en kan niet worden verwijderd.",
       "noPermission": "Je hebt geen rechten om flows te beheren.",
-      "selectOrNew": "Kies een flow of maak een nieuwe."
+      "selectOrNew": "Kies een flow of maak een nieuwe.",
+      "disclosureFallback": "De intro in {{languages}} heeft geen eigen AI-vermelding; voor die talen wordt de standaardtekst gebruikt."
     }
   },
   "canvas": {
@@ -1236,7 +1237,8 @@
     "Shift-type preference": "Voorkeur diensttype",
     "Shift ≥ 8 hours": "Dienst ≥ 8 uur",
     "E-mail — can be contacted now (derived)": "E-mail: nu benaderbaar (afgeleid)",
-    "WhatsApp — can be contacted now (derived)": "WhatsApp: nu benaderbaar (afgeleid)"
+    "WhatsApp — can be contacted now (derived)": "WhatsApp: nu benaderbaar (afgeleid)",
+    "Audience": "Doelgroep"
   },
   "fieldOptions": {
     "none": "Geen contract",
@@ -1459,7 +1461,9 @@
     "Template message": "Templatebericht",
     "WhatsApp Flow (shifts)": "WhatsApp Flow (diensten)",
     "Session message (24h window)": "Sessiebericht (24u-venster)",
-    "One vacancy": "Eén vacature"
+    "One vacancy": "Eén vacature",
+    "Candidate (their language)": "Kandidaat (eigen taal)",
+    "Staff (company language)": "Medewerker (bedrijfstaal)"
   },
   "agentTest": {
     "title": "Test-variabelen",
@@ -1623,7 +1627,8 @@
     "Direct https URL for this step Leave blank to use the shared setting webhook_endpoint_<slug> below No credentials in the URL": "Directe https-URL voor deze stap. Laat leeg om de gedeelde instelling webhook_endpoint_<slug> hieronder te gebruiken. Geen inloggegevens in de URL.",
     "Only used if no URL is set above the tenant setting webhook_endpoint_<slug> then determines the URL": "Alleen gebruikt als hierboven geen URL staat: de tenant-instelling webhook_endpoint_<slug> bepaalt dan de URL.",
     "A field name of the source record (mobile, phone, …), never a phone number Manual sending happens from the record itself": "Een veldnaam van het bronrecord (mobile, phone, …), nooit een telefoonnummer. Handmatig versturen doe je vanaf het record zelf.",
-    "This looks like a phone number Enter the source record’s field name, eg mobile": "Dit lijkt een telefoonnummer. Vul de veldnaam van het bronrecord in, bijv. mobile."
+    "This looks like a phone number Enter the source record’s field name, eg mobile": "Dit lijkt een telefoonnummer. Vul de veldnaam van het bronrecord in, bijv. mobile.",
+    "Candidate = the preferred language of the candidate, else the bureau messaging default Staff = the company language": "Kandidaat = de voorkeurstaal van de kandidaat, anders de berichtentaal van het bureau. Medewerker = de bedrijfstaal."
   },
   "triggers": {
     "groups": {

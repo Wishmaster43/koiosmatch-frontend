@@ -878,6 +878,9 @@
     "workflowStepFilterValueBlankStepLabel": "Schritt {{step}} ({{label}}): der Filter auf '{{field}}' hat keinen Wert. Tragen Sie einen Wert ein oder entfernen Sie die Zeile. Es wurde nichts gespeichert.",
     "taskStatusLookupEmpty": "Dieses Büro hat noch keine Aufgabenstatus. Legen Sie zuerst einen unter Einstellungen → Aufgaben → Status an. Es wurde nichts gespeichert.",
     "taskStatusLastRow": "Dies ist der letzte Aufgabenstatus dieses Büros und kann nicht gelöscht werden. Legen Sie zuerst einen anderen Status an. Es wurde nichts geändert.",
+    "workflowStepUnknownAudience": "Ein KI-Agent-Schritt nennt eine unbekannte Zielgruppe. Zulässige Werte: {{allowed}}. Es wurde nichts gespeichert.",
+    "workflowStepUnknownAudienceStep": "Schritt {{step}}: Zielgruppe '{{value}}' ist unbekannt. Zulässige Werte: {{allowed}}. Es wurde nichts gespeichert.",
+    "workflowStepUnknownAudienceStepLabel": "Schritt {{step}} ({{label}}): Zielgruppe '{{value}}' ist unbekannt. Zulässige Werte: {{allowed}}. Es wurde nichts gespeichert.",
     "aiDisclosureMissing": "Im Interview-Intro fehlt der verpflichtende KI-Hinweis; passen Sie die Vorlage an, bevor Sie dies aktivieren.",
     "fieldRequired": "{{field}} ist erforderlich."
   },

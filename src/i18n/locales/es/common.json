@@ -878,6 +878,9 @@
     "workflowStepFilterValueBlankStepLabel": "El paso {{step}} ({{label}}): el filtro en '{{field}}' no tiene valor. Rellénalo o elimina la fila. No se ha guardado nada.",
     "taskStatusLookupEmpty": "Esta agencia aún no tiene estados de tarea. Añade uno primero en Ajustes → Tareas → Estados. No se ha guardado nada.",
     "taskStatusLastRow": "Este es el último estado de tarea de esta agencia y no se puede eliminar. Añade primero otro estado. No se ha cambiado nada.",
+    "workflowStepUnknownAudience": "Un paso de agente de IA indica un público desconocido. Valores permitidos: {{allowed}}. No se ha guardado nada.",
+    "workflowStepUnknownAudienceStep": "El paso {{step}}: el público '{{value}}' es desconocido. Valores permitidos: {{allowed}}. No se ha guardado nada.",
+    "workflowStepUnknownAudienceStepLabel": "El paso {{step}} ({{label}}): el público '{{value}}' es desconocido. Valores permitidos: {{allowed}}. No se ha guardado nada.",
     "aiDisclosureMissing": "Falta la mención obligatoria de IA en la introducción de la entrevista; modifica la plantilla antes de activarlo.",
     "fieldRequired": "{{field}} es obligatorio."
   },

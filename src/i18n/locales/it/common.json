@@ -878,6 +878,9 @@
     "workflowStepFilterValueBlankStepLabel": "Il passaggio {{step}} ({{label}}): il filtro su '{{field}}' non ha valore. Compilalo o rimuovi la riga. Non è stato salvato nulla.",
     "taskStatusLookupEmpty": "Questa agenzia non ha ancora stati attività. Aggiungine prima uno in Impostazioni → Attività → Stati. Non è stato salvato nulla.",
     "taskStatusLastRow": "Questo è l’ultimo stato attività di questa agenzia e non può essere eliminato. Aggiungi prima un altro stato. Non è stato modificato nulla.",
+    "workflowStepUnknownAudience": "Un passaggio dell’agente IA indica un destinatario sconosciuto. Valori consentiti: {{allowed}}. Non è stato salvato nulla.",
+    "workflowStepUnknownAudienceStep": "Il passaggio {{step}}: il destinatario '{{value}}' è sconosciuto. Valori consentiti: {{allowed}}. Non è stato salvato nulla.",
+    "workflowStepUnknownAudienceStepLabel": "Il passaggio {{step}} ({{label}}): il destinatario '{{value}}' è sconosciuto. Valori consentiti: {{allowed}}. Non è stato salvato nulla.",
     "aiDisclosureMissing": "Nell’introduzione del colloquio manca l’informativa obbligatoria sull’IA; modifica il modello prima di attivarlo.",
     "fieldRequired": "{{field}} è obbligatorio."
   },

@@ -878,6 +878,9 @@
     "workflowStepFilterValueBlankStepLabel": "Stap {{step}} ({{label}}): het filter op '{{field}}' heeft geen waarde. Vul de waarde in of verwijder de rij. Er is niets opgeslagen.",
     "taskStatusLookupEmpty": "Dit bureau heeft nog geen taakstatussen. Voeg er eerst een toe onder Instellingen → Taken → Statussen. Er is niets opgeslagen.",
     "taskStatusLastRow": "Dit is de laatste taakstatus van dit bureau en kan niet worden verwijderd. Voeg eerst een andere status toe. Er is niets gewijzigd.",
+    "workflowStepUnknownAudience": "Een AI-agentstap noemt een onbekende doelgroep. Toegestane waarden: {{allowed}}. Er is niets opgeslagen.",
+    "workflowStepUnknownAudienceStep": "Stap {{step}}: doelgroep '{{value}}' is onbekend. Toegestane waarden: {{allowed}}. Er is niets opgeslagen.",
+    "workflowStepUnknownAudienceStepLabel": "Stap {{step}} ({{label}}): doelgroep '{{value}}' is onbekend. Toegestane waarden: {{allowed}}. Er is niets opgeslagen.",
     "aiDisclosureMissing": "De interview-intro mist de verplichte AI-vermelding; pas de template aan voordat je dit activeert.",
     "fieldRequired": "{{field}} is verplicht."
   },

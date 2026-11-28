@@ -7,7 +7,8 @@ import { useQueryClient } from '@tanstack/react-query'
 import { useTranslation } from 'react-i18next'
 import { notifyApiError } from '@/lib/extractApiError'
 import api, { unwrap, unwrapList } from '@/lib/api'
-import { notifyError } from '@/lib/notify'
+import { notify, notifyError } from '@/lib/notify'
+import { languageDisplayName } from '@/lib/languageNames'
 import { useConfirm } from '@/hooks/useConfirm'
 import { useAuth } from '@/context/AuthContext'
 import Spinner from '@/components/ui/Spinner'
@@ -16,7 +17,7 @@ import { InterviewFlowsPanel } from '@/components/ai/management/InterviewFlowsPa
 import type { InterviewFlow } from '@/types/ai'
 
 export function FlowsTab() {
-  const { t } = useTranslation('workflows')
+  const { t, i18n } = useTranslation('workflows')
   const auth = useAuth()
   // Mutations gate on settings.update (§7) — the backend re-checks regardless.
   const canEdit = Boolean(auth?.hasPermission?.('settings.update'))
@@ -72,6 +73,14 @@ export function FlowsTab() {
         ? await api.put(`/ai/interview-flows/${selected.id}`, payload)
         : await api.post('/ai/interview-flows', payload)
       const updated = unwrap<InterviewFlow>(res)
+      // AI-AGENT-STEP-LANGUAGE-FE-1 (BE InterviewFlowController update, batch R1): activating a flow answers, beside `data`, the
+      // intro languages without an AI disclosure of their own (they fall back to the default copy); told once, as information.
+      const fallbackLanguages: unknown = res.data?.disclosure_fallback_languages
+      if (Array.isArray(fallbackLanguages) && fallbackLanguages.length > 0) {
+        // The codes are WhatsApp template languages (Meta writes en_US, pt_BR); ICU wants the BCP 47 hyphen.
+        const languages = fallbackLanguages.map(code => languageDisplayName(String(code).replace('_', '-'), i18n.language)).join(', ')
+        notify('info', t('ai.flows.disclosureFallback', { languages }))
+      }
       setFlows(prev => (selected?.id ? prev.map(f => (f.id === updated.id ? updated : f)) : [updated, ...prev]))
       setSelected(updated)
       invalidatePickers()

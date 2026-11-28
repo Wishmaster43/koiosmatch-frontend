@@ -80,7 +80,8 @@ const EXPECTED_SCHEMA_KEYS: Record<string, string[]> = {
   // INTERVIEW-WORKFLOW-1 Appendix C (Danny 30-08) supersedes WF-AI-AGENT-NODE-FE-1
   // for ai_agent's key set (MODULE-TERUG-1, Danny 31-08: pre-P1 base + only the instructions list): the reduced 6-key node grows a knowledge group, the
   // instructions list and a rejection-mode override (see the describe block below).
-  ai_agent: ['agent', 'instruction', 'instructions', 'max_attempts', 'reply_timeout_hours', 'use_external_knowledge', 'use_faq'],
+  // AI-AGENT-STEP-LANGUAGE-1 (Danny 27-11): plus the audience select (BE AiAgentModule::configSchema 'audience').
+  ai_agent: ['agent', 'audience', 'instruction', 'instructions', 'max_attempts', 'reply_timeout_hours', 'use_external_knowledge', 'use_faq'],
 }
 
 describe('WF-BUILDER-VELDEN-1 · registry config-schema mirrors the engine exactly', () => {
@@ -172,11 +173,12 @@ describe('WF-WAIT-NODE-FE-1 · delay/sleep deleted, wait mirrors WaitModule::con
  * toggle as `use_external_knowledge`/`use_faq` — both a deliberate CMBE-accepted
  * schema growth, not a regression to the deleted 13-field builder. Every OTHER
  * dead key from that builder (naam/input/faq_ids/response_format/…) stays dead.
+ * AI-AGENT-STEP-LANGUAGE-1 (Danny 27-11, Q21 yes) adds `audience` the same deliberate way.
  */
 describe('WF-AI-AGENT-NODE-FE-1 · the 13-field builder is gone; INTERVIEW-WORKFLOW-1 grows the schema deliberately', () => {
   it("ai_agent's schema has exactly the CMBE-accepted key set, nothing more", () => {
     const keys = (MODULE_SCHEMAS.ai_agent ?? []).map(f => f.key).sort()
-    expect(keys).toEqual(['agent', 'instruction', 'instructions', 'max_attempts', 'reply_timeout_hours', 'use_external_knowledge', 'use_faq'])
+    expect(keys).toEqual(['agent', 'audience', 'instruction', 'instructions', 'max_attempts', 'reply_timeout_hours', 'use_external_knowledge', 'use_faq'])
   })
 
   it('none of the OTHER old 13-field builder keys survive (instructions/use_knowledge are back under new names, see above)', () => {

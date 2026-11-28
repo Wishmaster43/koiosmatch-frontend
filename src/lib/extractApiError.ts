@@ -96,6 +96,9 @@ const ERROR_CODE_KEYS: Record<string, string> = {
   // STEP-FILTER-BLANK-422-FE-1 (BE StepConfigChecks via refuseStep, batch P, 422): a step filter, or a ScenarioModule condition
   // with = / !=, was saved with a blank value; the body carries step, label, field (the first blank member) and value null.
   step_filter_value_blank: 'errors.workflowStepFilterValueBlank',
+  // AI-AGENT-STEP-LANGUAGE-FE-1 (BE StepConfigChecks::aiAgentAudience via refuseStep, batch R1, 422): an AI agent step names an
+  // audience outside InterviewLanguage::AUDIENCE_OPTIONS; the body carries step, label, field ('audience'), value and allowed.
+  workflow_step_unknown_audience: 'errors.workflowStepUnknownAudience',
   // TASK-STATUS-LOOKUP-EMPTY-422-FE-1 (BE bootstrap/app.php renderer for TaskStatusLookupEmptyException, batch N, 422): a task
   // create arrived while the bureau's task-status lookup is empty and no status_id was sent; the body is exactly {code, message}.
   task_status_lookup_empty: 'errors.taskStatusLookupEmpty',
@@ -151,6 +154,24 @@ function stepRefusalBody(err: unknown): { body: ServerErrorBody; allowed: string
   return body && Array.isArray(list) && list.length > 0 ? { body, allowed: list.join(', ') } : null
 }
 
+// The translate function apiErrorMessage and its arms accept (the i18next `t` with the option names the sentences use).
+type ErrorCopyT = (key: string, options?: { ns: string; clash_name?: string; branch?: string; allowed?: string; step?: number; label?: string; field?: string; value?: string }) => string
+
+// A step refusal whose sentence names the 1-based step, its label (null when the step has none), the offending value and the
+// allowed vocabulary (contract status, audience): the step variants when the body carries step and value, else the bare
+// sentence; without an allowed list the server sentence (which names the step) is more honest than an empty list.
+function stepValueRefusalMessage(err: unknown, t: ErrorCopyT, fallback: string, keys: { bare: string; step: string; stepLabel: string }): string {
+  const hit = stepRefusalBody(err)
+  if (!hit) return extractApiError(err, fallback)
+  const { body, allowed } = hit
+  if (typeof body.step === 'number' && typeof body.value === 'string') {
+    return body.label
+      ? t(keys.stepLabel, { ns: 'common', step: body.step, label: body.label, value: body.value, allowed })
+      : t(keys.step, { ns: 'common', step: body.step, value: body.value, allowed })
+  }
+  return t(keys.bare, { ns: 'common', allowed })
+}
+
 /**
  * One call for the whole "coded refusal, else server text, else fallback" chain:
  * a known backend `code` renders its translated `common` copy (never the server's
@@ -158,7 +179,7 @@ function stepRefusalBody(err: unknown): { body: ServerErrorBody; allowed: string
  */
 export function apiErrorMessage(
   err: unknown,
-  t: (key: string, options?: { ns: string; clash_name?: string; branch?: string; allowed?: string; step?: number; label?: string; field?: string; value?: string }) => string,
+  t: ErrorCopyT,
   fallback: string,
 ): string {
   const key = apiErrorKey(err)
@@ -174,17 +195,12 @@ export function apiErrorMessage(
     return name ? t(key, { ns: 'common', branch: name }) : extractApiError(err, fallback)
   }
   if (key === ERROR_CODE_KEYS.workflow_step_contract_status_unknown) {
-    // The refusal lists the allowed vocabulary; without it the server sentence (which names the step) is more honest than an empty list.
-    const hit = stepRefusalBody(err)
-    if (!hit) return extractApiError(err, fallback)
-    const { body, allowed } = hit
     // BE batch G adds step (1-based), label (null when the step has none) and value: the sentence names them when they are there.
-    if (typeof body.step === 'number' && typeof body.value === 'string') {
-      return body.label
-        ? t('errors.workflowStepContractStatusUnknownStepLabel', { ns: 'common', step: body.step, label: body.label, value: body.value, allowed })
-        : t('errors.workflowStepContractStatusUnknownStep', { ns: 'common', step: body.step, value: body.value, allowed })
-    }
-    return t('errors.workflowStepContractStatusUnknown', { ns: 'common', allowed })
+    return stepValueRefusalMessage(err, t, fallback, { bare: 'errors.workflowStepContractStatusUnknown', step: 'errors.workflowStepContractStatusUnknownStep', stepLabel: 'errors.workflowStepContractStatusUnknownStepLabel' })
+  }
+  if (key === ERROR_CODE_KEYS.workflow_step_unknown_audience) {
+    // AI-AGENT-STEP-LANGUAGE-FE-1: the field is 'audience' by contract, so the sentence names only the step, the value and the two allowed audiences.
+    return stepValueRefusalMessage(err, t, fallback, { bare: 'errors.workflowStepUnknownAudience', step: 'errors.workflowStepUnknownAudienceStep', stepLabel: 'errors.workflowStepUnknownAudienceStepLabel' })
   }
   if (key === ERROR_CODE_KEYS.workflow_step_appointment_lookup_unknown) {
     // The refusal names the field (type | location), the offending value and the bureau's allowed list; without the list the server sentence is more honest.

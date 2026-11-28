@@ -504,7 +504,8 @@
       "confirmDelete": "Delete flow \"{{name}}\"?",
       "inUse": "This flow is in use and cannot be deleted.",
       "noPermission": "You have no permission to manage flows.",
-      "selectOrNew": "Select a flow or create a new one."
+      "selectOrNew": "Select a flow or create a new one.",
+      "disclosureFallback": "The intro in {{languages}} has no AI disclosure of its own; the default text is used for those languages."
     }
   },
   "categories": {
@@ -1168,7 +1169,8 @@
     "Shift-type preference": "Shift-type preference",
     "Shift ≥ 8 hours": "Shift ≥ 8 hours",
     "E-mail — can be contacted now (derived)": "E-mail: can be contacted now (derived)",
-    "WhatsApp — can be contacted now (derived)": "WhatsApp: can be contacted now (derived)"
+    "WhatsApp — can be contacted now (derived)": "WhatsApp: can be contacted now (derived)",
+    "Audience": "Audience"
   },
   "fieldOptions": {
     "none": "No contract",
@@ -1391,7 +1393,9 @@
     "Template message": "Template message",
     "WhatsApp Flow (shifts)": "WhatsApp Flow (shifts)",
     "Session message (24h window)": "Session message (24h window)",
-    "One vacancy": "One vacancy"
+    "One vacancy": "One vacancy",
+    "Candidate (their language)": "Candidate (their language)",
+    "Staff (company language)": "Staff (company language)"
   },
   "agentTest": {
     "title": "Test variables",
@@ -1623,7 +1627,8 @@
     "Direct https URL for this step Leave blank to use the shared setting webhook_endpoint_<slug> below No credentials in the URL": "Direct https URL for this step. Leave blank to use the shared setting webhook_endpoint_<slug> below. No credentials in the URL.",
     "Only used if no URL is set above the tenant setting webhook_endpoint_<slug> then determines the URL": "Only used if no URL is set above: the tenant setting webhook_endpoint_<slug> then determines the URL.",
     "A field name of the source record (mobile, phone, …), never a phone number Manual sending happens from the record itself": "A field name of the source record (mobile, phone, …), never a phone number. Manual sending happens from the record itself.",
-    "This looks like a phone number Enter the source record’s field name, eg mobile": "This looks like a phone number. Enter the source record’s field name, e.g. mobile."
+    "This looks like a phone number Enter the source record’s field name, eg mobile": "This looks like a phone number. Enter the source record’s field name, e.g. mobile.",
+    "Candidate = the preferred language of the candidate, else the bureau messaging default Staff = the company language": "Candidate = the preferred language of the candidate, else the bureau messaging default. Staff = the company language."
   },
   "triggers": {
     "groups": {

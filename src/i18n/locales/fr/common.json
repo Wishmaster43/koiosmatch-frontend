@@ -878,6 +878,9 @@
     "workflowStepFilterValueBlankStepLabel": "L’étape {{step}} ({{label}}) : le filtre sur '{{field}}' n’a pas de valeur. Renseignez-la ou supprimez la ligne. Rien n’a été enregistré.",
     "taskStatusLookupEmpty": "Ce bureau n’a pas encore de statuts de tâche. Ajoutez-en d’abord un sous Paramètres → Tâches → Statuts. Rien n’a été enregistré.",
     "taskStatusLastRow": "Il s’agit du dernier statut de tâche de ce bureau, il ne peut pas être supprimé. Ajoutez d’abord un autre statut. Rien n’a été modifié.",
+    "workflowStepUnknownAudience": "Une étape d’agent IA nomme un public inconnu. Valeurs autorisées : {{allowed}}. Rien n’a été enregistré.",
+    "workflowStepUnknownAudienceStep": "L’étape {{step}} : le public '{{value}}' est inconnu. Valeurs autorisées : {{allowed}}. Rien n’a été enregistré.",
+    "workflowStepUnknownAudienceStepLabel": "L’étape {{step}} ({{label}}) : le public '{{value}}' est inconnu. Valeurs autorisées : {{allowed}}. Rien n’a été enregistré.",
     "aiDisclosureMissing": "L’introduction de l’entretien ne contient pas la mention IA obligatoire ; modifiez le modèle avant de l’activer.",
     "fieldRequired": "{{field}} est obligatoire."
   },
