@@ -105,6 +105,14 @@ const ERROR_CODE_KEYS: Record<string, string> = {
   // TASK-STATUS-LAST-ROW-FE-1 (BE TaskStatus `deleting` hook rendered on DELETE /task-statuses/{id}, batch R1, 409): the last
   // task status of a bureau cannot be deleted; the body is exactly {code, message}, without the in_use key of the in-use 409.
   task_status_last_row: 'errors.taskStatusLastRow',
+  // HF-ACTIVITY-ROWS-CARD-FE-1 (BE HelloFlexActivityRules via SettingSchema, batch Q, 422 on POST /settings): the six coded refusals
+  // of the three HelloFlex activity settings; the body is the shared settings envelope {message, code, errors: {<key>: [sentence]}}.
+  setting_guid_invalid: 'errors.settingGuidInvalid',
+  setting_json_object_required: 'errors.settingJsonObjectRequired',
+  setting_map_key_not_digits: 'errors.settingMapKeyNotDigits',
+  setting_map_value_unknown_note_type: 'errors.settingMapValueUnknownNoteType',
+  setting_defaults_key_unknown: 'errors.settingDefaultsKeyUnknown',
+  setting_defaults_value_not_digits: 'errors.settingDefaultsValueNotDigits',
   // The interview intro / workflow / Koios toggle lacks the mandatory AI disclosure (422).
   ai_disclosure_missing: 'errors.aiDisclosureMissing',
   // ONIX C-007: one generic 422 for a taken e-mail (never reveals why or where it is in use).

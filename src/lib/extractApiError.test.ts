@@ -277,3 +277,26 @@ describe('system_workflow_locked', () => {
     expect(apiErrorCode(new Error('network'))).toBeNull()
   })
 })
+
+describe('apiErrorKey/apiErrorMessage · HelloFlex activity settings (HF-ACTIVITY-ROWS-CARD-FE-1, six coded 422s)', () => {
+  const CODES: Array<[string, string]> = [
+    ['setting_guid_invalid', 'errors.settingGuidInvalid'],
+    ['setting_json_object_required', 'errors.settingJsonObjectRequired'],
+    ['setting_map_key_not_digits', 'errors.settingMapKeyNotDigits'],
+    ['setting_map_value_unknown_note_type', 'errors.settingMapValueUnknownNoteType'],
+    ['setting_defaults_key_unknown', 'errors.settingDefaultsKeyUnknown'],
+    ['setting_defaults_value_not_digits', 'errors.settingDefaultsValueNotDigits'],
+  ]
+  // The BE settings envelope: message, code and the one refused key with its sentence; no top-level key field.
+  const refusal = (code: string) => ({ response: { status: 422, data: { message: 'NL zin', code, errors: { helloflex_activity_type_map: ['NL zin'] } } } })
+  const t = (key: string) => key
+
+  it.each(CODES)('maps %s to its common key', (code, key) => {
+    expect(apiErrorKey(refusal(code))).toBe(key)
+  })
+
+  it.each(CODES)('renders %s as the translated key, never the server sentence', (code, key) => {
+    expect(apiErrorMessage(refusal(code), t, 'fallback')).toBe(key)
+    expect(apiErrorMessage(refusal(code), t, 'fallback')).not.toBe('NL zin')
+  })
+})

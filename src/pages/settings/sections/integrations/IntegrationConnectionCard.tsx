@@ -30,6 +30,7 @@ import { FIELD_SPEC } from './connectionFieldSpec'
 import IntegrationConnectionFields, { type WorkingSettings, type SecretState } from './IntegrationConnectionFields'
 import IntegrationHealthBadge from './IntegrationHealthBadge'
 import IntegrationWebhookBlock from './IntegrationWebhookBlock'
+import HelloflexActivityCard from './HelloflexActivityCard'
 import { useIntegrationHealth } from './useIntegrationHealth'
 import { isUuid } from '@/lib/uuid'
 import {
@@ -232,6 +233,9 @@ export default function IntegrationConnectionCard({ connector }: { connector: Co
           {t('common.save')}
         </SaveButton>
       </div>
+
+      {/* HF-ACTIVITY-ROWS-CARD-FE-1 (Danny 27-11): the three HelloFlex activity settings, on this card only (own save path). */}
+      {connector === 'helloflex' && <HelloflexActivityCard />}
     </div>
   )
 }

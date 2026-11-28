@@ -2338,7 +2338,8 @@
     "tabKoiosAi": "Koios AI",
     "comingSoon": "Binnenkort beschikbaar",
     "tabTelefonie": "Telefonie",
-    "tabVerificatie": "Verificatie"
+    "tabVerificatie": "Verificatie",
+    "reportingAddOnNote": "Aanzetten koopt ook de rapportage-add-on van dit systeem (één aankoop). Uitzetten kan pas nadat die add-on op het pakketscherm is weggehaald."
   },
   "modules": {
     "refreshError": "De modules konden niet worden ververst. De getoonde instellingen kunnen verouderd zijn.",
@@ -5003,6 +5004,35 @@
         "step": "Trede",
         "function": "Functie"
       }
+    },
+    "helloflexActivity": {
+      "title": "HelloFlex-activiteiten",
+      "subtitle": "De instellingen rond HelloFlex-activiteiten: de eigenaar en de HelloFlex-id's die Koios gebruikt wanneer het een plaatsingsactiviteit in HelloFlex vastlegt, en het Koios-notitietype waaronder een binnenkomend HelloFlex-activiteittype wordt vastgelegd.",
+      "ownerGuid": "Standaardeigenaar (HelloFlex-gebruikers-GUID)",
+      "ownerGuidHint": "Gebruikt wanneer de match-eigenaar geen gekoppelde HelloFlex-gebruiker heeft. Leeg betekent geen standaardeigenaar: zo'n plaatsingsactiviteit wordt dan overgeslagen.",
+      "ownerGuidInvalid": "Vul een HelloFlex-GUID in (8-4-4-4-12 hexadecimale tekens) of laat het veld leeg.",
+      "typeMapTitle": "Activiteittypen",
+      "typeMapHint": "Als welk Koios-notitietype een binnenkomend HelloFlex-activiteittype wordt vastgelegd. Lege rijen worden niet opgeslagen.",
+      "typeMapEmpty": "Nog geen activiteittypen gekoppeld.",
+      "hfTypeId": "HelloFlex-activiteittype-id",
+      "noteType": "Koios-notitietype",
+      "noteTypePlaceholder": "Kies een notitietype",
+      "addRow": "Activiteittype toevoegen",
+      "typeMapDuplicate": "Elk HelloFlex-activiteittype-id kan maar één keer gekoppeld worden.",
+      "typeMapIncomplete": "Elke rij heeft zowel een HelloFlex-activiteittype-id als een notitietype nodig.",
+      "defaultsTitle": "Standaardwaarden activiteit",
+      "defaultsHint": "De HelloFlex-domein-id's waarmee een plaatsingsactiviteit wordt aangemaakt. Een leeg veld wordt niet opgeslagen; zolang er een ontbreekt, wordt geen activiteit weggeschreven.",
+      "typeId": "Type-id",
+      "priorityId": "Prioriteit-id",
+      "entityStateId": "Entiteitsstatus-id",
+      "subjectId": "Onderwerp-id",
+      "entityTypeId": "Entiteitstype-id",
+      "loadError": "De HelloFlex-activiteitinstellingen konden niet worden geladen.",
+      "saveError": "De HelloFlex-activiteitinstellingen konden niet worden opgeslagen.",
+      "save": "Activiteitinstellingen opslaan",
+      "hfTypeIdRow": "HelloFlex-activiteittype-id, rij {{n}}",
+      "noteTypeRow": "Koios-notitietype, rij {{n}}",
+      "removeRowN": "Rij {{n}} verwijderen"
     }
   },
   "customerSourcesSettings": {

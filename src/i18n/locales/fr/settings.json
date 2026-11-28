@@ -2062,7 +2062,8 @@
     "tabKoiosAi": "Koios AI",
     "comingSoon": "Bientôt disponible",
     "tabTelefonie": "Téléphonie",
-    "tabVerificatie": "Vérification"
+    "tabVerificatie": "Vérification",
+    "reportingAddOnNote": "L’activation achète aussi le module de rapports de ce système (un seul achat). La désactivation n’est possible qu’une fois ce module retiré sur l’écran du forfait."
   },
   "modules": {
     "refreshError": "Les modules n’ont pas pu être actualisés. Les réglages affichés peuvent être obsolètes.",
@@ -5003,6 +5004,35 @@
         "step": "Échelon",
         "function": "Fonction"
       }
+    },
+    "helloflexActivity": {
+      "title": "Activités HelloFlex",
+      "subtitle": "Les paramètres des activités HelloFlex : le propriétaire et les identifiants HelloFlex que Koios utilise lorsqu’il enregistre une activité de placement dans HelloFlex, et le type de note Koios sous lequel un type d’activité HelloFlex entrant est enregistré.",
+      "ownerGuid": "Propriétaire par défaut (GUID utilisateur HelloFlex)",
+      "ownerGuidHint": "Utilisé lorsque le propriétaire du match n’a pas d’utilisateur HelloFlex lié. Vide signifie aucun propriétaire par défaut : une telle activité de placement est alors ignorée.",
+      "ownerGuidInvalid": "Saisissez un GUID HelloFlex (8-4-4-4-12 caractères hexadécimaux) ou laissez le champ vide.",
+      "typeMapTitle": "Types d’activité",
+      "typeMapHint": "Le type de note Koios sous lequel un type d’activité HelloFlex entrant est enregistré. Les lignes vides ne sont pas enregistrées.",
+      "typeMapEmpty": "Aucun type d’activité associé pour l’instant.",
+      "hfTypeId": "Identifiant du type d’activité HelloFlex",
+      "noteType": "Type de note Koios",
+      "noteTypePlaceholder": "Choisir un type de note",
+      "addRow": "Ajouter un type d’activité",
+      "typeMapDuplicate": "Chaque identifiant de type d’activité HelloFlex ne peut être associé qu’une seule fois.",
+      "typeMapIncomplete": "Chaque ligne a besoin d’un identifiant de type d’activité HelloFlex et d’un type de note.",
+      "defaultsTitle": "Valeurs par défaut de l’activité",
+      "defaultsHint": "Les identifiants de domaine HelloFlex avec lesquels une activité de placement est créée. Un champ vide n’est pas enregistré ; tant qu’il en manque un, aucune activité n’est écrite.",
+      "typeId": "Identifiant du type",
+      "priorityId": "Identifiant de priorité",
+      "entityStateId": "Identifiant d’état d’entité",
+      "subjectId": "Identifiant du sujet",
+      "entityTypeId": "Identifiant du type d’entité",
+      "loadError": "Les paramètres d’activité HelloFlex n’ont pas pu être chargés.",
+      "saveError": "Les paramètres d’activité HelloFlex n’ont pas pu être enregistrés.",
+      "save": "Enregistrer les paramètres d’activité",
+      "hfTypeIdRow": "Identifiant du type d’activité HelloFlex, ligne {{n}}",
+      "noteTypeRow": "Type de note Koios, ligne {{n}}",
+      "removeRowN": "Supprimer la ligne {{n}}"
     }
   },
   "customerSourcesSettings": {

@@ -162,3 +162,19 @@ describe('AppsSettings', () => {
     expect(invalidate).not.toHaveBeenCalled()
   })
 })
+
+describe('AppsSettings · reporting add-on note (APPS-ONE-PURCHASE-ALIGN-1)', () => {
+  // The sentence sits under the connectors whose ON buys the reporting add-on (Shiftmanager, HelloFlex), nowhere else.
+  it('renders the note under HelloFlex on the backoffice tab and under Shiftmanager on planning, not on telefonie', () => {
+    renderApps()
+    // The note's parent is the row's text column, which also carries the catalogue label (key-echoed here).
+    const noteRows = () => screen.getAllByText('apps.reportingAddOnNote').map(el => el.parentElement?.textContent ?? '')
+    expect(noteRows()).toHaveLength(1)
+    expect(noteRows()[0]).toContain('appsCatalogLabels.shiftmanager')
+    fireEvent.click(screen.getByRole('tab', { name: 'apps.tabBackoffice' }))
+    expect(noteRows()).toHaveLength(1)
+    expect(noteRows()[0]).toContain('appsCatalogLabels.hf')
+    fireEvent.click(screen.getByRole('tab', { name: 'apps.tabTelefonie' }))
+    expect(screen.queryByText('apps.reportingAddOnNote')).not.toBeInTheDocument()
+  })
+})

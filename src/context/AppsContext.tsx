@@ -54,6 +54,9 @@ interface AppDef {
   Mark?: ComponentType<{ size?: number }>
   // Not built yet: the toggle renders greyed-out + a "binnenkort" chip (honest, §3).
   comingSoon?: boolean
+  // APPS-ONE-PURCHASE-ALIGN-1 (BE batch Q): switching this connector on also buys its reporting add-on (one purchase);
+  // switching it off waits until that add-on is removed on the package screen. The Apps page says so under the row.
+  reportingAddOn?: boolean
 }
 
 interface AppsValue {
@@ -94,6 +97,7 @@ export const AVAILABLE_APPS: AppDef[] = [
     bg:          '#FDECEC',
     border:      '#FECACA',
     monthly:     true,
+    reportingAddOn: true,
   },
   {
     id:          'aelio',
@@ -166,6 +170,7 @@ export const AVAILABLE_APPS: AppDef[] = [
     bg:          'var(--color-warning-bg)',
     border:      '#FDE68A',
     monthly:     true,
+    reportingAddOn: true,
   },
   {
     id:          'easyflex',

@@ -163,6 +163,8 @@ export default function AppsSettings() {
                 </div>
                 {/* Every catalogue entry's description lives in i18n (appsCatalog.<id>), the only source (§5). */}
                 <PageSubtitle as="div" style={{ marginTop: 3 }}>{t(`appsCatalog.${app.id}`)}</PageSubtitle>
+                {/* APPS-ONE-PURCHASE-ALIGN-1 (BE batch Q): ON buys the reporting add-on, OFF waits for the package screen; said before the toggle. */}
+                {app.reportingAddOn && <Caption as="p" style={{ marginTop: 3 }}>{t('apps.reportingAddOnNote')}</Caption>}
               </div>
               {/* Shared house Toggle (audit finding, 05-08) — replaces the hand-rolled
                   44x24 success-green pill so every on/off control looks the same. */}

@@ -2338,7 +2338,8 @@
     "tabKoiosAi": "Koios AI",
     "comingSoon": "Prossimamente disponibile",
     "tabTelefonie": "Telefonia",
-    "tabVerificatie": "Verifica"
+    "tabVerificatie": "Verifica",
+    "reportingAddOnNote": "Attivarlo acquista anche il componente aggiuntivo per i report di questo sistema (un solo acquisto). Si può disattivare solo dopo aver rimosso quel componente nella schermata del pacchetto."
   },
   "modules": {
     "refreshError": "Impossibile aggiornare i moduli. Le impostazioni mostrate potrebbero essere obsolete.",
@@ -5004,6 +5005,35 @@
         "step": "Livello",
         "function": "Funzione"
       }
+    },
+    "helloflexActivity": {
+      "title": "Attività HelloFlex",
+      "subtitle": "Le impostazioni delle attività HelloFlex: il proprietario e gli identificativi HelloFlex che Koios usa quando registra un’attività di collocamento in HelloFlex, e il tipo di nota Koios con cui viene registrato un tipo di attività HelloFlex in entrata.",
+      "ownerGuid": "Proprietario predefinito (GUID utente HelloFlex)",
+      "ownerGuidHint": "Usato quando il proprietario del match non ha un utente HelloFlex collegato. Vuoto significa nessun proprietario predefinito: quell’attività di collocamento viene allora saltata.",
+      "ownerGuidInvalid": "Inserisci un GUID HelloFlex (8-4-4-4-12 caratteri esadecimali) o lascia il campo vuoto.",
+      "typeMapTitle": "Tipi di attività",
+      "typeMapHint": "Con quale tipo di nota Koios viene registrato un tipo di attività HelloFlex in entrata. Le righe vuote non vengono salvate.",
+      "typeMapEmpty": "Nessun tipo di attività associato per ora.",
+      "hfTypeId": "Identificativo del tipo di attività HelloFlex",
+      "noteType": "Tipo di nota Koios",
+      "noteTypePlaceholder": "Scegli un tipo di nota",
+      "addRow": "Aggiungi tipo di attività",
+      "typeMapDuplicate": "Ogni identificativo di tipo di attività HelloFlex può essere associato una sola volta.",
+      "typeMapIncomplete": "Ogni riga ha bisogno sia di un identificativo di tipo di attività HelloFlex sia di un tipo di nota.",
+      "defaultsTitle": "Valori predefiniti dell’attività",
+      "defaultsHint": "Gli identificativi di dominio HelloFlex con cui viene creata un’attività di collocamento. Un campo vuoto non viene salvato; finché ne manca uno, nessuna attività viene scritta.",
+      "typeId": "Identificativo del tipo",
+      "priorityId": "Identificativo di priorità",
+      "entityStateId": "Identificativo dello stato entità",
+      "subjectId": "Identificativo dell’oggetto",
+      "entityTypeId": "Identificativo del tipo di entità",
+      "loadError": "Impossibile caricare le impostazioni delle attività HelloFlex.",
+      "saveError": "Impossibile salvare le impostazioni delle attività HelloFlex.",
+      "save": "Salva impostazioni attività",
+      "hfTypeIdRow": "Identificativo del tipo di attività HelloFlex, riga {{n}}",
+      "noteTypeRow": "Tipo di nota Koios, riga {{n}}",
+      "removeRowN": "Rimuovi riga {{n}}"
     }
   },
   "customerSourcesSettings": {

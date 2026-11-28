@@ -6,7 +6,7 @@
  * module directly.
  */
 import { describe, it, expect, afterEach, vi } from 'vitest'
-import { render, screen, waitFor } from '@testing-library/react'
+import { cleanup, render, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import i18n from '@/i18n'
 import IntegrationConnectionCard from './IntegrationConnectionCard'
@@ -26,6 +26,8 @@ vi.mock('./useIntegrationHealth', () => ({
   useIntegrationHealth: () => ({ health: { state: 'unknown', errorCode: null, errorMessage: null, checkedAt: null }, webhook: mockWebhook, refresh: mockRefresh }),
 }))
 
+// HF-ACTIVITY-ROWS-CARD-FE-1: the activity block has its own suite; here only the host's connector gate matters.
+vi.mock('./HelloflexActivityCard', () => ({ default: () => <div data-testid="helloflex-activity-card" /> }))
 vi.mock('./integrationsApi', () => ({
   getIntegrationSettings: vi.fn(),
   putIntegrationSettings: vi.fn(),
@@ -247,5 +249,24 @@ describe('states', () => {
     await user.click(screen.getByRole('button', { name: t('integrations.connection.undoClear') }))
     expect(screen.queryByText(t('integrations.connection.secretPendingClear'))).not.toBeInTheDocument()
     expect(screen.getByText(t('integrations.connection.secretSet'))).toBeInTheDocument()
+  })
+})
+
+describe('HelloFlex activity block (HF-ACTIVITY-ROWS-CARD-FE-1)', () => {
+  // The block renders on the HelloFlex card only; the other connectors keep their card unchanged.
+  it('renders the activity card under the helloflex connection settings', async () => {
+    mockGet.mockResolvedValue({ two_way: false, environment: 'uat', client_id: null, has_client_secret: false, connected_as: null })
+    await renderCard('helloflex')
+    expect(screen.getByTestId('helloflex-activity-card')).toBeInTheDocument()
+  })
+
+  it('keeps the shiftmanager and werkzoeken cards free of it', async () => {
+    mockGet.mockResolvedValue(SM_GET)
+    await renderCard('shiftmanager')
+    expect(screen.queryByTestId('helloflex-activity-card')).not.toBeInTheDocument()
+    cleanup()
+    mockGet.mockResolvedValue({ two_way: true, has_api_key: false, connected_as: null })
+    await renderCard('werkzoeken')
+    expect(screen.queryByTestId('helloflex-activity-card')).not.toBeInTheDocument()
   })
 })

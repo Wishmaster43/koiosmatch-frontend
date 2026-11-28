@@ -2062,7 +2062,8 @@
     "tabKoiosAi": "Koios AI",
     "comingSoon": "Bald verfügbar",
     "tabTelefonie": "Telefonie",
-    "tabVerificatie": "Überprüfung"
+    "tabVerificatie": "Überprüfung",
+    "reportingAddOnNote": "Das Einschalten kauft auch das Berichts-Add-on dieses Systems (ein Kauf). Ausschalten ist erst möglich, nachdem dieses Add-on auf der Paketseite entfernt wurde."
   },
   "modules": {
     "refreshError": "Die Module konnten nicht aktualisiert werden. Die angezeigten Einstellungen sind möglicherweise veraltet.",
@@ -5003,6 +5004,35 @@
         "step": "Schritt",
         "function": "Funktion"
       }
+    },
+    "helloflexActivity": {
+      "title": "HelloFlex-Aktivitäten",
+      "subtitle": "Die Einstellungen rund um HelloFlex-Aktivitäten: der Eigentümer und die HelloFlex-IDs, die Koios beim Anlegen einer Platzierungsaktivität in HelloFlex verwendet, und der Koios-Notiztyp, unter dem ein eingehender HelloFlex-Aktivitätstyp abgelegt wird.",
+      "ownerGuid": "Standard-Eigentümer (HelloFlex-Benutzer-GUID)",
+      "ownerGuidHint": "Wird verwendet, wenn der Match-Eigentümer keinen verknüpften HelloFlex-Benutzer hat. Leer bedeutet kein Standard-Eigentümer: eine solche Platzierungsaktivität wird dann übersprungen.",
+      "ownerGuidInvalid": "Geben Sie eine HelloFlex-GUID ein (8-4-4-4-12 hexadezimale Zeichen) oder lassen Sie das Feld leer.",
+      "typeMapTitle": "Aktivitätstypen",
+      "typeMapHint": "Als welcher Koios-Notiztyp ein eingehender HelloFlex-Aktivitätstyp abgelegt wird. Leere Zeilen werden nicht gespeichert.",
+      "typeMapEmpty": "Noch keine Aktivitätstypen zugeordnet.",
+      "hfTypeId": "HelloFlex-Aktivitätstyp-ID",
+      "noteType": "Koios-Notiztyp",
+      "noteTypePlaceholder": "Notiztyp wählen",
+      "addRow": "Aktivitätstyp hinzufügen",
+      "typeMapDuplicate": "Jede HelloFlex-Aktivitätstyp-ID kann nur einmal zugeordnet werden.",
+      "typeMapIncomplete": "Jede Zeile braucht sowohl eine HelloFlex-Aktivitätstyp-ID als auch einen Notiztyp.",
+      "defaultsTitle": "Standardwerte der Aktivität",
+      "defaultsHint": "Die HelloFlex-Domänen-IDs, mit denen eine Platzierungsaktivität angelegt wird. Ein leeres Feld wird nicht gespeichert; solange eine fehlt, wird keine Aktivität geschrieben.",
+      "typeId": "Typ-ID",
+      "priorityId": "Prioritäts-ID",
+      "entityStateId": "Entitätsstatus-ID",
+      "subjectId": "Betreff-ID",
+      "entityTypeId": "Entitätstyp-ID",
+      "loadError": "Die HelloFlex-Aktivitätseinstellungen konnten nicht geladen werden.",
+      "saveError": "Die HelloFlex-Aktivitätseinstellungen konnten nicht gespeichert werden.",
+      "save": "Aktivitätseinstellungen speichern",
+      "hfTypeIdRow": "HelloFlex-Aktivitätstyp-ID, Zeile {{n}}",
+      "noteTypeRow": "Koios-Notiztyp, Zeile {{n}}",
+      "removeRowN": "Zeile {{n}} entfernen"
     }
   },
   "customerSourcesSettings": {

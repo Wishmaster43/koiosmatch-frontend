@@ -19,6 +19,8 @@ vi.mock('./useIntegrationHealth', () => ({
   useIntegrationHealth: () => ({ health: { state: 'unknown', errorCode: null, errorMessage: null, checkedAt: null }, refresh: mockRefresh }),
 }))
 
+// HF-ACTIVITY-ROWS-CARD-FE-1: the activity block has its own suite; here only the host's connector gate matters.
+vi.mock('./HelloflexActivityCard', () => ({ default: () => <div data-testid="helloflex-activity-card" /> }))
 vi.mock('./integrationsApi', () => ({
   getIntegrationSettings: vi.fn(),
   putIntegrationSettings: vi.fn(),

@@ -2338,7 +2338,8 @@
     "tabKoiosAi": "Koios AI",
     "comingSoon": "Coming soon",
     "tabTelefonie": "Telephony",
-    "tabVerificatie": "Verification"
+    "tabVerificatie": "Verification",
+    "reportingAddOnNote": "Switching this on also buys the reporting add-on of this system (one purchase). It can be switched off once that add-on has been removed on the package screen."
   },
   "modules": {
     "refreshError": "The modules could not be refreshed. The settings shown may be out of date.",
@@ -5003,6 +5004,35 @@
         "step": "Step",
         "function": "Function"
       }
+    },
+    "helloflexActivity": {
+      "title": "HelloFlex activities",
+      "subtitle": "The settings around HelloFlex activities: the owner and the HelloFlex ids Koios uses when it files a placement activity in HelloFlex, and the Koios note type an incoming HelloFlex activity type is filed as.",
+      "ownerGuid": "Default owner (HelloFlex user GUID)",
+      "ownerGuidHint": "Used when the match owner has no linked HelloFlex user. Empty means no default owner: such a placement activity is then skipped.",
+      "ownerGuidInvalid": "Enter a HelloFlex GUID (8-4-4-4-12 hexadecimal characters) or leave the field empty.",
+      "typeMapTitle": "Activity types",
+      "typeMapHint": "Which Koios note type an incoming HelloFlex activity type files as. Empty rows are not saved.",
+      "typeMapEmpty": "No activity types mapped yet.",
+      "hfTypeId": "HelloFlex activity type id",
+      "noteType": "Koios note type",
+      "noteTypePlaceholder": "Choose a note type",
+      "addRow": "Add activity type",
+      "typeMapDuplicate": "Each HelloFlex activity type id can be mapped only once.",
+      "typeMapIncomplete": "Every row needs both a HelloFlex activity type id and a note type.",
+      "defaultsTitle": "Activity defaults",
+      "defaultsHint": "The HelloFlex domain ids a placement activity is created with. An empty field is not saved; while one is missing, no activity is written.",
+      "typeId": "Type id",
+      "priorityId": "Priority id",
+      "entityStateId": "Entity state id",
+      "subjectId": "Subject id",
+      "entityTypeId": "Entity type id",
+      "loadError": "The HelloFlex activity settings could not be loaded.",
+      "saveError": "The HelloFlex activity settings could not be saved.",
+      "save": "Save activity settings",
+      "hfTypeIdRow": "HelloFlex activity type id, row {{n}}",
+      "noteTypeRow": "Koios note type, row {{n}}",
+      "removeRowN": "Remove row {{n}}"
     }
   },
   "customerSourcesSettings": {
