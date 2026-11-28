@@ -35,6 +35,26 @@ const FIXTURE = {
 }
 
 describe('WorkflowQueueView', () => {
+  // WORKFLOW-SEED-NAMES-TEMPLATE-KEY-FE-1: the queue rows carry template_key since BE batch R2; an English-stored
+  // seed name still renders as the Dutch seed name for a Dutch user.
+  it('translates a queue row name through its template_key', async () => {
+    mockedGet.mockResolvedValue({ data: { ...FIXTURE,
+      pending: [{ run_id: 'r9', workflow_id: 'wf-9', workflow_name: 'Vacancy leads count', template_key: 'vacancy_leads_recount', queued_at: '2026-08-24T08:00:00Z', trigger: 'event' }] } })
+    render(<WorkflowQueueView />)
+    expect(await screen.findByText('Leads-telling vacatures')).toBeInTheDocument()
+    expect(screen.queryByText('Vacancy leads count')).not.toBeInTheDocument()
+  })
+
+  it('lets the template_key decide: a row renamed to another template\'s English seed name stays raw, and resolves only without a key', async () => {
+    // 'Reactivation' is the English seed name of candidate_reactivate_unplaceable; under vacancy_leads_recount it is a tenant rename.
+    mockedGet.mockResolvedValue({ data: { ...FIXTURE,
+      pending: [{ run_id: 'r9', workflow_id: 'wf-9', workflow_name: 'Reactivation', template_key: 'vacancy_leads_recount', queued_at: '2026-08-24T08:00:00Z', trigger: 'event' }],
+      waiting: [{ run_id: 'r8', workflow_id: 'wf-8', workflow_name: 'Reactivation', template_key: null, resume_at: '2026-08-25T08:00:00Z' }] } })
+    render(<WorkflowQueueView />)
+    expect(await screen.findByText('Reactivation')).toBeInTheDocument()
+    expect(screen.getByText('Heractivering')).toBeInTheDocument()
+  })
+
   it('shows the loading state', () => {
     mockedGet.mockReturnValue(new Promise(() => {}))
     render(<WorkflowQueueView />)
@@ -123,7 +143,7 @@ describe('WorkflowQueueView · seeded workflow name i18n (LOOKUP-I18N-1)', () =>
       retrying: [], counts: { scheduled_today: 1 },
     } })
     const { unmount } = render(<WorkflowQueueView />)
-    expect(await screen.findByText('Vacancy lead count')).toBeInTheDocument()
+    expect(await screen.findByText('Vacancy leads count')).toBeInTheDocument()
     expect(screen.queryByText('Leads-telling vacatures')).not.toBeInTheDocument()
     // Unmount before switching back — resetting the language on a still-mounted
     // component would fire a state update outside act().

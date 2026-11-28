@@ -10,13 +10,13 @@ import api, { unwrap } from '@/lib/api'
 import { resolveWorkflowBaseURL } from '@/lib/workflowApi'
 
 // One entry per list — shapes mirror the K-171 contract exactly (never invented).
-export interface QueuePendingEntry { run_id?: string | number; workflow_id?: string | number; workflow_name?: string; queued_at?: string; trigger?: string }
+export interface QueuePendingEntry { run_id?: string | number; workflow_id?: string | number; workflow_name?: string; template_key?: string | null; queued_at?: string; trigger?: string }
 // Waiting rows carry resume_at INSTEAD of queued_at (QueueOverview::waiting()
 // returns run_id/workflow_id/workflow_name/resume_at/trigger only — measured,
 // never inherited from pending).
-export interface QueueWaitingEntry { run_id?: string | number; workflow_id?: string | number; workflow_name?: string; resume_at?: string; trigger?: string }
-export interface QueueScheduledEntry { workflow_id?: string | number; workflow_name?: string; next_run_at?: string; schedule_label?: string }
-export interface QueueRetryingEntry { run_id?: string | number; workflow_id?: string | number; workflow_name?: string; attempts?: number; next_attempt_at?: string; last_error?: string }
+export interface QueueWaitingEntry { run_id?: string | number; workflow_id?: string | number; workflow_name?: string; template_key?: string | null; resume_at?: string; trigger?: string }
+export interface QueueScheduledEntry { workflow_id?: string | number; workflow_name?: string; template_key?: string | null; next_run_at?: string; schedule_label?: string }
+export interface QueueRetryingEntry { run_id?: string | number; workflow_id?: string | number; workflow_name?: string; template_key?: string | null; attempts?: number; next_attempt_at?: string; last_error?: string }
 export interface QueueCounts { pending?: number; waiting?: number; scheduled_today?: number; retrying?: number }
 export interface QueueSnapshot {
   pending: QueuePendingEntry[]

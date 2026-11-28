@@ -13,9 +13,10 @@ const ROOT = process.cwd()
 const SCAN = ['src', 'e2e', 'scripts']
 const EXT = /\.(ts|tsx|js|jsx|mjs|cjs)$/
 const SKIP = [/\/i18n\/locales\//, /api-generated\.ts$/, /node_modules/, /\/dist\//, /english-code-count\.mjs$/, /scripts\/lib\/stripComments/]
-// Text catalogues (seeded demo copy, lookup seed labels) and the word-list tooling are
-// values, not code: their string hits are reported apart and never ratcheted.
-const TEXT_VALUES = [/\/demoSeedTexts\//, /lookupSeedCatalogue/, /comment-audit\.mjs$/, /dutchCopies\.houseStyle/, /placeholdersGeneric\.houseStyle/]
+// Text catalogues (seeded demo copy, lookup seed labels, the generated BE mirror of the seeded workflow
+// template names per language) and the word-list tooling are values, not code: their string hits are
+// reported apart and never ratcheted.
+const TEXT_VALUES = [/\/demoSeedTexts\//, /lookupSeedCatalogue/, /workflowTemplateNames\.generated/, /comment-audit\.mjs$/, /dutchCopies\.houseStyle/, /placeholdersGeneric\.houseStyle/]
 // A *.testKit.* file holds test fixtures shared by split suites (TEST-SPLIT-1/2): its strings follow the test bucket.
 const isTest = (f) => /\.test\.[jt]sx?$/.test(f) || /\.testKit\.[jt]sx?$/.test(f) || /^e2e\//.test(f)
 

@@ -43,14 +43,14 @@ function OpenRunsButton({ workflowId, label }: { workflowId?: string | number; l
 
 // One queue row's shell — workflow name (deep-links to the editor) + a caption
 // line of section-specific detail + the "open runs" affordance on the right.
-function QueueRow({ workflowId, workflowName, children, openRuns = true }: {
-  workflowId?: string | number; workflowName?: string; children: ReactNode; openRuns?: boolean
+function QueueRow({ workflowId, workflowName, templateKey, children, openRuns = true }: {
+  workflowId?: string | number; workflowName?: string; templateKey?: string | null; children: ReactNode; openRuns?: boolean
 }) {
   const { t } = useTranslation('workflows')
   const seedLabel = useSeedLabel()
-  // LOOKUP-I18N-1: a queue row's workflow name is the same seeded default a
-  // seeded workflow carries in the list/card views — translate it the same way.
-  const displayName = workflowName ? seedLabel('workflowNames', { label: workflowName }) : undefined
+  // LOOKUP-I18N-1: a queue row's workflow name is the same seeded default a seeded workflow carries in the list/card
+  // views; translate it the same way, through the row's template key (WORKFLOW-SEED-NAMES-TEMPLATE-KEY-FE-1).
+  const displayName = workflowName ? seedLabel('workflowNames', { value: templateKey ?? null, label: workflowName }) : undefined
   return (
     <div style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '10px 14px',
                   border: '1px solid var(--border)', borderRadius: 10, background: 'var(--surface)' }}>
@@ -139,7 +139,7 @@ export default function WorkflowQueueView({ workflowId }: { workflowId?: string 
         <div style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
           <QueueSection icon={Clock} title={t('queue.pending.title')} rows={pending} emptyLabel={t('queue.pending.empty')}
             renderRow={(row: QueuePendingEntry, i) => (
-              <QueueRow key={row.run_id ?? i} workflowId={row.workflow_id} workflowName={row.workflow_name}>
+              <QueueRow key={row.run_id ?? i} workflowId={row.workflow_id} workflowName={row.workflow_name} templateKey={row.template_key}>
                 <Caption>
                   {t('queue.pending.queuedAt', { date: formatDateTime(row.queued_at) })}
                   {row.trigger ? ` · ${labelOrRaw(t, i18n, `queue.trigger.${row.trigger}`, row.trigger, 'workflows')}` : ''}
@@ -149,7 +149,7 @@ export default function WorkflowQueueView({ workflowId }: { workflowId?: string 
 
           <QueueSection icon={PauseCircle} title={t('queue.waiting.title')} rows={waiting} emptyLabel={t('queue.waiting.empty')}
             renderRow={(row: QueueWaitingEntry, i) => (
-              <QueueRow key={row.run_id ?? i} workflowId={row.workflow_id} workflowName={row.workflow_name}>
+              <QueueRow key={row.run_id ?? i} workflowId={row.workflow_id} workflowName={row.workflow_name} templateKey={row.template_key}>
                 <Caption>{t('queue.waiting.resumeAt', { date: formatDateTime(row.resume_at) })}</Caption>
               </QueueRow>
             )} />
@@ -157,7 +157,7 @@ export default function WorkflowQueueView({ workflowId }: { workflowId?: string 
           <QueueSection icon={CalendarClock} title={t('queue.scheduled.title')} rows={scheduled} emptyLabel={t('queue.scheduled.empty')}
             renderRow={(row: QueueScheduledEntry, i) => (
               // Scheduled entries have no run yet — no "open runs" affordance.
-              <QueueRow key={`${row.workflow_id ?? i}`} workflowId={row.workflow_id} workflowName={row.workflow_name} openRuns={false}>
+              <QueueRow key={`${row.workflow_id ?? i}`} workflowId={row.workflow_id} workflowName={row.workflow_name} templateKey={row.template_key} openRuns={false}>
                 <Caption>
                   {t('queue.scheduled.nextRunAt', { date: formatDateTime(row.next_run_at) })}
                   {row.schedule_label ? ` · ${row.schedule_label}` : ''}
@@ -167,7 +167,7 @@ export default function WorkflowQueueView({ workflowId }: { workflowId?: string 
 
           <QueueSection icon={RotateCcw} title={t('queue.retrying.title')} rows={retrying} emptyLabel={t('queue.retrying.empty')}
             renderRow={(row: QueueRetryingEntry, i) => (
-              <QueueRow key={row.run_id ?? i} workflowId={row.workflow_id} workflowName={row.workflow_name}>
+              <QueueRow key={row.run_id ?? i} workflowId={row.workflow_id} workflowName={row.workflow_name} templateKey={row.template_key}>
                 <Caption as="div">
                   {t('queue.retrying.attempts', { count: row.attempts ?? 0 })}
                   {/* next_attempt_at is a derived estimate (K-171) — the "±" prefix

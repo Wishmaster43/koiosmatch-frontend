@@ -76,6 +76,19 @@ if [ -f ../koiosmatch-api/docs/reference/koios-tool-refusal-reasons.json ]; then
     exit 1
   fi
 fi
+# gen:workflow-template-names freshness (WORKFLOW-SEED-NAMES-TEMPLATE-KEY-FE-1): the generated template-name
+# mirror must match the BE's exported names JSON; same shape as the gen:refusal-reasons gate above.
+if [ -f ../koiosmatch-api/docs/reference/workflow-template-names.json ]; then
+  echo "▶ pre-commit: gen:workflow-template-names freshness…"
+  npm run --silent gen:workflow-template-names >/dev/null 2>&1 || {
+    echo "✗ gen:workflow-template-names itself failed (generator or JSON error): run: npm run gen:workflow-template-names"
+    exit 1
+  }
+  if ! git diff --quiet src/lib/workflowTemplateNames.generated.ts; then
+    echo "✗ workflowTemplateNames.generated.ts was behind the BE export: just regenerated: git add it and commit again"
+    exit 1
+  fi
+fi
 # Dependency-audit gate (heraudit SEC-1/2/3): HIGH/CRITICAL advisories fail the
 # commit unless allowlisted in audit-ci.jsonc WITH a reason + revalidation date.
 echo "▶ pre-commit: dependency-audit…"

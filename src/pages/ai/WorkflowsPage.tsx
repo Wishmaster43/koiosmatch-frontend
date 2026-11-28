@@ -77,7 +77,7 @@ export default function WorkflowsPage({ intent }: { intent?: WorkflowsIntent } =
   // (possibly tenant-renamed) translated name.
   const openMarkDeletion = (wf: Workflow) => {
     if (wf.id == null) return
-    trash.openFor(String(wf.id), seedLabel('workflowNames', { label: wf.name ?? null }) || String(wf.id))
+    trash.openFor(String(wf.id), seedLabel('workflowNames', { value: wf.template_key ?? null, label: wf.name ?? null }) || String(wf.id))
   }
 
   return (

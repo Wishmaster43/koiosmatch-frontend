@@ -347,7 +347,7 @@ export function useWorkflowsData(showArchived: boolean) {
   // (workflows:reap-stale), then refetches so the archived view picks it up.
   const handleArchive = (wf: Workflow) => {
     if (!canManageFolders) return
-    confirm(t('page.archiveConfirm', { name: seedLabel('workflowNames', { label: wf.name ?? null }) }), async () => {
+    confirm(t('page.archiveConfirm', { name: seedLabel('workflowNames', { value: wf.template_key ?? null, label: wf.name ?? null }) }), async () => {
       try {
         await api.delete(`/workflows/${wf.id}`)
         notify('success', t('page.archiveSuccess'))

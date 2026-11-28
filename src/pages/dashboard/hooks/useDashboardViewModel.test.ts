@@ -232,9 +232,28 @@ describe('useDashboardViewModel · LOOKUP-I18N-1 translates the seeded workflow 
     const { result, unmount } = renderHook(() => useDashboardViewModel(baseArgs({
       dash: { ai_runs: [{ name: 'Leads-telling vacatures', ran_at: null, ok: true, processed: 1, error: null }] },
     })))
-    expect(result.current.runs[0].name).toBe('Vacancy lead count')
+    expect(result.current.runs[0].name).toBe('Vacancy leads count')
     unmount()
     await i18n.changeLanguage('nl')
+  })
+
+  it('translates an English-stored run name through its template_key for a Dutch user (WORKFLOW-SEED-NAMES-TEMPLATE-KEY-FE-1)', () => {
+    const { result, unmount } = renderHook(() => useDashboardViewModel(baseArgs({
+      dash: { ai_runs: [{ name: 'Vacancy leads count', template_key: 'vacancy_leads_recount', ran_at: null, ok: true, processed: 1, error: null }] },
+    })))
+    expect(result.current.runs[0].name).toBe('Leads-telling vacatures')
+    unmount()
+  })
+
+  it('lets the template_key decide: a run renamed to another template\'s English seed name stays raw, and resolves only without a key', () => {
+    const { result, unmount } = renderHook(() => useDashboardViewModel(baseArgs({
+      dash: { ai_runs: [
+        { name: 'Reactivation', template_key: 'vacancy_leads_recount', ran_at: null, ok: true, processed: 1, error: null },
+        { name: 'Reactivation', template_key: null, ran_at: null, ok: true, processed: 1, error: null },
+      ] },
+    })))
+    expect(result.current.runs.map(r => r.name)).toEqual(['Reactivation', 'Heractivering'])
+    unmount()
   })
 
   it('leaves a tenant-renamed workflow name untouched (no catalogue match)', async () => {

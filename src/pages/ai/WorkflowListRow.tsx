@@ -105,9 +105,9 @@ export default function WorkflowListRow({ workflow, folderName, onRun, canRun = 
   // TRASH-OVERAL-2: trashed rows swap restore/mark for the erase note + unmark.
   const inTrash = workflow.lifecycle === 'pending_erase'
   const trig = triggerMeta(workflow.trigger_type)
-  // LOOKUP-I18N-1: a workflow that still carries its seeded Dutch name renders in the
-  // user language; a tenant rename/creation stays exactly as typed.
-  const displayName = seedLabel('workflowNames', { label: workflow.name ?? null })
+  // LOOKUP-I18N-1: a workflow that still carries its seeded name (resolved through its template key, any seed language)
+  // renders in the user language; a tenant rename/creation stays exactly as typed.
+  const displayName = seedLabel('workflowNames', { value: workflow.template_key ?? null, label: workflow.name ?? null })
 
   // Restore is a distinct async action — keep the row responsive while it lands.
   const handleRestoreClick = async (e: MouseEvent) => {

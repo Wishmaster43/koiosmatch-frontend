@@ -6,6 +6,9 @@
  * locale fails immediately; the administered remainder retires per touch (many
  * ARE legitimate data separators — the ceiling only stops growth, review decides
  * per string on touch). Runs in pre-commit beside the typography ratchet.
+ * One deliberate raise (WORKFLOW-SEED-NAMES-TEMPLATE-KEY-FE-1, 28-11): nl/en common.json carry the
+ * seeded workflow template names byte-identical to the BE seed (workflowTemplateNames.guard.test),
+ * whose em dashes are data separators the BE chose; the new de/fr/es/it/pt translations use a comma or colon.
  *
  * Plain .js — the walker needs node:fs (no @types/node in this repo).
  */

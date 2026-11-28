@@ -13,6 +13,7 @@
     "typecheck": "tsc --noEmit",
     "gen:types": "openapi-typescript ../koiosmatch-api/docs/openapi.yaml -o src/types/api-generated.ts",
     "gen:refusal-reasons": "node scripts/gen-koios-refusal-reasons.mjs",
+    "gen:workflow-template-names": "node scripts/gen-workflow-template-names.mjs",
     "preview": "vite preview",
     "test": "vitest run",
     "test:watch": "vitest",

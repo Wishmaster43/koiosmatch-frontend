@@ -133,6 +133,21 @@ describe('WorkflowCard · seeded workflow name i18n (LOOKUP-I18N-1)', () => {
     unmount()
     await i18n.changeLanguage('nl')
   })
+
+  it('passes the template_key with the name: a card renamed to another template\'s English seed name stays raw under English', async () => {
+    // WORKFLOW-SEED-NAMES-TEMPLATE-KEY-FE-1: 'Reactivation' is candidate_reactivate_unplaceable's English seed name; under
+    // vacancy_leads_recount it is a tenant rename and must never translate; without a key the same name resolves.
+    await i18n.changeLanguage('en')
+    const renamed: Workflow = { ...baseWorkflow, name: 'Reactivation', template_key: 'vacancy_leads_recount' }
+    const { unmount } = render(<WorkflowCard workflow={renamed} onRun={vi.fn()} onEdit={vi.fn()} />)
+    expect(screen.getByText('Reactivation')).toBeInTheDocument()
+    unmount()
+    await i18n.changeLanguage('nl')
+    const seeded: Workflow = { ...baseWorkflow, name: 'Reactivation', template_key: null }
+    const second = render(<WorkflowCard workflow={seeded} onRun={vi.fn()} onEdit={vi.fn()} />)
+    expect(screen.getByText('Heractivering')).toBeInTheDocument()
+    second.unmount()
+  })
 })
 
 // SYSWF-HIDE-FE-1: mirrors WorkflowListRow: the badge replaces run and archive on a system workflow.

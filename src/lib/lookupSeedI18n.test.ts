@@ -15,19 +15,6 @@ import esCommon from '../i18n/locales/es/common.json'
 import itCommon from '../i18n/locales/it/common.json'
 import ptCommon from '../i18n/locales/pt/common.json'
 
-// The eight OpenCage geocoding-template workflowNames labels: seeded in the TS catalogue
-// but never given a translation key in any locale (a pre-existing gap, not a rename miss).
-const UNTRANSLATED_WORKFLOW_NAMES = [
-  'Adres geocoderen (OpenCage)',
-  'Adressen geocoderen, bulk (OpenCage)',
-  'Klantadres geocoderen (OpenCage)',
-  'Klantadressen geocoderen, bulk (OpenCage)',
-  'Locatieadres geocoderen (OpenCage)',
-  'Locatieadressen geocoderen, bulk (OpenCage)',
-  'Vacatureadres geocoderen (OpenCage)',
-  'Vacatureadressen geocoderen, bulk (OpenCage)',
-]
-
 const LOCALES: Record<string, unknown> = { nl: nlCommon, en: enCommon, de: deCommon, fr: frCommon, es: esCommon, it: itCommon, pt: ptCommon }
 
 // Stand-in for i18next: returns a marker so a translated value is unmistakable.
@@ -74,24 +61,23 @@ describe('seedKeyFor — label-keyed families (the row carries only a uuid)', ()
     expect(seedKeyFor('rejectionReasons', { value: '01a03913-e812-4c4d-9f0a-000000000000', label: ' Niet gekwalificeerd ' })).toBe(englishKey)
   })
 
-  it('falls back to labelKey() for a seeded label outside the SEED_LABEL_KEYS map', () => {
-    // workflowNames' OpenCage geocoding templates are seeded but never got a map entry
-    // (the pre-existing gap) — this actually exercises the fallback branch, unlike an
-    // unseeded label, which returns null before the map is even consulted.
+  it('resolves the OpenCage geocoding templates to their English keys (the gap R2 closed, WORKFLOW-SEED-NAMES-TEMPLATE-KEY-FE-1)', () => {
+    // Until batch R2 these labels sat in the catalogue without a map entry and fell back to labelKey(); the template
+    // mirror gave them keys, so the fallback branch has no shipped case left and the English key is what resolves.
     const label = 'Adres geocoderen (OpenCage)'
-    expect(SEED_LABEL_KEYS.workflowNames[label]).toBeUndefined()
-    expect(seedKeyFor('workflowNames', { label })).toBe(labelKey(label))
+    expect(SEED_LABEL_KEYS.workflowNames[label]).toBe('geocodeAddressOpenCage')
+    expect(seedKeyFor('workflowNames', { label })).toBe('geocodeAddressOpenCage')
+    expect(seedKeyFor('workflowNames', { label })).not.toBe(labelKey(label))
   })
 })
 
 describe('SEED_LABEL_KEYS — the English key map (SEED-KEYS-EN-1)', () => {
-  it('covers every SEED_LABELS label except the named untranslated workflowNames templates', () => {
+  it('covers every SEED_LABELS label', () => {
     const missing: string[] = []
     for (const family of LABEL_KEYED) {
       const keys = SEED_LABEL_KEYS[family] ?? {}
       const seeds = SEED_LABELS[family] ?? {}
       for (const label of Object.values(seeds)) {
-        if (family === 'workflowNames' && UNTRANSLATED_WORKFLOW_NAMES.includes(label)) continue
         if (!keys[label]) missing.push(`${family}: ${label}`)
       }
     }

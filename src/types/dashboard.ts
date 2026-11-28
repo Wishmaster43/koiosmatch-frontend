@@ -47,7 +47,7 @@ interface CustomerByOwner { owner_id?: string | number; name?: string; count?: n
 interface RecentCandidate { name?: string; status_value?: string; role?: string; last_activity_at?: string; [k: string]: unknown }
 interface RecentApplication { candidate_name?: string; vacancy_title?: string; stage_value?: string; created_at?: string; [k: string]: unknown }
 interface RecentLead { name?: string; contact_name?: string; status_value?: string; created_at?: string; [k: string]: unknown }
-interface AiRun { name?: string; ran_at?: string; ok?: boolean; processed?: number; error?: string; [k: string]: unknown }
+interface AiRun { name?: string; template_key?: string | null; ran_at?: string; ok?: boolean; processed?: number; error?: string; [k: string]: unknown }
 interface Conversation { name?: string; last_message?: string; at?: string; [k: string]: unknown }
 export interface TimeseriesPoint { name: string; value?: number; [k: string]: unknown }
 

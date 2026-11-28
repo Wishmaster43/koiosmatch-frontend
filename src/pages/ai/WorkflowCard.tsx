@@ -68,9 +68,9 @@ export default function WorkflowCard({ workflow, onRun, canRun = true, onEdit, c
   const archived = Boolean(workflow.archived)
   // TRASH-OVERAL-2: trashed cards swap restore/mark for the erase note + unmark.
   const inTrash = workflow.lifecycle === 'pending_erase'
-  // LOOKUP-I18N-1: a workflow that still carries its seeded Dutch name renders in the
-  // user language; a tenant rename/creation stays exactly as typed.
-  const displayName = seedLabel('workflowNames', { label: workflow.name ?? null })
+  // LOOKUP-I18N-1: a workflow that still carries its seeded name (resolved through its template key, any seed language)
+  // renders in the user language; a tenant rename/creation stays exactly as typed.
+  const displayName = seedLabel('workflowNames', { value: workflow.template_key ?? null, label: workflow.name ?? null })
 
   // Run is a distinct action — stop propagation so it doesn't also open the editor.
   // The shared runWithDoneFlash (N007-POINT3-FIX-1) blocks a repeat click while

@@ -153,7 +153,7 @@ export function useDashboardViewModel({
   // Recent workflow-run rows for the Koios AI runs block; workflowNames goes through
   // seedLabel so a tenant rename overrides the seeded default.
   const runs = useMemo(() => (dash?.ai_runs ?? []).map(r => ({
-    name: r.name ? seedLabel('workflowNames', { label: r.name }) : '—', time: fmtWhen(r.ran_at, locale), ok: r.ok, n: r.processed, err: r.error,
+    name: r.name ? seedLabel('workflowNames', { value: r.template_key ?? null, label: r.name }) : '—', time: fmtWhen(r.ran_at, locale), ok: r.ok, n: r.processed, err: r.error,
   })), [dash, seedLabel, locale])
 
   // Recent WhatsApp/chat rows for the conversations block.

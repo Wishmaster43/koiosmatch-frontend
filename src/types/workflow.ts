@@ -71,6 +71,9 @@ export interface Workflow {
   // MANUAL-START-WORKFLOW-1 / SYSWF-HIDE-FE-1: a seeded system workflow the platform starts itself
   // (BE SystemWorkflows); absent until the BE lands, so consumers check `=== true` only.
   is_system?: boolean
+  // WORKFLOW-SEED-NAMES-TEMPLATE-KEY-FE-1 (BE WorkflowResource; batch R2 adds it to runs, queue, dashboard and relation rows
+  // too): the seeded template this workflow was created from, null for a bureau-built one; it keys the name translation.
+  template_key?: string | null
   agent?: { id: string | number; name: string } | null
   steps: WorkflowStep[]
   last_run?: WorkflowLastRun | null

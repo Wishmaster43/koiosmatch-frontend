@@ -17,6 +17,7 @@
 import type { TFunction } from 'i18next'
 import { labelOrRaw, type KeyChecker } from '@/lib/labelOrRaw'
 import { LABEL_KEYED, SEED_LABELS, SEED_LABEL_KEYS } from './lookupSeedCatalogue'
+import { workflowSeedKey } from './workflowSeedNames'
 
 // The shape every lookup row shares: a stable-ish value plus the label the server sent.
 export interface SeedTranslatable { value?: string | null; label?: string | null }
@@ -52,6 +53,13 @@ export function seedKeyFor(family: string, item: SeedTranslatable): string | nul
   const seeds = SEED_LABELS[family]
   const label = item?.label ?? ''
   if (!seeds || !label) return null
+  // WORKFLOW-SEED-NAMES-TEMPLATE-KEY-FE-1: a workflow row resolves through its template key, or its seeded name in any
+  // seed language, first (a non-nl bureau stores the English name since BE batch R2); the Dutch-label path below stays
+  // for hand-built catalogue entries and for payloads without a template key.
+  if (family === 'workflowNames') {
+    const byTemplate = workflowSeedKey(item, normalise)
+    if (byTemplate) return byTemplate
+  }
   // SEED_LABELS itself still carries the OLD (Dutch-derived) key — that catalogue is
   // the "is this still exactly what we seeded" check and never renames. `catalogueKey`
   // is ONLY used to verify against it; the i18n KEY returned to the caller is the
